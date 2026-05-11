@@ -1,0 +1,102 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    //
+    // TIP: To filter out WebView/GPU logs in Debug Console, use the filter box at the top:
+    // Filter: !setRequestedFrameRate !ImageReader_JNI !GPUAUX
+    // This will hide logs containing these patterns.
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "🔴 Tenax (Debug)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (tenax)",
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "tenax",
+                "--dart-define=FLAVOR=tenax",
+                "--no-enable-impeller"
+            ],
+            "flutterMode": "debug",
+            "console": "terminal"
+        },
+        {
+            "name": "🔵 Vantage (Debug)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (vantage)",
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "vantage",
+                "--dart-define=CLIENT=vantage",
+                "--dart-define=FLAVOR=vantage",
+                "--no-enable-impeller"
+            ],
+            "flutterMode": "debug",
+            "console": "terminal"
+        },
+        {
+            "name": "🔵 Vantage (Profile)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (vantage)",
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "vantage",
+                "--dart-define=CLIENT=vantage",
+                "--dart-define=FLAVOR=vantage"
+            ],
+            "flutterMode": "profile",
+            "console": "terminal"
+        },
+        {
+            "name": "🔴 Tenax (Profile)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (tenax)",
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "tenax",
+                "--dart-define=FLAVOR=tenax"
+            ],
+            "flutterMode": "profile",
+            "console": "terminal"
+        },
+        {
+            "name": "🔴 Tenax (Release)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (tenax)",
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "tenax",
+                "--dart-define=FLAVOR=tenax"
+            ],
+            "flutterMode": "release",
+            "console": "terminal"
+        },
+        {
+            "name": "🟡 Vantage (Release)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (vantage)",
+            "program": "lib/main.dart",
+            "args": [
+                "--flavor",
+                "vantage",
+                "--dart-define=CLIENT=vantage",
+                "--dart-define=FLAVOR=vantage"
+            ],
+            "flutterMode": "release",
+            "console": "terminal"
+        }
+    ]
+}
