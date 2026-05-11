@@ -1,0 +1,139 @@
+part of 'app_pages.dart';
+
+abstract class Routes {
+  Routes._();
+  static const SPLASH = _Paths.SPLASH;
+  static const GET_STARTED = _Paths.GET_STARTED;
+  static const LOGIN = _Paths.LOGIN;
+  static const CREATE_ACCOUNT = _Paths.CREATE_ACCOUNT;
+  static const LEGAL_DOCUMENTS = _Paths.LEGAL_DOCUMENTS;
+  static const PRIVACY_POLICY = _Paths.PRIVACY_POLICY;
+  static const ACCOUNT_CREATED = _Paths.ACCOUNT_CREATED;
+  static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
+  static const VERIFY_CODE = _Paths.VERIFY_CODE;
+  static const CREATE_NEW_PASSWORD = _Paths.CREATE_NEW_PASSWORD;
+  static const TRADING = _Paths.TRADING;
+  static const TOAST_DEMO = _Paths.TOAST_DEMO;
+  static const LANGUAGE_SELECTOR = _Paths.LANGUAGE_SELECTOR;
+  static const ACCOUNT_MANAGEMENT = _Paths.ACCOUNT_MANAGEMENT;
+  static const EDIT_PROFILE = _Paths.EDIT_PROFILE;
+  static const WITHDRAWAL = _Paths.WITHDRAWAL;
+  static const DEPOSIT = _Paths.DEPOSIT;
+  static const WALLET = _Paths.WALLET;
+  static const TRANSACTION_HISTORY = _Paths.TRANSACTION_HISTORY;
+  static const KYC_VERIFICATION = _Paths.KYC_VERIFICATION;
+  static const KYC_INTRO = _Paths.KYC_INTRO;
+  static const KYC_DETAILS = _Paths.KYC_DETAILS;
+  static const KYC_DOCS = _Paths.KYC_DOCS;
+  static const KYC_SUCCESS = _Paths.KYC_SUCCESS;
+  static const CHAT_WITH_US = _Paths.CHAT_WITH_US;
+  static const OPEN_ACCOUNT = _Paths.OPEN_ACCOUNT;
+  static const CREATE_TRADING_ACCOUNT = _Paths.CREATE_TRADING_ACCOUNT;
+  static const CHOOSE_ACCOUNT = _Paths.CHOOSE_ACCOUNT;
+  static const INTERNAL_TRANSFER = _Paths.INTERNAL_TRANSFER;
+  static const COPY_TRADING_MAIN = _Paths.COPY_TRADING_MAIN;
+  static const COPY_TRADING_HUB = _Paths.COPY_TRADING_HUB;
+  static const TRADER_DETAILS = _Paths.TRADER_DETAILS;
+  static const BONUS = _Paths.BONUS;
+  static const DEMO_CONTEST = _Paths.DEMO_CONTEST;
+  static const SETTING = _Paths.SETTING;
+  static const SUPPORT = _Paths.SUPPORT;
+  static const TOOLS_EDUCATION = _Paths.TOOLS_EDUCATION;
+  static const MORE = _Paths.MORE;
+  static const PARTNERSHIP_PROGRAM = _Paths.PARTNERSHIP_PROGRAM;
+  static const BRAND_TEST = _Paths.BRAND_TEST;
+  static const ORDER_CONFIRMATION = _Paths.ORDER_CONFIRMATION;
+  static const COPY_TRADING_WALLET = _Paths.COPY_TRADING_WALLET;
+  static const COPY_TRADING_DEPOSIT = _Paths.COPY_TRADING_DEPOSIT;
+  static const COPY_TRADING_PAYMENT_METHODS =
+      _Paths.COPY_TRADING_PAYMENT_METHODS;
+  static const COPY_TRADING_INVITE_FRIEND = _Paths.COPY_TRADING_INVITE_FRIEND;
+  static const COPY_TRADING_INTERNAL_TRANSFER =
+      _Paths.COPY_TRADING_INTERNAL_TRANSFER;
+
+  static const FEATURE_UNAVAILABLE = _Paths.FEATURE_UNAVAILABLE;
+
+  // ── PMAM Routes ──
+  static const PMAM_MAIN = _Paths.PMAM_MAIN;
+  static const PMAM_BECOME_MANAGER = _Paths.PMAM_BECOME_MANAGER;
+  static const PMAM_MANAGER_DASHBOARD = _Paths.PMAM_MANAGER_DASHBOARD;
+  static const PMAM_MANAGER_PORTAL = _Paths.PMAM_MANAGER_PORTAL;
+  static const PMAM_CREATE_PLAN = _Paths.PMAM_CREATE_PLAN;
+  static const PMAM_INVESTOR_PORTAL = _Paths.PMAM_INVESTOR_PORTAL;
+  static const PMAM_MANAGER_DETAIL = _Paths.PMAM_MANAGER_DETAIL;
+  static const PMAM_MANAGER_PLAN_DETAIL = _Paths.PMAM_MANAGER_PLAN_DETAIL;
+}
+
+abstract class _Paths {
+  _Paths._();
+  static const SPLASH = '/splash';
+  static const GET_STARTED = '/get-started';
+  static const LOGIN = '/login';
+  static const CREATE_ACCOUNT = '/create-account';
+  static const LEGAL_DOCUMENTS = '/legal-documents';
+  static const PRIVACY_POLICY = '/privacy-policy';
+  static const ACCOUNT_CREATED = '/account-created';
+  static const FORGOT_PASSWORD = '/forgot-password';
+  static const VERIFY_CODE = '/verify-code';
+  static const CREATE_NEW_PASSWORD = '/create-new-password';
+  static const TRADING = '/trading';
+  static const TOAST_DEMO = '/toast-demo';
+  static const LANGUAGE_SELECTOR = '/language-selector';
+  static const ACCOUNT_MANAGEMENT = '/account-management';
+  static const EDIT_PROFILE = '/edit-profile';
+  static const WITHDRAWAL = '/withdrawal';
+  static const DEPOSIT = '/deposit';
+  static const WALLET = '/wallet';
+  static const TRANSACTION_HISTORY = '/transaction-history';
+  static const KYC_VERIFICATION = '/kyc-verification';
+  static const KYC_INTRO = '/kyc/intro';
+  static const KYC_DETAILS = '/kyc/details';
+  static const KYC_DOCS = '/kyc/docs';
+  static const KYC_SUCCESS = '/kyc/success';
+  static const CHAT_WITH_US = '/chat-with-us';
+  static const OPEN_ACCOUNT = '/open-account';
+  static const CREATE_TRADING_ACCOUNT = '/create-trading-account';
+  static const CHOOSE_ACCOUNT = '/choose-account';
+  static const CREATE_APP_ACCOUNT = '/create-app-account';
+  static const INTERNAL_TRANSFER = '/internal-transfer';
+  static const CHART = '/chart';
+  static const FINANCE = '/finance';
+  static const IB_DASHBOARD = '/ib-dashboard';
+  static const IB_MAIN = '/ib-main';
+  static const COPY_TRADING_MAIN = '/copy-trading-main';
+  static const COPY_TRADING_HUB = '/copy-trading-hub';
+  static const TRADER_DETAILS = '/trader-details';
+  static const BONUS = '/bonus';
+  static const DEMO_CONTEST = '/demo-contest';
+  static const SETTING = '/setting';
+  static const SUPPORT = '/support';
+  static const TOOLS_EDUCATION = '/tools-education';
+  static const MORE = '/more';
+  static const PARTNERSHIP_PROGRAM = '/partnership-program';
+  static const ORDER_CONFIRMATION = '/order-confirmation';
+  static const BRAND_TEST = '/brand-test';
+  static const KYC_BANK = '/kyc-bank';
+
+  static const PAYMENT_METHOD = '/payment-method';
+  static const DEPOSIT_INSTRUCTION_SCREEN = '/deposit-instruction';
+  static const BANK_LIST = '/bank-list';
+  static const CHANGE_PASSWORD = '/change-password';
+  static const COPY_TRADING_WALLET = '/copy-trading-wallet';
+  static const COPY_TRADING_DEPOSIT = '/copy-trading-deposit';
+  static const COPY_TRADING_PAYMENT_METHODS = '/copy-trading-payment-methods';
+  static const COPY_TRADING_INVITE_FRIEND = '/copy-trading-invite-friend';
+  static const COPY_TRADING_INTERNAL_TRANSFER =
+      '/copy-trading-internal-transfer';
+
+  static const FEATURE_UNAVAILABLE = '/feature-unavailable';
+
+  // ── PMAM Paths ──
+  static const PMAM_MAIN = '/pmam-main';
+  static const PMAM_BECOME_MANAGER = '/pmam-become-manager';
+  static const PMAM_MANAGER_DASHBOARD = '/pmam-manager-dashboard';
+  static const PMAM_MANAGER_PORTAL = '/pmam-manager-portal';
+  static const PMAM_CREATE_PLAN = '/pmam-create-plan';
+  static const PMAM_INVESTOR_PORTAL = '/pmam-investor-portal';
+  static const PMAM_MANAGER_DETAIL = '/pmam-manager-detail';
+  static const PMAM_MANAGER_PLAN_DETAIL = '/pmam-manager-plan-detail';
+}

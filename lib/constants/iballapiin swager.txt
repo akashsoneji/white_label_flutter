@@ -1,0 +1,1749 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Tenax CRM API Documentation",
+        "description": "API documentation for Tenax CRM system. This API provides endpoints for user authentication, trading operations, finance management, and more.",
+        "contact": {
+            "email": "support@tenax.com"
+        },
+        "license": {
+            "name": "Proprietary",
+            "url": "https://tenax.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        
+        "/api/user/ib/dashboard": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get IB dashboard data",
+                "description": "Retrieve IB dashboard information including available rebate, reference link details, and visit counts. Returns basic IB information for the authenticated user.",
+                "operationId": "b1dac2662e57e7dd2cc2f3897001625a",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard data retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "userIBDetails": {
+                                            "properties": {
+                                                "available_rebate": {
+                                                    "description": "Available rebate amount formatted as currency",
+                                                    "type": "string",
+                                                    "example": "$1,250.50"
+                                                },
+                                                "reference_link_id": {
+                                                    "description": "Unique reference link ID for referrals",
+                                                    "type": "string",
+                                                    "example": "IB123456"
+                                                },
+                                                "reference_link_nickname": {
+                                                    "description": "Custom nickname for the reference link",
+                                                    "type": "string",
+                                                    "example": "My Referral Link"
+                                                },
+                                                "reference_links_visit_count": {
+                                                    "description": "Total number of clicks on referral links",
+                                                    "type": "string",
+                                                    "example": "Total Clicks : 45"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/status": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get IB application status",
+                "description": "Retrieve the current status of the user's IB application, including approval status, profile completion, IB type (traditional/dynamic), and available rebate. Useful for checking if user can access IB features.",
+                "operationId": "de188eaa10867219bc55aa05b5d21b93",
+                "responses": {
+                    "200": {
+                        "description": "IB status retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "ib_status": {
+                                                    "description": "Current IB application status",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "not_applied",
+                                                        "inreview",
+                                                        "approved",
+                                                        "rejected"
+                                                    ],
+                                                    "example": "approved"
+                                                },
+                                                "profile_completion": {
+                                                    "description": "Profile completion percentage (0-100)",
+                                                    "type": "integer",
+                                                    "example": 85
+                                                },
+                                                "stage_completion": {
+                                                    "description": "Stage completion percentage (0-100)",
+                                                    "type": "integer",
+                                                    "example": 90
+                                                },
+                                                "reference_link_id": {
+                                                    "description": "Reference link ID if approved",
+                                                    "type": "string",
+                                                    "example": "IB123456",
+                                                    "nullable": true
+                                                },
+                                                "available_rebate": {
+                                                    "description": "Available rebate amount",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1250.5
+                                                },
+                                                "is_approved": {
+                                                    "description": "Whether IB application is approved",
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "ib_type": {
+                                                    "description": "Type of IB structure",
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "traditional",
+                                                        "dynamic"
+                                                    ],
+                                                    "example": "dynamic"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get IB status: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/application": {
+            "post": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Submit IB application",
+                "description": "Submit a new Introducing Broker (IB) application. User must accept terms and conditions. Only one application per user is allowed. Application will be set to 'inreview' status for admin approval.",
+                "operationId": "f4ebb4348e5d7cdb80746791bd8b6059",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "terms_accepted"
+                                ],
+                                "properties": {
+                                    "terms_accepted": {
+                                        "description": "Must be true to accept terms and conditions",
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "IB application submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "IB application submitted successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "application_id": {
+                                                    "description": "ID of the created application",
+                                                    "type": "integer",
+                                                    "example": 123
+                                                },
+                                                "status": {
+                                                    "description": "Application status",
+                                                    "type": "string",
+                                                    "example": "inreview"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Application already exists",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "IB application already submitted"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to submit IB application: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/stats": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get IB statistics and summary",
+                "description": "Retrieve comprehensive IB statistics including available rebate, client counts, deposits, withdrawals, equity, commission data, and trading metrics. Includes aggregated data from direct clients and sub-IBs.",
+                "operationId": "4548e0b1eae052414930959239c7f58e",
+                "responses": {
+                    "200": {
+                        "description": "IB statistics retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "available_rebate": {
+                                                    "description": "Available rebate amount",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1250.5
+                                                },
+                                                "total_clients": {
+                                                    "description": "Total number of clients (including sub-IB clients)",
+                                                    "type": "integer",
+                                                    "example": 45
+                                                },
+                                                "total_withdrawal": {
+                                                    "description": "Total withdrawal amount",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 5000
+                                                },
+                                                "total_deposited": {
+                                                    "description": "Total deposit amount from all clients",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 50000
+                                                },
+                                                "total_equity": {
+                                                    "description": "Total equity across all client accounts",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 45000
+                                                },
+                                                "total_rebate_generated": {
+                                                    "description": "Total rebate generated from trading",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 2500
+                                                },
+                                                "ib_pending_requests": {
+                                                    "description": "Number of pending sub-IB requests",
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "total_lots": {
+                                                    "description": "Total trading lots",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 125.5
+                                                },
+                                                "margin_level_below_100": {
+                                                    "description": "Number of accounts with margin level below 100%",
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "reference_links": {
+                                                    "description": "Total referral link visit count",
+                                                    "type": "integer",
+                                                    "example": 45
+                                                },
+                                                "direct_commission": {
+                                                    "description": "Direct commission from own clients",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1000
+                                                },
+                                                "sub_ib_commission": {
+                                                    "description": "Commission from sub-IBs",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 500
+                                                },
+                                                "total_commission": {
+                                                    "description": "Total commission (direct + sub-IB)",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1500
+                                                },
+                                                "commission_this_month": {
+                                                    "description": "Commission earned this month",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 300
+                                                },
+                                                "commission_this_quarter": {
+                                                    "description": "Commission earned this quarter",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 800
+                                                },
+                                                "commission_this_year": {
+                                                    "description": "Commission earned this year",
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1500
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get IB stats: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/clients": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get list of IB clients",
+                "description": "Retrieve a list of all clients under the authenticated IB, including direct clients and clients from sub-IBs. Returns client details with trading account information, deposit totals, trading lots, and commission data.",
+                "operationId": "5627a8176f8455c84036619da228b791",
+                "responses": {
+                    "200": {
+                        "description": "Clients list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "Client user ID",
+                                                        "type": "integer",
+                                                        "example": 123
+                                                    },
+                                                    "name": {
+                                                        "description": "Client full name",
+                                                        "type": "string",
+                                                        "example": "John Doe"
+                                                    },
+                                                    "email": {
+                                                        "description": "Client email address",
+                                                        "type": "string",
+                                                        "example": "client@example.com"
+                                                    },
+                                                    "accountNumber": {
+                                                        "description": "MT5 account numbers (first 3 accounts)",
+                                                        "type": "string",
+                                                        "example": "12345678, 87654321"
+                                                    },
+                                                    "totalDeposit": {
+                                                        "description": "Total approved deposits",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 5000
+                                                    },
+                                                    "totalWithdraw": {
+                                                        "description": "Total withdrawals (always 0 for client-level)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 0
+                                                    },
+                                                    "totalLot": {
+                                                        "description": "Total trading lots (commission trades only)",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 12.5
+                                                    },
+                                                    "totalRebate": {
+                                                        "description": "Total commission/rebate from this client",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 250
+                                                    },
+                                                    "avatar": {
+                                                        "description": "Avatar image path",
+                                                        "type": "string",
+                                                        "example": "/assets/avatar-default.svg"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get clients: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/sub-ibs": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get list of direct Sub-IBs",
+                "description": "Retrieve a list of direct Sub-IBs (one level down) under the authenticated IB. Returns Sub-IB details including client counts, deposits, rebates, and number of sub-IBs under each.",
+                "operationId": "ad1759def2775656970dc0ad0991ce68",
+                "responses": {
+                    "200": {
+                        "description": "Sub-IBs list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "Sub-IB user ID",
+                                                        "type": "integer",
+                                                        "example": 456
+                                                    },
+                                                    "name": {
+                                                        "description": "Sub-IB full name",
+                                                        "type": "string",
+                                                        "example": "Jane Smith"
+                                                    },
+                                                    "email": {
+                                                        "description": "Sub-IB email address",
+                                                        "type": "string",
+                                                        "example": "subib@example.com"
+                                                    },
+                                                    "totalClients": {
+                                                        "description": "Total clients under this Sub-IB",
+                                                        "type": "integer",
+                                                        "example": 15
+                                                    },
+                                                    "totalDeposit": {
+                                                        "description": "Total deposits from Sub-IB clients",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 20000
+                                                    },
+                                                    "totalRebate": {
+                                                        "description": "Total rebate/commission from Sub-IB",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 500
+                                                    },
+                                                    "totalSubIBs": {
+                                                        "description": "Number of Sub-IBs under this Sub-IB",
+                                                        "type": "integer",
+                                                        "example": 2
+                                                    },
+                                                    "avatar": {
+                                                        "description": "Avatar image path",
+                                                        "type": "string",
+                                                        "example": "/assets/avatar-default.svg"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get Sub IBs: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/sub-ib-structure/{id}": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get Sub-IB client structure",
+                "description": "Retrieve the client structure for a specific Sub-IB. Returns all clients under the specified Sub-IB with their trading accounts, deposits, withdrawals, lots, rebates, and equity information.",
+                "operationId": "82364aea3595837b24b60bae5727d95c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Sub-IB user ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 456
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sub-IB structure retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "Client user ID",
+                                                        "type": "integer",
+                                                        "example": 789
+                                                    },
+                                                    "name": {
+                                                        "description": "Client full name",
+                                                        "type": "string",
+                                                        "example": "Client Name"
+                                                    },
+                                                    "email": {
+                                                        "description": "Client email",
+                                                        "type": "string",
+                                                        "example": "client@example.com"
+                                                    },
+                                                    "accountNumber": {
+                                                        "description": "MT5 account numbers",
+                                                        "type": "string",
+                                                        "example": "12345678"
+                                                    },
+                                                    "deposit": {
+                                                        "description": "Total deposits",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 5000
+                                                    },
+                                                    "withdraw": {
+                                                        "description": "Total withdrawals",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 0
+                                                    },
+                                                    "lots": {
+                                                        "description": "Total trading lots",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 12.5
+                                                    },
+                                                    "rebate": {
+                                                        "description": "Total rebate",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 250
+                                                    },
+                                                    "equity": {
+                                                        "description": "Total equity",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 4500
+                                                    },
+                                                    "status": {
+                                                        "description": "Account status",
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    },
+                                                    "ib_type": {
+                                                        "description": "Type of account",
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "client",
+                                                            "sub-ib"
+                                                        ],
+                                                        "example": "client"
+                                                    },
+                                                    "is_sub_ib_approved": {
+                                                        "description": "Whether client is an approved Sub-IB",
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "sub_ib_count": {
+                                                        "description": "Number of Sub-IBs if this is a Sub-IB",
+                                                        "type": "integer",
+                                                        "example": 0
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get Sub IB structure: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/sub-ib-sub-ibs/{id}": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get Sub-IBs under a specific Sub-IB",
+                "description": "Retrieve a list of direct Sub-IBs under a specific Sub-IB. Returns Sub-IB details including client counts, deposits, and rebates.",
+                "operationId": "2a38d450c822bd3376b3cf7601cbe9e2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Sub-IB user ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 456
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sub-IB Sub-IBs retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "Sub-IB user ID",
+                                                        "type": "integer",
+                                                        "example": 789
+                                                    },
+                                                    "name": {
+                                                        "description": "Sub-IB full name",
+                                                        "type": "string",
+                                                        "example": "Sub-IB Name"
+                                                    },
+                                                    "email": {
+                                                        "description": "Sub-IB email",
+                                                        "type": "string",
+                                                        "example": "subib2@example.com"
+                                                    },
+                                                    "totalClients": {
+                                                        "description": "Total clients under this Sub-IB",
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "totalDeposit": {
+                                                        "description": "Total deposits",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 15000
+                                                    },
+                                                    "totalRebate": {
+                                                        "description": "Total rebate",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 300
+                                                    },
+                                                    "totalSubIBs": {
+                                                        "description": "Number of Sub-IBs under this Sub-IB",
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "avatar": {
+                                                        "description": "Avatar image path",
+                                                        "type": "string",
+                                                        "example": "/assets/avatar-default.svg"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get Sub IB Sub IBs: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/structure": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get IB commission structure",
+                "description": "Retrieve the IB's commission structure information including group details, commission plans, and MT5 group mappings. Only available for dynamic IB types.",
+                "operationId": "a8b32fb80a2099967088cf180b5ccd1b",
+                "responses": {
+                    "200": {
+                        "description": "IB structure retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "group_id": {
+                                                    "description": "Commission group ID",
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "nullable": true
+                                                },
+                                                "group_name": {
+                                                    "description": "Commission group name",
+                                                    "type": "string",
+                                                    "example": "Standard Group",
+                                                    "nullable": true
+                                                },
+                                                "mt5_groups": {
+                                                    "description": "MT5 group mappings",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Access denied - User does not have access",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "You do not have access to this page"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get structure: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/trade-history": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get IB trade history",
+                "description": "Retrieve trade history for the authenticated IB including all closed trades from clients that generated commission. Returns trade details with client information, symbol, volume, commission, profit, and price data.",
+                "operationId": "e73ff599e33759f75fe8a0be9378fc45",
+                "responses": {
+                    "200": {
+                        "description": "Trade history retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "Trade ID",
+                                                        "type": "integer",
+                                                        "example": 12345
+                                                    },
+                                                    "client_name": {
+                                                        "description": "Client full name",
+                                                        "type": "string",
+                                                        "example": "John Doe"
+                                                    },
+                                                    "client_email": {
+                                                        "description": "Client email",
+                                                        "type": "string",
+                                                        "example": "client@example.com"
+                                                    },
+                                                    "mt5_account": {
+                                                        "description": "MT5 account number",
+                                                        "type": "string",
+                                                        "example": "12345678"
+                                                    },
+                                                    "symbol": {
+                                                        "description": "Trading symbol",
+                                                        "type": "string",
+                                                        "example": "EURUSD"
+                                                    },
+                                                    "type": {
+                                                        "description": "Trade type",
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "Buy",
+                                                            "Sell"
+                                                        ],
+                                                        "example": "Buy"
+                                                    },
+                                                    "volume": {
+                                                        "description": "Trade volume in lots",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 1
+                                                    },
+                                                    "commission": {
+                                                        "description": "Commission/rebate earned",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 5.5
+                                                    },
+                                                    "profit": {
+                                                        "description": "Trade profit/loss",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 25
+                                                    },
+                                                    "open_price": {
+                                                        "description": "Trade open price",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 1.085
+                                                    },
+                                                    "close_price": {
+                                                        "description": "Trade close price",
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 1.0875
+                                                    },
+                                                    "open_time": {
+                                                        "description": "Trade open time",
+                                                        "type": "string",
+                                                        "example": "2024-01-15 10:30:00"
+                                                    },
+                                                    "close_time": {
+                                                        "description": "Trade close time",
+                                                        "type": "string",
+                                                        "example": "2024-01-15 15:45:00"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get trade history: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/activities": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get recent IB activities",
+                "description": "Retrieve recent activities for the authenticated IB including commission earnings, new client registrations, and sub-IB approvals. Returns a chronological list of recent events.",
+                "operationId": "c777efc1e5de21a9488a84795ec59b9a",
+                "responses": {
+                    "200": {
+                        "description": "Recent activities retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "Activity ID",
+                                                        "type": "string",
+                                                        "example": "commission_123"
+                                                    },
+                                                    "type": {
+                                                        "description": "Activity type",
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "commission",
+                                                            "new_client",
+                                                            "sub_ib_approved"
+                                                        ],
+                                                        "example": "commission"
+                                                    },
+                                                    "title": {
+                                                        "description": "Activity title",
+                                                        "type": "string",
+                                                        "example": "Commission Earned"
+                                                    },
+                                                    "description": {
+                                                        "description": "Activity description",
+                                                        "type": "string",
+                                                        "example": "From EURUSD"
+                                                    },
+                                                    "time": {
+                                                        "description": "Time ago format",
+                                                        "type": "string",
+                                                        "example": "2 hours ago"
+                                                    },
+                                                    "amount": {
+                                                        "description": "Amount (for commission activities)",
+                                                        "type": "string",
+                                                        "example": "+$25.50",
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "description": "Activity timestamp",
+                                                        "type": "string",
+                                                        "example": "2024-01-15 10:30:00"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get activities: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/track-visit": {
+            "post": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Track referral link visit",
+                "description": "Track a visit to a referral link. Increments the visit count for the specified reference link. Used for analytics and tracking referral link performance.",
+                "operationId": "9a9d9659cd9b09bc6d03ca6b676f4cfa",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reference_link_id"
+                                ],
+                                "properties": {
+                                    "reference_link_id": {
+                                        "description": "Reference link ID to track",
+                                        "type": "string",
+                                        "example": "IB123456"
+                                    },
+                                    "visitor_ip": {
+                                        "description": "Visitor IP address (optional, auto-detected if not provided)",
+                                        "type": "string",
+                                        "format": "ipv4",
+                                        "example": "192.168.1.1",
+                                        "nullable": true
+                                    },
+                                    "user_agent": {
+                                        "description": "Visitor user agent (optional, auto-detected if not provided)",
+                                        "type": "string",
+                                        "example": "Mozilla/5.0...",
+                                        "nullable": true
+                                    },
+                                    "referrer": {
+                                        "description": "Referrer URL (optional)",
+                                        "type": "string",
+                                        "example": "https://google.com",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Visit tracked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Visit tracked successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "reference_link_id": {
+                                                    "description": "Reference link ID",
+                                                    "type": "string",
+                                                    "example": "IB123456"
+                                                },
+                                                "visit_count": {
+                                                    "description": "Updated visit count",
+                                                    "type": "integer",
+                                                    "example": 46
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Referral link not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Referral link not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to track visit: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/user/ib/sub-ib-approval-requests": {
+            "get": {
+                "tags": [
+                    "IB (Introducing Broker)"
+                ],
+                "summary": "Get Sub-IB approval requests",
+                "description": "Retrieve all Sub-IB approval requests for the authenticated IB. Includes users who applied via referral code and master IBs that were moved under this IB. Returns requests sorted by status (inreview first, then approved, then rejected).",
+                "operationId": "1b361c8aa467e65d6ebdda4561794108",
+                "responses": {
+                    "200": {
+                        "description": "Sub-IB approval requests retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "IB detail ID",
+                                                        "type": "integer",
+                                                        "example": 123
+                                                    },
+                                                    "user_id": {
+                                                        "description": "User ID of applicant",
+                                                        "type": "integer",
+                                                        "example": 456
+                                                    },
+                                                    "status": {
+                                                        "description": "Request status",
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "inreview",
+                                                            "approved",
+                                                            "rejected"
+                                                        ],
+                                                        "example": "inreview"
+                                                    },
+                                                    "expected_client": {
+                                                        "description": "Expected number of clients",
+                                                        "type": "string",
+                                                        "example": "10"
+                                                    },
+                                                    "country": {
+                                                        "description": "Target countries",
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "string"
+                                                        },
+                                                        "example": []
+                                                    },
+                                                    "sub_ib_id": {
+                                                        "description": "Parent IB ID if moved",
+                                                        "type": "integer",
+                                                        "example": 789,
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "description": "Request creation time",
+                                                        "type": "string",
+                                                        "example": "2024-01-15 10:30:00"
+                                                    },
+                                                    "updated_at": {
+                                                        "description": "Last update time",
+                                                        "type": "string",
+                                                        "example": "2024-01-15 12:00:00"
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 456
+                                                            },
+                                                            "first_name": {
+                                                                "type": "string",
+                                                                "example": "John"
+                                                            },
+                                                            "last_name": {
+                                                                "type": "string",
+                                                                "example": "Doe"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "applicant@example.com"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to get approval requests: Error message"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+      
+    },
+    "components": {
+        "schemas": {
+            "ApiResponse": {
+                "properties": {
+                    "status": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Operation successful"
+                    },
+                    "data": {
+                        "type": "object",
+                        "example": []
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorResponse": {
+                "properties": {
+                    "status": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Error message"
+                    },
+                    "data": {
+                        "type": "object",
+                        "example": []
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationErrorResponse": {
+                "properties": {
+                    "status": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Validation failed"
+                    },
+                    "data": {
+                        "properties": {
+                            "errors": {
+                                "properties": {
+                                    "field": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Laravel Sanctum token authentication. Enter token in format (Bearer <token>)",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "IB (Introducing Broker)",
+            "description": "Introducing Broker API endpoints for managing IB applications, clients, commissions, and referrals"
+        },
+       
+        {
+            "name": "Trading",
+            "description": "Trading"
+        }
+    ]
+}

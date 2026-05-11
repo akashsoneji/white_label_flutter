@@ -1,0 +1,167 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
+class FavoritesStorageService {
+  static const String _favoritesKey = 'favorite_instruments';
+  static FavoritesStorageService? _instance;
+
+  // Default favorite instruments - only include instruments that exist in API
+  static const List<String> _defaultFavorites = [
+    'EURUSD.c',
+    'GBPUSD.c',
+    'XAUUSD.c',
+    'AUDUSD.c',
+    'USDJPY.c',
+    'EURJPY.c',
+  ];
+
+  // Singleton pattern
+  static FavoritesStorageService get instance {
+    _instance ??= FavoritesStorageService._();
+    return _instance!;
+  }
+
+  FavoritesStorageService._();
+
+  // Get all favorite instruments
+  Future<List<String>> getFavoriteInstruments() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final json = prefs.getString(_favoritesKey);
+
+      if (json != null && json.isNotEmpty) {
+        final List<dynamic> decoded = jsonDecode(json);
+        return decoded.cast<String>();
+      } else {
+        // If no favorites exist, initialize with default favorites
+        print('No favorites found, initializing with default favorites');
+        await _initializeDefaultFavorites();
+        return List.from(_defaultFavorites);
+      }
+    } catch (e) {
+      print('Error getting favorites: $e');
+      // If error occurs, return default favorites
+      return List.from(_defaultFavorites);
+    }
+  }
+
+  // Initialize default favorites in storage
+  Future<void> _initializeDefaultFavorites() async {
+    try {
+      await saveFavoriteInstruments(_defaultFavorites);
+      print('Default favorites initialized: $_defaultFavorites');
+    } catch (e) {
+      print('Error initializing default favorites: $e');
+    }
+  }
+
+  // Save favorites list
+  Future<void> saveFavoriteInstruments(List<String> favorites) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final json = jsonEncode(favorites);
+      await prefs.setString(_favoritesKey, json);
+    } catch (e) {
+      print('Error saving favorites: $e');
+    }
+  }
+
+  // Add single instrument to favorites
+  Future<bool> addToFavorites(String symbol) async {
+    try {
+      final favorites = await getFavoriteInstruments();
+      if (!favorites.contains(symbol)) {
+        favorites.add(symbol);
+        await saveFavoriteInstruments(favorites);
+        return true;
+      }
+      return false; // Already exists
+    } catch (e) {
+      print('Error adding to favorites: $e');
+      return false;
+    }
+  }
+
+  // Remove single instrument from favorites
+  Future<bool> removeFromFavorites(String symbol) async {
+    try {
+      final favorites = await getFavoriteInstruments();
+      if (favorites.remove(symbol)) {
+        await saveFavoriteInstruments(favorites);
+        return true;
+      }
+      return false; // Not found
+    } catch (e) {
+      print('Error removing from favorites: $e');
+      return false;
+    }
+  }
+
+  // Check if instrument is in favorites
+  Future<bool> isFavorite(String symbol) async {
+    try {
+      final favorites = await getFavoriteInstruments();
+      return favorites.contains(symbol);
+    } catch (e) {
+      print('Error checking favorite status: $e');
+      return false;
+    }
+  }
+
+  // Toggle favorite status
+  Future<bool> toggleFavorite(String symbol) async {
+    try {
+      final isFav = await isFavorite(symbol);
+      if (isFav) {
+        return await removeFromFavorites(symbol);
+      } else {
+        return await addToFavorites(symbol);
+      }
+    } catch (e) {
+      print('Error toggling favorite: $e');
+      return false;
+    }
+  }
+
+  // Clear all favorites
+  Future<void> clearAllFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_favoritesKey);
+    } catch (e) {
+      print('Error clearing favorites: $e');
+    }
+  }
+
+  // Reset to default favorites
+  Future<void> resetToDefaultFavorites() async {
+    try {
+      await saveFavoriteInstruments(_defaultFavorites);
+      print('Reset to default favorites: $_defaultFavorites');
+    } catch (e) {
+      print('Error resetting to default favorites: $e');
+    }
+  }
+
+  // Force reinitialize with new defaults (useful when default list changes)
+  Future<void> forceReinitializeDefaults() async {
+    try {
+      await clearAllFavorites();
+      await saveFavoriteInstruments(_defaultFavorites);
+      print('Force reinitialized with new defaults: $_defaultFavorites');
+    } catch (e) {
+      print('Error force reinitializing defaults: $e');
+    }
+  }
+
+  // Get favorites count
+  Future<int> getFavoritesCount() async {
+    try {
+      final favorites = await getFavoriteInstruments();
+      return favorites.length;
+    } catch (e) {
+      print('Error getting favorites count: $e');
+      return 0;
+    }
+  }
+}

@@ -1,0 +1,10 @@
+<svg width="78" height="60" viewBox="0 0 78 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Three horizontal lines (hamburger/list lines) -->
+  <line x1="4" y1="14" x2="38" y2="14" stroke="#9CA3AF" stroke-width="5" stroke-linecap="round"/>
+  <line x1="4" y1="28" x2="32" y2="28" stroke="#9CA3AF" stroke-width="5" stroke-linecap="round"/>
+  <line x1="4" y1="42" x2="26" y2="42" stroke="#9CA3AF" stroke-width="5" stroke-linecap="round"/>
+  <!-- Magnifying glass circle -->
+  <circle cx="56" cy="34" r="16" stroke="#9CA3AF" stroke-width="5"/>
+  <!-- Magnifying glass handle -->
+  <line x1="67" y1="45" x2="76" y2="55" stroke="#9CA3AF" stroke-width="5" stroke-linecap="round"/>
+</svg>

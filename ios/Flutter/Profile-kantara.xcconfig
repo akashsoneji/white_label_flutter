@@ -1,0 +1,7 @@
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"
+#include "Generated.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = com.kantara.app
+INFOPLIST_KEY_CFBundleDisplayName = Kantara
+INFOPLIST_KEY_CFBundleName = Kantara
+

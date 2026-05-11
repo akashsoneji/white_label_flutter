@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_color">#4A0C54</color>
+    <color name="secondary_color">#E8F5E8</color>
+    <color name="accent_color">#4A0C54</color>
+    <!-- SR wants white native splash background -->
+    <color name="my_splash_color">#4A0C54</color> <!-- vantage -->
+</resources>

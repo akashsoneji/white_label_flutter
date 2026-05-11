@@ -1,0 +1,8 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "lib/clients/tenax/assets/app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#4A0C54"  # Tenax purple
+  adaptive_icon_foreground: "lib/clients/tenax/assets/app_icon.png"
+

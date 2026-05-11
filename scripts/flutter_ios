@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# Wrapper script to auto-detect iOS simulator when running flutter run --flavor
+# Usage: 
+#   Option 1: Alias this script to 'flutter' for iOS development
+#   Option 2: Use directly: ./scripts/flutter_ios run --flavor pipze
+#
+# This script automatically converts --flavor to --dart-define for iOS devices
+
+# Check if command is 'run' and has '--flavor' flag
+if [ "$1" == "run" ] && [[ "$*" == *"--flavor"* ]]; then
+    # Extract flavor from arguments
+    FLAVOR=""
+    DEVICE_SPECIFIED=false
+    ARGS=("$@")
+    
+    # Parse arguments to find flavor and check for device
+    for i in "${!ARGS[@]}"; do
+        if [ "${ARGS[$i]}" == "--flavor" ] && [ $((i+1)) -lt ${#ARGS[@]} ]; then
+            FLAVOR="${ARGS[$((i+1))]}"
+        elif [ "${ARGS[$i]}" == "-d" ] || [ "${ARGS[$i]}" == "--device" ]; then
+            DEVICE_SPECIFIED=true
+        fi
+    done
+    
+    if [ -n "$FLAVOR" ]; then
+        # Always use Runner scheme - flavor switching is handled by Flutter and update_ios_flavor.sh
+        SCHEME_NAME="Runner"
+        
+        echo "🎨 Flavor detected: $FLAVOR"
+        echo "📱 Updating iOS configuration (app name, icon, etc.)..."
+        
+        # Update iOS flavor config (pass flavor as parameter)
+        bash scripts/update_ios_flavor.sh "$FLAVOR"
+        
+        if [ $? -ne 0 ]; then
+            echo "❌ Failed to update iOS flavor configuration"
+            exit 1
+        fi
+        
+        # If no device specified, auto-detect iOS simulator
+        IOS_DEVICE=""
+        if [ "$DEVICE_SPECIFIED" == false ]; then
+            echo "🔍 Auto-detecting iOS simulator..."
+            
+            # Find iOS simulator
+            DEVICES_OUTPUT=$(flutter devices 2>/dev/null)
+            IOS_DEVICE=$(echo "$DEVICES_OUTPUT" | grep -E "iPhone|iPad|ios|simulator|iOS" | head -1 | awk -F' • ' '{print $2}' | awk '{print $1}' | xargs)
+            
+            if [ -n "$IOS_DEVICE" ]; then
+                IOS_DEVICE_NAME=$(echo "$DEVICES_OUTPUT" | grep -E "iPhone|iPad|ios|simulator|iOS" | head -1 | awk -F' • ' '{print $3}' | xargs)
+                echo "✅ Using iOS simulator: $IOS_DEVICE_NAME"
+            else
+                echo "⚠️  No iOS simulator found. Please start one or specify device with -d"
+            fi
+        fi
+        
+        echo "📋 Running with --dart-define=FLAVOR=$FLAVOR (iOS uses default Runner scheme)"
+        echo "   Flavor is passed via --dart-define instead of --flavor for iOS"
+        echo ""
+        
+        # Build new arguments array: replace --flavor with --dart-define, keep other args, add device if needed
+        NEW_ARGS=("run")
+        SKIP_NEXT=false
+        
+        for i in "${!ARGS[@]}"; do
+            if [ "$SKIP_NEXT" == true ]; then
+                SKIP_NEXT=false
+                continue
+            fi
+            
+            # Replace --flavor with --dart-define=FLAVOR for iOS
+            if [ "${ARGS[$i]}" == "--flavor" ]; then
+                NEW_ARGS+=("--dart-define=FLAVOR=$FLAVOR")
+                SKIP_NEXT=true
+                continue
+            fi
+            
+            # Keep all other arguments
+            NEW_ARGS+=("${ARGS[$i]}")
+        done
+        
+        # Add device if we auto-detected one and it's not already specified
+        if [ "$DEVICE_SPECIFIED" == false ] && [ -n "$IOS_DEVICE" ]; then
+            NEW_ARGS+=("-d")
+            NEW_ARGS+=("$IOS_DEVICE")
+        fi
+        
+        # Run flutter with --dart-define instead of --flavor for iOS
+        flutter "${NEW_ARGS[@]}"
+    else
+        # No flavor found, just pass through
+        flutter "$@"
+    fi
+else
+    # For all other commands, just pass through to flutter
+    flutter "$@"
+fi
