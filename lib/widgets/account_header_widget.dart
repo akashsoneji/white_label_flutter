@@ -30,7 +30,7 @@ class AccountHeaderWidget extends StatelessWidget {
     this.onMenuTap,
     this.onSearchTap,
     this.showSearchIcon = true,
-    this.showMenuIcon = true,
+    this.showMenuIcon = false,
     this.rightWidget,
     this.padding,
     this.floatingProfit,
@@ -165,12 +165,16 @@ class AccountHeaderWidget extends StatelessWidget {
                                   ),
                                 ),
                                 SizedBox(width: 8.w),
-                                Text(
-                                  accountNumberText,
-                                  style: AppTextStyles.label.copyWith(
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
+                                Flexible(
+                                  child: Text(
+                                    accountNumberText,
+                                    style: AppTextStyles.label.copyWith(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 ),
                                 SizedBox(width: 6.w),
@@ -190,6 +194,8 @@ class AccountHeaderWidget extends StatelessWidget {
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w700,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 ),
                               ],
@@ -210,12 +216,16 @@ class AccountHeaderWidget extends StatelessWidget {
                       ),
                       SizedBox(width: 8.w),
                     ],
-                    Text(
-                      valueText,
-                      style: AppTextStyles.heading.copyWith(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        color: valueColor,
+                    Flexible(
+                      child: Text(
+                        valueText,
+                        style: AppTextStyles.heading.copyWith(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: valueColor,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                   ],
@@ -225,7 +235,7 @@ class AccountHeaderWidget extends StatelessWidget {
                   case AccountHeaderLayoutStyle.vantageInstruments:
                     return Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
+                        horizontal: 8.w,
                         vertical: 10.h,
                       ),
                       decoration: BoxDecoration(
@@ -255,7 +265,7 @@ class AccountHeaderWidget extends StatelessWidget {
                               ],
                             ),
                           ),
-                          SizedBox(width: 10.w),
+                          SizedBox(width: 4.w),
                           accountSelector,
                         ],
                       ),

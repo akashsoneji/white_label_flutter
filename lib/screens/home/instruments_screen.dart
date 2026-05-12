@@ -188,7 +188,6 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
               isVantage
                   ? Container(
                     margin: EdgeInsets.only(right: 0),
-                    padding: EdgeInsets.symmetric(horizontal: 4.w),
                     decoration: BoxDecoration(
                       color: AppColors.whiteColor,
                       borderRadius: BorderRadius.circular(24.r),
@@ -200,43 +199,20 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                         ),
                       ],
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: SvgPicture.asset(
-                            "assets/svg/search-normal.svg",
-                            height: 18.h,
-                            width: 18.w,
-                            color: AppColors.primary,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isSearching = true;
-                            });
-                          },
-                          padding: EdgeInsets.all(8.r),
-                          constraints: const BoxConstraints(),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 14.h,
-                          color: AppColors.border.withValues(alpha: 0.15),
-                          margin: EdgeInsets.symmetric(horizontal: 2.w),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.edit_outlined,
-                            size: 18.sp,
-                            color: AppColors.primary,
-                          ),
-                          onPressed: () {
-                            // Edit functionality placeholder
-                          },
-                          padding: EdgeInsets.all(8.r),
-                          constraints: const BoxConstraints(),
-                        ),
-                      ],
+                    child: IconButton(
+                      icon: SvgPicture.asset(
+                        "assets/svg/search-normal.svg",
+                        height: 18.h,
+                        width: 18.w,
+                        color: AppColors.primary,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isSearching = true;
+                        });
+                      },
+                      padding: EdgeInsets.all(8.r),
+                      constraints: const BoxConstraints(),
                     ),
                   )
                   : null,

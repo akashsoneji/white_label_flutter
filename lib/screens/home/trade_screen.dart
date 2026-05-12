@@ -337,7 +337,7 @@ class _TradeScreenState extends State<TradeScreen> {
   Widget build(BuildContext context) {
     final accountController = Get.find<AccountController>();
     final tradingController = Get.find<TradingController>();
-
+final languageService = Get.find<LanguageService>();
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       // drawer: const GlobalDrawer(),
@@ -670,7 +670,7 @@ class _TradeScreenState extends State<TradeScreen> {
                           FlavorConfig.isVantage()
                               ? Colors.transparent
                               : AppColors.cardBackGround,
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      padding: EdgeInsets.symmetric(horizontal: 8.w),
                     ),
                     onPressed: () {
                       print('🔘 Close All button clicked!');
@@ -715,6 +715,9 @@ class _TradeScreenState extends State<TradeScreen> {
           layoutStyle: isVantage 
               ? AccountHeaderLayoutStyle.vantageInstruments 
               : AccountHeaderLayoutStyle.defaultLayout,
+          padding: isVantage 
+              ? EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h) 
+              : null,
           showSearchIcon: false,
           rightWidget: closeAllButton,
           floatingProfit: floatingProfit,
@@ -724,6 +727,27 @@ class _TradeScreenState extends State<TradeScreen> {
   }
 
   Widget _buildTabs(TradingController tradingController) {
+    if (!FlavorConfig.isVantage()) {
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: 0.w),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: AppColors.grey.withOpacity(0.2),
+              width: 1.w,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            _buildTabItem(tradingController, 0, 'Market'),
+            _buildTabItem(tradingController, 1, 'Pending'),
+            _buildTabItem(tradingController, 2, 'History'),
+          ],
+        ),
+      );
+    }
+
     return Container(
       height: 40.h,
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
@@ -782,6 +806,69 @@ class _TradeScreenState extends State<TradeScreen> {
     int index,
     String title,
   ) {
+    if (!FlavorConfig.isVantage()) {
+      return Obx(() {
+        final isSelected = tradingController.selectedTab == index;
+        final count = _getPositionCount(tradingController, index);
+
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => tradingController.setSelectedTab(index),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: isSelected ? AppColors.primary : Colors.transparent,
+                    width: 2.w,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.label.copyWith(
+                      fontSize: 14.sp,
+                      height: 1.57,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color:
+                          isSelected
+                              ? AppColors.textPrimary
+                              : AppColors.textGrey,
+                    ),
+                  ),
+                  if (count > 0 && index != 2) ...[
+                    SizedBox(width: 4.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 4.w,
+                        vertical: 1.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Text(
+                        count.toString(),
+                        style: AppTextStyles.label.copyWith(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      });
+    }
+
     return Expanded(
       child: GestureDetector(
         onTap: () => tradingController.setSelectedTab(index),
@@ -1447,23 +1534,26 @@ class _TradeScreenState extends State<TradeScreen> {
       onTap: () => _showPositionDetailsBottomSheet(tradingController, position),
       child: Container(
         margin: EdgeInsets.only(bottom: 6.h),
-        decoration: BoxDecoration(
-          color: AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: AppColors.border.withOpacity(0.08),
-            width: 1,
-          ),
-        ),
-        // padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 0.h),
-        // margin: EdgeInsets.only(bottom: 6.h),
-        // decoration: BoxDecoration(
-        //   color: AppColors.card,
-        //   // borderRadius: BorderRadius.circular(12.r),
-        //   // .symmetric(horizontal: BorderSide(color: AppColors.icongrey)),
-        //   // Shadows are expensive in long, frequently-updating lists.
-        //   // Remove them for Market/Pending to keep scrolling smooth at 450-1000 rows.
-        // ),
+        decoration: FlavorConfig.isVantage()
+            ? BoxDecoration(
+                color: AppColors.whiteColor,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: AppColors.border.withOpacity(0.08),
+                  width: 1,
+                ),
+              )
+            : BoxDecoration(
+                color: AppColors.whiteColor,
+                borderRadius: BorderRadius.circular(12.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: _buildCardContent(tradingController, position, isPositive),
@@ -1531,130 +1621,174 @@ class _TradeScreenState extends State<TradeScreen> {
     );
   }
 
-  // Extract card content for Market and Pending tabs
-  Widget _buildCardContent(
+    Widget _buildCardContent(
     TradingController tradingController,
     TradePosition position,
     bool isPositive,
   ) {
     final isPendingTab = tradingController.selectedTab == 1;
     final displaySymbol = _removeSymbolSuffixForDisplay(position.symbol);
+    final isBuy = position.action.toLowerCase() == 'buy';
 
     // For pending orders, show status instead of P/L
     // For market positions, show P/L
     final rightSideContent =
         isPendingTab
             ? Text(
-              'placed',
-              style: AppTextStyles.heading.copyWith(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textGrey,
-              ),
-            )
+                'placed',
+                style: AppTextStyles.heading.copyWith(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textGrey,
+                ),
+              )
             : Text(
-              '${PrecisionHelper.formatPnL(position.profitLoss)}',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.heading.copyWith(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w800,
-                color: isPositive ? AppColors.green : AppColors.red,
-              ),
-            );
+                '${PrecisionHelper.formatPnL(position.profitLoss)}',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.heading.copyWith(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  color: isPositive ? AppColors.green : AppColors.red,
+                ),
+              );
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Left side: Icon + Symbol/Action
-          Expanded(
-            flex: 3,
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(6.w),
-                  decoration: BoxDecoration(
-                    color: (position.action.toLowerCase() == 'buy' ? AppColors.green : AppColors.red).withOpacity(0.1),
-                    shape: BoxShape.circle,
+    if (FlavorConfig.isVantage()) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Left side: Icon + Symbol/Action
+            Expanded(
+              flex: 3,
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(6.w),
+                    decoration: BoxDecoration(
+                      color: (isBuy ? AppColors.green : AppColors.red).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      isBuy ? Icons.trending_up : Icons.trending_down,
+                      size: 14.sp,
+                      color: isBuy ? AppColors.green : AppColors.red,
+                    ),
                   ),
-                  child: Icon(
-                    position.action.toLowerCase() == 'buy' ? Icons.trending_up : Icons.trending_down,
-                    size: 14.sp,
-                    color: position.action.toLowerCase() == 'buy' ? AppColors.green : AppColors.red,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        displaySymbol,
-                        style: AppTextStyles.heading.copyWith(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displaySymbol,
+                          style: AppTextStyles.heading.copyWith(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${position.action.toUpperCase()} ${position.volume}',
-                        style: AppTextStyles.label.copyWith(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w600,
-                          color: position.action.toLowerCase() == 'buy' ? AppColors.green : AppColors.red,
+                        Text(
+                          '${position.action.toUpperCase()} ${position.volume}',
+                          style: AppTextStyles.label.copyWith(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w600,
+                            color: isBuy ? AppColors.green : AppColors.red,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // Center: Price Range
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            // Center: Price Range
+            Expanded(
+              flex: 3,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Price Range',
+                    style: AppTextStyles.label.copyWith(
+                      fontSize: 9.sp,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                  Text(
+                    '${position.entryPrice} → ${position.currentPrice}',
+                    style: AppTextStyles.label.copyWith(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Right side: P/L
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    isPendingTab ? 'Status' : 'Profit',
+                    style: AppTextStyles.label.copyWith(
+                      fontSize: 9.sp,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                  rightSideContent,
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // ORIGINAL DESIGN: 2-column Row for other flavors
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
                 Text(
-                  'Price Range',
-                  style: AppTextStyles.label.copyWith(
-                    fontSize: 9.sp,
-                    color: AppColors.textGrey,
-                  ),
-                ),
-                Text(
-                  '${position.entryPrice} → ${position.currentPrice}',
-                  style: AppTextStyles.label.copyWith(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w500,
+                  displaySymbol,
+                  style: AppTextStyles.heading.copyWith(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
                 ),
-              ],
-            ),
-          ),
-          // Right side: P/L
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
+                SizedBox(width: 8.w),
                 Text(
-                  isPendingTab ? 'Status' : 'Profit',
+                  '${position.action.toUpperCase()} ${position.volume}',
                   style: AppTextStyles.label.copyWith(
-                    fontSize: 9.sp,
-                    color: AppColors.textGrey,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                    color: isBuy ? AppColors.green : AppColors.red,
                   ),
                 ),
-                rightSideContent,
               ],
             ),
-          ),
-        ],
-      ),
+            SizedBox(height: 4.h),
+            Text(
+              '${position.entryPrice} -> ${position.currentPrice}',
+              style: AppTextStyles.label.copyWith(
+                fontSize: 12.sp,
+                color: AppColors.textGrey,
+              ),
+            ),
+          ],
+        ),
+        rightSideContent,
+      ],
     );
   }
 
@@ -3713,19 +3847,48 @@ class _TradeScreenState extends State<TradeScreen> {
       return true;
     }).toList();
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(vertical: 2.h),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 2.8,
-        crossAxisSpacing: 8.w,
-        mainAxisSpacing: 8.h,
-      ),
-      itemCount: metricKeys.length,
-      itemBuilder: (context, index) {
-        final key = metricKeys[index];
+    // INNOVATIVE DESIGN: Grid view with icons for Vantage flavor
+    if (FlavorConfig.isVantage()) {
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(vertical: 2.h),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 2.8,
+          crossAxisSpacing: 8.w,
+          mainAxisSpacing: 8.h,
+        ),
+        itemCount: metricKeys.length,
+        itemBuilder: (context, index) {
+          final key = metricKeys[index];
+          String value;
+          Color? valueColor;
+
+          if (currentTab == 2 && totals != null) {
+            value = _getMetricValue(key, null, totals);
+            valueColor = _getMetricColor(key, null, totals);
+          } else if (currentTab != 2 && accountInfo != null) {
+            value = _getMetricValue(key, accountInfo, null);
+            valueColor = _getMetricColor(key, accountInfo, null);
+          } else {
+            value = '0.00';
+            valueColor = AppColors.textGrey;
+          }
+
+          return _buildInnovativeMetricCard(
+            languageService.tr(key),
+            value,
+            key,
+            valueColor: valueColor,
+          );
+        },
+      );
+    }
+
+    // ORIGINAL DESIGN: Simple list for other flavors
+    return Column(
+      children: metricKeys.map((key) {
         String value;
         Color? valueColor;
 
@@ -3740,13 +3903,12 @@ class _TradeScreenState extends State<TradeScreen> {
           valueColor = AppColors.textGrey;
         }
 
-        return _buildInnovativeMetricCard(
+        return _buildMetricRow(
           languageService.tr(key),
           value,
-          key,
           valueColor: valueColor,
         );
-      },
+      }).toList(),
     );
   }
 
