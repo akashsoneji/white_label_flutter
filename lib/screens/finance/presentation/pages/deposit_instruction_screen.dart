@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -210,9 +211,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           child: Wrap(
             children: <Widget>[
               ListTile(
-                leading: const Icon(Icons.camera_alt),
+                leading:   Icon(Icons.camera_alt, color: AppColors.textPrimary),
                 title: Text(
                   languageService.tr('deposit_instruction_take_photo'),
+                  style: AppTextStyles.bodyText,
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -220,9 +222,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library),
+                leading:   Icon(Icons.photo_library, color: AppColors.textPrimary),
                 title: Text(
                   languageService.tr('deposit_instruction_choose_from_gallery'),
+                  style: AppTextStyles.bodyText,
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -263,17 +266,8 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           scrolledUnderElevation: 0,
           backgroundColor: AppColors.background,
           elevation: 0,
-          leading: Padding(
-            padding: EdgeInsets.only(left: 10.w),
-            child: IconButton(
-              icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-              onPressed: _handleBackNavigation,
-            ),
-          ),
+          leading:  AppBackButton(onPressed: _handleBackNavigation,),
           title: Text(titleString, style: AppTextStyles.screenTitle),
-          shape: Border(
-            bottom: BorderSide(color: AppColors.border, width: 1),
-          ),
           centerTitle: true,
         ),
         body: Stack(
