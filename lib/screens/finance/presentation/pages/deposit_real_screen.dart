@@ -1,3 +1,4 @@
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -173,29 +174,17 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        backgroundColor: AppColors.backgroundLight,
+        backgroundColor: AppColors.background,
         elevation: 0,
-        leading: Padding(
-          padding: EdgeInsets.only(left: 10.w),
-          child: IconButton(
-            icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-            onPressed: () => NavigationHelper.safeBack(context: context),
-          ),
-        ),
+        leading: const AppBackButton(),
 
         title: Text(
           languageService.tr('deposit'),
           style: AppTextStyles.screenTitle,
-        ),
-        shape: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade300, // divider color
-            width: 1, // divider thickness
-          ),
         ),
         centerTitle: true,
       ),
@@ -266,6 +255,8 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       onTap: null, // disable dropdown tap
       decoration: InputDecoration(
         labelText: 'Payment Mode',
+        labelStyle: TextStyle(color: AppColors.textGrey),
+        hintStyle: TextStyle(color: AppColors.hint),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -301,11 +292,13 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         onTap: () => _showAccountDropdown(),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
-          child: RTLHelper.rtlIcon(Icons.arrow_drop_down, color: Colors.grey),
+          child: RTLHelper.rtlIcon(Icons.arrow_drop_down, color: AppColors.textGrey),
         ),
       ),
       decoration: InputDecoration(
         labelText: 'Deposit to',
+        labelStyle: TextStyle(color: AppColors.textGrey),
+        hintStyle: TextStyle(color: AppColors.hint),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -329,7 +322,11 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   Widget _buildAmountField() {
     return RTLHelper.rtlTextField(
-      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400),
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textPrimary,
+      ),
       controller: amountController,
       focusNode: amountFocusNode,
       keyboardType: TextInputType.numberWithOptions(
@@ -342,6 +339,8 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       ],
       decoration: InputDecoration(
         labelText: 'Amount',
+        labelStyle: TextStyle(color: AppColors.textGrey),
+        hintStyle: TextStyle(color: AppColors.hint),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -368,7 +367,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 11.5.h),
       decoration: BoxDecoration(
-        color: AppColors.grey,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -379,14 +378,14 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: AppColors.icongrey,
+              color: AppColors.textGrey,
             ),
           ),
           Text(
             '${amountController.text.isEmpty ? "0.00" : amountController.text} $selectedCurrency',
             style: TextStyle(
               fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
           ),
@@ -449,7 +448,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.whiteColor,
+      backgroundColor: AppColors.card,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -466,6 +465,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -476,7 +476,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
             shrinkWrap: true,
             itemCount: accounts.length,
             separatorBuilder:
-                (_, __) => Divider(height: 1, color: Colors.grey.shade300),
+                (_, __) => Divider(height: 1, color: AppColors.border),
             itemBuilder: (context, index) {
               final account = accounts[index];
 
@@ -523,7 +523,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       ),
@@ -534,7 +534,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey.shade700,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],

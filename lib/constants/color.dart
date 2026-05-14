@@ -16,7 +16,7 @@ class AppColors {
         Brightness.dark;
   }
   // Brand Colors - Now using flavor configuration
-  static Color get primary => FlavorConfig.instance.primaryColor;
+  static Color get primary1 => FlavorConfig.instance.primaryColor;
   static Color get secondary => FlavorConfig.instance.secondaryColor;
   static Color get accent => FlavorConfig.instance.accentColor;
 
@@ -45,6 +45,7 @@ class AppColors {
   static const Color tradeBackgroundCenterColorDark = Color(0xFF1E1E1E);
 
   // Current Text Colors (based on theme)
+  static Color get primary => isDarkMode ? textPrimaryDark : primary1;
   static Color get textPrimary => isDarkMode ? textPrimaryDark : textPrimaryLight;
   static Color get textSecondary => isDarkMode ? textSecondaryDark : textSecondaryLight;
   static Color get textGrey => isDarkMode ? textGreyDark : textGreyLightTheme;
@@ -52,6 +53,7 @@ class AppColors {
   static Color get whiteColor => isDarkMode ? whiteColorDark : whiteColorLight;
   static Color get tradeTextCenterColor => isDarkMode ? tradeTextCenterColorDark : tradeTextCenterColorLight;
   static Color get tradeBackgroundCenterColor => isDarkMode ? tradeBackgroundCenterColorDark : tradeBackgroundCenterColorLight;
+  static Color get tradeBackgroundCenterColorBoeder => isDarkMode ? textPrimaryDark : tradeTextCenterColorDark;
 
   // Backgrounds - Light Theme
   static const Color backgroundLightTheme = Color(0xFFFFFFFF);

@@ -91,7 +91,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             height: 200,
             width: 200,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Center(child: CircularProgressIndicator()),
@@ -103,11 +103,11 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             height: 200,
             width: 200,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Center(
-              child: Icon(Icons.error_outline, color: Colors.grey),
+            child: Center(
+              child: Icon(Icons.error_outline, color: AppColors.textSecondary),
             ),
           );
         }
@@ -115,9 +115,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.whiteColor,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
+            border: Border.all(color: AppColors.border),
           ),
           child: Image.memory(
             snapshot.data!,
@@ -129,11 +129,11 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 height: 200,
                 width: 200,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Center(
-                  child: Icon(Icons.error_outline, color: Colors.grey),
+                child: Center(
+                  child: Icon(Icons.error_outline, color: AppColors.textSecondary),
                 ),
               );
             },
@@ -258,10 +258,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           scrolledUnderElevation: 0,
-          backgroundColor: AppColors.backgroundLight,
+          backgroundColor: AppColors.background,
           elevation: 0,
           leading: Padding(
             padding: EdgeInsets.only(left: 10.w),
@@ -272,7 +272,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           ),
           title: Text(titleString, style: AppTextStyles.screenTitle),
           shape: Border(
-            bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+            bottom: BorderSide(color: AppColors.border, width: 1),
           ),
           centerTitle: true,
         ),
@@ -307,7 +307,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // Instruction Section
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(8),
             ),
             child: ExpansionTile(
@@ -321,9 +321,13 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 borderRadius: BorderRadius.zero,
                 side: BorderSide.none,
               ),
-              title: const Text(
-                'Instruction',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              title: Text(
+                languageService.tr('deposit_instruction_instruction') ?? 'Instruction',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
               childrenPadding: const EdgeInsets.all(16),
               children: [
@@ -402,11 +406,21 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // Transaction Number TextField
           TextField(
             controller: transactionNumberController,
+            style: AppTextStyles.input,
             decoration: InputDecoration(
               hintText: 'Transaction Number',
+              hintStyle: AppTextStyles.hint,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.grey),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: AppColors.primary),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -465,19 +479,22 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   vertical: 24,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.whiteColor,
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.grey[300]!,
+                    color: AppColors.border,
                     style: BorderStyle.solid,
                   ),
                 ),
                 child: Obx(() {
                   if (controller.selectedImage.value != null) {
-                    return Image.file(
-                      controller.selectedImage.value!,
-                      height: 120,
-                      fit: BoxFit.cover,
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        controller.selectedImage.value!,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      ),
                     );
                   } else {
                     return Column(
@@ -485,13 +502,13 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: AppColors.surface,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.cloud_upload_outlined,
                             size: 32,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -499,7 +516,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                           'Upload file',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -526,9 +543,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: Colors.grey,
+            color: AppColors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -568,7 +585,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // Instruction Card
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(8),
             ),
             child: ExpansionTile(
@@ -582,9 +599,13 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 borderRadius: BorderRadius.zero,
                 side: BorderSide.none,
               ),
-              title: const Text(
-                'Instruction',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              title: Text(
+                languageService.tr('deposit_instruction_instruction') ?? 'Instruction',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
               childrenPadding: const EdgeInsets.all(16),
               children: [
@@ -617,9 +638,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           if (qrCodePath != null && qrCodePath!.isNotEmpty) ...[
             Text(
               'QR Code',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -633,9 +654,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               bankDetail!['crypto_address'].toString().isNotEmpty) ...[
             Text(
               'Deposit Address',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -643,18 +664,19 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.whiteColor,
+                color: AppColors.cardBackground,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: AppColors.border),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       bankDetail!['crypto_address'].toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -695,19 +717,22 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   vertical: 24,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.whiteColor,
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.grey[300]!,
+                    color: AppColors.border,
                     style: BorderStyle.solid,
                   ),
                 ),
                 child: Obx(() {
                   if (controller.selectedImage.value != null) {
-                    return Image.file(
-                      controller.selectedImage.value!,
-                      height: 120,
-                      fit: BoxFit.cover,
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        controller.selectedImage.value!,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      ),
                     );
                   } else {
                     return Column(
@@ -715,13 +740,13 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: AppColors.surface,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.cloud_upload_outlined,
                             size: 32,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -729,7 +754,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                           'Upload file',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -766,7 +791,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // Instruction Card
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(8),
             ),
             child: ExpansionTile(
@@ -780,9 +805,13 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 borderRadius: BorderRadius.zero,
                 side: BorderSide.none,
               ),
-              title: const Text(
-                'Instruction',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              title: Text(
+                languageService.tr('deposit_instruction_instruction') ?? 'Instruction',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
               childrenPadding: const EdgeInsets.all(16),
               children: [
@@ -815,9 +844,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           if (qrCodePath != null && qrCodePath!.isNotEmpty) ...[
             Text(
               'QR Code',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -849,19 +878,22 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   vertical: 24,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.whiteColor,
+                  color: AppColors.cardBackground,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.grey[300]!,
+                    color: AppColors.border,
                     style: BorderStyle.solid,
                   ),
                 ),
                 child: Obx(() {
                   if (controller.selectedImage.value != null) {
-                    return Image.file(
-                      controller.selectedImage.value!,
-                      height: 120,
-                      fit: BoxFit.cover,
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        controller.selectedImage.value!,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      ),
                     );
                   } else {
                     return Column(
@@ -869,13 +901,13 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: AppColors.surface,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.cloud_upload_outlined,
                             size: 32,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -883,7 +915,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                           'Upload file',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -990,13 +1022,20 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           margin: const EdgeInsets.only(top: 8, right: 8),
           width: 4,
           height: 4,
-          decoration: const BoxDecoration(
-            color: Colors.black,
+          decoration: BoxDecoration(
+            color: AppColors.textSecondary,
             shape: BoxShape.circle,
           ),
         ),
         Expanded(
-          child: Text(text, style: const TextStyle(fontSize: 14, height: 1.4)),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.4,
+              color: AppColors.textPrimary,
+            ),
+          ),
         ),
       ],
     );

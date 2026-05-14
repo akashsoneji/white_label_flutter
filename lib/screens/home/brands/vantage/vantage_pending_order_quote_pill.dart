@@ -21,7 +21,7 @@ class VantagePendingOrderQuotePill extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.35)),
+        border: Border.all(color: AppColors.tradeBackgroundCenterColorBoeder.withValues(alpha: 0.35)),
       ),
       child: Obx(() {
         final bid = chartSocketController.getBidPrice() ?? 0.0;
@@ -38,7 +38,7 @@ class VantagePendingOrderQuotePill extends StatelessWidget {
             Container(
               width: 1,
               height: 22.h,
-              color: AppColors.border.withValues(alpha: 0.45),
+              color: AppColors.tradeBackgroundCenterColorBoeder.withValues(alpha: 0.45),
             ),
             SizedBox(width: 8.w),
             _QuoteCell(

@@ -216,6 +216,9 @@ class RTLHelper {
       decoration:
           decoration?.copyWith(
             floatingLabelStyle: TextStyle(color: AppColors.textGrey),
+            labelStyle: TextStyle(color: AppColors.textGrey),
+            hintStyle: TextStyle(color: AppColors.hint),
+            helperStyle: TextStyle(color: AppColors.textSecondary),
 
             prefixIcon: isRTL ? suffixIcon : prefixIcon,
             suffixIcon: isRTL ? prefixIcon : suffixIcon,
@@ -231,6 +234,8 @@ class RTLHelper {
           InputDecoration(
             labelStyle: TextStyle(color: AppColors.textGrey),
             floatingLabelStyle: TextStyle(color: AppColors.textGrey),
+            hintStyle: TextStyle(color: AppColors.hint),
+            helperStyle: TextStyle(color: AppColors.textSecondary),
             labelText: labelText,
             hintText: hintText,
             prefixIcon: isRTL ? suffixIcon : prefixIcon,

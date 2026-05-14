@@ -2425,7 +2425,7 @@ Placing Order:
           height: 40.h,
           width: 40.w,
           child: Center(
-            child: Icon(icon, size: 20.sp, color: primary),
+            child: Icon(icon, size: 20.sp, color:  AppColors.primary),
           ),
         ),
       );
@@ -2586,7 +2586,7 @@ Placing Order:
           border: Border.all(color: primary.withOpacity(0.16)),
         ),
         child: Center(
-          child: Icon(icon, size: 18.sp, color: primary),
+          child: Icon(icon, size: 18.sp, color: AppColors.primary),
         ),
       ),
     );

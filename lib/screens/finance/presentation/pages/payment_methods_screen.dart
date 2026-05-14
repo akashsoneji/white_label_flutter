@@ -1,3 +1,4 @@
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -50,13 +51,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
-        leading: Padding(
-          padding: EdgeInsets.only(left: 10.w),
-          child: IconButton(
-            icon: SvgPicture.asset("assets/svg/trade/arro_back.svg",color: AppColors.textPrimary),
-            onPressed: () => NavigationHelper.safeBack(context: context),
-          ),
-        ),
+        leading: const AppBackButton(),
         title: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -74,9 +69,6 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             //   ),
             // ),
           ],
-        ),
-        shape: Border(
-          bottom: BorderSide(color: Colors.grey.shade300, width: 1),
         ),
         centerTitle: true,
       ),
@@ -183,12 +175,12 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                               },
                             )
                             : CircleAvatar(
-                              child: Text(name.isNotEmpty ? name[0] : "?"),
+                              child: Text(name.isNotEmpty ? name[0] : "?", style: AppTextStyles.label.copyWith(color: AppColors.tradeBackgroundCenterColorBoeder)),
                             ),
                   ),
-                  title: Text(name),
+                  title: Text(name, style: AppTextStyles.label),
                   // subtitle: Text("Instant up to 1 hour"),
-                  trailing: Icon(Icons.arrow_forward_ios_rounded),
+                  trailing: Icon(Icons.arrow_forward_ios_rounded, color: AppColors.textGrey),
                 ),
               );
             },

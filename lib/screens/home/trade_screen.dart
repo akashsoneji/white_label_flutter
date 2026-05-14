@@ -915,7 +915,7 @@ final languageService = Get.find<LanguageService>();
                   fontSize: 12.sp,
                   height: 1.0,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? Colors.white : AppColors.textGrey,
+                  color: isSelected ? AppColors.whiteColor : AppColors.textGrey,
                 ),
               ),
               

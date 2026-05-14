@@ -484,7 +484,7 @@ class DashboardScreen extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color:
                             account.accountType == 'live'
-                                ? AppColors.whiteColor
+                                ? AppColors.tradeBackgroundCenterColorBoeder
                                 : AppColors.whiteColor,
                       ),
                     ),

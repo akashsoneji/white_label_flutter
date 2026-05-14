@@ -161,7 +161,7 @@ class AccountHeaderWidget extends StatelessWidget {
                                   child: Icon(
                                     Icons.account_balance_wallet_outlined,
                                     size: 12.sp,
-                                    color: accountTypeTextColor,
+                                    color: AppColors.whiteColorLight,
                                   ),
                                 ),
                                 SizedBox(width: 8.w),
@@ -184,13 +184,13 @@ class AccountHeaderWidget extends StatelessWidget {
                                     vertical: 3.h,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: accountTypeColor.withOpacity(0.12),
+                                    color: AppColors.primary1,
                                     borderRadius: BorderRadius.circular(999),
                                   ),
                                   child: Text(
                                     accountTypeText.toUpperCase(),
                                     style: TextStyle(
-                                      color: accountTypeColor,
+                                      color: AppColors.whiteColorLight,
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w700,
                                     ),

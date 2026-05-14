@@ -892,59 +892,59 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       ),
     );
 
-    if (isVantage) {
-      return VantageMoreLayout(
-        backgroundColor: AppColors.tradeBackgroundCenterColor,
-        child: Stack(
-          children: [
-            body,
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 8.h,
-              right: 0,
-              child: Obx(() {
-                final model = moreController.dashboardModel.value;
-                final stage = model?.data?.stageCompletion;
-                final isProfileVerified =
-                    (stage?.emailVerified != null) &&
-                    (stage?.mobileVerified != null) &&
-                    (stage?.personalDetails == true);
+    // if (isVantage) {
+    //   return VantageMoreLayout(
+    //     backgroundColor: AppColors.tradeBackgroundCenterColor,
+    //     child: Stack(
+    //       children: [
+    //         body,
+    //         Positioned(
+    //           top: MediaQuery.of(context).padding.top + 8.h,
+    //           right: 0,
+    //           child: Obx(() {
+    //             final model = moreController.dashboardModel.value;
+    //             final stage = model?.data?.stageCompletion;
+    //             final isProfileVerified =
+    //                 (stage?.emailVerified != null) &&
+    //                 (stage?.mobileVerified != null) &&
+    //                 (stage?.personalDetails == true);
 
-                return Container(
-                  margin: EdgeInsets.only(right: 16.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.whiteColor,
-                    borderRadius: BorderRadius.circular(24.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 10,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: IconButton(
-                    icon: SvgPicture.asset(
-                      'assets/svg/edit_profile.svg',
-                      height: 20.h,
-                      width: 20.w,
-                      color: AppColors.primary,
-                    ),
-                    padding: EdgeInsets.all(8.r),
-                    constraints: const BoxConstraints(),
-                    onPressed: () {
-                      Get.toNamed(
-                        AppPages.EDIT_PROFILE,
-                        arguments: isProfileVerified,
-                      );
-                    },
-                  ),
-                );
-              }),
-            ),
-          ],
-        ),
-      );
-    }
+    //             return Container(
+    //               margin: EdgeInsets.only(right: 16.w),
+    //               decoration: BoxDecoration(
+    //                 color: AppColors.whiteColor,
+    //                 borderRadius: BorderRadius.circular(24.r),
+    //                 boxShadow: [
+    //                   BoxShadow(
+    //                     color: Colors.black.withValues(alpha: 0.12),
+    //                     blurRadius: 10,
+    //                     offset: const Offset(0, 3),
+    //                   ),
+    //                 ],
+    //               ),
+    //               child: IconButton(
+    //                 icon: SvgPicture.asset(
+    //                   'assets/svg/edit_profile.svg',
+    //                   height: 20.h,
+    //                   width: 20.w,
+    //                   color: AppColors.primary,
+    //                 ),
+    //                 padding: EdgeInsets.all(8.r),
+    //                 constraints: const BoxConstraints(),
+    //                 onPressed: () {
+    //                   Get.toNamed(
+    //                     AppPages.EDIT_PROFILE,
+    //                     arguments: isProfileVerified,
+    //                   );
+    //                 },
+    //               ),
+    //             );
+    //           }),
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    // }
 
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
