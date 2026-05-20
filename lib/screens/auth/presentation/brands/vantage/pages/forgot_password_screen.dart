@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../auth_form_validation.dart';
 import '../widgets/vantage_auth_theme.dart';
 import '../widgets/vantage_auth_scaffold.dart';
 import '../widgets/vantage_controls.dart';
@@ -18,7 +19,6 @@ class VantageForgotPasswordScreen extends StatefulWidget {
 }
 
 class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 
   final AuthController authController = Get.find<AuthController>();
@@ -30,6 +30,16 @@ class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScree
     super.dispose();
   }
 
+  void _sendOtp() {
+    final email = _emailController.text.trim();
+    final errors = AuthFormValidation.validateForgotPassword(
+      languageService: languageService,
+      email: email,
+    );
+    if (!AuthFormValidation.showErrorsIfAny(errors)) return;
+    authController.requestPasswordResetOTP(email: email);
+  }
+
   @override
   Widget build(BuildContext context) {
     return VantageAuthScaffold(
@@ -39,7 +49,7 @@ class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScree
           TextSpan(
             text: 'You remember your password? ',
             style: TextStyle(color: VantageAuthTheme.muted, fontSize: 13.sp),
-            children: const [
+            children: [
               TextSpan(
                 text: 'Sign In',
                 style: TextStyle(
@@ -51,9 +61,7 @@ class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScree
           ),
         ),
       ),
-      child: Form(
-        key: _formKey,
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
@@ -69,35 +77,16 @@ class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScree
               controller: _emailController,
               hintText: 'Email',
               keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return languageService.tr('forgot_password_enter_your_email');
-                }
-                if (!value.contains('@')) {
-                  return languageService.tr(
-                    'forgot_password_Please_enter_a_valid_email',
-                  );
-                }
-                return null;
-              },
             ),
             SizedBox(height: 14.h),
             Obx(() {
               return VantagePrimaryButton(
                 text: 'Send OTP',
                 isLoading: authController.isLoading,
-                onPressed: authController.isLoading
-                    ? null
-                    : () {
-                        if (_formKey.currentState?.validate() != true) return;
-                        authController.requestPasswordResetOTP(
-                          email: _emailController.text.trim(),
-                        );
-                      },
+                onPressed: authController.isLoading ? null : _sendOtp,
               );
             }),
           ],
-        ),
       ),
     );
   }

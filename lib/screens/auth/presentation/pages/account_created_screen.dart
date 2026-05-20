@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/utils/svg_color_helper.dart';
-import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
+import '../auth_screen_theme.dart';
+import '../brands/vantage/widgets/vantage_auth_scaffold.dart';
+import '../brands/vantage/widgets/vantage_controls.dart';
+import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 
@@ -14,10 +16,31 @@ class AccountCreatedScreen extends StatelessWidget {
   final AuthController authController = Get.find<AuthController>();
   final LanguageService languageService = Get.find<LanguageService>();
 
+  Widget _buildBody() {
+    return Column(
+      children: [
+        SizedBox(height: 40.h),
+        _buildSuccessIcon(),
+        SizedBox(height: 24.h),
+        _buildWelcomeMessage(),
+        SizedBox(height: 32.h),
+        _buildCallToAction(),
+        SizedBox(height: 24.h),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (FlavorConfig.isVantage()) {
+      return VantageAuthScaffold(
+        showBack: false,
+        child: _buildBody(),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AuthScreenTheme.scaffoldBackground,
       body: SafeArea(
         child: Column(
           children: [
@@ -25,17 +48,7 @@ class AccountCreatedScreen extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  children: [
-                    SizedBox(height: 40.h),
-                    _buildSuccessIcon(),
-                    SizedBox(height: 24.h),
-                    _buildWelcomeMessage(),
-                    SizedBox(height: 32.h),
-                    _buildCallToAction(context),
-                    SizedBox(height: 24.h),
-                  ],
-                ),
+                child: _buildBody(),
               ),
             ),
           ],
@@ -79,20 +92,19 @@ class AccountCreatedScreen extends StatelessWidget {
   }
 
   Widget _buildSuccessIcon() {
-    return FutureBuilder<Widget>(
-      future: SvgColorHelper.loadSvgWithTwoColors(
-        assetPath: 'assets/svg/welcom_withstr_icon.svg',
-        targetColor1: AppColors.primary,
-        targetColor2: Colors.black,
-        colorToReplace1: '#5F259E',
-        colorToReplace2: '#3D126C',
-        height: 130.h,
-        width: 130.w,
+    return Container(
+      height: 130.w,
+      width: 130.w,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.whiteColor,
+        border: Border.all(color: AppColors.success, width: 2.5),
       ),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) return snapshot.data!;
-        return SizedBox(height: 130.h, width: 130.w);
-      },
+      child: Icon(
+        Icons.check_rounded,
+        color: AppColors.success,
+        size: 72.sp,
+      ),
     );
   }
 
@@ -121,7 +133,38 @@ class AccountCreatedScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCallToAction(BuildContext context) {
+  Widget _buildCallToAction() {
+    if (FlavorConfig.isVantage()) {
+      return Column(
+        children: [
+          Text(
+            languageService.tr("common_to_start_trading"),
+            style: TextStyle(
+              fontSize: 16.sp,
+              color: AppColors.textGrey,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20.h),
+          VantagePrimaryButton(
+            text: 'Create Trading Account',
+            onPressed: () {
+              Get.toNamed(
+                AppPages.CHOOSE_ACCOUNT,
+                arguments: {'from': 'account_created'},
+              );
+            },
+          ),
+          SizedBox(height: 12.h),
+          VantageOutlinedButton(
+            text: languageService.tr("common_skip_for_now"),
+            onPressed: () => Get.offAllNamed(AppPages.TRADING),
+          ),
+        ],
+      );
+    }
+
     return Column(
       children: [
         Text(
@@ -158,13 +201,7 @@ class AccountCreatedScreen extends StatelessWidget {
           height: 46.h,
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/trading',
-                (route) => false,
-              );
-            },
+            onPressed: () => Get.offAllNamed(AppPages.TRADING),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: AppColors.primary),
               shape: RoundedRectangleBorder(

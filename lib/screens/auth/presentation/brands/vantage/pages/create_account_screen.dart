@@ -14,6 +14,7 @@ import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 
+import '../../../auth_form_validation.dart';
 import '../widgets/vantage_auth_scaffold.dart';
 import '../widgets/vantage_auth_theme.dart';
 import '../widgets/vantage_controls.dart';
@@ -28,7 +29,6 @@ class VantageCreateAccountScreen extends StatefulWidget {
 
 class _VantageCreateAccountScreenState
     extends State<VantageCreateAccountScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -37,6 +37,7 @@ class _VantageCreateAccountScreenState
 
   String _selectedCountryCode = '';
   String _selectedCountryFlag = '';
+  Map<String, dynamic>? _registrationData;
 
   bool _isFormValid = false;
   bool _passwordVisible = false;
@@ -114,15 +115,27 @@ class _VantageCreateAccountScreenState
     } catch (_) {}
   }
 
-  bool _isValidEmail(String email) {
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
-    );
-    return emailRegex.hasMatch(email);
-  }
-
-  Future<void> _sendOtpForVerification() async {
-    _showOtpVerificationBottomSheet();
+  Map<String, dynamic> _buildRegistrationData({
+    required String registerEventType,
+    String? otp,
+  }) {
+    final data = <String, dynamic>{
+      'first_name': _firstNameController.text.trim(),
+      'last_name': _lastNameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'password': _passwordController.text.trim(),
+      'mobile': _phoneController.text.trim(),
+      'otp_verification_type': 'email',
+      'register_event_type': registerEventType,
+      'accept_terms': true,
+    };
+    if (_selectedCountryCode.isNotEmpty) {
+      data['register_country_code'] = _selectedCountryCode;
+    }
+    if (otp != null && otp.isNotEmpty) {
+      data['otp'] = otp;
+    }
+    return data;
   }
 
   void _showOtpVerificationBottomSheet() {
@@ -140,9 +153,7 @@ class _VantageCreateAccountScreenState
           onOtpSubmitted: (otp) async {
             await _verifyOtpAndCompleteRegistration(otp);
           },
-          onResendOtp: () async {
-            await _sendOtpForVerification();
-          },
+          onResendOtp: _resendRegistrationOtp,
         );
       },
     );
@@ -150,27 +161,18 @@ class _VantageCreateAccountScreenState
 
   Future<void> _verifyOtpAndCompleteRegistration(String otp) async {
     try {
-      final registrationData = {
-        "first_name": _firstNameController.text.trim(),
-        "last_name": _lastNameController.text.trim(),
-        "email": _emailController.text.trim(),
-        "password": _passwordController.text.trim(),
-        "mobile": _phoneController.text.trim(),
-        "otp_verification_type": "email",
-        "register_event_type": "verifyOtp",
-        "accept_terms": true,
-      };
+      final registrationData = Map<String, dynamic>.from(
+        _registrationData ?? _buildRegistrationData(registerEventType: 'register'),
+      );
+      registrationData['register_event_type'] = 'verifyOtp';
+      registrationData['otp'] = otp;
 
-      final otpVerified = await _authController.register(
+      final otpVerified = await _authController.registerWithOTPVerification(
         data: registrationData,
       );
       if (!mounted) return;
       if (otpVerified) {
         Navigator.of(context).pop();
-        CustomToastService.showSuccess(
-          title: 'Success',
-          message: 'Account created successfully!',
-        );
 
         if (_enableBiometricAfterRegister) {
           final supported = await BiometricService.instance.isDeviceSupported();
@@ -189,32 +191,46 @@ class _VantageCreateAccountScreenState
           }
         }
 
-        Get.offAllNamed(AppPages.LOGIN);
+        Get.offAllNamed(AppPages.ACCOUNT_CREATED);
       }
     } catch (e) {
       CustomToastService.showError(title: 'Error', message: '$e');
     }
   }
 
-  void _startRegistration() {
-    final email = _emailController.text.trim();
-    if (email.isEmpty || !_isValidEmail(email)) {
-      CustomToastService.showError(
-        title: 'Error',
-        message: 'Please check email, email is not valid',
-      );
-      return;
+  Future<void> _resendRegistrationOtp() async {
+    final resendData = Map<String, dynamic>.from(
+      _registrationData ?? _buildRegistrationData(registerEventType: 'register'),
+    );
+    resendData.remove('otp');
+    resendData['register_event_type'] = 'register';
+
+    await _authController.register(data: resendData);
+  }
+
+  Future<void> _startRegistration() async {
+    final errors = AuthFormValidation.validateSignUp(
+      languageService: _languageService,
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
+    if (!AuthFormValidation.showErrorsIfAny(errors)) return;
+
+    _registrationData = _buildRegistrationData(registerEventType: 'register');
+    final registered = await _authController.register(data: _registrationData!);
+    if (!mounted) return;
+    if (registered) {
+      _showOtpVerificationBottomSheet();
     }
-    if (_formKey.currentState?.validate() != true) return;
-    _sendOtpForVerification();
   }
 
   @override
   Widget build(BuildContext context) {
     return VantageAuthScaffold(
-      child: Form(
-        key: _formKey,
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
@@ -230,24 +246,12 @@ class _VantageCreateAccountScreenState
               controller: _firstNameController,
               hintText: 'First Name',
               prefixIcon: const Icon(Icons.person_outline_rounded),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return _languageService.tr('validation_required');
-                }
-                return null;
-              },
             ),
             SizedBox(height: 10.h),
             VantagePillTextField(
               controller: _lastNameController,
               hintText: 'Last Name',
               prefixIcon: const Icon(Icons.person_outline_rounded),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return _languageService.tr('validation_required');
-                }
-                return null;
-              },
             ),
             SizedBox(height: 10.h),
             Row(
@@ -278,41 +282,11 @@ class _VantageCreateAccountScreenState
                   child: TextFormField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
+                    autovalidateMode: AutovalidateMode.disabled,
                     inputFormatters: [LengthLimitingTextInputFormatter(20)],
                     onChanged: (_) => _validateForm(),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return _languageService.tr('validation_required');
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
+                    decoration: VantageAuthTheme.pillDecoration(
                       hintText: 'Phone number',
-                      filled: true,
-                      fillColor: VantageAuthTheme.fieldFill,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 14.h,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24.r),
-                        borderSide: const BorderSide(
-                          color: VantageAuthTheme.fieldBorder,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24.r),
-                        borderSide: const BorderSide(
-                          color: VantageAuthTheme.fieldBorder,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24.r),
-                        borderSide: const BorderSide(
-                          color: VantageAuthTheme.primary,
-                          width: 1.5,
-                        ),
-                      ),
                     ),
                   ),
                 ),
@@ -325,15 +299,6 @@ class _VantageCreateAccountScreenState
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(Icons.mail_outline_rounded),
               onChanged: (_) => _validateForm(),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return _languageService.tr('validation_required');
-                }
-                if (!_isValidEmail(value)) {
-                  return 'Please check email, email is not valid';
-                }
-                return null;
-              },
             ),
             SizedBox(height: 10.h),
             VantagePillTextField(
@@ -352,15 +317,6 @@ class _VantageCreateAccountScreenState
                 ),
               ),
               onChanged: (_) => _validateForm(),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return _languageService.tr('validation_required');
-                }
-                if (value.length < 6) {
-                  return _languageService.tr('validation_password_min_length');
-                }
-                return null;
-              },
             ),
             SizedBox(height: 16.h),
             Row(
@@ -421,7 +377,7 @@ class _VantageCreateAccountScreenState
                     color: VantageAuthTheme.muted,
                     fontSize: 13.sp,
                   ),
-                  children: const [
+                  children: [
                     TextSpan(
                       text: 'Sign In',
                       style: TextStyle(
@@ -447,7 +403,6 @@ class _VantageCreateAccountScreenState
             //     style: TextStyle(color: VantageAuthTheme.muted, fontSize: 11.sp),
             //   ),
           ],
-        ),
       ),
     );
   }

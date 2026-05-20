@@ -801,6 +801,29 @@ final languageService = Get.find<LanguageService>();
     );
   }
 
+  Widget _buildSegmentTapTarget({
+    required VoidCallback onTap,
+    required BorderRadius borderRadius,
+    required Color splashColor,
+    required Color highlightColor,
+    required Widget child,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: borderRadius,
+        splashColor: splashColor,
+        highlightColor: highlightColor,
+        child: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: Center(child: child),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTabItem(
     TradingController tradingController,
     int index,
@@ -812,11 +835,13 @@ final languageService = Get.find<LanguageService>();
         final count = _getPositionCount(tradingController, index);
 
         return Expanded(
-          child: GestureDetector(
+          child: _buildSegmentTapTarget(
             onTap: () => tradingController.setSelectedTab(index),
-            behavior: HitTestBehavior.opaque,
+            borderRadius: BorderRadius.circular(8.r),
+            splashColor: AppColors.primary.withValues(alpha: 0.18),
+            highlightColor: AppColors.primary.withValues(alpha: 0.10),
             child: Container(
-              padding: EdgeInsets.symmetric(vertical: 12.h),
+              padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
@@ -870,62 +895,73 @@ final languageService = Get.find<LanguageService>();
     }
 
     return Expanded(
-      child: GestureDetector(
+      child: _buildSegmentTapTarget(
         onTap: () => tradingController.setSelectedTab(index),
-        behavior: HitTestBehavior.opaque,
+        borderRadius: BorderRadius.circular(17.r),
+        splashColor: Colors.white.withValues(alpha: 0.28),
+        highlightColor: Colors.white.withValues(alpha: 0.16),
         child: Obx(() {
           final isSelected = tradingController.selectedTab == index;
           final count = _getPositionCount(tradingController, index);
-          
-          final badge = count > 0 && index != 2
-              ? Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : AppColors.primary.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Text(
-                    count.toString(),
-                    style: AppTextStyles.label.copyWith(
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? AppColors.primary : AppColors.textGrey,
+
+          final badge =
+              count > 0 && index != 2
+                  ? Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 5.w,
+                      vertical: 1.5.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          isSelected
+                              ? Colors.white
+                              : AppColors.primary.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      count.toString(),
+                      style: AppTextStyles.label.copyWith(
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.bold,
+                        color:
+                            isSelected ? AppColors.primary : AppColors.textGrey,
+                      ),
+                    ),
+                  )
+                  : const SizedBox.shrink();
+
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (count > 0 && index != 2)
+                  IgnorePointer(
+                    child: Opacity(
+                      opacity: 0,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 4.w),
+                        child: badge,
+                      ),
                     ),
                   ),
-                )
-              : const SizedBox.shrink();
-
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Left placeholder to balance the badge and keep text centered
-              if (count > 0 && index != 2)
-                Opacity(
-                  opacity: 0,
-                  child: Padding(
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.label.copyWith(
+                    fontSize: 12.sp,
+                    height: 1.0,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected ? Colors.white : AppColors.textGrey,
+                  ),
+                ),
+                if (count > 0 && index != 2)
+                  Padding(
                     padding: EdgeInsets.only(left: 4.w),
                     child: badge,
                   ),
-                ),
-              
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.label.copyWith(
-                  fontSize: 12.sp,
-                  height: 1.0,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? Colors.white : AppColors.textGrey,
-                ),
-              ),
-              
-              // Actual badge
-              if (count > 0 && index != 2)
-                Padding(
-                  padding: EdgeInsets.only(left: 4.w),
-                  child: badge,
-                ),
-            ],
+              ],
+            ),
           );
         }),
       ),

@@ -113,7 +113,7 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
           TextSpan(
             text: 'You remember your password? ',
             style: TextStyle(color: VantageAuthTheme.muted, fontSize: 13.sp),
-            children: const [
+            children: [
               TextSpan(
                 text: 'Sign In',
                 style: TextStyle(
@@ -163,7 +163,7 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
           Center(
             child: TextButton(
               onPressed: authController.isLoading ? null : _resendCode,
-              child: const Text(
+              child: Text(
                 'Resend Code',
                 style: TextStyle(
                   color: VantageAuthTheme.primary,
@@ -207,23 +207,9 @@ class _OtpRow extends StatelessWidget {
               LengthLimitingTextInputFormatter(index == 0 ? controllers.length : 1),
             ],
             onChanged: (v) => onChanged(v, index),
-            decoration: InputDecoration(
+            decoration: VantageAuthTheme.pillDecoration(
               counterText: '',
-              filled: true,
-              fillColor: const Color(0xFFF3F4F6),
               contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(22.r),
-                borderSide: const BorderSide(color: VantageAuthTheme.fieldBorder),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(22.r),
-                borderSide: const BorderSide(color: VantageAuthTheme.fieldBorder),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(22.r),
-                borderSide: const BorderSide(color: VantageAuthTheme.primary, width: 1.5),
-              ),
             ),
           ),
         );

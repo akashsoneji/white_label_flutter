@@ -676,12 +676,12 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     switchValue: _biometricEnabled,
                     onSwitchChanged: (v) => _toggleBiometric(),
                   ),
-                  VantageMoreItem(
-                    iconData: Icons.brightness_6_rounded,
-                    label: languageService.tr('settings_theme_title'),
-                    tint: const Color(0xFFFFB300),
-                    onTap: _openThemePickerSheet,
-                  ),
+                  // VantageMoreItem(
+                  //   iconData: Icons.brightness_6_rounded,
+                  //   label: languageService.tr('settings_theme_title'),
+                  //   tint: const Color(0xFFFFB300),
+                  //   onTap: _openThemePickerSheet,
+                  // ),
                   VantageMoreItem(
                     iconAsset: 'assets/svg/more/personal_info.svg',
                     label: languageService.tr('delete_account'),
@@ -922,22 +922,22 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                       ),
                     ],
                   ),
-                  child: IconButton(
-                    icon: SvgPicture.asset(
-                      'assets/svg/edit_profile.svg',
-                      height: 20.h,
-                      width: 20.w,
-                      color: AppColors.primary,
-                    ),
-                    padding: EdgeInsets.all(8.r),
-                    constraints: const BoxConstraints(),
-                    onPressed: () {
-                      Get.toNamed(
-                        AppPages.EDIT_PROFILE,
-                        arguments: isProfileVerified,
-                      );
-                    },
-                  ),
+                  // child: IconButton(
+                  //   icon: SvgPicture.asset(
+                  //     'assets/svg/edit_profile.svg',
+                  //     height: 20.h,
+                  //     width: 20.w,
+                  //     color: AppColors.primary,
+                  //   ),
+                  //   padding: EdgeInsets.all(8.r),
+                  //   constraints: const BoxConstraints(),
+                  //   onPressed: () {
+                  //     Get.toNamed(
+                  //       AppPages.EDIT_PROFILE,
+                  //       arguments: isProfileVerified,
+                  //     );
+                  //   },
+                  // ),
                 );
               }),
             ),

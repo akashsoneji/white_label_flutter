@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/models/app_notification.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 
@@ -109,8 +110,8 @@ class AppNotificationItem extends StatelessWidget {
         leftBorderColor = AppColors.success;
         break;
       case NotificationType.error:
-        backgroundColor = AppColors.primary;
-        leftBorderColor = AppColors.error;
+        backgroundColor = FlavorConfig.instance.primaryColor;
+        leftBorderColor = FlavorConfig.instance.primaryColor;
         break;
       case NotificationType.info:
         backgroundColor = AppColors.primary;

@@ -21,7 +21,11 @@ class VantageAuthScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Theme(
+      data: Theme.of(context).copyWith(
+        inputDecorationTheme: VantageAuthTheme.pillInputDecorationTheme(),
+      ),
+      child: Scaffold(
       backgroundColor: VantageAuthTheme.background,
       body: SafeArea(
         child: Stack(
@@ -78,6 +82,7 @@ class VantageAuthScaffold extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -106,7 +111,7 @@ class _LogoBubble extends StatelessWidget {
     return Container(
       height: 72.w,
       width: 72.w,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: VantageAuthTheme.primary,
         shape: BoxShape.circle,
       ),

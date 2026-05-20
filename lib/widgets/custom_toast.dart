@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 
 enum ToastType { success, error, info, warning }
@@ -123,7 +124,7 @@ class CustomToast extends StatelessWidget {
       case ToastType.success:
         return AppColors.success;
       case ToastType.error:
-        return AppColors.error;
+        return FlavorConfig.instance.primaryColor;
       case ToastType.info:
         return AppColors.primary;
       case ToastType.warning:
@@ -216,7 +217,7 @@ class CustomToastService {
           title ?? 'Error',
           message,
           snackPosition: position,
-          backgroundColor: Colors.red,
+          backgroundColor: FlavorConfig.instance.primaryColor,
           colorText: AppColors.whiteColor,
           duration: duration,
         );

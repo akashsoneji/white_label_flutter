@@ -8,8 +8,8 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/screens/auth/presentation/auth_form_validation.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
-
 import 'login_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -22,22 +22,17 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController(text: '');
-  bool _isFormValid = false;
   final AuthController authController = Get.find<AuthController>();
   final LanguageService languageService = Get.find<LanguageService>();
 
-  @override
-  void initState() {
-    super.initState();
-    _emailController.addListener(_validateForm);
-    _validateForm();
-  }
-
-  void _validateForm() {
-    setState(() {
-      _isFormValid =
-          _emailController.text.isNotEmpty && _emailController.text.contains('@');
-    });
+  void _sendOtp() {
+    final email = _emailController.text.trim();
+    final errors = AuthFormValidation.validateForgotPassword(
+      languageService: languageService,
+      email: email,
+    );
+    if (!AuthFormValidation.showErrorsIfAny(errors)) return;
+    authController.requestPasswordResetOTP(email: email);
   }
 
   @override
@@ -120,17 +115,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   Obx(() {
                                     return ElevatedButton(
                                       onPressed:
-                                          authController.isLoading
-                                              ? null
-                                              : _isFormValid
-                                              ? () {
-                                                if (_formKey.currentState!.validate()) {
-                                                  authController.requestPasswordResetOTP(
-                                                    email: _emailController.text.trim(),
-                                                  );
-                                                }
-                                              }
-                                              : null,
+                                          authController.isLoading ? null : _sendOtp,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: AppColors.primary,
                                         minimumSize: Size(double.infinity, 40.h),

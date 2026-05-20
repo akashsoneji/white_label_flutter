@@ -550,7 +550,6 @@ class MyGetXApp extends StatelessWidget {
       builder: (context, child) {
         return Obx(() {
           final languageService = Get.find<LanguageService>();
-          final themeService = Get.find<ThemeService>();
           final isRTL = languageService.isRTL();
 
           return Directionality(
@@ -582,7 +581,7 @@ class MyGetXApp extends StatelessWidget {
                   debugShowCheckedModeBanner: false,
                   // showPerformanceOverlay: true, // Removed in favor of custom overlay
                   locale: languageService.getCurrentLocale(),
-                  themeMode: themeService.themeMode,
+                  themeMode: ThemeMode.light,
                   theme: _buildLightTheme(),
                   darkTheme: _buildDarkTheme(),
                   initialRoute: AppPages.SPLASH,

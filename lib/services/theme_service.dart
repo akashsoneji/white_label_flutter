@@ -9,7 +9,7 @@ class ThemeService extends GetxService {
   // New key (System/Light/Dark)
   static const String _themeModeKey = 'theme_mode';
 
-  static const ThemeMode defaultThemeMode = ThemeMode.system;
+  static const ThemeMode defaultThemeMode = ThemeMode.light;
 
   /// Persisted user preference (System/Light/Dark).
   final Rx<ThemeMode> themeModeRx = defaultThemeMode.obs;
@@ -26,6 +26,11 @@ class ThemeService extends GetxService {
 
   Future<void> _initialize() async {
     await _loadSavedThemeMode();
+    // App is light-only; migrate any saved dark/system preference.
+    if (themeModeRx.value != ThemeMode.light) {
+      themeModeRx.value = ThemeMode.light;
+      await _saveThemeMode(ThemeMode.light);
+    }
   }
 
   Future<void> ensureInitialized() => _initialization;

@@ -8,10 +8,10 @@ class VantageConfig extends BaseClientConfig {
     : super(
         brandName: 'Vantage',
         appTitle: 'Vantage',
-        // Match the existing design tokens (blue primary + light background).
-        primaryColor: const Color.fromARGB(255, 81, 13, 154),
-        secondaryColor: const Color(0xFFE8F5E8),
-        accentColor: const Color.fromARGB(255, 81, 13, 154),
+        // Match auth UI + Android vantage flavor (blue primary + light background).
+        primaryColor: const Color(0xFF124CE7),
+        secondaryColor: const Color(0xFFEFF2FA),
+        accentColor: const Color(0xFF124CE7),
         logoSvgPath: 'logo.svg',
         splashLogoPath: 'splash_logo.svg',
         appIconPath: 'app_icon.png',

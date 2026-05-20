@@ -449,29 +449,27 @@ class AuthController extends GetxController {
       final response = await _registerUser(data: data);
 
       if (response.success && response.data != null) {
-        // _registerData.value = response.data;
-
-        CustomToastService.showSuccess(
-          message: 'Registration initiated successfully',
-          title: 'Success',
+        final message = _resolveApiMessage(
+          data: response.data,
+          responseMessage: response.message,
+          fallback: 'Registration initiated successfully',
         );
-
-        return true; // Return success for OTP flow
+        CustomToastService.showSuccess(message: message, title: 'Success');
+        return true;
       } else {
-        // Display validation errors if available
-        final errorMessage = response.message ?? 'Registration failed';
-        _setError(errorMessage);
-
-        // Show error toast with validation details
-        CustomToastService.showError(
-          message: errorMessage,
-          title: 'Validation Error',
+        final errorMessage = _resolveApiMessage(
+          data: response.data,
+          responseMessage: response.message,
+          fallback: 'Registration failed',
         );
-
+        _errorMessage.value = errorMessage;
+        CustomToastService.showError(message: errorMessage, title: 'Error');
         return false;
       }
     } catch (e) {
-      _setError('Registration error: $e');
+      final errorMessage = 'Registration error: $e';
+      _errorMessage.value = errorMessage;
+      CustomToastService.showError(message: errorMessage, title: 'Error');
       return false;
     } finally {
       _setLoading(false);
@@ -657,10 +655,10 @@ class AuthController extends GetxController {
             'AuthController: All controllers re-initialized for new registered user',
           );
 
-          CustomToastService.showSuccess(
-            message: 'Registration completed successfully',
-            title: 'Success',
-          );
+          final message = response.data!.message.trim().isNotEmpty
+              ? response.data!.message
+              : 'Registration completed successfully';
+          CustomToastService.showSuccess(message: message, title: 'Success');
         } else {
           CustomToastService.showError(
             message: 'Invalid response structure from server',
@@ -670,20 +668,21 @@ class AuthController extends GetxController {
           return false;
         }
       } else {
-        // Display validation errors if available
-        final errorMessage = response.message ?? 'Registration failed';
-        _setError(errorMessage);
-
-        CustomToastService.showError(
-          message: errorMessage,
-          title: 'Validation Error',
+        final errorMessage = _resolveApiMessage(
+          data: response.data,
+          responseMessage: response.message,
+          fallback: 'Registration failed',
         );
+        _errorMessage.value = errorMessage;
+        CustomToastService.showError(message: errorMessage, title: 'Error');
         return false;
       }
 
-      return true; // Return success for OTP flow
+      return true;
     } catch (e) {
-      _setError('Registration error: $e');
+      final errorMessage = 'Registration error: $e';
+      _errorMessage.value = errorMessage;
+      CustomToastService.showError(message: errorMessage, title: 'Error');
       return false;
     } finally {
       _setLoading(false);
@@ -1136,6 +1135,23 @@ class AuthController extends GetxController {
   }
 
   // ==================== PRIVATE HELPER METHODS ====================
+  String _resolveApiMessage({
+    dynamic data,
+    String? responseMessage,
+    required String fallback,
+  }) {
+    if (data is Map<String, dynamic>) {
+      final bodyMessage = data['message'];
+      if (bodyMessage is String && bodyMessage.trim().isNotEmpty) {
+        return bodyMessage.trim();
+      }
+    }
+    if (responseMessage != null && responseMessage.trim().isNotEmpty) {
+      return responseMessage.trim();
+    }
+    return fallback;
+  }
+
   void _setLoading(bool loading) {
     _isLoading.value = loading;
   }
@@ -1330,19 +1346,32 @@ class AuthController extends GetxController {
       final response = await _requestPasswordResetOtp(email: email);
 
       if (response.success && response.data != null) {
-        final message = response.data?['message'] ?? 'OTP sent to your email.';
+        final data = response.data!;
+        final apiStatus = data['status'];
+        if (apiStatus == false) {
+          final errorMessage =
+              data['message']?.toString() ??
+              response.message ??
+              'Failed to send OTP';
+          CustomToastService.showError(title: 'Error', message: errorMessage);
+          return;
+        }
+
+        final message =
+            data['message']?.toString() ?? 'OTP sent to your email.';
         CustomToastService.showSuccess(message: message, title: 'Success');
 
         // Navigate to verify code screen with email
         Get.toNamed(AppPages.VERIFY_CODE, arguments: email);
       } else {
         final errorMessage = response.message ?? 'Failed to send OTP';
-        CustomToastService.showError(message: errorMessage);
-        _setError(errorMessage);
+        CustomToastService.showError(title: 'Error', message: errorMessage);
       }
     } catch (e) {
-      _setError('Request OTP error: $e');
-      CustomToastService.showError(message: 'Failed to send OTP: $e');
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Failed to send OTP: $e',
+      );
     } finally {
       _setLoading(false);
     }

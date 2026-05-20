@@ -20,7 +20,6 @@ import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 
-import 'legal_documents_screen.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -215,11 +214,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       registrationData["ib_affiliate_refcode"] = referrerCode;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LegalDocumentsScreen(registrationData: registrationData),
-      ),
+    Get.toNamed(
+      AppPages.LEGAL_DOCUMENTS,
+      arguments: registrationData,
     );
   }
 
@@ -608,7 +605,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   }
 
   bool _isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailRegex.hasMatch(email);
   }
 

@@ -122,39 +122,17 @@ class VantagePillTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       onChanged: onChanged,
+      autovalidateMode: AutovalidateMode.disabled,
       validator: validator,
       style: TextStyle(
         color: VantageAuthTheme.text,
         fontSize: 14.sp,
         fontWeight: FontWeight.w600,
       ),
-      decoration: InputDecoration(
+      decoration: VantageAuthTheme.pillDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(
-          color: VantageAuthTheme.muted.withValues(alpha: 0.8),
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w500,
-        ),
-        filled: true,
-        fillColor: VantageAuthTheme.fieldFill,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24.r),
-          borderSide: const BorderSide(color: VantageAuthTheme.fieldBorder),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24.r),
-          borderSide: const BorderSide(color: VantageAuthTheme.fieldBorder),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24.r),
-          borderSide: const BorderSide(
-            color: VantageAuthTheme.primary,
-            width: 1.5,
-          ),
-        ),
       ),
     );
   }

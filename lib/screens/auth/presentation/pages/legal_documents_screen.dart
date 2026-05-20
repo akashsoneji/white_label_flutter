@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import '../auth_screen_theme.dart';
+import '../brands/vantage/widgets/vantage_auth_scaffold.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/language_service.dart';
 
 import 'package:crm_app/widgets/common_loading_widget.dart';
@@ -48,34 +51,43 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
     }
   }
 
+  Widget _buildFormContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          languageService.tr("legal_documents_title"),
+          style: AppTextStyles.heading,
+        ),
+        SizedBox(height: 24.h),
+        _buildAgreementCheckbox(),
+        SizedBox(height: 35.h),
+        _buildDocumentsList(),
+        SizedBox(height: 32.h),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (FlavorConfig.isVantage()) {
+      return VantageAuthScaffold(
+        bottom: _buildSubmitButton(),
+        child: _buildFormContent(),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AuthScreenTheme.scaffoldBackground,
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(),
             SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(height: 24.h),
-                  Text(
-                    languageService.tr("legal_documents_title"),
-                    style: AppTextStyles.heading,
-                  ),
-                  SizedBox(height: 24.h),
-                  _buildAgreementCheckbox(),
-                  SizedBox(height: 35.h),
-                  _buildDocumentsList(),
-                  SizedBox(height: 32.h),
-                ],
-              ),
+              child: _buildFormContent(),
             ),
-            Spacer(),
+            const Spacer(),
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: _buildSubmitButton(),
@@ -194,7 +206,7 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
   Widget _buildDocumentItem(String title) {
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, '/privacy-policy');
+        Get.toNamed(AppPages.PRIVACY_POLICY);
       },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),

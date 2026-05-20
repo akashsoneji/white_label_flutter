@@ -166,7 +166,14 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.LEGAL_DOCUMENTS,
-      page: () => const LegalDocumentsScreen(registrationData: {}),
+      page: () {
+        final args = Get.arguments;
+        final data =
+            args is Map<String, dynamic>
+                ? args
+                : <String, dynamic>{};
+        return LegalDocumentsScreen(registrationData: data);
+      },
       binding: AuthBinding(),
     ),
     GetPage(

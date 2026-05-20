@@ -9,6 +9,7 @@ import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 
+import '../../../auth_form_validation.dart';
 import '../widgets/vantage_auth_scaffold.dart';
 import '../widgets/vantage_auth_theme.dart';
 import '../widgets/vantage_controls.dart';
@@ -23,7 +24,6 @@ class VantageLoginScreen extends StatefulWidget {
 class _VantageLoginScreenState extends State<VantageLoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
   bool obscureText = true;
   bool _enableBiometricAfterLogin = false;
   bool _biometricAttempted = false;
@@ -63,36 +63,34 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
     Get.offAllNamed(AppPages.TRADING);
   }
 
-  bool _validateEmail(String email) {
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-    );
-    return emailRegex.hasMatch(email);
-  }
-
-  bool _validatePassword(String password) => password.length >= 6;
-
   Future<void> _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      await authController.login(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final errors = AuthFormValidation.validateLogin(
+      languageService: languageService,
+      email: email,
+      password: password,
+    );
+    if (!AuthFormValidation.showErrorsIfAny(errors)) return;
 
-      if (_enableBiometricAfterLogin) {
-        final supported = await BiometricService.instance.isDeviceSupported();
-        final enrolled = await BiometricService.instance.isEnrolled();
-        if (supported && enrolled) {
-          final ok = await BiometricService.instance.authenticate(
-            reason: languageService.tr('biometric_enable_reason'),
+    await authController.login(
+      email: email,
+      password: password,
+    );
+
+    if (_enableBiometricAfterLogin) {
+      final supported = await BiometricService.instance.isDeviceSupported();
+      final enrolled = await BiometricService.instance.isEnrolled();
+      if (supported && enrolled) {
+        final ok = await BiometricService.instance.authenticate(
+          reason: languageService.tr('biometric_enable_reason'),
+        );
+        if (ok) {
+          await SecureStorageService.setBiometricEnabled(
+            true,
+            userIdentifier: email,
           );
-          if (ok) {
-            await SecureStorageService.setBiometricEnabled(
-              true,
-              userIdentifier: emailController.text.trim(),
-            );
-            Get.find<AppLockService>().markJustAuthenticated();
-          }
+          Get.find<AppLockService>().markJustAuthenticated();
         }
       }
     }
@@ -108,7 +106,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
           TextSpan(
             text: "Don’t have an account? ",
             style: TextStyle(color: VantageAuthTheme.muted, fontSize: 13.sp),
-            children: const [
+            children: [
               TextSpan(
                 text: 'Sign Up',
                 style: TextStyle(
@@ -120,9 +118,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
           ),
         ),
       ),
-      child: Form(
-        key: _formKey,
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
@@ -148,15 +144,6 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
               hintText: 'Email / Username',
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(Icons.mail_outline_rounded),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return languageService.tr('validation_email_required');
-                }
-                if (!_validateEmail(value)) {
-                  return languageService.tr('validation_email_invalid');
-                }
-                return null;
-              },
             ),
             SizedBox(height: 12.h),
             VantagePillTextField(
@@ -173,15 +160,6 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
                   color: VantageAuthTheme.muted,
                 ),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return languageService.tr('validation_password_required');
-                }
-                if (!_validatePassword(value)) {
-                  return languageService.tr('validation_password_min_length');
-                }
-                return null;
-              },
             ),
             SizedBox(height: 8.h),
             Align(
@@ -246,7 +224,6 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
               );
             }),
           ],
-        ),
       ),
     );
   }

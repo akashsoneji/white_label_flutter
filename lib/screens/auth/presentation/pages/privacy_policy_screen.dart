@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/flavor_config.dart';
+import '../auth_screen_theme.dart';
 import 'package:crm_app/services/language_service.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
@@ -9,10 +11,15 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.whiteColor,
+      backgroundColor: AuthScreenTheme.scaffoldBackground,
       appBar: AppBar(
         title: Text(Get.find<LanguageService>().tr('privacy_policy_title')),
-        backgroundColor: AppColors.whiteColor,
+        backgroundColor: AuthScreenTheme.scaffoldBackground,
+        foregroundColor: AppColors.textPrimary,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(
+          color: FlavorConfig.isVantage() ? AppColors.primary : AppColors.textPrimary,
+        ),
       ),
       body: const Padding(
         padding: EdgeInsets.all(24.0),
