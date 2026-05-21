@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class PmamManagerInvestorDetailScreen extends StatefulWidget {
   final int investorId;
@@ -416,10 +417,7 @@ class _PmamManagerInvestorDetailScreenState
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-        ),
+        leading: const AppBackButton(),
         title: Text(  'Investor: ${widget.investorName}', style: AppTextStyles.heading),
         centerTitle: true,
       ),

@@ -35,25 +35,16 @@ class ThemeService extends GetxService {
 
   Future<void> ensureInitialized() => _initialization;
 
-  bool get isSystemMode => themeMode == ThemeMode.system;
+  bool get isSystemMode => false;
 
-  /// True when the *effective* UI should be dark (System-aware).
-  bool get isDarkResolved {
-    switch (themeMode) {
-      case ThemeMode.dark:
-        return true;
-      case ThemeMode.light:
-        return false;
-      case ThemeMode.system:
-        return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
-            Brightness.dark;
-    }
-  }
+  /// App is light-theme only (including all new modules).
+  bool get isDarkResolved => false;
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    if (themeModeRx.value == mode) return;
-    themeModeRx.value = mode;
-    await _saveThemeMode(mode);
+    const effective = ThemeMode.light;
+    if (themeModeRx.value == effective) return;
+    themeModeRx.value = effective;
+    await _saveThemeMode(effective);
     Get.forceAppUpdate();
   }
 

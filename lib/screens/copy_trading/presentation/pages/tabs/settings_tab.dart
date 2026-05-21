@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_settings_controller.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 
 class SettingsTab extends StatelessWidget {
   const SettingsTab({super.key});
@@ -90,11 +91,16 @@ class SettingsTab extends StatelessWidget {
               label: 'Notification',
               onTap: () {},
             ),
-            _MenuItem(
-              svgIconPath: 'assets/svg/copy_trading/setting/trade_win.svg',
-              label: 'Trade and Win',
-              onTap: () {},
-            ),
+            Obx(() {
+              final showTradeWin =
+                  Get.find<EnabledModulesService>().isTradeWinEnabled;
+              if (!showTradeWin) return const SizedBox.shrink();
+              return _MenuItem(
+                svgIconPath: 'assets/svg/copy_trading/setting/trade_win.svg',
+                label: 'Trade and Win',
+                onTap: () => Get.toNamed(AppPages.TRADE_WIN_MAIN),
+              );
+            }),
             _MenuItem(
               svgIconPath: 'assets/svg/copy_trading/setting/share.svg',
               label: 'Invite a Friend',

@@ -15,6 +15,7 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/file_compression_helper.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/kyc_scaffold.dart';
 
 class KycBankScreen extends StatefulWidget {
@@ -254,9 +255,8 @@ class _KycBankScreenState extends State<KycBankScreen> {
               backgroundColor: AppColors.whiteColor,
               scrolledUnderElevation: 0,
               elevation: 0,
-              leading: IconButton(
+              leading: AppBackButton(
                 onPressed: () => _handleBackNavigation(),
-                icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
               ),
               title: Text(
                 'Add Withdrawal Method',

@@ -3,7 +3,6 @@ import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -27,6 +26,7 @@ import 'package:crm_app/screens/finance/presentation/pages/internal_transfer_scr
 import 'package:crm_app/screens/finance/presentation/pages/transaction_history_screen.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_dashboard_layout.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_glass_tokens.dart';
+import 'package:crm_app/widgets/app_svg_icon.dart';
 import 'package:crm_app/widgets/vantage/vantage_app_bar.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -107,10 +107,12 @@ class DashboardScreen extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: SvgPicture.asset(
-                                    "assets/svg/deshboard/empty-wallet-add.svg",
+                                  icon: AppSvgIcon(
+                                    assetPath:
+                                        'assets/svg/deshboard/empty-wallet-add.svg',
                                     height: 18.h,
                                     width: 18.w,
+                                    color: AppColors.primary,
                                   ),
                                   onPressed: () => Get.toNamed(AppPages.WALLET),
                                   padding: EdgeInsets.all(8.r),
@@ -123,10 +125,12 @@ class DashboardScreen extends StatelessWidget {
                                   margin: EdgeInsets.symmetric(horizontal: 2.w),
                                 ),
                                 IconButton(
-                                  icon: SvgPicture.asset(
-                                    "assets/svg/deshboard/add-square.svg",
+                                  icon: AppSvgIcon(
+                                    assetPath:
+                                        'assets/svg/deshboard/add-square.svg',
                                     height: 18.h,
                                     width: 18.w,
+                                    color: AppColors.primary,
                                   ),
                                   onPressed: controller.showOpenAccountSheet,
                                   padding: EdgeInsets.all(8.r),
@@ -307,8 +311,11 @@ class DashboardScreen extends StatelessWidget {
                 Container(
                   margin: EdgeInsets.only(right: 0),
                   child: IconButton(
-                    icon: SvgPicture.asset(
-                      "assets/svg/deshboard/empty-wallet-add.svg",
+                    icon: AppSvgIcon(
+                      assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
+                      height: 22.h,
+                      width: 22.w,
+                      color: AppColors.primary,
                     ),
                     onPressed: () {
                       Get.toNamed(AppPages.WALLET);
@@ -318,8 +325,11 @@ class DashboardScreen extends StatelessWidget {
                 Container(
                   margin: EdgeInsets.only(right: 8),
                   child: IconButton(
-                    icon: SvgPicture.asset(
-                      "assets/svg/deshboard/add-square.svg",
+                    icon: AppSvgIcon(
+                      assetPath: 'assets/svg/deshboard/add-square.svg',
+                      height: 22.h,
+                      width: 22.w,
+                      color: AppColors.primary,
                     ),
                     onPressed: controller.showOpenAccountSheet,
                   ),
@@ -340,8 +350,11 @@ class DashboardScreen extends StatelessWidget {
                 Container(
                   margin: EdgeInsets.only(right: 0),
                   child: IconButton(
-                    icon: SvgPicture.asset(
-                      "assets/svg/deshboard/empty-wallet-add.svg",
+                    icon: AppSvgIcon(
+                      assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
+                      height: 22.h,
+                      width: 22.w,
+                      color: AppColors.primary,
                     ),
                     onPressed: () {
                       Get.toNamed(AppPages.WALLET);
@@ -351,8 +364,11 @@ class DashboardScreen extends StatelessWidget {
                 Container(
                   margin: EdgeInsets.only(right: 8),
                   child: IconButton(
-                    icon: SvgPicture.asset(
-                      "assets/svg/deshboard/add-square.svg",
+                    icon: AppSvgIcon(
+                      assetPath: 'assets/svg/deshboard/add-square.svg',
+                      height: 22.h,
+                      width: 22.w,
+                      color: AppColors.primary,
                     ),
                     onPressed: controller.showOpenAccountSheet,
                   ),
@@ -537,10 +553,11 @@ class DashboardScreen extends StatelessWidget {
                       InkWell(
                         onTap: () => _showAccountInfoBottomSheet(account),
                         borderRadius: BorderRadius.circular(999),
-                        child: SvgPicture.asset(
-                          "assets/svg/info-circle.svg",
+                        child: AppSvgIcon(
+                          assetPath: 'assets/svg/info-circle.svg',
                           height: 24,
                           width: 24,
+                          color: AppColors.primary,
                         ),
                       ),
                     ],
@@ -623,9 +640,11 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child: SvgPicture.asset(
-                          "assets/svg/bottom_navigation/candle_bold.svg",
+                        child: AppSvgIcon(
+                          assetPath:
+                              'assets/svg/bottom_navigation/candle_bold.svg',
                           height: 16.h,
+                          width: 16.w,
                           color: AppColors.primary,
                         ),
                       ),
@@ -660,7 +679,7 @@ class DashboardScreen extends StatelessWidget {
                         svg:
                             account.accountType.toLowerCase() == 'live'
                                 ? "assets/svg/deshboard/money-send.svg"
-                                : "assets/svg/bottom_navigation/setting.svg",
+                                : 'assets/svg/more/settings.svg',
                         icon:
                             account.accountType.toLowerCase() == 'live'
                                 ? Icons.trending_down
@@ -693,9 +712,10 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child: SvgPicture.asset(
-                          "assets/svg/deshboard/Three_dot.svg",
+                        child: AppSvgIcon(
+                          assetPath: 'assets/svg/deshboard/Three_dot.svg',
                           height: 14.h,
+                          width: 14.w,
                           color: AppColors.primary,
                         ),
                       ),
@@ -728,9 +748,11 @@ class DashboardScreen extends StatelessWidget {
                         color: AppColors.cardBackGround,
                         borderRadius: BorderRadius.circular(5.r),
                       ),
-                      child: SvgPicture.asset(
-                        "assets/svg/bottom_navigation/candle_bold.svg",
+                      child: AppSvgIcon(
+                        assetPath:
+                            'assets/svg/bottom_navigation/candle_bold.svg',
                         height: 22.h,
+                        width: 22.w,
                         color: AppColors.primary,
                       ),
                     ),
@@ -773,7 +795,7 @@ class DashboardScreen extends StatelessWidget {
                       svg:
                           account.accountType.toLowerCase() == 'live'
                               ? "assets/svg/deshboard/money-send.svg"
-                              : "assets/svg/bottom_navigation/setting.svg",
+                              : 'assets/svg/more/settings.svg',
                       icon:
                           account.accountType.toLowerCase() == 'live'
                               ? Icons.trending_down
@@ -803,9 +825,10 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     child: GestureDetector(
                       onTap: () => _showAccountMenuBottomSheet(account),
-                      child: SvgPicture.asset(
-                        "assets/svg/deshboard/Three_dot.svg",
+                      child: AppSvgIcon(
+                        assetPath: 'assets/svg/deshboard/Three_dot.svg',
                         height: 21.h,
+                        width: 21.w,
                         color: AppColors.primary,
                       ),
                     ),
@@ -847,9 +870,10 @@ class DashboardScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SvgPicture.asset(
-                      "assets/svg/deshboard/switch_icon.svg",
-                      height: isVantage ? 16 : 18,
+                    AppSvgIcon(
+                      assetPath: 'assets/svg/deshboard/switch_icon.svg',
+                      height: isVantage ? 16.h : 18.h,
+                      width: isVantage ? 16.w : 18.w,
                       color: AppColors.primary,
                     ),
                     SizedBox(width: 8),
@@ -914,8 +938,8 @@ class DashboardScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 (isSvg == true)
-                    ? SvgPicture.asset(
-                      svg!,
+                    ? AppSvgIcon(
+                      assetPath: svg!,
                       height: compact ? 13.h : 16.h,
                       width: compact ? 13.w : 16.w,
                       color: color,
@@ -1290,7 +1314,12 @@ class AccountInfoBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             (isSvg == true)
-                ? SvgPicture.asset(svg!, height: 18, width: 18, color: color)
+                ? AppSvgIcon(
+                  assetPath: svg!,
+                  height: 18,
+                  width: 18,
+                  color: color,
+                )
                 : Icon(icon, size: 18, color: color),
             SizedBox(width: 6),
             Text(
@@ -1612,21 +1641,21 @@ class AccountMenuBottomSheet extends StatelessWidget {
                   },
                 ),
                 SizedBox(height: 16),
-                _buildMenuItem(
-                  icon: Icons.card_giftcard,
-                  label: languageService.tr('dashboard_bonus'),
-                  onTap: () {
-                    Get.back(closeOverlays: true);
-                    if (Get.isRegistered<AppNotificationController>()) {
-                      Get.find<AppNotificationController>().showInfo(
-                        message: languageService.tr(
-                          'dashboard_bonus_coming_soon_message',
-                        ),
-                        title: languageService.tr('common_coming_soon'),
-                      );
-                    }
-                  },
-                ),
+                // _buildMenuItem(
+                //   icon: Icons.card_giftcard,
+                //   label: languageService.tr('dashboard_bonus'),
+                //   onTap: () {
+                //     Get.back(closeOverlays: true);
+                //     if (Get.isRegistered<AppNotificationController>()) {
+                //       Get.find<AppNotificationController>().showInfo(
+                //         message: languageService.tr(
+                //           'dashboard_bonus_coming_soon_message',
+                //         ),
+                //         title: languageService.tr('common_coming_soon'),
+                //       );
+                //     }
+                //   },
+                // ),
                 SizedBox(height: 16),
                 _buildMenuItem(
                   icon: Icons.history,

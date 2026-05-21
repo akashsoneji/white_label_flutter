@@ -10,6 +10,7 @@ import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/utils/navigation_helper.dart';
 import '../../../../services/language_service.dart';
 import '../../../../widgets/custom_toast.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class DepositScreen extends StatefulWidget {
   final String accountNumber;
@@ -68,9 +69,7 @@ class _DepositScreenState extends State<DepositScreen> {
         elevation: 0,
         leading: Padding(
           padding: EdgeInsets.only(left: 10.w),
-          child: IconButton(
-            icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-            onPressed: () => NavigationHelper.safeBack(context: context),
+          child: AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
           ),
         ),
 

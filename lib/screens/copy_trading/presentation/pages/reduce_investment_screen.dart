@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class ReduceInvestmentScreen extends StatefulWidget {
   final String traderName;
@@ -27,9 +28,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-          onPressed: () => Get.back(),
+        leading: AppBackButton(onPressed: ()=> Get.back(),
         ),
         title: Text('Reduce Investment', style: AppTextStyles.heading),
         centerTitle: true,

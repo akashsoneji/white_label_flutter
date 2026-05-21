@@ -60,6 +60,10 @@ import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'services/auth_service.dart';
+import 'services/google_otp_service.dart';
+import 'services/enabled_modules_service.dart';
+import 'services/crm_settings_service.dart';
+import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'services/account_service.dart';
 import 'services/websocket_endpoint_helper.dart';
 import 'routes/app_pages.dart';
@@ -264,6 +268,9 @@ Future<void> initServices() async {
     AuthServiceImpl(Get.find<ApiClient>()),
     permanent: true,
   );
+  Get.put<GoogleOtpService>(GoogleOtpService(), permanent: true);
+  Get.put<EnabledModulesService>(EnabledModulesService(), permanent: true);
+  Get.put<CrmSettingsService>(CrmSettingsService(), permanent: true);
   Get.put<AuthRepository>(
     AuthRepositoryImpl(Get.find<AuthService>(), Get.find<ApiClient>()),
     permanent: true,
@@ -321,6 +328,7 @@ Future<void> initServices() async {
   // Initialize DashboardController first as AccountController depends on it
   Get.put<DashboardController>(DashboardController(), permanent: true);
   Get.put<AccountController>(AccountController(), permanent: true);
+  Get.put<MarketWatchV2Service>(MarketWatchV2Service(), permanent: true);
   Get.put<InstrumentsController>(InstrumentsController(), permanent: true);
   Get.put<ChartSocketController>(ChartSocketController(), permanent: true);
   Get.put<TradingController>(TradingController(), permanent: true);
@@ -656,6 +664,12 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
             }
           } catch (e) {
             print('AuthCheckScreen: Error fetching accounts: $e');
+          }
+
+          if (Get.isRegistered<EnabledModulesService>()) {
+            unawaited(
+              Get.find<EnabledModulesService>().fetchEnabledModules(force: true),
+            );
           }
 
           print('AuthCheckScreen: Navigating to Trading screen (Home)');

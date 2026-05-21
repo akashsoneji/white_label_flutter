@@ -3,7 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/widgets/vantage/vantage_app_bar.dart';
 
 class VantageChartLayout extends StatelessWidget {
-  final String title;
+  final String? title;
+  final Widget? titleWidget;
   final Color backgroundColor;
   final Color primaryColor;
   final int chartFlex;
@@ -11,23 +12,39 @@ class VantageChartLayout extends StatelessWidget {
   final Widget controlDock;
   final Widget? overlay;
 
-  const VantageChartLayout({
+  VantageChartLayout({
     super.key,
-    required this.title,
+    this.title,
+    this.titleWidget,
     required this.backgroundColor,
     required this.primaryColor,
     required this.chartFlex,
     required this.chart,
     required this.controlDock,
     this.overlay,
-  });
+  }) : assert(
+         titleWidget != null ||
+             (title != null && title!.isNotEmpty),
+         'Provide titleWidget or title',
+       );
 
   @override
   Widget build(BuildContext context) {
+    final appBarTitle =
+        titleWidget ??
+        Text(
+          title!,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: backgroundColor,
-      appBar: VantageAppBar.text(title, backgroundColor: backgroundColor),
+      appBar: VantageAppBar(
+        title: appBarTitle,
+        backgroundColor: backgroundColor,
+      ),
       body: SafeArea(
         child: Stack(
           children: [

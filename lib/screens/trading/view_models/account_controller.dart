@@ -15,6 +15,7 @@ import 'package:crm_app/screens/finance/data/repositories/finance_repository.dar
 import 'package:crm_app/services/account_service.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/services/account_websocket_service.dart';
+import 'package:crm_app/services/market_watch_v2_service.dart';
 
 class AccountController extends GetxController {
   final AccountService _accountService = Get.find<AccountService>();
@@ -825,6 +826,14 @@ class AccountController extends GetxController {
               await instrumentsController.unsubscribeAndResubscribe(
                 accountNumber,
               );
+              Future.delayed(const Duration(milliseconds: 150), () async {
+                try {
+                  if (Get.isRegistered<MarketWatchV2Service>()) {
+                    await Get.find<MarketWatchV2Service>()
+                        .reconnectAndResyncFavorites();
+                  }
+                } catch (_) {}
+              });
               WebSocketEndpointHelper.logSwitchStep(
                 'Instruments unsubscribe done',
               );
@@ -837,6 +846,14 @@ class AccountController extends GetxController {
               await Future.delayed(const Duration(milliseconds: 60));
               instrumentsController.clearInstrumentsData();
               instrumentsController.startWebSocket();
+              Future.delayed(const Duration(milliseconds: 150), () async {
+                try {
+                  if (Get.isRegistered<MarketWatchV2Service>()) {
+                    await Get.find<MarketWatchV2Service>()
+                        .reconnectAndResyncFavorites();
+                  }
+                } catch (_) {}
+              });
               // ✅ FIX: Request instrument data after reconnection
               Future.delayed(const Duration(milliseconds: 100), () {
                 if (Get.isRegistered<InstrumentsController>()) {

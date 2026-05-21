@@ -16,6 +16,7 @@ import 'package:get/get.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import 'vantage_glass_tokens.dart';
+import '../../../../widgets/app_switch_tile.dart';
 
 /// Vantage-only compact Pending Order content.
 ///
@@ -1012,37 +1013,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
     return ValueListenableBuilder<bool>(
       valueListenable: valueNotifier,
       builder: (context, value, _) {
-        return SizedBox(
-          height: 34.h,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.label.copyWith(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Transform.scale(
-                scale: 0.9,
-                child: Switch(
-                  value: value,
-                  onChanged: onChanged,
-                  activeColor: AppColors.primary,
-                  activeTrackColor: AppColors.primary.withOpacity(0.3),
-                  inactiveThumbColor: AppColors.whiteColor,
-                  inactiveTrackColor: AppColors.icongrey.withAlpha(55),
-                  trackOutlineColor: WidgetStateProperty.all(
-                    Colors.transparent,
-                  ),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-            ],
-          ),
-        );
+        return AppSwitchTile(title: title, value: value, onChanged: onChanged);
       },
     );
   }

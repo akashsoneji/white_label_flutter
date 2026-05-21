@@ -10,6 +10,8 @@ import 'package:crm_app/screens/finance/view_models/transaction_history_controll
 import '../../../../routes/app_pages.dart';
 import '../../../../services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
+import 'package:crm_app/utils/app_picker_theme.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
@@ -93,7 +95,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     'All',
     'Deposit',
     'Withdrawal',
-    'Transfer',
+    'Fund Transfer',
   ];
 
   final List<String> timePeriods = [
@@ -189,9 +191,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           elevation: 0,
           leading: Padding(
             padding: EdgeInsets.only(left: 0.w),
-            child: IconButton(
-              icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-              onPressed: () {
+            child: AppBackButton(onPressed: () {
                 final fromTab =
                     Get.arguments != null && Get.arguments['from'] != null
                         ? Get.arguments['from']
@@ -748,8 +748,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   }
 
   void _showCustomDatePicker(bool isStartDate) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
+    final DateTime? picked = await AppPickerTheme.showAppDatePicker(
+      context,
       initialDate:
           isStartDate
               ? (customStartDate ??
@@ -757,18 +757,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               : (customEndDate ?? DateTime.now()),
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: AppColors.whiteColor,
-              onSurface: AppColors.textPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {

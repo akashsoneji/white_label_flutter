@@ -12,6 +12,7 @@ class UserModel {
   final String status;
   final int regComplete;
   final String? deletedAt;
+  final bool googleOtpEnabled;
 
   UserModel({
     required this.id,
@@ -27,6 +28,7 @@ class UserModel {
     required this.status,
     required this.regComplete,
     this.deletedAt,
+    this.googleOtpEnabled = false,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -44,7 +46,15 @@ class UserModel {
       status: json['status'] is String ? json['status'] : '',
       regComplete: json['reg_complete'] is int ? json['reg_complete'] : 0,
       deletedAt: json['deleted_at'] is String ? json['deleted_at'] : null,
+      googleOtpEnabled: _parseGoogleOtp(json['google_otp_enabled']),
     );
+  }
+
+  static bool _parseGoogleOtp(dynamic value) {
+    if (value is bool) return value;
+    if (value is int) return value == 1;
+    if (value is String) return value == '1' || value.toLowerCase() == 'true';
+    return false;
   }
 
   Map<String, dynamic> toJson() {
@@ -62,7 +72,27 @@ class UserModel {
       'status': status,
       'reg_complete': regComplete,
       'deleted_at': deletedAt,
+      'google_otp_enabled': googleOtpEnabled,
     };
+  }
+
+  UserModel copyWith({bool? googleOtpEnabled}) {
+    return UserModel(
+      id: id,
+      email: email,
+      emailVerifiedAt: emailVerifiedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      userSlug: userSlug,
+      firstName: firstName,
+      lastName: lastName,
+      mobile: mobile,
+      mobileVerifiedAt: mobileVerifiedAt,
+      status: status,
+      regComplete: regComplete,
+      deletedAt: deletedAt,
+      googleOtpEnabled: googleOtpEnabled ?? this.googleOtpEnabled,
+    );
   }
 
   String get fullName => '$firstName $lastName'.trim();

@@ -8,6 +8,7 @@ import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/screens/pmam/presentation/pages/pmam_manager_investor_detail_screen.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class PmamManagerPortalScreen extends StatefulWidget {
   const PmamManagerPortalScreen({super.key});
@@ -71,10 +72,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-        ),
+        leading: const AppBackButton(),
         title: Text('Manager Portal', style: AppTextStyles.heading),
         centerTitle: true,
         actions: [

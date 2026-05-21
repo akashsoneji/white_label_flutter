@@ -5,9 +5,11 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/models/socket_response.dart';
+import 'package:crm_app/models/search_instruments_model.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
-import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
+import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/services/favorites_storage_service.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
@@ -17,13 +19,11 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:crm_app/utils/message_pack_decoder.dart';
 import 'package:crm_app/services/websocket_endpoint_helper.dart';
 import 'package:crm_app/services/unified_websocket_service.dart';
+import 'package:crm_app/services/market_watch_v2_service.dart';
 
 class InstrumentsController extends GetxController with WidgetsBindingObserver {
-  final FinanceRepository _financeRepo = Get.find<FinanceRepository>();
   final RxList<ListElement> allInstruments = <ListElement>[].obs;
   final RxList<ListElement> instruments = <ListElement>[].obs;
-  // Vantage: manual reordering support (UI can override default order)
-  final RxList<String> manualOrderSymbols = <String>[].obs;
 
   // ✅ PERF: Per-symbol reactive price store (prevents full list rebuilds)
   // Each symbol has its own Rx, so only that row's price widgets update.
@@ -105,9 +105,13 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   // Put your WebSocket URL here
   late WebSocketChannel channel;
   StreamSubscription? _unifiedMwSub;
+  StreamSubscription<dynamic>? _marketWatchV2Sub;
+  bool _marketWatchV2ListenerBound = false;
 
   // Connection management
   final RxBool isConnected = false.obs;
+  /// True while initial REST hydrate + v2 subscribe runs ([startMarketWatchV2Only]).
+  final RxBool isHydratingInstrumentCatalog = false.obs;
   final RxBool isReconnecting = false.obs;
   Timer? _reconnectTimer;
 
@@ -149,47 +153,6 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     } catch (e) {
       print('Error checking MT5 account: $e');
       return false;
-    }
-  }
-
-  // Get MT5 group name and escape backslashes (single to double)
-  // Group name comes as "app\Standard" but needs to be sent as "app\\Standard"
-  Future<String> _getMT5GroupName() async {
-    try {
-      final accountController = Get.find<AccountController>();
-      final activeAccount = accountController.activeMT5Account;
-      String mt5GroupName = activeAccount?.mt5GroupName ?? "";
-
-      if (mt5GroupName.isEmpty) {
-        // Fallback: fetch from API if not available in account
-        try {
-          final resp = await _financeRepo.postRealPlanDetails(
-            data: {"group_id": 0},
-          );
-          if (resp.success && resp.data is Map && resp.data['data'] is List) {
-            final List list = resp.data['data'] as List;
-            if (list.isNotEmpty) {
-              final first = list.first as Map<String, dynamic>;
-              mt5GroupName =
-                  (first['mt5_group_name'] ?? first['group_name'])
-                      ?.toString() ??
-                  "";
-            }
-          }
-        } catch (e) {
-          print('Error fetching MT5 group name from API: $e');
-        }
-      }
-
-      // Escape backslashes: "app\Standard" -> "app\\Standard"
-      if (mt5GroupName.isNotEmpty) {
-        mt5GroupName = mt5GroupName.replaceAll('\\', '\\\\');
-      }
-
-      return mt5GroupName.isNotEmpty ? mt5GroupName : "Internal\\Standard";
-    } catch (e) {
-      print('Error getting MT5 group name: $e');
-      return "Internal\\Standard";
     }
   }
 
@@ -240,74 +203,19 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
           // Update last account
           _lastAccount = account;
 
-          // ✅ STEP 1: Cancel unified subscription FIRST to stop old data flow
-          if (_unifiedMwSub != null) {
-            print(
-              '🛑 STEP 1: Cancelling unified WebSocket subscription to stop old data...',
-            );
-            _unifiedMwSub?.cancel();
-            _unifiedMwSub = null;
-            isConnected.value = false;
-          }
-
-          // ✅ STEP 2: Set clearing flag to block new data processing
-          _isClearingData = true;
+          // DO NOT call startWebSocket() here
+          // WebSocket reconnection is handled centrally by AccountController.setActiveMT5Account()
+          // This listener only tracks _lastAccount for change detection
           print(
-            '🛑 STEP 2: Setting _isClearingData flag to block data processing',
+            'Instruments: Account change detected, reconnection will be handled by AccountController',
           );
-
-          // ✅ STEP 3: Clear instruments data immediately
-          print(
-            '🗑️ STEP 3: Clearing all instruments data...',
-          );
-          allInstruments.clear();
-          instruments.clear();
-          tradingGroups.clear();
-          currentFilter.value = 'Favorites';
-          availableFilters.value = ['Favorites'];
-          searchQuery.value = '';
-
-          // Update current account number
-          _currentAccountNumber = account.metaAccountNumber;
-
-          // ✅ STEP 4: Switch account in unified service (async, non-blocking)
-          Future.microtask(() async {
-            try {
-              final unified = Get.find<UnifiedWebSocketService>();
-              print(
-                '🔄 STEP 4: Switching account in unified WebSocket service...',
-              );
-              await unified.switchAccount(account);
-              print(
-                '✅ Unified service account switched successfully',
-              );
-              
-              // ✅ STEP 5: Reconnect with new account after switch
-              print(
-                '🔄 STEP 5: Reconnecting with new account...',
-              );
-              // Small delay to ensure clean disconnect
-              await Future.delayed(const Duration(milliseconds: 100));
-              startWebSocket();
-            } catch (e) {
-              print(
-                '⚠️ Error switching account in unified service: $e',
-              );
-              // Fallback: try to reconnect anyway
-              startWebSocket();
-            }
-          });
-
-          // ✅ STEP 6: Reset clearing flag after reconnect (will be reset when data arrives)
-          // Flag will be reset in _parseNewFormat when initial snapshot arrives
-
-          // Trigger UI update
-          update();
         }
       });
     } catch (e) {
       print('⚠️ InstrumentsController: Error setting up account listener: $e');
     }
+
+    _bindMarketWatchV2DecodedListener();
 
     // ✅ FIX: DON'T initialize WebSocket automatically - let screen decide when to start
     // WebSocket will only start when:
@@ -318,7 +226,6 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Method to start WebSocket when screen becomes visible
   void startWebSocket() async {
-    // ✅ FIX: Check authentication before starting WebSocket
     final isLoggedIn = await SecureStorageService.isUserLoggedIn();
     if (!isLoggedIn) {
       if (kDebugMode) {
@@ -327,174 +234,231 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       return;
     }
 
-    print('🔌 InstrumentsController: Starting WebSocket');
-
-    // Use unified service
-    if (_bindUnifiedMarketWatch()) {
-      return;
-    }
-
-    // Get current account number
-    String? newAccountNumber;
-    try {
-      final accountController = Get.find<AccountController>();
-      newAccountNumber = accountController.activeMT5Account?.metaAccountNumber;
-    } catch (e) {
-      print('Error getting account number: $e');
-    }
-
-    // Check if account changed
-    // Account changed if:
-    // 1. We have a previous account number AND new account number is different
-    // 2. OR we have a new account number but no previous one (first connection)
-    final accountChanged =
-        _currentAccountNumber != null &&
-        newAccountNumber != null &&
-        _currentAccountNumber != newAccountNumber;
-
-    // If this is the first connection (no previous account), treat it as not changed
-    final isFirstConnection =
-        _currentAccountNumber == null && newAccountNumber != null;
-
-    // ✅ FIX: When called from account switch (dashboard), always reconnect if account changed
-    // This ensures instrument data loads even when instruments screen is not visible
-
-    // Only reconnect if:
-    // 1. Not already connecting
-    // 2. AND (not connected OR account changed)
-    if (!_isConnecting) {
-      if (isConnected.value && !accountChanged && !isFirstConnection) {
-        // Already connected and account hasn't changed - no need to reconnect
-        print(
-          'Instruments: Already connected with same account, skipping reconnect',
-        );
-        return;
-      }
-
-      print('Websocket started');
-      // ✅ OPTIMIZATION: If already connected and account changed, reuse same channel
-      // This is faster than disconnecting and reconnecting
-      // When accountChanged is true, newAccountNumber is guaranteed to be non-null
-      // (accountChanged requires both _currentAccountNumber and newAccountNumber to be non-null)
-      if (isConnected.value && accountChanged) {
-        // ignore: unnecessary_null_assertion
-        // newAccountNumber is guaranteed non-null when accountChanged is true
-        print(
-          'Instruments: Account changed from $_currentAccountNumber to $newAccountNumber, reusing same channel',
-        );
-        // Reuse same channel - just unsubscribe and resubscribe with new account
-        // newAccountNumber is guaranteed non-null when accountChanged is true
-        unsubscribeAndResubscribe(newAccountNumber);
-        return; // Don't create new connection
-      }
-
-      // Update current account number before connecting
-      _currentAccountNumber = newAccountNumber;
-      _initializeWebSocket();
-    } else {
-      print('Instruments: Connection already in progress, skipping');
-    }
+    print('🔌 InstrumentsController: Starting marketwatchv2 (legacy unified WS disabled)');
+    _bindMarketWatchV2DecodedListener();
+    await startMarketWatchV2Only();
   }
 
-  bool _bindUnifiedMarketWatch() {
+  /// REST snapshot for current favorites + v2 subscribe (replaces legacy `/ws/marketwatch`).
+  Future<void> startMarketWatchV2Only() async {
+    isHydratingInstrumentCatalog.value = true;
     try {
-      final unified = Get.find<UnifiedWebSocketService>();
-      MT5Account? account;
       try {
         final accountController = Get.find<AccountController>();
-        account = accountController.activeMT5Account;
+        _currentAccountNumber =
+            accountController.activeMT5Account?.metaAccountNumber;
       } catch (_) {}
-      
-      print(
-        '🔌 InstrumentsController: Binding to unified WebSocket service',
-      );
-      print(
-        '   Account: ${account?.metaAccountNumber ?? "N/A"}',
-      );
-      
-      // ✅ FIX: Cancel old subscription FIRST to prevent old data flow
-      if (_unifiedMwSub != null) {
-        print(
-          '   Cancelling old subscription...',
-        );
-        _unifiedMwSub?.cancel();
-        _unifiedMwSub = null;
+
+      _bindMarketWatchV2DecodedListener();
+
+      if (!Get.isRegistered<MarketWatchV2Service>()) {
+        isConnected.value = false;
+        return;
       }
-      
-      // ✅ FIX: Switch account in unified service BEFORE connecting
-      if (account != null) {
-        print(
-          '   Switching account in unified service...',
-        );
-        unified.switchAccount(account);
+
+      final v2 = Get.find<MarketWatchV2Service>();
+      await hydrateFavoritesFromRest();
+
+      final syms =
+          favoriteInstruments
+              .map(MarketWatchV2Service.normalizeSymbol)
+              .where((s) => s.isNotEmpty)
+              .toSet()
+              .toList();
+      if (syms.isNotEmpty) {
+        await v2.subscribeSymbols(syms);
+      } else {
+        await v2.ensureAuthenticatedConnection();
       }
-      
-      // ✅ FIX: Ensure connected with new account
-      unified.ensureConnected(WebSocketChannelType.marketWatch, account);
-      
-      // ✅ FIX: Create new subscription AFTER account switch
-      _unifiedMwSub = unified.marketWatchStream().listen(
-        (message) => _handleSocketMessage(message),
-        onError: (_) {
-          isConnected.value = false;
-          print('❌ InstrumentsController: Unified WebSocket error');
-        },
-        onDone: () {
-          isConnected.value = false;
-          print('❌ InstrumentsController: Unified WebSocket closed');
-        },
-      );
       isConnected.value = true;
-      print(
-        '✅ InstrumentsController: Successfully bound to unified WebSocket service',
-      );
-      return true;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Instruments: Failed to bind unified marketwatch: $e');
-      }
-      return false;
+    } finally {
+      isHydratingInstrumentCatalog.value = false;
     }
   }
 
-  void _handleSocketMessage(dynamic message) {
-    // ✅ FIX: Ignore messages while clearing data to prevent old data from being added
-    if (_isClearingData) {
-      print(
-        '⚠️ InstrumentsController: Ignoring message while clearing data (preventing old data)',
+  void _bindMarketWatchV2DecodedListener() {
+    if (_marketWatchV2ListenerBound) return;
+    if (!Get.isRegistered<MarketWatchV2Service>()) return;
+    _marketWatchV2ListenerBound = true;
+    _marketWatchV2Sub = Get.find<MarketWatchV2Service>().decodedFrames.listen(
+      _onMarketWatchV2Decoded,
+    );
+  }
+
+  void _onMarketWatchV2Decoded(dynamic decodedData) {
+    if (_isClearingData) return;
+    try {
+      final accountController = Get.find<AccountController>();
+      final currentAccount = accountController.activeMT5Account;
+      if (currentAccount != null &&
+          _currentAccountNumber != null &&
+          currentAccount.metaAccountNumber != _currentAccountNumber) {
+        return;
+      }
+    } catch (_) {}
+
+    _processDecodedMarketPayload(decodedData);
+  }
+
+  /// Public hook: subscribe or unsubscribe on `marketwatchv2` after favorite changes (Search + Instruments).
+  Future<void> syncMarketWatchV2AfterFavoriteChange(
+    String displaySymbol, {
+    required bool isFavoriteNow,
+  }) async {
+    if (!Get.isRegistered<MarketWatchV2Service>()) return;
+    final sym = MarketWatchV2Service.normalizeSymbol(displaySymbol);
+    if (sym.isEmpty) return;
+    final v2 = Get.find<MarketWatchV2Service>();
+    if (isFavoriteNow) {
+      await v2.subscribeSymbols([sym]);
+    } else {
+      await v2.unsubscribeSymbols([sym]);
+    }
+  }
+
+  /// Load favorite rows from same REST API as search; bid/ask filled by v2 ticks.
+  Future<void> hydrateFavoritesFromRest() async {
+    try {
+      final token = await SecureStorageService.getAuthToken();
+      if (token == null || token.isEmpty) {
+        _isClearingData = false;
+        return;
+      }
+
+      final accountController = Get.find<AccountController>();
+      final raw = accountController.activeMT5Account?.metaAccountNumber;
+      final tradingAccount =
+          (raw != null && raw.trim().isNotEmpty) ? raw.trim() : '0';
+
+      final response = await ApiService.get(
+        endpoint: ApiConstants.getInstrumentsByAccount(tradingAccount),
+        token: token,
       );
+
+      if (!response.success || response.data == null) {
+        _isClearingData = false;
+        return;
+      }
+
+      final parsed = SearchInstrumentsResponse.fromJson(
+        Map<String, dynamic>.from(response.data as Map),
+      );
+      final symbols = parsed.data?.symbols;
+      if (symbols == null || symbols.isEmpty) {
+        allInstruments.clear();
+        _updateTradingGroups(allInstruments);
+        _updateFilteredInstruments();
+        _isClearingData = false;
+        return;
+      }
+
+      final incoming = <ListElement>[];
+      for (final s in symbols) {
+        if (!isFavorite(s.displaySymbol)) continue;
+        incoming.add(
+          ListElement(
+            symbol: s.displaySymbol,
+            digits: s.digits,
+            bid: 0,
+            ask: 0,
+            spreadDiff: 0,
+            last: 0,
+            volume: 0,
+            volumeReal: 0,
+            logo: '',
+            category: s.categoryName,
+          ),
+        );
+      }
+
+      allInstruments.assignAll(incoming);
+      for (final it in incoming) {
+        _applyPriceUpdate(it);
+      }
+
+      _isClearingData = false;
+      _isInitialSnapshot = false;
+
+      _updateTradingGroups(allInstruments);
+      _updateFilteredInstruments();
+    } catch (e) {
+      if (kDebugMode) {
+        print('InstrumentsController: hydrateFavoritesFromRest error: $e');
+      }
+    }
+  }
+
+  List<dynamic>? _legacyListRowFromTickMap(Map<dynamic, dynamic> raw) {
+    dynamic pick(List<String> keys) {
+      for (final k in keys) {
+        if (raw.containsKey(k) && raw[k] != null) return raw[k];
+      }
+      return null;
+    }
+
+    final sym = pick(['symbol', 'Symbol', 's', 'name']);
+    if (sym == null) return null;
+    final bid = pick(['bid', 'Bid', 'b']);
+    final ask = pick(['ask', 'Ask', 'a']);
+    if (bid == null && ask == null) return null;
+
+    final spread = pick([
+      'spread',
+      'spread_points',
+      'spreadPoints',
+      'SpreadDiff',
+      'spread_diff',
+    ]);
+    final digits = pick(['digits', 'Digits', 'd']);
+    final dayHigh = pick(['day_high', 'dayHigh', 'high', 'day_high_price']);
+    final dayLow = pick(['day_low', 'dayLow', 'low', 'day_low_price']);
+    final category = pick(['category', 'Category', 'group', 'Group']);
+
+    return <dynamic>[
+      sym.toString(),
+      bid ?? 0,
+      ask ?? 0,
+      spread ?? 0,
+      digits ?? 5,
+      dayHigh,
+      dayLow,
+      category?.toString(),
+    ];
+  }
+
+  void _processDecodedMarketPayload(dynamic decodedData) {
+    if (decodedData is Map) {
+      final m = Map<dynamic, dynamic>.from(decodedData);
+      final row = _legacyListRowFromTickMap(m);
+      if (row != null) {
+        _parseSingleInstrument(row);
+        return;
+      }
+      final jsonish = <String, dynamic>{};
+      for (final e in decodedData.entries) {
+        jsonish[e.key.toString()] = e.value;
+      }
+      _handleJsonResponse(jsonish);
       return;
     }
 
-    try {
-      dynamic decodedData;
-      if (message is Uint8List || message is List<int>) {
-        decodedData = MessagePackDecoder.decodeBinary(
-          message is Uint8List
-              ? message
-              : Uint8List.fromList(message as List<int>),
-        );
-        if (decodedData == null) return;
-      } else {
-        final jsonStr = message is String ? message : message.toString();
-        decodedData = jsonDecode(jsonStr);
-      }
-
-      if (decodedData is Map<String, dynamic>) {
-        _handleJsonResponse(decodedData);
-        return;
-      }
-
-      if (decodedData is List && decodedData.isNotEmpty) {
-        if (decodedData[0] is List) {
-          _parseNewFormat(decodedData);
-        } else if (decodedData[0] is String && decodedData.length >= 5) {
-          _parseSingleInstrument(decodedData);
+    if (decodedData is List && decodedData.isNotEmpty && decodedData[0] is Map) {
+      for (final item in decodedData) {
+        if (item is! Map) continue;
+        final row = _legacyListRowFromTickMap(Map<dynamic, dynamic>.from(item));
+        if (row != null) {
+          _parseSingleInstrument(row);
         }
-        return;
       }
-    } catch (e, t) {
-      print('Error parsing JSON: $e\n $t');
+      return;
+    }
+
+    if (decodedData is List && decodedData.isNotEmpty) {
+      if (decodedData[0] is List) {
+        _parseNewFormat(decodedData);
+      } else if (decodedData[0] is String && decodedData.length >= 5) {
+        _parseSingleInstrument(decodedData);
+      }
     }
   }
 
@@ -686,62 +650,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   }
 
   void getSocketdata() async {
-    // ✅ FIX: Debounce to prevent double calls during account switch
+    // Legacy unified `/ws/marketwatch` auth payload — disabled. Use marketwatchv2 instead.
     _socketDataDebounceTimer?.cancel();
-
-    // ✅ FIX: Check authentication before requesting socket data
-    final isLoggedIn = await SecureStorageService.isUserLoggedIn();
-    if (!isLoggedIn) {
-      if (kDebugMode) {
-        print('Instruments: User not logged in, skipping socket data request');
-      }
-      return;
-    }
-
-    final authid = await SecureStorageService.getAuthToken();
-    print(
-      "Instruments: WebSocket token: ${authid != null ? 'exists' : 'null'}",
-    );
-
-    if (authid == null || authid.isEmpty) {
-      if (kDebugMode) {
-        print(
-          'Instruments: WebSocket token is null or empty, skipping request (user not logged in)',
-        );
-      }
-      // Don't retry if user is not logged in
-      return;
-    }
-
-    // Get the active MT5 account number from account controller
-    final accountController = Get.find<AccountController>();
-    final activeAccount = accountController.activeMT5Account;
-    final accountNumber = activeAccount?.metaAccountNumber ?? "0";
-
-    print("Instruments: Using MT5 Account Number: $accountNumber");
-
-    // Send different event based on trading_server
-    // ✅ PERFORMANCE: Request binary format for improved performance (50-70% smaller, 5-10x faster)
-    if (_isMT5Account()) {
-      // MT5 account: send join_market event with actual group name
-      final groupName = await _getMT5GroupName();
-      print(
-        "Instruments: Sending join_market event for MT5 account with group: $groupName",
-      );
-      // sendEvent({"type": "join_market", "group": groupName});
-      sendEvent({
-        "authID": authid,
-        "trading_account": accountNumber,
-        "format": "binary", // Request binary format
-      });
-    } else {
-      // Default: send authID and trading_account
-      sendEvent({
-        "authID": authid,
-        "trading_account": accountNumber,
-        "format": "binary", // Request binary format
-      });
-    }
+    _socketDataDebounceTimer = Timer(const Duration(milliseconds: 120), () async {
+      await startMarketWatchV2Only();
+    });
   }
 
   void updateFromJson(dynamic message) {
@@ -775,33 +688,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         decodedData = jsonDecode(jsonStr);
       }
 
-      // ✅ Handle JSON object responses (authentication, errors, etc.)
-      if (decodedData is Map<String, dynamic>) {
-        _handleJsonResponse(decodedData);
-        return;
-      }
-
-      // ✅ Handle array responses (price updates)
-      // STEP 1: Initial snapshot (array of arrays) - comes first
-      // STEP 3: Real-time updates (array of arrays) - comes after confirmation
-      // Format: [symbol, bid, ask, spread_points, digits, day_high, day_low, category]
-      if (decodedData is List && decodedData.isNotEmpty) {
-        // Array of arrays (multiple instruments)
-        if (decodedData[0] is List) {
-          _parseNewFormat(decodedData);
-        }
-        // Single array (one instrument update)
-        else if (decodedData[0] is String && decodedData.length >= 5) {
-          _parseSingleInstrument(decodedData);
-        }
-        return;
-      }
-
-      // Fallback: Try old JSON format (only if it's actually a Map)
-      if (decodedData is Map<String, dynamic>) {
+      // Legacy full-catalog JSON (direct channel only)
+      if (decodedData is Map && decodedData['groups'] is List) {
         try {
           final SocketResponse socketResponse = SocketResponse.fromJson(
-            decodedData,
+            Map<String, dynamic>.from(decodedData),
           );
 
           final List<ListElement> allItems = [];
@@ -837,15 +728,16 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
           _updateInstrumentsList(allItems);
 
-          // ✅ Update trading groups and available filters
           _updateTradingGroups(allInstruments);
 
-          // ✅ Apply current filter and sort
           _updateFilteredInstruments();
         } catch (e) {
           print('Error parsing old format: $e');
         }
+        return;
       }
+
+      _processDecodedMarketPayload(decodedData);
     } catch (e, t) {
       print('Error parsing JSON: $e\n $t');
     }
@@ -1280,6 +1172,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // Cancel reconnect timer
     _reconnectTimer?.cancel();
     _unifiedMwSub?.cancel();
+    _marketWatchV2Sub?.cancel();
+    _marketWatchV2Sub = null;
+    _marketWatchV2ListenerBound = false;
     _priceFlushTimer?.cancel();
     _scrollIdleTimer?.cancel();
 
@@ -1301,12 +1196,10 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         print('App resumed - checking WebSocket connection');
-        // ✅ FIX: Force reconnect even if connected flag says connected
-        // The connection might be stale after app was paused
         if (!isConnected.value) {
-          // Clear data before reconnecting to ensure fresh data
-          clearInstrumentsData();
-          _reconnectWebSocket();
+          Future.microtask(() async {
+            await startMarketWatchV2Only();
+          });
         }
         break;
       case AppLifecycleState.paused:
@@ -1440,10 +1333,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   void sortInstruments(String sortBy) {
     currentSort.value = sortBy;
-    // Reapply sorting using the same helper method
-    _applyCurrentSort(instruments);
-    // Trigger update by reassigning
-    instruments.assignAll(instruments);
+    // Rebuild filtered list so sort reflects immediately for:
+    // - current filter (Favorites/category)
+    // - current search query
+    // Also avoids in-place sorting of RxList (can be a no-op for reactivity).
+    _updateFilteredInstruments();
   }
 
   // Load favorites from storage
@@ -1474,11 +1368,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         normalizedSymbol,
       );
       if (success) {
-        // Reload favorites to update the list
         await _loadFavorites();
-        // Update filtered instruments to reflect changes
         _updateFilteredInstruments();
-        // print('Toggled favorite for: $normalizedSymbol');
+        await hydrateFavoritesFromRest();
       }
     } catch (e) {
       print('Error toggling favorite for $instrumentSymbol: $e');
@@ -1508,6 +1400,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       if (success) {
         await _loadFavorites();
         _updateFilteredInstruments();
+        await hydrateFavoritesFromRest();
+        await syncMarketWatchV2AfterFavoriteChange(
+          instrumentSymbol,
+          isFavoriteNow: true,
+        );
         print('Added $instrumentSymbol to favorites');
       }
     } catch (e) {
@@ -1518,13 +1415,26 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   // Remove instrument from favorites
   Future<void> removeFromFavorites(String instrumentSymbol) async {
     try {
-      final success = await FavoritesStorageService.instance
-          .removeFromFavorites(instrumentSymbol);
-      if (success) {
-        await _loadFavorites();
-        _updateFilteredInstruments();
-        print('Removed $instrumentSymbol from favorites');
-      }
+      // Clean symbol variations to ensure thorough removal
+      final String cleanSymbol = instrumentSymbol.contains('.') 
+          ? instrumentSymbol.substring(0, instrumentSymbol.lastIndexOf('.'))
+          : instrumentSymbol;
+      
+      final storage = FavoritesStorageService.instance;
+      
+      // Remove all possible variations from storage
+      await storage.removeFromFavorites(cleanSymbol);
+      await storage.removeFromFavorites('$cleanSymbol.c');
+      await storage.removeFromFavorites('$cleanSymbol.r');
+      
+      await _loadFavorites();
+      _updateFilteredInstruments();
+      await hydrateFavoritesFromRest();
+      await syncMarketWatchV2AfterFavoriteChange(
+        instrumentSymbol,
+        isFavoriteNow: false,
+      );
+      print('Removed $instrumentSymbol (and variations) from favorites');
     } catch (e) {
       print('Error removing $instrumentSymbol from favorites: $e');
     }
@@ -1554,6 +1464,36 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       print('Force reinitialized with new defaults');
     } catch (e) {
       print('Error force reinitializing defaults: $e');
+    }
+  }
+
+  // Reorder instruments in the list
+  Future<void> reorderInstruments(int oldIndex, int newIndex) async {
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    // Update the UI list immediately
+    final ListElement item = instruments.removeAt(oldIndex);
+    instruments.insert(newIndex, item);
+
+    // If we are viewing favorites, we should persist the new order
+    if (currentFilter.value == 'Favorites') {
+      try {
+        final List<String> currentFavs = List.from(favoriteInstruments);
+        final String symbol = currentFavs.removeAt(oldIndex);
+        currentFavs.insert(newIndex, symbol);
+        
+        // Save to persistent storage
+        await FavoritesStorageService.instance.saveFavoriteInstruments(currentFavs);
+        
+        // Update local RxList
+        favoriteInstruments.assignAll(currentFavs);
+        
+        print('Reordered favorites: $currentFavs');
+      } catch (e) {
+        print('Error persisting reordered favorites: $e');
+      }
     }
   }
 
@@ -1594,10 +1534,6 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       }
     }
 
-    // Apply manual order (only when not searching and sort is Default).
-    // Keeps user drag-drop ordering stable across live updates.
-    _applyManualOrderIfAny(filteredInstruments);
-
     // Apply current sort (preserve sort when filters/search change)
     _applyCurrentSort(filteredInstruments);
 
@@ -1619,31 +1555,6 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       update(); // Only rebuild when items are added/removed
     }
     // Note: Price updates don't need update() - RxList changes trigger Obx automatically
-  }
-
-  void _applyManualOrderIfAny(List<ListElement> instrumentsToOrder) {
-    if (manualOrderSymbols.isEmpty) return;
-    if (searchQuery.value.isNotEmpty) return;
-    if (currentSort.value != 'Default') return;
-
-    final orderIndex = <String, int>{};
-    for (var i = 0; i < manualOrderSymbols.length; i++) {
-      orderIndex[manualOrderSymbols[i]] = i;
-    }
-
-    instrumentsToOrder.sort((a, b) {
-      final ai = orderIndex[a.symbol];
-      final bi = orderIndex[b.symbol];
-      if (ai == null && bi == null) return 0;
-      if (ai == null) return 1;
-      if (bi == null) return -1;
-      return ai.compareTo(bi);
-    });
-  }
-
-  void setManualOrderSymbols(List<String> symbols) {
-    manualOrderSymbols.assignAll(symbols);
-    _updateFilteredInstruments();
   }
 
   // Helper method to apply current sort to instruments list
@@ -1679,10 +1590,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
     // If not connected, try to reconnect first
     if (!isConnected.value) {
-      print("Not connected, attempting to reconnect...");
-      _reconnectWebSocket();
+      print("Not connected, attempting marketwatchv2 refresh...");
+      Future.microtask(() async {
+        await startMarketWatchV2Only();
+      });
     } else {
-      // If connected, just send new data
       getSocketdata();
     }
   }
@@ -1726,7 +1638,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       _unifiedMwSub = null;
       isConnected.value = false;
     }
-    
+
+    isHydratingInstrumentCatalog.value = false;
+
     // ✅ Clear all data
     allInstruments.clear();
     instruments.clear();
@@ -1795,16 +1709,13 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   // Unsubscribe and resubscribe with new account (keeps socket active)
   Future<void> unsubscribeAndResubscribe(String newAccountNumber) async {
     print(
-      '🔄 InstrumentsController: Unsubscribing and resubscribing for account: $newAccountNumber',
+      '🔄 InstrumentsController: marketwatchv2 resync for account: $newAccountNumber',
     );
 
-    // Update current account number
     _currentAccountNumber = newAccountNumber;
 
-    // Check if URL needs to change (trading_server changed)
     final wasMT5 = _isMT5Account();
 
-    // Get new account to check if trading_server changed
     try {
       final accountController = Get.find<AccountController>();
       final newAccount = accountController.mt5Accounts.firstWhereOrNull(
@@ -1812,101 +1723,40 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       );
       final isNowMT5 = newAccount?.tradingServer.toUpperCase() == "MT5";
 
-      // If URL needs to change, close and reconnect
       if (wasMT5 != isNowMT5) {
         print(
-          '🔄 InstrumentsController: Trading server changed (was MT5: $wasMT5, now MT5: $isNowMT5), closing and reconnecting',
+          '🔄 InstrumentsController: Trading server changed (was MT5: $wasMT5, now MT5: $isNowMT5), resyncing v2',
         );
         stopWebSocket();
         await Future.delayed(const Duration(milliseconds: 150));
         clearInstrumentsData();
-        startWebSocket();
+        await startMarketWatchV2Only();
         return;
       }
     } catch (e) {
       print('⚠️ InstrumentsController: Error checking trading server: $e');
     }
 
-    // If not connected, just initialize normally
     if (!isConnected.value) {
-      print('⚠️ InstrumentsController: Not connected, initializing normally');
+      print('⚠️ InstrumentsController: Not connected, initializing marketwatchv2');
       clearInstrumentsData();
-      startWebSocket();
+      await startMarketWatchV2Only();
       return;
     }
 
     try {
-      // Step 1: Unsubscribe from current market watch
-      print(
-        '📤 InstrumentsController: Sending {"type": "unsubscribe"} request',
-      );
-      _unsubscribeCompleter = Completer<void>();
-      sendEvent({"type": "unsubscribe"});
-
-      // Step 2: Wait for unsubscribe confirmation (with timeout)
-      try {
-        await _unsubscribeCompleter!.future.timeout(
-          const Duration(milliseconds: 500),
-          onTimeout: () {
-            print(
-              '⚠️ InstrumentsController: Unsubscribe timeout, proceeding anyway',
-            );
-            if (_unsubscribeCompleter != null &&
-                !_unsubscribeCompleter!.isCompleted) {
-              _unsubscribeCompleter!.complete();
-              _unsubscribeCompleter = null;
-            }
-          },
-        );
-      } catch (e) {
-        print('⚠️ InstrumentsController: Error waiting for unsubscribe: $e');
+      if (Get.isRegistered<MarketWatchV2Service>()) {
+        await Get.find<MarketWatchV2Service>().disconnect();
       }
-
-      // Step 3: Clear instruments data
       clearInstrumentsData();
-
-      // Step 4: Resubscribe with new account (using appropriate event)
-      print(
-        '📤 InstrumentsController: Resubscribing with new account: $newAccountNumber',
-      );
-
-      // ✅ FIX: Add small delay to ensure unsubscribe is fully processed
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      if (_isMT5Account()) {
-        // MT5 account: send join_market event with actual group name
-        final groupName = await _getMT5GroupName();
-        print(
-          "InstrumentsController: Sending join_market event for MT5 account with group: $groupName",
-        );
-        sendEvent({"type": "join_market", "group": groupName});
-      } else {
-        // Default: send authID and trading_account
-        final authid = await SecureStorageService.getAuthToken();
-        if (authid != null && authid.isNotEmpty) {
-          sendEvent({"authID": authid, "trading_account": newAccountNumber});
-        } else {
-          print(
-            '❌ InstrumentsController: No auth token available for resubscribe',
-          );
-        }
-      }
-
-      // ✅ FIX: Request instrument data after resubscription to ensure data loads
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (isConnected.value) {
-          getSocketdata();
-        }
-      });
-
-      print('✅ InstrumentsController: Resubscribed successfully');
+      await startMarketWatchV2Only();
+      print('✅ InstrumentsController: marketwatchv2 resync complete');
     } catch (e) {
       print('❌ InstrumentsController: Error in unsubscribeAndResubscribe: $e');
-      // Fallback: if unsubscribe/resubscribe fails, do full reconnect
       stopWebSocket();
       await Future.delayed(const Duration(milliseconds: 100));
       clearInstrumentsData();
-      startWebSocket();
+      await startMarketWatchV2Only();
     }
   }
 }
@@ -1916,40 +1766,36 @@ class InstrumentPrice {
   final double ask;
   final int digits;
   final double spreadDiff;
-  final double? dayHigh;
-  final double? dayLow;
+  final double dayLow;
+  final double dayHigh;
 
   const InstrumentPrice({
     required this.bid,
     required this.ask,
     required this.digits,
     required this.spreadDiff,
-    this.dayHigh,
-    this.dayLow,
+    required this.dayLow,
+    required this.dayHigh,
   });
 
-  factory InstrumentPrice.empty() => const InstrumentPrice(
-    bid: 0.0,
-    ask: 0.0,
-    digits: 5,
-    spreadDiff: 0.0,
-  );
+  factory InstrumentPrice.empty() =>
+      const InstrumentPrice(bid: 0.0, ask: 0.0, digits: 5, spreadDiff: 0.0, dayLow: 0.0, dayHigh: 0.0);
 
   InstrumentPrice copyWith({
     double? bid,
     double? ask,
     int? digits,
     double? spreadDiff,
-    double? dayHigh,
     double? dayLow,
+    double? dayHigh,
   }) {
     return InstrumentPrice(
       bid: bid ?? this.bid,
       ask: ask ?? this.ask,
       digits: digits ?? this.digits,
       spreadDiff: spreadDiff ?? this.spreadDiff,
-      dayHigh: dayHigh ?? this.dayHigh,
       dayLow: dayLow ?? this.dayLow,
+      dayHigh: dayHigh ?? this.dayHigh,
     );
   }
 }

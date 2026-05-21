@@ -12,11 +12,13 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/app_switch_tile.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class ClosePositionScreen extends StatefulWidget {
   final TradePosition position;
@@ -642,14 +644,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
         elevation: 0,
         toolbarHeight: 72.h, // a bit more height so 2 lines fit nicely
         centerTitle: false, // easier for layout; we’ll align manually
-        leading: IconButton(
-          onPressed: () => Get.back(closeOverlays: true),
-          icon: SvgPicture.asset(
-            'assets/svg/trade/arro_back.svg',
-            width: 256.w,
-            height: 30.h,
-          ),
-        ),
+        leading: const AppBackButton(),
         titleSpacing: 0, // so title starts close to leading
         title: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1539,38 +1534,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
     bool value, {
     required Function(bool) onChanged,
   }) {
-    return Container(
-      height: 35,
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 2.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            textAlign: TextAlign.start,
-            style: AppTextStyles.label.copyWith(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          Transform.scale(
-            scale: 0.9,
-            child: Switch(
-              value: value,
-              onChanged: onChanged,
-              activeColor: AppColors.primary,
-              activeTrackColor: AppColors.primary.withOpacity(0.3),
-              inactiveThumbColor: AppColors.whiteColor,
-              inactiveTrackColor: AppColors.icongrey.withAlpha(55),
-              trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
-        ],
-      ),
-    );
+    return AppSwitchTile(title: title, value: value, onChanged: onChanged);
   }
 
   Widget _buildCurrentProfitLoss(double profitLoss, bool isPositive) {

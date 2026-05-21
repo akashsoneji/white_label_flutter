@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/utils/app_picker_theme.dart';
 
 class PmamTradeHistoryScreen extends StatefulWidget {
   const PmamTradeHistoryScreen({super.key, required this.enrollment});
@@ -124,8 +125,8 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
   }
 
   Future<void> _pickFrom() async {
-    final picked = await showDatePicker(
-      context: context,
+    final picked = await AppPickerTheme.showAppDatePicker(
+      context,
       initialDate: _from,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
@@ -136,8 +137,8 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
   }
 
   Future<void> _pickTo() async {
-    final picked = await showDatePicker(
-      context: context,
+    final picked = await AppPickerTheme.showAppDatePicker(
+      context,
       initialDate: _to,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),

@@ -7,6 +7,7 @@ import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import '../../../../routes/app_pages.dart';
 import '../../../../services/language_service.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class IbDashboardScreen extends StatelessWidget {
   const IbDashboardScreen({super.key});
@@ -25,9 +26,7 @@ class IbDashboardScreen extends StatelessWidget {
           languageService.tr('general_finance'),
           style: AppTextStyles.screenTitle,
         ),
-        leading: IconButton(
-          icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: AppBackButton(onPressed: ()=> Navigator.of(context).pop(),
         ),
         centerTitle: true,
       ),

@@ -7,6 +7,7 @@ import 'package:get/get_core/src/get_main.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import '../../../../services/language_service.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class DemoContestScreen extends StatelessWidget {
   const DemoContestScreen({super.key});
@@ -25,9 +26,7 @@ class DemoContestScreen extends StatelessWidget {
           languageService.tr('more_demo_contest'),
           style: AppTextStyles.screenTitle,
         ),
-        leading: IconButton(
-          icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: AppBackButton(onPressed: ()=> Navigator.of(context).pop(),
         ),
         centerTitle: true,
       ),

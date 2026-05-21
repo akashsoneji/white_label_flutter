@@ -8,6 +8,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class PmamManagerDashboardScreen extends StatefulWidget {
   const PmamManagerDashboardScreen({super.key});
@@ -56,7 +57,7 @@ class _PmamManagerDashboardScreenState
         elevation: 0,
         title: Text('MANAGER PROFILE', style: AppTextStyles.headingblack),
         centerTitle: true,
-        leading: AppSvgBackButton(onPressed: () => Get.back()),
+        leading: AppBackButton(onPressed: () => Get.back()),
         actions: [
           IconButton(
             icon: Icon(

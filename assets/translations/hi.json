@@ -1,11 +1,9 @@
 {
   "app_name": "पिप्ज़",
   "app_version": "1.0.0",
-  
   "welcome_title": "नमस्ते, स्वागत है! 👋",
   "welcome_subtitle": "पेशेवर ट्रेडिंग का आपका प्रवेश द्वार।",
   "welcome_login_title": "वापसी पर स्वागत है",
-  
   "login_title": "लॉगिन",
   "login_subtitle": "अपने ट्रेड को आसानी से प्रबंधित करें",
   "login_email": "ईमेल के साथ जारी रखें",
@@ -20,7 +18,6 @@
   "login_register": "रजिस्टर",
   "login_google_coming_soon": "Google लॉगिन जल्द आ रहा है!",
   "login_apple_coming_soon": "Apple लॉगिन जल्द आ रहा है!",
-  
   "register_title": "खाता बनाएं",
   "register_subtitle": "हमसे जुड़ें और ट्रेडिंग शुरू करें",
   "register_first_name": "पहला नाम",
@@ -47,7 +44,6 @@
   "register_phone": "फोन नंबर",
   "register_trading_experience": "क्या आपको ट्रेडिंग का अनुभव है?",
   "register_personal_info": "व्यक्तिगत जानकारी",
-  
   "forgot_password_title": "पासवर्ड भूल गए",
   "forgot_password_subtitle": "अपना पासवर्ड रीसेट करें",
   "forgot_password_email": "ईमेल",
@@ -56,10 +52,8 @@
   "forgot_password_button": "रीसेट लिंक भेजें",
   "forgot_password_login": "लॉगिन",
   "forgot_password_check_email": "रीसेट निर्देशों के लिए अपना ईमेल देखें",
-  "forgot_password_enter_your_email":"कृपया अपना ईमेल दर्ज करें",
-  "forgot_password_Please_enter_a_valid_email":"कृपया एक वैध ईमेल दर्ज करें",
-
-  
+  "forgot_password_enter_your_email": "कृपया अपना ईमेल दर्ज करें",
+  "forgot_password_Please_enter_a_valid_email": "कृपया एक वैध ईमेल दर्ज करें",
   "verify_code_title": "कोड सत्यापित करें",
   "verify_code_subtitle": "सत्यापन कोड दर्ज करें",
   "verify_code_description": "कृपया वह कोड दर्ज करें जो हमने अभी ईमेल पर भेजा है ",
@@ -68,7 +62,6 @@
   "verify_code_resend": "कोड पुनः भेजें?",
   "verify_code_didnt_receive": "OTP नहीं मिला?",
   "verify_code_timer": "{seconds} सेकंड में पुनः भेजें",
-  
   "create_password_title": "नया पासवर्ड बनाएं",
   "create_password_subtitle": "अपना नया पासवर्ड सेट करें",
   "create_password_description": "अपना नया पासवर्ड दर्ज करें",
@@ -76,7 +69,6 @@
   "create_password_confirm": "पासवर्ड की पुष्टि करें",
   "create_password_button": "पासवर्ड अपडेट करें",
   "create_password_requirements": "पासवर्ड कम से कम 8 अक्षर होना चाहिए",
-  
   "validation_required": "यह फील्ड आवश्यक है",
   "validation_email_required": "ईमेल आवश्यक है",
   "validation_email_invalid": "कृपया एक वैध ईमेल पता दर्ज करें",
@@ -97,7 +89,6 @@
   "validation_code_required": "सत्यापन कोड आवश्यक है",
   "validation_code_length": "कोड {length} अंक होना चाहिए",
   "validation_code_invalid": "अमान्य सत्यापन कोड",
-  
   "toast_login_success": "लॉगिन सफल! वापसी पर स्वागत है! 🎉",
   "toast_login_error": "लॉगिन विफल। कृपया पुनः प्रयास करें।",
   "toast_register_success": "खाता सफलतापूर्वक बनाया गया! 🎉",
@@ -117,7 +108,6 @@
   "toast_coming_soon": "यह सुविधा जल्द आ रही है!",
   "toast_maintenance": "सिस्टम रखरखाव जारी है",
   "toast_update_available": "नया अपडेट उपलब्ध है",
-  
   "dashboard_title": "डैशबोर्ड",
   "dashboard_balance": "बैलेंस",
   "dashboard_profit": "लाभ",
@@ -128,7 +118,6 @@
   "dashboard_closed_positions": "बंद पोजीशन",
   "dashboard_total_profit": "कुल लाभ",
   "dashboard_total_loss": "कुल हानि",
-  
   "instruments_title": "इंस्ट्रूमेंट्स",
   "quote_title": "कोटेशन",
   "instruments_search": "इंस्ट्रूमेंट्स में खोजें...",
@@ -142,7 +131,6 @@
   "instruments_popular": "लोकप्रिय",
   "instruments_recent": "हाल ही का",
   "instruments_favorites": "पसंदीदा",
-  
   "chart_title": "चार्ट",
   "chart_timeframe": "समय सीमा",
   "chart_indicators": "संकेतक",
@@ -150,7 +138,6 @@
   "chart_settings": "चार्ट सेटिंग्स",
   "chart_fullscreen": "पूर्ण स्क्रीन",
   "chart_share": "चार्ट साझा करें",
-  
   "trade_title": "ट्रेड",
   "trade_buy": "खरीदें",
   "trade_sell": "बेचें",
@@ -162,22 +149,19 @@
   "trade_close": "ट्रेड बंद करें",
   "trade_modify": "ट्रेड संशोधित करें",
   "trade_history": "ट्रेड इतिहास",
-  
   "portfolio_title": "पोर्टफोलियो",
   "portfolio_overview": "अवलोकन",
   "portfolio_positions": "पोजीशन",
   "portfolio_history": "इतिहास",
   "portfolio_analytics": "विश्लेषण",
   "portfolio_performance": "प्रदर्शन",
-  
-   "more_profile": "प्रोफाइल",
+  "more_profile": "प्रोफाइल",
   "more_settings": "सेटिंग्स",
   "more_help": "सहायता और समर्थन",
   "more_about": "के बारे में",
   "more_language": "भाषा",
   "more_notifications": "सूचनाएं",
   "more_security": "सुरक्षा",
-  
   "onboarding_welcome": "आपका स्वागत है!",
   "onboarding_get_started": "शुरू करें",
   "onboarding_skip": "छोड़ें",
@@ -186,7 +170,6 @@
   "onboarding_account_created": "खाता सफलतापूर्वक बनाया गया! 🎉",
   "onboarding_account_created_description": "आपका खाता बनाया गया है। अब आप ट्रेडिंग शुरू कर सकते हैं!",
   "onboarding_continue": "जारी रखें",
-  
   "onboarding_slide1_description": "आपके सभी ट्रेडर।\nएक सुरक्षित स्थान",
   "onboarding_slide2_title": "स्मार्ट ट्रेड",
   "onboarding_slide2_description": "उन्नत चार्ट और रीयल-टाइम डेटा",
@@ -194,7 +177,6 @@
   "onboarding_slide3_description": "आपके फंड बैंक-स्तरीय सुरक्षा के साथ संरक्षित हैं",
   "onboarding_slide3_subtitle": "अब आपके पास पूर्व-कॉन्फ़िगर किए गए सेटिंग्स के साथ एक ट्रेडिंग खाता है।",
   "onboarding_slide3_subtitle2": "आप किसी भी समय अतिरिक्त खाते बना और अनुकूलित कर सकते हैं",
-  
   "settings_title": "सेटिंग्स",
   "settings_account": "खाता",
   "settings_security": "सुरक्षा",
@@ -224,7 +206,6 @@
   "settings_notifications_price_alerts": "मूल्य अलर्ट",
   "settings_notifications_news": "समाचार और अपडेट",
   "settings_notifications_marketing": "मार्केटिंग",
-  
   "error_network": "नेटवर्क त्रुटि। कृपया अपना कनेक्शन जांचें।",
   "error_server": "सर्वर त्रुटि। कृपया बाद में पुनः प्रयास करें।",
   "error_timeout": "अनुरोध समय सीमा समाप्त। कृपया पुनः प्रयास करें।",
@@ -237,7 +218,6 @@
   "error_insufficient_funds": "इस ट्रेड के लिए अपर्याप्त फंड।",
   "error_market_closed": "बाजार वर्तमान में बंद है।",
   "error_invalid_amount": "अमान्य ट्रेड राशि।",
-  
   "time_now": "अभी",
   "time_today": "आज",
   "time_yesterday": "कल",
@@ -253,7 +233,6 @@
   "time_weeks": "सप्ताह",
   "time_months": "महीने",
   "time_years": "वर्ष",
-  
   "currency_usd": "USD",
   "currency_eur": "EUR",
   "currency_gbp": "GBP",
@@ -264,7 +243,6 @@
   "currency_cny": "CNY",
   "currency_btc": "BTC",
   "currency_eth": "ETH",
-  
   "common_loading": "लोड हो रहा है...",
   "common_no_data": "कोई इंस्ट्रूमेंट नहीं मिला।",
   "common_no_data_description": "कृपया एक अलग कीबोर्ड आज़माएं",
@@ -301,7 +279,6 @@
   "common_platform": "प्लेटफॉर्म",
   "common_currency": "मुद्रा",
   "common_leverage": "लीवरेज",
-  
   "common_currency_usd": "USD",
   "common_currency_eur": "EUR",
   "common_currency_gbp": "GBP",
@@ -330,7 +307,6 @@
   "common_grand_total": "कुल योग",
   "common_deposit": "जमा",
   "common_skip_for_now": "अभी के लिए छोड़ें",
-  
   "navigation_back": "वापस",
   "navigation_next": "अगला",
   "navigation_skip": "छोड़ें",
@@ -347,19 +323,16 @@
   "navigation_no": "नहीं",
   "navigation_confirm": "पुष्टि करें",
   "navigation_retry": "पुनः प्रयास करें",
-  
   "drawer_subtitle": "पेशेवर ट्रेडिंग प्लेटफॉर्म",
   "common_coming_soon": "जल्द आ रहा है",
   "common_to_start_trading": "ट्रेडिंग शुरू करने के लिए, जमा करें",
   "more_title": "अधिक",
-  
   "more_trading_tools": "ट्रेडिंग टूल्स",
   "more_price_alerts": "मूल्य अलर्ट",
   "more_economic_calendar": "आर्थिक कैलेंडर",
   "more_market_news": "बाजार समाचार",
   "more_trading_signals": "ट्रेडिंग सिग्नल",
   "more_logout": "लॉगआउट",
-  
   "legal_documents_title": "कानूनी दस्तावेज",
   "privacy_policy_title": "गोपनीयता नीति",
   "legal_documents_subtitle": "मैं पुष्टि करता हूं कि मैंने नीचे दिए गए दस्तावेजों में उल्लिखित शर्तों को पढ़ा है और उनसे सहमत हूं।",
@@ -377,8 +350,6 @@
   "privacy_policy_data_protection": "डेटा संरक्षण",
   "privacy_policy_data_protection_text": "हम आपकी व्यक्तिगत जानकारी की रक्षा के लिए उद्योग-मानक सुरक्षा उपाय लागू करते हैं।",
   "privacy_policy_contact": "हमसे संपर्क करें",
-  
-
   "trading_order_market_order": "बाजार आदेश",
   "trading_order_pending_order": "लंबित आदेश",
   "trading_order_volume_lots": "मात्रा, लॉट",
@@ -405,5 +376,7 @@
   "trading_order_balance": "बैलेंस",
   "trading_order_enter_volume": "मात्रा दर्ज करें",
   "trading_order_enter_price": "मूल्य दर्ज करें",
-  "trading_order_enter_distance": "दूरी दर्ज करें"
-} 
+  "trading_order_enter_distance": "दूरी दर्ज करें",
+  "internal_transfer_history": "Internal Transfer History",
+  "agreement_document_unavailable": "यह दस्तावेज़ अभी उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।"
+}

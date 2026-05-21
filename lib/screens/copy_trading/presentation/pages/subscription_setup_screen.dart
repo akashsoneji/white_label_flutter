@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class SubscriptionSetupScreen extends StatefulWidget {
   const SubscriptionSetupScreen({super.key});
@@ -80,9 +81,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        leading: IconButton(
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-          onPressed: () => Get.back(),
+        leading: AppBackButton(onPressed: ()=> Get.back(),
         ),
         title: const Text(
           'Subscription Setup',

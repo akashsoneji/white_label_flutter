@@ -5,6 +5,24 @@ abstract class CopyTradingRepository {
 
   Future<ApiResponse> getCopierSubscriptions({Map<String, dynamic>? queryParameters});
 
+  Future<ApiResponse> getCopierSubscriptionsList({
+    required int page,
+    required int perPage,
+    Map<String, dynamic>? queryParameters,
+  });
+
+  Future<ApiResponse> getCopierSubscriptionTrades({
+    required int subscriptionId,
+    required int page,
+    Map<String, dynamic>? queryParameters,
+  });
+
+  Future<ApiResponse> getMasterCopiersList({
+    required int page,
+    required int perPage,
+    Map<String, dynamic>? queryParameters,
+  });
+
   Future<ApiResponse> getCopierSubscriptionDetail({
     required int subscriptionId,
     Map<String, dynamic>? queryParameters,

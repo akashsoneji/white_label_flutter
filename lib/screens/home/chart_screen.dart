@@ -18,6 +18,7 @@ import '../../constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_chart_layout.dart';
+import 'package:crm_app/widgets/vantage/vantage_symbol_dropdown.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
@@ -31,6 +32,7 @@ import '../../utils/precision_helper.dart';
 import '../../models/order_types.dart';
 import '../../utils/app_logger.dart';
 import '../../widgets/custom_toast.dart';
+import '../../widgets/app_switch_tile.dart';
 import '../../routes/app_pages.dart';
 import 'dashboard_screen.dart';
 import 'pending_order_content.dart';
@@ -39,6 +41,7 @@ import '../../services/one_click_trading_service.dart';
 import '../../services/one_click_trading_queue_service.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import '../../services/symbol_selection_service.dart';
+import 'search_instruments_screen.dart';
 import '../../services/symbol_details_cache_service.dart';
 import '../../services/theme_service.dart';
 
@@ -1281,7 +1284,18 @@ Placing Order:
       final chartFlex = isSmallScreen ? 16 : (isLargeScreen ? 20 : 18);
 
       return VantageChartLayout(
-        title: _removeSymbolSuffix(selectedSymbol),
+        titleWidget: Obx(
+          () => VantageSymbolDropdown(
+            selectedSymbol: selectedSymbol,
+            favorites: instrumentsController.favoriteInstruments.toList(),
+            formatLabel: _removeSymbolSuffix,
+            onSymbolSelected: _onSymbolChanged,
+            onEmptyTap:
+                () => _openSearchInstrumentsSheet(
+                  onSymbolPicked: _onSymbolChanged,
+                ),
+          ),
+        ),
         backgroundColor: baseBg,
         primaryColor: primary,
         chartFlex: chartFlex,
@@ -1418,10 +1432,10 @@ Placing Order:
     final tradingController = Get.find<TradingController>();
 
     return Obx(() {
-      final double? floatingProfit = tradingController.accountInfo?.profit;
+      final double? floatingProfit =
+          tradingController.accountInfoRx.value?.profit;
 
       if (FlavorConfig.isVantage()) {
-        // Vantage: keep header minimal; hide the symbol dropdown selector.
         return SafeArea(
           bottom: false,
           child: Padding(
@@ -1446,14 +1460,17 @@ Placing Order:
                 Expanded(
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      _removeSymbolSuffix(selectedSymbol),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.heading.copyWith(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                    child: Obx(
+                      () => VantageSymbolDropdown(
+                        selectedSymbol: selectedSymbol,
+                        favorites:
+                            instrumentsController.favoriteInstruments.toList(),
+                        formatLabel: _removeSymbolSuffix,
+                        onSymbolSelected: _onSymbolChanged,
+                        onEmptyTap:
+                            () => _openSearchInstrumentsSheet(
+                              onSymbolPicked: _onSymbolChanged,
+                            ),
                       ),
                     ),
                   ),
@@ -1733,479 +1750,48 @@ Placing Order:
   //   return '📈';
   // }
 
-  void _showSymbolSelector() {
-    // Use the real instruments data from instruments controller
-    final instrumentsController = Get.find<InstrumentsController>();
-    // Use ListElement directly instead of converting to Instrument
-    final allInstruments = instrumentsController.allInstruments;
-
-    // Only show Favorites - no search or tabs needed
-    // Initialize with favorites only
-    List<ListElement> filteredInstruments =
-        allInstruments
-            .where(
-              (instrument) =>
-                  instrumentsController.isFavorite(instrument.symbol),
-            )
-            .toList();
-
-    print(
-      '🚪 Modal opened - real-time prices will update via instrumentsController.allInstruments',
-    );
-
-    showModalBottomSheet(
+  void _openSearchInstrumentsSheet({void Function(String)? onSymbolPicked}) {
+    showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            // Get keyboard height and screen dimensions
-            final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-            final screenHeight = MediaQuery.of(context).size.height;
-            final availableHeight = screenHeight - keyboardHeight;
-
-            // Calculate modal height - use more space when keyboard is visible
-            double modalHeight;
-            if (keyboardHeight > 0) {
-              // When keyboard is visible, use most of available space
-              modalHeight = availableHeight * 0.9;
-            } else {
-              // When keyboard is hidden, use 90% of screen
-              modalHeight = screenHeight * 0.9;
-            }
-
-            // Ensure minimum and maximum bounds
-            modalHeight = modalHeight.clamp(
-              screenHeight * 0.9, // Minimum 70% of screen
-              screenHeight * 0.95, // Maximum 95% of screen
-            );
-
-            return Container(
-              height: modalHeight,
-              decoration: BoxDecoration(
-                color: AppColors.whiteColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20.r),
-                  topRight: Radius.circular(20.r),
-                ),
-              ),
-              child: Column(
-                children: [
-                  // Handle bar
-                  Container(
-                    margin: EdgeInsets.only(top: 12.h),
-                    width: 40.w,
-                    height: 4.h,
-                    decoration: BoxDecoration(
-                      color: AppColors.grey,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-
-                  // Title with Socket Status
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20.w,
-                      vertical: 10.h,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Select Symbol',
-                          style: AppTextStyles.heading.copyWith(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        // Socket connection status indicator with refresh button
-                        // Obx(() {
-                        //   final isConnected =
-                        //       instrumentsController.isConnected.value;
-                        //   final isReconnecting =
-                        //       instrumentsController.isReconnecting.value;
-
-                        //   return Row(
-                        //     children: [
-                        //       if (isReconnecting) ...[
-                        //         SizedBox(
-                        //           width: 12.w,
-                        //           height: 12.h,
-                        //           child: CircularProgressIndicator(
-                        //             strokeWidth: 2,
-                        //             valueColor: AlwaysStoppedAnimation<Color>(
-                        //               AppColors.primary,
-                        //             ),
-                        //           ),
-                        //         ),
-                        //         SizedBox(width: 8.w),
-                        //         Text(
-                        //           'Reconnecting...',
-                        //           style: AppTextStyles.subheading.copyWith(
-                        //             fontSize: 12.sp,
-                        //             color: AppColors.textGrey,
-                        //           ),
-                        //         ),
-                        //       ] else if (isConnected) ...[
-                        //         Container(
-                        //           width: 8.w,
-                        //           height: 8.h,
-                        //           decoration: BoxDecoration(
-                        //             color: AppColors.success,
-                        //             shape: BoxShape.circle,
-                        //           ),
-                        //         ),
-                        //         SizedBox(width: 8.w),
-                        //         Text(
-                        //           'Live Prices',
-                        //           style: AppTextStyles.subheading.copyWith(
-                        //             fontSize: 12.sp,
-                        //             color: AppColors.success,
-                        //             fontWeight: FontWeight.w500,
-                        //           ),
-                        //         ),
-                        //       ] else ...[
-                        //         Container(
-                        //           width: 8.w,
-                        //           height: 8.h,
-                        //           decoration: BoxDecoration(
-                        //             color: AppColors.red,
-                        //             shape: BoxShape.circle,
-                        //           ),
-                        //         ),
-                        //         SizedBox(width: 8.w),
-                        //         Text(
-                        //           'Offline',
-                        //           style: AppTextStyles.subheading.copyWith(
-                        //             fontSize: 12.sp,
-                        //             color: AppColors.red,
-                        //             fontWeight: FontWeight.w500,
-                        //           ),
-                        //         ),
-                        //       ],
-                        //       SizedBox(width: 12.w),
-                        //       // Refresh button
-                        //       GestureDetector(
-                        //         onTap: () {
-                        //           print(
-                        //             '🔄 Symbol Selector: Manual refresh requested',
-                        //           );
-                        //           instrumentsController.manualReconnect();
-                        //         },
-                        //         child: Container(
-                        //           padding: EdgeInsets.all(6.w),
-                        //           decoration: BoxDecoration(
-                        //             color: AppColors.primary.withOpacity(0.1),
-                        //             borderRadius: BorderRadius.circular(6.r),
-                        //           ),
-                        //           child: Icon(
-                        //             Icons.refresh,
-                        //             size: 16.w,
-                        //             color: AppColors.primary,
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   );
-                        // }),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 16.h),
-
-                  // Favorites label on the left
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: Obx(() {
-                      return Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Favorites (${instrumentsController.favoritesCount})',
-                          style: AppTextStyles.heading.copyWith(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-
-                  SizedBox(height: 16.h),
-
-                  // Instruments list with same layout as instruments screen
-                  Expanded(
-                    child:
-                        filteredInstruments.isEmpty
-                            ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.search_off,
-                                    size: 48.h,
-                                    color: AppColors.textGrey,
-                                  ),
-                                  SizedBox(height: 16.h),
-                                  Text(
-                                    'No favorites found',
-                                    style: AppTextStyles.subheading.copyWith(
-                                      color: AppColors.textGrey,
-                                      fontSize: 16.sp,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                            : ListView.builder(
-                              padding: EdgeInsets.zero,
-                              itemCount: filteredInstruments.length,
-                              itemBuilder: (context, index) {
-                                final instrument = filteredInstruments[index];
-
-                                return GestureDetector(
-                                  onTap: () {
-                                    print(
-                                      '🚪 Modal closed - resuming price updates',
-                                    );
-                                    Navigator.pop(context);
-                                    _onSymbolChanged(instrument.symbol);
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 16.w,
-                                      vertical: 8.h,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.whiteColor,
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: AppColors.border.withOpacity(
-                                            0.3,
-                                          ),
-                                          width: 0.5,
-                                        ),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          flex: 3,
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                width: 50.w,
-                                                height: 42.h,
-                                                alignment: Alignment.centerLeft,
-                                                child: _buildFlagIcon(
-                                                  instrument.symbol,
-                                                ),
-                                              ),
-                                              SizedBox(width: 12.w),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      DateFormat(
-                                                        'HH:mm:ss',
-                                                      ).format(DateTime.now()),
-                                                      style: AppTextStyles
-                                                          .subheading
-                                                          .copyWith(
-                                                            fontSize: 10.sp,
-                                                            color:
-                                                                AppColors
-                                                                    .textGrey,
-                                                          ),
-                                                    ),
-                                                    Text(
-                                                      _removeSymbolSuffix(
-                                                        instrument.symbol,
-                                                      ),
-                                                      style: AppTextStyles.input
-                                                          .copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontSize: 14.sp,
-                                                          ),
-                                                    ),
-                                                    Row(
-                                                      children: [
-                                                        Text(
-                                                          _formatSpreadDiff(
-                                                            instrument
-                                                                .spreadDiff,
-                                                          ),
-                                                          style: AppTextStyles
-                                                              .subheading
-                                                              .copyWith(
-                                                                fontSize: 10.sp,
-                                                                color:
-                                                                    AppColors
-                                                                        .textGrey,
-                                                              ),
-                                                        ),
-                                                        SvgPicture.asset(
-                                                          'assets/svg/spread.svg',
-                                                          width: 10.w,
-                                                          height: 10.h,
-                                                          // color: AppColors.textGrey,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(height: 2.h),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              // ✅ FIX: Use Obx to listen to real-time price updates
-                                              Obx(() {
-                                                final updatedInstrument =
-                                                    instrumentsController
-                                                        .allInstruments
-                                                        .firstWhereOrNull(
-                                                          (i) =>
-                                                              i.symbol ==
-                                                              instrument.symbol,
-                                                        );
-                                                final bid =
-                                                    updatedInstrument?.bid ??
-                                                    instrument.bid;
-                                                return RichText(
-                                                  text: TextSpan(
-                                                    children:
-                                                        _buildPriceTextSpans(
-                                                          bid,
-                                                          AppColors.red,
-                                                          updatedInstrument
-                                                                  ?.digits ??
-                                                              instrument.digits,
-                                                        ),
-                                                  ),
-                                                );
-                                              }),
-                                            ],
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              // ✅ FIX: Use Obx to listen to real-time price updates
-                                              Obx(() {
-                                                final updatedInstrument =
-                                                    instrumentsController
-                                                        .allInstruments
-                                                        .firstWhereOrNull(
-                                                          (i) =>
-                                                              i.symbol ==
-                                                              instrument.symbol,
-                                                        );
-                                                final ask =
-                                                    updatedInstrument?.ask ??
-                                                    instrument.ask;
-                                                return RichText(
-                                                  text: TextSpan(
-                                                    children:
-                                                        _buildPriceTextSpans(
-                                                          ask,
-                                                          AppColors.green,
-                                                          updatedInstrument
-                                                                  ?.digits ??
-                                                              instrument.digits,
-                                                        ),
-                                                  ),
-                                                );
-                                              }),
-                                            ],
-                                          ),
-                                        ),
-                                        // Favorite button
-                                        SizedBox(width: 8.w),
-                                        GestureDetector(
-                                          onTap: () {
-                                            instrumentsController
-                                                .toggleFavorite(
-                                                  instrument.symbol,
-                                                );
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.all(4.w),
-                                            child: Obx(() {
-                                              final isFavorite =
-                                                  instrumentsController
-                                                      .isFavorite(
-                                                        instrument.symbol,
-                                                      );
-                                              return Container(
-                                                width: 22.w,
-                                                height: 22.w,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  border: Border.all(
-                                                    color:
-                                                        isFavorite
-                                                            ? AppColors.primary
-                                                            : AppColors
-                                                                .textGrey,
-                                                    width: 2,
-                                                  ),
-                                                  color:
-                                                      isFavorite
-                                                          ? AppColors.primary
-                                                          : Colors.transparent,
-                                                ),
-                                                child:
-                                                    isFavorite
-                                                        ? Icon(
-                                                          Icons.check,
-                                                          size: 15.w,
-                                                          color: AppColors.whiteColor,
-                                                        )
-                                                        : null,
-                                              );
-                                            }),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                  ),
-
-                  // Bottom padding - only add extra padding when keyboard is not visible
-                  if (keyboardHeight == 0)
-                    SizedBox(
-                      height: MediaQuery.of(context).padding.bottom + 16.h,
-                    ),
-                ],
-              ),
-            );
-          },
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          height: MediaQuery.of(sheetContext).size.height * 0.9,
+          decoration: BoxDecoration(
+            color: AppColors.tradeBackgroundCenterColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+            child: SearchInstrumentsScreen(
+              onNavigateToChart: (symbol) {
+                Navigator.of(sheetContext).pop();
+                if (onSymbolPicked != null) {
+                  onSymbolPicked(symbol);
+                } else {
+                  _onSymbolChanged(symbol);
+                }
+              },
+            ),
+          ),
         );
       },
-    ).then((_) {
-      print('🚪 Modal dismissed');
-    });
+    );
+  }
+
+  void _showSymbolSelector() {
+    if (!FlavorConfig.isVantage()) {
+      _openSearchInstrumentsSheet();
+      return;
+    }
+
+    final favorites = instrumentsController.favoriteInstruments.toList();
+    if (favorites.isEmpty) {
+      _openSearchInstrumentsSheet(onSymbolPicked: _onSymbolChanged);
+      return;
+    }
+
   }
 
   Widget _buildInteractiveIcons() {
@@ -5002,45 +4588,7 @@ Placing Order:
     return ValueListenableBuilder<bool>(
       valueListenable: valueNotifier,
       builder: (context, value, child) {
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 10.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                textAlign: TextAlign.start,
-                style: AppTextStyles.label.copyWith(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textGrey,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: SizedBox(
-                  height: 20.h,
-                  width: 25.w,
-                  child: Transform.scale(
-                    scale: 0.8, // Adjust this scale to control total size
-                    child: Switch(
-                      value: value,
-                      onChanged: onChanged,
-                      activeColor: AppColors.primary,
-                      activeTrackColor: AppColors.primary.withOpacity(0.3),
-                      inactiveThumbColor: AppColors.whiteColor,
-                      inactiveTrackColor: AppColors.icongrey.withAlpha(55),
-                      trackOutlineColor: WidgetStateProperty.all(
-                        Colors.transparent,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
+        return AppSwitchTile(title: title, value: value, onChanged: onChanged);
       },
     );
   }

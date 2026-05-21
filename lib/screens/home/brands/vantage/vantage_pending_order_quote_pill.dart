@@ -44,7 +44,7 @@ class VantagePendingOrderQuotePill extends StatelessWidget {
             _QuoteCell(
               label: 'Ask',
               value: ask.toString(),
-              valueColor: AppColors.blue,
+              valueColor: AppColors.primary,
             ),
           ],
         );
@@ -93,4 +93,3 @@ class _QuoteCell extends StatelessWidget {
     );
   }
 }
-

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class AddInvestmentScreen extends StatefulWidget {
   final String traderName;
@@ -28,9 +29,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-          onPressed: () => Get.back(),
+        leading: AppBackButton(onPressed: ()=> Get.back(),
         ),
         title: Text('Add Investment', style: AppTextStyles.heading),
         centerTitle: true,

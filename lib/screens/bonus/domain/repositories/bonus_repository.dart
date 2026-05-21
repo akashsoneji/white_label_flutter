@@ -7,4 +7,11 @@ abstract class BonusRepository {
     String? token,
     required int cardId,
   });
+
+  Future<ApiResponse> getScratchLeaderboard({String? token});
+
+  Future<ApiResponse> convertScratchCreditToBalance({
+    String? token,
+    required int accountId,
+  });
 }

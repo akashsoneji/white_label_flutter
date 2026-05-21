@@ -112,7 +112,9 @@ class CopyTradingHubController extends GetxController {
 
   Future<void> _loadCopierSubscriptions() async {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final res = await _repo.getCopierSubscriptions(
+    final res = await _repo.getCopierSubscriptionsList(
+      page: 1,
+      perPage: 20,
       queryParameters: {'_t': timestamp.toString()},
     );
 

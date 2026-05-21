@@ -3885,15 +3885,17 @@ final languageService = Get.find<LanguageService>();
 
     // INNOVATIVE DESIGN: Grid view with icons for Vantage flavor
     if (FlavorConfig.isVantage()) {
+      final screenWidth = MediaQuery.sizeOf(context).width;
+      final isCompactScreen = screenWidth < 420;
       return GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.symmetric(vertical: 2.h),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 2.8,
-          crossAxisSpacing: 8.w,
-          mainAxisSpacing: 8.h,
+          crossAxisCount: 3,
+          childAspectRatio: isCompactScreen ? 1.38 : 1.55,
+          crossAxisSpacing: 6.w,
+          mainAxisSpacing: 6.h,
         ),
         itemCount: metricKeys.length,
         itemBuilder: (context, index) {
@@ -3917,6 +3919,7 @@ final languageService = Get.find<LanguageService>();
             value,
             key,
             valueColor: valueColor,
+            isCompactScreen: isCompactScreen,
           );
         },
       );
@@ -4127,7 +4130,18 @@ final languageService = Get.find<LanguageService>();
     );
   }
 
-  Widget _buildInnovativeMetricCard(String label, String value, String key, {Color? valueColor}) {
+  Widget _buildInnovativeMetricCard(
+    String label,
+    String value,
+    String key, {
+    Color? valueColor,
+    bool isCompactScreen = false,
+  }) {
+    final wrapLongLabel =
+        isCompactScreen &&
+        (key == 'trade_metric_margin_level' ||
+            key == 'trade_metric_free_margin');
+    final labelMaxLines = wrapLongLabel ? 2 : 1;
     IconData icon;
     switch (key) {
       case 'trade_metric_balance':
@@ -4152,51 +4166,68 @@ final languageService = Get.find<LanguageService>();
         icon = Icons.bar_chart_outlined;
     }
 
+    // Format value: strip % suffix from display, add % after negative values
+    final displayValue = value.replaceAll('%', '').trim();
+    final showPercent = valueColor != null &&
+        valueColor == AppColors.red &&
+        key == 'trade_metric_margin_level';
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 5.h),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.border.withOpacity(0.1)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(5.w),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(6.r),
-            ),
-            child: Icon(icon, size: 14.sp, color: AppColors.primary),
+        borderRadius: BorderRadius.circular(10.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
-          SizedBox(width: 6.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.all(3.w),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(5.r),
+                ),
+                child: Icon(icon, size: 12.sp, color: AppColors.primary),
+              ),
+              SizedBox(width: 4.w),
+              Expanded(
+                child: Text(
                   label,
                   style: AppTextStyles.label.copyWith(
-                    fontSize: 9.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textGrey,
+                    height: wrapLongLabel ? 1.15 : null,
                   ),
-                  maxLines: 1,
+                  maxLines: labelMaxLines,
+                  softWrap: true,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  value,
-                  style: AppTextStyles.heading.copyWith(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
-                    color: valueColor ?? AppColors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+              ),
+            ],
+          ),
+          SizedBox(height: 3.h),
+          Text(
+            showPercent ? '$displayValue%' : displayValue,
+            style: AppTextStyles.heading.copyWith(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: valueColor ?? AppColors.textPrimary,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

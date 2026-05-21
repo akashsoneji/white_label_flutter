@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/constants/color.dart';
 
-/// App-wide back button matching `ChartScreen` app bar style.
+/// App-wide back control: same SVG asset, size, and tap target on every screen.
 class AppBackButton extends StatelessWidget {
+  static const String assetPath = 'assets/svg/trade/arro_back.svg';
+
+  /// Standard AppBar leading slot (matches Material [kToolbarHeight] alignment).
+  static const double leadingSlotSize = 48;
+
+  static const double iconSize = 22;
+
   final VoidCallback? onPressed;
   final bool closeOverlays;
 
   const AppBackButton({super.key, this.onPressed, this.closeOverlays = true});
 
+  /// Prefer [Navigator.pop] when possible, otherwise [Get.back].
   static void popRoute(BuildContext context, {bool closeOverlays = true}) {
     final nav = Navigator.of(context);
     if (nav.canPop()) {
@@ -22,15 +31,26 @@ class AppBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed:
-          onPressed ?? () => popRoute(context, closeOverlays: closeOverlays),
-      icon: Icon(
-        Icons.arrow_back_ios_new_rounded,
-        size: 18.sp,
-        color: AppColors.textPrimary,
+    return SizedBox(
+      width: leadingSlotSize.w,
+      height: leadingSlotSize.w,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+        alignment: Alignment.center,
+        onPressed:
+            onPressed ?? () => popRoute(context, closeOverlays: closeOverlays),
+        icon: SvgPicture.asset(
+          assetPath,
+          width: iconSize.w,
+          height: iconSize.w,
+          fit: BoxFit.contain,
+          colorFilter: ColorFilter.mode(
+            AppColors.textPrimary,
+            BlendMode.srcIn,
+          ),
+        ),
       ),
     );
   }
 }
-

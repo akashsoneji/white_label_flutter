@@ -9,6 +9,7 @@ import 'package:crm_app/models/bank_withdralList_model.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class BankListScreen extends StatefulWidget {
   const BankListScreen({Key? key}) : super(key: key);
@@ -37,10 +38,7 @@ class _BankListScreenState extends State<BankListScreen> {
         backgroundColor: AppColors.backgroundLight,
         scrolledUnderElevation: 0,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(closeOverlays: true),
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-        ),
+        leading: const AppBackButton(),
         title: Text(
           'Withdrawal Method',
           style: AppTextStyles.heading.copyWith(

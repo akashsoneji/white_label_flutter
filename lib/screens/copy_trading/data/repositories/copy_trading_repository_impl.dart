@@ -31,6 +31,45 @@ class CopyTradingRepositoryImpl implements CopyTradingRepository {
   }
 
   @override
+  Future<ApiResponse> getCopierSubscriptionsList({
+    required int page,
+    required int perPage,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _remote.getCopierSubscriptionsList(
+      page: page,
+      perPage: perPage,
+      queryParameters: queryParameters,
+    );
+  }
+
+  @override
+  Future<ApiResponse> getCopierSubscriptionTrades({
+    required int subscriptionId,
+    required int page,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _remote.getCopierSubscriptionTrades(
+      subscriptionId: subscriptionId,
+      page: page,
+      queryParameters: queryParameters,
+    );
+  }
+
+  @override
+  Future<ApiResponse> getMasterCopiersList({
+    required int page,
+    required int perPage,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _remote.getMasterCopiersList(
+      page: page,
+      perPage: perPage,
+      queryParameters: queryParameters,
+    );
+  }
+
+  @override
   Future<ApiResponse> getCopierSubscriptionDetail({
     required int subscriptionId,
     Map<String, dynamic>? queryParameters,

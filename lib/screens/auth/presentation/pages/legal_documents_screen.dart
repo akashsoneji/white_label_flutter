@@ -16,6 +16,7 @@ import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/otp_modal.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
+import 'package:crm_app/utils/agreement_launcher.dart';
 
 class LegalDocumentsScreen extends StatefulWidget {
   final Map<String, dynamic> registrationData;
@@ -194,20 +195,20 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
         SizedBox(height: 16.h),
         _buildDocumentItem(
           languageService.tr("legal_documents_customer_agreement"),
+          onTap: AgreementLauncher.openTerms,
         ),
         SizedBox(height: 5.h),
         _buildDocumentItem(
           languageService.tr("legal_documents_privacy_policy"),
+          onTap: AgreementLauncher.openPrivacy,
         ),
       ],
     );
   }
 
-  Widget _buildDocumentItem(String title) {
+  Widget _buildDocumentItem(String title, {required VoidCallback onTap}) {
     return InkWell(
-      onTap: () {
-        Get.toNamed(AppPages.PRIVACY_POLICY);
-      },
+      onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
         child: Row(

@@ -12,6 +12,7 @@ import '../../utils/precision_helper.dart';
 import '../../utils/app_logger.dart';
 import '../../services/symbol_details_cache_service.dart';
 import 'package:get/get.dart';
+import '../../widgets/app_switch_tile.dart';
 import 'dart:async';
 
 class PendingOrderContent extends StatefulWidget {
@@ -1209,40 +1210,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
     return ValueListenableBuilder<bool>(
       valueListenable: valueNotifier,
       builder: (context, value, child) {
-        return Container(
-          height: 35,
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 2.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                textAlign: TextAlign.start,
-                style: AppTextStyles.label.copyWith(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Transform.scale(
-                scale: 0.9,
-                child: Switch(
-                  value: value,
-                  onChanged: onChanged,
-                  activeColor: AppColors.primary,
-                  activeTrackColor: AppColors.primary.withOpacity(0.3),
-                  inactiveThumbColor: AppColors.whiteColor,
-                  inactiveTrackColor: AppColors.icongrey.withAlpha(55),
-                  trackOutlineColor: WidgetStateProperty.all(
-                    Colors.transparent,
-                  ),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-              ),
-            ],
-          ),
-        );
+        return AppSwitchTile(title: title, value: value, onChanged: onChanged);
       },
     );
   }

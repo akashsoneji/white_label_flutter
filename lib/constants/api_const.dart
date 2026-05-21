@@ -20,6 +20,10 @@ class ApiConstants {
   static const String changePassword = '${ajax}mt5accounts/changepassword';
   static const String changeLeverage = '${ajax}mt5accounts/changeleverage';
   static const String changeUserPassword = '${ajax}settings/change-password';
+  static const String googleOtpGenerate = '${ajax}settings/google-otp/generate';
+  static const String googleOtpVerify = '${ajax}settings/google-otp/verify';
+  static const String googleOtpDisable = '${ajax}settings/google-otp/disable';
+  static const String googleOtpVerifyLogin = '${ajax}auth/google/verify-login-otp';
   static const String register = '${ajax}register';
   static const String registerFcmToken = '${ajax}register-fcm-token';
   static const String dashboard = '${ajax}dashboard';
@@ -47,6 +51,8 @@ class ApiConstants {
   static const String depositProofProxy = '${ajax}deposit-proof-proxy/';
   static const String changePrimaryAccount =
       '${ajax}mt5accounts/changePrimaryAccount';
+  static String getInstrumentsByAccount(String accountNumber) =>
+      '${ajax}instruments/$accountNumber';
 
   // Dropdown APIs
   static const String getCountryDropdown = '${ajax}settings/getCountryDropdown';
@@ -65,6 +71,8 @@ class ApiConstants {
   static const String checkBalance = '${ajax}withdrawal/checkbalance';
   static const String internalTransferRequest =
       '${ajax}internaltransfer/request';
+  static const String internalTransferHistory =
+      '${ajax}internaltransfer/history';
   static const String withdrawalMethods =
       '${ajax}withdrawal/withdrawal-method/';
   static const String bankWithdrawalList =
@@ -94,9 +102,22 @@ class ApiConstants {
   // Scratch Card APIs
   static const String getScratchCards   = 'v1/user/scratch-cards';
   static const String revealScratchCard = 'v1/user/scratch-cards/reveal';
+  static const String getScratchLeaderboard = 'v1/user/scratch-cards/leaderboard';
+  static const String convertScratchCreditToBalance =
+      'v1/user/scratch-cards/convert-credit-to-balance';
 
   // App Status APIs (public; used before login for version / maintenance)
   static const String mobileAppDetails = '${ajax}mobile-app-details';
+  static const String crmSettings = '${ajax}crm-settings';
+
+  // Enabled modules (per-user feature flags)
+  static const String enabledModules = '${ajax}enabled-modules';
+
+  // Trade & Win APIs
+  static const String tradeWinProducts = 'v1/user/trade-win/products';
+  static const String tradeWinPastWins = 'v1/user/trade-win/past-wins';
+  static const String tradeWinSavedAddresses = 'v1/user/trade-win/saved-addresses';
+  static const String tradeWinClaim = 'v1/user/trade-win/claim';
 
   // Copy Trading APIs
   // User (authenticated) endpoints
@@ -112,10 +133,22 @@ class ApiConstants {
       '${ajax}copytrading/copier/subscribe';
   static const String copyTradingCopierSubscriptions =
       '${ajax}copytrading/copier/subscriptions';
+  static String copyTradingCopierSubscriptionsList({
+    int page = 1,
+    int perPage = 20,
+  }) =>
+      '${ajax}copytrading/copier/subscriptions?page=$page&per_page=$perPage';
+  static String copyTradingMasterCopiers({int page = 1, int perPage = 20}) =>
+      '${ajax}copytrading/master/copiers?page=$page&per_page=$perPage';
   static String copyTradingCopierSubscriptionDetail(int id) =>
       '${ajax}copytrading/copier/subscriptions/$id/detail';
-  static String copyTradingCopierSubscriptionTrades(int id) =>
-      '${ajax}copytrading/copier/subscriptions/$id/trades';
+  static String copyTradingCopierSubscriptionTrades(
+    int id, {
+    int page = 1,
+    int limit = 20,
+    int? t,
+  }) =>
+      '${ajax}copytrading/copier/subscriptions/$id/trades?page=$page&limit=$limit${t != null ? '&_t=$t' : ''}';
   static String copyTradingCopierSubscriptionPnlHistory(int id) =>
       '${ajax}copytrading/copier/subscriptions/$id/pnl-history';
   static String copyTradingCopierSubscriptionAddCapital(int id) =>

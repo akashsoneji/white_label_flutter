@@ -54,6 +54,14 @@ import '../screens/pmam/presentation/pages/pmam_investor_portal_screen.dart';
 import '../screens/pmam/presentation/pages/pmam_manager_detail_screen.dart';
 import '../screens/pmam/presentation/pages/pmam_manager_plan_detail_screen.dart';
 import '../bindings/auth_binding.dart';
+import '../screens/auth/presentation/pages/google_login_otp_screen.dart';
+import '../screens/home/more/two_factor_auth_screen.dart';
+import '../screens/finance/presentation/pages/internal_transfer_history_screen.dart';
+import '../screens/trade_win/trade_win_main_screen.dart';
+import '../screens/trade_win/trade_win_product_detail_screen.dart';
+import '../screens/trade_win/trade_win_redeem_screen.dart';
+import '../screens/trade_win/trade_win_redemption_success_screen.dart';
+import '../screens/trade_win/trade_win_past_win_detail_screen.dart';
 import '../bindings/account_binding.dart';
 import '../bindings/trading_binding.dart';
 import '../screens/pmam/feature_di/pmam_binding.dart';
@@ -93,6 +101,14 @@ class AppPages {
   static const CHART = _Paths.CHART;
   static const FINANCE = _Paths.FINANCE;
   static const INTERNAL_TRANSFER = _Paths.INTERNAL_TRANSFER;
+  static const INTERNAL_TRANSFER_HISTORY = _Paths.INTERNAL_TRANSFER_HISTORY;
+  static const GOOGLE_LOGIN_OTP = _Paths.GOOGLE_LOGIN_OTP;
+  static const TWO_FACTOR_AUTH = _Paths.TWO_FACTOR_AUTH;
+  static const TRADE_WIN_MAIN = _Paths.TRADE_WIN_MAIN;
+  static const TRADE_WIN_PRODUCT_DETAIL = _Paths.TRADE_WIN_PRODUCT_DETAIL;
+  static const TRADE_WIN_REDEEM = _Paths.TRADE_WIN_REDEEM;
+  static const TRADE_WIN_REDEMPTION_SUCCESS = _Paths.TRADE_WIN_REDEMPTION_SUCCESS;
+  static const TRADE_WIN_PAST_WIN_DETAIL = _Paths.TRADE_WIN_PAST_WIN_DETAIL;
   static const IB_DASHBOARD = _Paths.IB_DASHBOARD;
   static const IB_MAIN = _Paths.IB_MAIN;
   static const COPY_TRADING_MAIN = _Paths.COPY_TRADING_MAIN;
@@ -194,6 +210,11 @@ class AppPages {
     GetPage(
       name: _Paths.CREATE_NEW_PASSWORD,
       page: () => BrandScope.widgets.createNewPassword(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: _Paths.GOOGLE_LOGIN_OTP,
+      page: () => const GoogleLoginOtpScreen(),
       binding: AuthBinding(),
     ),
     GetPage(
@@ -383,6 +404,34 @@ class AppPages {
       page: () => const PmamManagerPlanDetailScreen(),
       binding: PmamBinding(),
       middlewares: [FeatureFlagMiddleware(FeatureKeys.pmam)],
+    ),
+    GetPage(
+      name: _Paths.TWO_FACTOR_AUTH,
+      page: () => const TwoFactorAuthScreen(),
+    ),
+    GetPage(
+      name: _Paths.INTERNAL_TRANSFER_HISTORY,
+      page: () => const InternalTransferHistoryScreen(),
+    ),
+    GetPage(
+      name: _Paths.TRADE_WIN_MAIN,
+      page: () => const TradeWinMainScreen(),
+    ),
+    GetPage(
+      name: _Paths.TRADE_WIN_PRODUCT_DETAIL,
+      page: () => const TradeWinProductDetailScreen(),
+    ),
+    GetPage(
+      name: _Paths.TRADE_WIN_REDEEM,
+      page: () => const TradeWinRedeemScreen(),
+    ),
+    GetPage(
+      name: _Paths.TRADE_WIN_REDEMPTION_SUCCESS,
+      page: () => const TradeWinRedemptionSuccessScreen(),
+    ),
+    GetPage(
+      name: _Paths.TRADE_WIN_PAST_WIN_DETAIL,
+      page: () => const TradeWinPastWinDetailScreen(),
     ),
   ];
 }

@@ -192,25 +192,15 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     }
     // If previousIndex == 2, we're already on Trade screen, so don't override the tab
 
-    // Resubscribe dashboard WebSocket and refresh accounts when Dashboard tab is tapped
+    // Dashboard tab: avoid force refresh on every switch (reduces API/WS churn).
     if (index == dashboardIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         try {
-          if (Get.isRegistered<DashboardController>()) {
-            final dashboardController = Get.find<DashboardController>();
-            // Always call get account API when dashboard tab is tapped
-            dashboardController.refreshMT5Accounts(force: true);
-            // Also resubscribe WebSocket
-            dashboardController.unsubscribeAndResubscribe();
-          }
-
-          // Also re-check app update on dashboard open, so returning users
-          // still get the popup when a new version is available.
           if (Get.isRegistered<AppStatusService>()) {
             unawaited(Get.find<AppStatusService>().checkAppStatus());
           }
         } catch (e) {
-          print('Error refreshing dashboard on tab switch: $e');
+          print('Error checking app status on dashboard tab: $e');
         }
       });
     }

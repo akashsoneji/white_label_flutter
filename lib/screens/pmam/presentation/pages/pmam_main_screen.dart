@@ -9,6 +9,7 @@ import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/screens/home/more/widgets/more_menu_widgets.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class PmamMainScreen extends StatefulWidget {
   const PmamMainScreen({super.key});
@@ -42,10 +43,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-        ),
+        leading: const AppBackButton(),
 
         // leading: GestureDetector(
         //   onTap: () => Get.back(),
@@ -64,7 +62,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
         //     ),
         //   ),
         // ),
-        title: Text('PMAM', style: AppTextStyles.heading),
+        title: Text('PAMM', style: AppTextStyles.heading),
         centerTitle: true,
       ),
       body: Obx(() {

@@ -13,6 +13,7 @@ import 'package:crm_app/screens/finance/view_models/withdrawal_controller.dart';
 import '../../../../widgets/common_loading_widget.dart';
 import '../../../../widgets/custom_toast.dart';
 import '../../../../routes/app_pages.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class WithdrawalScreen extends StatefulWidget {
   final String? accountNumber;
@@ -170,9 +171,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         elevation: 0,
         leading: Padding(
           padding: EdgeInsets.only(left: 10.w),
-          child: IconButton(
-            icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-            onPressed: () => NavigationHelper.safeBack(context: context),
+          child: AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
           ),
         ),
         shape: Border(

@@ -11,6 +11,7 @@ import '../../../../constants/text_styles.dart';
 import '../../../../services/language_service.dart';
 import '../../../../utils/navigation_helper.dart';
 import '../../../../widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class PaymentMethodsScreen extends StatefulWidget {
   final String accountNumber;
@@ -52,9 +53,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
         elevation: 0,
         leading: Padding(
           padding: EdgeInsets.only(left: 10.w),
-          child: IconButton(
-            icon: SvgPicture.asset("assets/svg/trade/arro_back.svg",color: AppColors.textPrimary),
-            onPressed: () => NavigationHelper.safeBack(context: context),
+          child: AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
           ),
         ),
         title: Column(

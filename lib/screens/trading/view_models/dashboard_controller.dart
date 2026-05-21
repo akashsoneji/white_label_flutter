@@ -1352,6 +1352,9 @@ class DashboardController extends GetxController {
   // Public getter for WebSocket connection status
   bool get isWebSocketConnected => _isWebSocketConnected.value;
 
+  /// Use inside [Obx] / [GetX] (do not use [isWebSocketConnected] getter there).
+  RxBool get isWebSocketConnectedRx => _isWebSocketConnected;
+
   // Ensure WebSocket is initialized (public method for all screens)
   void ensureWebSocketInitialized() {
     if (_isDisposed) return;

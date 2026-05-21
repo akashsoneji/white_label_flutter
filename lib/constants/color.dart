@@ -103,4 +103,41 @@ class AppColors {
   static Color get border => isDarkMode ? borderDark : borderLight;
   static Color get hint => isDarkMode ? hintDark : hintLight;
   static Color get dashLineColor => isDarkMode ? dashLineColorDark : dashLineColorLight;
+
+  static Color get brandPrimary => primary;
+  static Color get onColoredBackground => Colors.white;
+
+  /// Foreground on light primary-tinted surfaces (Vantage light theme).
+  static Color get onPrimaryTint =>
+      isDarkMode ? Colors.white : primary;
+
+  /// Trade & Win / promotional module scaffold (same as other screens).
+  static Color get tradeWinScaffoldBackground => tradeBackgroundCenterColor;
+
+  /// Accent-tinted highlight surfaces (e.g. point-cost chips).
+  static Color get accentHighlightBg =>
+      accent.withValues(alpha: isDarkMode ? 0.22 : 0.38);
+
+  static Color get accentHighlightText =>
+      isDarkMode ? accent : const Color(0xFF6B4E00);
+  static Color get selectedChipBackground =>
+      isDarkMode ? const Color(0xFF4F535D) : primary;
+  static Color get selectedChipForeground => onColoredBackground;
+  static Color get chipSurface =>
+      isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF0F0F0);
+
+  static const Color quickActionGreen = Color(0xFF4CAF50);
+  static const Color quickActionOrange = Color(0xFFFF9800);
+  static const Color quickActionBlue = Color(0xFF2196F3);
+
+  static Color get neutralTrack =>
+      isDarkMode ? const Color(0xFF404040) : const Color(0xFFE0E0E0);
+
+  static Color get warningBg =>
+      isDarkMode ? const Color(0xFF3D2A1A) : const Color(0xFFFFF8E1);
+  static Color get warningText =>
+      isDarkMode ? const Color(0xFFFFCC02) : const Color(0xFFB7791F);
+
+  static Color get shadow =>
+      textPrimary.withValues(alpha: isDarkMode ? 0.2 : 0.05);
 }

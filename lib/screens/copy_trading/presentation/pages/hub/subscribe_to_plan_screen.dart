@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class SubscribeToPlanScreen extends StatefulWidget {
   final String masterCode;
@@ -247,8 +248,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         }),
         leading: Obx(() {
           final s = _step.value;
-          return AppSvgBackButton(
-            onPressed: () {
+          return AppBackButton(onPressed: () {
               if (_isEditMode) {
                 Get.back();
                 return;

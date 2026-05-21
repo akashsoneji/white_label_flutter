@@ -5,6 +5,7 @@ import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_pla
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class MasterPlanDetailScreen extends StatelessWidget {
   final int planId;
@@ -25,9 +26,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text('Plan Details', style: AppTextStyles.heading),
-        leading: AppSvgBackButton(
-          onPressed: () => AppSvgBackButton.popRoute(context),
-        ),
+        leading: const AppBackButton(),
       ),
       body: GetBuilder<CopyTradingMasterPlanDetailController>(
         tag: 'planDetail:$planId',

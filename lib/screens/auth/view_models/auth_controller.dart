@@ -33,8 +33,12 @@ import 'package:crm_app/screens/auth/data/usecases/reset_password.dart';
 import 'package:crm_app/screens/auth/data/usecases/reset_password_with_otp.dart';
 import 'package:crm_app/screens/auth/data/usecases/send_otp.dart';
 import 'package:crm_app/screens/auth/data/usecases/verify_password_reset_otp.dart';
+import 'package:crm_app/models/google_otp_models.dart';
+import 'package:crm_app/services/google_otp_service.dart';
+import 'package:crm_app/services/enabled_modules_service.dart';
 
 class AuthController extends GetxController {
+  GoogleOtpService get _googleOtpService => Get.find<GoogleOtpService>();
   final AuthRepository _authRepo = Get.find<AuthRepository>();
   final LoginUser _loginUser = Get.find<LoginUser>();
   final ForgotPassword _forgotPassword = Get.find<ForgotPassword>();
@@ -75,6 +79,7 @@ class AuthController extends GetxController {
   String get verifiedOtp => _verifiedOtp.value;
   Map<String, dynamic>? get registerData => _registerData.value;
   SettingsProfileData? get profileData => _profileData.value;
+  bool get isGoogleOtpEnabled => _userData.value?.googleOtpEnabled ?? false;
 
   // User data getters
   String? get userEmail => _userData.value?.email;
@@ -153,11 +158,26 @@ class AuthController extends GetxController {
       );
 
       if (response.success && response.data != null) {
+        final loginResult = response.data!;
+
+        if (loginResult.requiresGoogleOtp) {
+          final challengeEmail =
+              loginResult.googleOtpChallenge?.email ?? email.trim();
+          Get.toNamed(AppPages.GOOGLE_LOGIN_OTP, arguments: challengeEmail);
+          return;
+        }
+
+        final loginResponse = loginResult.loginResponse;
+        if (loginResponse == null) {
+          _setError('Login failed. Please try again.');
+          return;
+        }
+
         // Save login data to secure storage
         final loginData = {
-          'token': response.data!.data.token,
-          'websocket_token': response.data!.data.websocketToken,
-          'user': response.data!.data.user.toJson(),
+          'token': loginResponse.data.token,
+          'websocket_token': loginResponse.data.websocketToken,
+          'user': loginResponse.data.user.toJson(),
           'is_logged_in': true,
         };
 
@@ -173,9 +193,9 @@ class AuthController extends GetxController {
         final tokenSaveStart = stopwatch.elapsedMilliseconds;
         await Future.wait([
           SecureStorageService.saveUserData(jsonEncode(loginData)),
-          SecureStorageService.saveAuthToken(response.data!.data.token),
+          SecureStorageService.saveAuthToken(loginResponse.data.token),
           SecureStorageService.saveWebsocketToken(
-            response.data!.data.websocketToken,
+            loginResponse.data.websocketToken,
           ),
           SecureStorageService.saveLoginStatus(true),
         ]);
@@ -183,8 +203,8 @@ class AuthController extends GetxController {
           '⏱️ [PERFORMANCE] Tokens saved: ${stopwatch.elapsedMilliseconds - tokenSaveStart}ms',
         );
 
-        _loginResponse.value = response.data;
-        _userData.value = response.data!.data.user;
+        _loginResponse.value = loginResponse;
+        _userData.value = loginResponse.data.user;
         _isAuthenticated.value = true;
 
         if (enableBiometricAfterLogin) {
@@ -379,6 +399,8 @@ class AuthController extends GetxController {
           'AuthController: All controllers and services re-initialized with new user token',
         );
 
+        _fetchEnabledModulesInBackground();
+
         // Navigate to trading screen AFTER controllers are ready
         Get.offAllNamed(AppPages.TRADING);
 
@@ -438,6 +460,191 @@ class AuthController extends GetxController {
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> verifyGoogleLoginOtp({
+    required String email,
+    required String otpCode,
+  }) async {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      final response = await _googleOtpService.verifyLoginOtp(
+        email: email,
+        otpCode: otpCode,
+      );
+
+      if (response.success && response.data != null) {
+        await _completeLogin(response.data!, email: email);
+      } else {
+        final errorMessage =
+            response.message?.isNotEmpty == true
+                ? response.message!
+                : 'OTP verification failed. Please try again.';
+        _setError(errorMessage);
+      }
+    } catch (e) {
+      _setError('OTP verification error: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> updateGoogleOtpEnabled(bool enabled) async {
+    final user = _userData.value;
+    if (user == null) return;
+
+    final updatedUser = user.copyWith(googleOtpEnabled: enabled);
+    _userData.value = updatedUser;
+
+    try {
+      final loginData = await SecureStorageService.getCompleteLoginData();
+      if (loginData != null) {
+        loginData['user'] = updatedUser.toJson();
+        await SecureStorageService.saveUserData(jsonEncode(loginData));
+      }
+    } catch (e) {
+      print('AuthController: Failed to persist google OTP flag: $e');
+    }
+  }
+
+  Future<void> _completeLogin(
+    LoginResponseModel response, {
+    required String email,
+    bool enableBiometricAfterLogin = false,
+  }) async {
+    final loginData = {
+      'token': response.data.token,
+      'websocket_token': response.data.websocketToken,
+      'user': response.data.user.toJson(),
+      'is_logged_in': true,
+    };
+
+    await Future.wait([
+      SecureStorageService.saveUserData(jsonEncode(loginData)),
+      SecureStorageService.saveAuthToken(response.data.token),
+      SecureStorageService.saveWebsocketToken(response.data.websocketToken),
+      SecureStorageService.saveLoginStatus(true),
+    ]);
+
+    _loginResponse.value = response;
+    _userData.value = response.data.user;
+    _isAuthenticated.value = true;
+
+    if (enableBiometricAfterLogin) {
+      try {
+        final supported = await BiometricService.instance.isDeviceSupported();
+        final enrolled = await BiometricService.instance.isEnrolled();
+        if (supported && enrolled) {
+          final ok = await BiometricService.instance.authenticate(
+            reason: 'Confirm biometric to enable login.',
+          );
+          if (ok) {
+            try {
+              if (Get.isRegistered<AppLockService>()) {
+                Get.find<AppLockService>().markJustAuthenticated();
+              }
+            } catch (_) {}
+            await SecureStorageService.setBiometricEnabled(
+              true,
+              userIdentifier: email.trim().toLowerCase(),
+            );
+          }
+        }
+      } catch (e) {
+        print('AuthController: Failed to enable biometrics after login: $e');
+      }
+    }
+
+    OneClickTradingService.instance.setOneClickTradingEnabled(true);
+
+    try {
+      AccountController? accountController;
+      final dashboardController = Get.put(DashboardController());
+      try {
+        if (Get.isRegistered<AccountController>()) {
+          accountController = Get.find<AccountController>();
+        }
+      } catch (e) {
+        print('AuthController: AccountController not registered yet: $e');
+      }
+
+      final futures = <Future>[dashboardController.forceCheckMT5Accounts()];
+      if (accountController != null) {
+        futures.add(accountController.forceRefreshAccountData());
+      }
+      await Future.wait(futures, eagerError: false);
+
+      final primaryAccount = dashboardController.primaryMT5Account;
+      WebSocketEndpointHelper.setPrimaryAccount(primaryAccount);
+    } catch (e) {
+      WebSocketEndpointHelper.setPrimaryAccount(null);
+    }
+
+    _reinitializeTradingControllers();
+    _fetchEnabledModulesInBackground();
+    Get.offAllNamed(AppPages.TRADING);
+  }
+
+  void _reinitializeTradingControllers() {
+    try {
+      if (Get.isRegistered<DashboardController>()) {
+        Get.delete<DashboardController>(force: true);
+      }
+      Get.put<DashboardController>(DashboardController(), permanent: true);
+    } catch (_) {}
+
+    try {
+      if (Get.isRegistered<AccountController>()) {
+        Get.delete<AccountController>(force: true);
+      }
+      Get.put<AccountController>(AccountController(), permanent: true);
+    } catch (_) {}
+
+    try {
+      if (Get.isRegistered<InstrumentsController>()) {
+        Get.delete<InstrumentsController>(force: true);
+      }
+      Get.put<InstrumentsController>(InstrumentsController(), permanent: true);
+    } catch (_) {}
+
+    try {
+      if (Get.isRegistered<ChartSocketController>()) {
+        Get.delete<ChartSocketController>(force: true);
+      }
+      Get.put<ChartSocketController>(ChartSocketController(), permanent: true);
+    } catch (_) {}
+
+    try {
+      if (Get.isRegistered<TradingController>()) {
+        Get.delete<TradingController>(force: true);
+      }
+      Get.put<TradingController>(TradingController(), permanent: true);
+    } catch (_) {}
+
+    try {
+      if (Get.isRegistered<TradingWebSocketService>()) {
+        Get.delete<TradingWebSocketService>(force: true);
+      }
+      Get.put<TradingWebSocketService>(TradingWebSocketService(), permanent: true);
+    } catch (_) {}
+
+    try {
+      if (Get.isRegistered<AccountWebSocketService>()) {
+        Get.delete<AccountWebSocketService>(force: true);
+      }
+      Get.put<AccountWebSocketService>(
+        AccountWebSocketService(),
+        permanent: true,
+      );
+    } catch (_) {}
+  }
+
+  void _fetchEnabledModulesInBackground() {
+    if (!Get.isRegistered<EnabledModulesService>()) return;
+    final service = Get.find<EnabledModulesService>();
+    service.fetchEnabledModules(force: true);
   }
 
   // ==================== REGISTRATION METHODS ====================

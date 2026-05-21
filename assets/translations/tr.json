@@ -1,11 +1,9 @@
 {
   "app_name": "CRM App",
   "app_version": "1.0.0",
-  
   "welcome_title": "Merhaba, Hoş Geldiniz! 👋",
   "welcome_subtitle": "Profesyonel ticaretinize açılan kapınız.",
   "welcome_login_title": "Tekrar hoş geldiniz",
-  
   "login_title": "Giriş",
   "login_subtitle": "Ticaretinizi kolayca yönetin",
   "login_email": "E-posta ile devam et",
@@ -20,7 +18,6 @@
   "login_register": "Kayıt Ol",
   "login_google_coming_soon": "Google girişi yakında!",
   "login_apple_coming_soon": "Apple girişi yakında!",
-  
   "register_title": "Hesap Oluştur",
   "register_subtitle": "Bize katılın ve ticarete başlayın",
   "register_first_name": "Ad",
@@ -47,7 +44,6 @@
   "register_phone": "Telefon numarası",
   "register_trading_experience": "Ticaret deneyiminiz var mı?",
   "register_personal_info": "Kişisel Bilgiler",
-  
   "forgot_password_title": "Şifremi Unuttum",
   "forgot_password_subtitle": "Şifrenizi sıfırlayın",
   "forgot_password_email": "E-posta",
@@ -56,10 +52,8 @@
   "forgot_password_button": "Sıfırlama Bağlantısı Gönder",
   "forgot_password_login": "Giriş Yap",
   "forgot_password_check_email": "Sıfırlama talimatları için e-postanızı kontrol edin",
-  "forgot_password_enter_your_email":"Lütfen e-postanızı girin",
-  "forgot_password_Please_enter_a_valid_email":"Lütfen geçerli bir e-posta girin",
-
-  
+  "forgot_password_enter_your_email": "Lütfen e-postanızı girin",
+  "forgot_password_Please_enter_a_valid_email": "Lütfen geçerli bir e-posta girin",
   "verify_code_title": "Kodu Doğrula",
   "verify_code_subtitle": "Doğrulama kodunu girin",
   "verify_code_description": "Lütfen az önce e-postaya gönderdiğimiz kodu girin ",
@@ -68,7 +62,6 @@
   "verify_code_resend": "Kodu Yeniden Gönder?",
   "verify_code_didnt_receive": "OTP almadınız mı?",
   "verify_code_timer": "{seconds} saniye içinde yeniden gönder",
-  
   "create_password_title": "Yeni Şifre Oluştur",
   "create_password_subtitle": "Yeni şifrenizi ayarlayın",
   "create_password_description": "Yeni şifrenizi girin",
@@ -76,7 +69,6 @@
   "create_password_confirm": "Şifreyi Onayla",
   "create_password_button": "Şifreyi Güncelle",
   "create_password_requirements": "Şifre en az 8 karakter olmalıdır",
-  
   "validation_required": "Bu alan gereklidir",
   "validation_email_required": "E-posta gereklidir",
   "validation_email_invalid": "Lütfen geçerli bir e-posta adresi girin",
@@ -97,7 +89,6 @@
   "validation_code_required": "Doğrulama kodu gereklidir",
   "validation_code_length": "Kod {length} rakam olmalıdır",
   "validation_code_invalid": "Geçersiz doğrulama kodu",
-  
   "toast_login_success": "Giriş başarılı! Tekrar hoş geldiniz! 🎉",
   "toast_login_error": "Giriş başarısız. Lütfen tekrar deneyin.",
   "toast_register_success": "Hesap başarıyla oluşturuldu! 🎉",
@@ -117,7 +108,6 @@
   "toast_coming_soon": "Bu özellik yakında!",
   "toast_maintenance": "Sistem bakımı devam ediyor",
   "toast_update_available": "Yeni güncelleme mevcut",
-  
   "dashboard_title": "Gösterge Paneli",
   "dashboard_balance": "Bakiye",
   "dashboard_profit": "Kar",
@@ -128,7 +118,6 @@
   "dashboard_closed_positions": "Kapalı Pozisyonlar",
   "dashboard_total_profit": "Toplam Kar",
   "dashboard_total_loss": "Toplam Zarar",
-  
   "instruments_title": "Araçlar",
   "quote_title": "Kotasyon",
   "instruments_search": "Araçlarda ara...",
@@ -142,7 +131,6 @@
   "instruments_popular": "Popüler",
   "instruments_recent": "Son",
   "instruments_favorites": "Favoriler",
-  
   "chart_title": "Grafik",
   "chart_timeframe": "Zaman Dilimi",
   "chart_indicators": "Göstergeler",
@@ -150,7 +138,6 @@
   "chart_settings": "Grafik Ayarları",
   "chart_fullscreen": "Tam Ekran",
   "chart_share": "Grafiği Paylaş",
-  
   "trade_title": "İşlem",
   "trade_buy": "Satın Al",
   "trade_sell": "Sat",
@@ -162,22 +149,19 @@
   "trade_close": "İşlem Kapat",
   "trade_modify": "İşlemi Düzenle",
   "trade_history": "İşlem Geçmişi",
-  
   "portfolio_title": "Portföy",
   "portfolio_overview": "Genel Bakış",
   "portfolio_positions": "Pozisyonlar",
   "portfolio_history": "Geçmiş",
   "portfolio_analytics": "Analitik",
   "portfolio_performance": "Performans",
-  
-   "more_profile": "Profil",
+  "more_profile": "Profil",
   "more_settings": "Ayarlar",
   "more_help": "Yardım ve Destek",
   "more_about": "Hakkında",
   "more_language": "Dil",
   "more_notifications": "Bildirimler",
   "more_security": "Güvenlik",
-  
   "onboarding_welcome": "Hoş Geldiniz!",
   "onboarding_get_started": "Başla",
   "onboarding_skip": "Atla",
@@ -186,7 +170,6 @@
   "onboarding_account_created": "Hesap Başarıyla Oluşturuldu! 🎉",
   "onboarding_account_created_description": "Hesabınız oluşturuldu. Artık işlem yapmaya başlayabilirsiniz!",
   "onboarding_continue": "Devam Et",
-  
   "onboarding_slide1_description": "Tüm tüccarlarınız.\nBir güvenli yer",
   "onboarding_slide2_title": "Akıllı Ticaret",
   "onboarding_slide2_description": "Gelişmiş grafikler ve gerçek zamanlı veriler",
@@ -194,7 +177,6 @@
   "onboarding_slide3_description": "Paralarınız banka seviyesinde güvenlikle korunur",
   "onboarding_slide3_subtitle": "Artık önceden yapılandırılmış ayarlarla bir ticaret hesabınız var.",
   "onboarding_slide3_subtitle2": "İstediğiniz zaman ek hesaplar oluşturabilir ve özelleştirebilirsiniz",
-  
   "settings_title": "Ayarlar",
   "settings_account": "Hesap",
   "settings_security": "Güvenlik",
@@ -224,7 +206,6 @@
   "settings_notifications_price_alerts": "Fiyat Uyarıları",
   "settings_notifications_news": "Haberler ve Güncellemeler",
   "settings_notifications_marketing": "Pazarlama",
-  
   "error_network": "Ağ hatası. Lütfen bağlantınızı kontrol edin.",
   "error_server": "Sunucu hatası. Lütfen daha sonra tekrar deneyin.",
   "error_timeout": "İstek zaman aşımına uğradı. Lütfen tekrar deneyin.",
@@ -237,7 +218,6 @@
   "error_insufficient_funds": "Bu işlem için yetersiz bakiye.",
   "error_market_closed": "Piyasa şu anda kapalı.",
   "error_invalid_amount": "Geçersiz işlem miktarı.",
-  
   "time_now": "Şimdi",
   "time_today": "Bugün",
   "time_yesterday": "Dün",
@@ -253,7 +233,6 @@
   "time_weeks": "hafta",
   "time_months": "ay",
   "time_years": "yıl",
-  
   "currency_usd": "USD",
   "currency_eur": "EUR",
   "currency_gbp": "GBP",
@@ -264,7 +243,6 @@
   "currency_cny": "CNY",
   "currency_btc": "BTC",
   "currency_eth": "ETH",
-  
   "common_loading": "Yükleniyor...",
   "common_no_data": "Araç bulunamadı.",
   "common_no_data_description": "lütfen farklı bir klavye deneyin",
@@ -301,7 +279,6 @@
   "common_platform": "Platform",
   "common_currency": "Para Birimi",
   "common_leverage": "Kaldıraç",
-  
   "common_currency_usd": "USD",
   "common_currency_eur": "EUR",
   "common_currency_gbp": "GBP",
@@ -330,7 +307,6 @@
   "common_grand_total": "Genel Toplam",
   "common_deposit": "Depozito",
   "common_skip_for_now": "Şimdilik atla",
-  
   "navigation_back": "Geri",
   "navigation_next": "Sonraki",
   "navigation_skip": "Atla",
@@ -347,19 +323,16 @@
   "navigation_no": "Hayır",
   "navigation_confirm": "Onayla",
   "navigation_retry": "Tekrar Dene",
-  
   "drawer_subtitle": "Profesyonel Ticaret Platformu",
   "common_coming_soon": "Yakında",
   "common_to_start_trading": "İşlem yapmaya başlamak için para yatırın",
   "more_title": "Daha Fazla",
-  
   "more_trading_tools": "Ticaret Araçları",
   "more_price_alerts": "Fiyat Uyarıları",
   "more_economic_calendar": "Ekonomik Takvim",
   "more_market_news": "Piyasa Haberleri",
   "more_trading_signals": "Ticaret Sinyalleri",
   "more_logout": "Çıkış Yap",
-  
   "legal_documents_title": "Yasal Belgeler",
   "privacy_policy_title": "Gizlilik Politikası",
   "legal_documents_subtitle": "Aşağıdaki belgelerde belirtilen şartları okuduğumu ve kabul ettiğimi onaylıyorum.",
@@ -377,8 +350,6 @@
   "privacy_policy_data_protection": "Veri Koruması",
   "privacy_policy_data_protection_text": "Kişisel bilgilerinizi korumak için endüstri standardı güvenlik önlemleri uyguluyoruz.",
   "privacy_policy_contact": "Bize Ulaşın",
-  
-
   "trading_order_market_order": "Piyasa emri",
   "trading_order_pending_order": "Bekleyen emir",
   "trading_order_volume_lots": "Hacim, lot",
@@ -405,5 +376,7 @@
   "trading_order_balance": "bakiye",
   "trading_order_enter_volume": "Hacim girin",
   "trading_order_enter_price": "Fiyat girin",
-  "trading_order_enter_distance": "Mesafe girin"
-} 
+  "trading_order_enter_distance": "Mesafe girin",
+  "internal_transfer_history": "Internal Transfer History",
+  "agreement_document_unavailable": "Bu belge şu anda kullanılamıyor. Lütfen daha sonra tekrar deneyin."
+}

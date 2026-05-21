@@ -41,16 +41,16 @@ class VantageGetStartedScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 18.h),
-                Text(
-                  FlavorConfig.instance.appName,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 34.sp,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-                SizedBox(height: 10.h),
+                // Text(
+                //   FlavorConfig.instance.appName,
+                //   style: TextStyle(
+                //     color: Colors.white,
+                //     fontSize: 34.sp,
+                //     fontWeight: FontWeight.w800,
+                //     letterSpacing: 0.4,
+                //   ),
+                // ),
+                // SizedBox(height: 10.h),
                 Text(
                   'Every trader managed. One secure window.',
                   textAlign: TextAlign.center,
@@ -79,4 +79,3 @@ class VantageGetStartedScreen extends StatelessWidget {
     );
   }
 }
-

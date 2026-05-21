@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'master_details_screen.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class ExploreMastersScreen extends StatelessWidget {
   const ExploreMastersScreen({super.key});
@@ -29,9 +30,7 @@ class ExploreMastersScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading: AppSvgBackButton(
-          onPressed: () => AppSvgBackButton.popRoute(context),
-        ),
+        leading: const AppBackButton(),
         actions: [
           IconButton(
             onPressed: () => controller.loadMasters(showLoading: true),

@@ -62,7 +62,7 @@ class FinanceUiRegistry implements FinanceUiSlots {
 
   @override
   Widget transactionHistory() {
-    if (_isVantage) return const vantage.TransactionHistoryScreen();
+    if (_isVantage) return const vantage.VantageTransactionHistoryScreen();
     return const base.TransactionHistoryScreen();
   }
 }

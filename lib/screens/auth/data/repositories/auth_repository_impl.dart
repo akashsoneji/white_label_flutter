@@ -1,3 +1,4 @@
+import 'package:crm_app/models/google_otp_models.dart';
 import 'package:crm_app/models/login_response_model.dart';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/core/network/api_client.dart';
@@ -13,7 +14,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._service, this._api);
 
   @override
-  Future<ApiResponse<LoginResponseModel>> login({
+  Future<ApiResponse<LoginApiResult>> login({
     required String email,
     required String password,
     String? fcmToken,

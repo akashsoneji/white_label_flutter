@@ -7,6 +7,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class PmamBecomeManagerScreen extends StatefulWidget {
   const PmamBecomeManagerScreen({super.key});
@@ -84,9 +85,7 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: AppBackButton(onPressed: ()=> Navigator.of(context).pop(),
         ),
         title: Text('Become a Manager', style: AppTextStyles.heading),
         centerTitle: true,

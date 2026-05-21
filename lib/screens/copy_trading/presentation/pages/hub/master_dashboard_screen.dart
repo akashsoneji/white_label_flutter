@@ -9,6 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'master_plan_detail_screen.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class MasterDashboardScreen extends StatelessWidget {
   final String masterCode;
@@ -32,9 +33,7 @@ class MasterDashboardScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading: AppSvgBackButton(
-          onPressed: () => AppSvgBackButton.popRoute(context),
-        ),
+        leading: const AppBackButton(),
         actions: [
           IconButton(
             onPressed: () => controller.refreshAll(showLoading: true),
@@ -494,14 +493,11 @@ class _CreatePlanSheetState extends State<_CreatePlanSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final bottom = MediaQuery.of(context).viewInsets.bottom;
-    final sheetBg =
-        isDark ? AppColors.backgroundDarkTheme : AppColors.tradeBackgroundCenterColor;
-    final cardBg = isDark ? AppColors.surfaceDarkTheme : AppColors.whiteColor;
-    final borderColor =
-        isDark ? AppColors.borderDark : Colors.grey.withOpacity(0.15);
-    final mutedText = isDark ? AppColors.textGreyDark : AppColors.textGrey;
+    final sheetBg = AppColors.tradeBackgroundCenterColor;
+    final cardBg = AppColors.whiteColor;
+    final borderColor = Colors.grey.withOpacity(0.15);
+    final mutedText = AppColors.textGrey;
     return Container(
       padding: EdgeInsets.only(bottom: bottom),
       decoration: BoxDecoration(
@@ -798,9 +794,9 @@ class _CreatePlanSheetState extends State<_CreatePlanSheet> {
                       Container(
                         padding: EdgeInsets.all(12.r),
                         decoration: BoxDecoration(
-                          color: (isDark ? AppColors.backgroundDarkTheme : AppColors.tradeBackgroundCenterColor).withOpacity(0.35),
+                          color: AppColors.tradeBackgroundCenterColor.withOpacity(0.35),
                           borderRadius: BorderRadius.circular(14.r),
-                          border: Border.all(color: isDark ? AppColors.borderDark : Colors.grey.withOpacity(0.12)),
+                          border: Border.all(color: Colors.grey.withOpacity(0.12)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -950,8 +946,7 @@ class _EligibleAccountDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mutedText = isDark ? AppColors.textGreyDark : AppColors.textGrey;
+    final mutedText = AppColors.textGrey;
     return DropdownButtonFormField<int>(
       value: selectedIndex ?? -1,
       items: [

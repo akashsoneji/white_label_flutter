@@ -1,12 +1,12 @@
 import 'dart:ui'; // 👈 Needed for ImageFilter.blur
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/widgets/app_svg_icon.dart';
 
 class TradingBottomNavigation extends StatelessWidget {
   final int currentIndex;
@@ -23,9 +23,8 @@ class TradingBottomNavigation extends StatelessWidget {
     final languageService = Get.find<LanguageService>();
     final isVantage = FlavorConfig.isVantage();
 
-    return Obx(() {
-      if (isVantage) {
-        return Container(
+    if (isVantage) {
+      return Container(
           height: 56.h,
           margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 18.h),
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
@@ -71,9 +70,9 @@ class TradingBottomNavigation extends StatelessWidget {
             ],
           ),
         );
-      }
+    }
 
-      return SafeArea(
+    return SafeArea(
         child: Padding(
           padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
           child: ClipRRect(
@@ -147,8 +146,6 @@ class TradingBottomNavigation extends StatelessWidget {
           ),
         ),
       );
-    });
-
   }
 
   static const double _tabCapsuleHeight = 42;
@@ -192,8 +189,8 @@ class TradingBottomNavigation extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SvgPicture.asset(
-                    isSelected ? iconBold : icon,
+                  AppSvgIcon(
+                    assetPath: isSelected ? iconBold : icon,
                     height: (isSelected ? _selectedIconSize : _unselectedIconSize).h,
                     width: (isSelected ? _selectedIconSize : _unselectedIconSize).w,
                     color: isSelected ? AppColors.primary : AppColors.textGrey,
@@ -246,8 +243,8 @@ class TradingBottomNavigation extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset(
-                isSelected ? iconBold : icon,
+              AppSvgIcon(
+                assetPath: isSelected ? iconBold : icon,
                 height: _selectedIconSize.h,
                 width: _selectedIconSize.w,
                 color: isSelected ? AppColors.primary : AppColors.textGrey,

@@ -48,6 +48,8 @@ class MoreMenuTile extends StatelessWidget {
   final bool showArrow;
   final String? iconName;
   final String? iconAssetPath;
+  final IconData? iconData;
+  final bool showIconBackground;
 
   const MoreMenuTile({
     super.key,
@@ -57,15 +59,21 @@ class MoreMenuTile extends StatelessWidget {
     this.showArrow = true,
     this.iconName,
     this.iconAssetPath,
+    this.iconData,
+    this.showIconBackground = true,
   }) : assert(
-         iconName != null || iconAssetPath != null,
-         'Either iconName or iconAssetPath must be provided.',
+         iconName != null || iconAssetPath != null || iconData != null,
+         'Provide iconName, iconAssetPath, or iconData.',
        );
 
   @override
   Widget build(BuildContext context) {
     final iconPath =
-        iconAssetPath != null ? iconAssetPath! : 'assets/svg/more/$iconName.svg';
+        iconAssetPath != null
+            ? iconAssetPath!
+            : iconName != null
+            ? 'assets/svg/more/$iconName.svg'
+            : null;
 
     return Material(
       color: Colors.transparent,
@@ -79,17 +87,33 @@ class MoreMenuTile extends StatelessWidget {
               Container(
                 width: 34.w,
                 height: 34.w,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
-                ),
+                decoration:
+                    showIconBackground
+                        ? BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        )
+                        : null,
                 child: Center(
-                  child: SvgPicture.asset(
-                    iconPath,
-                    height: 18.h,
-                    width: 18.w,
-                    color: AppColors.primary,
-                  ),
+                  child:
+                      iconData != null
+                          ? Icon(
+                            iconData,
+                            size: 18.sp,
+                            color: AppColors.primary,
+                          )
+                          : SvgPicture.asset(
+                            iconPath!,
+                            height: showIconBackground ? 18.h : 28.h,
+                            width: showIconBackground ? 18.w : 28.w,
+                            colorFilter:
+                                showIconBackground
+                                    ? ColorFilter.mode(
+                                      AppColors.primary,
+                                      BlendMode.srcIn,
+                                    )
+                                    : null,
+                          ),
                 ),
               ),
               SizedBox(width: 14.w),

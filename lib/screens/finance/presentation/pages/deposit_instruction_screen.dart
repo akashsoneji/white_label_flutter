@@ -16,6 +16,7 @@ import '../../../../services/language_service.dart';
 import '../../../../services/secure_storage_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
 import '../../../../routes/app_pages.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class DepositInstructionScreen extends StatefulWidget {
   final Map<String, dynamic> object;
@@ -263,13 +264,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           scrolledUnderElevation: 0,
           backgroundColor: AppColors.backgroundLight,
           elevation: 0,
-          leading: Padding(
-            padding: EdgeInsets.only(left: 10.w),
-            child: IconButton(
-              icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-              onPressed: _handleBackNavigation,
-            ),
-          ),
+          leading: const AppBackButton(),
           title: Text(titleString, style: AppTextStyles.screenTitle),
           shape: Border(
             bottom: BorderSide(color: Colors.grey.shade300, width: 1),

@@ -65,9 +65,9 @@ android {
             // Keep same ID unless you have a final applicationId for Vantage.
             applicationId = "com.vantage.app"
             resValue("string", "app_name", "Vantage")
-            resValue("color", "primary_color", "#124CE7")
-            resValue("color", "secondary_color", "#EFF2FA")
-            resValue("color", "accent_color", "#124CE7")
+            resValue("color", "primary_color", "#5F259E")
+            resValue("color", "secondary_color", "#F8F3FF")
+            resValue("color", "accent_color", "#FFC93C")
             buildConfigField("String", "FLAVOR", "\"vantage\"")
             manifestPlaceholders["FLAVOR"] = "vantage"
         }

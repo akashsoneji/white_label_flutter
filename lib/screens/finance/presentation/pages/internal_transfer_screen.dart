@@ -14,6 +14,7 @@ import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class InternalTransferScreen extends StatefulWidget {
   const InternalTransferScreen({Key? key}) : super(key: key);
@@ -154,9 +155,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
           ),
         ),
         elevation: 0,
-        leading: IconButton(
-          icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-          onPressed: () => NavigationHelper.safeBack(context: context),
+        leading: AppBackButton(onPressed: ()=> NavigationHelper.safeBack(context: context),
         ),
         title: Text(
           languageService.tr('internal_transfer'),

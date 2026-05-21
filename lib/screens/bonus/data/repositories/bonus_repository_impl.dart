@@ -24,4 +24,21 @@ class BonusRepositoryImpl implements BonusRepository {
       data: {'card_id': cardId},
     );
   }
+
+  @override
+  Future<ApiResponse> getScratchLeaderboard({String? token}) {
+    return _api.get(endpoint: ApiConstants.getScratchLeaderboard, token: token);
+  }
+
+  @override
+  Future<ApiResponse> convertScratchCreditToBalance({
+    String? token,
+    required int accountId,
+  }) {
+    return _api.post(
+      endpoint: ApiConstants.convertScratchCreditToBalance,
+      token: token,
+      data: {'account_id': accountId},
+    );
+  }
 }

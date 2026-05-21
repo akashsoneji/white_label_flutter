@@ -442,6 +442,9 @@ class TradingController extends GetxController {
   WebSocketTradingResponse? get websocketData => _websocketData.value;
   AccountInfo? get accountInfo => _accountInfo.value;
 
+  /// Use inside [Obx] / [GetX] (do not use [accountInfo] getter there).
+  Rxn<AccountInfo> get accountInfoRx => _accountInfo;
+
   // Trade history getters
   List<TradeHistoryItem> get tradeHistory => _tradeHistory;
   PaginationInfo? get paginationInfo => _paginationInfo.value;

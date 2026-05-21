@@ -11,6 +11,8 @@ import 'package:get/get.dart';
 import 'explore_masters_screen.dart';
 import 'master_dashboard_screen.dart';
 import 'my_copies_screen.dart';
+import 'my_investments_screen.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class CopyTradingHubScreen extends StatelessWidget {
   const CopyTradingHubScreen({super.key});
@@ -34,9 +36,7 @@ class CopyTradingHubScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading: AppSvgBackButton(
-          onPressed: () => AppSvgBackButton.popRoute(context),
-        ),
+        leading: const AppBackButton(),
       ),
       body: RefreshIndicator(
         onRefresh: () => controller.refreshAll(showLoading: false),
@@ -111,12 +111,20 @@ class CopyTradingHubScreen extends StatelessWidget {
                     _divider(),
                     _HubMenuItem(
                       icon: Icons.copy_all_outlined,
-                      label: 'My Copies',
+                      label: status == CopyTradingMasterApplicationStatus.approved
+                          ? 'My Copies'
+                          : 'My Investments',
                       trailing:
                           hasSubs
                               ? const _StatusPill(text: 'Active', color: Color(0xFF22C55E))
                               : const _StatusPill(text: 'None', color: Color(0xFF94A3B8)),
-                      onTap: () => Get.to(() => const MyCopiesScreen()),
+                      onTap: () {
+                        if (status == CopyTradingMasterApplicationStatus.approved) {
+                          Get.to(() => const MyCopiesScreen());
+                        } else {
+                          Get.to(() => const MyInvestmentsScreen());
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -346,9 +354,7 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-         leading: AppSvgBackButton(
-          onPressed: () => AppSvgBackButton.popRoute(context),
-        ),
+         leading: const AppBackButton(),
         title: Text('Become a Master', style: AppTextStyles.screenTitle),
       ),
       body: SingleChildScrollView(

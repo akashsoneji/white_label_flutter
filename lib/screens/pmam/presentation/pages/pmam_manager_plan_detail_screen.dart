@@ -7,6 +7,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_manager_plan_detail_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/dashBorder.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class PmamManagerPlanDetailScreen extends StatefulWidget {
   const PmamManagerPlanDetailScreen({super.key});
@@ -74,10 +75,7 @@ class _PmamManagerPlanDetailScreenState
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-        ),
+        leading: const AppBackButton(),
         title: Obx(() {
           final planName =
               _ctrl.planDetails['plan']?['plan_name'] ?? 'Plan Details';

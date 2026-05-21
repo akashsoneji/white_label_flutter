@@ -11,8 +11,9 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/flavor_config.dart';
 
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
+import 'package:crm_app/services/market_watch_v2_service.dart';
+import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
-import 'package:crm_app/screens/trading/view_models/trading_controller.dart'; // ✅ ADD: For floating P&L
 import 'package:crm_app/screens/trading/view_models/account_controller.dart'; // ✅ ADD: For account change listener
 
 import 'package:crm_app/models/socket_response.dart';
@@ -51,6 +52,28 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
   Timer? _searchDebounceTimer;
   static const int _minSearchLength = 2; // Minimum characters before searching
 
+  void _openSearchInstrumentsSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            height: MediaQuery.of(context).size.height * 0.9,
+            decoration: BoxDecoration(
+              color: AppColors.tradeBackgroundCenterColor,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+              child: SearchInstrumentsScreen(
+                onNavigateToChart: widget.onNavigateToChart,
+              ),
+            ),
+          ),
+    );
+  }
+
   @override
   bool get wantKeepAlive => true;
 
@@ -70,7 +93,32 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
     // ✅ FIX: Listen to account changes and refresh instruments
     _listenToAccountChanges();
 
-    // Note: WebSocket will be started by TradingMainScreen when tab is switched to
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureMarketWatchV2ForTab();
+    });
+  }
+
+  Future<void> _ensureMarketWatchV2ForTab() async {
+    if (!Get.isRegistered<MarketWatchV2Service>()) return;
+    final ic = _controller;
+    final deadline = DateTime.now().add(const Duration(milliseconds: 400));
+    while (ic.isLoadingFavorites.value && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+    }
+    final svc = Get.find<MarketWatchV2Service>();
+    final syms =
+        ic.favoriteInstruments
+            .map(MarketWatchV2Service.normalizeSymbol)
+            .where((s) => s.isNotEmpty)
+            .toSet()
+            .toList();
+    try {
+      if (syms.isNotEmpty) {
+        await svc.subscribeSymbols(syms);
+      } else {
+        await svc.ensureAuthenticatedConnection();
+      }
+    } catch (_) {}
   }
 
   @override
@@ -171,62 +219,45 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
         ),
       );
     } else {
-      final tradingController = Get.find<TradingController>();
       final isVantage = FlavorConfig.isVantage();
 
-      return Obx(() {
-        final double? floatingProfit = tradingController.accountInfo?.profit;
-
-        return AccountHeaderWidget(
-          layoutStyle:
-              isVantage
-                  ? AccountHeaderLayoutStyle.vantageInstruments
-                  : AccountHeaderLayoutStyle.defaultLayout,
-          showMenuIcon: !isVantage,
-          showSearchIcon: !isVantage,
-          rightWidget:
-              isVantage
-                  ? Container(
-                    margin: EdgeInsets.only(right: 0),
-                    decoration: BoxDecoration(
-                      color: AppColors.whiteColor,
-                      borderRadius: BorderRadius.circular(24.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.12),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: SvgPicture.asset(
-                        "assets/svg/search-normal.svg",
-                        height: 18.h,
-                        width: 18.w,
-                        color: AppColors.primary,
+      return AccountHeaderWidget(
+        layoutStyle:
+            isVantage
+                ? AccountHeaderLayoutStyle.vantageInstruments
+                : AccountHeaderLayoutStyle.defaultLayout,
+        showMenuIcon: !isVantage,
+        showSearchIcon: !isVantage,
+        useTradingFloatingProfit: true,
+        rightWidget:
+            isVantage
+                ? Container(
+                  margin: EdgeInsets.only(right: 0),
+                  decoration: BoxDecoration(
+                    color: AppColors.whiteColor,
+                    borderRadius: BorderRadius.circular(24.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _isSearching = true;
-                        });
-                      },
-                      padding: EdgeInsets.all(8.r),
-                      constraints: const BoxConstraints(),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.search_rounded,
+                      size: 20.sp,
+                      color: AppColors.primary,
                     ),
-                  )
-                  : null,
-          onSearchTap:
-              isVantage
-                  ? null
-                  : () {
-                    setState(() {
-                      _isSearching = true;
-                    });
-                  },
-          floatingProfit: floatingProfit,
-        );
-      });
+                    onPressed: _openSearchInstrumentsSheet,
+                    padding: EdgeInsets.all(8.r),
+                    constraints: const BoxConstraints(),
+                  ),
+                )
+                : null,
+        onSearchTap: isVantage ? null : _openSearchInstrumentsSheet,
+      );
     }
   }
 
@@ -398,11 +429,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                 ),
                 itemCount: instruments.length,
                 onReorder: (oldIndex, newIndex) {
-                  if (oldIndex < newIndex) newIndex -= 1;
-                  final symbols = instruments.map((e) => e.symbol).toList();
-                  final moved = symbols.removeAt(oldIndex);
-                  symbols.insert(newIndex, moved);
-                  _controller.setManualOrderSymbols(symbols);
+                  _controller.reorderInstruments(oldIndex, newIndex);
                 },
                 itemBuilder: (context, index) {
                   final instrument = instruments[index];
@@ -477,7 +504,9 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
           ),
           child: Row(
             crossAxisAlignment:
-                isVantage ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+                isVantage
+                    ? CrossAxisAlignment.center
+                    : CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               if (showReorderHandle && reorderIndex != null) ...[
@@ -560,7 +589,10 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                               Flexible(
                                 child: Obx(() {
                                   final spreadDiff =
-                                      _controller.priceRx(instrument.symbol).value.spreadDiff;
+                                      _controller
+                                          .priceRx(instrument.symbol)
+                                          .value
+                                          .spreadDiff;
                                   return Text(
                                     _formatSpreadDiff(spreadDiff),
                                     style: AppTextStyles.caption.copyWith(
@@ -620,8 +652,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                   constraints: BoxConstraints(
                     minHeight: (isVantage ? 34.0 : 36.0).h,
                   ),
-                  alignment:
-                      isVantage ? Alignment.center : Alignment.topCenter,
+                  alignment: isVantage ? Alignment.center : Alignment.topCenter,
                   padding:
                       isVantage ? EdgeInsets.zero : EdgeInsets.only(top: 1.h),
                   child: _FavoriteButton(
@@ -674,33 +705,38 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
         if (account == null) return;
 
         final newAccountNumber = account.metaAccountNumber;
-        
+
         // Check if account actually changed
-        if (_lastAccountNumber != null && _lastAccountNumber != newAccountNumber) {
+        if (_lastAccountNumber != null &&
+            _lastAccountNumber != newAccountNumber) {
           dev.log(
             'InstrumentsScreen: Account changed from $_lastAccountNumber to $newAccountNumber, refreshing...',
           );
-          
+
           // Force refresh instruments for new account
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
-            
+
             try {
               // Ensure WebSocket is started for new account
               _controller.startWebSocket();
-              
+
               // Force UI refresh
               setState(() {});
             } catch (e) {
-              dev.log('InstrumentsScreen: Error refreshing on account change: $e');
+              dev.log(
+                'InstrumentsScreen: Error refreshing on account change: $e',
+              );
             }
           });
         }
-        
+
         _lastAccountNumber = newAccountNumber;
       });
     } catch (e) {
-      dev.log('InstrumentsScreen: Error setting up account change listener: $e');
+      dev.log(
+        'InstrumentsScreen: Error setting up account change listener: $e',
+      );
     }
   }
 
@@ -1000,46 +1036,53 @@ class _BidPriceColumn extends StatelessWidget {
         // ✅ PERFORMANCE FIX: Use Obx to observe only the bid price for this symbol
         // This ensures only the price text updates, not the entire widget
         Obx(() {
-          final bid = controller.priceRx(symbol).value.bid;
-          return RichText(
-            text: TextSpan(
-              children: _buildPriceTextSpans(
-                bid,
-                AppColors.red,
-                digits,
-                compact: compact,
-              ),
-            ),
-          );
-        }),
-        if (dayLow != null) ...[
-          SizedBox(height: (compact ? 3.0 : 1.0).h),
-          RichText(
-            textAlign: TextAlign.right,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: 'L: ',
-                  style: AppTextStyles.caption.copyWith(
-                    fontFamily: 'Roboto',
-                    fontSize: 9.sp,
-                    color: AppColors.textGrey,
-                    height: 1.0,
+          final priceData = controller.priceRx(symbol).value;
+          final dayLowValue = priceData.dayLow > 0 ? priceData.dayLow : dayLow;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RichText(
+                text: TextSpan(
+                  children: _buildPriceTextSpans(
+                    priceData.bid,
+                    AppColors.red,
+                    digits,
+                    compact: compact,
                   ),
                 ),
-                TextSpan(
-                  text: PrecisionHelper.formatPrice(dayLow!, decimals: digits),
-                  style: AppTextStyles.caption.copyWith(
-                    fontFamily: 'Roboto',
-                    fontSize: 9.sp,
-                    color: AppColors.textGrey,
-                    height: 1.0,
+              ),
+              if (dayLowValue != null) ...[
+                SizedBox(height: (compact ? 3.0 : 1.0).h),
+                RichText(
+                  textAlign: TextAlign.right,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'L: ',
+                        style: AppTextStyles.caption.copyWith(
+                          fontFamily: 'Roboto',
+                          fontSize: 9.sp,
+                          color: AppColors.textGrey,
+                          height: 1.0,
+                        ),
+                      ),
+                      TextSpan(
+                        text: PrecisionHelper.formatPrice(dayLowValue, decimals: digits),
+                        style: AppTextStyles.caption.copyWith(
+                          fontFamily: 'Roboto',
+                          fontSize: 9.sp,
+                          color: AppColors.textGrey,
+                          height: 1.0,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
+            ],
+          );
+        }),
       ],
     );
   }
@@ -1047,9 +1090,9 @@ class _BidPriceColumn extends StatelessWidget {
   List<InlineSpan> _buildPriceTextSpans(
     dynamic price,
     Color color,
-    int digits,
-    {required bool compact}
-  ) {
+    int digits, {
+    required bool compact,
+  }) {
     String priceStr = PrecisionHelper.formatPrice(price, decimals: digits);
 
     if (priceStr.length < 3) {
@@ -1135,64 +1178,64 @@ class _AskPriceColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color askColor = compact ? AppColors.primary : AppColors.green;
-    return Column(
-      crossAxisAlignment: compact ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // ✅ PERFORMANCE FIX: Use Obx to observe only the ask price for this symbol
-        // This ensures only the price text updates, not the entire widget
-        Obx(() {
-          final ask = controller.priceRx(symbol).value.ask;
-          return RichText(
+    return Obx(() {
+      final priceData = controller.priceRx(symbol).value;
+      final dayHighValue = priceData.dayHigh > 0 ? priceData.dayHigh : dayHigh;
+      return Column(
+        crossAxisAlignment:
+            compact ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RichText(
             text: TextSpan(
               children: _buildPriceTextSpans(
-                ask,
+                priceData.ask,
                 askColor,
                 digits,
                 compact: compact,
               ),
             ),
-          );
-        }),
-        if (dayHigh != null) ...[
-          SizedBox(height: (compact ? 3.0 : 1.0).h),
-          RichText(
-            textAlign: TextAlign.left,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: 'H: ',
-                  style: AppTextStyles.caption.copyWith(
-                    fontFamily: 'Roboto',
-                    fontSize: 9.sp,
-                    color: AppColors.textGrey,
-                    height: 1.0,
-                  ),
-                ),
-                TextSpan(
-                  text: PrecisionHelper.formatPrice(dayHigh!, decimals: digits),
-                  style: AppTextStyles.caption.copyWith(
-                    fontFamily: 'Roboto',
-                    fontSize: 9.sp,
-                    color: AppColors.textGrey,
-                    height: 1.0,
-                  ),
-                ),
-              ],
-            ),
           ),
+          if (dayHighValue != null) ...[
+            SizedBox(height: (compact ? 3.0 : 1.0).h),
+            RichText(
+              textAlign: TextAlign.left,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'H: ',
+                    style: AppTextStyles.caption.copyWith(
+                      fontFamily: 'Roboto',
+                      fontSize: 9.sp,
+                      color: AppColors.textGrey,
+                      height: 1.0,
+                    ),
+                  ),
+                  TextSpan(
+                    text: PrecisionHelper.formatPrice(dayHighValue, decimals: digits),
+                    style: AppTextStyles.caption.copyWith(
+                      fontFamily: 'Roboto',
+                      fontSize: 9.sp,
+                      color: AppColors.textGrey,
+                      height: 1.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
-      ],
-    );
+      );
+    });
   }
 
   List<InlineSpan> _buildPriceTextSpans(
     dynamic price,
     Color color,
-    int digits,
-    {required bool compact}
-  ) {
+    int digits, {
+    required bool compact,
+  }) {
     String priceStr = PrecisionHelper.formatPrice(price, decimals: digits);
 
     if (priceStr.length < 3) {
@@ -1271,7 +1314,11 @@ class _FavoriteButton extends StatelessWidget {
         controller.toggleFavorite(symbol);
       },
       child: Obx(() {
-        final isFavorite = controller.isFavorite(symbol);
+        final favs = controller.favoriteInstruments;
+        final isFavorite =
+            favs.contains(symbol) ||
+            favs.contains('$symbol.c') ||
+            favs.contains(symbol.replaceAll('.c', ''));
         final Color borderColor =
             isFavorite ? AppColors.primary : AppColors.primary.withOpacity(0.6);
 

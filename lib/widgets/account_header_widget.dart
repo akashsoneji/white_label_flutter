@@ -8,6 +8,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
+import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/models/websocket_trading_response.dart';
 import 'package:crm_app/utils/precision_helper.dart';
@@ -23,6 +24,8 @@ class AccountHeaderWidget extends StatelessWidget {
   final Widget? rightWidget;
   final EdgeInsets? padding;
   final double? floatingProfit;
+  /// When true, reads [TradingController.accountInfoRx] inside [Obx] for P/L.
+  final bool useTradingFloatingProfit;
   final AccountHeaderLayoutStyle layoutStyle;
 
   const AccountHeaderWidget({
@@ -34,6 +37,7 @@ class AccountHeaderWidget extends StatelessWidget {
     this.rightWidget,
     this.padding,
     this.floatingProfit,
+    this.useTradingFloatingProfit = false,
     this.layoutStyle = AccountHeaderLayoutStyle.defaultLayout,
   });
 
@@ -63,17 +67,24 @@ class AccountHeaderWidget extends StatelessWidget {
             ],
             Expanded(
               child: Obx(() {
-                final activeAccount = accountController.activeMT5Account;
-                final primaryAccount =
-                    activeAccount ?? dashboardController?.primaryMT5Account;
+                final activeAccount =
+                    accountController.activeMT5AccountRx.value;
 
-                final accountInfoMap = dashboardController?.accountInfoMap;
+                final dash = dashboardController;
+                if (dash != null) {
+                  dash.mt5Accounts.length;
+                }
+
+                final primaryAccount =
+                    activeAccount ?? dash?.primaryMT5Account;
+
                 final isWebSocketConnected =
-                    dashboardController?.isWebSocketConnected ?? false;
+                    dash?.isWebSocketConnectedRx.value ?? false;
 
                 AccountInfo? accountInfo;
-                if (primaryAccount != null && accountInfoMap != null) {
-                  accountInfo = accountInfoMap[primaryAccount.metaAccountNumber];
+                if (primaryAccount != null && dash != null) {
+                  accountInfo =
+                      dash.accountInfoMap[primaryAccount.metaAccountNumber];
                 }
 
                 final double? realTimeEquity = accountInfo?.equity;
@@ -83,8 +94,10 @@ class AccountHeaderWidget extends StatelessWidget {
                 final double displayEquity = realTimeEquity ?? (apiEquity ?? 0.0);
 
                 final bool hasAccountInfo = primaryAccount != null &&
-                    accountInfoMap != null &&
-                    accountInfoMap.containsKey(primaryAccount.metaAccountNumber);
+                    dash != null &&
+                    dash.accountInfoMap.containsKey(
+                      primaryAccount.metaAccountNumber,
+                    );
                 final bool showLoading = primaryAccount != null &&
                     realTimeEquity == null &&
                     (!isWebSocketConnected || !hasAccountInfo) &&
@@ -96,9 +109,18 @@ class AccountHeaderWidget extends StatelessWidget {
                   });
                 }
 
-                final bool useFloatingProfit = floatingProfit != null;
+                double? tradingProfit;
+                if (useTradingFloatingProfit &&
+                    Get.isRegistered<TradingController>()) {
+                  tradingProfit =
+                      Get.find<TradingController>().accountInfoRx.value?.profit;
+                }
+
+                final double? resolvedFloatingProfit =
+                    floatingProfit ?? tradingProfit;
+                final bool useFloatingProfit = resolvedFloatingProfit != null;
                 final double displayValue =
-                    useFloatingProfit ? floatingProfit! : displayEquity;
+                    useFloatingProfit ? resolvedFloatingProfit : displayEquity;
                 final bool isPositive = displayValue >= 0;
 
                 final valueText = useFloatingProfit

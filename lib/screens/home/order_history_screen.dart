@@ -7,6 +7,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/widgets/dashBorder.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class CloseOrderScreen extends StatelessWidget {
   final TradePosition position;
@@ -23,10 +24,7 @@ class CloseOrderScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(closeOverlays: true),
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-        ),
+        leading: const AppBackButton(),
         title: Text(
           languageService.tr('order_history_close_order'),
           style: AppTextStyles.heading,
@@ -243,10 +241,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         scrolledUnderElevation: 0,
         // elevation: 0,
         shadowColor: Colors.transparent,
-        leading: IconButton(
-          onPressed: () => Get.back(closeOverlays: true),
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-        ),
+        leading: const AppBackButton(),
         title: Text(
           languageService.tr('order_history_history'),
           style: AppTextStyles.heading,

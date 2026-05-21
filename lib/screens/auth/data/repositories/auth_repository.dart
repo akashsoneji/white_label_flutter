@@ -1,8 +1,9 @@
+import 'package:crm_app/models/google_otp_models.dart';
 import 'package:crm_app/models/login_response_model.dart';
 import 'package:crm_app/core/network/api_response.dart';
 
 abstract class AuthRepository {
-  Future<ApiResponse<LoginResponseModel>> login({
+  Future<ApiResponse<LoginApiResult>> login({
     required String email,
     required String password,
     String? fcmToken,

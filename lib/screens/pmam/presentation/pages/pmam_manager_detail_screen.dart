@@ -7,6 +7,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/models/pmam_model.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class PmamManagerDetailScreen extends StatefulWidget {
   const PmamManagerDetailScreen({super.key});
@@ -377,10 +378,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-        ),
+        leading: const AppBackButton(),
         title: Text('Manager Detail', style: AppTextStyles.heading),
         centerTitle: true,
       ),

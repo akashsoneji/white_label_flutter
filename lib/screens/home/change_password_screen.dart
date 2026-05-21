@@ -9,6 +9,7 @@ import '../../constants/text_styles.dart';
 import 'package:crm_app/screens/auth/view_models/change_password_controller.dart';
 import '../../services/language_service.dart';
 import '../../utils/trl_helper.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -132,9 +133,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           languageService.tr('change_password'),
           style: AppTextStyles.screenTitle,
         ),
-        leading: IconButton(
-          icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: AppBackButton(onPressed: ()=> Navigator.of(context).pop(),
         ),
         centerTitle: true,
       ),

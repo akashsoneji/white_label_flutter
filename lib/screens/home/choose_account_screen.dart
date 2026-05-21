@@ -9,6 +9,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/plan_controller.dart';
 import 'package:crm_app/screens/home/create_crm_app_account_screen.dart';
 import 'package:crm_app/widgets/dashBorder.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/services/language_service.dart';
 import '../../routes/app_pages.dart';
@@ -52,21 +53,17 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
         shape: Border(bottom: BorderSide(color: AppColors.grey)),
         scrolledUnderElevation: 0.0,
         backgroundColor: AppColors.backgroundLight,
-        leading: IconButton(
+        leading: AppBackButton(
           onPressed: () {
-            // Check if came from account_created_screen
             final args = Get.arguments;
             if (args != null &&
                 args is Map &&
                 args['from'] == 'account_created') {
-              // Navigate to trading screen (home/instruments screen)
               Get.offAllNamed(AppPages.TRADING);
             } else {
-              // Normal back navigation (e.g., from dashboard)
               Get.back(closeOverlays: true);
             }
           },
-          icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
         ),
         title: Text(
           languageService.tr('choose_account_title'),

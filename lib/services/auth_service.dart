@@ -3,11 +3,12 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/core/network/api_client.dart';
 import 'package:crm_app/core/network/api_response.dart';
+import 'package:crm_app/models/google_otp_models.dart';
 import 'package:crm_app/models/login_response_model.dart';
 import 'dart:developer' as dev;
 
 abstract class AuthService extends GetxService {
-  Future<ApiResponse<LoginResponseModel>> login({
+  Future<ApiResponse<LoginApiResult>> login({
     required String email,
     required String password,
     String? fcmToken,
@@ -75,7 +76,7 @@ class AuthServiceImpl extends AuthService {
 
   // ==================== LOGIN ====================
   @override
-  Future<ApiResponse<LoginResponseModel>> login({
+  Future<ApiResponse<LoginApiResult>> login({
     required String email,
     required String password,
     String? fcmToken,
@@ -138,9 +139,31 @@ class AuthServiceImpl extends AuthService {
             return ApiResponse.error(errorMessage);
           }
 
-          // Success case
+          final envelope = response.data as Map<String, dynamic>;
+          final envelopeData = envelope['data'];
+          if (envelopeData is Map<String, dynamic> &&
+              envelopeData['requires_google_otp'] == true) {
+            return ApiResponse(
+              success: true,
+              message: loginResponse.message,
+              data: LoginApiResult.fromGoogleOtpChallenge(
+                GoogleOtpLoginChallenge.fromJson(envelopeData),
+              ),
+            );
+          }
+
+          if (loginResponse.data.token.isEmpty) {
+            return ApiResponse.error(
+              loginResponse.message.isNotEmpty
+                  ? loginResponse.message
+                  : 'Login failed. Please check your credentials and try again.',
+            );
+          }
+
           print('✅ AuthService: Login successful');
-          return ApiResponse.success(loginResponse);
+          return ApiResponse.success(
+            LoginApiResult.fromLoginResponse(loginResponse),
+          );
         } catch (e, t) {
           print("❌ AuthService login parsing error: ${e.toString()}");
           print("❌ AuthService login parsing stacktrace: ${t.toString()}");

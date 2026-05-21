@@ -22,6 +22,50 @@ class CopyTradingRemoteDataSource {
     );
   }
 
+  Future<ApiResponse> getCopierSubscriptionsList({
+    required int page,
+    required int perPage,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _api.get(
+      endpoint: ApiConstants.copyTradingCopierSubscriptionsList(
+        page: page,
+        perPage: perPage,
+      ),
+      queryParameters: queryParameters,
+    );
+  }
+
+  Future<ApiResponse> getCopierSubscriptionTrades({
+    required int subscriptionId,
+    required int page,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    final t = queryParameters?['_t'];
+    return _api.get(
+      endpoint: ApiConstants.copyTradingCopierSubscriptionTrades(
+        subscriptionId,
+        page: page,
+        t: t is String ? int.tryParse(t) : (t is int ? t : null),
+      ),
+      queryParameters: queryParameters,
+    );
+  }
+
+  Future<ApiResponse> getMasterCopiersList({
+    required int page,
+    required int perPage,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _api.get(
+      endpoint: ApiConstants.copyTradingMasterCopiers(
+        page: page,
+        perPage: perPage,
+      ),
+      queryParameters: queryParameters,
+    );
+  }
+
   Future<ApiResponse> getCopierSubscriptionDetail({
     required int subscriptionId,
     Map<String, dynamic>? queryParameters,

@@ -163,6 +163,13 @@ class WebSocketEndpointHelper {
     return getFullUrl(getMarketWatchEndpoint(account));
   }
 
+  static const String marketWatchV2 = '/ws/marketwatchv2';
+
+  /// Per-symbol subscribe/unsubscribe feed (binary MessagePack ticks).
+  static String getMarketWatchV2Url() {
+    return getFullUrl(marketWatchV2);
+  }
+
   /// Get full WebSocket URL for account
   static String getAccountUrl(MT5Account? account) {
     return getFullUrl(getAccountEndpoint(account));

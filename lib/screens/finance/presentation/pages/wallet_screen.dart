@@ -16,6 +16,7 @@ import 'package:crm_app/screens/wallet/view_models/wallet_controller.dart';
 import '../../../../services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
 import '../../../../widgets/custom_toast.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class WalletScreen extends StatefulWidget {
   @override
@@ -60,13 +61,7 @@ class _WalletScreenState extends State<WalletScreen> {
         elevation: 0,
         leading: Padding(
           padding: EdgeInsets.only(left: 10.w),
-          child: IconButton(
-            icon: SvgPicture.asset(
-              "assets/svg/trade/arro_back.svg",
-              height: 24.h,
-              width: 24.w,
-            ),
-            onPressed: () => NavigationHelper.safeBack(context: context),
+          child: AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
           ),
         ),
 

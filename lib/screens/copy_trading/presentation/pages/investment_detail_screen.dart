@@ -9,6 +9,7 @@ import 'add_investment_screen.dart';
 import 'copy_trading_main_screen.dart';
 import 'reduce_investment_screen.dart';
 import 'change_proportion_screen.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 // ─── Mock trade data ──────────────────────────────────────────────
 class _TradeItem {
@@ -146,9 +147,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-          onPressed: () => Navigator.of(context).pop(),
+        leading: AppBackButton(onPressed: ()=> Navigator.of(context).pop(),
         ),
         title: Text('Your Investment', style: AppTextStyles.screenTitle),
         centerTitle: true,

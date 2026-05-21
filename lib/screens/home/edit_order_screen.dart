@@ -13,6 +13,7 @@ import 'package:crm_app/screens/trading/view_models/chart_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/app_switch_tile.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -1104,38 +1105,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     bool value, {
     required Function(bool) onChanged,
   }) {
-    return Container(
-      height: 35,
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 2.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            textAlign: TextAlign.start,
-            style: AppTextStyles.label.copyWith(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          Transform.scale(
-            scale: 0.9,
-            child: Switch(
-              value: value,
-              onChanged: onChanged,
-              activeColor: AppColors.primary,
-              activeTrackColor: AppColors.primary.withOpacity(0.3),
-              inactiveThumbColor: AppColors.whiteColor,
-              inactiveTrackColor: AppColors.icongrey.withAlpha(55),
-              trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
-        ],
-      ),
-    );
+    return AppSwitchTile(title: title, value: value, onChanged: onChanged);
   }
 
   /// Build P&L display widget below TP/SL fields

@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'subscribe_to_plan_screen.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class MasterDetailsScreen extends StatelessWidget {
   final String masterCode;
@@ -32,9 +33,7 @@ class MasterDetailsScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading: AppSvgBackButton(
-          onPressed: () => AppSvgBackButton.popRoute(context),
-        ),
+        leading: const AppBackButton(),
         actions: [
           IconButton(
             onPressed: () => controller.loadProfile(showLoading: true),

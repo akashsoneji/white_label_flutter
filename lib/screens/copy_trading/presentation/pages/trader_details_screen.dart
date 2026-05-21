@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'subscription_setup_screen.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class TraderDetailsScreen extends StatefulWidget {
   const TraderDetailsScreen({super.key});
@@ -95,9 +96,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: SvgPicture.asset('assets/svg/trade/arro_back.svg'),
-          onPressed: () => Get.back(),
+        leading: AppBackButton(onPressed: ()=> Get.back(),
         ),
       ),
       body: SingleChildScrollView(

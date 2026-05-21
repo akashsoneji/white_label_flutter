@@ -7,6 +7,7 @@ import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/utils/agreement_launcher.dart';
 
 class GetStartedScreen extends StatelessWidget {
   GetStartedScreen({super.key});
@@ -107,7 +108,7 @@ class GetStartedScreen extends StatelessWidget {
                       recognizer:
                           TapGestureRecognizer()
                             ..onTap = () {
-                              Get.toNamed(AppPages.LEGAL_DOCUMENTS);
+                              AgreementLauncher.openTerms();
                             },
                     ),
                     const TextSpan(text: " and "),
@@ -121,7 +122,7 @@ class GetStartedScreen extends StatelessWidget {
                       recognizer:
                           TapGestureRecognizer()
                             ..onTap = () {
-                              Get.toNamed(AppPages.PRIVACY_POLICY);
+                              AgreementLauncher.openPrivacy();
                             },
                     ),
                   ],
