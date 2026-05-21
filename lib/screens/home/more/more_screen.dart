@@ -248,182 +248,104 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     final languageService = Get.find<LanguageService>();
     final isVantage = FlavorConfig.isVantage();
 
-    final appBar =
-        FlavorConfig.isVantage()
-            ? null
-            : AppBar(
-              backgroundColor: AppColors.backgroundLight,
-              scrolledUnderElevation: 0,
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              shape: Border(
-                bottom: BorderSide(
-                  color: AppColors.border,
-                  width: 1,
-                ),
-              ),
-              leading: Padding(
-                padding: EdgeInsets.only(left: 16.w),
-                child: IconButton(
-                  icon: Icon(Icons.arrow_back_ios_new_rounded,
-                      size: 20.sp, color: AppColors.textPrimary),
-                  onPressed: () => Navigator.pop(context)),
-              ),
-              title: Text(
-                languageService.tr('setting_title'),
-                style: AppTextStyles.screenTitle,
-              ),
-              centerTitle: true,
-            );
+    final appBar = FlavorConfig.isVantage()
+        ? null
+        : AppBar(
+            backgroundColor: AppColors.tradeBackgroundCenterColor,
+            scrolledUnderElevation: 0,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            leading: Padding(
+              padding: EdgeInsets.only(left: 16.w),
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios_new_rounded,
+                    size: 20.sp, color: AppColors.textPrimary),
+                onPressed: () => Navigator.pop(context)),
+            ),
+            title: Text(
+              languageService.tr('setting_title'),
+              style: AppTextStyles.screenTitle,
+            ),
+            centerTitle: true,
+          );
 
     final body = SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 12.h),
-
-          // Profile Card Section
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: _buildProfileCard(authController),
-          ),
-
-          SizedBox(height: 12.h),
-
-          // Verification Card (if not completed)
-          GetBuilder<MoreController>(
-            builder: (controller) {
-              final model = controller.dashboardModel.value;
-              final stage = model?.data?.stageCompletion;
-              final completion = _calculateCompletion(stage);
-              return completion == 100
-                  ? const SizedBox.shrink()
-                  : Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    child: VerifyAccountCard(
-                      title: languageService.tr('verify_your_account'),
-                      subTitle: languageService.tr(
-                        'complete_verification_to_unlock',
-                      ),
-                      percentage: '',
-                    ),
-                  );
-            },
-          ),
-
-          SizedBox(height: 20.h),
-
-          // Financial Quick Actions
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _SectionHeader(title: languageService.tr('general_financial')),
-                SizedBox(height: 12.h),
-                _buildFinancialActions(),
-              ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 16.h),
+            _buildCompactProfileCard(authController),
+            SizedBox(height: 12.h),
+            _buildCompactVerificationCard(languageService),
+            SizedBox(height: 16.h),
+            _buildCompactSection(
+              title: languageService.tr('general_financial'),
+              child: _buildCompactFinancialGrid(),
             ),
-          ),
-
-          SizedBox(height: 24.h),
-
-          // Finance & Trading Section
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _SectionHeader(title: languageService.tr('general_tradind_settings')),
-                SizedBox(height: 12.h),
-                _buildFinanceSection(),
-              ],
+            SizedBox(height: 16.h),
+            _buildCompactSection(
+              title: languageService.tr('general_tradind_settings'),
+              child: _buildCompactMenuList(_buildFinanceSectionItems()),
             ),
-          ),
-
-          SizedBox(height: 24.h),
-
-          // Security Section
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _SectionHeader(title: languageService.tr('general_account_security')),
-                SizedBox(height: 12.h),
-                _buildSecuritySection(),
-              ],
+            SizedBox(height: 16.h),
+            _buildCompactSection(
+              title: languageService.tr('general_account_security'),
+              child: _buildCompactMenuList(_buildSecuritySectionItems()),
             ),
-          ),
-
-          SizedBox(height: 24.h),
-
-          // Danger Zone
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _SectionHeader(title: 'Account'),
-                SizedBox(height: 12.h),
-                _buildDangerSection(authController),
-              ],
+            SizedBox(height: 16.h),
+            _buildCompactSection(
+              title: 'Account',
+              child: _buildCompactMenuList(_buildDangerSectionItems(authController)),
             ),
-          ),
-
-          SizedBox(height: 32.h),
-
-          // App Version
-          Center(
-            child: FutureBuilder<PackageInfo>(
-              future: PackageInfo.fromPlatform(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const SizedBox.shrink();
-                final version = snapshot.data!.version;
-                return Text(
-                  '${languageService.tr('version_label')} $version',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: AppColors.textGrey.withValues(alpha: 0.6),
-                    fontWeight: FontWeight.w500,
-                  ),
-                );
-              },
-            ),
-          ),
-
-          SizedBox(height: 100.h + MediaQuery.of(context).padding.bottom),
-        ],
+            SizedBox(height: 20.h),
+            _buildCompactVersionInfo(languageService),
+            SizedBox(height: 80.h + MediaQuery.of(context).padding.bottom),
+          ],
+        ),
       ),
     );
 
     if (isVantage) {
       return VantageMoreLayout(
-        backgroundColor: AppColors.backgroundLight,
+        backgroundColor: AppColors.tradeBackgroundCenterColor,
         child: body,
       );
     }
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: appBar,
       body: body,
     );
   }
 
-  Widget _buildProfileCard(AuthController authController) {
+  Widget _buildCompactProfileCard(AuthController authController) {
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.border),
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          AppColors.isDarkMode
+              ? BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                )
+              : BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
+                ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 56.w,
-            height: 56.w,
+            width: 48.w,
+            height: 48.w,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -441,14 +363,14 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     ? authController.userFullName![0].toUpperCase()
                     : 'U',
                 style: TextStyle(
-                  fontSize: 24.sp,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.whiteColor,
+                  color: AppColors.cardBackground,
                 ),
               ),
             ),
           ),
-          SizedBox(width: 14.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -459,8 +381,8 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                       child: Text(
                         authController.userFullName ?? '',
                         style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15.sp,
                           color: AppColors.textPrimary,
                         ),
                         maxLines: 1,
@@ -481,12 +403,12 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                             color: completion == 100
                                 ? AppColors.primary.withValues(alpha: 0.1)
                                 : Colors.orange.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8.r),
+                            borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
                             '$completion%',
                             style: TextStyle(
-                              fontSize: 11.sp,
+                              fontSize: 10.sp,
                               fontWeight: FontWeight.w600,
                               color: completion == 100
                                   ? AppColors.primary
@@ -498,12 +420,12 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     ),
                   ],
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 2.h),
                 Text(
                   authController.userEmail ?? '',
                   style: TextStyle(
                     color: AppColors.textGrey,
-                    fontSize: 13.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
                   ),
                   maxLines: 1,
@@ -516,13 +438,13 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
           Container(
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: IconButton(
               icon: SvgPicture.asset(
                 'assets/svg/edit_profile.svg',
-                height: 20.h,
-                width: 20.w,
+                height: 18.h,
+                width: 18.w,
                 color: AppColors.primary,
               ),
               onPressed: () {
@@ -537,6 +459,8 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   arguments: isProfileVerified,
                 );
               },
+              padding: EdgeInsets.all(8.w),
+              constraints: BoxConstraints(),
             ),
           ),
         ],
@@ -544,100 +468,236 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildFinancialActions() {
+  Widget _buildCompactVerificationCard(LanguageService languageService) {
+    return GetBuilder<MoreController>(
+      builder: (controller) {
+        final model = controller.dashboardModel.value;
+        final stage = model?.data?.stageCompletion;
+        final completion = _calculateCompletion(stage);
+        if (completion == 100) return const SizedBox.shrink();
+
+        return Container(
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: [
+              AppColors.isDarkMode
+                  ? BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    )
+                  : BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 18,
+                      offset: const Offset(0, 10),
+                    ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36.w,
+                    height: 36.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Icon(
+                      Icons.verified_user_outlined,
+                      size: 18.sp,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          languageService.tr('verify_your_account'),
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          languageService.tr('complete_verification_to_unlock'),
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: AppColors.textGrey,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14.sp,
+                      color: AppColors.primary,
+                    ),
+                    onPressed: () async {
+                      final mdl = controller.dashboardModel.value;
+                      final stg = mdl?.data?.stageCompletion;
+                      await Get.toNamed(AppPages.KYC_INTRO, arguments: stg);
+                      controller.loadMoreScreenData();
+                    },
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3.r),
+                      child: LinearProgressIndicator(
+                        value: completion / 100,
+                        minHeight: 5,
+                        backgroundColor: AppColors.border,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Text(
+                    '$completion%',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCompactSection({required String title, required Widget child}) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                icon: 'assets/svg/more/deposit.svg',
-                label: languageService.tr('general_deposit'),
-                color: const Color(0xFF4CAF50),
-                onTap: () => Get.to(
-                  () => PaymentMethodsScreen(accountNumber: ''),
-                ),
-              ),
+        Padding(
+          padding: EdgeInsets.only(left: 4.w, bottom: 8.h),
+          child: Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textGrey,
+              letterSpacing: 1.0,
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: _buildActionCard(
-                icon: 'assets/svg/more/withdrawal.svg',
-                label: languageService.tr('general_withdraw'),
-                color: const Color(0xFFFF9800),
-                onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
-              ),
-            ),
-          ],
+          ),
         ),
-        SizedBox(height: 12.h),
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                icon: 'assets/svg/more/internal-transfer.svg',
-                label: languageService.tr('general_transfer'),
-                color: const Color(0xFF2196F3),
-                onTap: () => Get.toNamed(AppPages.INTERNAL_TRANSFER),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: _buildActionCard(
-                icon: 'assets/svg/more/transaction_history.svg',
-                label: languageService.tr('general_history'),
-                color: const Color(0xFF9C27B0),
-                onTap: () => Get.toNamed(AppPages.TRANSACTION_HISTORY),
-              ),
-            ),
-          ],
-        ),
+        child,
       ],
     );
   }
 
-  Widget _buildActionCard({
-    required String icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildCompactFinancialGrid() {
+    final items = [
+      _CompactGridItem(
+        icon: 'assets/svg/more/deposit.svg',
+        label: languageService.tr('general_deposit'),
+        color: const Color(0xFF4CAF50),
+        onTap: () => Get.to(() => PaymentMethodsScreen(accountNumber: '')),
+      ),
+      _CompactGridItem(
+        icon: 'assets/svg/more/withdrawal.svg',
+        label: languageService.tr('general_withdraw'),
+        color: const Color(0xFFFF9800),
+        onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
+      ),
+      _CompactGridItem(
+        icon: 'assets/svg/more/internal-transfer.svg',
+        label: languageService.tr('general_transfer'),
+        color: const Color(0xFF2196F3),
+        onTap: () => Get.toNamed(AppPages.INTERNAL_TRANSFER),
+      ),
+      _CompactGridItem(
+        icon: 'assets/svg/more/transaction_history.svg',
+        label: languageService.tr('general_history'),
+        color: const Color(0xFF9C27B0),
+        onTap: () => Get.toNamed(AppPages.TRANSACTION_HISTORY),
+      ),
+    ];
+
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 8.h,
+      crossAxisSpacing: 8.w,
+      childAspectRatio: 2.2,
+      children: items.map((item) => _buildCompactGridCard(item)).toList(),
+    );
+  }
+
+  Widget _buildCompactGridCard(_CompactGridItem item) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14.r),
+        onTap: item.onTap,
+        borderRadius: BorderRadius.circular(10.r),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 12.w),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
           decoration: BoxDecoration(
-            color: AppColors.whiteColor,
-            borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: AppColors.border),
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(10.r),
+            boxShadow: [
+              AppColors.isDarkMode
+                  ? BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    )
+                  : BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 18,
+                      offset: const Offset(0, 10),
+                    ),
+            ],
           ),
           child: Row(
             children: [
               Container(
-                width: 40.w,
-                height: 40.w,
+                width: 32.w,
+                height: 32.w,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10.r),
+                  color: item.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Center(
                   child: SvgPicture.asset(
-                    icon,
-                    height: 20.h,
-                    width: 20.w,
-                    color: color,
+                    item.icon,
+                    height: 16.h,
+                    width: 16.w,
+                    color: item.color,
                   ),
                 ),
               ),
-              SizedBox(width: 10.w),
+              SizedBox(width: 8.w),
               Expanded(
                 child: Text(
-                  label,
+                  item.label,
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -647,8 +707,8 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                size: 20.sp,
-                color: AppColors.textGrey.withValues(alpha: 0.6),
+                size: 16.sp,
+                color: AppColors.textGrey.withValues(alpha: 0.5),
               ),
             ],
           ),
@@ -657,151 +717,183 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildFinanceSection() {
-    return Obx(() {
-      final modules = Get.find<EnabledModulesService>().modules.value;
-      final showCopyTrading = modules?.copytrading ?? false;
-      final showPmam = modules?.pmam ?? appConfig.isFeatureEnabled(FeatureKeys.pmam);
+  List<_CompactMenuItem> _buildFinanceSectionItems() {
+    final modules = Get.find<EnabledModulesService>().modules.value;
+    final showCopyTrading = modules?.copytrading ?? false;
+    final showPmam = modules?.pmam ?? appConfig.isFeatureEnabled(FeatureKeys.pmam);
 
-      final items = <Widget>[
-        _buildMenuItem(
-          icon: 'assets/svg/more/wallet.svg',
-          label: languageService.tr('general_finance'),
-          color: const Color(0xFF00BFA5),
-          onTap: () async {
-            await Get.toNamed(AppPages.FINANCE);
-            if (mounted) _refreshDataIfNeeded();
-          },
-        ),
-        _buildMenuItem(
-          icon: 'assets/svg/more/ib_dashboard/overview.svg',
-          label: languageService.tr('more_dashboard'),
-          color: AppColors.primary,
-          onTap: () async => await _handleSwitchToIB(),
-        ),
-      ];
+    final items = <_CompactMenuItem>[
+      _CompactMenuItem(
+        icon: 'assets/svg/more/wallet.svg',
+        label: languageService.tr('general_finance'),
+        color: const Color(0xFF00BFA5),
+        onTap: () async {
+          await Get.toNamed(AppPages.FINANCE);
+          if (mounted) _refreshDataIfNeeded();
+        },
+      ),
+      _CompactMenuItem(
+        icon: 'assets/svg/more/ib_dashboard/overview.svg',
+        label: languageService.tr('more_dashboard'),
+        color: AppColors.primary,
+        onTap: () async => await _handleSwitchToIB(),
+      ),
+    ];
 
-      if (showCopyTrading) {
-        items.add(
-          _buildMenuItem(
-            icon: 'assets/svg/more/copy.svg',
-            label: languageService.tr('more_copy_trading'),
-            color: const Color(0xFF1E88E5),
-            onTap: () => Get.toNamed(AppPages.COPY_TRADING_HUB),
-          ),
-        );
-      }
-      if (showPmam) {
-        items.add(
-          _buildMenuItem(
-            icon: 'assets/svg/more/demo-account.svg',
-            label: 'PAMM',
-            color: const Color(0xFF29B6F6),
-            onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
-          ),
-        );
-      }
-
-      return _buildCardGroup(items);
-    });
+    if (showCopyTrading) {
+      items.add(_CompactMenuItem(
+        icon: 'assets/svg/more/copy.svg',
+        label: languageService.tr('more_copy_trading'),
+        color: const Color(0xFF1E88E5),
+        onTap: () => Get.toNamed(AppPages.COPY_TRADING_HUB),
+      ));
+    }
+    if (showPmam) {
+      items.add(_CompactMenuItem(
+        icon: 'assets/svg/more/demo-account.svg',
+        label: 'PAMM',
+        color: const Color(0xFF29B6F6),
+        onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
+      ));
+    }
+    return items;
   }
 
-  Widget _buildSecuritySection() {
-    return _buildCardGroup([
-      _buildMenuItem(
+  List<_CompactMenuItem> _buildSecuritySectionItems() {
+    return [
+      _CompactMenuItem(
         icon: 'assets/svg/more/change_password.svg',
         label: languageService.tr('change_password'),
         color: const Color(0xFFEF5350),
         onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
       ),
-      _buildMenuItem(
+      _CompactMenuItem(
         icon: 'assets/svg/more/two_factor_auth.svg',
         label: languageService.tr('two_factor_authentication'),
         color: const Color(0xFF7E57C2),
         onTap: () => Get.toNamed(AppPages.TWO_FACTOR_AUTH),
       ),
-      _buildToggleItem(
+      _CompactMenuItem(
         icon: 'assets/svg/more/one-click.svg',
         label: 'One Click Trading',
         color: const Color(0xFF26A69A),
-        value: _oneClickEnabled,
+        isToggle: true,
+        toggleValue: _oneClickEnabled,
         onTap: _toggleOneClickTrading,
       ),
-      _buildToggleItem(
+      _CompactMenuItem(
         icon: 'assets/svg/more/biometric.svg',
         label: languageService.tr('biometric_login_toggle'),
         color: const Color(0xFF5C6BC0),
-        value: _biometricEnabled,
+        isToggle: true,
+        toggleValue: _biometricEnabled,
         onTap: _toggleBiometric,
       ),
-    ]);
+    ];
   }
 
-  Widget _buildDangerSection(AuthController authController) {
-    return _buildCardGroup([
-      _buildMenuItem(
+  List<_CompactMenuItem> _buildDangerSectionItems(AuthController authController) {
+    return [
+      _CompactMenuItem(
         icon: 'assets/svg/more/setting/profile-kyc.svg',
         label: languageService.tr('delete_account'),
         color: const Color(0xFFEC407A),
         onTap: () => _showDeleteAccountDialog(authController),
       ),
-      _buildMenuItem(
+      _CompactMenuItem(
         icon: 'assets/svg/more/logout.svg',
         label: languageService.tr('more_logout'),
         color: AppColors.red,
         showArrow: false,
         onTap: () => _showLogoutDialog(authController),
       ),
-    ]);
+    ];
   }
 
-  Widget _buildMenuItem({
-    required String icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-    bool showArrow = true,
-  }) {
+  Widget _buildCompactMenuList(List<_CompactMenuItem> items) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          AppColors.isDarkMode
+              ? BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                )
+              : BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
+                ),
+        ],
+      ),
+      child: Column(
+        children: items.asMap().entries.map((entry) {
+          final idx = entry.key;
+          final item = entry.value;
+          return Column(
+            children: [
+              _buildCompactMenuRow(item),
+              if (idx < items.length - 1)
+                Padding(
+                  padding: EdgeInsets.only(left: 52.w),
+                  child: Divider(
+                    height: 1,
+                    color: AppColors.border.withValues(alpha: 0.5),
+                  ),
+                ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildCompactMenuRow(_CompactMenuItem item) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14.r),
+        onTap: item.onTap,
+        borderRadius: BorderRadius.circular(12.r),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           child: Row(
             children: [
               Container(
-                width: 38.w,
-                height: 38.w,
+                width: 32.w,
+                height: 32.w,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10.r),
+                  color: item.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Center(
                   child: SvgPicture.asset(
-                    icon,
-                    height: 18.h,
-                    width: 18.w,
-                    color: color,
+                    item.icon,
+                    height: 16.h,
+                    width: 16.w,
+                    color: item.color,
                   ),
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 10.w),
               Expanded(
                 child: Text(
-                  label,
+                  item.label,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
                 ),
               ),
-              if (showArrow)
+              if (item.isToggle)
+                _buildCompactSwitch(item.toggleValue)
+              else if (item.showArrow)
                 Icon(
                   Icons.chevron_right_rounded,
-                  size: 22.sp,
+                  size: 18.sp,
                   color: AppColors.textGrey.withValues(alpha: 0.5),
                 ),
             ],
@@ -811,83 +903,32 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildToggleItem({
-    required String icon,
-    required String label,
-    required Color color,
-    required bool value,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14.r),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-          child: Row(
-            children: [
-              Container(
-                width: 38.w,
-                height: 38.w,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    icon,
-                    height: 18.h,
-                    width: 18.w,
-                    color: color,
-                  ),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              _buildModernSwitch(value),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildModernSwitch(bool value) {
+  Widget _buildCompactSwitch(bool value) {
     return GestureDetector(
       onTap: () {},
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 48.w,
-        height: 28.h,
+        width: 42.w,
+        height: 24.h,
         decoration: BoxDecoration(
           color: value ? AppColors.primary : AppColors.border,
-          borderRadius: BorderRadius.circular(14.r),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),
           alignment: value ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            margin: EdgeInsets.all(3.w),
-            width: 22.w,
-            height: 22.w,
+            margin: EdgeInsets.all(2.5.w),
+            width: 19.w,
+            height: 19.w,
             decoration: BoxDecoration(
-              color: AppColors.whiteColor,
+              color: AppColors.cardBackground,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 3,
+                  offset: const Offset(0, 1),
                 ),
               ],
             ),
@@ -897,32 +938,25 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildCardGroup(List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        children:
-            children.asMap().entries.map((entry) {
-              int idx = entry.key;
-              Widget val = entry.value;
-              if (idx == children.length - 1) return val;
-              return Column(
-                children: [
-                  val,
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 14.w),
-                    child: Divider(
-                      height: 1,
-                      color: AppColors.border.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ],
-              );
-            }).toList(),
+  Widget _buildCompactVersionInfo(LanguageService languageService) {
+    return Center(
+      child: FutureBuilder<PackageInfo>(
+        future: PackageInfo.fromPlatform(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const SizedBox.shrink();
+          final version = snapshot.data!.version;
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.h),
+            child: Text(
+              '${languageService.tr('version_label')} $version',
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: AppColors.textGrey.withValues(alpha: 0.5),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -930,42 +964,42 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   void _showLogoutDialog(AuthController authController) {
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: AppColors.whiteColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        backgroundColor: AppColors.cardBackground,
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 70.w,
-                height: 70.w,
+                width: 60.w,
+                height: 60.w,
                 decoration: BoxDecoration(
                   color: AppColors.red.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.logout_rounded,
-                  size: 32.sp,
+                  size: 28.sp,
                   color: AppColors.red,
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 16.h),
               Text(
                 languageService.tr('logout_confirm_message'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 20.h),
               Row(
                 children: [
                   Expanded(
                     child: Obx(
-                      () => _buildDialogButton(
+                      () => _buildCompactDialogButton(
                         label: languageService.tr('navigation_yes'),
                         isPrimary: true,
                         onTap: authController.isLoading
@@ -974,9 +1008,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 10.w),
                   Expanded(
-                    child: _buildDialogButton(
+                    child: _buildCompactDialogButton(
                       label: languageService.tr('navigation_no'),
                       isPrimary: false,
                       onTap: () => Get.back(closeOverlays: true),
@@ -996,73 +1030,74 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     final RxBool _isPasswordEmpty = false.obs;
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: AppColors.whiteColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        backgroundColor: AppColors.cardBackground,
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 70.w,
-                height: 70.w,
+                width: 60.w,
+                height: 60.w,
                 decoration: BoxDecoration(
                   color: const Color(0xFFEC407A).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.delete_forever_rounded,
-                  size: 32.sp,
+                  size: 28.sp,
                   color: const Color(0xFFEC407A),
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 16.h),
               Text(
                 languageService.tr('delete_account_confirm_message'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 16.h),
               Obx(
                 () => TextField(
                   controller: _passwordController,
                   obscureText: true,
+                  style: TextStyle(fontSize: 14.sp),
                   decoration: InputDecoration(
                     hintText: languageService.tr('delete_account_password_hint'),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(10.r),
                       borderSide: BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(10.r),
                       borderSide: BorderSide(
                         color: _isPasswordEmpty.value ? Colors.red : AppColors.border,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(10.r),
                       borderSide: BorderSide(
                         color: _isPasswordEmpty.value ? Colors.red : AppColors.primary,
-                        width: 2,
+                        width: 1.5,
                       ),
                     ),
                     contentPadding: EdgeInsets.symmetric(
-                      horizontal: 14.w,
-                      vertical: 14.h,
+                      horizontal: 12.w,
+                      vertical: 12.h,
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 20.h),
               Row(
                 children: [
                   Expanded(
                     child: Obx(
-                      () => _buildDialogButton(
+                      () => _buildCompactDialogButton(
                         label: languageService.tr('navigation_yes'),
                         isPrimary: true,
                         isDanger: true,
@@ -1086,9 +1121,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 10.w),
                   Expanded(
-                    child: _buildDialogButton(
+                    child: _buildCompactDialogButton(
                       label: languageService.tr('navigation_no'),
                       isPrimary: false,
                       onTap: () => Get.back(closeOverlays: true),
@@ -1103,7 +1138,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildDialogButton({
+  Widget _buildCompactDialogButton({
     required String label,
     required bool isPrimary,
     bool isDanger = false,
@@ -1113,21 +1148,21 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(10.r),
         child: Container(
-          height: 48.h,
+          height: 44.h,
           decoration: BoxDecoration(
             color: isPrimary
                 ? (isDanger ? const Color(0xFFEC407A) : AppColors.primary)
-                : AppColors.border.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(12.r),
+                : AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(10.r),
           ),
           alignment: Alignment.center,
           child: Text(
             label,
             style: TextStyle(
               color: isPrimary ? AppColors.whiteColor : AppColors.textPrimary,
-              fontSize: 15.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1137,22 +1172,38 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  const _SectionHeader({required this.title});
+class _CompactGridItem {
+  final String icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
 
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title.toUpperCase(),
-      style: TextStyle(
-        fontSize: 11.sp,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textGrey,
-        letterSpacing: 1.2,
-      ),
-    );
-  }
+  _CompactGridItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+}
+
+class _CompactMenuItem {
+  final String icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  final bool showArrow;
+  final bool isToggle;
+  final bool toggleValue;
+
+  _CompactMenuItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+    this.showArrow = true,
+    this.isToggle = false,
+    this.toggleValue = false,
+  });
 }
 
 class VerifyAccountCard extends StatelessWidget {
@@ -1191,9 +1242,21 @@ class VerifyAccountCard extends StatelessWidget {
         return Container(
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
-            color: AppColors.whiteColor,
+            color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+            boxShadow: [
+              AppColors.isDarkMode
+                  ? BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    )
+                  : BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 18,
+                      offset: const Offset(0, 10),
+                    ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
