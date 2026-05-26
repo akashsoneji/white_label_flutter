@@ -7,7 +7,6 @@ import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
-import 'package:crm_app/models/order_types.dart';
 import 'package:crm_app/models/websocket_trading_response.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/websocket_endpoint_helper.dart';
@@ -51,7 +50,6 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
   final RxBool isSymbolsConnected = false.obs;
   bool _isConnectingOpenPositions = false;
   bool _isConnectingPendingOrders = false;
-  bool _isConnectingMarketWatch = false;
   bool _isConnectingSymbols = false;
   bool _loggedFirstMessage = false;
 
@@ -88,6 +86,8 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
   // ✅ Track removed trades to prevent re-adding from WebSocket
   // Only used to filter batch responses, NOT individual add/update messages
   final Set<String> _removedPositionIds = {};
+  final Map<String, double> _removedPositionVolumes = {}; // Track volume at removal
+  final Map<String, DateTime> _removedPositionTimes = {}; // Track removal time
   final Set<int> _removedPendingOrderIds = {};
 
   // Debounce timer to prevent rapid updates causing flickering
@@ -441,6 +441,17 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
       }
       return;
     }
+
+    // ✅ CLEANUP: Remove stale entries from zombie filter maps (older than 30s)
+    final now = DateTime.now();
+    _removedPositionTimes.removeWhere((id, time) {
+      final isStale = now.difference(time).inSeconds > 30;
+      if (isStale) {
+        _removedPositionVolumes.remove(id);
+        _removedPositionIds.remove(id);
+      }
+      return isStale;
+    });
 
     // Use getAuthToken for /ws/op endpoint (same as other new endpoints)
     final authId = await SecureStorageService.getAuthToken();
@@ -894,73 +905,9 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
     });
   }
 
-  // Connect to market watch endpoint with conditional MT5 prefix
-  void _connectToMarketWatch() {
-    if (_isDisposed || _isConnectingMarketWatch) return;
-
-    final activeAccount = _accountController.activeMT5Account;
-
-    // ✅ Validate account exists before determining endpoint
-    if (activeAccount == null) {
-      return;
-    }
-
-    // ✅ Use centralized endpoint helper
-    final marketWatchUrl = WebSocketEndpointHelper.getMarketWatchUrl(
-      activeAccount,
-    );
-
-    // Check if already connected
-    if (isMarketWatchConnected.value && _marketWatchChannel != null) {
-      _requestMarketWatchData();
-      return;
-    }
-
-    _isConnectingMarketWatch = true;
-    _marketWatchReconnectAttempts = 0;
-
-    try {
-      _marketWatchChannel = WebSocketChannel.connect(Uri.parse(marketWatchUrl));
-      isMarketWatchConnected.value = true;
-
-      // ✅ FIX: Cancel old subscription before creating new one
-      _marketWatchSubscription?.cancel();
-      _marketWatchSubscription = _marketWatchChannel!.stream.listen(
-        (message) => _handleMarketWatchMessage(message),
-        onError: (error) {
-          AppLogger.error(
-            'Trading WS: Market watch connection error',
-            error: error,
-          );
-          isMarketWatchConnected.value = false;
-          _scheduleMarketWatchReconnect();
-        },
-        onDone: () {
-          AppLogger.websocket('Trading WS: Market watch connection closed');
-          isMarketWatchConnected.value = false;
-          if (!_isDisposed) {
-            _scheduleMarketWatchReconnect();
-          }
-        },
-        cancelOnError: false,
-      );
-
-      // Request data immediately to avoid lag on price feed during account switch
-      _requestMarketWatchData();
-      // Quick retry shortly after connect to cover any handshake timing
-      Future.delayed(const Duration(milliseconds: 150), () {
-        if (isMarketWatchConnected.value && !_isDisposed) {
-          _requestMarketWatchData();
-        }
-      });
-
-      _isConnectingMarketWatch = false;
-    } catch (e) {
-      _isConnectingMarketWatch = false;
-      AppLogger.error('Trading WS: Error connecting to market watch', error: e);
-      _scheduleMarketWatchReconnect();
-    }
-  }
+  /// Legacy `/ws/marketwatch` — intentionally not opened; pricing for instruments uses
+  /// [MarketWatchV2Service]. Restore connection logic here if a feature still needs this channel.
+  void _connectToMarketWatch() {}
 
   /// Ensure Symbols WebSocket is connected (lazy loading)
   /// Call this when user opens chart screen to connect on demand
@@ -1123,7 +1070,8 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
     });
   }
 
-  // Schedule reconnect for market watch
+  // Schedule reconnect for market watch (legacy channel disabled — kept for reference)
+  // ignore: unused_element
   void _scheduleMarketWatchReconnect() {
     if (_isDisposed || _marketWatchReconnectAttempts >= _maxReconnectAttempts) {
       return;
@@ -1225,7 +1173,8 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
     _handleSocketMessage(message, isOpenPositionChannel: true);
   }
 
-  // Request market watch data
+  // Request market watch data (legacy channel disabled — kept for reference)
+  // ignore: unused_element
   void _requestMarketWatchData() async {
     if (_marketWatchChannel == null || _isDisposed) return;
 
@@ -1250,7 +1199,8 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
     _sendEventToChannel(_marketWatchChannel, event);
   }
 
-  // Handle market watch messages
+  // Handle market watch messages (legacy channel disabled — kept for reference)
+  // ignore: unused_element
   void _handleMarketWatchMessage(dynamic message) {
     try {
       // ✅ PERFORMANCE: Handle both JSON and binary (MessagePack) formats
@@ -1861,6 +1811,13 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
               }
             } else {
               // Default to Position removal (Open Positions channel or legacy)
+              // ✅ FIX: Track volume and time of removal to prevent zombie re-adds
+              final pos = _tradingController.getMarketPositionById(positionId);
+              if (pos != null) {
+                _removedPositionVolumes[positionId] = pos.volume;
+                _removedPositionTimes[positionId] = DateTime.now();
+              }
+
               // ✅ FIX: Remove from UI immediately and track removal to block future updates
               _tradingController.removePositionFromList(positionId);
               _removedPositionIds.add(
@@ -1919,6 +1876,13 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
                   _removedPendingOrderIds.add(orderIdInt); // Track removal
                 } else {
                   // Not a pending order - remove from market positions
+                  // ✅ FIX: Track volume and time of removal
+                  final pos = _tradingController.getMarketPositionById(positionId);
+                  if (pos != null) {
+                    _removedPositionVolumes[positionId] = pos.volume;
+                    _removedPositionTimes[positionId] = DateTime.now();
+                  }
+
                   // ✅ FIX: Remove immediately and track to block future updates
                   _tradingController.removePositionFromList(positionId);
                   _removedPositionIds.add(
@@ -2860,44 +2824,36 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
                 ).toIso8601String()
                 : DateHelper.nowUtc().toIso8601String();
 
-        // Convert action code to proper format
+        // Convert action code to proper format using switch-case
         String action;
-        // Map action code to OrderType enum
-        // For pending orders, action codes 0-1 (market) shouldn't appear, but handle them
-        if (actionCode >= 2 && actionCode <= 5) {
-          // Valid pending order types: 2=Buy Limit, 3=Sell Limit, 4=Buy Stop, 5=Sell Stop
-          final orderType = OrderType.fromValue(actionCode);
-          action = orderType.displayName;
-        } else if (actionCode == 0 || actionCode == 1) {
-          // Market orders (0 or 1) shouldn't be pending, but if they appear, determine from price
-          // This is a fallback - determine order type from price relationship
-          if (priceOrder > 0 && priceCurrent > 0) {
-            if (priceOrder < priceCurrent) {
-              // Buy below current price = Buy Limit
-              action = 'Buy Limit';
+        switch (actionCode) {
+          case 0:
+            action = 'Buy';
+          case 1:
+            action = 'Sell';
+          case 2:
+            action = 'Buy Limit';
+          case 3:
+            action = 'Sell Limit';
+          case 4:
+            action = 'Buy Stop';
+          case 5:
+            action = 'Sell Stop';
+          case 6:
+            action = 'Buy Stop Limit';
+          case 7:
+            action = 'Sell Stop Limit';
+          default:
+            // For codes 0-1 (market) or unknown codes, determine from price relationship
+            if (priceOrder > 0 && priceCurrent > 0) {
+              if (priceOrder < priceCurrent) {
+                action = 'Buy Limit';
+              } else {
+                action = 'Sell Limit';
+              }
             } else {
-              // Sell above current price = Sell Limit
-              action = 'Sell Limit';
-            }
-          } else {
-            action = 'Buy Limit'; // Default fallback
-          }
-        } else {
-          // Invalid action code - determine from price relationship
-          if (priceOrder > 0 && priceCurrent > 0) {
-            if (priceOrder < priceCurrent) {
-              // Buy below current price = Buy Limit
-              action = 'Buy Limit';
-            } else if (priceOrder > priceCurrent) {
-              // Sell above current price = Sell Limit
-              action = 'Sell Limit';
-            } else {
-              // Prices equal - default to Buy Limit
               action = 'Buy Limit';
             }
-          } else {
-            action = 'Buy Limit'; // Default fallback
-          }
         }
 
         final pendingOrder = PendingOrder(
@@ -2989,7 +2945,6 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           final priceOrder = double.tryParse(orderData[3].toString()) ?? 0.0;
           final priceCurrent = double.tryParse(orderData[4].toString()) ?? 0.0;
           final volume = double.tryParse(orderData[5].toString()) ?? 0.0;
-          final actionStr = orderData[6].toString().toLowerCase();
 
           // Parse optional SL and TP (indices 7 and 8)
           final priceSL =
@@ -3001,18 +2956,43 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
                   ? (double.tryParse(orderData[8].toString()) ?? 0.0)
                   : 0.0;
 
-          // Convert action string to proper format
+          // Convert action string/code to proper format using switch-case
+          // actionCode at [6] can be either a number (2-7) or a string ("buy", "sell", etc.)
+          final actionCodeRaw = orderData[6];
           String action;
-          if (actionStr.contains('buy')) {
-            action = 'Buy Limit';
-          } else if (actionStr.contains('sell')) {
-            action = 'Sell Limit';
+          if (actionCodeRaw is num) {
+            final actionCode = actionCodeRaw.toInt();
+            switch (actionCode) {
+              case 0:
+                action = 'Buy';
+              case 1:
+                action = 'Sell';
+              case 2:
+                action = 'Buy Limit';
+              case 3:
+                action = 'Sell Limit';
+              case 4:
+                action = 'Buy Stop';
+              case 5:
+                action = 'Sell Stop';
+              case 6:
+                action = 'Buy Stop Limit';
+              case 7:
+                action = 'Sell Stop Limit';
+              default:
+                action = 'Buy Limit';
+            }
           } else {
-            // Try to parse as is or default
-            action =
-                actionStr.isEmpty
-                    ? 'Buy Limit'
-                    : actionStr[0].toUpperCase() + actionStr.substring(1);
+            final actionStr = actionCodeRaw.toString().toLowerCase();
+            if (actionStr.contains('buy')) {
+              action = 'Buy Limit';
+            } else if (actionStr.contains('sell')) {
+              action = 'Sell Limit';
+            } else {
+              action = actionStr.isEmpty
+                  ? 'Buy Limit'
+                  : actionStr[0].toUpperCase() + actionStr.substring(1);
+            }
           }
 
           final pendingOrder = PendingOrder(
@@ -3176,21 +3156,6 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           final symbol = item[offset + 2].toString();
           final action = int.tryParse(item[offset + 3].toString()) ?? 0;
           final volume = double.tryParse(item[offset + 4].toString()) ?? 0.0;
-
-          // ✅ FIX: Don't permanently block a position after a transient "r" (remove).
-          // Some servers emit: u(op) -> r(id) -> u(op) for partial closes. In that case,
-          // the position still exists with reduced volume and must be allowed back in.
-          final positionIdStr = positionId.toString();
-          final bool wasMarkedRemoved = _removedPositionIds.contains(positionIdStr) ||
-              _tradingController.isPositionDeleted(positionIdStr);
-          if (wasMarkedRemoved) {
-            if (volume > 0) {
-              _removedPositionIds.remove(positionIdStr);
-              _tradingController.unmarkPositionAsDeleted(positionIdStr);
-            } else {
-              continue;
-            }
-          }
           final priceOpen = double.tryParse(item[offset + 5].toString()) ?? 0.0;
           final priceCurrent =
               double.tryParse(item[offset + 6].toString()) ?? 0.0;
@@ -3231,6 +3196,40 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
               item.length > offset + 13
                   ? (int.tryParse(item[offset + 13].toString()) ?? 5)
                   : 5;
+
+          // ✅ FIX: Handle "zombie" positions that come back after removal.
+          // We only allow a removed position back in if it's a valid PARTIAL close
+          // (i.e., volume is strictly LESS than when it was removed).
+          // Stale updates with the same volume are ignored.
+          final positionIdStr = positionId.toString();
+          final bool wasMarkedRemoved =
+              _removedPositionIds.contains(positionIdStr) ||
+              _tradingController.isPositionDeleted(positionIdStr);
+
+          if (wasMarkedRemoved) {
+            final lastVolume = _removedPositionVolumes[positionIdStr];
+            final removedAt = _removedPositionTimes[positionIdStr];
+            final now = DateTime.now();
+
+            // If it arrived within 15 seconds of removal and volume is same/more, it's likely a zombie
+            bool isZombie = false;
+            if (removedAt != null && now.difference(removedAt).inSeconds < 15) {
+              if (lastVolume != null && volume >= lastVolume) {
+                isZombie = true;
+              }
+            }
+
+            if (!isZombie && volume > 0) {
+              // Valid partial close - allow it back in
+              _removedPositionIds.remove(positionIdStr);
+              _removedPositionVolumes.remove(positionIdStr);
+              _removedPositionTimes.remove(positionIdStr);
+              _tradingController.unmarkPositionAsDeleted(positionIdStr);
+            } else {
+              // Ignore zombie or zero-volume update
+              continue;
+            }
+          }
 
           final position = TradingPosition(
             mt5Account: int.tryParse(account) ?? 0,
@@ -3367,20 +3366,6 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
       final action =
           int.tryParse(item[offset + 3].toString()) ?? 0; // 0 = BUY, 1 = SELL
       final volume = double.tryParse(item[offset + 4].toString()) ?? 0.0;
-
-      // ✅ FIX: Don't permanently block a position after a transient "r" (remove).
-      // Allow it back in if the update shows remaining volume (partial close).
-      final positionIdStr = positionId.toString();
-      final bool wasMarkedRemoved = _removedPositionIds.contains(positionIdStr) ||
-          _tradingController.isPositionDeleted(positionIdStr);
-      if (wasMarkedRemoved) {
-        if (volume > 0) {
-          _removedPositionIds.remove(positionIdStr);
-          _tradingController.unmarkPositionAsDeleted(positionIdStr);
-        } else {
-          return;
-        }
-      }
       final priceOpen = double.tryParse(item[offset + 5].toString()) ?? 0.0;
       final priceCurrent = double.tryParse(item[offset + 6].toString()) ?? 0.0;
       final profit = double.tryParse(item[offset + 7].toString()) ?? 0.0;
@@ -3419,6 +3404,34 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           item.length > offset + 13
               ? (int.tryParse(item[offset + 13].toString()) ?? 5)
               : 5;
+
+      // ✅ FIX: Handle "zombie" positions for single updates
+      final positionIdStr = positionId.toString();
+      final bool wasMarkedRemoved =
+          _removedPositionIds.contains(positionIdStr) ||
+          _tradingController.isPositionDeleted(positionIdStr);
+
+      if (wasMarkedRemoved) {
+        final lastVolume = _removedPositionVolumes[positionIdStr];
+        final removedAt = _removedPositionTimes[positionIdStr];
+        final now = DateTime.now();
+
+        bool isZombie = false;
+        if (removedAt != null && now.difference(removedAt).inSeconds < 15) {
+          if (lastVolume != null && volume >= lastVolume) {
+            isZombie = true;
+          }
+        }
+
+        if (!isZombie && volume > 0) {
+          _removedPositionIds.remove(positionIdStr);
+          _removedPositionVolumes.remove(positionIdStr);
+          _removedPositionTimes.remove(positionIdStr);
+          _tradingController.unmarkPositionAsDeleted(positionIdStr);
+        } else {
+          return;
+        }
+      }
 
       // Convert to TradingPosition format
       // Handle TP/SL: preserve actual values, only use '0' if truly 0.0
