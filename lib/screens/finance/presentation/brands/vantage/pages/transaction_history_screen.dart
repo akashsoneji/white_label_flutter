@@ -149,8 +149,8 @@ class _VantageTransactionHistoryScreenState
       onPopInvoked: (didPop) {},
       child: Scaffold(
         backgroundColor: AppColors.isDarkMode
-            ? const Color(0xFF0D1117)
-            : const Color(0xFFF8F9FC),
+            ? AppColors.backgroundDarkAlt
+            : AppColors.backgroundLightAlt,
         appBar: _buildAppBar(),
         body: SafeArea(
           child: RefreshIndicator(

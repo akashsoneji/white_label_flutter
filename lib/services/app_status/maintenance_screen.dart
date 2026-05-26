@@ -28,7 +28,7 @@ class MaintenanceScreen extends StatelessWidget {
                 height: 120.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                 ),
                 child: Icon(
                   Icons.build_circle,

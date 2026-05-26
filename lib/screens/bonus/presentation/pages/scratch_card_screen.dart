@@ -1159,7 +1159,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
                             '\$${r.amount.toStringAsFixed(2)}',
                             style: TextStyle(
                               fontSize: 13.sp,
-                              color: const Color(0xFF2A9D5C),
+                              color: AppColors.prizeGreen,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -1627,7 +1627,7 @@ class _MockStreakBanner extends StatelessWidget {
                   (data["title"] ?? "").toString(),
                   style: TextStyle(
                     fontSize: 16.sp,
-                    color: const Color(0xFFFDCC29),
+                    color: AppColors.prizeYellow,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -1796,7 +1796,7 @@ class _MockUnlockCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(6.r),
             child: Container(
               height: 10.h,
-              color: const Color(0xFFF0E0F8),
+              color: AppColors.surfacePurpleLight,
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: FractionallySizedBox(
@@ -1812,9 +1812,9 @@ class _MockUnlockCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF4E0),
+              color: AppColors.surfaceGold,
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: const Color(0xFFFDCC29), width: 0.8),
+              border: Border.all(color: AppColors.prizeYellow, width: 0.8),
             ),
             child: Row(
               children: [
@@ -1825,7 +1825,7 @@ class _MockUnlockCard extends StatelessWidget {
                     text: TextSpan(
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: const Color(0xFF7A5500),
+                        color: AppColors.prizeBrown,
                         height: 1.3,
                       ),
                       children: [
@@ -1922,7 +1922,7 @@ class _MockUnlockCard extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isDone
-                                      ? const Color(0xFFEDF7EE)
+                                      ? AppColors.prizeBgGreen
                                       : Colors.grey.shade200,
                                   borderRadius: BorderRadius.circular(20.r),
                                 ),
@@ -1931,7 +1931,7 @@ class _MockUnlockCard extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     color: isDone
-                                        ? const Color(0xFF2A7D3F)
+                                        ? AppColors.prizeDarkGreen
                                         : Colors.grey.shade600,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -1945,7 +1945,7 @@ class _MockUnlockCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13.sp,
                             color: isDone
-                                ? const Color(0xFF2A9D5C)
+                                ? AppColors.prizeGreen
                                 : Colors.grey.shade500,
                             fontWeight: FontWeight.w500,
                           ),
@@ -2078,7 +2078,7 @@ class _MockLeaderboardCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: isYou ? const Color(0xFFFDCC29) : AppColors.primary,
+                          color: isYou ? AppColors.prizeYellow : AppColors.primary,
                         ),
                       ),
                     ),
@@ -2121,7 +2121,7 @@ class _MockLeaderboardCard extends StatelessWidget {
                     '\$${amount.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: 13.sp,
-                      color: const Color(0xFF2A9D5C),
+                      color: AppColors.prizeGreen,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -2208,14 +2208,14 @@ class _MockHistoryCard extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEDF7EE),
+                            color: AppColors.prizeBgGreen,
                             borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Text(
                             chip,
                             style: TextStyle(
                               fontSize: 10.sp,
-                              color: const Color(0xFF2A7D3F),
+                              color: AppColors.prizeDarkGreen,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -2229,7 +2229,7 @@ class _MockHistoryCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF2A9D5C),
+                    color: AppColors.prizeGreen,
                   ),
                 ),
               ],
@@ -2752,7 +2752,7 @@ class _NextCardCountdownBannerState extends State<_NextCardCountdownBanner> {
         margin: EdgeInsets.symmetric(horizontal: 16.w),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFBEA),
+          color: AppColors.prizeBackground,
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(color: Colors.yellow.shade300, width: 1),
         ),
@@ -3573,7 +3573,7 @@ class _ActiveScratchCardState extends State<_ActiveScratchCard> {
                   accuracy: ScratchAccuracy.low,
                   brushSize: 70,
                   threshold: 100,
-                  color: const Color(0xFF0F1E2D),
+                  color: AppColors.prizeDarkBg,
                   image: Image.memory(_svgBytes!, fit: BoxFit.cover),
                   onChange: widget.ctrl.onProgress,
                   onScratchEnd: widget.ctrl.onScratchEnd,
@@ -3611,7 +3611,7 @@ class _ScratchCoverFace extends StatelessWidget {
     // Ensure the scratch-cover render is fully opaque (no see-through to reward layer).
     return ColoredBox(
       color: AppColors.primary,
-      // color: const Color(0xFF0F1E2D), // matches the dark card background
+      // color: AppColors.prizeDarkBg, // matches the dark card background
       child: SvgPicture.asset(
         'assets/svg/more/scratch_pop.svg',
         fit: BoxFit.cover,

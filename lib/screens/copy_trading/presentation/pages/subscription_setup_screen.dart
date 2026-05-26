@@ -75,14 +75,13 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: AppColors.tradeBackgroundCenterColor,
       appBar: AppBar(
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        leading: AppBackButton(onPressed: ()=> Get.back(),
-        ),
+        leading: AppBackButton(onPressed: () => Get.back()),
         title: const Text(
           'Subscription Setup',
           style: TextStyle(
@@ -127,7 +126,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                         height: 20,
                       ),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         '50.01 USD',
                         style: TextStyle(
                           fontSize: 14,
@@ -228,7 +227,8 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                       fontWeight: FontWeight.w400,
                                       color:
                                           selected
-                                              ? AppColors.whiteColor.withOpacity(0.70)
+                                              ? AppColors.whiteColor
+                                                  .withOpacity(0.70)
                                               : AppColors.textPrimary,
                                     ),
                                   ),
@@ -240,7 +240,8 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                       fontWeight: FontWeight.w400,
                                       color:
                                           selected
-                                              ? AppColors.whiteColor.withOpacity(0.70)
+                                              ? AppColors.whiteColor
+                                                  .withOpacity(0.70)
                                               : AppColors.textPrimary,
                                     ),
                                   ),
@@ -262,8 +263,8 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                       keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 6),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 2),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 2),
                       child: Text(
                         'Required investment : \$188',
                         style: TextStyle(
@@ -324,7 +325,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                       Expanded(
                         child: RichText(
                           text: TextSpan(
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: AppColors.icongrey,
                             ),
@@ -414,7 +415,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
             ),
             elevation: 0,
           ),
-          child:   Text(
+          child: Text(
             'Start Copying',
             style: TextStyle(
               fontSize: 16,
@@ -528,5 +529,4 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
       ),
     );
   }
-
 }

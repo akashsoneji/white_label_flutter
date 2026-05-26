@@ -1403,7 +1403,7 @@ class _MiniPresetChip extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : const Color(0xFFF3F4F6),
+          color: selected ? AppColors.primary : AppColors.inactivePlanBg,
           borderRadius: BorderRadius.circular(8.r),
           border: Border.all(color: selected ? AppColors.primary : Colors.grey.withOpacity(0.18)),
         ),
@@ -1434,7 +1434,7 @@ class _ModeChip extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : const Color(0xFFF3F4F6),
+          color: selected ? AppColors.primary : AppColors.inactivePlanBg,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: selected ? AppColors.primary : Colors.grey.withOpacity(0.18)),
         ),
@@ -1889,13 +1889,13 @@ class _Pill extends StatelessWidget {
       border = AppColors.primary.withOpacity(0.22);
       fg = AppColors.primary;
     } else if (tone == _PillTone.success) {
-      bg = const Color(0xFF22C55E).withOpacity(0.12);
-      border = const Color(0xFF22C55E).withOpacity(0.25);
-      fg = const Color(0xFF22C55E);
+      bg = AppColors.statusGreen.withOpacity(0.12);
+      border = AppColors.statusGreen.withOpacity(0.25);
+      fg = AppColors.statusGreen;
     } else {
-      bg = const Color(0xFFF59E0B).withOpacity(0.12);
-      border = const Color(0xFFF59E0B).withOpacity(0.25);
-      fg = const Color(0xFFF59E0B);
+      bg = AppColors.statusYellow.withOpacity(0.12);
+      border = AppColors.statusYellow.withOpacity(0.25);
+      fg = AppColors.statusYellow;
     }
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),

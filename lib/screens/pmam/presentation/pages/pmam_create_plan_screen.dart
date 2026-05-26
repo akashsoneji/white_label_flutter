@@ -225,7 +225,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                         return Container(
                           padding: EdgeInsets.all(12.w),
                           decoration: BoxDecoration(
-                            border: Border.all(color: const Color(0xFFDDDDDD)),
+                            border: Border.all(color: AppColors.dividerMedium),
                             borderRadius: BorderRadius.circular(10.r),
                           ),
                           child: Text(
@@ -255,13 +255,13 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.r),
                             borderSide: const BorderSide(
-                              color: Color(0xFFDDDDDD),
+                              color: AppColors.dividerMedium,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.r),
                             borderSide: const BorderSide(
-                              color: Color(0xFFDDDDDD),
+                              color: AppColors.dividerMedium,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
@@ -469,11 +469,11 @@ class _StyledTextField extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
+          borderSide: const BorderSide(color: AppColors.dividerMedium),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: Color(0xFFDDDDDD)),
+          borderSide: const BorderSide(color: AppColors.dividerMedium),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),

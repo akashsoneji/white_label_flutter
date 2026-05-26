@@ -76,7 +76,7 @@ class KycIntroScreen extends StatelessWidget {
                           stageCompletion?.mobileVerified != null &&
                                   stageCompletion?.emailVerified != null &&
                                   stageCompletion?.personalDetails == true
-                              ? const Color(0xFFE8F5E8) // Light green
+                              ? AppColors.kycStageComplete // Light green
                               : AppColors.primary.withOpacity(
                                 0.1,
                               ), // Light purple
@@ -119,7 +119,7 @@ class KycIntroScreen extends StatelessWidget {
                       backgroundColor:
                           stageCompletion?.identityVerified == true &&
                                   stageCompletion?.addressProofVerified == true
-                              ? const Color(0xFFE8F5E8) // Light green
+                              ? AppColors.kycStageComplete // Light green
                               : (stageCompletion?.mobileVerified != null &&
                                   stageCompletion?.emailVerified != null &&
                                   stageCompletion?.personalDetails == true)
@@ -169,9 +169,9 @@ class KycIntroScreen extends StatelessWidget {
                               : Colors.grey[400]!,
                       backgroundColor:
                           stageCompletion?.addressProofVerified == true
-                              ? const Color(0xFFE8F5E8) // Light green
+                              ? AppColors.kycStageComplete // Light green
                               : stageCompletion?.identityVerified == true
-                              ? const Color(0xFFF8F3FF) // Light purple
+                              ? AppColors.kycStageActive // Light purple
                               : AppColors.whiteColor,
                       iconColor:
                           stageCompletion?.addressProofVerified == true
@@ -284,7 +284,7 @@ class KycIntroScreen extends StatelessWidget {
           border:
               isActive
                   ? Border.all(color: AppColors.primary, width: 1)
-                  : Border.all(color: const Color(0xFFE3E7EF), width: 1),
+                  : Border.all(color: AppColors.kycFeatureBorder, width: 1),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

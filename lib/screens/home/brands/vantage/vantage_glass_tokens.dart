@@ -16,7 +16,7 @@ class VantageUiTokens {
       AppColors.border.withValues(alpha: AppColors.isDarkMode ? 0.28 : 0.14);
 
   static Color get surface =>
-      (AppColors.isDarkMode ? const Color(0xFF151A22) : AppColors.card);
+      (AppColors.isDarkMode ? AppColors.surfaceDark : AppColors.card);
 
   static Color get surfaceAlt =>
       AppColors.surface.withValues(alpha: AppColors.isDarkMode ? 0.92 : 0.96);

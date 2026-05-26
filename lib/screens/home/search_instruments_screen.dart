@@ -141,7 +141,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
                     decoration: BoxDecoration(
                       color:
                           isSelected
-                              ? AppColors.selectedChipBackground
+                              ? AppColors.chipSelected
                               : Colors.transparent,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: AppColors.primary, width: 1),
@@ -153,7 +153,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
                           fontSize: 12.sp,
                           color:
                               isSelected
-                                  ? AppColors.selectedChipForeground
+                                  ? AppColors.chipText
                                   : AppColors.primary,
                           fontWeight:
                               isSelected ? FontWeight.w600 : FontWeight.w400,

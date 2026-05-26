@@ -282,7 +282,7 @@ class _StepCard extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         border: Border.all(
-          color: done ? AppColors.primary : const Color(0xFFE0E0E0),
+          color: done ? AppColors.primary : AppColors.stepperInactive,
           width: 1.2,
         ),
         borderRadius: BorderRadius.circular(12.r),
@@ -299,7 +299,7 @@ class _StepCard extends StatelessWidget {
                 width: 24.w,
                 height: 24.w,
                 decoration: BoxDecoration(
-                  color: done ? AppColors.primary : const Color(0xFFD0D0D0),
+                  color: done ? AppColors.primary : AppColors.stepperActive,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -325,7 +325,7 @@ class _StepCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: done ? AppColors.primary : const Color(0xFFBDBDBD),
+                  color: done ? AppColors.primary : AppColors.stepperComplete,
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Text(

@@ -96,7 +96,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                         width: 40.w,
                         height: 4.h,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFDDDDDD),
+                          color: AppColors.dividerMedium,
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),

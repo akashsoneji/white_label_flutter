@@ -232,7 +232,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.whiteColor,
                           borderRadius: BorderRadius.circular(10.r),
-                          border: Border.all(color: const Color(0xFFEAEAEA)),
+                          border: Border.all(color: AppColors.dividerLight),
                         ),
                         child: Row(
                           children: [
@@ -278,7 +278,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.whiteColor,
                           borderRadius: BorderRadius.circular(10.r),
-                          border: Border.all(color: const Color(0xFFEAEAEA)),
+                          border: Border.all(color: AppColors.dividerLight),
                         ),
                         child: Row(
                           children: [
@@ -320,7 +320,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                   decoration: BoxDecoration(
                     color: AppColors.tradeBackgroundCenterColor,
                     borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: const Color(0xFFEAEAEA)),
+                    border: Border.all(color: AppColors.dividerLight),
                   ),
                   child: Column(
                     children: [
@@ -508,7 +508,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.whiteColor,
                           borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(color: const Color(0xFFEAEAEA)),
+                          border: Border.all(color: AppColors.dividerLight),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.04),

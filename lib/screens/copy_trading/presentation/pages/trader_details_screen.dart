@@ -488,19 +488,19 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                 children: [
                   Icon(Icons.star, color: AppColors.primary, size: 18),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'High Achiever',
                     style: TextStyle(
-                      color: AppColors.icongrey,
+                      color: AppColors.iconGrey,
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                 ],
               ),
-              const Icon(
+              Icon(
                 Icons.info_outline,
-                color: AppColors.icongrey,
+                color: AppColors.iconGrey,
                 size: 16,
               ),
             ],
@@ -546,10 +546,10 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Copiers',
                     style: TextStyle(
-                      color: AppColors.icongrey,
+                      color: AppColors.iconGrey,
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                     ),
@@ -590,9 +590,9 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Profit and Loss',
-            style: TextStyle(color: AppColors.icongrey, fontSize: 10),
+            style: TextStyle(color: AppColors.iconGrey, fontSize: 10),
           ),
           const SizedBox(height: 4),
           Row(
@@ -671,8 +671,8 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.icongrey,
+          style: TextStyle(
+            color: AppColors.iconGrey,
             fontSize: 12,
             fontWeight: FontWeight.w400,
           ),
@@ -738,13 +738,13 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                color: AppColors.icongrey,
+              style: TextStyle(
+                color: AppColors.iconGrey,
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
               ),
             ),
-            const Icon(Icons.info_outline, color: AppColors.icongrey, size: 16),
+            Icon(Icons.info_outline, color: AppColors.iconGrey, size: 16),
           ],
         ),
         const SizedBox(height: 4),

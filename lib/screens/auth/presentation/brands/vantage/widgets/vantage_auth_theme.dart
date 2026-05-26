@@ -1,3 +1,4 @@
+import 'package:crm_app/constants/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -10,17 +11,17 @@ class VantageAuthTheme {
   static Color get background => FlavorConfig.instance.secondaryColor;
   static const Color card = Colors.white;
   static Color get primary => FlavorConfig.instance.primaryColor;
-  static const Color text = Color(0xFF111827);
-  static const Color muted = Color(0xFF6B7280);
-  static const Color fieldFill = Color(0xFFF3F4F6);
-  static const Color fieldBorder = Color(0xFFE5E7EB);
+  static Color text = AppColors.textPrimary;
+  static Color muted = AppColors.textGrey;
+  static Color fieldFill = AppColors.inactivePlanBg;
+  static Color fieldBorder = AppColors.surfaceLight;
 
   static const Radius cardRadius = Radius.circular(28);
 
   static const double fieldBorderRadius = 24;
 
   static OutlineInputBorder pillOutlineBorder({
-    Color borderColor = fieldBorder,
+    Color borderColor = const Color(0xFFE5E7EB),
     double width = 1,
   }) {
     return OutlineInputBorder(
@@ -57,11 +58,11 @@ class VantageAuthTheme {
       contentPadding: padding,
       border: OutlineInputBorder(
         borderRadius: radius,
-        borderSide: const BorderSide(color: fieldBorder),
+        borderSide: BorderSide(color: fieldBorder),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: radius,
-        borderSide: const BorderSide(color: fieldBorder),
+        borderSide: BorderSide(color: fieldBorder),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: radius,
@@ -69,7 +70,7 @@ class VantageAuthTheme {
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: radius,
-        borderSide: const BorderSide(color: fieldBorder),
+        borderSide: BorderSide(color: fieldBorder),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: radius,
@@ -78,7 +79,7 @@ class VantageAuthTheme {
       errorStyle: const TextStyle(fontSize: 0, height: 0),
       disabledBorder: OutlineInputBorder(
         borderRadius: radius,
-        borderSide: const BorderSide(color: fieldBorder),
+        borderSide: BorderSide(color: fieldBorder),
       ),
     );
   }
@@ -91,11 +92,11 @@ class VantageAuthTheme {
       contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       border: OutlineInputBorder(
         borderRadius: radius,
-        borderSide: const BorderSide(color: fieldBorder),
+        borderSide: BorderSide(color: fieldBorder),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: radius,
-        borderSide: const BorderSide(color: fieldBorder),
+        borderSide: BorderSide(color: fieldBorder),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: radius,
@@ -103,7 +104,7 @@ class VantageAuthTheme {
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: radius,
-        borderSide: const BorderSide(color: fieldBorder),
+        borderSide: BorderSide(color: fieldBorder),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: radius,
@@ -112,7 +113,7 @@ class VantageAuthTheme {
       errorStyle: const TextStyle(fontSize: 0, height: 0),
       disabledBorder: OutlineInputBorder(
         borderRadius: radius,
-        borderSide: const BorderSide(color: fieldBorder),
+        borderSide: BorderSide(color: fieldBorder),
       ),
     );
   }

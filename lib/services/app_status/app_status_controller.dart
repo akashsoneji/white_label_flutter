@@ -147,19 +147,16 @@ class AppStatusController extends GetxController {
     _forceUpdateDialogShown = true;
 
     Get.dialog(
-      WillPopScope(
-        onWillPop: () async {
-          // For force update, prevent closing
-          if (isForceUpdate) {
-            return false;
+      PopScope(
+        canPop: !isForceUpdate,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop && isForceUpdate) {
+            _forceUpdateDialogShown = false;
           }
-          // For non-force update, allow closing
-          _forceUpdateDialogShown = false;
-          return true;
         },
         child: force_update.ForceUpdateDialog(isForceUpdate: isForceUpdate),
       ),
-      barrierDismissible: false, // Prevent closing by tapping outside
+      barrierDismissible: false,
     );
     AppLogger.debug(
       'AppStatusController: Force update dialog shown (force: $isForceUpdate)',
@@ -252,29 +249,23 @@ class AppStatusController extends GetxController {
       String url;
 
       if (Platform.isAndroid) {
-        // Android Play Store
-        url = 'https://play.google.com/store/apps/details?id=$packageName';
-      } else if (Platform.isIOS) {
-        // iOS App Store
-        url = 'https://apps.apple.com/app/id$packageName';
-
-        // Use backend provided URL if available
-        if (statusData.value?.updateUrlIos != null &&
-            statusData.value!.updateUrlIos!.isNotEmpty) {
-          url = statusData.value!.updateUrlIos!;
+        // Prefer backend URL if available (can be Play Store URL or direct APK URL)
+        final androidUrl = statusData.value?.updateUrlAndroid;
+        if (androidUrl != null && androidUrl.isNotEmpty) {
+          url = androidUrl;
+        } else {
+          url = 'https://play.google.com/store/apps/details?id=$packageName';
         }
+      } else if (Platform.isIOS) {
+        // Prefer backend URL for iOS; fallback to App Store URL using package name
+        url = statusData.value?.updateUrlIos?.isNotEmpty == true
+            ? statusData.value!.updateUrlIos!
+            : 'https://apps.apple.com/app/id$packageName';
       } else {
         AppLogger.error(
           'AppStatusController: Unsupported platform for app store',
         );
         return;
-      }
-
-      // Android custom URL check
-      if (Platform.isAndroid &&
-          statusData.value?.updateUrlAndroid != null &&
-          statusData.value!.updateUrlAndroid!.isNotEmpty) {
-        url = statusData.value!.updateUrlAndroid!;
       }
 
       final uri = Uri.parse(url);

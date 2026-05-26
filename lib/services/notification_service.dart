@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/color.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -224,7 +225,7 @@ class NotificationService {
         enableVibration: true,
         sound: const RawResourceAndroidNotificationSound('alert_sound'),
         icon: '@mipmap/ic_launcher',
-        color: const Color(0xFF2196F3),
+        color: AppColors.notificationBlue,
         largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
         styleInformation: BigTextStyleInformation(
           _buildNotificationContent(
@@ -403,7 +404,7 @@ class NotificationService {
         enableVibration: true,
         sound: RawResourceAndroidNotificationSound('alert_sound'),
         icon: '@mipmap/ic_launcher',
-        color: Color(0xFF2196F3),
+        color: AppColors.notificationBlue,
       ),
       iOS: DarwinNotificationDetails(
         presentAlert: true,

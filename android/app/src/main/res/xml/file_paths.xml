@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- APK files downloaded to app cache directory -->
+    <cache-path name="apk_cache" path="." />
+    <!-- APK files in files directory (if ever needed) -->
+    <files-path name="apk_files" path="updates/" />
+</paths>

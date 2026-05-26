@@ -542,7 +542,7 @@ class _PlanCard extends StatelessWidget {
       case 'approved':
         return AppColors.green;
       case 'pending_admin':
-        return const Color(0xFFF59E0B);
+        return AppColors.statusYellow;
       case 'inactive':
         return AppColors.textGrey;
       default:

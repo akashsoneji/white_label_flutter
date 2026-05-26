@@ -172,15 +172,15 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
       return Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF8E1),
+          color: AppColors.warningBgLight,
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: const Color(0xFFFFCC02), width: 1.2),
+          border: Border.all(color: AppColors.warningBorder, width: 1.2),
         ),
         child: Row(
           children: [
             Icon(
               Icons.schedule_rounded,
-              color: const Color(0xFFF59E0B),
+              color: AppColors.statusYellow,
               size: 22.sp,
             ),
             SizedBox(width: 12.w),
@@ -193,7 +193,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF92400E),
+                      color: AppColors.warningTextDark,
                     ),
                   ),
                   SizedBox(height: 2.h),
@@ -201,7 +201,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
                     'Your application is under review by admin.',
                     style: TextStyle(
                       fontSize: 12.sp,
-                      color: const Color(0xFFA37E3B),
+                      color: AppColors.warningTextMedium,
                     ),
                   ),
                 ],
@@ -216,7 +216,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
       return Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFFEF2F2),
+          color: AppColors.errorBgLight,
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(color: AppColors.red.withOpacity(0.4), width: 1.2),
         ),

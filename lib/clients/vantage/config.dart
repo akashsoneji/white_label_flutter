@@ -15,8 +15,8 @@ class VantageConfig extends BaseClientConfig {
         splashLogoPath: 'splash_logo.svg',
         appIconPath: 'app_icon.png',
         // Keep same APIs (per requirement) unless overridden later.
-        apiBaseUrl: 'https://demo.tenaxcode.com/api/',
-        websocketUrl: 'wss://demo.tenaxcode.com/trade-engine',
-        chartBaseUrl: 'https://demo.tenaxcode.com',
+        apiBaseUrl: 'https://my.pipze.com/api/',
+        websocketUrl: 'wss://my.pipze.com/trade-engine',
+        chartBaseUrl: 'https://my.pipze.com',
       );
 }

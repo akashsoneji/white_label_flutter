@@ -375,11 +375,11 @@ ThemeData _buildLightTheme() {
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.borderLight),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.borderLight),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -469,11 +469,11 @@ ThemeData _buildDarkTheme() {
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.borderDark),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.borderDark),
+        borderSide: BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -721,7 +721,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
       backgroundColor:
           FlavorConfig.isVantage()
               ? FlavorConfig.instance.primaryColor
-              : AppColors.backgroundLight,
+              : AppColors.surface,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

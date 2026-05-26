@@ -214,7 +214,7 @@ class _PmamManagerPlanDetailScreenState
                 ],
               ),
             ),
-            const Divider(height: 1, color: Color(0xFFEEEEEE)),
+            const Divider(height: 1, color: AppColors.dividerDark),
 
             Expanded(
               child: TabBarView(
@@ -534,7 +534,7 @@ class _PmamManagerPlanDetailScreenState
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: AppColors.whiteColor,
-              border: Border.all(color: const Color(0xFFEEEEEE)),
+              border: Border.all(color: AppColors.dividerDark),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Row(
@@ -582,7 +582,7 @@ class _PmamManagerPlanDetailScreenState
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           decoration: BoxDecoration(
             color: AppColors.whiteColor,
-            border: Border.all(color: const Color(0xFFEEEEEE)),
+            border: Border.all(color: AppColors.dividerDark),
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: DropdownButtonHideUnderline(
@@ -635,7 +635,7 @@ class _PmamManagerPlanDetailScreenState
           // padding: EdgeInsets.symmetric(horizontal: 5.w),
           decoration: BoxDecoration(
             color: AppColors.whiteColor,
-            border: Border.all(color: const Color(0xFFEEEEEE)),
+            border: Border.all(color: AppColors.dividerDark),
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: TextField(
@@ -743,7 +743,7 @@ class _PmamManagerPlanDetailScreenState
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           decoration: BoxDecoration(
             color: AppColors.whiteColor,
-            border: Border.all(color: const Color(0xFFEEEEEE)),
+            border: Border.all(color: AppColors.dividerDark),
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: DropdownButtonHideUnderline(
@@ -800,7 +800,7 @@ class _PmamManagerPlanDetailScreenState
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           decoration: BoxDecoration(
             color: AppColors.whiteColor,
-            border: Border.all(color: const Color(0xFFEEEEEE)),
+            border: Border.all(color: AppColors.dividerDark),
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Obx(() {
@@ -889,7 +889,7 @@ class _AllocCardState extends State<_AllocCard> {
             color:
                 isExpanded
                     ? AppColors.primary.withOpacity(0.5)
-                    : const Color(0xFFEEEEEE),
+                    : AppColors.dividerDark,
           ),
         ),
         child: Column(
@@ -1007,7 +1007,7 @@ class _InvestorCardState extends State<_InvestorCard> {
             color:
                 isExpanded
                     ? AppColors.primary.withOpacity(0.5)
-                    : const Color(0xFFEEEEEE),
+                    : AppColors.dividerDark,
           ),
         ),
         child: Column(

@@ -4,6 +4,6 @@
   "is_force_update": false,
   "later_date": "2026-03-15T23:59:59Z",
   "update_url_ios": "https://apps.apple.com/app/idxxxxxxx",
-  "update_url_android": "https://play.google.com/store/apps/details?id=com.vantage.crmapp",
+  "update_url_android": "https://play.google.com/store/apps/details?id=com.vantage.crmapp.qa",
   "release_notes": "We have added exciting new features and fixed some bugs."
 }

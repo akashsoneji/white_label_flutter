@@ -615,25 +615,25 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       _CompactGridItem(
         icon: 'assets/svg/more/deposit.svg',
         label: languageService.tr('general_deposit'),
-        color: const Color(0xFF4CAF50),
+        color: AppColors.iconGreen,
         onTap: () => Get.to(() => PaymentMethodsScreen(accountNumber: '')),
       ),
       _CompactGridItem(
         icon: 'assets/svg/more/withdrawal.svg',
         label: languageService.tr('general_withdraw'),
-        color: const Color(0xFFFF9800),
+        color: AppColors.iconOrange,
         onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
       ),
       _CompactGridItem(
         icon: 'assets/svg/more/internal-transfer.svg',
         label: languageService.tr('general_transfer'),
-        color: const Color(0xFF2196F3),
+        color: AppColors.notificationBlue,
         onTap: () => Get.toNamed(AppPages.INTERNAL_TRANSFER),
       ),
       _CompactGridItem(
         icon: 'assets/svg/more/transaction_history.svg',
         label: languageService.tr('general_history'),
-        color: const Color(0xFF9C27B0),
+        color: AppColors.iconPurple,
         onTap: () => Get.toNamed(AppPages.TRANSACTION_HISTORY),
       ),
     ];
@@ -726,7 +726,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       _CompactMenuItem(
         icon: 'assets/svg/more/wallet.svg',
         label: languageService.tr('general_finance'),
-        color: const Color(0xFF00BFA5),
+        color: AppColors.iconTeal,
         onTap: () async {
           await Get.toNamed(AppPages.FINANCE);
           if (mounted) _refreshDataIfNeeded();
@@ -744,7 +744,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       items.add(_CompactMenuItem(
         icon: 'assets/svg/more/copy.svg',
         label: languageService.tr('more_copy_trading'),
-        color: const Color(0xFF1E88E5),
+        color: AppColors.iconBlue,
         onTap: () => Get.toNamed(AppPages.COPY_TRADING_HUB),
       ));
     }
@@ -752,7 +752,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       items.add(_CompactMenuItem(
         icon: 'assets/svg/more/demo-account.svg',
         label: 'PAMM',
-        color: const Color(0xFF29B6F6),
+        color: AppColors.iconLightBlue,
         onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
       ));
     }
@@ -764,19 +764,19 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       _CompactMenuItem(
         icon: 'assets/svg/more/change_password.svg',
         label: languageService.tr('change_password'),
-        color: const Color(0xFFEF5350),
+        color: AppColors.iconRed,
         onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
       ),
       _CompactMenuItem(
         icon: 'assets/svg/more/two_factor_auth.svg',
         label: languageService.tr('two_factor_authentication'),
-        color: const Color(0xFF7E57C2),
+        color: AppColors.iconDeepPurple,
         onTap: () => Get.toNamed(AppPages.TWO_FACTOR_AUTH),
       ),
       _CompactMenuItem(
         icon: 'assets/svg/more/one-click.svg',
         label: 'One Click Trading',
-        color: const Color(0xFF26A69A),
+        color: AppColors.iconDeepTeal,
         isToggle: true,
         toggleValue: _oneClickEnabled,
         onTap: _toggleOneClickTrading,
@@ -784,7 +784,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       _CompactMenuItem(
         icon: 'assets/svg/more/biometric.svg',
         label: languageService.tr('biometric_login_toggle'),
-        color: const Color(0xFF5C6BC0),
+        color: AppColors.iconIndigo,
         isToggle: true,
         toggleValue: _biometricEnabled,
         onTap: _toggleBiometric,
@@ -797,7 +797,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       _CompactMenuItem(
         icon: 'assets/svg/more/setting/profile-kyc.svg',
         label: languageService.tr('delete_account'),
-        color: const Color(0xFFEC407A),
+        color: AppColors.iconPink,
         onTap: () => _showDeleteAccountDialog(authController),
       ),
       _CompactMenuItem(
@@ -1041,13 +1041,13 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 width: 60.w,
                 height: 60.w,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEC407A).withValues(alpha: 0.1),
+                  color: AppColors.iconPink.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.delete_forever_rounded,
                   size: 28.sp,
-                  color: const Color(0xFFEC407A),
+                  color: AppColors.iconPink,
                 ),
               ),
               SizedBox(height: 16.h),
@@ -1153,7 +1153,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
           height: 44.h,
           decoration: BoxDecoration(
             color: isPrimary
-                ? (isDanger ? const Color(0xFFEC407A) : AppColors.primary)
+                ? (isDanger ? AppColors.iconPink : AppColors.primary)
                 : AppColors.cardBackground,
             borderRadius: BorderRadius.circular(10.r),
           ),

@@ -589,7 +589,7 @@ class _HistoryItem extends StatelessWidget {
       return Container(
         padding: EdgeInsets.all(4.r),
         decoration: const BoxDecoration(
-          color: Color(0xFF26A17B),
+          color: AppColors.green,
           shape: BoxShape.circle,
         ),
         child: Text(

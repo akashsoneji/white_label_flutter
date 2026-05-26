@@ -94,7 +94,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: const Divider(height: 1, color: Color(0xFFEEEEEE)),
+              child: const Divider(height: 1, color: AppColors.dividerDark),
             ),
 
             Expanded(
@@ -235,7 +235,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: const Divider(
                               height: 1,
-                              color: Color(0xFFEEEEEE),
+                              color: AppColors.dividerDark,
                             ),
                           ),
                           _buildExpertiseRadioItem(
@@ -252,7 +252,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: const Divider(
                               height: 1,
-                              color: Color(0xFFEEEEEE),
+                              color: AppColors.dividerDark,
                             ),
                           ),
                           _buildExpertiseRadioItem(
@@ -270,7 +270,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: const Divider(
                               height: 1,
-                              color: Color(0xFFEEEEEE),
+                              color: AppColors.dividerDark,
                             ),
                           ),
                           _buildExpertiseRadioItem(
@@ -288,7 +288,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: const Divider(
                               height: 1,
-                              color: Color(0xFFEEEEEE),
+                              color: AppColors.dividerDark,
                             ),
                           ),
                           _buildExpertiseRadioItem(
@@ -306,7 +306,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: const Divider(
                               height: 1,
-                              color: Color(0xFFEEEEEE),
+                              color: AppColors.dividerDark,
                             ),
                           ),
                           _buildExpertiseRadioItem(
@@ -389,7 +389,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: AppColors.icongrey,

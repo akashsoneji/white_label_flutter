@@ -53,21 +53,21 @@ class CopyTradingHubScreen extends StatelessWidget {
                   icon: Icons.access_time,
                   label: 'Pending Review',
                   subtitle: code.isEmpty ? null : 'Code: $code',
-                  trailing: _StatusPill(text: 'Pending', color: const Color(0xFFF59E0B)),
+                  trailing: _StatusPill(text: 'Pending', color: AppColors.statusYellow),
                   onTap: () => Get.to(() => _PendingReviewScreen(masterCode: code)),
                 ),
               CopyTradingMasterApplicationStatus.approved => _HubMenuItem(
                   icon: Icons.verified,
                   label: 'Master Dashboard',
                   subtitle: code.isEmpty ? null : 'Code: $code',
-                  trailing: _StatusPill(text: 'Active', color: const Color(0xFF22C55E)),
+                  trailing: _StatusPill(text: 'Active', color: AppColors.statusGreen),
                   onTap: () => Get.to(() => MasterDashboardScreen(masterCode: code)),
                 ),
               CopyTradingMasterApplicationStatus.rejected => _HubMenuItem(
                   icon: Icons.error_outline,
                   label: 'Become a Master',
                   subtitle: 'Application rejected — apply again',
-                  trailing: _StatusPill(text: 'Rejected', color: const Color(0xFFEF4444)),
+                  trailing: _StatusPill(text: 'Rejected', color: AppColors.statusRed),
                   onTap: () => Get.to(() => const _BecomeMasterScreen()),
                 ),
               CopyTradingMasterApplicationStatus.unknown => _HubMenuItem(
@@ -116,8 +116,8 @@ class CopyTradingHubScreen extends StatelessWidget {
                           : 'My Investments',
                       trailing:
                           hasSubs
-                              ? const _StatusPill(text: 'Active', color: Color(0xFF22C55E))
-                              : const _StatusPill(text: 'None', color: Color(0xFF94A3B8)),
+                              ? const _StatusPill(text: 'Active', color: AppColors.statusGreen)
+                              : const _StatusPill(text: 'None', color: AppColors.statusGrey),
                       onTap: () {
                         if (status == CopyTradingMasterApplicationStatus.approved) {
                           Get.to(() => const MyCopiesScreen());
@@ -295,7 +295,7 @@ class _PendingReviewScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.access_time, size: 42.r, color: const Color(0xFFF59E0B)),
+              Icon(Icons.access_time, size: 42.r, color: AppColors.statusYellow),
               SizedBox(height: 10.h),
               Text(
                 'Your master application is under review.',

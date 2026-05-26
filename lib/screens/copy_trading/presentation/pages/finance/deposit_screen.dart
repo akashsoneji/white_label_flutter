@@ -49,7 +49,7 @@ class CopyTradingDepositScreen extends StatelessWidget {
                     padding: EdgeInsets.all(4.r),
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFFFFB800),
+                      color: AppColors.accentGold,
                     ),
                     child: Icon(
                       Icons.priority_high_rounded,

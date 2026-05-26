@@ -210,9 +210,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
-        color: highlight ? const Color(0xFF22C55E).withOpacity(0.08) : AppColors.whiteColor,
+        color: highlight ? AppColors.iconBgGreen : AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: highlight ? const Color(0xFF16A34A) : Colors.grey.withOpacity(0.15)),
+        border: Border.all(color: highlight ? AppColors.statusGreenDark : Colors.grey.withOpacity(0.15)),
       ),
       child: Row(
         children: [
@@ -233,7 +233,7 @@ class _StatCard extends StatelessWidget {
               children: [
                 Text(title, style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey, fontWeight: FontWeight.w400),maxLines: 1, overflow: TextOverflow.ellipsis,),
                 SizedBox(height: 4.h),
-                Text(value, style: TextStyle(fontSize: 14.sp, color: highlight ? const Color(0xFF16A34A) : AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                Text(value, style: TextStyle(fontSize: 14.sp, color: highlight ? AppColors.statusGreenDark : AppColors.textPrimary, fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -290,12 +290,12 @@ class _PlanTile extends StatelessWidget {
     final statusLower = status.toLowerCase();
 
     final statusColor = statusLower == 'approved'
-        ? const Color(0xFF22C55E)
+        ? AppColors.statusGreen
         : statusLower.contains('pending')
-            ? const Color(0xFFF59E0B)
+            ? AppColors.statusYellow
             : statusLower.contains('inactive')
-                ? const Color(0xFF94A3B8)
-                : const Color(0xFFEF4444);
+                ? AppColors.statusGrey
+                : AppColors.statusRed;
 
     final canInactivate = statusLower == 'approved' && plan.activeCopiersCount == 0;
     final planSubtitle = (plan.commissionLabel.isNotEmpty ? plan.commissionLabel : plan.commissionType);

@@ -148,7 +148,7 @@ class _MasterHeroCard extends StatelessWidget {
                           width: 7.r,
                           height: 7.r,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF22C55E),
+                            color: AppColors.statusGreen,
                             shape: BoxShape.circle,
                           ),
                         ),

@@ -2275,8 +2275,8 @@ Placing Order:
             label: 'SELL',
             price: bidPrice,
             colors: const [
-              Color(0xFFFF5A5F),
-              Color(0xFFE84855),
+              AppColors.chartRed1,
+              AppColors.chartRed2,
             ],
             onTap: () async {
               // Preserve original behavior by delegating to the existing control.
@@ -2821,10 +2821,10 @@ Placing Order:
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  const Color(0xFFFF5A5F),
+                                  AppColors.chartRed1,
                                   Color.alphaBlend(
                                     Colors.black.withOpacity(0.10),
-                                    const Color(0xFFFF5A5F),
+                                    AppColors.chartRed1,
                                   ),
                                 ],
                               )
@@ -2833,7 +2833,7 @@ Placing Order:
                           isVantage
                               ? [
                                 BoxShadow(
-                                  color: const Color(0xFFFF5A5F).withOpacity(
+                                  color: AppColors.chartRed1.withOpacity(
                                     0.22,
                                   ),
                                   blurRadius: 18,

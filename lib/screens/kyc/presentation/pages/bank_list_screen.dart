@@ -279,16 +279,16 @@ class _BankListScreenState extends State<BankListScreen> {
     Color badgeColor;
     switch (status?.toLowerCase()) {
       case 'approved':
-        badgeColor = const Color(0xFF4CAF50);
+        badgeColor = AppColors.success;
         break;
       case 'rejected':
-        badgeColor = const Color(0xFFF44336);
+        badgeColor = AppColors.error;
         break;
       case 'pending':
-        badgeColor = const Color(0xFFFF9800);
+        badgeColor = AppColors.warning;
         break;
       default:
-        badgeColor = const Color(0xFF9E9E9E);
+        badgeColor = AppColors.textGrey;
     }
 
     return Container(

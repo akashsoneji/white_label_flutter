@@ -594,7 +594,7 @@ class _EditProfileState extends State<EditProfile> {
                                       controller.updateTitle(value);
                                     },
                                   ),
-                          suffixIcon: const Icon(
+                          suffixIcon: Icon(
                             Icons.arrow_drop_down,
                             color: AppColors.icongrey,
                           ),
@@ -788,7 +788,7 @@ class _EditProfileState extends State<EditProfile> {
                                       controller.updateGender(value);
                                     },
                                   ),
-                          suffixIcon: const Icon(
+                          suffixIcon: Icon(
                             Icons.arrow_drop_down,
                             color: AppColors.icongrey,
                           ),

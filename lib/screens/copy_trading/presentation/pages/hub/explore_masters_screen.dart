@@ -256,16 +256,16 @@ class _MasterCard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF22C55E).withOpacity(0.12),
+                      color: AppColors.statusGreen.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: const Color(0xFF22C55E).withOpacity(0.25)),
+                      border: Border.all(color: AppColors.statusGreen.withOpacity(0.25)),
                     ),
                     child: Text(
                       'Enrolled',
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFF22C55E),
+                        color: AppColors.statusGreen,
                       ),
                     ),
                   ),
