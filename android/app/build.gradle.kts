@@ -47,8 +47,9 @@ android {
     }
 
     flavorDimensions += "brand"
-    
+
     productFlavors {
+        // Tenax — legacy flavor (not in brands.yaml)
         create("tenax") {
             dimension = "brand"
             applicationId = "com.tenax.app"
@@ -60,16 +61,23 @@ android {
             manifestPlaceholders["FLAVOR"] = "tenax"
         }
 
+        // Vantage — parent brand (has its own screen files)
+        // Colors are in android/app/src/vantage/res/values/colors.xml
         create("vantage") {
             dimension = "brand"
-            // Keep same ID unless you have a final applicationId for Vantage.
             applicationId = "com.vantage.app"
             resValue("string", "app_name", "Vantage")
-            resValue("color", "primary_color", "#5F259E")
-            resValue("color", "secondary_color", "#F8F3FF")
-            resValue("color", "accent_color", "#FFC93C")
             buildConfigField("String", "FLAVOR", "\"vantage\"")
             manifestPlaceholders["FLAVOR"] = "vantage"
+        }
+
+        // Celestial — child brand (inherits Vantage's screen files, different colors/icons/URLs)
+        create("celestial") {
+            dimension = "brand"
+            applicationId = "com.celestial.app"
+            resValue("string", "app_name", "Celestial")
+            buildConfigField("String", "FLAVOR", "\"celestial\"")
+            manifestPlaceholders["FLAVOR"] = "celestial"
         }
     }
 
@@ -101,12 +109,13 @@ dependencies {
 // Skip Google Services task for flavors without Firebase config
 // to avoid requiring google-services.json.
 afterEvaluate {
-  // Vantage flavor currently has no Firebase config.
-  tasks.matching {
-    it.name.startsWith("processVantage") && it.name.endsWith("GoogleServices")
-  }.configureEach {
-    enabled = false
-  }
+    // Vantage and Celestial flavors have no Firebase config.
+    tasks.matching {
+        (it.name.startsWith("processVantage") || it.name.startsWith("processCelestial")) &&
+            it.name.endsWith("GoogleServices")
+    }.configureEach {
+        enabled = false
+    }
 }
 
 

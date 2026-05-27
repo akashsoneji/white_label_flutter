@@ -1,0 +1,29 @@
+// GENERATED — Do not edit manually.
+// Regenerate from brands.yaml: dart run scripts/generate_brand_config.dart
+
+ext.brandFlavors = [
+    [
+        name: "vantage",
+        label: "Vantage",
+        appId: "com.vantage.app",
+        appName: "Vantage",
+        primary: "#5F259E",
+        secondary: "#F8F3FF",
+        accent: "#FFC93C",
+        type: "parent",
+    ],
+    [
+        name: "celestial",
+        label: "Celestial",
+        appId: "com.celestial.app",
+        appName: "Celestial",
+        primary: "#24324D",
+        secondary: "#22D3EE",
+        accent: "#24324D",
+        type: "child",
+        inheritsFrom: "vantage",
+    ],
+]
+
+// Helper to get flavor by name
+ext.getBrandFlavor = { String name -> brandFlavors.find { it.name == name } }

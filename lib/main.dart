@@ -783,11 +783,11 @@ Future<void> _initializeFlavor() async {
       FlavorConfig.vantage;
       AppLogger.debug('Flavor initialized: vantage');
       return;
-    case 'tenax':
-    case '':
-      FlavorConfig.tenax;
-      AppLogger.debug('Flavor initialized: tenax');
+    case 'celestial':
+      FlavorConfig.celestial;
+      AppLogger.debug('Flavor initialized: celestial');
       return;
+    case 'tenax':
     default:
       AppLogger.error(
         'Unsupported flavor/client "$selectedRaw". Falling back to tenax.',

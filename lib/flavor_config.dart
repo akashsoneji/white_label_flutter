@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'clients/tenax/config.dart';
 import 'clients/vantage/config.dart';
+import 'clients/celestial/config.dart';
 
 enum Flavor {
   tenax,
   vantage,
+  celestial,
 }
 
 class FlavorConfig {
@@ -93,7 +95,15 @@ class FlavorConfig {
   }
 
   static bool isTenax() => _instance?.flavor == Flavor.tenax;
-  static bool isVantage() => _instance?.flavor == Flavor.vantage;
+  static bool isCelestial() => _instance?.flavor == Flavor.celestial;
+
+  /// Vantage and Celestial share the same 4-tab trading shell and Vantage auth UI.
+  static bool isVantage() =>
+      _instance?.flavor == Flavor.vantage ||
+      _instance?.flavor == Flavor.celestial;
+
+  /// Alias for UI branching (auth, trading shell, finance screens).
+  static bool usesVantageUi() => isVantage();
 
   static String get svgLogoAsset => instance.svgLogoPath;
   static String? get remoteLogo => instance.remoteLogoUrl;
@@ -195,6 +205,27 @@ class FlavorConfig {
       appIconPath: config.getAssetPath('vantage', config.appIconPath),
       svgLogoPath: config.getAssetPath('vantage', config.logoSvgPath),
       splashLogoPath: config.getAssetPath('vantage', config.splashLogoPath),
+      remoteLogoUrl: null,
+      selectedBrokerData: null,
+    );
+  }
+
+  static FlavorConfig get celestial {
+    _selectedFlavor = Flavor.celestial;
+    const config = CelestialConfig();
+    return FlavorConfig(
+      flavor: Flavor.celestial,
+      appName: config.brandName,
+      appTitle: config.appTitle,
+      primaryColor: config.primaryColor,
+      secondaryColor: config.secondaryColor,
+      accentColor: config.accentColor,
+      websocketUrl: config.websocketUrl,
+      chartBaseUrl: config.chartBaseUrl,
+      apiBaseUrl: config.apiBaseUrl,
+      appIconPath: config.getAssetPath('celestial', config.appIconPath),
+      svgLogoPath: config.getAssetPath('celestial', config.logoSvgPath),
+      splashLogoPath: config.getAssetPath('celestial', config.splashLogoPath),
       remoteLogoUrl: null,
       selectedBrokerData: null,
     );

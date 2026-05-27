@@ -110,18 +110,25 @@ build_flavor() {
         echo ""
     fi
     
-    # Step 1: Prepare assets
-    echo -e "${YELLOW}📦 Step 1: Preparing client assets for $FLAVOR...${NC}"
+    # Step 1: Run brand config generator (auto-regenerates if needed)
+    echo -e "${YELLOW}📦 Step 1: Running brand config generator...${NC}"
+    if ! dart run scripts/generate_brand_config.dart; then
+        echo -e "${RED}❌ Failed to run brand config generator${NC}"
+        return 1
+    fi
+
+    # Step 2: Prepare assets
+    echo -e "${YELLOW}📦 Step 2: Preparing client assets for $FLAVOR...${NC}"
     if ! dart run scripts/prepare_flavor.dart $FLAVOR; then
         echo -e "${RED}❌ Failed to prepare assets for $FLAVOR${NC}"
         return 1
     fi
-    
-    # Step 2: Build
+
+    # Step 3: Build
     if [ "$BUILD_TYPE" == "apk" ] && [ "$UNIVERSAL_APK" == "true" ]; then
-        echo -e "\n${YELLOW}🔨 Step 2: Building Flutter app for $FLAVOR (universal APK, single file)...${NC}"
+        echo -e "\n${YELLOW}🔨 Step 3: Building Flutter app for $FLAVOR (universal APK, single file)...${NC}"
     else
-        echo -e "\n${YELLOW}🔨 Step 2: Building Flutter app for $FLAVOR (all architectures with split APKs)...${NC}"
+        echo -e "\n${YELLOW}🔨 Step 3: Building Flutter app for $FLAVOR (all architectures with split APKs)...${NC}"
     fi
     local BUILD_CMD=""
     local SPLIT_FLAG=""
@@ -130,21 +137,21 @@ build_flavor() {
     fi
     if [ "$MODE" == "release" ]; then
         if [ "$BUILD_TYPE" == "apk" ]; then
-            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=FLAVOR=$FLAVOR --release$SPLIT_FLAG"
+            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=CLIENT=$FLAVOR --dart-define=FLAVOR=$FLAVOR --release$SPLIT_FLAG"
         else
-            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=FLAVOR=$FLAVOR --release"
+            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=CLIENT=$FLAVOR --dart-define=FLAVOR=$FLAVOR --release"
         fi
     elif [ "$MODE" == "debug" ]; then
         if [ "$BUILD_TYPE" == "apk" ]; then
-            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=FLAVOR=$FLAVOR --debug$SPLIT_FLAG"
+            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=CLIENT=$FLAVOR --dart-define=FLAVOR=$FLAVOR --debug$SPLIT_FLAG"
         else
-            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=FLAVOR=$FLAVOR --debug"
+            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=CLIENT=$FLAVOR --dart-define=FLAVOR=$FLAVOR --debug"
         fi
     elif [ "$MODE" == "profile" ]; then
         if [ "$BUILD_TYPE" == "apk" ]; then
-            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=FLAVOR=$FLAVOR --profile$SPLIT_FLAG"
+            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=CLIENT=$FLAVOR --dart-define=FLAVOR=$FLAVOR --profile$SPLIT_FLAG"
         else
-            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=FLAVOR=$FLAVOR --profile"
+            BUILD_CMD="flutter build $BUILD_TYPE --flavor $FLAVOR --dart-define=CLIENT=$FLAVOR --dart-define=FLAVOR=$FLAVOR --profile"
         fi
     else
         echo -e "${RED}❌ Invalid mode: $MODE${NC}"

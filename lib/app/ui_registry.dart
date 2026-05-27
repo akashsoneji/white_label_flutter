@@ -23,7 +23,8 @@ import 'ui_slots.dart';
 
 /// Build-time selected client (no runtime switching).
 ///
-/// Use: `--dart-define=CLIENT=tenax` or `--dart-define=CLIENT=vantage`
+/// Use: `--dart-define=CLIENT=tenax|vantage|celestial`
+/// Celestial inherits Vantage's screen files.
 const String activeClient = String.fromEnvironment(
   'CLIENT',
   defaultValue: 'tenax',
@@ -34,44 +35,45 @@ class UiRegistry implements UiSlots {
 
   const UiRegistry({required this.client});
 
-  bool get _isVantage => client.toLowerCase() == 'vantage';
+  bool get _usesVantageUi =>
+      client.toLowerCase() == 'vantage' || client.toLowerCase() == 'celestial';
 
   @override
   Widget splash() => const SplashScreen();
 
   @override
   Widget getStarted() {
-    if (_isVantage) return VantageGetStartedScreen();
+    if (_usesVantageUi) return VantageGetStartedScreen();
     return GetStartedScreen();
   }
 
   @override
   Widget login() {
-    if (_isVantage) return const VantageLoginScreen();
+    if (_usesVantageUi) return const VantageLoginScreen();
     return const LoginScreen();
   }
 
   @override
   Widget createAccount() {
-    if (_isVantage) return const VantageCreateAccountScreen();
+    if (_usesVantageUi) return const VantageCreateAccountScreen();
     return const CreateAccountScreen();
   }
 
   @override
   Widget forgotPassword() {
-    if (_isVantage) return const VantageForgotPasswordScreen();
+    if (_usesVantageUi) return const VantageForgotPasswordScreen();
     return const ForgotPasswordScreen();
   }
 
   @override
   Widget verifyCode({required String email}) {
-    if (_isVantage) return VantageVerifyCodeScreen(email: email);
+    if (_usesVantageUi) return VantageVerifyCodeScreen(email: email);
     return VerifyCodeScreen(email: email);
   }
 
   @override
   Widget createNewPassword() {
-    if (_isVantage) return const VantageCreateNewPasswordScreen();
+    if (_usesVantageUi) return const VantageCreateNewPasswordScreen();
     return const CreateNewPasswordScreen();
   }
 

@@ -20,29 +20,29 @@
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Set Android icon (celestial)",
+      "type": "shell",
+      "command": "dart",
+      "args": ["run", "scripts/prepare_flavor.dart", "celestial"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "prepare-flavor-afx",
+      "type": "shell",
+      "command": "dart",
+      "args": ["run", "scripts/prepare_flavor.dart", "afx"],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": true
+      }
     }
   ]
-}
-
-{
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "prepare-flavor-afx",
-            "type": "shell",
-            "command": "dart",
-            "args": [
-                "run",
-                "scripts/prepare_flavor.dart",
-                "afx"
-            ],
-            "problemMatcher": [],
-            "presentation": {
-                "reveal": "always",
-                "panel": "dedicated",
-                "focus": false,
-                "clear": true
-            }
-        }
-    ]
 }

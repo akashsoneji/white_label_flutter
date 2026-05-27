@@ -16,6 +16,10 @@ import 'brands/vantage/pages/transaction_history_screen.dart' as vantage;
 import 'brands/vantage/pages/wallet_screen.dart' as vantage;
 import 'brands/vantage/pages/withdrawal_screen.dart' as vantage;
 
+/// Build-time selected client (no runtime switching).
+///
+/// Use: `--dart-define=CLIENT=tenax|vantage|celestial`
+/// Celestial inherits Vantage's finance screen files.
 const String _activeClient = String.fromEnvironment(
   'CLIENT',
   defaultValue: 'tenax',
@@ -24,11 +28,12 @@ const String _activeClient = String.fromEnvironment(
 class FinanceUiRegistry implements FinanceUiSlots {
   const FinanceUiRegistry();
 
-  bool get _isVantage => _activeClient.toLowerCase() == 'vantage';
+  bool get _usesVantageUi =>
+      _activeClient.toLowerCase() == 'vantage' || _activeClient.toLowerCase() == 'celestial';
 
   @override
   Widget paymentMethods({required String accountNumber}) {
-    if (_isVantage) {
+    if (_usesVantageUi) {
       return vantage.PaymentMethodsScreen(accountNumber: accountNumber);
     }
     return base.PaymentMethodsScreen(accountNumber: accountNumber);
@@ -36,7 +41,7 @@ class FinanceUiRegistry implements FinanceUiSlots {
 
   @override
   Widget deposit({required String accountNumber}) {
-    if (_isVantage) {
+    if (_usesVantageUi) {
       return vantage.DepositScreen(accountNumber: accountNumber);
     }
     return base.DepositScreen(accountNumber: accountNumber);
@@ -44,25 +49,25 @@ class FinanceUiRegistry implements FinanceUiSlots {
 
   @override
   Widget withdrawal() {
-    if (_isVantage) return const vantage.WithdrawalScreen();
+    if (_usesVantageUi) return const vantage.WithdrawalScreen();
     return const base.WithdrawalScreen();
   }
 
   @override
   Widget wallet() {
-    if (_isVantage) return const vantage.WalletScreen();
+    if (_usesVantageUi) return const vantage.WalletScreen();
     return base.WalletScreen();
   }
 
   @override
   Widget internalTransfer() {
-    if (_isVantage) return const vantage.InternalTransferScreen();
+    if (_usesVantageUi) return const vantage.InternalTransferScreen();
     return base.InternalTransferScreen();
   }
 
   @override
   Widget transactionHistory() {
-    if (_isVantage) return const vantage.VantageTransactionHistoryScreen();
+    if (_usesVantageUi) return const vantage.VantageTransactionHistoryScreen();
     return const base.TransactionHistoryScreen();
   }
 }

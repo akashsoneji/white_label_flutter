@@ -58,6 +58,7 @@ Future<void> cleanOtherClientAssets(String currentFlavor) async {
     'sr',
     'vr19',
     'vantage',
+    'celestial',
   ];
 
   // 1. Clean assets/clients/ folder - remove other clients' subfolders
@@ -157,6 +158,7 @@ Future<void> updatePubspec(String flavor) async {
     'sr',
     'vr19',
     'vantage',
+    'celestial',
   ];
 
   // Remove ALL client asset entries first

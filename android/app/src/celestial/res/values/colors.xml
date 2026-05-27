@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_color">#24324D</color>
+    <color name="secondary_color">#22D3EE</color>
+    <color name="accent_color">#24324D</color>
+    <!-- SR wants white native splash background -->
+    <color name="my_splash_color">#24324D</color> <!-- celestial -->
+</resources>

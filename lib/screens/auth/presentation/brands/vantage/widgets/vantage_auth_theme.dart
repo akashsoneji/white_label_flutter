@@ -8,7 +8,7 @@ import '../../../../../../flavor_config.dart';
 class VantageAuthTheme {
   VantageAuthTheme._();
 
-  static Color get background => FlavorConfig.instance.secondaryColor;
+  static Color get background => Colors.white;
   static const Color card = Colors.white;
   static Color get primary => FlavorConfig.instance.primaryColor;
   static Color text = AppColors.textPrimary;

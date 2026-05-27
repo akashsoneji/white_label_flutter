@@ -1,100 +1,63 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    //
-    // TIP: To filter out WebView/GPU logs in Debug Console, use the filter box at the top:
-    // Filter: !setRequestedFrameRate !ImageReader_JNI !GPUAUX
-    // This will hide logs containing these patterns.
     "version": "0.2.0",
     "configurations": [
-
         {
-            "name": "🔴 Tenax (Debug)",
-            "request": "launch",
-            "type": "dart",
-            "preLaunchTask": "Set Android icon (tenax)",
-            "program": "lib/main.dart",
-            "args": [
-                "--flavor",
-                "tenax",
-                "--dart-define=FLAVOR=tenax",
-                "--no-enable-impeller"
-            ],
-            "flutterMode": "debug",
-            "console": "terminal"
-        },
-        {
-            "name": "🔵 Vantage (Debug)",
+            "name": "🔵 Vantage (debug)",
             "request": "launch",
             "type": "dart",
             "preLaunchTask": "Set Android icon (vantage)",
             "program": "lib/main.dart",
-            "args": [
-                "--flavor",
-                "vantage",
-                "--dart-define=CLIENT=vantage",
-                "--dart-define=FLAVOR=vantage",
-                "--no-enable-impeller"
-            ],
+            "args": ["--flavor", "vantage", "--dart-define=CLIENT=vantage", "--dart-define=FLAVOR=vantage", "--no-enable-impeller"],
             "flutterMode": "debug",
             "console": "terminal"
         },
         {
-            "name": "🔵 Vantage (Profile)",
+            "name": "🔵 Vantage (profile)",
             "request": "launch",
             "type": "dart",
             "preLaunchTask": "Set Android icon (vantage)",
             "program": "lib/main.dart",
-            "args": [
-                "--flavor",
-                "vantage",
-                "--dart-define=CLIENT=vantage",
-                "--dart-define=FLAVOR=vantage"
-            ],
+            "args": ["--flavor", "vantage", "--dart-define=CLIENT=vantage", "--dart-define=FLAVOR=vantage"],
             "flutterMode": "profile",
             "console": "terminal"
         },
         {
-            "name": "🔴 Tenax (Profile)",
+            "name": "🔵 Vantage (release)",
             "request": "launch",
             "type": "dart",
-            "preLaunchTask": "Set Android icon (tenax)",
+            "preLaunchTask": "Set Android icon (vantage)",
             "program": "lib/main.dart",
-            "args": [
-                "--flavor",
-                "tenax",
-                "--dart-define=FLAVOR=tenax"
-            ],
-            "flutterMode": "profile",
-            "console": "terminal"
-        },
-        {
-            "name": "🔴 Tenax (Release)",
-            "request": "launch",
-            "type": "dart",
-            "preLaunchTask": "Set Android icon (tenax)",
-            "program": "lib/main.dart",
-            "args": [
-                "--flavor",
-                "tenax",
-                "--dart-define=FLAVOR=tenax"
-            ],
+            "args": ["--flavor", "vantage", "--dart-define=CLIENT=vantage", "--dart-define=FLAVOR=vantage"],
             "flutterMode": "release",
             "console": "terminal"
         },
         {
-            "name": "🟡 Vantage (Release)",
+            "name": "🟡 Celestial (debug)",
             "request": "launch",
             "type": "dart",
-            "preLaunchTask": "Set Android icon (vantage)",
+            "preLaunchTask": "Set Android icon (celestial)",
             "program": "lib/main.dart",
-            "args": [
-                "--flavor",
-                "vantage",
-                "--dart-define=CLIENT=vantage",
-                "--dart-define=FLAVOR=vantage"
-            ],
+            "args": ["--flavor", "celestial", "--dart-define=CLIENT=celestial", "--dart-define=FLAVOR=celestial", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal"
+        },
+        {
+            "name": "🟡 Celestial (profile)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (celestial)",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "celestial", "--dart-define=CLIENT=celestial", "--dart-define=FLAVOR=celestial"],
+            "flutterMode": "profile",
+            "console": "terminal"
+        },
+        {
+            "name": "🟡 Celestial (release)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (celestial)",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "celestial", "--dart-define=CLIENT=celestial", "--dart-define=FLAVOR=celestial"],
             "flutterMode": "release",
             "console": "terminal"
         }
