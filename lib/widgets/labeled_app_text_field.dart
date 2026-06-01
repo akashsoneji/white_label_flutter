@@ -49,11 +49,14 @@ class LabeledAppTextField extends StatelessWidget {
       // ],
       decoration: InputDecoration(
         hintText: hintText,
+        hintStyle: TextStyle(color: AppColors.hint),
         prefix: prefixIcon,
         suffix: suffixIcon,
         labelText: label,
-        labelStyle: TextStyle(color: AppColors.textGrey),
+        labelStyle: TextStyle(color: AppColors.hint),
         floatingLabelStyle: TextStyle(color: AppColors.primary),
+        fillColor: AppColors.pureWhite,
+        filled: true,
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

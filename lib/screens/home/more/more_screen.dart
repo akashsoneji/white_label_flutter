@@ -23,6 +23,7 @@ import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_more_layout.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
+import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 
 class MoreScreen extends StatefulWidget {
   const MoreScreen({super.key});
@@ -762,6 +763,12 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   List<_CompactMenuItem> _buildSecuritySectionItems() {
     return [
       _CompactMenuItem(
+        icon: 'assets/svg/more/theme.svg',
+        label: languageService.tr('settings_theme'),
+        color: AppColors.iconPurple,
+        onTap: () => showThemeBottomSheet(context),
+      ),
+      _CompactMenuItem(
         icon: 'assets/svg/more/change_password.svg',
         label: languageService.tr('change_password'),
         color: AppColors.iconRed,
@@ -889,7 +896,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 ),
               ),
               if (item.isToggle)
-                _buildCompactSwitch(item.toggleValue)
+                _buildCompactSwitch(item.toggleValue, onTap: item.onTap)
               else if (item.showArrow)
                 Icon(
                   Icons.chevron_right_rounded,
@@ -903,9 +910,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildCompactSwitch(bool value) {
+  Widget _buildCompactSwitch(bool value, {VoidCallback? onTap}) {
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         width: 42.w,

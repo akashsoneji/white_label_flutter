@@ -60,6 +60,15 @@ class VantageUiTokens {
   }
 
   static BoxDecoration groupDecoration() {
+    if (AppColors.isDarkMode) {
+      return BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(radiusLg),
+        border: Border.all(
+          color: AppColors.border.withOpacity(0.14),
+        ),
+      );
+    }
     return BoxDecoration(
       color: surface,
       borderRadius: BorderRadius.circular(radiusLg),
@@ -75,4 +84,3 @@ class VantageUiTokens {
     );
   }
 }
-

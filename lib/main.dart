@@ -366,9 +366,9 @@ ThemeData _buildLightTheme() {
       primary: FlavorConfig.instance.primaryColor,
       secondary: FlavorConfig.instance.secondaryColor,
       surface: AppColors.whiteColor,
-      onPrimary: AppColors.whiteColor,
-      onSecondary: Colors.black,
-      onSurface: Colors.black,
+      onPrimary: AppColors.pureWhite,
+      onSecondary: AppColors.textPrimary,
+      onSurface: AppColors.textPrimary,
     ),
     useMaterial3: true,
     scaffoldBackgroundColor: AppColors.whiteColor,
@@ -465,8 +465,10 @@ ThemeData _buildDarkTheme() {
       onSurface: AppColors.whiteColor,
     ),
     useMaterial3: true,
-    scaffoldBackgroundColor: AppColors.backgroundDarkTheme,
+    scaffoldBackgroundColor: AppColors.scaffold,
     inputDecorationTheme: InputDecorationTheme(
+      fillColor: AppColors.pureWhite,
+      filled: true,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: AppColors.border),
@@ -486,6 +488,8 @@ ThemeData _buildDarkTheme() {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.error),
       ),
+      labelStyle: TextStyle(color: AppColors.hint),
+      hintStyle: TextStyle(color: AppColors.hint),
       contentPadding: EdgeInsets.symmetric(
         horizontal: 16.w,
         vertical: 14.h,
@@ -495,7 +499,7 @@ ThemeData _buildDarkTheme() {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: FlavorConfig.instance.primaryColor,
-        foregroundColor: AppColors.whiteColor,
+        foregroundColor: Colors.white,
         minimumSize: Size(double.infinity, 40.h),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -509,18 +513,18 @@ ThemeData _buildDarkTheme() {
         borderRadius: BorderRadius.circular(12),
       ),
       margin: EdgeInsets.symmetric(vertical: 8.h),
-      color: AppColors.cardDarkTheme,
+      color: AppColors.card,
     ),
     listTileTheme: ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
       minLeadingWidth: 0,
       leadingAndTrailingTextStyle: TextStyle(
         fontSize: 14.sp,
-        color: AppColors.textGreyDark,
+        color: AppColors.textGrey,
       ),
     ),
     drawerTheme: DrawerThemeData(
-      backgroundColor: AppColors.surfaceDarkTheme,
+      backgroundColor: AppColors.surface,
       elevation: 16,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -530,19 +534,23 @@ ThemeData _buildDarkTheme() {
       ),
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: AppColors.surfaceDarkTheme,
+      backgroundColor: AppColors.surface,
       selectedItemColor: FlavorConfig.instance.primaryColor,
-      unselectedItemColor: AppColors.textGreyDark,
+      unselectedItemColor: AppColors.textGrey,
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
-    appBarTheme:   AppBarTheme(
-      backgroundColor: AppColors.surfaceDarkTheme,
-      foregroundColor: AppColors.whiteColor,
+    appBarTheme: AppBarTheme(
+      backgroundColor: AppColors.surface,
+      foregroundColor: AppColors.textPrimary,
       elevation: 0,
     ),
-    iconTheme:   IconThemeData(color: AppColors.whiteColor),
-    textTheme:   TextTheme(bodyLarge: TextStyle(color: AppColors.whiteColor)),
+    iconTheme: IconThemeData(color: AppColors.textPrimary),
+    textTheme: TextTheme(
+      bodyLarge: TextStyle(color: AppColors.textPrimary),
+      bodyMedium: TextStyle(color: AppColors.textPrimary),
+      bodySmall: TextStyle(color: AppColors.textGrey),
+    ),
   );
 }
 
@@ -589,7 +597,7 @@ class MyGetXApp extends StatelessWidget {
                   debugShowCheckedModeBanner: false,
                   // showPerformanceOverlay: true, // Removed in favor of custom overlay
                   locale: languageService.getCurrentLocale(),
-                  themeMode: ThemeMode.light,
+                  themeMode: Get.find<ThemeService>().themeMode,
                   theme: _buildLightTheme(),
                   darkTheme: _buildDarkTheme(),
                   initialRoute: AppPages.SPLASH,

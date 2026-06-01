@@ -24,6 +24,7 @@ class AccountHeaderWidget extends StatelessWidget {
   final Widget? rightWidget;
   final EdgeInsets? padding;
   final double? floatingProfit;
+
   /// When true, reads [TradingController.accountInfoRx] inside [Obx] for P/L.
   final bool useTradingFloatingProfit;
   final AccountHeaderLayoutStyle layoutStyle;
@@ -75,8 +76,7 @@ class AccountHeaderWidget extends StatelessWidget {
                   dash.mt5Accounts.length;
                 }
 
-                final primaryAccount =
-                    activeAccount ?? dash?.primaryMT5Account;
+                final primaryAccount = activeAccount ?? dash?.primaryMT5Account;
 
                 final isWebSocketConnected =
                     dash?.isWebSocketConnectedRx.value ?? false;
@@ -88,17 +88,21 @@ class AccountHeaderWidget extends StatelessWidget {
                 }
 
                 final double? realTimeEquity = accountInfo?.equity;
-                final double? apiEquity = primaryAccount != null
-                    ? double.tryParse(primaryAccount.equity)
-                    : null;
-                final double displayEquity = realTimeEquity ?? (apiEquity ?? 0.0);
+                final double? apiEquity =
+                    primaryAccount != null
+                        ? double.tryParse(primaryAccount.equity)
+                        : null;
+                final double displayEquity =
+                    realTimeEquity ?? (apiEquity ?? 0.0);
 
-                final bool hasAccountInfo = primaryAccount != null &&
+                final bool hasAccountInfo =
+                    primaryAccount != null &&
                     dash != null &&
                     dash.accountInfoMap.containsKey(
                       primaryAccount.metaAccountNumber,
                     );
-                final bool showLoading = primaryAccount != null &&
+                final bool showLoading =
+                    primaryAccount != null &&
                     realTimeEquity == null &&
                     (!isWebSocketConnected || !hasAccountInfo) &&
                     displayEquity == 0.0;
@@ -123,18 +127,22 @@ class AccountHeaderWidget extends StatelessWidget {
                     useFloatingProfit ? resolvedFloatingProfit : displayEquity;
                 final bool isPositive = displayValue >= 0;
 
-                final valueText = useFloatingProfit
-                    ? '\$${PrecisionHelper.formatPnL(displayValue)}'
-                    : '\$${displayEquity.toStringAsFixed(2)}';
+                final valueText =
+                    useFloatingProfit
+                        ? '\$${PrecisionHelper.formatPnL(displayValue)}'
+                        : '\$${displayEquity.toStringAsFixed(2)}';
 
-                final valueColor = useFloatingProfit
-                    ? (isPositive ? AppColors.success : AppColors.error)
-                    : AppTextStyles.heading.color;
+                final valueColor =
+                    useFloatingProfit
+                        ? (isPositive ? AppColors.success : AppColors.error)
+                        : AppTextStyles.heading.color;
 
                 final accountTypeText = _getAccountTypeText(primaryAccount);
                 final accountNumberText = _getAccountNumber(primaryAccount);
                 final accountTypeColor = _getAccountTypeColor(primaryAccount);
-                final accountTypeTextColor = _getAccountTypeTextColor(primaryAccount);
+                final accountTypeTextColor = _getAccountTypeTextColor(
+                  primaryAccount,
+                );
 
                 final accountSelector = Builder(
                   builder: (pillContext) {
@@ -163,7 +171,9 @@ class AccountHeaderWidget extends StatelessWidget {
                             height: 28.h,
                             padding: EdgeInsets.symmetric(horizontal: 10.w),
                             decoration: BoxDecoration(
-                              color: AppColors.card.withOpacity(0.06),
+                              color: AppColors.isDarkMode
+                                  ? const Color(0xFFE0E0E0)
+                                  : AppColors.card.withOpacity(0.06),
                               borderRadius: BorderRadius.circular(999),
                               border: Border.all(
                                 color: AppColors.border.withOpacity(0.18),
@@ -343,7 +353,6 @@ class AccountHeaderWidget extends StatelessWidget {
                   ),
                 ),
             ],
-
           ],
         ),
       ),
@@ -354,9 +363,14 @@ class AccountHeaderWidget extends StatelessWidget {
   Color _getAccountTypeColor(MT5Account? primaryAccount) {
     if (primaryAccount != null) {
       final accountType = primaryAccount.accountType;
-      return accountType.toLowerCase() == "live"
-          ? AppColors.accent
-          : AppColors.primary;
+      if (accountType.toLowerCase() == "live") {
+        return AppColors.accent;
+      }
+      // Demo account - use a visible color that works on light backgrounds
+      if (AppColors.isDarkMode) {
+        return const Color(0xFF757984); // Grey color for demo on light bg in dark mode
+      }
+      return AppColors.primary;
     }
     // Default color when no accounts are available
     return AppColors.primary;
@@ -379,8 +393,14 @@ class AccountHeaderWidget extends StatelessWidget {
   }
 
   Color _getAccountTypeTextColor(MT5Account? primaryAccount) {
-    // Always white text for better contrast
-    return AppColors.whiteColor;
+    // In dark mode with light gray backgrounds, use dark text for contrast
+    if (AppColors.isDarkMode) {
+      if (primaryAccount?.accountType.toLowerCase() == "live") {
+        return AppColors.whiteColor; // White text on green/live accent
+      }
+      return const Color(0xFF1A1A1A); // Dark text for DEMO on light backgrounds
+    }
+    return AppColors.whiteColor; // Light mode: always white on colored backgrounds
   }
 
   String _getAccountNumber(MT5Account? primaryAccount) {
@@ -617,10 +637,7 @@ class AccountHeaderWidget extends StatelessWidget {
     final renderBox = anchorContext.findRenderObject() as RenderBox?;
     if (overlay == null || renderBox == null) return;
 
-    final position = renderBox.localToGlobal(
-      Offset.zero,
-      ancestor: overlay,
-    );
+    final position = renderBox.localToGlobal(Offset.zero, ancestor: overlay);
     final rect = position & renderBox.size;
 
     final selected = await showMenu<String>(
@@ -629,18 +646,10 @@ class AccountHeaderWidget extends StatelessWidget {
       surfaceTintColor: AppColors.card,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.r),
-        side: BorderSide(
-          color: AppColors.border.withOpacity(0.18),
-          width: 0.5,
-        ),
+        side: BorderSide(color: AppColors.border.withOpacity(0.18), width: 0.5),
       ),
       position: RelativeRect.fromRect(
-        Rect.fromLTWH(
-          rect.left,
-          rect.bottom + 6.h,
-          rect.width,
-          rect.height,
-        ),
+        Rect.fromLTWH(rect.left, rect.bottom + 6.h, rect.width, rect.height),
         Offset.zero & overlay.size,
       ),
       items:
@@ -661,16 +670,16 @@ class AccountHeaderWidget extends StatelessWidget {
                     height: 18.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color:
-                          (type == 'LIVE' ? AppColors.accent : AppColors.primary)
-                              .withOpacity(0.16),
+                      color: (type == 'LIVE'
+                              ? AppColors.accent
+                              : AppColors.primary)
+                          .withOpacity(0.16),
                     ),
                     child: Icon(
                       Icons.account_balance_wallet_outlined,
                       size: 12.sp,
-                      color: type == 'LIVE'
-                          ? AppColors.accent
-                          : AppColors.primary,
+                      color:
+                          type == 'LIVE' ? AppColors.accent : AppColors.primary,
                     ),
                   ),
                   SizedBox(width: 10.w),
@@ -692,16 +701,19 @@ class AccountHeaderWidget extends StatelessWidget {
                       vertical: 3.h,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          (type == 'LIVE' ? AppColors.accent : AppColors.primary)
-                              .withOpacity(0.12),
+                      color: (type == 'LIVE'
+                              ? AppColors.accent
+                              : AppColors.primary)
+                          .withOpacity(0.12),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
                       type,
                       style: TextStyle(
                         color:
-                            type == 'LIVE' ? AppColors.accent : AppColors.primary,
+                            type == 'LIVE'
+                                ? AppColors.accent
+                                : AppColors.primary,
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
                       ),

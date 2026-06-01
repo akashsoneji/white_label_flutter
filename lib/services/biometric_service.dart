@@ -12,9 +12,15 @@ class BiometricService {
 
   Future<bool> isDeviceSupported() async {
     try {
-      final supported = await _auth.isDeviceSupported();
-      final canCheck = await _auth.canCheckBiometrics;
-      return supported || canCheck;
+      return await _auth.isDeviceSupported();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> canCheckBiometrics() async {
+    try {
+      return await _auth.canCheckBiometrics;
     } catch (_) {
       return false;
     }

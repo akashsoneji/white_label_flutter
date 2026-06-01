@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 
@@ -86,13 +85,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           obscureText: obscureText,
           controller: controller,
           validator: validator,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400),
+          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
           decoration: InputDecoration(
             labelText: label,
+            fillColor: AppColors.pureWhite,
+            filled: true,
+            hintStyle: TextStyle(color: AppColors.hint),
+            labelStyle: TextStyle(color: AppColors.hint),
             suffixIcon: IconButton(
               icon: Icon(
                 obscureText ? Icons.visibility : Icons.visibility_off,
-                color: AppColors.textGrey,
+                color: AppColors.hint,
               ),
               onPressed: onToggleVisibility,
             ),
@@ -196,8 +199,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         child: ElevatedButton(
           onPressed: isLoading ? null : _changePassword,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.whiteColor,
+            backgroundColor: AppColors.pureWhite,
+            foregroundColor: Colors.black,
             disabledBackgroundColor: AppColors.border,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -208,9 +211,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ? SizedBox(
                   width: 20.w,
                   height: 20.h,
-                  child: CircularProgressIndicator(
+                  child: const CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.whiteColor),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
                   ),
                 )
               : Text(
@@ -219,7 +222,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     fontSize: 14.sp,
                     height: 1.71,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.whiteColor,
+                    color: Colors.black,
                   ),
                 ),
         ),

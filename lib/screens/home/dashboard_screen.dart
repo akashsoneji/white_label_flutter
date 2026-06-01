@@ -51,7 +51,8 @@ class DashboardScreen extends StatelessWidget {
     }
   }
 
-  BoxDecoration _vantageGlassCardDecoration() => VantageUiTokens.cardDecoration();
+  BoxDecoration _vantageGlassCardDecoration() =>
+      VantageUiTokens.cardDecoration();
 
   BoxDecoration _vantageSegmentedBarDecoration() =>
       VantageUiTokens.groupDecoration();
@@ -76,71 +77,75 @@ class DashboardScreen extends StatelessWidget {
                 cacheExtent: 500,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                    if (isVantage)
-                      SliverAppBar(
-                        pinned: true,
-                        floating: false,
-                        backgroundColor: Colors.transparent,
-                        surfaceTintColor: Colors.transparent,
-                        elevation: 0,
-                        scrolledUnderElevation: 0,
-                        automaticallyImplyLeading: false,
-                        title: null,
-                        centerTitle: true,
-                        toolbarHeight: 56.h,
-                        actions: [
-                          Container(
-                            margin: EdgeInsets.only(right: 16.w, top: 8.h, bottom: 8.h),
-                            padding: EdgeInsets.symmetric(horizontal: 4.w),
-                            decoration: BoxDecoration(
-                              color: AppColors.whiteColor,
-                              borderRadius: BorderRadius.circular(24.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.12),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: AppSvgIcon(
-                                    assetPath:
-                                        'assets/svg/deshboard/empty-wallet-add.svg',
-                                    height: 18.h,
-                                    width: 18.w,
-                                    color: AppColors.primary,
-                                  ),
-                                  onPressed: () => Get.toNamed(AppPages.WALLET),
-                                  padding: EdgeInsets.all(8.r),
-                                  constraints: const BoxConstraints(),
-                                ),
-                                Container(
-                                  width: 1,
-                                  height: 14.h,
-                                  color: AppColors.border.withValues(alpha: 0.15),
-                                  margin: EdgeInsets.symmetric(horizontal: 2.w),
-                                ),
-                                IconButton(
-                                  icon: AppSvgIcon(
-                                    assetPath:
-                                        'assets/svg/deshboard/add-square.svg',
-                                    height: 18.h,
-                                    width: 18.w,
-                                    color: AppColors.primary,
-                                  ),
-                                  onPressed: controller.showOpenAccountSheet,
-                                  padding: EdgeInsets.all(8.r),
-                                  constraints: const BoxConstraints(),
-                                ),
-                              ],
-                            ),
+                  if (isVantage)
+                    SliverAppBar(
+                      pinned: true,
+                      floating: false,
+                      backgroundColor: Colors.transparent,
+                      surfaceTintColor: Colors.transparent,
+                      elevation: 0,
+                      scrolledUnderElevation: 0,
+                      automaticallyImplyLeading: false,
+                      title: null,
+                      centerTitle: true,
+                      toolbarHeight: 56.h,
+                      actions: [
+                        Container(
+                          margin: EdgeInsets.only(
+                            right: 16.w,
+                            top: 8.h,
+                            bottom: 8.h,
                           ),
-                        ],
-                      ),
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.whiteColor,
+                            borderRadius: BorderRadius.circular(24.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.12),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: AppSvgIcon(
+                                  assetPath:
+                                      'assets/svg/deshboard/empty-wallet-add.svg',
+                                  height: 18.h,
+                                  width: 18.w,
+                                  color: AppColors.primary,
+                                ),
+                                onPressed: () => Get.toNamed(AppPages.WALLET),
+                                padding: EdgeInsets.all(8.r),
+                                constraints: const BoxConstraints(),
+                              ),
+                              Container(
+                                width: 1,
+                                height: 14.h,
+                                color: AppColors.border.withValues(alpha: 0.15),
+                                margin: EdgeInsets.symmetric(horizontal: 2.w),
+                              ),
+                              IconButton(
+                                icon: AppSvgIcon(
+                                  assetPath:
+                                      'assets/svg/deshboard/add-square.svg',
+                                  height: 18.h,
+                                  width: 18.w,
+                                  color: AppColors.primary,
+                                ),
+                                onPressed: controller.showOpenAccountSheet,
+                                padding: EdgeInsets.all(8.r),
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
 
                   if (isEmpty)
                     SliverFillRemaining(
@@ -206,10 +211,8 @@ class DashboardScreen extends StatelessWidget {
                                     languageService.tr(
                                       'dashboard_open_real_account',
                                     ),
-                                    style:
-                                        AppTextStyles.black14600h1_71.copyWith(
-                                          color: AppColors.primary,
-                                        ),
+                                    style: AppTextStyles.black14600h1_71
+                                        .copyWith(color: AppColors.primary),
                                   ),
                                 ),
                               ),
@@ -232,10 +235,8 @@ class DashboardScreen extends StatelessWidget {
                                     languageService.tr(
                                       'dashboard_open_demo_account',
                                     ),
-                                    style:
-                                        AppTextStyles.black14600h1_71.copyWith(
-                                          color: AppColors.whiteColor,
-                                        ),
+                                    style: AppTextStyles.black14600h1_71
+                                        .copyWith(color: AppColors.whiteColor),
                                   ),
                                 ),
                               ),
@@ -256,16 +257,13 @@ class DashboardScreen extends StatelessWidget {
                             MediaQuery.of(context).padding.bottom,
                       ),
                       sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final account = controller.mt5Accounts[index];
-                            return Container(
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: _buildAccountCard(account),
-                            );
-                          },
-                          childCount: controller.mt5Accounts.length,
-                        ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final account = controller.mt5Accounts[index];
+                          return Container(
+                            margin: EdgeInsets.only(bottom: 16),
+                            child: _buildAccountCard(account),
+                          );
+                        }, childCount: controller.mt5Accounts.length),
                       ),
                     ),
                 ],
@@ -277,7 +275,6 @@ class DashboardScreen extends StatelessWidget {
         );
       }),
     );
-
   }
 
   @override
@@ -380,7 +377,8 @@ class DashboardScreen extends StatelessWidget {
     if (isVantage) {
       return Obx(
         () => VantageDashboardLayout(
-          appBar: null, // AppBar moved to SliverAppBar in _buildDashboardContent
+          appBar:
+              null, // AppBar moved to SliverAppBar in _buildDashboardContent
           backgroundColor: AppColors.tradeBackgroundCenterColor,
           onRefresh: _onRefresh,
           dimmed: controller.isBottomSheetOpen.value,
@@ -479,41 +477,42 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                  SizedBox(width: 8),
-                  Container(
-                    height: 22,
-                    width: 42,
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                    alignment: Alignment.center,
-                    // padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color:
-                          account.accountType == 'live'
-                              ? AppColors.accent
-                              : AppColors.blue,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      account.accountType.capitalizeFirst ?? '',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
+                    SizedBox(width: 8),
+                    Container(
+                      height: 22,
+                      width: 42,
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                      alignment: Alignment.center,
+                      // padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
                         color:
                             account.accountType == 'live'
-                                ? AppColors.whiteColor
-                                : AppColors.whiteColor,
+                                ? AppColors.accent
+                                : AppColors.blue,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        account.accountType.capitalizeFirst ?? '',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color:
+                              account.accountType == 'live'
+                                  ? AppColors.whiteColor
+                                  : AppColors.whiteColor,
+                        ),
                       ),
                     ),
-                  ),
-                  if (account.masterGroupId.toLowerCase() == 'scratchcard') ...[
-                  SizedBox(width: 8),
-                 BrandLogo (
-                    source: "assets/svg/more/scratch.svg",
-                    height: 22,
-                    width: 22,
-                    color: AppColors.primary,
-                  ),
-                  ],
+                    if (account.masterGroupId.toLowerCase() ==
+                        'scratchcard') ...[
+                      SizedBox(width: 8),
+                      BrandLogo(
+                        source: "assets/svg/more/scratch.svg",
+                        height: 22,
+                        width: 22,
+                        color: AppColors.primary,
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -597,7 +596,8 @@ class DashboardScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
-                        color: isVantage ? AppColors.textGrey : AppColors.icongrey,
+                        color:
+                            isVantage ? AppColors.textGrey : AppColors.icongrey,
                         height: 1.4,
                       ),
                     ),
@@ -630,9 +630,14 @@ class DashboardScreen extends StatelessWidget {
                       },
                       borderRadius: BorderRadius.circular(12.r),
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 6.h,
+                          horizontal: 8.w,
+                        ),
                         decoration: BoxDecoration(
-                          color: AppColors.cardBackGround,
+                          color: AppColors.isDarkMode
+                              ? const Color(0xFFE0E0E0)
+                              : AppColors.cardBackGround,
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(
                             color: AppColors.border.withValues(
@@ -645,7 +650,9 @@ class DashboardScreen extends StatelessWidget {
                               'assets/svg/bottom_navigation/candle_bold.svg',
                           height: 16.h,
                           width: 16.w,
-                          color: AppColors.primary,
+                          color: AppColors.isDarkMode
+                              ? const Color(0xFF333333)
+                              : AppColors.primary,
                         ),
                       ),
                     ),
@@ -660,7 +667,9 @@ class DashboardScreen extends StatelessWidget {
                         label: languageService.tr('dashboard_deposit'),
                         onTap: () {
                           if (account.accountType.toLowerCase() == 'live') {
-                            controller.onDepositRealAccount(account.metaAccountNumber);
+                            controller.onDepositRealAccount(
+                              account.metaAccountNumber,
+                            );
                           } else {
                             controller.onDeposit(account.metaAccountNumber);
                           }
@@ -702,7 +711,10 @@ class DashboardScreen extends StatelessWidget {
                       onTap: () => _showAccountMenuBottomSheet(account),
                       borderRadius: BorderRadius.circular(12.r),
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 6.h,
+                          horizontal: 8.w,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.cardBackGround,
                           borderRadius: BorderRadius.circular(12.r),
@@ -818,7 +830,10 @@ class DashboardScreen extends StatelessWidget {
 
                   // Three dots button with onTap functionality
                   Container(
-                    padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 5.w),
+                    padding: EdgeInsets.symmetric(
+                      vertical: 10.h,
+                      horizontal: 5.w,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.cardBackGround,
                       borderRadius: BorderRadius.circular(5.r),
@@ -864,7 +879,10 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   padding:
                       isVantage
-                          ? EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w)
+                          ? EdgeInsets.symmetric(
+                            vertical: 8.h,
+                            horizontal: 12.w,
+                          )
                           : null,
                 ),
                 child: Row(
@@ -924,13 +942,22 @@ class DashboardScreen extends StatelessWidget {
                 ? EdgeInsets.symmetric(vertical: 6.h, horizontal: 6.w)
                 : EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w);
 
+        // In dark mode with light segment bar background, use light gray buttons with dark text
+        final bool isDarkModeWithLightBg = AppColors.isDarkMode;
+        final Color buttonBgColor = isDarkModeWithLightBg
+            ? const Color(0xFFE0E0E0)
+            : color.withAlpha(20);
+        final Color textAndIconColor = isDarkModeWithLightBg
+            ? const Color(0xFF333333)
+            : color;
+
         return GestureDetector(
           onTap: onTap,
           child: Container(
             constraints: BoxConstraints(minHeight: compact ? 30.h : 40.h),
             padding: padding,
             decoration: BoxDecoration(
-              color: color.withAlpha(20),
+              color: buttonBgColor,
               borderRadius: BorderRadius.circular(compact ? 12.r : 5.r),
             ),
             child: Row(
@@ -942,9 +969,9 @@ class DashboardScreen extends StatelessWidget {
                       assetPath: svg!,
                       height: compact ? 13.h : 16.h,
                       width: compact ? 13.w : 16.w,
-                      color: color,
+                      color: textAndIconColor,
                     )
-                    : Icon(icon, color: AppColors.primary, size: iconSize),
+                    : Icon(icon, color: textAndIconColor, size: iconSize),
                 SizedBox(width: 4.w),
                 Flexible(
                   child: Text(
@@ -952,7 +979,7 @@ class DashboardScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w500,
-                      color: color,
+                      color: textAndIconColor,
                       height: 1.2,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -968,7 +995,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 }
-
 
 class AccountInfoBottomSheet extends StatelessWidget {
   final MT5Account account;
@@ -1640,7 +1666,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     Get.to(() => InternalTransferScreen());
                   },
                 ),
-                SizedBox(height: 16),
+                // SizedBox(height: 16),
                 // _buildMenuItem(
                 //   icon: Icons.card_giftcard,
                 //   label: languageService.tr('dashboard_bonus'),

@@ -16,11 +16,11 @@ class FeatureUnavailableScreen extends StatelessWidget {
     final featureKey = (args['featureKey'] ?? '').toString();
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: AppColors.scaffold,
       appBar: AppBar(
         title: Text(languageService.tr('general_not_available')),
         backgroundColor: AppColors.whiteColor,
-        foregroundColor: Colors.black,
+        foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
       body: Center(
@@ -29,18 +29,18 @@ class FeatureUnavailableScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.lock_outline, size: 48, color: Colors.grey),
+              Icon(Icons.lock_outline, size: 48, color: AppColors.textGrey),
               const SizedBox(height: 12),
               Text(
                 languageService.tr('general_feature_not_available'),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
               ),
               if (featureKey.isNotEmpty) ...[
                 const SizedBox(height: 6),
                 Text(
                   featureKey,
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(color: AppColors.textGrey),
                 ),
               ],
               const SizedBox(height: 18),
@@ -58,4 +58,3 @@ class FeatureUnavailableScreen extends StatelessWidget {
     );
   }
 }
-

@@ -9,7 +9,7 @@ class ThemeService extends GetxService {
   // New key (System/Light/Dark)
   static const String _themeModeKey = 'theme_mode';
 
-  static const ThemeMode defaultThemeMode = ThemeMode.light;
+  static const ThemeMode defaultThemeMode = ThemeMode.system;
 
   /// Persisted user preference (System/Light/Dark).
   final Rx<ThemeMode> themeModeRx = defaultThemeMode.obs;
@@ -26,25 +26,24 @@ class ThemeService extends GetxService {
 
   Future<void> _initialize() async {
     await _loadSavedThemeMode();
-    // App is light-only; migrate any saved dark/system preference.
-    if (themeModeRx.value != ThemeMode.light) {
-      themeModeRx.value = ThemeMode.light;
-      await _saveThemeMode(ThemeMode.light);
-    }
   }
 
   Future<void> ensureInitialized() => _initialization;
 
-  bool get isSystemMode => false;
+  bool get isSystemMode => themeMode == ThemeMode.system;
 
-  /// App is light-theme only (including all new modules).
-  bool get isDarkResolved => false;
+  bool get isDarkResolved {
+    if (themeMode == ThemeMode.system) {
+      return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+          Brightness.dark;
+    }
+    return themeMode == ThemeMode.dark;
+  }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    const effective = ThemeMode.light;
-    if (themeModeRx.value == effective) return;
-    themeModeRx.value = effective;
-    await _saveThemeMode(effective);
+    if (themeModeRx.value == mode) return;
+    themeModeRx.value = mode;
+    await _saveThemeMode(mode);
     Get.forceAppUpdate();
   }
 

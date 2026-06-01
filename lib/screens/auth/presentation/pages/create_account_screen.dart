@@ -556,7 +556,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       ),
       child: IconButton(
         onPressed: () => Navigator.pop(context),
-        icon: RTLHelper.rtlIcon(Icons.arrow_back_ios, color: Colors.black),
+        icon: RTLHelper.rtlIcon(Icons.arrow_back_ios, color: AppColors.textPrimary),
         iconSize: 17.h,
         padding: RTLHelper.getRTLPadding(left: 5.w),
       ),

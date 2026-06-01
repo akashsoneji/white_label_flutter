@@ -50,13 +50,13 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                   height: 40.h,
                   width: 40.w,
                   decoration: BoxDecoration(
-                    color: AppColors.whiteColor,
+                    color: AppColors.pureWhite,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: AppColors.border),
                   ),
                   child: IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+                    icon: Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
                     iconSize: 17.h,
                     padding: EdgeInsets.only(left: 5.w),
                   ),

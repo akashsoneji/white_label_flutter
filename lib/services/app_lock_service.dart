@@ -9,53 +9,95 @@ class AppLockService extends GetxService {
   final RxBool authUnavailable = false.obs;
   final RxBool lastUnlockFailed = false.obs;
 
-  DateTime? _justAuthenticatedUntil;
+  DateTime? _lastUnlockAttemptAt;
+  DateTime? _lastSuccessfulUnlockAt;
+  DateTime? _lastAuthUiAt;
+  static const Duration _resumeGrace = Duration(milliseconds: 1800);
 
+  /// Lock only when:
+  /// - biometric enabled in app, AND
+  /// - user session exists (token + logged-in status).
   Future<void> lockIfNeeded({required String reason}) async {
-    if (_isWithinGraceWindow()) {
+    // If we are currently showing auth UI (or just returned), don't immediately re-lock.
+    if (_lastAuthUiAt != null &&
+        DateTime.now().difference(_lastAuthUiAt!) < _resumeGrace) {
       return;
     }
+    if (_lastSuccessfulUnlockAt != null &&
+        DateTime.now().difference(_lastSuccessfulUnlockAt!) < _resumeGrace) {
+      return;
+    }
+    if (isUnlocking.value) return;
 
     final enabled = await SecureStorageService.getBiometricEnabled();
     if (!enabled) {
-      clearLock();
+      isLocked.value = false;
+      authUnavailable.value = false;
+      lastUnlockFailed.value = false;
       return;
     }
 
-    final sessionValid = await SecureStorageService.isUserLoggedIn();
-    if (!sessionValid) {
-      clearLock();
+    final token = await SecureStorageService.getAuthToken();
+    final loggedIn = await SecureStorageService.getLoginStatus();
+    if (token == null || token.isEmpty || !loggedIn) {
+      isLocked.value = false;
+      authUnavailable.value = false;
+      lastUnlockFailed.value = false;
       return;
     }
 
+    // Lock. We will attempt device authentication (biometric OR device credential)
+    // during unlock. If the device cannot authenticate, we'll show a full-screen
+    // recovery UI (Open Settings / Disable AppLock).
     isLocked.value = true;
     authUnavailable.value = false;
     lastUnlockFailed.value = false;
   }
 
+  /// Unlock with biometric OR device credential fallback.
+  /// Returns true if unlocked.
   Future<bool> unlock({required String reason}) async {
     if (isUnlocking.value) return false;
+    if (!isLocked.value) return true;
+
+    // Simple debounce: if user cancels repeatedly, don't auto-loop.
+    final now = DateTime.now();
+    if (_lastUnlockAttemptAt != null &&
+        now.difference(_lastUnlockAttemptAt!).inMilliseconds < 600) {
+      return false;
+    }
+    _lastUnlockAttemptAt = now;
+    _lastAuthUiAt = now;
 
     isUnlocking.value = true;
-    authUnavailable.value = false;
-    lastUnlockFailed.value = false;
-
     try {
+      lastUnlockFailed.value = false;
+      final enabled = await SecureStorageService.getBiometricEnabled();
+      if (!enabled) {
+        isLocked.value = false;
+        authUnavailable.value = false;
+        lastUnlockFailed.value = false;
+        return true;
+      }
+
       final supported = await BiometricService.instance.isDeviceSupported();
       if (!supported) {
         authUnavailable.value = true;
+        lastUnlockFailed.value = true;
         return false;
       }
 
       final ok = await BiometricService.instance.authenticate(reason: reason);
       if (ok) {
         isLocked.value = false;
-        markJustAuthenticated();
-        return true;
+        authUnavailable.value = false;
+        _lastSuccessfulUnlockAt = DateTime.now();
+        lastUnlockFailed.value = false;
       }
-
-      lastUnlockFailed.value = true;
-      return false;
+      if (!ok) {
+        lastUnlockFailed.value = true;
+      }
+      return ok;
     } finally {
       isUnlocking.value = false;
     }
@@ -63,24 +105,28 @@ class AppLockService extends GetxService {
 
   Future<void> disableAppLock() async {
     await SecureStorageService.setBiometricEnabled(false);
-    clearLock();
+    authUnavailable.value = false;
+    lastUnlockFailed.value = false;
+    isLocked.value = false;
   }
 
-  void clearLock() {
+  Future<void> clearLock() async {
     isLocked.value = false;
     isUnlocking.value = false;
     authUnavailable.value = false;
     lastUnlockFailed.value = false;
   }
 
-  void markJustAuthenticated({Duration window = const Duration(seconds: 2)}) {
-    _justAuthenticatedUntil = DateTime.now().add(window);
-  }
-
-  bool _isWithinGraceWindow() {
-    final until = _justAuthenticatedUntil;
-    if (until == null) return false;
-    return DateTime.now().isBefore(until);
+  /// Call after successful device auth used to **enable** biometrics (settings / login / registration).
+  /// Prevents an immediate second prompt when the biometric sheet dismisses and the app
+  /// lifecycle fires `resumed` → [lockIfNeeded] / [AppLockOverlay].
+  void markJustAuthenticated() {
+    final now = DateTime.now();
+    _lastAuthUiAt = now;
+    _lastSuccessfulUnlockAt = now;
+    _lastUnlockAttemptAt = now;
+    isLocked.value = false;
+    authUnavailable.value = false;
+    lastUnlockFailed.value = false;
   }
 }
-

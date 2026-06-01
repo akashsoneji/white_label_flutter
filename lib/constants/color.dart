@@ -18,31 +18,44 @@ class AppColors {
   }
 
   // ── Brand Colors (flavor-driven) ──────────────────────────────────────────
-  static Color get primary => FlavorConfig.instance.primaryColor;
+  // Primary color - white in dark mode for text visibility, brand color in light
+  static Color get primary =>
+      isDarkMode ? const Color(0xFFFFFFFF) : FlavorConfig.instance.primaryColor;
   static Color get secondary => FlavorConfig.instance.secondaryColor;
   static Color get accent => FlavorConfig.instance.accentColor;
 
   // ── Common Black & Grey ───────────────────────────────────────────────────
   // Primary text — black in light, white in dark
-  static Color get textPrimary => isDarkMode ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
-  // Secondary text — grey in both modes
-  static Color get textSecondary => isDarkMode ? const Color(0xFFB0B0B0) : const Color(0xFF757984);
-  // Grey text (captions, hints, placeholders) — #757984 in light, #9E9E9E in dark
-  static Color get textGrey => isDarkMode ? const Color(0xFF9E9E9E) : const Color(0xFF757984);
-  // Light variant of grey text
-  static Color get textGreyLight => isDarkMode ? const Color(0xFF9E9E9E) : const Color(0xFF919EAB);
-  // Trade center text — #4F535D in light, #B0B0B0 in dark
-  static Color get tradeTextCenterColor => isDarkMode ? const Color(0xFFB0B0B0) : const Color(0xFF4F535D);
+  static Color get textPrimary =>
+      isDarkMode ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+  // Secondary text — lighter grey in both modes
+  static Color get textSecondary =>
+      isDarkMode ? const Color(0xFFC0C0C0) : const Color(0xFF757984);
+  // Grey text (captions, hints, placeholders) — #757984 in light, #C8C8C8 in dark (brighter for visibility)
+  static Color get textGrey =>
+      isDarkMode ? const Color(0xFFC8C8C8) : const Color(0xFF757984);
+  // Light variant of grey text — brighter in dark mode
+  static Color get textGreyLight =>
+      isDarkMode ? const Color(0xFFB0B0B0) : const Color(0xFF919EAB);
+  // Trade center text — lighter in dark mode for visibility
+  static Color get tradeTextCenterColor =>
+      isDarkMode ? const Color(0xFFC8C8C8) : const Color(0xFF4F535D);
 
   // ── Common White & Surface ─────────────────────────────────────────────────
-  // White / off-white surface — #F6F6F6 in light, #2C2C2C in dark
-  static Color get whiteColor => isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF6F6F6);
+  // Off-white for light surfaces — used for light theme backgrounds
+  static Color get whiteColor =>
+      isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF6F6F6);
+  // Pure white for buttons and text — always white regardless of theme
+  static Color get pureWhite => const Color(0xFFFFFFFF);
   // Scaffold background — #FFFFFF in light, #121212 in dark
-  static Color get scaffold => isDarkMode ? const Color(0xFF121212) : const Color(0xFFFFFFFF);
+  static Color get scaffold =>
+      isDarkMode ? const Color(0xFF121212) : const Color(0xFFFFFFFF);
   // Card background — #FFFFFF in light, #2C2C2C in dark
-  static Color get card => isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFFFFFFF);
+  static Color get card =>
+      isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFFFFFFF);
   // Surface / divider — #F5F5F5 in light, #1E1E1E in dark
-  static Color get surface => isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF5F5F5);
+  static Color get surface =>
+      isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF5F5F5);
   // Background alias for scaffold
   static Color get background => scaffold;
   // Card background alias
@@ -50,15 +63,23 @@ class AppColors {
 
   // ── Trade Background ──────────────────────────────────────────────────────
   // Main scaffold bg for feature screens — #F7F7F7 in light, #1E1E1E in dark
-  static Color get tradeBackground => isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF7F7F7);
+  static Color get tradeBackground =>
+      isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF7F7F7);
+
+  // Text field/input background — slightly lighter than card in dark mode for visibility
+  static Color get textFieldBg =>
+      isDarkMode ? const Color(0xFF333333) : const Color(0xFFFFFFFF);
 
   // ── Border & Divider ──────────────────────────────────────────────────────
-  // Main border color — #BBBBBB in light, #404040 in dark
-  static Color get border => isDarkMode ? const Color(0xFF404040) : const Color(0xFFBBBBBB);
-  // Hint / placeholder color — grey in both modes
-  static Color get hint => isDarkMode ? const Color(0xFF9E9E9E) : const Color(0xFF757984);
-  // Neutral divider / track — #E0E0E0 in light, #404040 in dark
-  static Color get divider => isDarkMode ? const Color(0xFF404040) : const Color(0xFFE0E0E0);
+  // Main border color — lighter in dark mode for visibility
+  static Color get border =>
+      isDarkMode ? const Color(0xFF5A5A5A) : const Color(0xFFBBBBBB);
+  // Hint / placeholder color — bright white in dark mode for visibility
+  static Color get hint =>
+      isDarkMode ? const Color(0xFFAAAAAA) : const Color(0xFF757984);
+  // Neutral divider / track — lighter in dark mode
+  static Color get divider =>
+      isDarkMode ? const Color(0xFF5A5A5A) : const Color(0xFFE0E0E0);
 
   // ── Icon Colors ────────────────────────────────────────────────────────────
   static Color get iconPrimary => primary;
@@ -67,25 +88,31 @@ class AppColors {
 
   // ── Icon Background ────────────────────────────────────────────────────────
   static Color get iconBgSurface => surface;
-  static Color get iconBgTertiary => isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF0F0F0);
+  static Color get iconBgTertiary =>
+      isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF0F0F0);
   static Color get iconBgPrimary => primary.withValues(alpha: 0.12);
   static Color get iconBgGreen => statusGreen.withValues(alpha: 0.08);
 
   // ── Brand-Tinted Surfaces ────────────────────────────────────────────────
-  static Color get surfacePrimary => primary.withValues(alpha: isDarkMode ? 0.10 : 0.20);
-  static Color get surfaceSecondary => primary.withValues(alpha: isDarkMode ? 0.45 : 0.60);
+  static Color get surfacePrimary =>
+      primary.withValues(alpha: isDarkMode ? 0.10 : 0.20);
+  static Color get surfaceSecondary =>
+      primary.withValues(alpha: isDarkMode ? 0.45 : 0.60);
   static Color get surfaceTertiary => whiteColor.withValues(alpha: 0.85);
 
   // ── Chip & Badge ───────────────────────────────────────────────────────────
   static Color get chipDefault => iconBgTertiary;
-  static Color get chipSelected => isDarkMode ? const Color(0xFF4F535D) : primary;
+  static Color get chipSelected =>
+      isDarkMode ? const Color(0xFF4F535D) : primary;
   static Color get chipText => onColoredBackground;
 
   // ── Common Aliases ─────────────────────────────────────────────────────────
   static Color get onColoredBackground => Colors.white;
+
   /// @deprecated Use `onColoredBackground` instead
   static Color get onPrimaryTint => onColoredBackground;
-  static Color get shadow => textPrimary.withValues(alpha: isDarkMode ? 0.2 : 0.05);
+  static Color get shadow =>
+      textPrimary.withValues(alpha: isDarkMode ? 0.2 : 0.05);
   static Color get brandPrimary => primary;
 
   // ── Status Colors ──────────────────────────────────────────────────────────
@@ -188,7 +215,8 @@ class AppColors {
   static const Color transparentDivider = Color(0x1A000000);
   static const Color backgroundDarkAlt = Color(0xFF0D1117);
   static const Color backgroundLightAlt = Color(0xFFF8F9FC);
-  static Color get placeholderSoft => const Color(0xFF8C98A8).withValues(alpha: 0.2);
+  static Color get placeholderSoft =>
+      const Color(0xFF8C98A8).withValues(alpha: 0.2);
 
   // ── Accent Highlight ────────────────────────────────────────────────────────
   static Color get accentHighlightBg =>
@@ -209,58 +237,74 @@ class AppColors {
 
   /// @deprecated Use `scaffold` / `surface` instead
   /// Light scaffold/background color — white in light, dark surface in dark
-  static Color get backgroundLight => isDarkMode ? surface : const Color(0xFFFFFFFF);
+  static Color get backgroundLight => scaffold;
 
   /// @deprecated Use `scaffold` / `background` instead
   static Color get backgroundLightTheme => const Color(0xFFFFFFFF);
+
   /// @deprecated Use `scaffold` / `background` instead
   static Color get backgroundDarkTheme => const Color(0xFF121212);
+
   /// @deprecated Use `surface` instead
   static Color get surfaceDarkTheme => const Color(0xFF1E1E1E);
+
   /// @deprecated Use `surface` instead
   static Color get surfaceLightTheme => const Color(0xFFF5F5F5);
 
   /// @deprecated Use `card` instead
   static Color get cardDarkTheme => const Color(0xFF2C2C2C);
+
   /// @deprecated Use `card` instead
   static Color get cardLightTheme => const Color(0xFFFFFFFF);
+
   /// @deprecated Use `card` instead
   static Color get cardBackGround => surfacePrimary;
+
   /// @deprecated Use `card` instead
   static Color get cardBackGroundSecondary => surfaceSecondary;
 
   /// @deprecated Use `border` instead
   static Color get borderLight => border;
+
   /// @deprecated Use `border` instead
   static Color get borderDark => border;
 
   /// @deprecated Use `hint` instead
   static Color get hintLight => hint;
+
   /// @deprecated Use `hint` instead
   static Color get hintDark => hint;
 
   /// @deprecated Use `divider` instead
   static Color get neutralTrack => divider;
+
   /// @deprecated Use `divider` instead
   static Color get dashLineColor => divider.withValues(alpha: 0.2);
 
   /// @deprecated Use `textGrey` instead
   static Color get textGreyLightTheme => textGrey;
+
   /// @deprecated Use `textGreyLight` instead
   static Color get textGreyLightVariant => textGreyLight;
+
   /// @deprecated Use `textGreyDark` instead
   static Color get textGreyDark => textGrey;
+
   /// @deprecated Use `textPrimary` instead
   static Color get textPrimaryLight => Colors.black;
+
   /// @deprecated Use `textPrimary` instead
   static Color get textPrimaryDark => Colors.white;
+
   /// @deprecated Use `textSecondary` instead
   static Color get textSecondaryLight => const Color(0xFF757984);
+
   /// @deprecated Use `textSecondary` instead
   static Color get textSecondaryDark => const Color(0xFFB0B0B0);
 
   /// @deprecated Use `whiteColor` instead
   static Color get whiteColorLight => const Color(0xFFF6F6F6);
+
   /// @deprecated Use `whiteColor` instead
   static Color get whiteColorDark => const Color(0xFF2C2C2C);
 
@@ -269,34 +313,44 @@ class AppColors {
 
   /// @deprecated Use `icongrey` instead
   static Color get icongrey => textGrey;
+
   /// @deprecated Use `icongreylight` instead
   static Color get icongreylight => textGreyLight.withValues(alpha: 0.5);
 
   /// @deprecated Use `grey` instead
   static const Color grey = Color(0xFFEDF1F3);
+
   /// @deprecated Use `red` instead
   static const Color red = Color(0xFFD72E1F);
+
   /// @deprecated Use `green` instead
   static const Color green = Color(0xFF3C8836);
+
   /// @deprecated Use `secondary` instead
   static const Color secondaryStatic = Color(0xFFF6F6F6);
+
   /// @deprecated Use `accent` instead
   static const Color accentStatic = Color(0xFFFEBC1F);
 
   /// @deprecated Use `successBg` instead
   static Color get successBgLight => successBg;
+
   /// @deprecated Use `successText` instead
   static Color successTextResolved([bool isDark = false]) =>
       isDark ? success.withValues(alpha: 0.9) : successText;
 
   /// @deprecated Use `kycComplete` instead
   static const Color kycStageComplete = Color(0xFFE8F5E8);
+
   /// @deprecated Use `kycActive` instead
   static const Color kycStageActive = Color(0xFFF8F3FF);
+
   /// @deprecated Use `kycBorder` instead
   static const Color kycFeatureBorder = Color(0xFFE3E7EF);
+
   /// @deprecated Use `successBorder` instead
   static const Color successBorderLight = Color(0xFFBBF7D0);
+
   /// @deprecated Use `successText` instead
   static const Color successTextLight = Color(0xFF15803D);
 }

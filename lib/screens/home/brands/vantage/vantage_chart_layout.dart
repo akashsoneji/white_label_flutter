@@ -24,7 +24,7 @@ class VantageChartLayout extends StatelessWidget {
     this.overlay,
   }) : assert(
          titleWidget != null ||
-             (title != null && title!.isNotEmpty),
+             (title != null && title.isNotEmpty),
          'Provide titleWidget or title',
        );
 
@@ -59,29 +59,29 @@ class VantageChartLayout extends StatelessWidget {
                         children: [
                           Expanded(
                             flex: chartFlex,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(18.r),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: backgroundColor,
-                                  border: Border.all(
-                                    color: primaryColor.withOpacity(0.10),
-                                  ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18.r),
+                                border: Border.all(
+                                  color: primaryColor.withOpacity(0.10),
                                 ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(18.r),
                                 child: chart,
                               ),
                             ),
                           ),
                           SizedBox(height: 8.h),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(20.r),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: backgroundColor,
-                                border: Border.all(
-                                  color: primaryColor.withOpacity(0.12),
-                                ),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(
+                                color: primaryColor.withOpacity(0.12),
                               ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20.r),
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(
                                   10.w,
