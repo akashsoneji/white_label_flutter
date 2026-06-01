@@ -1,5 +1,5 @@
 import 'dart:async';
-
+//
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -114,21 +114,24 @@ void main() async {
     // IMPORTANT: Do not block app startup on token fetching.
     // Native splash will stay visible until the first Flutter frame renders.
     // Token retrieval can be slow/flaky, so we fetch it in the background.
-    FirebaseMessaging.instance.getToken().then((token) async {
-      try {
-        print("====================================");
-        print("FCM TOKEN: $token");
-        print("====================================");
+    FirebaseMessaging.instance
+        .getToken()
+        .then((token) async {
+          try {
+            print("====================================");
+            print("FCM TOKEN: $token");
+            print("====================================");
 
-        if (token != null) {
-          await SecureStorageService.saveFcmToken(token);
-        }
-      } catch (e) {
-        print("FCM token handling error: $e");
-      }
-    }).catchError((e) {
-      print("FCM token fetch error: $e");
-    });
+            if (token != null) {
+              await SecureStorageService.saveFcmToken(token);
+            }
+          } catch (e) {
+            print("FCM token handling error: $e");
+          }
+        })
+        .catchError((e) {
+          print("FCM token fetch error: $e");
+        });
   } catch (e) {
     print("Firebase initialization error: $e");
   }
@@ -202,10 +205,7 @@ Future<void> initServices() async {
   await languageService.ensureInitialized();
 
   // Register ThemeService
-  final themeService = Get.put<ThemeService>(
-    ThemeService(),
-    permanent: true,
-  );
+  final themeService = Get.put<ThemeService>(ThemeService(), permanent: true);
   await themeService.ensureInitialized();
 
   // Shared API client abstraction (wrapping existing ApiService).
@@ -264,10 +264,7 @@ Future<void> initServices() async {
     permanent: true,
   );
 
-  Get.put<AuthService>(
-    AuthServiceImpl(Get.find<ApiClient>()),
-    permanent: true,
-  );
+  Get.put<AuthService>(AuthServiceImpl(Get.find<ApiClient>()), permanent: true);
   Get.put<GoogleOtpService>(GoogleOtpService(), permanent: true);
   Get.put<EnabledModulesService>(EnabledModulesService(), permanent: true);
   Get.put<CrmSettingsService>(CrmSettingsService(), permanent: true);
@@ -275,10 +272,7 @@ Future<void> initServices() async {
     AuthRepositoryImpl(Get.find<AuthService>(), Get.find<ApiClient>()),
     permanent: true,
   );
-  Get.put<LoginUser>(
-    LoginUser(Get.find<AuthRepository>()),
-    permanent: true,
-  );
+  Get.put<LoginUser>(LoginUser(Get.find<AuthRepository>()), permanent: true);
   Get.put<ForgotPassword>(
     ForgotPassword(Get.find<AuthRepository>()),
     permanent: true,
@@ -291,10 +285,7 @@ Future<void> initServices() async {
     RegisterWithOtpVerification(Get.find<AuthRepository>()),
     permanent: true,
   );
-  Get.put<SendOtp>(
-    SendOtp(Get.find<AuthRepository>()),
-    permanent: true,
-  );
+  Get.put<SendOtp>(SendOtp(Get.find<AuthRepository>()), permanent: true);
   Get.put<ResetPassword>(
     ResetPassword(Get.find<AuthRepository>()),
     permanent: true,
@@ -392,10 +383,7 @@ ThemeData _buildLightTheme() {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.error),
       ),
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 14.h,
-      ),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       alignLabelWithHint: true,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -403,17 +391,13 @@ ThemeData _buildLightTheme() {
         backgroundColor: FlavorConfig.instance.primaryColor,
         foregroundColor: AppColors.whiteColor,
         minimumSize: Size(double.infinity, 40.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
     ),
     cardTheme: CardThemeData(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: EdgeInsets.symmetric(vertical: 8.h),
       color: AppColors.whiteColor,
     ),
@@ -486,10 +470,7 @@ ThemeData _buildDarkTheme() {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.error),
       ),
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 14.h,
-      ),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       alignLabelWithHint: true,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -497,17 +478,13 @@ ThemeData _buildDarkTheme() {
         backgroundColor: FlavorConfig.instance.primaryColor,
         foregroundColor: AppColors.whiteColor,
         minimumSize: Size(double.infinity, 40.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
     ),
     cardTheme: CardThemeData(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: EdgeInsets.symmetric(vertical: 8.h),
       color: AppColors.cardDarkTheme,
     ),
@@ -536,13 +513,13 @@ ThemeData _buildDarkTheme() {
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
-    appBarTheme:   AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: AppColors.surfaceDarkTheme,
       foregroundColor: AppColors.whiteColor,
       elevation: 0,
     ),
-    iconTheme:   IconThemeData(color: AppColors.whiteColor),
-    textTheme:   TextTheme(bodyLarge: TextStyle(color: AppColors.whiteColor)),
+    iconTheme: IconThemeData(color: AppColors.whiteColor),
+    textTheme: TextTheme(bodyLarge: TextStyle(color: AppColors.whiteColor)),
   );
 }
 
@@ -668,7 +645,9 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
 
           if (Get.isRegistered<EnabledModulesService>()) {
             unawaited(
-              Get.find<EnabledModulesService>().fetchEnabledModules(force: true),
+              Get.find<EnabledModulesService>().fetchEnabledModules(
+                force: true,
+              ),
             );
           }
 
