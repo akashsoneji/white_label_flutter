@@ -15,10 +15,8 @@ export 'package:crm_app/screens/copy_trading/presentation/pages/finance/payment_
 export 'package:crm_app/screens/copy_trading/presentation/pages/settings/invite_friend_screen.dart';
 export 'package:crm_app/screens/copy_trading/presentation/pages/settings/wallet_screen.dart';
 
-export 'package:crm_app/screens/copy_trading/presentation/pages/tabs/settings_tab.dart';
-export 'package:crm_app/screens/copy_trading/presentation/pages/tabs/clients_tab.dart';
-export 'package:crm_app/screens/copy_trading/presentation/pages/tabs/investment_tab.dart';
-export 'package:crm_app/screens/copy_trading/presentation/pages/tabs/traders_tab.dart';
+export 'package:crm_app/screens/copy_trading/presentation/pages/tabs/become_master_tab.dart';
+export 'package:crm_app/screens/copy_trading/presentation/pages/tabs/my_plans_tab.dart';
 
 // CopyTrading hub (More menu)
 export 'package:crm_app/screens/copy_trading/presentation/pages/hub/copy_trading_hub_screen.dart';

@@ -19,7 +19,6 @@ import '../../services/auth_service.dart';
 import '../../services/account_websocket_service.dart';
 import '../../widgets/custom_toast.dart';
 import '../../utils/trl_helper.dart';
-import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/utils/svg_color_helper.dart';
 import 'change_leverage_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/internal_transfer_screen.dart';

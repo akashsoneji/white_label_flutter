@@ -11,6 +11,7 @@ flutter_*.png
 **/android/captures/
 **/android/.idea/
 **/android/local.properties
+**/android/keystore.properties
 **/android/.settings/
 **/android/.project
 **/android/.classpath

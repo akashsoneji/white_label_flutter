@@ -3,7 +3,6 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/more/view_models/two_factor_auth_controller.dart';
 import 'package:crm_app/services/language_service.dart';
-import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/otp_modal.dart';
 import 'package:flutter/material.dart';

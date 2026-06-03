@@ -1,6 +1,6 @@
+import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/services/api_service.dart';
 import 'package:get/get.dart';
-
-import 'package:crm_app/screens/copy_trading/data/repositories/copy_trading_repository.dart';
 
 class CopyTradingMasterPlanDetail {
   final int id;
@@ -18,6 +18,7 @@ class CopyTradingMasterPlanDetail {
   final num minimumCapital;
   final num copyRatio;
   final int maxCopiers;
+  final bool isFull;
 
   final int activeCopiers;
   final int openPositions;
@@ -30,6 +31,13 @@ class CopyTradingMasterPlanDetail {
 
   final num takeProfitPips;
   final num stopLossPips;
+
+  final bool copyingPaused;
+  final String copyingPausedAt;
+
+  final String initialEquitySnapshot;
+  final String createdAt;
+  final String tradingServer;
 
   final List<CopyTradingMasterTradeHistoryItem> tradeHistory;
   final List<CopyTradingMasterCommissionHistoryItem> commissionHistory;
@@ -57,8 +65,14 @@ class CopyTradingMasterPlanDetail {
     required this.commissionPercentage,
     required this.takeProfitPips,
     required this.stopLossPips,
+    required this.copyingPaused,
+    required this.copyingPausedAt,
     required this.tradeHistory,
     required this.commissionHistory,
+    required this.initialEquitySnapshot,
+    required this.createdAt,
+    required this.isFull,
+    required this.tradingServer,
   });
 
   factory CopyTradingMasterPlanDetail.fromJson(Map<String, dynamic> json) {
@@ -95,8 +109,14 @@ class CopyTradingMasterPlanDetail {
       commissionPercentage: toNum(json['commission_percentage']),
       takeProfitPips: toNum(json['take_profit_pips']),
       stopLossPips: toNum(json['stop_loss_pips']),
+      copyingPaused: json['copying_paused'] == true,
+      copyingPausedAt: (json['copying_paused_at'] ?? '').toString(),
       tradeHistory: toMapList(json['trade_history']).map(CopyTradingMasterTradeHistoryItem.fromJson).toList(),
       commissionHistory: toMapList(json['commission_history']).map(CopyTradingMasterCommissionHistoryItem.fromJson).toList(),
+      initialEquitySnapshot: (json['initial_equity_snapshot'] ?? '').toString(),
+      createdAt: (json['created_at'] ?? '').toString(),
+      isFull: json['is_full'] == true,
+      tradingServer: (json['trading_server'] ?? '').toString(),
     );
   }
 }
@@ -206,7 +226,6 @@ class CopyTradingMasterCommissionHistoryItem {
 }
 
 class CopyTradingMasterPlanDetailController extends GetxController {
-  final CopyTradingRepository _repo = Get.find<CopyTradingRepository>();
   final int planId;
 
   final RxBool isLoading = false.obs;
@@ -226,10 +245,8 @@ class CopyTradingMasterPlanDetailController extends GetxController {
     update();
     errorMessage.value = '';
     try {
-      final res = await _repo.getMasterPlanDetail(
-        planId: planId,
-        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
-      );
+      final endpoint = '${ApiConstants.copyTradingMasterPlans}/$planId';
+      final res = await ApiService.get(endpoint: endpoint, queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()});
       if (!res.success || res.data == null) {
         detail.value = null;
         errorMessage.value = res.message ?? 'Failed to load plan detail';
@@ -256,5 +273,96 @@ class CopyTradingMasterPlanDetailController extends GetxController {
       update();
     }
   }
-}
 
+  /// Pause a master plan copying
+  Future<ApiResponse> pausePlan() async {
+    isLoading.value = true;
+    update();
+    errorMessage.value = '';
+    try {
+      final endpoint = '${ApiConstants.copyTradingMasterPlans}/$planId/pause';
+      final res = await ApiService.post(endpoint: endpoint, data: <String, dynamic>{});
+      if (res.success) {
+        await loadPlanDetail(showLoading: false);
+      } else {
+        errorMessage.value = res.message ?? 'Failed to pause plan';
+      }
+      return res;
+    } catch (e) {
+      errorMessage.value = 'Pause plan error: $e';
+      return ApiResponse.error(errorMessage.value);
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+
+  /// Resume a master plan copying
+  Future<ApiResponse> resumePlan() async {
+    isLoading.value = true;
+    update();
+    errorMessage.value = '';
+    try {
+      final endpoint = '${ApiConstants.copyTradingMasterPlans}/$planId/resume';
+      final res = await ApiService.post(endpoint: endpoint, data: <String, dynamic>{});
+      if (res.success) {
+        await loadPlanDetail(showLoading: false);
+      } else {
+        errorMessage.value = res.message ?? 'Failed to resume plan';
+      }
+      return res;
+    } catch (e) {
+      errorMessage.value = 'Resume plan error: $e';
+      return ApiResponse.error(errorMessage.value);
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+
+  /// Update a master plan (name, strategy, risk)
+  Future<ApiResponse> updatePlan({required Map<String, dynamic> body}) async {
+    isLoading.value = true;
+    update();
+    errorMessage.value = '';
+    try {
+      final endpoint = '${ApiConstants.copyTradingMasterPlans}/$planId';
+      final res = await ApiService.post(endpoint: endpoint, data: body);
+      if (res.success) {
+        await loadPlanDetail(showLoading: false);
+      } else {
+        errorMessage.value = res.message ?? 'Failed to update plan';
+      }
+      return res;
+    } catch (e) {
+      errorMessage.value = 'Update plan error: $e';
+      return ApiResponse.error(errorMessage.value);
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+
+  /// Inactivate a master plan
+  Future<ApiResponse> inactivatePlan() async {
+    isLoading.value = true;
+    update();
+    errorMessage.value = '';
+    try {
+      final endpoint = '${ApiConstants.copyTradingMasterPlans}/$planId/inactivate';
+      final res = await ApiService.post(endpoint: endpoint, data: <String, dynamic>{});
+      if (res.success) {
+        await loadPlanDetail(showLoading: false);
+      } else {
+        errorMessage.value = res.message ?? 'Failed to inactivate plan';
+      }
+      return res;
+    } catch (e) {
+      errorMessage.value = 'Inactivate plan error: $e';
+      return ApiResponse.error(errorMessage.value);
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+}

@@ -1,8 +1,6 @@
 import 'package:crm_app/utils/navigation_helper.dart';
-import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -475,8 +473,6 @@ class _InternalTransferHistoryScreenState
     TextAlign textAlign = TextAlign.start,
   }) {
     final displayName = account?.displayName ?? '';
-    final number = account?.number ?? '';
-    final type = account?.type.toUpperCase() ?? '';
 
     return Column(
       crossAxisAlignment: alignment,

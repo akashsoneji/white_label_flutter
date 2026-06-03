@@ -5,11 +5,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'dart:io';
+import 'dart:async';
 
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_camera_screen.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
@@ -22,6 +24,21 @@ class DepositInstructionController extends GetxController {
   final amount = ''.obs;
   final cryptoAddress = 'UGIGfjdsofijofijwesef'.obs;
   var selectedImage = Rx<File?>(null);
+
+  // Cregis-specific fields (ported from crmapp controller)
+  final cregisNetworks = <String>[].obs;
+  final selectedCregisNetwork = ''.obs;
+  final cregisDepositAddress = ''.obs;
+  final cregisQrPath = ''.obs;
+  final cregisCheckoutUrl = ''.obs;
+  final isAddressLoading = false.obs;
+  final cregisReferenceNumber = ''.obs;
+  final cregisPollingStatus = ''.obs;
+  final cregisChainId = ''.obs;
+  Map<String, dynamic>? cregisNetworkMap;
+  int get cregisPollingAttemptCount => _pollingAttempts;
+  Timer? _pollingTimer;
+  int _pollingAttempts = 0;
 
   // Text editing controller
   final amountController = TextEditingController();
@@ -41,6 +58,7 @@ class DepositInstructionController extends GetxController {
 
   @override
   void onClose() {
+    _stopPolling();
     amountController.dispose();
     _disposeCamera();
     super.onClose();
@@ -376,5 +394,195 @@ class DepositInstructionController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// Create a Cregis deposit address for the selected network
+  Future<void> createCregisDepositAddress({
+    required String gatewayMethodId,
+    required String amount,
+    required String mt5AccountId,
+  }) async {
+    if (selectedCregisNetwork.value.isEmpty) {
+      CustomToastService.showError(message: 'Please select a network');
+      return;
+    }
+
+    try {
+      isAddressLoading.value = true;
+      final token = await SecureStorageService.getAuthToken();
+
+      final response = await ApiService.post(
+        endpoint: ApiConstants.cregisDepositCreate,
+        token: token,
+        data: {
+          'gateway_method_id': gatewayMethodId,
+          'amount': amount,
+          'mt5_account_id': mt5AccountId,
+          'crypto_network': selectedCregisNetwork.value,
+        },
+      );
+
+      if (response.success && response.data != null) {
+        final data = response.data['data'] ?? response.data;
+
+        cregisReferenceNumber.value = data['reference_number']?.toString() ?? '';
+        cregisChainId.value = data['chain_id']?.toString() ?? '';
+        cregisCheckoutUrl.value = data['checkout_url']?.toString() ?? '';
+        cregisDepositAddress.value = data['cregis_address']?.toString() ?? '';
+        cregisQrPath.value = data['qr_path']?.toString() ?? '';
+
+        if (cregisCheckoutUrl.value.isNotEmpty) {
+          _startPolling();
+          Get.toNamed(
+            AppPages.CREGIS_SUCCESS,
+            arguments: {
+              'checkoutUrl': cregisCheckoutUrl.value,
+              'referenceNumber': cregisReferenceNumber.value,
+              'amount': amount,
+            },
+          );
+        } else if (cregisDepositAddress.value.isNotEmpty) {
+          CustomToastService.showSuccess(
+            message:
+                'Deposit address created. Send crypto to the address shown.',
+          );
+        } else {
+          CustomToastService.showError(
+            message: 'No deposit address or checkout URL returned',
+          );
+        }
+      } else {
+        CustomToastService.showError(
+          message: response.message ?? 'Failed to create deposit',
+        );
+      }
+    } catch (e) {
+      CustomToastService.showError(
+        message: 'Error creating deposit address: $e',
+      );
+    } finally {
+      isAddressLoading.value = false;
+    }
+  }
+
+  void _startPolling() {
+    _stopPolling();
+    _pollingAttempts = 0;
+    cregisPollingStatus.value = 'pending';
+
+    _pollingTimer = Timer.periodic(const Duration(seconds: 4), (timer) async {
+      if (_pollingAttempts >= 20) {
+        _stopPolling();
+        cregisPollingStatus.value = 'timeout';
+        CustomToastService.showError(
+          message:
+              'Payment timeout. Please check Transaction History for status.',
+        );
+        return;
+      }
+
+      _pollingAttempts++;
+      await _pollCregisStatus();
+    });
+  }
+
+  void _stopPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+  }
+
+  Future<void> _pollCregisStatus() async {
+    if (cregisReferenceNumber.value.isEmpty) return;
+
+    try {
+      final token = await SecureStorageService.getAuthToken();
+      final response = await ApiService.get(
+        endpoint:
+            '${ApiConstants.cregisDepositStatus}?ref=${cregisReferenceNumber.value}',
+        token: token,
+      );
+
+      if (response.success && response.data != null) {
+        final data = response.data['data'] ?? response.data;
+        final status = data['status']?.toString().toLowerCase() ?? 'pending';
+        cregisPollingStatus.value = status;
+
+        if (status == 'approved' || status == 'confirmed') {
+          _stopPolling();
+          CustomToastService.showSuccess(
+            message: 'Payment confirmed! Funds credited to your account.',
+          );
+
+          try {
+            final dashboardController = Get.find<DashboardController>();
+            dashboardController.markMT5AccountsAsStale();
+          } catch (_) {}
+
+          Get.toNamed(
+            AppPages.TRANSACTION_HISTORY,
+            arguments: {'from': 'dashboard'},
+          );
+          _clearCregisState();
+        } else if (status == 'rejected' || status == 'failed') {
+          _stopPolling();
+          CustomToastService.showError(
+            message:
+                'Payment $status. Please contact support if problem persists.',
+          );
+        }
+      }
+    } catch (e) {
+      print('Error polling Cregis status: $e');
+    }
+  }
+
+  Future<void> submitCregisDeposit({
+    required String gatewayMethodId,
+    required String amount,
+    required String mt5AccountId,
+  }) async {
+    if (cregisCheckoutUrl.value.isNotEmpty) {
+      _startPolling();
+      Get.toNamed(
+        AppPages.CREGIS_SUCCESS,
+        arguments: {
+          'checkoutUrl': cregisCheckoutUrl.value,
+          'referenceNumber': cregisReferenceNumber.value,
+          'amount': amount,
+        },
+      );
+      return;
+    }
+
+    if (cregisDepositAddress.value.isEmpty) {
+      CustomToastService.showError(
+        message: 'Please generate a deposit address first',
+      );
+      return;
+    }
+
+    _startPolling();
+    Get.toNamed(
+      AppPages.CREGIS_ADDRESS,
+      arguments: {
+        'cregisAddress': cregisDepositAddress.value,
+        'referenceNumber': cregisReferenceNumber.value,
+        'amount': amount,
+        'networkKey': selectedCregisNetwork.value,
+      },
+    );
+  }
+
+  void _clearCregisState() {
+    _stopPolling();
+    cregisNetworks.clear();
+    selectedCregisNetwork.value = '';
+    cregisDepositAddress.value = '';
+    cregisQrPath.value = '';
+    cregisCheckoutUrl.value = '';
+    cregisReferenceNumber.value = '';
+    cregisPollingStatus.value = '';
+    cregisChainId.value = '';
+    _pollingAttempts = 0;
   }
 }

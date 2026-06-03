@@ -25,9 +25,6 @@ import 'core/config/app_config_service.dart';
 import 'core/network/api_client.dart';
 import 'core/network/network_startup_phase.dart';
 import 'services/api_service_client.dart';
-import 'package:crm_app/screens/copy_trading/data/datasources/copy_trading_remote_data_source.dart';
-import 'package:crm_app/screens/copy_trading/data/repositories/copy_trading_repository_impl.dart';
-import 'package:crm_app/screens/copy_trading/data/repositories/copy_trading_repository.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository_impl.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
 import 'package:crm_app/screens/ib/data/datasources/ib_remote_data_source.dart';
@@ -83,6 +80,10 @@ import 'services/connectivity/connectivity_overlay.dart';
 import 'services/app_lock/app_lock_lifecycle.dart';
 import 'services/app_lock/app_lock_overlay.dart';
 
+/// Global toggle to enable/disable Dark Mode support in the app.
+/// Set this to `true` to enable Dark Mode, or `false` to force Light Mode.
+const bool enableDarkModeGlobal = false;
+
 // Firebase Background Message Handler
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -114,21 +115,24 @@ void main() async {
     // IMPORTANT: Do not block app startup on token fetching.
     // Native splash will stay visible until the first Flutter frame renders.
     // Token retrieval can be slow/flaky, so we fetch it in the background.
-    FirebaseMessaging.instance.getToken().then((token) async {
-      try {
-        print("====================================");
-        print("FCM TOKEN: $token");
-        print("====================================");
+    FirebaseMessaging.instance
+        .getToken()
+        .then((token) async {
+          try {
+            print("====================================");
+            print("FCM TOKEN: $token");
+            print("====================================");
 
-        if (token != null) {
-          await SecureStorageService.saveFcmToken(token);
-        }
-      } catch (e) {
-        print("FCM token handling error: $e");
-      }
-    }).catchError((e) {
-      print("FCM token fetch error: $e");
-    });
+            if (token != null) {
+              await SecureStorageService.saveFcmToken(token);
+            }
+          } catch (e) {
+            print("FCM token handling error: $e");
+          }
+        })
+        .catchError((e) {
+          print("FCM token fetch error: $e");
+        });
   } catch (e) {
     print("Firebase initialization error: $e");
   }
@@ -202,24 +206,11 @@ Future<void> initServices() async {
   await languageService.ensureInitialized();
 
   // Register ThemeService
-  final themeService = Get.put<ThemeService>(
-    ThemeService(),
-    permanent: true,
-  );
+  final themeService = Get.put<ThemeService>(ThemeService(), permanent: true);
   await themeService.ensureInitialized();
 
   // Shared API client abstraction (wrapping existing ApiService).
   Get.put<ApiClient>(ApiServiceClient(), permanent: true);
-
-  // CopyTrading (incremental clean architecture)
-  Get.put<CopyTradingRemoteDataSource>(
-    CopyTradingRemoteDataSource(Get.find<ApiClient>()),
-    permanent: true,
-  );
-  Get.put<CopyTradingRepository>(
-    CopyTradingRepositoryImpl(Get.find<CopyTradingRemoteDataSource>()),
-    permanent: true,
-  );
 
   // Finance (incremental clean architecture)
   Get.put<FinanceRepository>(
@@ -264,10 +255,7 @@ Future<void> initServices() async {
     permanent: true,
   );
 
-  Get.put<AuthService>(
-    AuthServiceImpl(Get.find<ApiClient>()),
-    permanent: true,
-  );
+  Get.put<AuthService>(AuthServiceImpl(Get.find<ApiClient>()), permanent: true);
   Get.put<GoogleOtpService>(GoogleOtpService(), permanent: true);
   Get.put<EnabledModulesService>(EnabledModulesService(), permanent: true);
   Get.put<CrmSettingsService>(CrmSettingsService(), permanent: true);
@@ -275,10 +263,7 @@ Future<void> initServices() async {
     AuthRepositoryImpl(Get.find<AuthService>(), Get.find<ApiClient>()),
     permanent: true,
   );
-  Get.put<LoginUser>(
-    LoginUser(Get.find<AuthRepository>()),
-    permanent: true,
-  );
+  Get.put<LoginUser>(LoginUser(Get.find<AuthRepository>()), permanent: true);
   Get.put<ForgotPassword>(
     ForgotPassword(Get.find<AuthRepository>()),
     permanent: true,
@@ -291,10 +276,7 @@ Future<void> initServices() async {
     RegisterWithOtpVerification(Get.find<AuthRepository>()),
     permanent: true,
   );
-  Get.put<SendOtp>(
-    SendOtp(Get.find<AuthRepository>()),
-    permanent: true,
-  );
+  Get.put<SendOtp>(SendOtp(Get.find<AuthRepository>()), permanent: true);
   Get.put<ResetPassword>(
     ResetPassword(Get.find<AuthRepository>()),
     permanent: true,
@@ -392,10 +374,7 @@ ThemeData _buildLightTheme() {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.error),
       ),
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 14.h,
-      ),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       alignLabelWithHint: true,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -403,17 +382,13 @@ ThemeData _buildLightTheme() {
         backgroundColor: FlavorConfig.instance.primaryColor,
         foregroundColor: AppColors.whiteColor,
         minimumSize: Size(double.infinity, 40.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
     ),
     cardTheme: CardThemeData(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: EdgeInsets.symmetric(vertical: 8.h),
       color: AppColors.whiteColor,
     ),
@@ -490,10 +465,7 @@ ThemeData _buildDarkTheme() {
       ),
       labelStyle: TextStyle(color: AppColors.hint),
       hintStyle: TextStyle(color: AppColors.hint),
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 14.h,
-      ),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       alignLabelWithHint: true,
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -501,17 +473,13 @@ ThemeData _buildDarkTheme() {
         backgroundColor: FlavorConfig.instance.primaryColor,
         foregroundColor: Colors.white,
         minimumSize: Size(double.infinity, 40.h),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
       ),
     ),
     cardTheme: CardThemeData(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: EdgeInsets.symmetric(vertical: 8.h),
       color: AppColors.card,
     ),
@@ -676,7 +644,9 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
 
           if (Get.isRegistered<EnabledModulesService>()) {
             unawaited(
-              Get.find<EnabledModulesService>().fetchEnabledModules(force: true),
+              Get.find<EnabledModulesService>().fetchEnabledModules(
+                force: true,
+              ),
             );
           }
 

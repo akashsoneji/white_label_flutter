@@ -337,7 +337,6 @@ class _TradeScreenState extends State<TradeScreen> {
   Widget build(BuildContext context) {
     final accountController = Get.find<AccountController>();
     final tradingController = Get.find<TradingController>();
-final languageService = Get.find<LanguageService>();
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       // drawer: const GlobalDrawer(),

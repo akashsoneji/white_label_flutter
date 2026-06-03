@@ -24,6 +24,7 @@ import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_more_layout.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
+import 'package:crm_app/main.dart' as main_config;
 
 class MoreScreen extends StatefulWidget {
   const MoreScreen({super.key});
@@ -172,10 +173,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
 
       Get.dialog(
         Center(
-          child: CommonLoadingWidget(
-            size: 50.0,
-            color: AppColors.primary,
-          ),
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
         ),
         barrierDismissible: false,
       );
@@ -249,26 +247,31 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     final languageService = Get.find<LanguageService>();
     final isVantage = FlavorConfig.isVantage();
 
-    final appBar = FlavorConfig.isVantage()
-        ? null
-        : AppBar(
-            backgroundColor: AppColors.tradeBackgroundCenterColor,
-            scrolledUnderElevation: 0,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            leading: Padding(
-              padding: EdgeInsets.only(left: 16.w),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded,
-                    size: 20.sp, color: AppColors.textPrimary),
-                onPressed: () => Navigator.pop(context)),
-            ),
-            title: Text(
-              languageService.tr('setting_title'),
-              style: AppTextStyles.screenTitle,
-            ),
-            centerTitle: true,
-          );
+    final appBar =
+        FlavorConfig.isVantage()
+            ? null
+            : AppBar(
+              backgroundColor: AppColors.tradeBackgroundCenterColor,
+              scrolledUnderElevation: 0,
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              leading: Padding(
+                padding: EdgeInsets.only(left: 16.w),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 20.sp,
+                    color: AppColors.textPrimary,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+              title: Text(
+                languageService.tr('setting_title'),
+                style: AppTextStyles.screenTitle,
+              ),
+              centerTitle: true,
+            );
 
     final body = SingleChildScrollView(
       child: Padding(
@@ -288,7 +291,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
             SizedBox(height: 16.h),
             _buildCompactSection(
               title: languageService.tr('general_tradind_settings'),
-              child: _buildCompactMenuList(_buildFinanceSectionItems()),
+              child: Obx(() => _buildCompactMenuList(_buildFinanceSectionItems())),
             ),
             SizedBox(height: 16.h),
             _buildCompactSection(
@@ -298,7 +301,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
             SizedBox(height: 16.h),
             _buildCompactSection(
               title: 'Account',
-              child: _buildCompactMenuList(_buildDangerSectionItems(authController)),
+              child: _buildCompactMenuList(
+                _buildDangerSectionItems(authController),
+              ),
             ),
             SizedBox(height: 20.h),
             _buildCompactVersionInfo(languageService),
@@ -331,15 +336,15 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         boxShadow: [
           AppColors.isDarkMode
               ? BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                )
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              )
               : BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 18,
-                  offset: const Offset(0, 10),
-                ),
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
+              ),
         ],
       ),
       child: Row(
@@ -401,9 +406,10 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                             vertical: 2.h,
                           ),
                           decoration: BoxDecoration(
-                            color: completion == 100
-                                ? AppColors.primary.withValues(alpha: 0.1)
-                                : Colors.orange.withValues(alpha: 0.1),
+                            color:
+                                completion == 100
+                                    ? AppColors.primary.withValues(alpha: 0.1)
+                                    : Colors.orange.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
@@ -411,9 +417,10 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                             style: TextStyle(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w600,
-                              color: completion == 100
-                                  ? AppColors.primary
-                                  : Colors.orange,
+                              color:
+                                  completion == 100
+                                      ? AppColors.primary
+                                      : Colors.orange,
                             ),
                           ),
                         );
@@ -485,15 +492,15 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
             boxShadow: [
               AppColors.isDarkMode
                   ? BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.35),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    )
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  )
                   : BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
-                    ),
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
             ],
           ),
           child: Column(
@@ -664,15 +671,15 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
             boxShadow: [
               AppColors.isDarkMode
                   ? BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.35),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    )
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  )
                   : BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
-                    ),
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
             ],
           ),
           child: Row(
@@ -721,7 +728,8 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   List<_CompactMenuItem> _buildFinanceSectionItems() {
     final modules = Get.find<EnabledModulesService>().modules.value;
     final showCopyTrading = modules?.copytrading ?? false;
-    final showPmam = modules?.pmam ?? appConfig.isFeatureEnabled(FeatureKeys.pmam);
+    final showPmam =
+        modules?.pmam ?? appConfig.isFeatureEnabled(FeatureKeys.pmam);
 
     final items = <_CompactMenuItem>[
       _CompactMenuItem(
@@ -742,32 +750,37 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     ];
 
     if (showCopyTrading) {
-      items.add(_CompactMenuItem(
-        icon: 'assets/svg/more/copy.svg',
-        label: languageService.tr('more_copy_trading'),
-        color: AppColors.iconBlue,
-        onTap: () => Get.toNamed(AppPages.COPY_TRADING_HUB),
-      ));
+      items.add(
+        _CompactMenuItem(
+          icon: 'assets/svg/more/copy.svg',
+          label: languageService.tr('more_copy_trading'),
+          color: AppColors.iconBlue,
+          onTap: () => Get.toNamed(AppPages.COPY_TRADING_MAIN),
+        ),
+      );
     }
     if (showPmam) {
-      items.add(_CompactMenuItem(
-        icon: 'assets/svg/more/demo-account.svg',
-        label: 'PAMM',
-        color: AppColors.iconLightBlue,
-        onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
-      ));
+      items.add(
+        _CompactMenuItem(
+          icon: 'assets/svg/more/demo-account.svg',
+          label: 'PAMM',
+          color: AppColors.iconLightBlue,
+          onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
+        ),
+      );
     }
     return items;
   }
 
   List<_CompactMenuItem> _buildSecuritySectionItems() {
     return [
-      _CompactMenuItem(
-        icon: 'assets/svg/more/theme.svg',
-        label: languageService.tr('settings_theme'),
-        color: AppColors.iconPurple,
-        onTap: () => showThemeBottomSheet(context),
-      ),
+      if (main_config.enableDarkModeGlobal)
+        _CompactMenuItem(
+          icon: 'assets/svg/more/theme.svg',
+          label: languageService.tr('settings_theme'),
+          color: AppColors.iconPurple,
+          onTap: () => showThemeBottomSheet(context),
+        ),
       _CompactMenuItem(
         icon: 'assets/svg/more/change_password.svg',
         label: languageService.tr('change_password'),
@@ -799,7 +812,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     ];
   }
 
-  List<_CompactMenuItem> _buildDangerSectionItems(AuthController authController) {
+  List<_CompactMenuItem> _buildDangerSectionItems(
+    AuthController authController,
+  ) {
     return [
       _CompactMenuItem(
         icon: 'assets/svg/more/setting/profile-kyc.svg',
@@ -825,35 +840,36 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         boxShadow: [
           AppColors.isDarkMode
               ? BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                )
+                color: Colors.black.withValues(alpha: 0.35),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              )
               : BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 18,
-                  offset: const Offset(0, 10),
-                ),
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 18,
+                offset: const Offset(0, 10),
+              ),
         ],
       ),
       child: Column(
-        children: items.asMap().entries.map((entry) {
-          final idx = entry.key;
-          final item = entry.value;
-          return Column(
-            children: [
-              _buildCompactMenuRow(item),
-              if (idx < items.length - 1)
-                Padding(
-                  padding: EdgeInsets.only(left: 52.w),
-                  child: Divider(
-                    height: 1,
-                    color: AppColors.border.withValues(alpha: 0.5),
-                  ),
-                ),
-            ],
-          );
-        }).toList(),
+        children:
+            items.asMap().entries.map((entry) {
+              final idx = entry.key;
+              final item = entry.value;
+              return Column(
+                children: [
+                  _buildCompactMenuRow(item),
+                  if (idx < items.length - 1)
+                    Padding(
+                      padding: EdgeInsets.only(left: 52.w),
+                      child: Divider(
+                        height: 1,
+                        color: AppColors.border.withValues(alpha: 0.5),
+                      ),
+                    ),
+                ],
+              );
+            }).toList(),
       ),
     );
   }
@@ -971,7 +987,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   void _showLogoutDialog(AuthController authController) {
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
         backgroundColor: AppColors.cardBackground,
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
@@ -1009,9 +1027,10 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                       () => _buildCompactDialogButton(
                         label: languageService.tr('navigation_yes'),
                         isPrimary: true,
-                        onTap: authController.isLoading
-                            ? null
-                            : () async => await authController.logout(),
+                        onTap:
+                            authController.isLoading
+                                ? null
+                                : () async => await authController.logout(),
                       ),
                     ),
                   ),
@@ -1037,7 +1056,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     final RxBool _isPasswordEmpty = false.obs;
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
         backgroundColor: AppColors.cardBackground,
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
@@ -1074,7 +1095,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   obscureText: true,
                   style: TextStyle(fontSize: 14.sp),
                   decoration: InputDecoration(
-                    hintText: languageService.tr('delete_account_password_hint'),
+                    hintText: languageService.tr(
+                      'delete_account_password_hint',
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.r),
                       borderSide: BorderSide(color: AppColors.border),
@@ -1082,13 +1105,19 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.r),
                       borderSide: BorderSide(
-                        color: _isPasswordEmpty.value ? Colors.red : AppColors.border,
+                        color:
+                            _isPasswordEmpty.value
+                                ? Colors.red
+                                : AppColors.border,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.r),
                       borderSide: BorderSide(
-                        color: _isPasswordEmpty.value ? Colors.red : AppColors.primary,
+                        color:
+                            _isPasswordEmpty.value
+                                ? Colors.red
+                                : AppColors.primary,
                         width: 1.5,
                       ),
                     ),
@@ -1108,23 +1137,24 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                         label: languageService.tr('navigation_yes'),
                         isPrimary: true,
                         isDanger: true,
-                        onTap: authController.isLoading
-                            ? null
-                            : () {
-                              if (_passwordController.text.isEmpty) {
-                                _isPasswordEmpty.value = true;
-                              } else {
-                                _isPasswordEmpty.value = false;
-                                authController.deleteAccount({
-                                  "password": _passwordController.text,
-                                  "reason": languageService.tr(
-                                    'delete_account_reason_no_longer_needed',
-                                  ),
-                                  "accept_terms": true,
-                                  "confirm_deletion": true,
-                                });
-                              }
-                            },
+                        onTap:
+                            authController.isLoading
+                                ? null
+                                : () {
+                                  if (_passwordController.text.isEmpty) {
+                                    _isPasswordEmpty.value = true;
+                                  } else {
+                                    _isPasswordEmpty.value = false;
+                                    authController.deleteAccount({
+                                      "password": _passwordController.text,
+                                      "reason": languageService.tr(
+                                        'delete_account_reason_no_longer_needed',
+                                      ),
+                                      "accept_terms": true,
+                                      "confirm_deletion": true,
+                                    });
+                                  }
+                                },
                       ),
                     ),
                   ),
@@ -1159,9 +1189,10 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         child: Container(
           height: 44.h,
           decoration: BoxDecoration(
-            color: isPrimary
-                ? (isDanger ? AppColors.iconPink : AppColors.primary)
-                : AppColors.cardBackground,
+            color:
+                isPrimary
+                    ? (isDanger ? AppColors.iconPink : AppColors.primary)
+                    : AppColors.cardBackground,
             borderRadius: BorderRadius.circular(10.r),
           ),
           alignment: Alignment.center,
@@ -1254,15 +1285,15 @@ class VerifyAccountCard extends StatelessWidget {
             boxShadow: [
               AppColors.isDarkMode
                   ? BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.35),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    )
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  )
                   : BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
-                    ),
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
             ],
           ),
           child: Column(

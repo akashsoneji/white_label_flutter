@@ -46,6 +46,26 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
   final TextEditingController transactionNumberController =
       TextEditingController();
 
+  String _formatNetworkName(String key) {
+    const names = {
+      'trc20': 'TRC-20 (TRON)',
+      'erc20': 'ERC-20 (Ethereum)',
+      'bep20': 'BEP-20 (BSC)',
+      'polygon': 'Polygon (MATIC)',
+    };
+    return names[key.toLowerCase()] ?? key.toUpperCase();
+  }
+
+  String _getNetworkCurrency(String key) {
+    const currencies = {
+      'trc20': 'USDT-TRC20',
+      'erc20': 'USDT-ERC20',
+      'bep20': 'USDT-BEP20',
+      'polygon': 'USDT-POLYGON',
+    };
+    return currencies[key.toLowerCase()] ?? 'USDT';
+  }
+
   // Get QR code path from payment gateway
   String? get qrCodePath {
     try {
@@ -65,10 +85,45 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       titleString = 'Bank Transfer';
     } else if (widget.object['type'].toString().toLowerCase() == 'local') {
       titleString = 'Local Transfer';
+    } else if (widget.object['type'].toString().toLowerCase() == 'cregis') {
+      titleString = widget.object['display_name']?.toString() ?? 'Cregis';
+      _initCregisNetworks();
     } else if (widget.object['type'].toString().toLowerCase() == 'crypto') {
       titleString = widget.object['title']?.toString() ?? 'Crypto';
     } else {
       titleString = 'UPI';
+    }
+  }
+
+  void _initCregisNetworks() {
+    try {
+      final networkMap = widget.object['payment_gateway']?['cregis_network_map'];
+      if (networkMap != null && networkMap is Map) {
+        controller.cregisNetworkMap = Map<String, dynamic>.from(networkMap);
+        final keys = networkMap.keys.map((e) => e.toString()).toList();
+        controller.cregisNetworks.assignAll(keys);
+
+        final defaultChainId =
+            widget.object['payment_gateway']?['deposit_chain_id']?.toString();
+        if (defaultChainId != null && defaultChainId.isNotEmpty) {
+          String? matchedNetwork;
+          for (final entry in networkMap.entries) {
+            final chainId = entry.value is Map
+                ? entry.value['chain_id']?.toString()
+                : null;
+            if (chainId == defaultChainId) {
+              matchedNetwork = entry.key.toString();
+              break;
+            }
+          }
+          controller.selectedCregisNetwork.value =
+              matchedNetwork ?? (keys.isNotEmpty ? keys.first : '');
+        } else if (keys.isNotEmpty) {
+          controller.selectedCregisNetwork.value = keys.first;
+        }
+      }
+    } catch (e) {
+      print('Error initializing Cregis networks: $e');
     }
   }
 
@@ -247,6 +302,8 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       body = _buildCryptoUI();
     } else if (type == 'local') {
       body = _buildLocalUI();
+    } else if (type == 'cregis') {
+      body = _buildCregisUI();
     } else {
       body = _buildUPI();
     }
@@ -975,6 +1032,434 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildCregisUI() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ExpansionTile(
+              iconColor: AppColors.primary,
+              collapsedIconColor: AppColors.primary,
+              collapsedBackgroundColor: Colors.transparent,
+              backgroundColor: Colors.transparent,
+              collapsedShape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+                side: BorderSide.none,
+              ),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+                side: BorderSide.none,
+              ),
+              title: Text(
+                'Crypto deposit',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              childrenPadding: const EdgeInsets.all(16),
+              children: [
+                _buildInstructionItem('Choose a network and amount.'),
+                const SizedBox(height: 8),
+                _buildInstructionItem(
+                  'We will generate a unique deposit address for this payment.',
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Network',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textGrey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Obx(() {
+            final networks = controller.cregisNetworks;
+            if (networks.isEmpty) {
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.whiteColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Text(
+                  'Loading networks...',
+                  style: TextStyle(color: AppColors.textGrey),
+                ),
+              );
+            }
+            return GestureDetector(
+              onTap: () => _showCregisNetworkDropdown(context),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.whiteColor,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        controller.selectedCregisNetwork.value.isEmpty
+                            ? 'Select Network'
+                            : _formatNetworkName(
+                                controller.selectedCregisNetwork.value,
+                              ),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: controller.selectedCregisNetwork.value.isEmpty
+                              ? AppColors.textGrey
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.arrow_drop_down, color: AppColors.textGrey),
+                  ],
+                ),
+              ),
+            );
+          }),
+          const SizedBox(height: 24),
+          Obx(() {
+            if (controller.cregisDepositAddress.value.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Only send ${_getNetworkCurrency(controller.selectedCregisNetwork.value)} on ${_formatNetworkName(controller.selectedCregisNetwork.value)}. Sending other assets may result in loss.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red.shade700,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          Obx(() {
+            if (controller.cregisCheckoutUrl.value.isNotEmpty) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.primary),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Payment page ready',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Tap Confirm to open the payment page in your browser.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              );
+            }
+
+            if (controller.cregisDepositAddress.value.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (controller.cregisQrPath.value.isNotEmpty) ...[
+                  Center(child: _buildQRCodeImage()),
+                  const SizedBox(height: 24),
+                ],
+                Text(
+                  'Deposit Address',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textGrey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.whiteColor,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          controller.cregisDepositAddress.value,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () {
+                          Clipboard.setData(
+                            ClipboardData(
+                              text: controller.cregisDepositAddress.value,
+                            ),
+                          );
+                          CustomToastService.showSuccess(
+                            message: 'Address copied to clipboard',
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          child: SvgPicture.asset(
+                            'assets/svg/more/copy.svg',
+                            colorFilter: ColorFilter.mode(
+                              AppColors.primary,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            );
+          }),
+          Obx(() {
+            final status = controller.cregisPollingStatus.value;
+            if (status.isEmpty) return const SizedBox.shrink();
+            if (status == 'timeout') {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Payment verification timed out. Check Transaction History.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
+              );
+            }
+            if (status == 'pending') {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Waiting for payment... polling ${controller.cregisPollingAttemptCount}/20',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          }),
+          const SizedBox(height: 32),
+          _buildCregisContinueButton(),
+        ],
+      ),
+    );
+  }
+
+  void _showCregisNetworkDropdown(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.whiteColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return Obx(() {
+          final networks = controller.cregisNetworks;
+          return ListView.separated(
+            shrinkWrap: true,
+            itemCount: networks.length,
+            separatorBuilder: (_, __) =>
+                Divider(height: 1, color: AppColors.border),
+            itemBuilder: (context, index) {
+              final network = networks[index];
+              final isSelected =
+                  controller.selectedCregisNetwork.value == network;
+              return InkWell(
+                onTap: () {
+                  controller.selectedCregisNetwork.value = network;
+                  controller.cregisDepositAddress.value = '';
+                  controller.cregisQrPath.value = '';
+                  controller.cregisCheckoutUrl.value = '';
+                  Navigator.pop(ctx);
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _formatNetworkName(network),
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      if (isSelected)
+                        Icon(Icons.check, color: AppColors.primary, size: 20),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        });
+      },
+    );
+  }
+
+  Widget _buildCregisContinueButton() {
+    return Obx(() {
+      final hasAddress = controller.cregisDepositAddress.value.isNotEmpty;
+      final hasCheckoutUrl = controller.cregisCheckoutUrl.value.isNotEmpty;
+      final isGenerating = controller.isAddressLoading.value;
+      final isSubmitting = controller.isLoading.value;
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: isGenerating || isSubmitting
+              ? null
+              : () {
+                  if (hasAddress || hasCheckoutUrl) {
+                    controller.submitCregisDeposit(
+                      gatewayMethodId: widget.object['deposit_slug'],
+                      amount: widget.amountString,
+                      mt5AccountId: widget.selectedMT5AccountID,
+                    );
+                  } else {
+                    controller.createCregisDepositAddress(
+                      gatewayMethodId: widget.object['deposit_slug'],
+                      amount: widget.amountString,
+                      mt5AccountId: widget.selectedMT5AccountID,
+                    );
+                  }
+                },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.whiteColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 0,
+            padding: EdgeInsets.zero,
+          ),
+          child: isGenerating
+              ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
+              : isSubmitting
+                  ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
+                  : Text(
+                      hasCheckoutUrl
+                          ? 'Open link to payment'
+                          : hasAddress
+                              ? languageService.tr('deposit_confirm_deposit')
+                              : 'Generate Address',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        height: 1.71,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.whiteColor,
+                      ),
+                    ),
+        ),
+      );
+    });
   }
 
   Widget _buildInstructionItem(String text) {

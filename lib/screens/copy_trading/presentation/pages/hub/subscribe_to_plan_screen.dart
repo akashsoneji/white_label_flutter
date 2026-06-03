@@ -1,15 +1,15 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_copier_subscriptions_controller.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_hub_controller.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_details_controller.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_subscribe_controller.dart';
-import 'package:crm_app/screens/copy_trading/data/repositories/copy_trading_repository.dart';
+import 'package:crm_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
@@ -26,7 +26,6 @@ class SubscribeToPlanScreen extends StatefulWidget {
 }
 
 class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
-  final CopyTradingRepository _copyTradingRepo = Get.find<CopyTradingRepository>();
   late final CopyTradingMasterDetailsController masterController;
   CopyTradingSubscribeController? controller;
   final _selectedPlan = Rxn<CopyTradingPlan>();
@@ -101,8 +100,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     _editLoadError.value = '';
     _editLoading.value = true;
     try {
-      final res = await _copyTradingRepo.getCopierSubscriptionDetail(
-        subscriptionId: item.id,
+      final res = await ApiService.get(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionDetail(item.id),
         queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
       );
       if (!res.success || res.data == null) {

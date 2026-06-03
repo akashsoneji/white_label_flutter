@@ -53,6 +53,9 @@ import '../screens/pmam/presentation/pages/pmam_create_plan_screen.dart';
 import '../screens/pmam/presentation/pages/pmam_investor_portal_screen.dart';
 import '../screens/pmam/presentation/pages/pmam_manager_detail_screen.dart';
 import '../screens/pmam/presentation/pages/pmam_manager_plan_detail_screen.dart';
+import '../screens/finance/presentation/pages/cregis_address_screen.dart';
+import '../screens/finance/presentation/pages/cregis_success_screen.dart';
+import '../screens/common/webview_screen.dart';
 import '../bindings/auth_binding.dart';
 import '../screens/auth/presentation/pages/google_login_otp_screen.dart';
 import '../screens/home/more/two_factor_auth_screen.dart';
@@ -146,6 +149,8 @@ class AppPages {
   static const PMAM_INVESTOR_PORTAL = _Paths.PMAM_INVESTOR_PORTAL;
   static const PMAM_MANAGER_DETAIL = _Paths.PMAM_MANAGER_DETAIL;
   static const PMAM_MANAGER_PLAN_DETAIL = _Paths.PMAM_MANAGER_PLAN_DETAIL;
+  static const CREGIS_ADDRESS = _Paths.CREGIS_ADDRESS;
+  static const CREGIS_SUCCESS = _Paths.CREGIS_SUCCESS;
 
   static final routes = [
     GetPage(
@@ -404,6 +409,39 @@ class AppPages {
       page: () => const PmamManagerPlanDetailScreen(),
       binding: PmamBinding(),
       middlewares: [FeatureFlagMiddleware(FeatureKeys.pmam)],
+    ),
+    GetPage(
+      name: _Paths.CREGIS_CHECKOUT,
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>?;
+        return WebViewScreen(
+          url: args?['checkoutUrl'] ?? '',
+          title: args?['title'] ?? 'Cregis Payment',
+        );
+      },
+    ),
+    GetPage(
+      name: _Paths.CREGIS_ADDRESS,
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>?;
+        return CregisAddressScreen(
+          cregisAddress: args?['cregisAddress'] ?? '',
+          referenceNumber: args?['referenceNumber'] ?? '',
+          amount: args?['amount'] ?? '',
+          networkKey: args?['networkKey'] ?? '',
+        );
+      },
+    ),
+    GetPage(
+      name: _Paths.CREGIS_SUCCESS,
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>?;
+        return CregisSuccessScreen(
+          checkoutUrl: args?['checkoutUrl'] ?? '',
+          referenceNumber: args?['referenceNumber'] ?? '',
+          amount: args?['amount'] ?? '',
+        );
+      },
     ),
     GetPage(
       name: _Paths.TWO_FACTOR_AUTH,

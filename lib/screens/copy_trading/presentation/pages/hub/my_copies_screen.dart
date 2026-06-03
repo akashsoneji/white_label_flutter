@@ -4,7 +4,6 @@ import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_cop
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_details_controller.dart';
 import 'package:crm_app/screens/copy_trading/presentation/pages/hub/subscribe_to_plan_screen.dart';
 import 'package:crm_app/widgets/AppTextField.dart';
-import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

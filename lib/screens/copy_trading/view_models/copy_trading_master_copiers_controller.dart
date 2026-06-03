@@ -1,6 +1,7 @@
-import 'package:crm_app/core/network/api_response.dart';
-import 'package:crm_app/screens/copy_trading/data/repositories/copy_trading_repository.dart';
+import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/services/api_service.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_dashboard_controller.dart';
 
 class MasterCopierItem {
   final int id;
@@ -72,52 +73,52 @@ class MasterCopierItem {
   });
 
   factory MasterCopierItem.fromJson(Map<String, dynamic> json) {
-    int _i(dynamic v) {
+    int asInt(dynamic v) {
       if (v == null) return 0;
       if (v is int) return v;
       if (v is double) return v.toInt();
       return int.tryParse(v.toString()) ?? double.tryParse(v.toString())?.toInt() ?? 0;
     }
 
-    num _n(dynamic v) {
+    num asNum(dynamic v) {
       if (v == null) return 0;
       if (v is num) return v;
       return num.tryParse(v.toString()) ?? 0;
     }
 
     return MasterCopierItem(
-      id: _i(json['id']),
-      userId: _i(json['user_id']),
+      id: asInt(json['id']),
+      userId: asInt(json['user_id']),
       userName: (json['user_name'] ?? '').toString(),
       userEmail: (json['user_email'] ?? '').toString(),
-      planId: _i(json['plan_id']),
+      planId: asInt(json['plan_id']),
       planName: (json['plan_name'] ?? '').toString(),
       planStatus: (json['plan_status'] ?? '').toString(),
       accountNumber: (json['account_number'] ?? '').toString(),
       serverType: (json['server_type'] ?? '').toString(),
       status: (json['status'] ?? '').toString(),
-      capitalAmount: _n(json['capital_amount']),
-      copyRatio: _n(json['copy_ratio'] ?? 1),
+      capitalAmount: asNum(json['capital_amount']),
+      copyRatio: asNum(json['copy_ratio'] ?? 1),
       copyMethod: (json['copy_method'] ?? '').toString(),
-      totalPnl: _n(json['total_pnl']),
-      totalCommissionPaid: _n(json['total_commission_paid']),
+      totalPnl: asNum(json['total_pnl']),
+      totalCommissionPaid: asNum(json['total_commission_paid']),
       commissionType: (json['commission_type'] ?? '').toString(),
-      commissionPercentage: _n(json['commission_percentage']),
-      subscriptionFee: _n(json['subscription_fee']),
+      commissionPercentage: asNum(json['commission_percentage']),
+      subscriptionFee: asNum(json['subscription_fee']),
       activeSince: (json['active_since'] ?? '').toString(),
       subscriptionStartedAt: (json['subscription_started_at'] ?? '').toString(),
       pausedAt: (json['paused_at'] ?? '').toString(),
       stoppedAt: (json['stopped_at'] ?? '').toString(),
       createdAt: (json['created_at'] ?? '').toString(),
       updatedAt: (json['updated_at'] ?? '').toString(),
-      openTradesCount: _i(json['open_trades_count'] ?? 0),
+      openTradesCount: asInt(json['open_trades_count'] ?? 0),
       copyOpenTrades: json['copy_open_trades'] == true,
       overridesSlTp: json['overrides_sl_tp'] == true,
       takeProfit: (json['take_profit'] ?? '').toString(),
       stopLoss: (json['stop_loss'] ?? '').toString(),
       slTpMode: (json['sl_tp_mode'] ?? '').toString(),
       sizingMethod: (json['sizing_method'] ?? '').toString(),
-      lotMultiplier: _n(json['lot_multiplier']),
+      lotMultiplier: asNum(json['lot_multiplier']),
     );
   }
 
@@ -163,44 +164,90 @@ class MasterCopierItem {
 }
 
 class CopyTradingMasterCopiersController extends GetxController {
-  final CopyTradingRepository _repo = Get.find<CopyTradingRepository>();
   final RxBool isLoading = false.obs;
   final RxBool isLoadingMore = false.obs;
   final RxString errorMessage = ''.obs;
   final RxList<MasterCopierItem> copiers = <MasterCopierItem>[].obs;
   final RxBool actionLoading = false.obs;
 
-  // Summary from API /master/copiers response
+  // Summary stats
   final RxInt summaryTotal = 0.obs;
   final RxInt summaryPending = 0.obs;
   final RxInt summaryActive = 0.obs;
   final RxInt summaryPaused = 0.obs;
   final RxInt summaryStopped = 0.obs;
   final RxInt summaryCancelled = 0.obs;
+  final RxInt summaryStoppedOrRemoved = 0.obs;
   final Rx<num> summaryTotalCapital = 0.0.obs;
   final Rx<num> summaryTotalPnl = 0.0.obs;
   final Rx<num> summaryTotalCommissionPaid = 0.0.obs;
 
-  int _currentPage = 1;
-  int _totalPages = 1;
-  bool get hasMore => _currentPage < _totalPages;
+  final RxList<CopyTradingMasterPlanItem> masterPlans = <CopyTradingMasterPlanItem>[].obs;
+
+  // Filter & Pagination States
+  final RxString searchQuery = ''.obs;
+  final RxString statusFilter = 'all'.obs; // 'all', 'active', 'pending', 'paused', 'stopped'
+  final RxnInt planFilter = RxnInt(); // null (all), or a specific plan ID
+
+  final RxInt currentPage = 1.obs;
+  final RxInt totalPages = 1.obs;
+  final RxInt totalItemsCount = 0.obs;
+  final int perPage = 20;
+
+  bool get hasMore => currentPage.value < totalPages.value;
 
   @override
   void onInit() {
     super.onInit();
-    load(showLoading: true);
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    await fetchPlans();
+    await load(showLoading: true);
+  }
+
+  Future<void> fetchPlans() async {
+    try {
+      final res = await ApiService.get(
+        endpoint: ApiConstants.copyTradingMasterPlans,
+        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
+      );
+      if (res.success && res.data != null) {
+        final data = res.data?['data'];
+        if (data is List) {
+          masterPlans.assignAll(
+            data.whereType<Map>().map((e) => CopyTradingMasterPlanItem.fromJson(e.cast<String, dynamic>())),
+          );
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> load({bool showLoading = false}) async {
-    _currentPage = 1;
     if (showLoading) isLoading.value = true;
     errorMessage.value = '';
+    currentPage.value = 1;
     try {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final res = await _repo.getMasterCopiersList(
-        page: 1,
-        perPage: 20,
-        queryParameters: {'_t': timestamp.toString()},
+      final Map<String, dynamic> params = {
+        'page': '1',
+        'per_page': perPage.toString(),
+        '_t': timestamp.toString(),
+      };
+      if (searchQuery.value.trim().isNotEmpty) {
+        params['search'] = searchQuery.value.trim();
+      }
+      if (statusFilter.value != 'all') {
+        params['status'] = statusFilter.value;
+      }
+      if (planFilter.value != null) {
+        params['plan_id'] = planFilter.value.toString();
+      }
+
+      final res = await ApiService.get(
+        endpoint: '${ApiConstants.ajax}copytrading/master/copiers',
+        queryParameters: params,
       );
 
       if (!res.success || res.data == null) {
@@ -209,37 +256,34 @@ class CopyTradingMasterCopiersController extends GetxController {
         return;
       }
 
-      final summary = res.data?['data'];
-      if (summary is! Map) {
+      final body = res.data?['data'];
+      if (body is! Map) {
         copiers.clear();
-        errorMessage.value = 'Invalid response';
+        errorMessage.value = 'Invalid response format';
         return;
       }
 
-      final data = summary['data'];
-      if (data is! List) {
-        copiers.clear();
-        errorMessage.value = 'Invalid response';
-        return;
-      }
-
-      _totalPages = int.tryParse(summary['total_pages']?.toString() ?? '1') ?? 1;
+      totalPages.value = int.tryParse(body['total_pages']?.toString() ?? '1') ?? 1;
+      totalItemsCount.value = int.tryParse(body['total']?.toString() ?? '0') ?? 0;
 
       // Parse summary from API
-      final apiSummary = summary['summary'] as Map<String, dynamic>?;
+      final apiSummary = body['summary'] as Map<String, dynamic>?;
       if (apiSummary != null) {
         _parseApiSummary(apiSummary);
       }
 
-      final list = data
-          .whereType<Map>()
-          .map((e) => MasterCopierItem.fromJson(e.cast<String, dynamic>()))
-          .toList();
-      copiers.assignAll(list);
-    } catch (e,t) {
+      final dataList = body['data'];
+      if (dataList is List) {
+        final list = dataList
+            .whereType<Map>()
+            .map((e) => MasterCopierItem.fromJson(e.cast<String, dynamic>()))
+            .toList();
+        copiers.assignAll(list);
+      } else {
+        copiers.clear();
+      }
+    } catch (e) {
       copiers.clear();
-            print('Load error: $e\n$t');
-
       errorMessage.value = 'Load error: $e';
     } finally {
       if (showLoading) isLoading.value = false;
@@ -247,36 +291,53 @@ class CopyTradingMasterCopiersController extends GetxController {
   }
 
   Future<void> loadMore() async {
-    if (!hasMore || isLoadingMore.value) return;
+    if (!hasMore || isLoadingMore.value || isLoading.value) return;
     isLoadingMore.value = true;
     try {
-      final nextPage = _currentPage + 1;
+      final nextPage = currentPage.value + 1;
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final res = await _repo.getMasterCopiersList(
-        page: nextPage,
-        perPage: 20,
-        queryParameters: {'_t': timestamp.toString()},
+      final Map<String, dynamic> params = {
+        'page': nextPage.toString(),
+        'per_page': perPage.toString(),
+        '_t': timestamp.toString(),
+      };
+      if (searchQuery.value.trim().isNotEmpty) {
+        params['search'] = searchQuery.value.trim();
+      }
+      if (statusFilter.value != 'all') {
+        params['status'] = statusFilter.value;
+      }
+      if (planFilter.value != null) {
+        params['plan_id'] = planFilter.value.toString();
+      }
+
+      final res = await ApiService.get(
+        endpoint: '${ApiConstants.ajax}copytrading/master/copiers',
+        queryParameters: params,
       );
 
       if (!res.success || res.data == null) return;
 
-      final summary = res.data?['data'] as Map<String, dynamic>?;
-      if (summary == null) return;
+      final body = res.data?['data'];
+      if (body is! Map) return;
 
-      final data = summary['data'];
-      if (data is! List) return;
+      totalPages.value = int.tryParse(body['total_pages']?.toString() ?? '1') ?? 1;
+      totalItemsCount.value = int.tryParse(body['total']?.toString() ?? '0') ?? 0;
 
-      _currentPage = nextPage;
-      _totalPages = int.tryParse(summary['total_pages']?.toString() ?? '1') ?? 1;
+      final apiSummary = body['summary'] as Map<String, dynamic>?;
+      if (apiSummary != null) {
+        _parseApiSummary(apiSummary);
+      }
 
-      final apiSummary = summary['summary'] as Map<String, dynamic>?;
-      if (apiSummary != null) _parseApiSummary(apiSummary);
-
-      final list = data
-          .whereType<Map>()
-          .map((e) => MasterCopierItem.fromJson(e.cast<String, dynamic>()))
-          .toList();
-      copiers.addAll(list);
+      final dataList = body['data'];
+      if (dataList is List) {
+        final list = dataList
+            .whereType<Map>()
+            .map((e) => MasterCopierItem.fromJson(e.cast<String, dynamic>()))
+            .toList();
+        copiers.addAll(list);
+        currentPage.value = nextPage;
+      }
     } catch (_) {
     } finally {
       isLoadingMore.value = false;
@@ -284,35 +345,39 @@ class CopyTradingMasterCopiersController extends GetxController {
   }
 
   void _parseApiSummary(Map<String, dynamic> apiSummary) {
-    double _n(dynamic v) {
+    double asNum(dynamic v) {
       if (v == null) return 0.0;
       if (v is double) return v;
       if (v is int) return v.toDouble();
       return double.tryParse(v.toString()) ?? 0.0;
     }
 
-    int _i(dynamic v) {
+    int asInt(dynamic v) {
       if (v == null) return 0;
       if (v is int) return v;
       if (v is double) return v.toInt();
       return int.tryParse(v.toString()) ?? 0;
     }
 
-    summaryTotal.value = _i(apiSummary['total']);
-    summaryPending.value = _i(apiSummary['pending']);
-    summaryActive.value = _i(apiSummary['active']);
-    summaryPaused.value = _i(apiSummary['paused']);
-    summaryStopped.value = _i(apiSummary['stopped']);
-    summaryCancelled.value = _i(apiSummary['cancelled']);
-    summaryTotalCapital.value = _n(apiSummary['total_capital']);
-    summaryTotalPnl.value = _n(apiSummary['total_pnl']);
-    summaryTotalCommissionPaid.value = _n(apiSummary['total_commission_paid']);
+    summaryTotal.value = asInt(apiSummary['total']);
+    summaryPending.value = asInt(apiSummary['pending']);
+    summaryActive.value = asInt(apiSummary['active']);
+    summaryPaused.value = asInt(apiSummary['paused']);
+    summaryStopped.value = asInt(apiSummary['stopped']);
+    summaryCancelled.value = asInt(apiSummary['cancelled']);
+    summaryStoppedOrRemoved.value = asInt(apiSummary['stopped_or_removed']);
+    summaryTotalCapital.value = asNum(apiSummary['total_capital']);
+    summaryTotalPnl.value = asNum(apiSummary['total_pnl']);
+    summaryTotalCommissionPaid.value = asNum(apiSummary['total_commission_paid']);
   }
 
   Future<ApiResponse> pause(int copierId) async {
     actionLoading.value = true;
     try {
-      final res = await _repo.pauseCopierSubscription(subscriptionId: copierId);
+      final res = await ApiService.post(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionPause(copierId),
+        data: <String, dynamic>{},
+      );
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
@@ -325,7 +390,10 @@ class CopyTradingMasterCopiersController extends GetxController {
   Future<ApiResponse> resume(int copierId) async {
     actionLoading.value = true;
     try {
-      final res = await _repo.resumeCopierSubscription(subscriptionId: copierId);
+      final res = await ApiService.post(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionResume(copierId),
+        data: <String, dynamic>{},
+      );
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
@@ -338,7 +406,10 @@ class CopyTradingMasterCopiersController extends GetxController {
   Future<ApiResponse> stop(int copierId) async {
     actionLoading.value = true;
     try {
-      final res = await _repo.stopCopierSubscription(subscriptionId: copierId);
+      final res = await ApiService.post(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionStop(copierId),
+        data: <String, dynamic>{},
+      );
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
@@ -351,9 +422,9 @@ class CopyTradingMasterCopiersController extends GetxController {
   Future<ApiResponse> addCapital({required int copierId, required num amount}) async {
     actionLoading.value = true;
     try {
-      final res = await _repo.addCapitalToCopierSubscription(
-        subscriptionId: copierId,
-        amount: amount,
+      final res = await ApiService.post(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionAddCapital(copierId),
+        data: <String, dynamic>{'amount': amount},
       );
       if (res.success) await load(showLoading: false);
       return res;

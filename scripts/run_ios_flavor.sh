@@ -2,32 +2,26 @@
 
 # Script to run Flutter on iOS simulator with flavor
 # Usage: bash scripts/run_ios_flavor.sh <flavor>
-# Example: bash scripts/run_ios_flavor.sh pipze
+# Example: bash scripts/run_ios_flavor.sh vantage
 
 set -e
 
-# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Check if flavor is provided
 if [ $# -lt 1 ]; then
     echo -e "${RED}❌ Error: Flavor not specified${NC}"
     echo "Usage: bash scripts/run_ios_flavor.sh <flavor>"
-    echo "  Available flavors: afx, pipze, tenax, onsa, profx, vantage"
-    echo ""
-    echo "Example:"
-    echo "  bash scripts/run_ios_flavor.sh pipze"
+    echo "  Available flavors: tenax, vantage, celestial"
     exit 1
 fi
 
 FLAVOR=$1
 
-# Validate flavor
-VALID_FLAVORS=("afx" "pipze" "tenax" "onsa" "profx" "vantage")
+VALID_FLAVORS=("tenax" "vantage" "celestial")
 if [[ ! " ${VALID_FLAVORS[@]} " =~ " ${FLAVOR} " ]]; then
     echo -e "${RED}❌ Invalid flavor: $FLAVOR${NC}"
     echo "  Available flavors: ${VALID_FLAVORS[*]}"
@@ -140,5 +134,5 @@ echo -e "${BLUE}   Flavor is passed to Flutter via environment variable${NC}"
 echo ""
 
 # Use --dart-define to pass flavor to Flutter (main.dart reads it from environment)
-flutter run --dart-define=FLAVOR="$FLAVOR" -d "$IOS_DEVICE"
+flutter run --dart-define=CLIENT="$FLAVOR" --dart-define=FLAVOR="$FLAVOR" -d "$IOS_DEVICE"
 

@@ -46,6 +46,8 @@ class ApiConstants {
   static const String logout = '${ajax}logout';
   static const String depositList = '${ajax}deposit';
   static const String depositRequest = '${ajax}deposit/depositrequest';
+  static const String cregisDepositCreate = '${ajax}deposit/cregis';
+  static const String cregisDepositStatus = '${ajax}deposit/by-reference';
   static const String realPlanDetails = '${ajax}mt5accounts/plandetails';
   static const String getTransactions = '${ajax}transactions';
   static const String depositProofProxy = '${ajax}deposit-proof-proxy/';
@@ -127,6 +129,16 @@ class ApiConstants {
   static const String copyTradingMasterDashboardStats =
       '${ajax}copytrading/master/dashboard-stats';
   static const String copyTradingMasterPlans = '${ajax}copytrading/master/plans';
+  static String copyTradingMasterPlanOpenPositions(int planId) =>
+      '$copyTradingMasterPlans/$planId/open-positions';
+  static String copyTradingMasterOpenPositions(int planId) =>
+      '$copyTradingMasterPlans/$planId/open-positions';
+  static String copyTradingMasterPlanPause(int planId) =>
+      '$copyTradingMasterPlans/$planId/pause';
+  static String copyTradingMasterPlanResume(int planId) =>
+      '$copyTradingMasterPlans/$planId/resume';
+  static String copyTradingMasterPlanUpdate(int planId) =>
+      '$copyTradingMasterPlans/$planId';
   static const String copyTradingCopierEligibleAccounts =
       '${ajax}copytrading/copier/eligible-accounts';
   static const String copyTradingCopierSubscribe =
@@ -164,8 +176,43 @@ class ApiConstants {
 
   // Public endpoints
   static const String copyTradingMasters = 'copytrading/masters';
-  static String copyTradingMasterProfile(String masterCode) =>
-      'copytrading/masters/$masterCode';
+  static String copyTradingMasterProfile(
+    String masterCode, {
+    String? timeframe,
+    String? selectedPlanId,
+  }) {
+    final base = 'copytrading/masters/$masterCode';
+    final params = <String>[];
+    if (timeframe != null && timeframe.isNotEmpty) {
+      params.add('timeframe=$timeframe');
+    }
+    if (selectedPlanId != null && selectedPlanId.isNotEmpty) {
+      params.add('plan_id=$selectedPlanId');
+    }
+    if (params.isEmpty) return base;
+    return '$base?${params.join('&')}';
+  }
+
+  static String copyTradingMasterTradeHistory(
+    String masterCode, {
+    String? timeframe,
+    String? selectedPlanId,
+    int page = 1,
+    int perPage = 20,
+  }) {
+    final base = '${ajax}copytrading/copier/masters/$masterCode/trade-history';
+    final params = <String>[];
+    if (timeframe != null && timeframe.isNotEmpty) {
+      params.add('timeframe=$timeframe');
+    }
+    if (selectedPlanId != null && selectedPlanId.isNotEmpty) {
+      params.add('plan_id=$selectedPlanId');
+    }
+    params.add('page=$page');
+    params.add('per_page=$perPage');
+    return '$base?${params.join('&')}';
+  }
+
   static String copyTradingCopierMasterProfile(String masterCode) =>
       '${ajax}copytrading/copier/masters/$masterCode';
 

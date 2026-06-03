@@ -1,5 +1,4 @@
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_masters_controller.dart';
 import 'package:flutter/material.dart';

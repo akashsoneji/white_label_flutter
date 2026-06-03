@@ -1,5 +1,5 @@
-import 'package:crm_app/core/network/api_response.dart';
-import 'package:crm_app/screens/copy_trading/data/repositories/copy_trading_repository.dart';
+import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/services/api_service.dart';
 import 'package:get/get.dart';
 
 class TradeItem {
@@ -280,7 +280,6 @@ class CopierSubscriptionItem {
 }
 
 class CopyTradingCopierSubscriptionsController extends GetxController {
-  final CopyTradingRepository _repo = Get.find<CopyTradingRepository>();
   final RxBool isLoading = false.obs;
   final RxBool isLoadingMore = false.obs;
   final RxString errorMessage = ''.obs;
@@ -325,9 +324,8 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     errorMessage.value = '';
     try {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final res = await _repo.getCopierSubscriptionsList(
-        page: 1,
-        perPage: 20,
+      final res = await ApiService.get(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionsList(page: 1, perPage: 20),
         queryParameters: {'_t': timestamp.toString()},
       );
 
@@ -370,9 +368,8 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     try {
       final nextPage = _currentPage + 1;
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final res = await _repo.getCopierSubscriptionsList(
-        page: nextPage,
-        perPage: 20,
+      final res = await ApiService.get(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionsList(page: nextPage, perPage: 20),
         queryParameters: {'_t': timestamp.toString()},
       );
 
@@ -431,10 +428,8 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     tradeError.value = '';
     try {
       final t = DateTime.now().millisecondsSinceEpoch;
-      final res = await _repo.getCopierSubscriptionTrades(
-        subscriptionId: subscriptions.first.id,
-        page: _tradeCurrentPage,
-        queryParameters: {'_t': t.toString()},
+      final res = await ApiService.get(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionTrades(subscriptions.first.id, page: _tradeCurrentPage, t: t),
       );
 
       if (!res.success || res.data == null) {
@@ -474,10 +469,8 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     try {
       final nextPage = _tradeCurrentPage + 1;
       final t = DateTime.now().millisecondsSinceEpoch;
-      final res = await _repo.getCopierSubscriptionTrades(
-        subscriptionId: subscriptions.first.id,
-        page: nextPage,
-        queryParameters: {'_t': t.toString()},
+      final res = await ApiService.get(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionTrades(subscriptions.first.id, page: nextPage, t: t),
       );
 
       if (!res.success || res.data == null) return;
@@ -503,7 +496,10 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
   Future<ApiResponse> pause(int subscriptionId) async {
     actionLoading.value = true;
     try {
-      final res = await _repo.pauseCopierSubscription(subscriptionId: subscriptionId);
+      final res = await ApiService.post(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionPause(subscriptionId),
+        data: <String, dynamic>{},
+      );
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
@@ -516,7 +512,10 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
   Future<ApiResponse> resume(int subscriptionId) async {
     actionLoading.value = true;
     try {
-      final res = await _repo.resumeCopierSubscription(subscriptionId: subscriptionId);
+      final res = await ApiService.post(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionResume(subscriptionId),
+        data: <String, dynamic>{},
+      );
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
@@ -529,7 +528,10 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
   Future<ApiResponse> stop(int subscriptionId) async {
     actionLoading.value = true;
     try {
-      final res = await _repo.stopCopierSubscription(subscriptionId: subscriptionId);
+      final res = await ApiService.post(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionStop(subscriptionId),
+        data: <String, dynamic>{},
+      );
       if (res.success) await load(showLoading: false);
       return res;
     } catch (e) {
@@ -542,9 +544,9 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
   Future<ApiResponse> addCapital({required int subscriptionId, required num amount}) async {
     actionLoading.value = true;
     try {
-      final res = await _repo.addCapitalToCopierSubscription(
-        subscriptionId: subscriptionId,
-        amount: amount,
+      final res = await ApiService.post(
+        endpoint: ApiConstants.copyTradingCopierSubscriptionAddCapital(subscriptionId),
+        data: <String, dynamic>{'amount': amount},
       );
       if (res.success) await load(showLoading: false);
       return res;
@@ -555,4 +557,3 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     }
   }
 }
-

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/screens/finance/view_models/payment_method_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_real_screen.dart';

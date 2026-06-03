@@ -22,7 +22,6 @@ import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/services/account_websocket_service.dart';
 import 'dart:io' show Platform;
 import 'package:crm_app/services/biometric_service.dart';
-import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/screens/auth/data/repositories/auth_repository.dart';
 import 'package:crm_app/screens/auth/data/usecases/forgot_password.dart';
 import 'package:crm_app/screens/auth/data/usecases/login_user.dart';
@@ -33,7 +32,6 @@ import 'package:crm_app/screens/auth/data/usecases/reset_password.dart';
 import 'package:crm_app/screens/auth/data/usecases/reset_password_with_otp.dart';
 import 'package:crm_app/screens/auth/data/usecases/send_otp.dart';
 import 'package:crm_app/screens/auth/data/usecases/verify_password_reset_otp.dart';
-import 'package:crm_app/models/google_otp_models.dart';
 import 'package:crm_app/services/google_otp_service.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
 

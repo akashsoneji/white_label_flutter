@@ -151,6 +151,7 @@ flutter:
     - assets/config/brands/brands.json
     - assets/config/tenax/app_config.json
     - assets/config/vantage/app_config.json
+    - assets/config/celestial/app_config.json
     - assets/image/
     - assets/svg/
     - assets/svg/trade/

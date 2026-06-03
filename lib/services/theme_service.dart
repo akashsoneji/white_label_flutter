@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:crm_app/main.dart' as main_config;
 
 class ThemeService extends GetxService {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
@@ -14,7 +15,8 @@ class ThemeService extends GetxService {
   /// Persisted user preference (System/Light/Dark).
   final Rx<ThemeMode> themeModeRx = defaultThemeMode.obs;
 
-  ThemeMode get themeMode => themeModeRx.value;
+  ThemeMode get themeMode =>
+      main_config.enableDarkModeGlobal ? themeModeRx.value : ThemeMode.light;
 
   late final Future<void> _initialization;
 
@@ -30,9 +32,11 @@ class ThemeService extends GetxService {
 
   Future<void> ensureInitialized() => _initialization;
 
-  bool get isSystemMode => themeMode == ThemeMode.system;
+  bool get isSystemMode =>
+      main_config.enableDarkModeGlobal ? (themeModeRx.value == ThemeMode.system) : false;
 
   bool get isDarkResolved {
+    if (!main_config.enableDarkModeGlobal) return false;
     if (themeMode == ThemeMode.system) {
       return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
           Brightness.dark;
@@ -41,6 +45,13 @@ class ThemeService extends GetxService {
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
+    if (!main_config.enableDarkModeGlobal) {
+      if (themeModeRx.value == ThemeMode.light) return;
+      themeModeRx.value = ThemeMode.light;
+      await _saveThemeMode(ThemeMode.light);
+      Get.forceAppUpdate();
+      return;
+    }
     if (themeModeRx.value == mode) return;
     themeModeRx.value = mode;
     await _saveThemeMode(mode);
@@ -48,6 +59,10 @@ class ThemeService extends GetxService {
   }
 
   Future<void> toggleTheme() async {
+    if (!main_config.enableDarkModeGlobal) {
+      await setThemeMode(ThemeMode.light);
+      return;
+    }
     // For convenience: toggles between Light <-> Dark (ignores System).
     final next =
         isDarkResolved ? ThemeMode.light : ThemeMode.dark;
@@ -56,6 +71,10 @@ class ThemeService extends GetxService {
 
   /// Back-compat API: interpret as forcing light/dark (not system).
   Future<void> setDarkMode(bool value) async {
+    if (!main_config.enableDarkModeGlobal) {
+      await setThemeMode(ThemeMode.light);
+      return;
+    }
     await setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/main.dart' as main_config;
 import '../flavor_config.dart';
 import '../services/theme_service.dart';
 
@@ -11,6 +12,7 @@ class AppColors {
       Get.isRegistered<ThemeService>() ? Get.find<ThemeService>() : null;
 
   static bool get isDarkMode {
+    if (!main_config.enableDarkModeGlobal) return false;
     final service = _themeService;
     if (service != null) return service.isDarkResolved;
     return WidgetsBinding.instance.platformDispatcher.platformBrightness ==

@@ -57,6 +57,12 @@
 		A1B2C3D4E5F60718293A4B5C /* Debug-kantara.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "Debug-kantara.xcconfig"; path = "Flutter/Debug-kantara.xcconfig"; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B5D /* Release-kantara.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "Release-kantara.xcconfig"; path = "Flutter/Release-kantara.xcconfig"; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B5E /* Profile-kantara.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "Profile-kantara.xcconfig"; path = "Flutter/Profile-kantara.xcconfig"; sourceTree = "<group>"; };
+		E1C2D3E4F5061728394A5B6C /* Debug-Celestial.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "Debug-Celestial.xcconfig"; path = "Flutter/Debug-Celestial.xcconfig"; sourceTree = "<group>"; };
+		E1C2D3E4F5061728394A5B6D /* Release-Celestial.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "Release-Celestial.xcconfig"; path = "Flutter/Release-Celestial.xcconfig"; sourceTree = "<group>"; };
+		E1C2D3E4F5061728394A5B6E /* Profile-Celestial.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "Profile-Celestial.xcconfig"; path = "Flutter/Profile-Celestial.xcconfig"; sourceTree = "<group>"; };
+		V1A2N3T4D5E6F708192A3B4C /* Debug-Vantage.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "Debug-Vantage.xcconfig"; path = "Flutter/Debug-Vantage.xcconfig"; sourceTree = "<group>"; };
+		V1A2N3T4D5E6F708192A3B4D /* Release-Vantage.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "Release-Vantage.xcconfig"; path = "Flutter/Release-Vantage.xcconfig"; sourceTree = "<group>"; };
+		V1A2N3T4D5E6F708192A3B4E /* Profile-Vantage.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "Profile-Vantage.xcconfig"; path = "Flutter/Profile-Vantage.xcconfig"; sourceTree = "<group>"; };
 		8E0B69E6C2422C1D50E5E843 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
@@ -105,9 +111,15 @@
 				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,
 				9740EEB21CF90195004384FC /* Debug.xcconfig */,
 				A1B2C3D4E5F60718293A4B5C /* Debug-kantara.xcconfig */,
+				E1C2D3E4F5061728394A5B6C /* Debug-Celestial.xcconfig */,
+				V1A2N3T4D5E6F708192A3B4C /* Debug-Vantage.xcconfig */,
 				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
 				A1B2C3D4E5F60718293A4B5D /* Release-kantara.xcconfig */,
+				E1C2D3E4F5061728394A5B6D /* Release-Celestial.xcconfig */,
+				V1A2N3T4D5E6F708192A3B4D /* Release-Vantage.xcconfig */,
 				A1B2C3D4E5F60718293A4B5E /* Profile-kantara.xcconfig */,
+				E1C2D3E4F5061728394A5B6E /* Profile-Celestial.xcconfig */,
+				V1A2N3T4D5E6F708192A3B4E /* Profile-Vantage.xcconfig */,
 				9740EEB31CF90195004384FC /* Generated.xcconfig */,
 			);
 			name = Flutter;
@@ -818,6 +830,206 @@
 			};
 			name = "Profile-kantara";
 		};
+		F1E2D3C4B5A6978877665544 /* Debug-Celestial */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E1C2D3E4F5061728394A5B6C /* Debug-Celestial.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = MVB226KNM4;
+				ENABLE_BITCODE = NO;
+				FLUTTER_BUILD_NAME = 1.0;
+				FLUTTER_BUILD_NUMBER = 6;
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-Celestial";
+		};
+		F1E2D3C4B5A6978877665545 /* Release-Celestial */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E1C2D3E4F5061728394A5B6D /* Release-Celestial.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = MVB226KNM4;
+				ENABLE_BITCODE = NO;
+				FLUTTER_BUILD_NAME = 1.0;
+				FLUTTER_BUILD_NUMBER = 6;
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-Celestial";
+		};
+		F1E2D3C4B5A6978877665546 /* Profile-Celestial */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E1C2D3E4F5061728394A5B6E /* Profile-Celestial.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = MVB226KNM4;
+				ENABLE_BITCODE = NO;
+				FLUTTER_BUILD_NAME = 1.0;
+				FLUTTER_BUILD_NUMBER = 6;
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Profile-Celestial";
+		};
+		V1A2N3T4D5E6B7U8G9V0A1N /* Debug-Vantage */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = V1A2N3T4D5E6F708192A3B4C /* Debug-Vantage.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = MVB226KNM4;
+				ENABLE_BITCODE = NO;
+				FLUTTER_BUILD_NAME = 1.0;
+				FLUTTER_BUILD_NUMBER = 6;
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Debug-Vantage";
+		};
+		V1A2N3T4D5E6B7U8G9V0A1N2 /* Release-Vantage */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = V1A2N3T4D5E6F708192A3B4D /* Release-Vantage.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = MVB226KNM4;
+				ENABLE_BITCODE = NO;
+				FLUTTER_BUILD_NAME = 1.0;
+				FLUTTER_BUILD_NUMBER = 6;
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Release-Vantage";
+		};
+		V1A2N3T4D5E6B7U8G9V0A1N3 /* Profile-Vantage */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = V1A2N3T4D5E6F708192A3B4E /* Profile-Vantage.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = MVB226KNM4;
+				ENABLE_BITCODE = NO;
+				FLUTTER_BUILD_NAME = 1.0;
+				FLUTTER_BUILD_NUMBER = 6;
+				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = "Profile-Vantage";
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -846,10 +1058,16 @@
 			buildConfigurations = (
 				97C147061CF9000F007C117D /* Debug */,
 				B1C2D3E4F5061728394A5B6C /* Debug-kantara */,
+				F1E2D3C4B5A6978877665544 /* Debug-Celestial */,
+				V1A2N3T4D5E6B7U8G9V0A1N /* Debug-Vantage */,
 				97C147071CF9000F007C117D /* Release */,
 				B1C2D3E4F5061728394A5B6D /* Release-kantara */,
+				F1E2D3C4B5A6978877665545 /* Release-Celestial */,
+				V1A2N3T4D5E6B7U8G9V0A1N2 /* Release-Vantage */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
 				B1C2D3E4F5061728394A5B6E /* Profile-kantara */,
+				F1E2D3C4B5A6978877665546 /* Profile-Celestial */,
+				V1A2N3T4D5E6B7U8G9V0A1N3 /* Profile-Vantage */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

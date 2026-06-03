@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 class SubscriptionSetupScreen extends StatefulWidget {
   const SubscriptionSetupScreen({super.key});
@@ -405,7 +407,12 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
         ),
         child: ElevatedButton(
           onPressed: () {
-            // TODO: hook to API
+            // Legacy mock screen — route users to the live copy-trading hub flow.
+            Get.back();
+            CustomToastService.showInfo(
+              message: 'Use Explore Masters to subscribe with live API data.',
+            );
+            Get.toNamed(AppPages.COPY_TRADING_HUB);
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,

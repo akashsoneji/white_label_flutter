@@ -70,6 +70,9 @@ abstract class Routes {
   static const PMAM_INVESTOR_PORTAL = _Paths.PMAM_INVESTOR_PORTAL;
   static const PMAM_MANAGER_DETAIL = _Paths.PMAM_MANAGER_DETAIL;
   static const PMAM_MANAGER_PLAN_DETAIL = _Paths.PMAM_MANAGER_PLAN_DETAIL;
+  static const CREGIS_CHECKOUT = _Paths.CREGIS_CHECKOUT;
+  static const CREGIS_ADDRESS = _Paths.CREGIS_ADDRESS;
+  static const CREGIS_SUCCESS = _Paths.CREGIS_SUCCESS;
 }
 
 abstract class _Paths {
@@ -152,4 +155,7 @@ abstract class _Paths {
   static const PMAM_INVESTOR_PORTAL = '/pmam-investor-portal';
   static const PMAM_MANAGER_DETAIL = '/pmam-manager-detail';
   static const PMAM_MANAGER_PLAN_DETAIL = '/pmam-manager-plan-detail';
+  static const CREGIS_CHECKOUT = '/cregis-checkout';
+  static const CREGIS_ADDRESS = '/cregis-address';
+  static const CREGIS_SUCCESS = '/cregis-success';
 }

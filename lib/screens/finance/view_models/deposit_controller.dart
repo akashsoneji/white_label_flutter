@@ -40,7 +40,6 @@ class DepositController extends GetxController {
       _setLoading(true);
       _clearError();
 
-      // TODO: Replace with your actual API call
       final token = await SecureStorageService.getAuthToken();
 
       final response = await _repo.topupDemoAccount(
