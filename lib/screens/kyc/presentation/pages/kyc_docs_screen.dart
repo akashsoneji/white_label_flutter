@@ -274,7 +274,11 @@ class KycDocsScreen extends StatelessWidget {
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w500,
                                 color:
-                                    isSelected ? Colors.green : Colors.black87,
+                                    isSelected
+                                        ? Colors.green
+                                        : AppColors.isDarkMode
+                                        ? AppColors.primary
+                                        : AppColors.primary,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -308,7 +312,11 @@ class KycDocsScreen extends StatelessWidget {
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(Icons.check, color: AppColors.whiteColor, size: 16),
+                      child: Icon(
+                        Icons.check,
+                        color: AppColors.whiteColor,
+                        size: 16,
+                      ),
                     ),
                   ),
                 if (!isSelected)

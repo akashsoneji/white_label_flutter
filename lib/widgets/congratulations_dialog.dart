@@ -30,7 +30,7 @@ class CongratulationsDialog extends StatelessWidget {
 
     // ✅ FIX: Navigate to trading screen with dashboard tab index (3) as argument
     // This will open directly to the dashboard tab showing account list
-    Get.offAllNamed('/trading', arguments: 3); // Dashboard is at index 3
+    Get.offAllNamed('/trading', arguments: 2); // Dashboard is at index 3
 
     // Explicitly refresh accounts after navigation
     // Use a small delay to ensure navigation completes

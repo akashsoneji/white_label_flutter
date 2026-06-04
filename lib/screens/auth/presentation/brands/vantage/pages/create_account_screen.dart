@@ -131,7 +131,7 @@ class _VantageCreateAccountScreenState
       'accept_terms': true,
     };
     if (_selectedCountryCode.isNotEmpty) {
-      data['register_country_code'] = _selectedCountryCode;
+      data['country_code'] = _selectedCountryCode;
     }
     if (otp != null && otp.isNotEmpty) {
       data['otp'] = otp;

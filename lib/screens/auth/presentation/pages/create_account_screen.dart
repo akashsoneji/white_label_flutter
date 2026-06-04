@@ -207,7 +207,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       "otp_verification_type": "email",
       "register_event_type": "register",
       "accept_terms": true,
-      "register_country_code": _selectedCountryCode,
+      "country_code": _selectedCountryCode,
     };
 
     final referrerCode = _referrerController.text.trim();

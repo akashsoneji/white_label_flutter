@@ -21,8 +21,8 @@ class AppBrandingConfig {
 
   factory AppBrandingConfig.fromJson(Map<String, dynamic> json) {
     return AppBrandingConfig(
-      appName: (json['appName'] ?? 'Tenax').toString(),
-      appTitle: (json['appTitle'] ?? 'Tenax Code').toString(),
+      appName: json['appName']?.toString() ?? '',
+      appTitle: json['appTitle']?.toString() ?? '',
       primaryColor: _parseColor(json['primaryColor']),
       secondaryColor: _parseColor(json['secondaryColor']),
       accentColor: _parseColor(json['accentColor']),

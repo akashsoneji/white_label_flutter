@@ -258,9 +258,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
               automaticallyImplyLeading: false,
               leading: Padding(
                 padding: EdgeInsets.only(left: 16.w),
-                child: AppBackButton(
-                  onPressed: () => Navigator.pop(context),
-                ),
+                child: AppBackButton(onPressed: () => Navigator.pop(context)),
               ),
               title: Text(
                 languageService.tr('setting_title'),
@@ -287,7 +285,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
             SizedBox(height: 16.h),
             _buildCompactSection(
               title: languageService.tr('general_tradind_settings'),
-              child: Obx(() => _buildCompactMenuList(_buildFinanceSectionItems())),
+              child: Obx(
+                () => _buildCompactMenuList(_buildFinanceSectionItems()),
+              ),
             ),
             SizedBox(height: 16.h),
             _buildCompactSection(
@@ -390,37 +390,6 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    GetBuilder<MoreController>(
-                      builder: (controller) {
-                        final model = controller.dashboardModel.value;
-                        final stage = model?.data?.stageCompletion;
-                        final completion = _calculateCompletion(stage);
-                        return Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
-                            vertical: 2.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                completion == 100
-                                    ? AppColors.primary.withValues(alpha: 0.1)
-                                    : Colors.orange.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          child: Text(
-                            '$completion%',
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w600,
-                              color:
-                                  completion == 100
-                                      ? AppColors.primary
-                                      : Colors.orange,
-                            ),
-                          ),
-                        );
-                      },
                     ),
                   ],
                 ),
@@ -617,25 +586,25 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   Widget _buildCompactFinancialGrid() {
     final items = [
       _CompactGridItem(
-        icon: 'assets/svg/more/deposit.svg',
+        iconData: Icons.south_west_rounded,
         label: languageService.tr('general_deposit'),
         color: AppColors.iconGreen,
         onTap: () => Get.to(() => PaymentMethodsScreen(accountNumber: '')),
       ),
       _CompactGridItem(
-        icon: 'assets/svg/more/withdrawal.svg',
+        iconData: Icons.north_east_rounded,
         label: languageService.tr('general_withdraw'),
         color: AppColors.iconOrange,
         onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
       ),
       _CompactGridItem(
-        icon: 'assets/svg/more/internal-transfer.svg',
+        iconData: Icons.swap_horiz_rounded,
         label: languageService.tr('general_transfer'),
         color: AppColors.notificationBlue,
         onTap: () => Get.toNamed(AppPages.INTERNAL_TRANSFER),
       ),
       _CompactGridItem(
-        icon: 'assets/svg/more/transaction_history.svg',
+        iconData: Icons.receipt_long_rounded,
         label: languageService.tr('general_history'),
         color: AppColors.iconPurple,
         onTap: () => Get.toNamed(AppPages.TRANSACTION_HISTORY),
@@ -654,6 +623,11 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildCompactGridCard(_CompactGridItem item) {
+    final iconColor = AppColors.isDarkMode ? Colors.white : item.color;
+    final iconBg =
+        AppColors.isDarkMode
+            ? Colors.white.withValues(alpha: 0.12)
+            : item.color.withValues(alpha: 0.12);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -684,16 +658,11 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 width: 32.w,
                 height: 32.w,
                 decoration: BoxDecoration(
-                  color: item.color.withValues(alpha: 0.12),
+                  color: iconBg,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Center(
-                  child: SvgPicture.asset(
-                    item.icon,
-                    height: 16.h,
-                    width: 16.w,
-                    color: item.color,
-                  ),
+                  child: Icon(item.iconData, size: 18.sp, color: iconColor),
                 ),
               ),
               SizedBox(width: 8.w),
@@ -729,7 +698,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
 
     final items = <_CompactMenuItem>[
       _CompactMenuItem(
-        icon: 'assets/svg/more/wallet.svg',
+        iconData: Icons.account_balance_rounded,
         label: languageService.tr('general_finance'),
         color: AppColors.iconTeal,
         onTap: () async {
@@ -738,7 +707,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         },
       ),
       _CompactMenuItem(
-        icon: 'assets/svg/more/ib_dashboard/overview.svg',
+        iconData: Icons.dashboard_rounded,
         label: languageService.tr('more_dashboard'),
         color: AppColors.primary,
         onTap: () async => await _handleSwitchToIB(),
@@ -748,7 +717,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     if (showCopyTrading) {
       items.add(
         _CompactMenuItem(
-          icon: 'assets/svg/more/copy.svg',
+          iconData: Icons.content_copy_rounded,
           label: languageService.tr('more_copy_trading'),
           color: AppColors.iconBlue,
           onTap: () => Get.toNamed(AppPages.COPY_TRADING_MAIN),
@@ -758,7 +727,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     if (showPmam) {
       items.add(
         _CompactMenuItem(
-          icon: 'assets/svg/more/demo-account.svg',
+          iconData: Icons.groups_rounded,
           label: 'PAMM',
           color: AppColors.iconLightBlue,
           onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
@@ -772,25 +741,25 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     return [
       if (main_config.enableDarkModeGlobal)
         _CompactMenuItem(
-          icon: 'assets/svg/more/theme.svg',
+          iconData: Icons.color_lens_rounded,
           label: languageService.tr('settings_theme'),
           color: AppColors.iconPurple,
           onTap: () => showThemeBottomSheet(context),
         ),
       _CompactMenuItem(
-        icon: 'assets/svg/more/change_password.svg',
+        iconData: Icons.lock_outline_rounded,
         label: languageService.tr('change_password'),
         color: AppColors.iconRed,
         onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
       ),
       _CompactMenuItem(
-        icon: 'assets/svg/more/two_factor_auth.svg',
+        iconData: Icons.security_rounded,
         label: languageService.tr('two_factor_authentication'),
         color: AppColors.iconDeepPurple,
         onTap: () => Get.toNamed(AppPages.TWO_FACTOR_AUTH),
       ),
       _CompactMenuItem(
-        icon: 'assets/svg/more/one-click.svg',
+        iconData: Icons.touch_app_rounded,
         label: 'One Click Trading',
         color: AppColors.iconDeepTeal,
         isToggle: true,
@@ -798,7 +767,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         onTap: _toggleOneClickTrading,
       ),
       _CompactMenuItem(
-        icon: 'assets/svg/more/biometric.svg',
+        iconData: Icons.fingerprint_rounded,
         label: languageService.tr('biometric_login_toggle'),
         color: AppColors.iconIndigo,
         isToggle: true,
@@ -813,13 +782,13 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   ) {
     return [
       _CompactMenuItem(
-        icon: 'assets/svg/more/setting/profile-kyc.svg',
+        iconData: Icons.delete_forever_rounded,
         label: languageService.tr('delete_account'),
         color: AppColors.iconPink,
         onTap: () => _showDeleteAccountDialog(authController),
       ),
       _CompactMenuItem(
-        icon: 'assets/svg/more/logout.svg',
+        iconData: Icons.logout_rounded,
         label: languageService.tr('more_logout'),
         color: AppColors.red,
         showArrow: false,
@@ -871,6 +840,11 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildCompactMenuRow(_CompactMenuItem item) {
+    final iconColor = AppColors.isDarkMode ? Colors.white : item.color;
+    final iconBg =
+        AppColors.isDarkMode
+            ? Colors.white.withValues(alpha: 0.12)
+            : item.color.withValues(alpha: 0.12);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -884,16 +858,11 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 width: 32.w,
                 height: 32.w,
                 decoration: BoxDecoration(
-                  color: item.color.withValues(alpha: 0.12),
+                  color: iconBg,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Center(
-                  child: SvgPicture.asset(
-                    item.icon,
-                    height: 16.h,
-                    width: 16.w,
-                    color: item.color,
-                  ),
+                  child: Icon(item.iconData, size: 18.sp, color: iconColor),
                 ),
               ),
               SizedBox(width: 10.w),
@@ -1207,13 +1176,13 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
 }
 
 class _CompactGridItem {
-  final String icon;
+  final IconData iconData;
   final String label;
   final Color color;
   final VoidCallback onTap;
 
   _CompactGridItem({
-    required this.icon,
+    required this.iconData,
     required this.label,
     required this.color,
     required this.onTap,
@@ -1221,7 +1190,7 @@ class _CompactGridItem {
 }
 
 class _CompactMenuItem {
-  final String icon;
+  final IconData iconData;
   final String label;
   final Color color;
   final VoidCallback onTap;
@@ -1230,7 +1199,7 @@ class _CompactMenuItem {
   final bool toggleValue;
 
   _CompactMenuItem({
-    required this.icon,
+    required this.iconData,
     required this.label,
     required this.color,
     required this.onTap,
