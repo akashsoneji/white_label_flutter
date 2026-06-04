@@ -32,6 +32,16 @@
       "problemMatcher": []
     },
     {
+      "label": "Set Android icon (pipze)",
+      "type": "shell",
+      "command": "dart",
+      "args": ["run", "scripts/prepare_flavor.dart", "pipze"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "prepare-flavor-afx",
       "type": "shell",
       "command": "dart",

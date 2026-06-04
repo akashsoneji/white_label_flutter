@@ -23,6 +23,17 @@ ext.brandFlavors = [
         type: "child",
         inheritsFrom: "vantage",
     ],
+    [
+        name: "pipze",
+        label: "Pipze",
+        appId: "com.pipze.app",
+        appName: "Pipze",
+        primary: "#5F259E",
+        secondary: "#F8F3FF",
+        accent: "#FFC93C",
+        type: "child",
+        inheritsFrom: "vantage",
+    ],
 ]
 
 // Helper to get flavor by name

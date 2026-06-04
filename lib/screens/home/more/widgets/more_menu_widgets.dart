@@ -106,6 +106,7 @@ class MoreMenuTile extends StatelessWidget {
                             iconPath!,
                             height: showIconBackground ? 18.h : 28.h,
                             width: showIconBackground ? 18.w : 28.w,
+                            color: AppColors.primary,
                             colorFilter:
                                 showIconBackground
                                     ? ColorFilter.mode(

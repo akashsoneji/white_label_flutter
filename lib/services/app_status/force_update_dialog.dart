@@ -405,6 +405,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                 source: FlavorConfig.effectiveLogo,
                 height: 80.w,
                 width: 100.w,
+                isCircle: true,
               ),
             ),
           ),

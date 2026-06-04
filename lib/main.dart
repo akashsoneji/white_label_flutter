@@ -82,7 +82,7 @@ import 'services/app_lock/app_lock_overlay.dart';
 
 /// Global toggle to enable/disable Dark Mode support in the app.
 /// Set this to `true` to enable Dark Mode, or `false` to force Light Mode.
-const bool enableDarkModeGlobal = true;
+const bool enableDarkModeGlobal = false;
 
 // Firebase Background Message Handler
 @pragma('vm:entry-point')
@@ -806,6 +806,10 @@ Future<void> _initializeFlavor() async {
     case 'celestial':
       FlavorConfig.celestial;
       AppLogger.debug('Flavor initialized: celestial');
+      return;
+    case 'pipze':
+      FlavorConfig.pipze;
+      AppLogger.debug('Flavor initialized: pipze');
       return;
     case 'tenax':
     default:

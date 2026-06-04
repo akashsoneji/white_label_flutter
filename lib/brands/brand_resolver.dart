@@ -132,6 +132,9 @@ class BrandResolver extends GetxService {
       case 'celestial':
         FlavorConfig.celestial;
         break;
+      case 'pipze':
+        FlavorConfig.pipze;
+        break;
       case 'tenax':
       default:
         FlavorConfig.tenax;

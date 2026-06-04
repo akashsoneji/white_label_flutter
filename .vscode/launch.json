@@ -60,6 +60,36 @@
             "args": ["--flavor", "celestial", "--dart-define=CLIENT=celestial", "--dart-define=FLAVOR=celestial"],
             "flutterMode": "release",
             "console": "terminal"
+        },
+        {
+            "name": "🟢 Pipze (debug)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (pipze)",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "pipze", "--dart-define=CLIENT=pipze", "--dart-define=FLAVOR=pipze", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal"
+        },
+        {
+            "name": "🟢 Pipze (profile)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (pipze)",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "pipze", "--dart-define=CLIENT=pipze", "--dart-define=FLAVOR=pipze"],
+            "flutterMode": "profile",
+            "console": "terminal"
+        },
+        {
+            "name": "🟢 Pipze (release)",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "Set Android icon (pipze)",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "pipze", "--dart-define=CLIENT=pipze", "--dart-define=FLAVOR=pipze"],
+            "flutterMode": "release",
+            "console": "terminal"
         }
     ]
 }

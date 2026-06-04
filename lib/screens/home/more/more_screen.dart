@@ -24,6 +24,7 @@ import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_more_layout.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
+import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 import 'package:crm_app/main.dart' as main_config;
 
@@ -691,10 +692,12 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   }
 
   List<_CompactMenuItem> _buildFinanceSectionItems() {
-    final modules = Get.find<EnabledModulesService>().modules.value;
+    final modulesService = Get.find<EnabledModulesService>();
+    final modules = modulesService.modules.value;
     final showCopyTrading = modules?.copytrading ?? false;
     final showPmam =
         modules?.pmam ?? appConfig.isFeatureEnabled(FeatureKeys.pmam);
+    final showPromotional = modulesService.isPromotionalMenuVisible;
 
     final items = <_CompactMenuItem>[
       _CompactMenuItem(
@@ -706,13 +709,30 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
           if (mounted) _refreshDataIfNeeded();
         },
       ),
+    ];
+
+    if (showPromotional) {
+      items.add(
+        _CompactMenuItem(
+          iconData: Icons.campaign_rounded,
+          label: languageService.tr('general_promotional'),
+          color: AppColors.iconOrange,
+          onTap: () => Get.to(
+            () => const PromotionalScreen(),
+            transition: Transition.rightToLeft,
+          ),
+        ),
+      );
+    }
+
+    items.add(
       _CompactMenuItem(
         iconData: Icons.dashboard_rounded,
         label: languageService.tr('more_dashboard'),
         color: AppColors.primary,
         onTap: () async => await _handleSwitchToIB(),
       ),
-    ];
+    );
 
     if (showCopyTrading) {
       items.add(

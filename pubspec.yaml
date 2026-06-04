@@ -144,7 +144,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/clients/celestial/
+    - assets/clients/pipze/
 
     - assets/translations/
     - assets/config/
@@ -152,6 +152,7 @@ flutter:
     - assets/config/tenax/app_config.json
     - assets/config/vantage/app_config.json
     - assets/config/celestial/app_config.json
+    - assets/config/pipze/app_config.json
     - assets/image/
     - assets/svg/
     - assets/svg/trade/

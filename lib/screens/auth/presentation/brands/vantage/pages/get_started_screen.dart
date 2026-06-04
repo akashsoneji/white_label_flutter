@@ -38,6 +38,7 @@ class VantageGetStartedScreen extends StatelessWidget {
                     height: 84.w,
                     width: 84.w,
                     fit: BoxFit.contain,
+                    isCircle: true,
                   ),
                 ),
                 SizedBox(height: 18.h),

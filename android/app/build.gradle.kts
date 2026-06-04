@@ -88,6 +88,15 @@ android {
             buildConfigField("String", "FLAVOR", "\"celestial\"")
             manifestPlaceholders["FLAVOR"] = "celestial"
         }
+
+        // Pipze — child brand (inherits Vantage's screen files, different colors/icons/URLs)
+        create("pipze") {
+            dimension = "brand"
+            applicationId = "com.pipze.app"
+            resValue("string", "app_name", "Pipze")
+            buildConfigField("String", "FLAVOR", "\"pipze\"")
+            manifestPlaceholders["FLAVOR"] = "pipze"
+        }
     }
 
     signingConfigs {
@@ -131,9 +140,9 @@ dependencies {
 // Skip Google Services task for flavors without Firebase config
 // to avoid requiring google-services.json.
 afterEvaluate {
-    // Vantage and Celestial flavors have no Firebase config.
+    // Vantage, Celestial, and Pipze flavors have no Firebase config.
     tasks.matching {
-        (it.name.startsWith("processVantage") || it.name.startsWith("processCelestial")) &&
+        (it.name.startsWith("processVantage") || it.name.startsWith("processCelestial") || it.name.startsWith("processPipze")) &&
             it.name.endsWith("GoogleServices")
     }.configureEach {
         enabled = false

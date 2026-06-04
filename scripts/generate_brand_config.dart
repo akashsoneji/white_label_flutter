@@ -410,9 +410,8 @@ Future<void> createAndroidFlavorDirs(List<Map<String, dynamic>> brands) async {
         android:enableOnBackInvokedCallback="true"
         android:name="\${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:usesCleartextTraffic="true"
-        tools:replace="android:label,android:icon,android:roundIcon">
+        tools:replace="android:label,android:icon">
 
         <provider
             android:name="androidx.core.content.FileProvider"

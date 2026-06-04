@@ -61,3 +61,26 @@ brands:
       appIcon: assets/brands/celestial/icon.png
       logo: assets/brands/celestial/logo.svg
       splashLogo: assets/brands/celestial/splash_logo.svg
+
+  - name: pipze
+    type: child
+    inheritsFrom: vantage
+    label: Pipze
+    android:
+      applicationId: com.pipze.app
+      appName: Pipze
+    ios:
+      bundleId: com.pipze.app
+      appName: Pipze
+    colors:
+      primary: "#5F259E"
+      secondary: "#F8F3FF"
+      accent: "#FFC93C"
+    urls:
+      api: https://my.pipze.com/api/
+      websocket: wss://my.pipze.com/trade-engine
+      chart: https://my.pipze.com
+    assets:
+      appIcon: assets/brands/pipze/icon.png
+      logo: assets/brands/pipze/icon.png
+      splashLogo: assets/brands/pipze/icon.png

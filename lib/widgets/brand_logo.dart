@@ -8,6 +8,8 @@ class BrandLogo extends StatelessWidget {
   final double? width;
   final Color? color;
   final BoxFit fit;
+  final BorderRadius? borderRadius;
+  final bool isCircle;
 
   const BrandLogo({
     super.key,
@@ -16,6 +18,8 @@ class BrandLogo extends StatelessWidget {
     this.width,
     this.color,
     this.fit = BoxFit.contain,
+    this.borderRadius,
+    this.isCircle = false,
   });
 
   bool get _isNetworkLogo {
@@ -34,8 +38,10 @@ class BrandLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget child;
+
     if (_isNetworkLogo) {
-      return Image.network(
+      child = Image.network(
         source,
         height: height,
         width: width,
@@ -47,10 +53,8 @@ class BrandLogo extends StatelessWidget {
               color: Colors.grey,
             ),
       );
-    }
-
-    if (_isLocalFilePath) {
-      return Image.file(
+    } else if (_isLocalFilePath) {
+      child = Image.file(
         File(source),
         height: height,
         width: width,
@@ -62,10 +66,8 @@ class BrandLogo extends StatelessWidget {
               color: Colors.grey,
             ),
       );
-    }
-
-    if (_isInlineSvg) {
-      return SvgPicture.string(
+    } else if (_isInlineSvg) {
+      child = SvgPicture.string(
         source,
         height: height,
         width: width,
@@ -73,18 +75,27 @@ class BrandLogo extends StatelessWidget {
         colorFilter:
             color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
       );
-    }
-
-    if (source.toLowerCase().endsWith('.svg')) {
-      return SvgPicture.asset(
+    } else if (source.toLowerCase().endsWith('.svg')) {
+      child = SvgPicture.asset(
         source,
         height: height,
         width: width,
         colorFilter:
             color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
       );
+    } else {
+      child = Image.asset(source, height: height, width: width, fit: fit);
     }
 
-    return Image.asset(source, height: height, width: width, fit: fit);
+    if (isCircle) {
+      return ClipOval(child: child);
+    }
+    if (borderRadius != null) {
+      return ClipRRect(
+        borderRadius: borderRadius!,
+        child: child,
+      );
+    }
+    return child;
   }
 }

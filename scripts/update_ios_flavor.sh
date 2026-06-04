@@ -2,7 +2,7 @@
 
 # Script to update iOS app name and icon based on flavor
 # Usage: bash scripts/update_ios_flavor.sh [flavor]
-# Supported whitelabel flavors: tenax, vantage, celestial
+# Supported whitelabel flavors: tenax, vantage, celestial, pipze
 
 MAIN_DART="lib/main.dart"
 INFO_PLIST="ios/Runner/Info.plist"
@@ -12,7 +12,7 @@ if [ $# -ge 1 ] && [ -n "$1" ]; then
     FLAVOR="$1"
     echo "📱 Using provided flavor: $FLAVOR"
 else
-    FLAVOR=$(grep -E "^[[:space:]]*FlavorConfig\.(tenax|vantage|celestial)" "$MAIN_DART" | grep -v "^[[:space:]]*//" | head -1 | sed -E 's/.*FlavorConfig\.([a-z]+).*/\1/')
+    FLAVOR=$(grep -E "^[[:space:]]*FlavorConfig\.(tenax|vantage|celestial|pipze)" "$MAIN_DART" | grep -v "^[[:space:]]*//" | head -1 | sed -E 's/.*FlavorConfig\.([a-z]+).*/\1/')
 
     if [ -z "$FLAVOR" ]; then
         FLAVOR=$(grep -E "String\.fromEnvironment\('FLAVOR'" "$MAIN_DART" | head -1 | sed -E "s/.*'FLAVOR', defaultValue: '([^']+)'.*/\1/")
@@ -20,7 +20,7 @@ else
 
     if [ -z "$FLAVOR" ]; then
         echo "⚠️  Could not detect flavor from $MAIN_DART"
-        echo "   Provide flavor: bash scripts/update_ios_flavor.sh <tenax|vantage|celestial>"
+        echo "   Provide flavor: bash scripts/update_ios_flavor.sh <tenax|vantage|celestial|pipze>"
         exit 1
     fi
 
@@ -43,9 +43,14 @@ case "$FLAVOR" in
         APP_ICON="AppIcon"
         XCODE_CONFIG_PREFIX="Debug-Celestial"
         ;;
+    pipze)
+        APP_NAME="Pipze"
+        APP_ICON="AppIcon"
+        XCODE_CONFIG_PREFIX="Debug-Pipze"
+        ;;
     *)
         echo "❌ Unsupported flavor: $FLAVOR"
-        echo "   Supported: tenax, vantage, celestial"
+        echo "   Supported: tenax, vantage, celestial, pipze"
         exit 1
         ;;
 esac
@@ -88,8 +93,8 @@ echo "✅ iOS flavor prep complete for: $FLAVOR ($APP_NAME)"
 echo ""
 echo "📋 Build with:"
 echo "   flutter run --dart-define=CLIENT=$FLAVOR --dart-define=FLAVOR=$FLAVOR"
-if [ "$FLAVOR" = "tenax" ] || [ "$FLAVOR" = "vantage" ] || [ "$FLAVOR" = "celestial" ]; then
+if [ "$FLAVOR" = "tenax" ] || [ "$FLAVOR" = "vantage" ] || [ "$FLAVOR" = "celestial" ] || [ "$FLAVOR" = "pipze" ]; then
     echo "   Android: add --flavor $FLAVOR"
 fi
 echo ""
-echo "   iOS Xcode: select Debug-Celestial or Debug-Vantage configuration when building from Xcode"
+echo "   iOS Xcode: select Debug-Celestial, Debug-Vantage, or Debug-Pipze configuration when building from Xcode"

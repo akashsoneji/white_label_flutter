@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'clients/tenax/config.dart';
 import 'clients/vantage/config.dart';
 import 'clients/celestial/config.dart';
+import 'clients/pipze/config.dart';
 
 enum Flavor {
   tenax,
   vantage,
   celestial,
+  pipze,
 }
 
 class FlavorConfig {
@@ -96,11 +98,13 @@ class FlavorConfig {
 
   static bool isTenax() => _instance?.flavor == Flavor.tenax;
   static bool isCelestial() => _instance?.flavor == Flavor.celestial;
+  static bool isPipze() => _instance?.flavor == Flavor.pipze;
 
   /// Vantage and Celestial share the same 4-tab trading shell and Vantage auth UI.
   static bool isVantage() =>
       _instance?.flavor == Flavor.vantage ||
-      _instance?.flavor == Flavor.celestial;
+      _instance?.flavor == Flavor.celestial ||
+      _instance?.flavor == Flavor.pipze;
 
   /// Alias for UI branching (auth, trading shell, finance screens).
   static bool usesVantageUi() => isVantage();
@@ -226,6 +230,27 @@ class FlavorConfig {
       appIconPath: config.getAssetPath('celestial', config.appIconPath),
       svgLogoPath: config.getAssetPath('celestial', config.logoSvgPath),
       splashLogoPath: config.getAssetPath('celestial', config.splashLogoPath),
+      remoteLogoUrl: null,
+      selectedBrokerData: null,
+    );
+  }
+
+  static FlavorConfig get pipze {
+    _selectedFlavor = Flavor.pipze;
+    const config = PipzeConfig();
+    return FlavorConfig(
+      flavor: Flavor.pipze,
+      appName: config.brandName,
+      appTitle: config.appTitle,
+      primaryColor: config.primaryColor,
+      secondaryColor: config.secondaryColor,
+      accentColor: config.accentColor,
+      websocketUrl: config.websocketUrl,
+      chartBaseUrl: config.chartBaseUrl,
+      apiBaseUrl: config.apiBaseUrl,
+      appIconPath: config.getAssetPath('pipze', config.appIconPath),
+      svgLogoPath: config.getAssetPath('pipze', config.logoSvgPath),
+      splashLogoPath: config.getAssetPath('pipze', config.splashLogoPath),
       remoteLogoUrl: null,
       selectedBrokerData: null,
     );

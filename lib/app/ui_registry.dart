@@ -36,7 +36,9 @@ class UiRegistry implements UiSlots {
   const UiRegistry({required this.client});
 
   bool get _usesVantageUi =>
-      client.toLowerCase() == 'vantage' || client.toLowerCase() == 'celestial';
+      client.toLowerCase() == 'vantage' ||
+      client.toLowerCase() == 'celestial' ||
+      client.toLowerCase() == 'pipze';
 
   @override
   Widget splash() => const SplashScreen();

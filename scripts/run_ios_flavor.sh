@@ -15,13 +15,13 @@ NC='\033[0m'
 if [ $# -lt 1 ]; then
     echo -e "${RED}❌ Error: Flavor not specified${NC}"
     echo "Usage: bash scripts/run_ios_flavor.sh <flavor>"
-    echo "  Available flavors: tenax, vantage, celestial"
+    echo "  Available flavors: tenax, vantage, celestial, pipze"
     exit 1
 fi
 
 FLAVOR=$1
 
-VALID_FLAVORS=("tenax" "vantage" "celestial")
+VALID_FLAVORS=("tenax" "vantage" "celestial" "pipze")
 if [[ ! " ${VALID_FLAVORS[@]} " =~ " ${FLAVOR} " ]]; then
     echo -e "${RED}❌ Invalid flavor: $FLAVOR${NC}"
     echo "  Available flavors: ${VALID_FLAVORS[*]}"
