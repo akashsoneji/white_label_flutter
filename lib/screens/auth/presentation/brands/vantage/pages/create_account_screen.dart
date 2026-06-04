@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:country_picker/country_picker.dart';
+import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -313,7 +314,7 @@ class _VantageCreateAccountScreenState
                   _passwordVisible
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
-                  color: VantageAuthTheme.muted,
+                  color: AppColors.isDarkMode ? Colors.white : VantageAuthTheme.muted,
                 ),
               ),
               onChanged: (_) => _validateForm(),
@@ -343,6 +344,11 @@ class _VantageCreateAccountScreenState
                     setState(() => _enableBiometricAfterRegister = true);
                   },
                   activeColor: VantageAuthTheme.primary,
+                  checkColor: AppColors.isDarkMode ? Colors.black : Colors.white,
+                  side: BorderSide(
+                    color: AppColors.isDarkMode ? Colors.white : Colors.grey,
+                    width: 1.5,
+                  ),
                 ),
                 Expanded(
                   child: Text(

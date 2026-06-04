@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/screens/trading/view_models/chart_controller.dart';
@@ -11,6 +12,7 @@ class SoundTestWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const AppBackButton(),
         title: const Text('Sound Test'),
         backgroundColor: Colors.blue,
       ),

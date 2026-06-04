@@ -5,15 +5,18 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/services/auth_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/utils/trl_helper.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class ChangeLeverageScreen extends StatefulWidget {
   final String accountNumber;
   final int? currentLeverage; // Optional current leverage value
+  final List<int>? leverageOptions; // Dynamic leverage options list from api
 
   const ChangeLeverageScreen({
     Key? key,
     required this.accountNumber,
     this.currentLeverage,
+    this.leverageOptions,
   }) : super(key: key);
 
   @override
@@ -22,19 +25,24 @@ class ChangeLeverageScreen extends StatefulWidget {
 
 class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
   final AuthService _authService = Get.find<AuthService>();
-  final List<int> _leverageValues = [30, 50, 100, 300, 400, 500];
+  late final List<int> _leverageValues;
   int? _selectedLeverage;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    // Initialize leverage values dynamically from widget.leverageOptions, fallback to defaults
+    _leverageValues = (widget.leverageOptions != null && widget.leverageOptions!.isNotEmpty)
+        ? widget.leverageOptions!
+        : const [30, 50, 100, 300, 400, 500];
+
     // Set to current leverage if provided and valid, otherwise default to first value
     if (widget.currentLeverage != null &&
         _leverageValues.contains(widget.currentLeverage)) {
       _selectedLeverage = widget.currentLeverage;
     } else {
-      _selectedLeverage = _leverageValues.first;
+      _selectedLeverage = _leverageValues.isNotEmpty ? _leverageValues.first : null;
     }
   }
 
@@ -204,7 +212,11 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Change Leverage'), centerTitle: true),
+      appBar: AppBar(
+        leading: const AppBackButton(),
+        title: Text('Change Leverage'),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24.w),
         child: Column(
@@ -214,7 +226,9 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: AppColors.secondary,
+                color: AppColors.isDarkMode
+                    ? Colors.white.withOpacity(0.12)
+                    : AppColors.secondary,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(

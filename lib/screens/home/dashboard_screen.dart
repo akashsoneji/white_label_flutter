@@ -22,7 +22,7 @@ import '../../utils/trl_helper.dart';
 import 'package:crm_app/utils/svg_color_helper.dart';
 import 'change_leverage_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/internal_transfer_screen.dart';
-import 'package:crm_app/screens/finance/presentation/pages/transaction_history_screen.dart';
+import 'package:crm_app/screens/finance/presentation/finance_ui_scope.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_dashboard_layout.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_glass_tokens.dart';
 import 'package:crm_app/widgets/app_svg_icon.dart';
@@ -485,9 +485,11 @@ class DashboardScreen extends StatelessWidget {
                       // padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color:
-                            account.accountType == 'live'
-                                ? AppColors.accent
-                                : AppColors.blue,
+                            AppColors.isDarkMode
+                                ? Colors.white.withOpacity(0.12)
+                                : (account.accountType == 'live'
+                                    ? AppColors.accent
+                                    : AppColors.blue),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
@@ -496,9 +498,9 @@ class DashboardScreen extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color:
-                              account.accountType == 'live'
-                                  ? AppColors.whiteColor
-                                  : AppColors.whiteColor,
+                              AppColors.isDarkMode
+                                  ? Colors.white
+                                  : Colors.white,
                         ),
                       ),
                     ),
@@ -578,11 +580,11 @@ class DashboardScreen extends StatelessWidget {
                       text: ' ${account.accountType.capitalizeFirst}\t\t',
                       style: TextStyle(
                         backgroundColor:
-                            isVantage
-                                ? AppColors.primary.withValues(
-                                  alpha: AppColors.isDarkMode ? 0.18 : 0.10,
-                                )
-                                : AppColors.accent.withAlpha(50),
+                            AppColors.isDarkMode
+                                ? Colors.white.withOpacity(0.12)
+                                : (isVantage
+                                    ? AppColors.primary.withValues(alpha: 0.10)
+                                    : AppColors.accent.withAlpha(50)),
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
                         height: 1.4,
@@ -634,9 +636,10 @@ class DashboardScreen extends StatelessWidget {
                           horizontal: 8.w,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.isDarkMode
-                              ? const Color(0xFFE0E0E0)
-                              : AppColors.cardBackGround,
+                          color:
+                              AppColors.isDarkMode
+                                  ? AppColors.primary.withValues(alpha: 0.12)
+                                  : AppColors.cardBackGround,
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(
                             color: AppColors.border.withValues(
@@ -649,9 +652,10 @@ class DashboardScreen extends StatelessWidget {
                               'assets/svg/bottom_navigation/candle_bold.svg',
                           height: 16.h,
                           width: 16.w,
-                          color: AppColors.isDarkMode
-                              ? const Color(0xFF333333)
-                              : AppColors.primary,
+                          color:
+                              AppColors.isDarkMode
+                                  ? AppColors.primary
+                                  : AppColors.primary,
                         ),
                       ),
                     ),
@@ -941,14 +945,10 @@ class DashboardScreen extends StatelessWidget {
                 ? EdgeInsets.symmetric(vertical: 6.h, horizontal: 6.w)
                 : EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w);
 
-        // In dark mode with light segment bar background, use light gray buttons with dark text
-        final bool isDarkModeWithLightBg = AppColors.isDarkMode;
-        final Color buttonBgColor = isDarkModeWithLightBg
-            ? const Color(0xFFE0E0E0)
-            : color.withAlpha(20);
-        final Color textAndIconColor = isDarkModeWithLightBg
-            ? const Color(0xFF333333)
-            : color;
+        final bool isDarkMode = AppColors.isDarkMode;
+        final Color buttonBgColor =
+            isDarkMode ? Colors.white.withOpacity(0.12) : color.withAlpha(20);
+        final Color textAndIconColor = isDarkMode ? Colors.white : color;
 
         return GestureDetector(
           onTap: onTap,
@@ -1067,9 +1067,11 @@ class AccountInfoBottomSheet extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color:
-                                account.accountType == 'live'
-                                    ? AppColors.accent
-                                    : AppColors.blue,
+                                AppColors.isDarkMode
+                                    ? Colors.white.withOpacity(0.12)
+                                    : (account.accountType == 'live'
+                                        ? AppColors.accent
+                                        : AppColors.blue),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -1078,9 +1080,9 @@ class AccountInfoBottomSheet extends StatelessWidget {
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w600,
                               color:
-                                  account.accountType == 'live'
-                                      ? AppColors.whiteColor
-                                      : AppColors.whiteColor,
+                                  AppColors.isDarkMode
+                                      ? Colors.white
+                                      : Colors.white,
                             ),
                           ),
                         ),
@@ -1096,7 +1098,10 @@ class AccountInfoBottomSheet extends StatelessWidget {
                               // width: 29.w,
                               padding: EdgeInsets.only(left: 4.w, right: 4.w),
                               decoration: BoxDecoration(
-                                color: AppColors.accent.withAlpha(50),
+                                color:
+                                    AppColors.isDarkMode
+                                        ? AppColors.primary.withOpacity(0.12)
+                                        : AppColors.accent.withAlpha(50),
                                 borderRadius: BorderRadius.circular(2.r),
                               ),
                               child: Text.rich(
@@ -1328,7 +1333,7 @@ class AccountInfoBottomSheet extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: color.withAlpha(20),
           foregroundColor: AppColors.whiteColor,
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -1347,12 +1352,17 @@ class AccountInfoBottomSheet extends StatelessWidget {
                 )
                 : Icon(icon, size: 18, color: color),
             SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: color,
+            Flexible(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: color,
+                  height: 1.1,
+                ),
               ),
             ),
           ],
@@ -1688,7 +1698,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                   onTap: () {
                     Get.back(closeOverlays: true);
                     Get.to(
-                      () => TransactionHistoryScreen(),
+                      () => FinanceUiScope.widgets.transactionHistory(),
                       arguments: {'from': 'dashboard'},
                     );
                   },
@@ -1714,6 +1724,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         () => ChangeLeverageScreen(
                           accountNumber: account.metaAccountNumber,
                           currentLeverage: account.leverageId,
+                          leverageOptions: account.leverageOptions,
                         ),
                       );
                     },

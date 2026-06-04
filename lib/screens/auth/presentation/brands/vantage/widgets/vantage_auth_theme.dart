@@ -8,13 +8,31 @@ import '../../../../../../flavor_config.dart';
 class VantageAuthTheme {
   VantageAuthTheme._();
 
-  static Color get background => Colors.white;
-  static const Color card = Colors.white;
-  static Color get primary => FlavorConfig.instance.primaryColor;
-  static Color text = AppColors.textPrimary;
-  static Color muted = AppColors.textGrey;
-  static Color fieldFill = AppColors.inactivePlanBg;
-  static Color fieldBorder = AppColors.surfaceLight;
+  static Color get background =>
+      AppColors.isDarkMode ? AppColors.backgroundDarkAlt : Colors.white;
+
+  static Color get card =>
+      AppColors.isDarkMode
+          ? AppColors.primary.withValues(alpha: 0.12)
+          : Colors.white;
+
+  static Color get primary =>
+      AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
+
+  static Color get text => AppColors.textPrimary;
+
+  static Color get muted => AppColors.textGrey;
+
+  static Color get iconColor =>
+      AppColors.isDarkMode ? Colors.white : const Color(0xFF9CA3AF);
+
+  static Color get fieldFill =>
+      AppColors.isDarkMode ? AppColors.surface : AppColors.inactivePlanBg;
+
+  static Color get fieldBorder =>
+      AppColors.isDarkMode
+          ? AppColors.surface.withValues(alpha: 0.28)
+          : AppColors.surfaceLight;
 
   static const Radius cardRadius = Radius.circular(28);
 
@@ -55,6 +73,8 @@ class VantageAuthTheme {
       fillColor: fieldFill,
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
+      prefixIconColor: iconColor,
+      suffixIconColor: iconColor,
       contentPadding: padding,
       border: OutlineInputBorder(
         borderRadius: radius,
@@ -89,6 +109,8 @@ class VantageAuthTheme {
     return InputDecorationTheme(
       filled: true,
       fillColor: fieldFill,
+      prefixIconColor: iconColor,
+      suffixIconColor: iconColor,
       contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       border: OutlineInputBorder(
         borderRadius: radius,

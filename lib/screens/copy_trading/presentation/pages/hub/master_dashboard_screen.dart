@@ -142,7 +142,10 @@ class _MasterProfileCard extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   await Clipboard.setData(ClipboardData(text: masterCode));
-                  Get.snackbar('Copied', 'Master code copied', snackPosition: SnackPosition.BOTTOM);
+                  CustomToastService.showSuccess(
+                    title: 'Copied',
+                    message: 'Master code copied',
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -861,7 +864,10 @@ class _CreatePlanSheetState extends State<_CreatePlanSheet> {
                                     ? null
                                     : () async {
                                         if (_selectedEligibleAccountIndex == null) {
-                                          Get.snackbar('Required', 'Select trading account', snackPosition: SnackPosition.BOTTOM);
+                                          CustomToastService.showError(
+                                            title: 'Required',
+                                            message: 'Select trading account',
+                                          );
                                           return;
                                         }
                                         final formState = _formKey.currentState;
@@ -871,14 +877,20 @@ class _CreatePlanSheetState extends State<_CreatePlanSheet> {
 
                                         final idx = _selectedEligibleAccountIndex!;
                                         if (idx < 0 || idx >= widget.controller.eligibleAccounts.length) {
-                                          Get.snackbar('Invalid', 'Select a valid trading account', snackPosition: SnackPosition.BOTTOM);
+                                          CustomToastService.showError(
+                                            title: 'Invalid',
+                                            message: 'Select a valid trading account',
+                                          );
                                           return;
                                         }
                                         final acc = widget.controller.eligibleAccounts[idx];
                                         final commissionValue = num.tryParse(_commissionCtrl.text.trim());
                                         final minCap = num.tryParse(_minCapitalCtrl.text.trim());
                                         if (commissionValue == null || minCap == null) {
-                                          Get.snackbar('Invalid', 'Enter valid numeric values', snackPosition: SnackPosition.BOTTOM);
+                                          CustomToastService.showError(
+                                            title: 'Invalid',
+                                            message: 'Enter valid numeric values',
+                                          );
                                           return;
                                         }
 
@@ -906,9 +918,15 @@ class _CreatePlanSheetState extends State<_CreatePlanSheet> {
                                         final res = await widget.controller.createPlan(body);
                                         if (res.success) {
                                           Get.back();
-                                          Get.snackbar('Created', res.message ?? 'Plan created', snackPosition: SnackPosition.BOTTOM);
+                                          CustomToastService.showSuccess(
+                                            title: 'Created',
+                                            message: res.message ?? 'Plan created',
+                                          );
                                         } else {
-                                          Get.snackbar('Failed', res.message ?? widget.controller.errorMessage.value, snackPosition: SnackPosition.BOTTOM);
+                                          CustomToastService.showError(
+                                            title: 'Failed',
+                                            message: res.message ?? widget.controller.errorMessage.value,
+                                          );
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),

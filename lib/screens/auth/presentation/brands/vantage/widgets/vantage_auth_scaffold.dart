@@ -1,5 +1,6 @@
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -47,14 +48,10 @@ class VantageAuthScaffold extends StatelessWidget {
                           if (showBack)
                             Align(
                               alignment: Alignment.centerLeft,
-                              child: IconButton(
+                              child: AppBackButton(
                                 onPressed:
                                     onBack ??
                                     () => Navigator.of(context).maybePop(),
-                                icon: const Icon(
-                                  Icons.arrow_back_ios_new_rounded,
-                                  color: Colors.black,
-                                ),
                               ),
                             )
                           else
@@ -96,9 +93,9 @@ class _CardContainer extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(20.w, 56.h, 20.w, 22.h),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: VantageAuthTheme.card,
-        borderRadius: BorderRadius.all(VantageAuthTheme.cardRadius),
+        borderRadius: const BorderRadius.all(VantageAuthTheme.cardRadius),
       ),
       child: child,
     );

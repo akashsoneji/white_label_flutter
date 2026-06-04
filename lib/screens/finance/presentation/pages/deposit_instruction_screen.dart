@@ -97,7 +97,8 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
 
   void _initCregisNetworks() {
     try {
-      final networkMap = widget.object['payment_gateway']?['cregis_network_map'];
+      final networkMap =
+          widget.object['payment_gateway']?['cregis_network_map'];
       if (networkMap != null && networkMap is Map) {
         controller.cregisNetworkMap = Map<String, dynamic>.from(networkMap);
         final keys = networkMap.keys.map((e) => e.toString()).toList();
@@ -108,9 +109,8 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         if (defaultChainId != null && defaultChainId.isNotEmpty) {
           String? matchedNetwork;
           for (final entry in networkMap.entries) {
-            final chainId = entry.value is Map
-                ? entry.value['chain_id']?.toString()
-                : null;
+            final chainId =
+                entry.value is Map ? entry.value['chain_id']?.toString() : null;
             if (chainId == defaultChainId) {
               matchedNetwork = entry.key.toString();
               break;
@@ -173,7 +173,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           decoration: BoxDecoration(
             color: AppColors.whiteColor,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey[300]!),
+            border: Border.all(color: AppColors.border),
           ),
           child: Image.memory(
             snapshot.data!,
@@ -221,12 +221,14 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       print('═══════════════════════════════════════════════════════════');
 
       final streamedResponse = await request.send();
-      
+
       // Log response
-      final statusEmoji = streamedResponse.statusCode >= 200 && streamedResponse.statusCode < 300 
-          ? '✅' 
-          : streamedResponse.statusCode >= 400 
-              ? '❌' 
+      final statusEmoji =
+          streamedResponse.statusCode >= 200 &&
+                  streamedResponse.statusCode < 300
+              ? '✅'
+              : streamedResponse.statusCode >= 400
+              ? '❌'
               : '⚠️';
       print('═══════════════════════════════════════════════════════════');
       print('$statusEmoji DIRECT HTTP RESPONSE [$timestamp]');
@@ -235,7 +237,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       print('Status Code: ${streamedResponse.statusCode}');
       print('Headers: ${streamedResponse.headers}');
       print('═══════════════════════════════════════════════════════════');
-      
+
       if (streamedResponse.statusCode == 200) {
         final bytes = await streamedResponse.stream.toBytes();
         print('Image loaded: ${bytes.length} bytes');
@@ -261,14 +263,19 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
   void _showImagePicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.whiteColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (BuildContext ctx) {
         return SafeArea(
           child: Wrap(
             children: <Widget>[
               ListTile(
-                leading: const Icon(Icons.camera_alt),
+                leading: Icon(Icons.camera_alt, color: AppColors.textPrimary),
                 title: Text(
                   languageService.tr('deposit_instruction_take_photo'),
+                  style: TextStyle(color: AppColors.textPrimary),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -276,9 +283,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library),
+                leading: Icon(Icons.photo_library, color: AppColors.textPrimary),
                 title: Text(
                   languageService.tr('deposit_instruction_choose_from_gallery'),
+                  style: TextStyle(color: AppColors.textPrimary),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -316,15 +324,15 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: AppColors.scaffold,
         appBar: AppBar(
           scrolledUnderElevation: 0,
-          backgroundColor: AppColors.backgroundLight,
+          backgroundColor: AppColors.scaffold,
           elevation: 0,
           leading: const AppBackButton(),
           title: Text(titleString, style: AppTextStyles.screenTitle),
           shape: Border(
-            bottom: BorderSide(color: Colors.grey.shade300, width: 1),
+            bottom: BorderSide(color: AppColors.border, width: 1),
           ),
           centerTitle: true,
         ),
@@ -359,23 +367,33 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // Instruction Section
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.isDarkMode
+                  ? AppColors.backgroundDarkAlt
+                  : Colors.grey[100],
               borderRadius: BorderRadius.circular(8),
             ),
             child: ExpansionTile(
+              iconColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              collapsedIconColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              textColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              collapsedTextColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
               collapsedBackgroundColor: Colors.transparent,
               backgroundColor: Colors.transparent,
-              collapsedShape: RoundedRectangleBorder(
+              collapsedShape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
                 side: BorderSide.none,
               ),
-              shape: RoundedRectangleBorder(
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
                 side: BorderSide.none,
               ),
-              title: const Text(
+              title: Text(
                 'Instruction',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                ),
               ),
               childrenPadding: const EdgeInsets.all(16),
               children: [
@@ -520,7 +538,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   color: AppColors.whiteColor,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.grey[300]!,
+                    color: AppColors.border,
                     style: BorderStyle.solid,
                   ),
                 ),
@@ -620,23 +638,33 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // Instruction Card
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.isDarkMode
+                  ? AppColors.backgroundDarkAlt
+                  : Colors.grey[100],
               borderRadius: BorderRadius.circular(8),
             ),
             child: ExpansionTile(
+              iconColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              collapsedIconColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              textColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              collapsedTextColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
               collapsedBackgroundColor: Colors.transparent,
               backgroundColor: Colors.transparent,
-              collapsedShape: RoundedRectangleBorder(
+              collapsedShape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
                 side: BorderSide.none,
               ),
-              shape: RoundedRectangleBorder(
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
                 side: BorderSide.none,
               ),
-              title: const Text(
+              title: Text(
                 'Instruction',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                ),
               ),
               childrenPadding: const EdgeInsets.all(16),
               children: [
@@ -697,7 +725,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               decoration: BoxDecoration(
                 color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[300]!),
+                border: Border.all(color: AppColors.border),
               ),
               child: Row(
                 children: [
@@ -750,7 +778,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   color: AppColors.whiteColor,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.grey[300]!,
+                    color: AppColors.border,
                     style: BorderStyle.solid,
                   ),
                 ),
@@ -818,23 +846,33 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           // Instruction Card
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.isDarkMode
+                  ? AppColors.backgroundDarkAlt
+                  : Colors.grey[100],
               borderRadius: BorderRadius.circular(8),
             ),
             child: ExpansionTile(
+              iconColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              collapsedIconColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              textColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              collapsedTextColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
               collapsedBackgroundColor: Colors.transparent,
               backgroundColor: Colors.transparent,
-              collapsedShape: RoundedRectangleBorder(
+              collapsedShape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
                 side: BorderSide.none,
               ),
-              shape: RoundedRectangleBorder(
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
                 side: BorderSide.none,
               ),
-              title: const Text(
+              title: Text(
                 'Instruction',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                ),
               ),
               childrenPadding: const EdgeInsets.all(16),
               children: [
@@ -904,7 +942,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   color: AppColors.whiteColor,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.grey[300]!,
+                    color: AppColors.border,
                     style: BorderStyle.solid,
                   ),
                 ),
@@ -1046,8 +1084,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: ExpansionTile(
-              iconColor: AppColors.primary,
-              collapsedIconColor: AppColors.primary,
+              iconColor: AppColors.isDarkMode ? Colors.white : AppColors.primary,
+              collapsedIconColor: AppColors.isDarkMode ? Colors.white : AppColors.primary,
+              textColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              collapsedTextColor: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
               collapsedBackgroundColor: Colors.transparent,
               backgroundColor: Colors.transparent,
               collapsedShape: const RoundedRectangleBorder(
@@ -1063,7 +1103,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                 ),
               ),
               childrenPadding: const EdgeInsets.all(16),
@@ -1090,8 +1130,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             final networks = controller.cregisNetworks;
             if (networks.isEmpty) {
               return Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.whiteColor,
                   borderRadius: BorderRadius.circular(8),
@@ -1106,8 +1148,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             return GestureDetector(
               onTap: () => _showCregisNetworkDropdown(context),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.whiteColor,
                   borderRadius: BorderRadius.circular(8),
@@ -1120,13 +1164,14 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         controller.selectedCregisNetwork.value.isEmpty
                             ? 'Select Network'
                             : _formatNetworkName(
-                                controller.selectedCregisNetwork.value,
-                              ),
+                              controller.selectedCregisNetwork.value,
+                            ),
                         style: TextStyle(
                           fontSize: 16,
-                          color: controller.selectedCregisNetwork.value.isEmpty
-                              ? AppColors.textGrey
-                              : AppColors.textPrimary,
+                          color:
+                              controller.selectedCregisNetwork.value.isEmpty
+                                  ? AppColors.textGrey
+                                  : AppColors.textPrimary,
                         ),
                       ),
                     ),
@@ -1298,10 +1343,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 ),
                 child: Text(
                   'Payment verification timed out. Check Transaction History.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.orange.shade800,
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.orange.shade800),
                 ),
               );
             }
@@ -1360,8 +1402,8 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           return ListView.separated(
             shrinkWrap: true,
             itemCount: networks.length,
-            separatorBuilder: (_, __) =>
-                Divider(height: 1, color: AppColors.border),
+            separatorBuilder:
+                (_, __) => Divider(height: 1, color: AppColors.border),
             itemBuilder: (context, index) {
               final network = networks[index];
               final isSelected =
@@ -1414,23 +1456,24 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       return SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: isGenerating || isSubmitting
-              ? null
-              : () {
-                  if (hasAddress || hasCheckoutUrl) {
-                    controller.submitCregisDeposit(
-                      gatewayMethodId: widget.object['deposit_slug'],
-                      amount: widget.amountString,
-                      mt5AccountId: widget.selectedMT5AccountID,
-                    );
-                  } else {
-                    controller.createCregisDepositAddress(
-                      gatewayMethodId: widget.object['deposit_slug'],
-                      amount: widget.amountString,
-                      mt5AccountId: widget.selectedMT5AccountID,
-                    );
-                  }
-                },
+          onPressed:
+              isGenerating || isSubmitting
+                  ? null
+                  : () {
+                    if (hasAddress || hasCheckoutUrl) {
+                      controller.submitCregisDeposit(
+                        gatewayMethodId: widget.object['deposit_slug'],
+                        amount: widget.amountString,
+                        mt5AccountId: widget.selectedMT5AccountID,
+                      );
+                    } else {
+                      controller.createCregisDepositAddress(
+                        gatewayMethodId: widget.object['deposit_slug'],
+                        amount: widget.amountString,
+                        mt5AccountId: widget.selectedMT5AccountID,
+                      );
+                    }
+                  },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
             foregroundColor: AppColors.whiteColor,
@@ -1440,23 +1483,24 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             elevation: 0,
             padding: EdgeInsets.zero,
           ),
-          child: isGenerating
-              ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
-              : isSubmitting
+          child:
+              isGenerating
+                  ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
+                  : isSubmitting
                   ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
                   : Text(
-                      hasCheckoutUrl
-                          ? 'Open link to payment'
-                          : hasAddress
-                              ? languageService.tr('deposit_confirm_deposit')
-                              : 'Generate Address',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        height: 1.71,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.whiteColor,
-                      ),
+                    hasCheckoutUrl
+                        ? 'Open link to payment'
+                        : hasAddress
+                        ? languageService.tr('deposit_confirm_deposit')
+                        : 'Generate Address',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      height: 1.71,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.whiteColor,
                     ),
+                  ),
         ),
       );
     });
@@ -1470,13 +1514,20 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           margin: const EdgeInsets.only(top: 8, right: 8),
           width: 4,
           height: 4,
-          decoration: const BoxDecoration(
-            color: Colors.black,
+          decoration: BoxDecoration(
+            color: AppColors.textPrimary,
             shape: BoxShape.circle,
           ),
         ),
         Expanded(
-          child: Text(text, style: const TextStyle(fontSize: 14, height: 1.4)),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.4,
+              color: AppColors.textPrimary,
+            ),
+          ),
         ),
       ],
     );

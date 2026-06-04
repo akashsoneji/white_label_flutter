@@ -7,6 +7,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/kyc/view_models/kyc_docs_controller.dart';
 import 'package:crm_app/widgets/kyc_scaffold.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/routes/app_pages.dart';
 
 class KycDocsScreen extends StatelessWidget {
@@ -159,10 +160,7 @@ class KycDocsScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: AppColors.whiteColor,
           title: Text(Get.find<LanguageService>().tr('kyc_upload_documents')),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Get.back(closeOverlays: true),
-          ),
+          leading: const AppBackButton(),
         ),
         body: Center(
           child: Column(
@@ -478,7 +476,7 @@ class KycDocsScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ),
@@ -487,7 +485,7 @@ class KycDocsScreen extends StatelessWidget {
                         print('🔄 Closing image picker bottom sheet');
                         Navigator.of(context).pop();
                       },
-                      icon: Icon(Icons.close, color: Colors.grey[600]),
+                      icon: Icon(Icons.close, color: AppColors.textSecondary),
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints(),
                     ),

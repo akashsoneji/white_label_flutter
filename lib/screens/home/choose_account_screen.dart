@@ -191,7 +191,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
-                        color: Colors.black87,
+                        color: AppColors.primary,
                         height: 1.4,
                       ),
                     ),

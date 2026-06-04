@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../constants/color.dart';
 import '../../services/secure_storage_service.dart';
+import '../../widgets/app_back_button.dart';
 
 class WebViewScreen extends StatefulWidget {
   final String url;
@@ -75,6 +76,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const AppBackButton(),
         title: Text(widget.title, style: TextStyle(color: AppColors.textPrimary)),
         backgroundColor: AppColors.whiteColor,
         elevation: 0,

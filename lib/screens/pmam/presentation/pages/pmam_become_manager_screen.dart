@@ -7,6 +7,7 @@ import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 class PmamBecomeManagerScreen extends StatefulWidget {
   const PmamBecomeManagerScreen({super.key});
@@ -63,12 +64,9 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
 
   Future<void> _submit() async {
     if (!_emailVerified || !_mobileVerified || !_personalInfoDone) {
-      Get.snackbar(
-        'Incomplete Profile',
-        'Please complete all verification steps before applying.',
-        backgroundColor: AppColors.error,
-        colorText: AppColors.whiteColor,
-        snackPosition: SnackPosition.TOP,
+      CustomToastService.showError(
+        title: 'Incomplete Profile',
+        message: 'Please complete all verification steps before applying.',
       );
       return;
     }

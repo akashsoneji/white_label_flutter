@@ -4,6 +4,7 @@ import '../../constants/color.dart';
 import '../../flavor_config.dart';
 import '../../brand_switcher.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class BrandTestScreen extends StatelessWidget {
   const BrandTestScreen({super.key});
@@ -12,6 +13,7 @@ class BrandTestScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const AppBackButton(),
         title: Text('🎨 ${FlavorConfig.instance.appName} Brand Test'),
         backgroundColor: FlavorConfig.instance.primaryColor,
         foregroundColor: AppColors.whiteColor,

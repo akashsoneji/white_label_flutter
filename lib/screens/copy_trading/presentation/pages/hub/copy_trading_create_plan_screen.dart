@@ -8,6 +8,7 @@ import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 class CopyTradingCreatePlanScreen extends StatefulWidget {
   final CopyTradingMasterDashboardController controller;
@@ -573,10 +574,9 @@ class _CopyTradingCreatePlanScreenState
 
   Future<void> _submit() async {
     if (_selectedEligibleAccountIndex == null) {
-      Get.snackbar(
-        'Required',
-        'Select trading account',
-        snackPosition: SnackPosition.BOTTOM,
+      CustomToastService.showError(
+        title: 'Required',
+        message: 'Select trading account',
       );
       return;
     }
@@ -585,10 +585,9 @@ class _CopyTradingCreatePlanScreenState
 
     final idx = _selectedEligibleAccountIndex!;
     if (idx < 0 || idx >= _controller.eligibleAccounts.length) {
-      Get.snackbar(
-        'Invalid',
-        'Select a valid trading account',
-        snackPosition: SnackPosition.BOTTOM,
+      CustomToastService.showError(
+        title: 'Invalid',
+        message: 'Select a valid trading account',
       );
       return;
     }
@@ -596,10 +595,9 @@ class _CopyTradingCreatePlanScreenState
     final commissionValue = num.tryParse(_commissionCtrl.text.trim());
     final minCap = num.tryParse(_minCapitalCtrl.text.trim());
     if (commissionValue == null || minCap == null) {
-      Get.snackbar(
-        'Invalid',
-        'Enter valid numeric values',
-        snackPosition: SnackPosition.BOTTOM,
+      CustomToastService.showError(
+        title: 'Invalid',
+        message: 'Enter valid numeric values',
       );
       return;
     }
@@ -630,16 +628,14 @@ class _CopyTradingCreatePlanScreenState
     final res = await _controller.createPlan(body);
     if (res.success) {
       Get.back();
-      Get.snackbar(
-        'Created',
-        res.message ?? 'Plan created',
-        snackPosition: SnackPosition.BOTTOM,
+      CustomToastService.showSuccess(
+        title: 'Created',
+        message: res.message ?? 'Plan created',
       );
     } else {
-      Get.snackbar(
-        'Failed',
-        res.message ?? _controller.errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
+      CustomToastService.showError(
+        title: 'Failed',
+        message: res.message ?? _controller.errorMessage.value,
       );
     }
   }

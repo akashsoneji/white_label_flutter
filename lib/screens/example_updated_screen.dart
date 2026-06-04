@@ -4,6 +4,7 @@ import 'package:crm_app/services/language_service.dart' show TranslationUtils;
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/utils/rtl_wrapper.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 
 /// Example of how to update an existing screen to use the new translation system
@@ -18,13 +19,7 @@ class ExampleUpdatedScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: AppColors.backgroundLight,
           elevation: 0,
-          leading: IconButton(
-            icon: RTLIcon(
-              icon: Icons.arrow_back_ios,
-              color: AppColors.textPrimary,
-            ),
-            onPressed: () => Get.back(closeOverlays: true),
-          ),
+          leading: const AppBackButton(),
           title: RTLText(
             text: TranslationUtils.tr('example_screen_title'),
             style: AppTextStyles.heading.copyWith(

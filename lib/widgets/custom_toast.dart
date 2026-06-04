@@ -54,14 +54,24 @@ class CustomToast extends StatelessWidget {
                 width: 24.w,
                 height: 24.h,
                 decoration: BoxDecoration(
-                  color: AppColors.whiteColor.withValues(alpha: 0.25),
+                  color: AppColors.isDarkMode
+                      ? _getStatusColor()
+                      : AppColors.whiteColor.withValues(alpha: 0.25),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.whiteColor.withValues(alpha: 0.3),
+                    color: AppColors.isDarkMode
+                        ? _getStatusColor().withValues(alpha: 0.2)
+                        : AppColors.whiteColor.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 ),
-                child: Icon(_getIcon(), color: AppColors.whiteColor, size: 16.h),
+                child: Icon(
+                  _getIcon(),
+                  color: AppColors.isDarkMode
+                      ? Colors.white
+                      : AppColors.whiteColor,
+                  size: 16.h,
+                ),
               ),
               SizedBox(width: 14.w),
             ],
@@ -120,6 +130,9 @@ class CustomToast extends StatelessWidget {
   }
 
   Color _getBackgroundColor() {
+    if (AppColors.isDarkMode) {
+      return Colors.white;
+    }
     switch (type) {
       case ToastType.success:
         return AppColors.success;
@@ -127,6 +140,19 @@ class CustomToast extends StatelessWidget {
         return FlavorConfig.instance.primaryColor;
       case ToastType.info:
         return AppColors.primary;
+      case ToastType.warning:
+        return AppColors.warning;
+    }
+  }
+
+  Color _getStatusColor() {
+    switch (type) {
+      case ToastType.success:
+        return AppColors.success;
+      case ToastType.error:
+        return AppColors.error;
+      case ToastType.info:
+        return AppColors.blue;
       case ToastType.warning:
         return AppColors.warning;
     }
@@ -217,7 +243,9 @@ class CustomToastService {
           title ?? 'Error',
           message,
           snackPosition: position,
-          backgroundColor: FlavorConfig.instance.primaryColor,
+          backgroundColor: AppColors.isDarkMode
+              ? Colors.white
+              : FlavorConfig.instance.primaryColor,
           colorText: AppColors.whiteColor,
           duration: duration,
         );

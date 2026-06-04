@@ -10,6 +10,7 @@ import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 /// Cregis direct crypto address flow (ported from crmapp — additive screen).
 class CregisAddressScreen extends StatefulWidget {
@@ -181,10 +182,7 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
           scrolledUnderElevation: 0,
           backgroundColor: AppColors.background,
           elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-            onPressed: _goToHistory,
-          ),
+          leading: AppBackButton(onPressed: _goToHistory),
           title: Text(
             'Direct Crypto Transfer',
             style: TextStyle(color: AppColors.textPrimary, fontSize: 16.sp),

@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'dart:async';
 import '../../routes/app_pages.dart';
 import '../../constants/color.dart';
+import '../../widgets/app_back_button.dart';
 
 class OrderConfirmationScreen extends StatefulWidget {
   final Map<String, dynamic> orderData;
@@ -236,13 +237,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               child: Row(
                 children: [
                   // Back button
-                  GestureDetector(
-                    onTap: () => _navigateToTrade(),
-                    child: Icon(
-                      Icons.arrow_back,
-                      size: 24.h,
-                      color: AppColors.textGrey,
-                    ),
+                  AppBackButton(
+                    onPressed: () => _navigateToTrade(),
                   ),
                   SizedBox(width: 12.w),
                   // Symbol and description

@@ -6,6 +6,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/account_models.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 
 class AccountManagementScreen extends StatefulWidget {
@@ -42,10 +43,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         ),
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
-        leading: IconButton(
-          icon:   Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Get.back(closeOverlays: true),
-        ),
+        leading: const AppBackButton(),
         actions: [
           IconButton(
             icon: Icon(Icons.add, color: AppColors.primary),
@@ -223,7 +221,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: Text(
               languageService.tr('account_management_delete'),
-              style: TextStyle(color: AppColors.whiteColor),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],

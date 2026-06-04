@@ -1035,6 +1035,8 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                       color: AppColors.textPrimary,
                     ),
                     decoration: InputDecoration(
+                      filled: false,
+                      fillColor: Colors.transparent,
                       hintText: 'Enter lots',
                       hintStyle: AppTextStyles.label.copyWith(
                         fontSize: 12.sp,
@@ -1156,6 +1158,8 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                     textAlign: TextAlign.center,
                     style: AppTextStyles.labelOnTradeQuantityDigit,
                     decoration: InputDecoration(
+                      filled: false,
+                      fillColor: Colors.transparent,
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -1232,6 +1236,9 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
             onChanged: (value) {
               widget.takeProfitEnabled.value = value;
               isManuallyEditingTakeProfit = false;
+              if (value) {
+                _recalculateTPSL();
+              }
               if (mounted) {
                 setState(() {
                   _pnlCalculationKey++;
@@ -1293,6 +1300,9 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
             onChanged: (value) {
               widget.stopLossEnabled.value = value;
               isManuallyEditingStopLoss = false;
+              if (value) {
+                _recalculateTPSL();
+              }
               if (mounted) {
                 setState(() {
                   _pnlCalculationKey++;
@@ -1427,6 +1437,8 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                   color: AppColors.textPrimary,
                 ),
                 decoration: InputDecoration(
+                  filled: false,
+                  fillColor: Colors.transparent,
                   border: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,

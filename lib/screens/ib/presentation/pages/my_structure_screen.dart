@@ -1,4 +1,5 @@
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -53,6 +54,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
+        leading: const AppBackButton(),
         title: Text(
           'My Structure',
           style: TextStyle(

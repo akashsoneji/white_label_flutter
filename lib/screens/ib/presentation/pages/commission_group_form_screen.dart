@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class CommissionGroupFormScreen extends StatefulWidget {
   final CommissionGroup? group;
@@ -120,12 +122,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
 
   Future<void> _saveGroup() async {
     if (_groupNameController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter a group name',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: AppColors.whiteColor,
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Please enter a group name',
       );
       return;
     }
@@ -171,12 +170,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
         Get.back();
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to save group: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: AppColors.whiteColor,
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Failed to save group: $e',
       );
     } finally {
       setState(() {
@@ -202,10 +198,7 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        leading: AppBackButton(onPressed: () => Navigator.of(context).pop()),
         title: Text(
           widget.group != null ? 'Edit Standard Group' : 'Add Standard Group',
           style: TextStyle(

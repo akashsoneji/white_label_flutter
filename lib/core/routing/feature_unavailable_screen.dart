@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../constants/color.dart';
 import '../../services/language_service.dart';
+import '../../widgets/app_back_button.dart';
 
 class FeatureUnavailableScreen extends StatelessWidget {
   static const String routeName = '/feature-unavailable';
@@ -18,6 +19,7 @@ class FeatureUnavailableScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.scaffold,
       appBar: AppBar(
+        leading: const AppBackButton(),
         title: Text(languageService.tr('general_not_available')),
         backgroundColor: AppColors.whiteColor,
         foregroundColor: AppColors.textPrimary,

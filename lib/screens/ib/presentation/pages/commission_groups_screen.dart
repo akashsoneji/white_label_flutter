@@ -5,6 +5,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:intl/intl.dart';
 import 'commission_group_form_screen.dart';
 
@@ -100,10 +101,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Get.back(closeOverlays: true),
-        ),
+        leading: const AppBackButton(),
         title: Text(
           'Commission Groups',
           style: TextStyle(

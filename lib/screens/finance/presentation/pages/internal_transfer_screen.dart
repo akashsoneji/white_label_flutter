@@ -693,7 +693,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color:
-                                isSelected ? AppColors.primary : Colors.black87,
+                                isSelected ? AppColors.primary : AppColors.textPrimary,
                           ),
                         ),
                       ),
@@ -708,7 +708,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                           color:
                               isSelected
                                   ? AppColors.primary
-                                  : Colors.grey.shade700,
+                                  : AppColors.textSecondary,
                         ),
                       ),
                       if (isSelected) ...[
@@ -900,7 +900,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color:
-                                isSelected ? AppColors.primary : Colors.black87,
+                                isSelected ? AppColors.primary : AppColors.textPrimary,
                           ),
                         ),
                       ),
@@ -915,7 +915,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                           color:
                               isSelected
                                   ? AppColors.primary
-                                  : Colors.grey.shade700,
+                                  : AppColors.textSecondary,
                         ),
                       ),
                       if (isSelected) ...[

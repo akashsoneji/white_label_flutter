@@ -1,3 +1,4 @@
+import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +92,7 @@ class _VantageCreateNewPasswordScreenState
                   obscurePassword
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
-                  color: VantageAuthTheme.muted,
+                  color: AppColors.isDarkMode ? Colors.white : VantageAuthTheme.muted,
                 ),
               ),
               validator: (value) {
@@ -117,7 +118,7 @@ class _VantageCreateNewPasswordScreenState
                   obscureConfirmPassword
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
-                  color: VantageAuthTheme.muted,
+                  color: AppColors.isDarkMode ? Colors.white : VantageAuthTheme.muted,
                 ),
               ),
               validator: (value) {

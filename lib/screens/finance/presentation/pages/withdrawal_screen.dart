@@ -1376,7 +1376,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                               color:
                                   isSelected
                                       ? AppColors.primary
-                                      : Colors.black87,
+                                      : AppColors.textPrimary,
                             ),
                           ),
                         ),
@@ -1389,7 +1389,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                             color:
                                 isSelected
                                     ? AppColors.primary
-                                    : Colors.grey.shade700,
+                                    : AppColors.textSecondary,
                           ),
                         ),
                         if (isSelected) ...[
@@ -1458,7 +1458,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                               color:
                                   isSelected
                                       ? AppColors.primary
-                                      : Colors.black87,
+                                      : AppColors.textPrimary,
                             ),
                           ),
                         ),
@@ -1472,7 +1472,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                             color:
                                 isSelected
                                     ? AppColors.primary
-                                    : Colors.grey.shade700,
+                                    : AppColors.textSecondary,
                           ),
                         ),
 

@@ -16,7 +16,9 @@ class VantageUiTokens {
       AppColors.border.withValues(alpha: AppColors.isDarkMode ? 0.28 : 0.14);
 
   static Color get surface =>
-      (AppColors.isDarkMode ? AppColors.surfaceDark : AppColors.card);
+      (AppColors.isDarkMode
+          ? AppColors.primary.withValues(alpha: 0.12)
+          : AppColors.card);
 
   static Color get surfaceAlt =>
       AppColors.surface.withValues(alpha: AppColors.isDarkMode ? 0.92 : 0.96);
@@ -60,15 +62,6 @@ class VantageUiTokens {
   }
 
   static BoxDecoration groupDecoration() {
-    if (AppColors.isDarkMode) {
-      return BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(radiusLg),
-        border: Border.all(
-          color: AppColors.border.withOpacity(0.14),
-        ),
-      );
-    }
     return BoxDecoration(
       color: surface,
       borderRadius: BorderRadius.circular(radiusLg),

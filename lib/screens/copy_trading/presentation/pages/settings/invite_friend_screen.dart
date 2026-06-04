@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
@@ -21,14 +22,7 @@ class CopyTradingInviteFriendScreen extends StatelessWidget {
           'Invite a Friend',
           style: AppTextStyles.heading.copyWith(fontWeight: FontWeight.w600),
         ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            color: AppColors.textPrimary,
-            size: 24.r,
-          ),
-          onPressed: () => Get.back(),
-        ),
+        leading: const AppBackButton(),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 20.w),

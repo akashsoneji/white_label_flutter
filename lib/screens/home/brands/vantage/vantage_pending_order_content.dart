@@ -1035,6 +1035,9 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
             onChanged: (value) {
               widget.takeProfitEnabled.value = value;
               isManuallyEditingTakeProfit = false;
+              if (value) {
+                _recalculateTPSL();
+              }
               if (!mounted) return;
               setState(() => _pnlCalculationKey++);
             },
@@ -1099,6 +1102,9 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
             onChanged: (value) {
               widget.stopLossEnabled.value = value;
               isManuallyEditingStopLoss = false;
+              if (value) {
+                _recalculateTPSL();
+              }
               if (!mounted) return;
               setState(() => _pnlCalculationKey++);
             },
@@ -1289,6 +1295,8 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                     height: 1.05,
                   ),
                   decoration: InputDecoration(
+                    filled: false,
+                    fillColor: Colors.transparent,
                     hintText: hintText.isEmpty ? null : hintText,
                     hintStyle: AppTextStyles.label.copyWith(
                       fontSize: 12.sp,

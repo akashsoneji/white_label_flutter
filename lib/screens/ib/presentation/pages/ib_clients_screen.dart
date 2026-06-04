@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class IBClientsScreen extends StatefulWidget {
   const IBClientsScreen({super.key});
@@ -155,6 +157,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
+        leading: const AppBackButton(),
         title: Text(
           'My Clients',
           style: TextStyle(
@@ -279,10 +282,15 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.arrow_back,
-                          color: AppColors.primary,
-                          size: 16.sp,
+                        SvgPicture.asset(
+                          AppBackButton.assetPath,
+                          width: 16.sp,
+                          height: 16.sp,
+                          fit: BoxFit.contain,
+                          colorFilter: ColorFilter.mode(
+                            AppColors.primary,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         SizedBox(width: 4.w),
                         Text(

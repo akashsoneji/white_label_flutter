@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/utils/app_picker_theme.dart';
 
 class PmamTradeHistoryScreen extends StatefulWidget {
@@ -188,6 +189,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textPrimary,
+        leading: const AppBackButton(),
         title: Text(
           'My P&L Trade History',
           style: TextStyle(

@@ -7,6 +7,7 @@ import 'package:crm_app/widgets/custom_toast.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
+import '../../../../flavor_config.dart';
 import '../../../../services/language_service.dart';
 import '../../../../utils/navigation_helper.dart';
 import '../../../../widgets/common_loading_widget.dart';
@@ -165,6 +166,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                   }
                 },
                 child: ListTile(
+                  textColor: AppColors.textPrimary,
+                  iconColor: AppColors.textPrimary,
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(25),
                     child:
@@ -176,17 +179,37 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return CircleAvatar(
-                                  child: Text(name.isNotEmpty ? name[0] : "?"),
+                                  backgroundColor:
+                                      FlavorConfig.instance.primaryColor,
+                                  child: Text(
+                                    name.isNotEmpty ? name[0] : "?",
+                                    style: TextStyle(
+                                      color: AppColors.pureWhite,
+                                    ),
+                                  ),
                                 );
                               },
                             )
                             : CircleAvatar(
-                              child: Text(name.isNotEmpty ? name[0] : "?"),
+                              backgroundColor:
+                                  FlavorConfig.instance.primaryColor,
+                              child: Text(
+                                name.isNotEmpty ? name[0] : "?",
+                                style: TextStyle(
+                                  color: AppColors.pureWhite,
+                                ),
+                              ),
                             ),
                   ),
-                  title: Text(name),
+                  title: Text(
+                    name,
+                    style: TextStyle(color: AppColors.textPrimary),
+                  ),
                   // subtitle: Text("Instant up to 1 hour"),
-                  trailing: Icon(Icons.arrow_forward_ios_rounded),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               );
             },

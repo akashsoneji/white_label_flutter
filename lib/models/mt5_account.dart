@@ -22,6 +22,7 @@ class MT5Account {
   final String? tradingPlatform;
   final double minimumTradeSize;
   final double maxLotSize;
+  final List<int> leverageOptions;
 
   MT5Account({
     required this.userId,
@@ -47,6 +48,7 @@ class MT5Account {
     this.tradingPlatform,
     this.minimumTradeSize = 0.01,
     this.maxLotSize = 100.0,
+    this.leverageOptions = const [],
   });
 
   factory MT5Account.fromJson(Map<String, dynamic> json) {
@@ -74,6 +76,11 @@ class MT5Account {
       tradingPlatform: json['trading_platform']?.toString(),
       minimumTradeSize: _parseDouble(json['minimum_trade_size']) ?? 0.01,
       maxLotSize: _parseDouble(json['max_lot_size']) ?? 100.0,
+      leverageOptions: (json['leverage_options'] as List?)
+              ?.map((e) => _parseInt(e))
+              .whereType<int>()
+              .toList() ??
+          const [],
     );
   }
 
@@ -122,6 +129,7 @@ class MT5Account {
       'trading_platform': tradingPlatform,
       'minimum_trade_size': minimumTradeSize,
       'max_lot_size': maxLotSize,
+      'leverage_options': leverageOptions,
     };
   }
 

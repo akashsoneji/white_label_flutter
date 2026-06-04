@@ -10,11 +10,11 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/kyc/view_models/kyc_bank_controller.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/file_compression_helper.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/kyc_scaffold.dart';
 
 class KycBankScreen extends StatefulWidget {
@@ -361,10 +361,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
         appBar: AppBar(
           backgroundColor: AppColors.whiteColor,
           title: Text(languageService.tr('kyc_withdrawal_title')),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Get.back(closeOverlays: true),
-          ),
+          leading: const AppBackButton(),
         ),
         body: Center(
           child: Column(
@@ -1051,6 +1048,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -1140,6 +1138,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -1183,6 +1182,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
   void _showIfscIbanTypeSelection() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.whiteColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1198,6 +1198,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -1209,6 +1210,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
                     ),
                   ),
 
@@ -1225,6 +1227,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
                     ),
                   ),
 
@@ -1273,6 +1276,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
   void _showProofOptions() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.whiteColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -1281,24 +1285,33 @@ class _KycBankScreenState extends State<KycBankScreen> {
           child: Wrap(
             children: [
               ListTile(
-                leading: Icon(Icons.camera_alt),
-                title: Text(languageService.tr('kyc_take_photo')),
+                leading: Icon(Icons.camera_alt, color: AppColors.textPrimary),
+                title: Text(
+                  languageService.tr('kyc_take_photo'),
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   await controller.startCamera();
                 },
               ),
               ListTile(
-                leading: Icon(Icons.photo_library),
-                title: Text(languageService.tr('kyc_select_from_gallery')),
+                leading: Icon(Icons.photo_library, color: AppColors.textPrimary),
+                title: Text(
+                  languageService.tr('kyc_select_from_gallery'),
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   await _pickImageFromGallery();
                 },
               ),
               ListTile(
-                leading: Icon(Icons.attach_file),
-                title: Text(languageService.tr('kyc_attach_from_documents')),
+                leading: Icon(Icons.attach_file, color: AppColors.textPrimary),
+                title: Text(
+                  languageService.tr('kyc_attach_from_documents'),
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
                 onTap: () async {
                   final result = await FilePicker.platform.pickFiles(
                     type: FileType.any,
@@ -1583,7 +1596,11 @@ class _CurrencySelectionBottomSheetState
               padding: EdgeInsets.all(16.w),
               child: Text(
                 'Select Currency',
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
             // Search field

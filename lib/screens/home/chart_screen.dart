@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/screens/trading/view_models/chart_controller.dart';
 import 'package:crm_app/models/socket_response.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'dart:convert';
@@ -1442,7 +1443,7 @@ Placing Order:
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
             child: Row(
               children: [
-                IconButton(
+                AppBackButton(
                   onPressed: () {
                     final nav = Navigator.of(context);
                     if (nav.canPop()) {
@@ -1451,11 +1452,6 @@ Placing Order:
                       Get.back();
                     }
                   },
-                  icon: Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    size: 18.sp,
-                    color: AppColors.textPrimary,
-                  ),
                 ),
                 Expanded(
                   child: Align(
@@ -1996,7 +1992,7 @@ Placing Order:
   }
 
   Widget _buildVantageQuantityAndActionsRow() {
-    final primary = FlavorConfig.instance.primaryColor;
+    final primary = AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
     final baseBg = AppColors.background;
 
     Widget iconChip({
@@ -2065,6 +2061,8 @@ Placing Order:
                 color: AppColors.textPrimary,
               ),
               decoration: InputDecoration(
+                filled: false,
+                fillColor: Colors.transparent,
                 border: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -2159,7 +2157,7 @@ Placing Order:
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    final primary = FlavorConfig.instance.primaryColor;
+    final primary = AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10.r),
@@ -2181,7 +2179,7 @@ Placing Order:
   Widget _buildVantageBuySellRow() {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
-    final primary = FlavorConfig.instance.primaryColor;
+    final primary = AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
 
     // Prices from chart socket controller
     final bidPrice = chartSocketController.getBidPrice()?.toString() ?? '0';
@@ -2194,6 +2192,12 @@ Placing Order:
       required List<Color> colors,
       required VoidCallback onTap,
     }) {
+      final isBuy = label == 'BUY';
+      final textColor = (isBuy && AppColors.isDarkMode) ? const Color(0xFF1E1E1E) : Colors.white;
+      final subTextColor = (isBuy && AppColors.isDarkMode)
+          ? const Color(0xFF1E1E1E).withOpacity(0.8)
+          : Colors.white.withOpacity(0.92);
+
       return InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16.r),
@@ -2223,7 +2227,7 @@ Placing Order:
                   style: AppTextStyles.button.copyWith(
                     fontSize: isSmallScreen ? 12.sp : 15.sp,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: textColor,
                     height: 1.05,
                   ),
                 ),
@@ -2232,7 +2236,7 @@ Placing Order:
                   style: AppTextStyles.button.copyWith(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.92),
+                    color: subTextColor,
                     height: 1.05,
                   ),
                 ),
@@ -2574,6 +2578,7 @@ Placing Order:
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
     final isVantage = FlavorConfig.isVantage();
+    final primary = AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
 
     // Get real-time prices from chart socket controller
     final bidPrice = chartSocketController.getBidPrice()?.toString() ?? '0';
@@ -3144,10 +3149,10 @@ Placing Order:
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  FlavorConfig.instance.primaryColor,
+                                  primary,
                                   Color.alphaBlend(
                                     Colors.black.withOpacity(0.10),
-                                    FlavorConfig.instance.primaryColor,
+                                    primary,
                                   ),
                                 ],
                               )
@@ -3156,7 +3161,7 @@ Placing Order:
                           isVantage
                               ? [
                                 BoxShadow(
-                                  color: FlavorConfig.instance.primaryColor.withOpacity(
+                                  color: primary.withOpacity(
                                     0.20,
                                   ),
                                   blurRadius: 18,
@@ -3176,7 +3181,7 @@ Placing Order:
                               fontWeight: FontWeight.w700,
                               color:
                                   isVantage
-                                      ? Colors.white
+                                      ? (AppColors.isDarkMode ? const Color(0xFF1E1E1E) : Colors.white)
                                       : AppTextStyles.button.color,
                             ),
                           ),
@@ -3187,7 +3192,9 @@ Placing Order:
                               fontWeight: FontWeight.w500,
                               color:
                                   isVantage
-                                      ? Colors.white.withOpacity(0.92)
+                                      ? (AppColors.isDarkMode
+                                          ? const Color(0xFF1E1E1E).withOpacity(0.8)
+                                          : Colors.white.withOpacity(0.92))
                                       : AppTextStyles.button.color,
                             ),
                           ),
@@ -3299,6 +3306,8 @@ Placing Order:
                     textAlign: TextAlign.center,
                     style: AppTextStyles.labelOnTradeQuantityDigit,
                     decoration: InputDecoration(
+                      filled: false,
+                      fillColor: Colors.transparent,
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -3590,6 +3599,8 @@ Placing Order:
                                           fontWeight: FontWeight.w700,
                                         ),
                                         decoration: InputDecoration(
+                                          filled: false,
+                                          fillColor: Colors.transparent,
                                           border: InputBorder.none,
                                           focusedBorder: InputBorder.none,
                                           enabledBorder: InputBorder.none,
@@ -3817,6 +3828,8 @@ Placing Order:
                                           fontWeight: FontWeight.w700,
                                         ),
                                         decoration: InputDecoration(
+                                          filled: false,
+                                          fillColor: Colors.transparent,
                                           border: InputBorder.none,
                                           focusedBorder: InputBorder.none,
                                           enabledBorder: InputBorder.none,
@@ -4146,6 +4159,8 @@ Placing Order:
                               fontWeight: FontWeight.w700,
                             ),
                             decoration: InputDecoration(
+                              filled: false,
+                              fillColor: Colors.transparent,
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               enabledBorder: InputBorder.none,
@@ -4342,6 +4357,8 @@ Placing Order:
                     textAlign: TextAlign.center,
                     style: AppTextStyles.labelOnTradeQuantityDigit,
                     decoration: InputDecoration(
+                      filled: false,
+                      fillColor: Colors.transparent,
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -4457,6 +4474,8 @@ Placing Order:
                           fontWeight: FontWeight.w700,
                         ),
                         decoration: InputDecoration(
+                          filled: false,
+                          fillColor: Colors.transparent,
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           enabledBorder: InputBorder.none,
@@ -4949,6 +4968,8 @@ Placing Order:
                                       fontWeight: FontWeight.w700,
                                     ),
                                     decoration: InputDecoration(
+                                      filled: false,
+                                      fillColor: Colors.transparent,
                                       border: InputBorder.none,
                                       focusedBorder: InputBorder.none,
                                       enabledBorder: InputBorder.none,

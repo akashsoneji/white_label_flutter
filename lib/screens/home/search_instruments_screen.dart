@@ -84,24 +84,61 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           child: Row(
             children: [
-              AppBackButton(onPressed: () => Get.back(closeOverlays: true),
-              ),
+              AppBackButton(onPressed: () => Get.back(closeOverlays: true)),
               SizedBox(width: 12.w),
               Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  textDirection: RTLHelper.textDirection,
-                  textAlign: RTLHelper.isRTL ? TextAlign.right : TextAlign.left,
-                  decoration: InputDecoration(
-                    hintText: languageService.tr("instruments_search"),
-                    hintStyle: AppTextStyles.input.copyWith(
-                      color: AppColors.textGrey,
+                child: Container(
+                  height: 40.h,
+                  decoration: BoxDecoration(
+                    color: AppColors.isDarkMode
+                        ? const Color(0xFF2C2C2C)
+                        : AppColors.whiteColor,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: AppColors.border.withOpacity(0.18),
+                      width: 0.5,
                     ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8.w),
+                  ),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        child: SvgPicture.asset(
+                          "assets/svg/search-normal.svg",
+                          height: 18.h,
+                          width: 18.w,
+                          colorFilter: ColorFilter.mode(
+                            AppColors.textGrey,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          autofocus: true,
+                          style: AppTextStyles.input.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
+                          cursorColor: AppColors.primary,
+                          textDirection: RTLHelper.textDirection,
+                          textAlign: RTLHelper.isRTL ? TextAlign.right : TextAlign.left,
+                          decoration: InputDecoration(
+                            filled: false,
+                            fillColor: Colors.transparent,
+                            hintText: languageService.tr("instruments_search"),
+                            hintStyle: AppTextStyles.input.copyWith(
+                              color: AppColors.textGrey,
+                              fontSize: 14.sp,
+                            ),
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8.h),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

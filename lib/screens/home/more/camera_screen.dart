@@ -32,16 +32,7 @@ class CameraScreen extends StatelessWidget {
           Positioned(
             top: MediaQuery.of(context).padding.top,
             left: 4,
-            child: IconButton(
-              onPressed: () => AppBackButton.popRoute(
-                context,
-                closeOverlays: true,
-              ),
-              icon: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.white,
-              ),
-            ),
+            child: const AppBackButton(),
           ),
 
           // Overlay for ID card frame

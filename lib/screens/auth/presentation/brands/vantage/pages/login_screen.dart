@@ -1,3 +1,4 @@
+import 'package:crm_app/constants/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -73,10 +74,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
     );
     if (!AuthFormValidation.showErrorsIfAny(errors)) return;
 
-    await authController.login(
-      email: email,
-      password: password,
-    );
+    await authController.login(email: email, password: password);
 
     if (_enableBiometricAfterLogin) {
       final supported = await BiometricService.instance.isDeviceSupported();
@@ -119,113 +117,121 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
         ),
       ),
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Sign In',
-              style: TextStyle(
-                color: VantageAuthTheme.text,
-                fontSize: 24.sp,
-                fontWeight: FontWeight.w800,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Sign In',
+            style: TextStyle(
+              color: VantageAuthTheme.text,
+              fontSize: 24.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            languageService.tr('welcome_title'),
+            style: TextStyle(
+              color: VantageAuthTheme.muted,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 18.h),
+          VantagePillTextField(
+            controller: emailController,
+            hintText: 'Email / Username',
+            keyboardType: TextInputType.emailAddress,
+            prefixIcon: const Icon(
+              Icons.mail_outline_rounded,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          VantagePillTextField(
+            controller: passwordController,
+            hintText: 'Password',
+            obscureText: obscureText,
+            prefixIcon: const Icon(
+              Icons.lock_outline_rounded,
+            ),
+            suffixIcon: IconButton(
+              onPressed: () => setState(() => obscureText = !obscureText),
+              icon: Icon(
+                obscureText
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                color: AppColors.isDarkMode ? Colors.white : VantageAuthTheme.muted,
               ),
             ),
-            SizedBox(height: 4.h),
-            Text(
-              languageService.tr('welcome_title'),
-              style: TextStyle(
-                color: VantageAuthTheme.muted,
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: 18.h),
-            VantagePillTextField(
-              controller: emailController,
-              hintText: 'Email / Username',
-              keyboardType: TextInputType.emailAddress,
-              prefixIcon: const Icon(Icons.mail_outline_rounded),
-            ),
-            SizedBox(height: 12.h),
-            VantagePillTextField(
-              controller: passwordController,
-              hintText: 'Password',
-              obscureText: obscureText,
-              prefixIcon: const Icon(Icons.lock_outline_rounded),
-              suffixIcon: IconButton(
-                onPressed: () => setState(() => obscureText = !obscureText),
-                icon: Icon(
-                  obscureText
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  color: VantageAuthTheme.muted,
+          ),
+          SizedBox(height: 8.h),
+          Align(
+            alignment:
+                languageService.isRTL()
+                    ? Alignment.centerLeft
+                    : Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => Get.toNamed(AppPages.FORGOT_PASSWORD),
+              child: Text(
+                'Forgot Password?',
+                style: TextStyle(
+                  color: VantageAuthTheme.primary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12.sp,
                 ),
               ),
             ),
-            SizedBox(height: 8.h),
-            Align(
-              alignment:
-                  languageService.isRTL()
-                      ? Alignment.centerLeft
-                      : Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => Get.toNamed(AppPages.FORGOT_PASSWORD),
+          ),
+          Row(
+            children: [
+              Checkbox(
+                value: _enableBiometricAfterLogin,
+                onChanged: (v) async {
+                  final value = v ?? false;
+                  if (!value) {
+                    setState(() => _enableBiometricAfterLogin = false);
+                    return;
+                  }
+
+                  final supported =
+                      await BiometricService.instance.isDeviceSupported();
+                  final enrolled = await BiometricService.instance.isEnrolled();
+                  if (!supported || !enrolled) {
+                    setState(() => _enableBiometricAfterLogin = false);
+                    return;
+                  }
+
+                  if (!mounted) return;
+                  setState(() => _enableBiometricAfterLogin = true);
+                },
+                activeColor: VantageAuthTheme.primary,
+                checkColor: AppColors.isDarkMode ? Colors.black : Colors.white,
+                side: BorderSide(
+                  color: AppColors.isDarkMode ? Colors.white : Colors.grey,
+                  width: 1.5,
+                ),
+              ),
+              Expanded(
                 child: Text(
-                  'Forgot Password?',
+                  languageService.tr('biometric_enable_checkbox'),
                   style: TextStyle(
-                    color: VantageAuthTheme.primary,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12.sp,
+                    color: VantageAuthTheme.muted,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-            ),
-            Row(
-              children: [
-                Checkbox(
-                  value: _enableBiometricAfterLogin,
-                  onChanged: (v) async {
-                    final value = v ?? false;
-                    if (!value) {
-                      setState(() => _enableBiometricAfterLogin = false);
-                      return;
-                    }
-
-                    final supported =
-                        await BiometricService.instance.isDeviceSupported();
-                    final enrolled = await BiometricService.instance.isEnrolled();
-                    if (!supported || !enrolled) {
-                      setState(() => _enableBiometricAfterLogin = false);
-                      return;
-                    }
-
-                    if (!mounted) return;
-                    setState(() => _enableBiometricAfterLogin = true);
-                  },
-                  activeColor: VantageAuthTheme.primary,
-                ),
-                Expanded(
-                  child: Text(
-                    languageService.tr('biometric_enable_checkbox'),
-                    style: TextStyle(
-                      color: VantageAuthTheme.muted,
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Obx(() {
-              return VantagePrimaryButton(
-                text: 'Sign In',
-                isLoading: authController.isLoading,
-                onPressed: authController.isLoading ? null : _handleLogin,
-              );
-            }),
-          ],
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Obx(() {
+            return VantagePrimaryButton(
+              text: 'Sign In',
+              isLoading: authController.isLoading,
+              onPressed: authController.isLoading ? null : _handleLogin,
+            );
+          }),
+        ],
       ),
     );
   }
 }
-

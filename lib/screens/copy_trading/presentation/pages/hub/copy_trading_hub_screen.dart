@@ -280,6 +280,7 @@ class _PendingReviewScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
+        leading: const AppBackButton(),
         title: const Text('Pending Review'),
       ),
       body: Center(

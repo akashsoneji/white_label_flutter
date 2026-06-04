@@ -8,6 +8,7 @@ import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 class PmamManagerDashboardScreen extends StatefulWidget {
   const PmamManagerDashboardScreen({super.key});
@@ -137,13 +138,9 @@ class _PmamManagerDashboardScreenState
                 _CommissionEarnedCard(
                   amount: _fmt(stats['total_commission']),
                   onExport: () {
-                    Get.snackbar(
-                      'Export',
-                      'Export PDF is coming soon',
-                      backgroundColor: AppColors.primary,
-                      colorText: AppColors.whiteColor,
-                      snackPosition: SnackPosition.TOP,
-                      duration: const Duration(seconds: 2),
+                    CustomToastService.showInfo(
+                      title: 'Export',
+                      message: 'Export PDF is coming soon',
                     );
                   },
                 ),
@@ -286,13 +283,9 @@ class _PmamManagerDashboardScreenState
                           onTap: () {
                             if (code.isNotEmpty) {
                               Clipboard.setData(ClipboardData(text: code));
-                              Get.snackbar(
-                                'Copied',
-                                'Manager ID copied',
-                                backgroundColor: AppColors.primary,
-                                colorText: AppColors.whiteColor,
-                                snackPosition: SnackPosition.TOP,
-                                duration: const Duration(seconds: 2),
+                              CustomToastService.showSuccess(
+                                title: 'Copied',
+                                message: 'Manager ID copied',
                               );
                             }
                           },

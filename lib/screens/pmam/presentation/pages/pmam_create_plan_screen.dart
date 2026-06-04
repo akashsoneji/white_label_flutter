@@ -7,6 +7,7 @@ import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 class PmamCreatePlanScreen extends StatefulWidget {
   const PmamCreatePlanScreen({super.key});
@@ -59,12 +60,9 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAccount == null) {
-      Get.snackbar(
-        'Required',
-        'Please select a trading account',
-        backgroundColor: AppColors.error,
-        colorText: AppColors.whiteColor,
-        snackPosition: SnackPosition.TOP,
+      CustomToastService.showError(
+        title: 'Required',
+        message: 'Please select a trading account',
       );
       return;
     }

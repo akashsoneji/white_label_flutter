@@ -327,7 +327,11 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   Widget _buildAmountField() {
     return RTLHelper.rtlTextField(
-      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400),
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w400,
+        color: AppColors.textPrimary,
+      ),
       controller: amountController,
       focusNode: amountFocusNode,
       keyboardType: TextInputType.numberWithOptions(
@@ -366,7 +370,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 11.5.h),
       decoration: BoxDecoration(
-        color: AppColors.grey,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -447,7 +451,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.whiteColor,
+      backgroundColor: AppColors.scaffold,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -464,6 +468,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -474,7 +479,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
             shrinkWrap: true,
             itemCount: accounts.length,
             separatorBuilder:
-                (_, __) => Divider(height: 1, color: Colors.grey.shade300),
+                (_, __) => Divider(height: 1, color: AppColors.border),
             itemBuilder: (context, index) {
               final account = accounts[index];
 
@@ -521,7 +526,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       ),
@@ -532,7 +537,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey.shade700,
+                          color: AppColors.textGrey,
                         ),
                       ),
                     ],

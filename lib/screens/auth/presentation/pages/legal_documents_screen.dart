@@ -13,6 +13,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/language_service.dart';
 
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/otp_modal.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
@@ -104,21 +105,7 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
       child: Row(
         children: [
-          Container(
-            height: 40.h,
-            width: 40.w,
-            decoration: BoxDecoration(
-              color: AppColors.whiteColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
-              iconSize: 17.h,
-              padding: EdgeInsets.only(left: 5.w),
-            ),
-          ),
+          AppBackButton(onPressed: () => Navigator.pop(context)),
           SizedBox(width: 16.w),
           Expanded(
             child: Row(

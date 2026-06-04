@@ -4,6 +4,7 @@ import '../widgets/rtl_components.dart';
 import '../constants/color.dart';
 import '../constants/text_styles.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 
 /// Example screen showing how to use RTL Components
@@ -18,6 +19,7 @@ class ExampleRTLComponentsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
+        leading: const AppBackButton(),
         title: Text('RTL Components Demo'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.whiteColor,

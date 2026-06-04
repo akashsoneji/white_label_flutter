@@ -1259,6 +1259,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                   color: AppColors.textPrimary,
                 ),
                 decoration: InputDecoration(
+                  filled: false,
+                  fillColor: Colors.transparent,
                   border: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -1444,6 +1446,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                             fontWeight: FontWeight.w700,
                           ),
                           decoration: InputDecoration(
+                            filled: false,
+                            fillColor: Colors.transparent,
                             border: InputBorder.none,
                             focusedBorder: InputBorder.none,
                             enabledBorder: InputBorder.none,

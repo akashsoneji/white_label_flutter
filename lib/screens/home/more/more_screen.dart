@@ -12,6 +12,7 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/screens/home/more/one_click_trading_disclaimer_screen.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
@@ -257,12 +258,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
               automaticallyImplyLeading: false,
               leading: Padding(
                 padding: EdgeInsets.only(left: 16.w),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    size: 20.sp,
-                    color: AppColors.textPrimary,
-                  ),
+                child: AppBackButton(
                   onPressed: () => Navigator.pop(context),
                 ),
               ),

@@ -9,6 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
@@ -182,19 +183,14 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: Row(
           children: [
-            GestureDetector(
-              onTap: () {
+            AppBackButton(
+              onPressed: () {
                 setState(() {
                   _isSearching = false;
                   _searchController.clear();
                 });
                 _controller.searchInstruments("");
               },
-              child: Icon(
-                Icons.arrow_back,
-                size: 24.h,
-                color: AppColors.textGrey,
-              ),
             ),
             SizedBox(width: 12.w),
             Expanded(

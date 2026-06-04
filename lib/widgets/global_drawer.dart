@@ -178,7 +178,7 @@ class GlobalDrawer extends StatelessWidget {
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
             child: Text(
               languageService.tr('logout'),
-              style:   TextStyle(color: AppColors.whiteColor),
+              style: const TextStyle(color: Colors.white),
             ),
           ),
         ],

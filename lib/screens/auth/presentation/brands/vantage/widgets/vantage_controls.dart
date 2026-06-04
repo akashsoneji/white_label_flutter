@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:crm_app/constants/color.dart';
 
 import 'vantage_auth_theme.dart';
 
@@ -24,7 +25,9 @@ class VantagePrimaryButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: VantageAuthTheme.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.isDarkMode
+              ? AppColors.backgroundDarkAlt
+              : Colors.white,
           disabledBackgroundColor: VantageAuthTheme.primary.withValues(
             alpha: 0.4,
           ),
@@ -33,16 +36,19 @@ class VantagePrimaryButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(24.r),
           ),
         ),
-        child:
-            isLoading
-                ? SizedBox(
-                  height: 18.w,
-                  width: 18.w,
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        child: isLoading
+            ? SizedBox(
+                height: 18.w,
+                width: 18.w,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.isDarkMode
+                        ? AppColors.backgroundDarkAlt
+                        : Colors.white,
                   ),
-                )
+                ),
+              )
                 : Text(
                   text,
                   style: TextStyle(

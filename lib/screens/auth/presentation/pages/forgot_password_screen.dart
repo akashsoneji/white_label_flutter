@@ -8,6 +8,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/screens/auth/presentation/auth_form_validation.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'login_screen.dart';
@@ -191,21 +192,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildHeader() {
-    return Container(
-      height: 40.h,
-      width: 40.w,
-      decoration: BoxDecoration(
-        color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: IconButton(
-        onPressed: () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-        iconSize: 17.h,
-        padding: EdgeInsets.only(left: 5.w),
-      ),
-    );
+    return AppBackButton(onPressed: () => Navigator.pop(context));
   }
 }
 

@@ -82,7 +82,7 @@ import 'services/app_lock/app_lock_overlay.dart';
 
 /// Global toggle to enable/disable Dark Mode support in the app.
 /// Set this to `true` to enable Dark Mode, or `false` to force Light Mode.
-const bool enableDarkModeGlobal = false;
+const bool enableDarkModeGlobal = true;
 
 // Firebase Background Message Handler
 @pragma('vm:entry-point')
@@ -422,6 +422,27 @@ ThemeData _buildLightTheme() {
       foregroundColor: AppColors.textPrimary,
       elevation: 0,
     ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: AppColors.whiteColor,
+      surfaceTintColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.whiteColor,
+      surfaceTintColor: Colors.transparent,
+      titleTextStyle: TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 18.sp,
+        fontWeight: FontWeight.w600,
+      ),
+      contentTextStyle: TextStyle(
+        color: AppColors.textSecondary,
+        fontSize: 14.sp,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+    ),
     iconTheme: IconThemeData(color: AppColors.textPrimary),
     textTheme: TextTheme(bodyLarge: TextStyle(color: AppColors.textPrimary)),
   );
@@ -442,7 +463,7 @@ ThemeData _buildDarkTheme() {
     useMaterial3: true,
     scaffoldBackgroundColor: AppColors.scaffold,
     inputDecorationTheme: InputDecorationTheme(
-      fillColor: AppColors.pureWhite,
+      fillColor: AppColors.textFieldBg,
       filled: true,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -512,6 +533,27 @@ ThemeData _buildDarkTheme() {
       backgroundColor: AppColors.surface,
       foregroundColor: AppColors.textPrimary,
       elevation: 0,
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: AppColors.whiteColor,
+      surfaceTintColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: AppColors.whiteColor,
+      surfaceTintColor: Colors.transparent,
+      titleTextStyle: TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 18.sp,
+        fontWeight: FontWeight.w600,
+      ),
+      contentTextStyle: TextStyle(
+        color: AppColors.textSecondary,
+        fontSize: 14.sp,
+      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
     ),
     iconTheme: IconThemeData(color: AppColors.textPrimary),
     textTheme: TextTheme(

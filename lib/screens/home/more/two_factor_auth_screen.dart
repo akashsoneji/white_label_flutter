@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 class TwoFactorAuthScreen extends StatefulWidget {
   const TwoFactorAuthScreen({super.key});
@@ -323,11 +324,9 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
             icon: Icon(Icons.copy, size: 20.sp, color: AppColors.primary),
             onPressed: () {
               Clipboard.setData(ClipboardData(text: secret));
-              Get.snackbar(
-                _languageService.tr('success'),
-                _languageService.tr('two_factor_secret_copied'),
-                snackPosition: SnackPosition.TOP,
-                duration: const Duration(seconds: 2),
+              CustomToastService.showSuccess(
+                title: _languageService.tr('success'),
+                message: _languageService.tr('two_factor_secret_copied'),
               );
             },
           ),

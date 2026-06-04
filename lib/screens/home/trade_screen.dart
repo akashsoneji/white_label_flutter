@@ -773,11 +773,15 @@ class _TradeScreenState extends State<TradeScreen> {
                 widthFactor: 1 / 3,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: AppColors.isDarkMode
+                        ? Colors.white.withOpacity(0.2)
+                        : AppColors.primary,
                     borderRadius: BorderRadius.circular(17.r),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.2),
+                        color: AppColors.isDarkMode
+                            ? Colors.black.withOpacity(0.1)
+                            : AppColors.primary.withOpacity(0.2),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -911,10 +915,11 @@ class _TradeScreenState extends State<TradeScreen> {
                       vertical: 1.5.h,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          isSelected
+                      color: AppColors.isDarkMode
+                          ? AppColors.primary.withOpacity(0.15)
+                          : (isSelected
                               ? Colors.white
-                              : AppColors.primary.withOpacity(0.15),
+                              : AppColors.primary.withOpacity(0.15)),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
@@ -2113,6 +2118,12 @@ class _TradeScreenState extends State<TradeScreen> {
                                 }
                               },
                               activeColor: AppColors.primary,
+                              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return AppColors.primary;
+                                }
+                                return AppColors.isDarkMode ? Colors.white : Colors.grey;
+                              }),
                             ),
                           ),
                           onTap: () {
@@ -3406,6 +3417,12 @@ class _TradeScreenState extends State<TradeScreen> {
                   onChanged:
                       hasPositions ? (newValue) => onChanged(newValue!) : null,
                   activeColor: AppColors.primary,
+                  fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return AppColors.primary;
+                    }
+                    return AppColors.isDarkMode ? Colors.white : Colors.grey;
+                  }),
                 );
               }),
             ],

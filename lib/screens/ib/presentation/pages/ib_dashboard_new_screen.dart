@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:share_plus/share_plus.dart';
 
 enum CommissionPeriod { thisMonth, thisQuarter, thisYear }
@@ -109,8 +110,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+        leading: AppBackButton(
           onPressed: () => Get.offAllNamed(AppPages.TRADING),
         ),
         automaticallyImplyLeading: false,

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 
@@ -46,21 +47,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  height: 40.h,
-                  width: 40.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.pureWhite,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.arrow_back_ios, color: AppColors.textPrimary),
-                    iconSize: 17.h,
-                    padding: EdgeInsets.only(left: 5.w),
-                  ),
-                ),
+                AppBackButton(onPressed: () => Navigator.pop(context)),
                 SizedBox(height: 24.h),
                 const Text(
                   'Create New Password',

@@ -127,6 +127,7 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                     style: AppTextStyles.heading.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
+                      color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -189,7 +190,9 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                         children: [
                           Text(
                             'Price',
-                            style: AppTextStyles.labelOnTradeQuantity,
+                            style: AppTextStyles.labelOnTradeQuantity.copyWith(
+                              color: AppColors.isDarkMode ? Colors.white : AppColors.icongrey,
+                            ),
                           ),
                           TextField(
                             controller: _priceController,
@@ -197,8 +200,12 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                               decimal: true,
                             ),
                             textAlign: TextAlign.center,
-                            style: AppTextStyles.labelOnTradeQuantityDigit,
+                            style: AppTextStyles.labelOnTradeQuantityDigit.copyWith(
+                              color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                            ),
                             decoration: InputDecoration(
+                              filled: false,
+                              fillColor: Colors.transparent,
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               enabledBorder: InputBorder.none,
@@ -292,7 +299,9 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
               // Condition selection using Radio Buttons
               Text(
                 "Condition",
-                style: AppTextStyles.labelOnTradePriceAlertGrey,
+                style: AppTextStyles.labelOnTradePriceAlertGrey.copyWith(
+                  color: AppColors.isDarkMode ? Colors.white : AppColors.tradeTextCenterColor,
+                ),
               ),
               SizedBox(height: 4.h),
               Row(
@@ -301,12 +310,20 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                     child: RadioListTile<String>(
                       title: Text(
                         'Above',
-                        style: AppTextStyles.labelOnTradePriceAlertBlack,
+                        style: AppTextStyles.labelOnTradePriceAlertBlack.copyWith(
+                          color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                        ),
                       ),
                       value: 'above',
                       groupValue: _selectedCondition,
                       contentPadding: EdgeInsets.zero,
                       activeColor: AppColors.primary,
+                      fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return AppColors.primary;
+                        }
+                        return AppColors.isDarkMode ? Colors.white.withOpacity(0.54) : Colors.black.withOpacity(0.54);
+                      }),
                       onChanged: (value) {
                         if (value != null) {
                           setState(() {
@@ -320,12 +337,20 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                     child: RadioListTile<String>(
                       title: Text(
                         'Below',
-                        style: AppTextStyles.labelOnTradePriceAlertBlack,
+                        style: AppTextStyles.labelOnTradePriceAlertBlack.copyWith(
+                          color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                        ),
                       ),
                       value: 'below',
                       groupValue: _selectedCondition,
                       contentPadding: EdgeInsets.zero,
                       activeColor: AppColors.primary,
+                      fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return AppColors.primary;
+                        }
+                        return AppColors.isDarkMode ? Colors.white.withOpacity(0.54) : Colors.black.withOpacity(0.54);
+                      }),
                       onChanged: (value) {
                         if (value != null) {
                           setState(() {
@@ -344,14 +369,18 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                 children: [
                   Text(
                     "Current bid price",
-                    style: AppTextStyles.labelOnTradePriceAlertGrey,
+                    style: AppTextStyles.labelOnTradePriceAlertGrey.copyWith(
+                      color: AppColors.isDarkMode ? Colors.white : AppColors.tradeTextCenterColor,
+                    ),
                   ),
                   Text(
                     PrecisionHelper.formatPrice(
                       widget.currentPrice,
                       decimals: _decimalDigits,
                     ),
-                    style: AppTextStyles.labelOnTradePriceAlertBlack,
+                    style: AppTextStyles.labelOnTradePriceAlertBlack.copyWith(
+                      color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                    ),
                   ),
                 ],
               ),

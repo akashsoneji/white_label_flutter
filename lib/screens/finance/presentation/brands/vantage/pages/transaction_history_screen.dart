@@ -253,74 +253,28 @@ class _VantageTransactionHistoryScreenState
         margin: EdgeInsets.symmetric(horizontal: 20.w),
         padding: EdgeInsets.all(20.w),
         decoration: VantageUiTokens.cardDecoration(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(10.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.analytics_outlined,
-                    color: AppColors.primary,
-                    size: 22.sp,
-                  ),
-                ),
-                SizedBox(width: 14.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Transaction Summary',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        '${filtered.length} transactions found',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            Expanded(
+              child: _buildSummaryItem(
+                label: 'Deposits',
+                value: '\$${totalDeposits.toStringAsFixed(2)}',
+                count: depositCount,
+                icon: Icons.arrow_downward_rounded,
+                color: Colors.green,
+                bgColor: Colors.green.withValues(alpha: 0.1),
+              ),
             ),
-            SizedBox(height: 16.h),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildSummaryItem(
-                    label: 'Deposits',
-                    value: '\$${totalDeposits.toStringAsFixed(2)}',
-                    count: depositCount,
-                    icon: Icons.arrow_downward_rounded,
-                    color: Colors.green,
-                    bgColor: Colors.green.withValues(alpha: 0.1),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: _buildSummaryItem(
-                    label: 'Withdrawals',
-                    value: '\$${totalWithdrawals.toStringAsFixed(2)}',
-                    count: withdrawalCount,
-                    icon: Icons.arrow_upward_rounded,
-                    color: Colors.red,
-                    bgColor: Colors.red.withValues(alpha: 0.1),
-                  ),
-                ),
-              ],
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _buildSummaryItem(
+                label: 'Withdrawals',
+                value: '\$${totalWithdrawals.toStringAsFixed(2)}',
+                count: withdrawalCount,
+                icon: Icons.arrow_upward_rounded,
+                color: Colors.red,
+                bgColor: Colors.red.withValues(alpha: 0.1),
+              ),
             ),
           ],
         ),
@@ -429,7 +383,9 @@ class _VantageTransactionHistoryScreenState
                 duration: const Duration(milliseconds: 200),
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  color: isSelected
+                      ? Colors.white.withOpacity(0.2)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -563,11 +519,13 @@ class _VantageTransactionHistoryScreenState
                         vertical: 8.h,
                       ),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primary : AppColors.surface,
+                        color: isSelected
+                            ? Colors.white.withOpacity(0.2)
+                            : AppColors.surface,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: isSelected
-                              ? AppColors.primary
+                              ? Colors.transparent
                               : VantageUiTokens.borderColor,
                         ),
                       ),
@@ -1001,16 +959,6 @@ class _VantageTransactionHistoryScreenState
     return '$day $month, $hour:$minute $period';
   }
 
-  String _formatTime(String dateStr) {
-    final date = DateTime.tryParse(dateStr);
-    if (date == null) return '';
-
-    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
-    final period = date.hour >= 12 ? 'PM' : 'AM';
-    final minute = date.minute.toString().padLeft(2, '0');
-
-    return '$hour:$minute $period';
-  }
 
   void _showCustomDatePicker(bool isStartDate) async {
     final DateTime? picked = await AppPickerTheme.showAppDatePicker(

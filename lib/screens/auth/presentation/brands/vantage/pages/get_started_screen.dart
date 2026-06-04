@@ -22,8 +22,8 @@ class VantageGetStartedScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [VantageAuthTheme.primary, Colors.white],
-            stops: [0.0, 0.9],
+            colors: [VantageAuthTheme.primary, VantageAuthTheme.background],
+            stops: const [0.0, 0.9],
           ),
         ),
         child: SafeArea(

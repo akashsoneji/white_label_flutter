@@ -1065,9 +1065,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(6.r),
-                border: Border.all(color: Colors.grey[200]!),
+                border: Border.all(color: AppColors.border),
               ),
               child: Column(
                 children: [
@@ -1148,7 +1148,11 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey[400]!),
+                              border: Border.all(
+                                color: AppColors.isDarkMode
+                                    ? AppColors.border
+                                    : Colors.grey[400]!,
+                              ),
                             ),
                             child: IconButton(
                               onPressed: () {
@@ -1167,7 +1171,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                               icon: Icon(
                                 Icons.remove,
                                 size: 20.h,
-                                color: Colors.grey[600],
+                                color: AppColors.isDarkMode
+                                    ? Colors.white
+                                    : Colors.grey[600],
                               ),
                               padding: EdgeInsets.zero,
                               constraints: BoxConstraints(),
@@ -1187,6 +1193,8 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                                   color: AppColors.textPrimary,
                                 ),
                                 decoration: InputDecoration(
+                                  filled: false,
+                                  fillColor: Colors.transparent,
                                   hintText: 'Enter lots',
                                   hintStyle: AppTextStyles.label.copyWith(
                                     fontSize: 12.sp,
@@ -1767,9 +1775,11 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.isDarkMode ? AppColors.textFieldBg : Colors.grey[50],
         borderRadius: BorderRadius.circular(6.r),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(
+          color: AppColors.isDarkMode ? AppColors.border : Colors.grey[200]!,
+        ),
       ),
       child: Row(
         children: [
@@ -1778,7 +1788,11 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
             height: 20.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey[400]!),
+              border: Border.all(
+                color: AppColors.isDarkMode
+                    ? AppColors.border
+                    : Colors.grey[400]!,
+              ),
             ),
             child: IconButton(
               onPressed: () {
@@ -1799,7 +1813,11 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                   _pnlCalculationKey++;
                 });
               },
-              icon: Icon(Icons.remove, size: 10.h, color: Colors.grey[600]),
+              icon: Icon(
+                Icons.remove,
+                size: 10.h,
+                color: AppColors.isDarkMode ? Colors.white : Colors.grey[600],
+              ),
               padding: EdgeInsets.zero,
               constraints: BoxConstraints(),
             ),
@@ -1816,6 +1834,8 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                   color: AppColors.textPrimary,
                 ),
                 decoration: InputDecoration(
+                  filled: false,
+                  fillColor: Colors.transparent,
                   border: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,

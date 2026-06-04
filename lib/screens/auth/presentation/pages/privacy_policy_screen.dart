@@ -4,6 +4,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/flavor_config.dart';
 import '../auth_screen_theme.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -13,6 +14,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AuthScreenTheme.scaffoldBackground,
       appBar: AppBar(
+        leading: const AppBackButton(),
         title: Text(Get.find<LanguageService>().tr('privacy_policy_title')),
         backgroundColor: AuthScreenTheme.scaffoldBackground,
         foregroundColor: AppColors.textPrimary,
