@@ -82,7 +82,7 @@ import 'services/app_lock/app_lock_overlay.dart';
 
 /// Global toggle to enable/disable Dark Mode support in the app.
 /// Set this to `true` to enable Dark Mode, or `false` to force Light Mode.
-const bool enableDarkModeGlobal = false;
+const bool enableDarkModeGlobal = true;
 
 // Firebase Background Message Handler
 @pragma('vm:entry-point')

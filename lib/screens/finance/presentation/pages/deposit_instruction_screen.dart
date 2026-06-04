@@ -22,11 +22,13 @@ class DepositInstructionScreen extends StatefulWidget {
   final Map<String, dynamic> object;
   final String amountString;
   final String selectedMT5AccountID;
+  final String? currency;
   const DepositInstructionScreen({
     super.key,
     required this.object,
     required this.amountString,
     required this.selectedMT5AccountID,
+    this.currency,
   });
 
   @override
@@ -469,23 +471,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             const SizedBox(height: 24),
           ],
 
-          // Transaction Number TextField
-          TextField(
-            controller: transactionNumberController,
-            decoration: InputDecoration(
-              hintText: 'Transaction Number',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.grey),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
+          _buildUTRField(),
 
           // File Upload Section
           // GestureDetector(
@@ -586,6 +572,88 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           _buildContinueButton(),
         ],
       ),
+    );
+  }
+
+  Widget _buildUTRField() {
+    final type = widget.object['type'].toString().toLowerCase();
+    final requireUtr = widget.object['require_utr'] == true ||
+        widget.object['require_utr'] == 1 ||
+        widget.object['require_utr'].toString().toLowerCase() == 'true';
+
+    // Show if type is bank (always show for bank) or if require_utr is true
+    if (type != 'bank' && !requireUtr) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Transaction ID / UTR',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            Text(
+              ' *',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.error,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: transactionNumberController,
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: AppColors.textPrimary,
+          ),
+          decoration: InputDecoration(
+            hintText: 'Enter UTR or transaction reference',
+            hintStyle: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.grey,
+            ),
+            filled: true,
+            fillColor: AppColors.isDarkMode
+                ? AppColors.backgroundDarkAlt
+                : Colors.grey[100],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Transaction ID is filled automatically when you upload your payment screenshot.',
+          style: TextStyle(
+            fontSize: 11.sp,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 
@@ -764,6 +832,8 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             const SizedBox(height: 24),
           ],
 
+          _buildUTRField(),
+
           // File Upload Section
           GestureDetector(
             onTap: () => _showImagePicker(context),
@@ -926,7 +996,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             const SizedBox(height: 16),
           ],
 
-          const SizedBox(height: 24),
+          _buildUTRField(),
 
           // File Upload Section
           GestureDetector(
@@ -1007,44 +1077,36 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   ? null
                   : () {
                     print(widget.object);
-                    if (widget.object['type'].toString().toLowerCase() ==
-                        'bank') {
-                      if (transactionNumberController.text.isEmpty) {
-                        CustomToastService.showError(
-                          message: 'Please enter transaction number',
-                        );
-                      } else {
-                        controller.submitDepositInstruction({
-                          "gateway_method_id": widget.object['deposit_slug'],
-                          "amount": widget.amountString,
-                          "mt5_account_id": widget.selectedMT5AccountID,
-                        });
-                      }
-                    } else if (widget.object['type'].toString().toLowerCase() ==
-                        'local') {
-                      controller.submitDepositInstruction({
-                        "gateway_method_id": widget.object['deposit_slug'],
-                        "amount": widget.amountString,
-                        "mt5_account_id": widget.selectedMT5AccountID,
-                      });
-                    } else if (widget.object['type'].toString().toLowerCase() ==
-                        'crypto') {
-                      controller.submitDepositInstruction({
-                        "gateway_method_id": widget.object['deposit_slug'],
-                        "amount": widget.amountString,
-                        "mt5_account_id": widget.selectedMT5AccountID,
-                      });
-                    } else {
-                      // UPI
-                      if (widget.object['type'].toString().toLowerCase() ==
-                          'upi') {
-                        controller.submitDepositInstruction({
-                          "gateway_method_id": widget.object['deposit_slug'],
-                          "amount": widget.amountString,
-                          "mt5_account_id": widget.selectedMT5AccountID,
-                        });
-                      }
+                    final type = widget.object['type'].toString().toLowerCase();
+                    final requireUtr = widget.object['require_utr'] == true ||
+                        widget.object['require_utr'] == 1 ||
+                        widget.object['require_utr'].toString().toLowerCase() == 'true';
+
+                    // Enforce UTR / Transaction ID check if required or if it's bank type
+                    if ((type == 'bank' || requireUtr) &&
+                        transactionNumberController.text.trim().isEmpty) {
+                      CustomToastService.showError(
+                        message: 'Please enter transaction number / UTR',
+                      );
+                      return;
                     }
+
+                    final Map<String, dynamic> payload = {
+                      "gateway_method_id": widget.object['deposit_slug'],
+                      "amount": widget.amountString,
+                      "mt5_account_id": widget.selectedMT5AccountID,
+                      "currency": widget.currency ?? "USD",
+                    };
+
+                    if (transactionNumberController.text.trim().isNotEmpty) {
+                      final utrValue = transactionNumberController.text.trim();
+                      payload["utr_referce"] = utrValue;
+                      payload["utr"] = utrValue;
+                      payload["transaction_number"] = utrValue;
+                      payload["transaction_id"] = utrValue;
+                    }
+
+                    controller.submitDepositInstruction(payload);
                   },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,

@@ -96,6 +96,11 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         amountController.text = '0.00';
       }
     });
+    amountController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     final preselectedAccount = widget.preselectedAccountNumber;
     print('DepositRealScreen: initState called');
     print('DepositRealScreen: preselectedAccountNumber: "$preselectedAccount"');
@@ -152,6 +157,13 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         transferToController.text =
             "${account['meta_account_number']} - \$ ${account['balance'] ?? '0.00'}";
         selectedAccount = account['meta_account_number'].toString();
+        
+        final currency = account['currency']?.toString() ?? 'USD';
+        if (mounted) {
+          setState(() {
+            selectedCurrency = currency;
+          });
+        }
         print(
           'DepositRealScreen: Updated transferToController.text to: ${transferToController.text}',
         );
@@ -435,6 +447,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         selectedMT5AccountID:
             controller.selectedTransferAccount.value!['meta_account_number']
                 as String,
+        currency: selectedCurrency,
       ),
     );
 
