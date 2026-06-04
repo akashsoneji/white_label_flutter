@@ -260,18 +260,18 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close),
                   onPressed: () => Get.back(),
                 ),
               ],
             ),
           ),
-          const Divider(),
+          Divider(),
 
           if (_isLoadingDetail)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 40.h),
-              child: const Center(child: CircularProgressIndicator()),
+              child: Center(child: CircularProgressIndicator()),
             )
           else if (_detailError.isNotEmpty)
             Padding(
@@ -282,7 +282,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                   SizedBox(height: 12.h),
                   ElevatedButton(
                     onPressed: _loadSubscriptionDetail,
-                    child: const Text('Retry'),
+                    child: Text('Retry'),
                   ),
                 ],
               ),
@@ -501,7 +501,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                               ),
-                              child: const Text('Cancel'),
+                              child: Text('Cancel'),
                             ),
                           ),
                           SizedBox(width: 12.w),
@@ -516,7 +516,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                               ),
-                              child: const Text('Save Changes'),
+                              child: Text('Save Changes'),
                             ),
                           ),
                         ],

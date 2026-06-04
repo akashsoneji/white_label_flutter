@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:get/get.dart';
 
 class CopyTradingDepositScreen extends StatelessWidget {
@@ -21,7 +20,14 @@ class CopyTradingDepositScreen extends StatelessWidget {
           'Deposit',
           style: AppTextStyles.heading.copyWith(fontWeight: FontWeight.w600),
         ),
-        leading: const AppBackButton(),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: AppColors.textPrimary,
+            size: 24.r,
+          ),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -41,9 +47,9 @@ class CopyTradingDepositScreen extends StatelessWidget {
                 children: [
                   Container(
                     padding: EdgeInsets.all(4.r),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.accentGold,
+                      color: AppColors.accentStatic,
                     ),
                     child: Icon(
                       Icons.priority_high_rounded,
@@ -145,11 +151,11 @@ class _PaymentItem extends StatelessWidget {
           trailing: Icon(
             Icons.arrow_forward_ios,
             size: 16.r,
-            color: Colors.grey.withOpacity(0.3),
+            color: AppColors.border.withValues(alpha: 0.3),
           ),
           onTap: onTap,
         ),
-        Divider(height: 1, color: Colors.grey.withOpacity(0.1)),
+        Divider(height: 1, color: AppColors.border.withValues(alpha: 0.1)),
       ],
     );
   }

@@ -27,12 +27,12 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
       child: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Container(
               width: 28,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -94,7 +94,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: const Divider(height: 1, color: AppColors.dividerDark),
+              child: Divider(height: 1, color: AppColors.border),
             ),
 
             Expanded(
@@ -118,15 +118,15 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Colors.grey.withOpacity(0.3),
+                              color: AppColors.border.withValues(alpha: 0.3),
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
+                          child: Text(
                             '\$25.00 or more',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.black87,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         ),
@@ -136,18 +136,18 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           child: Container(
                             color: AppColors.whiteColor,
                             padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: const Text(
+                            child: Text(
                               'Minimum Investment',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey,
+                                color: AppColors.textGrey,
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
 
                     // Free 7-day trial
                     GestureDetector(
@@ -163,19 +163,19 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                         ),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.grey.withOpacity(0.3),
+                            color: AppColors.border.withValues(alpha: 0.3),
                           ),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               'Free 7-day trial',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             Container(
@@ -186,7 +186,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                                   color:
                                       freeTrial
                                           ? AppColors.primary
-                                          : Colors.grey.withOpacity(0.8),
+                                          : AppColors.textGrey,
                                   width: 1.5,
                                 ),
                                 borderRadius: BorderRadius.circular(4),
@@ -208,7 +208,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: 10),
 
                     // Minimum Expertise
                     Card(
@@ -220,23 +220,20 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.all(10),
+                          Padding(
+                            padding: const EdgeInsets.all(10),
                             child: Text(
                               'Minimum Expertise',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color: AppColors.textPrimary,
                               ),
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: const Divider(
-                              height: 1,
-                              color: AppColors.dividerDark,
-                            ),
+                            child: Divider(height: 1, color: AppColors.border),
                           ),
                           _buildExpertiseRadioItem(
                             'Legend',
@@ -250,10 +247,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: const Divider(
-                              height: 1,
-                              color: AppColors.dividerDark,
-                            ),
+                            child: Divider(height: 1, color: AppColors.border),
                           ),
                           _buildExpertiseRadioItem(
                             'Expert',
@@ -268,10 +262,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: const Divider(
-                              height: 1,
-                              color: AppColors.dividerDark,
-                            ),
+                            child: Divider(height: 1, color: AppColors.border),
                           ),
                           _buildExpertiseRadioItem(
                             'High Achiever',
@@ -286,10 +277,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: const Divider(
-                              height: 1,
-                              color: AppColors.dividerDark,
-                            ),
+                            child: Divider(height: 1, color: AppColors.border),
                           ),
                           _buildExpertiseRadioItem(
                             'Growing Talent',
@@ -304,10 +292,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: const Divider(
-                              height: 1,
-                              color: AppColors.dividerDark,
-                            ),
+                            child: Divider(height: 1, color: AppColors.border),
                           ),
                           _buildExpertiseRadioItem(
                             'All',
@@ -322,7 +307,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(
+                    SizedBox(
                       height: 100,
                     ), // padding for the bottom button
                   ],
@@ -385,7 +370,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
         child: Row(
           children: [
             icon,
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Text(
                 title,
@@ -410,7 +395,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                   if (states.contains(MaterialState.selected)) {
                     return AppColors.primary;
                   }
-                  return Colors.grey.shade400;
+                  return AppColors.textGrey;
                 }),
               ),
             ),

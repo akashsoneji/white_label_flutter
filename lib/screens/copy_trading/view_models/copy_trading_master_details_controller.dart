@@ -270,7 +270,7 @@ class CopyTradingMasterDetailsController extends GetxController {
 
   void _startAutoRefresh() {
     _refreshTimer?.cancel();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _refreshTimer = Timer.periodic(Duration(seconds: 30), (_) {
       if (!isLoading.value && !isTimeframeLoading.value && !isPlanLoading.value) {
         if (tradeHistoryPage == 1) {
           loadTradeHistory();
@@ -392,3 +392,4 @@ class CopyTradingMasterDetailsController extends GetxController {
     }
   }
 }
+

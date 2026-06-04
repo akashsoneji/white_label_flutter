@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:get/get.dart';
 
 class CopyTradingInternalTransferScreen extends StatelessWidget {
@@ -21,7 +20,14 @@ class CopyTradingInternalTransferScreen extends StatelessWidget {
           'Internal Transfer',
           style: AppTextStyles.heading.copyWith(fontWeight: FontWeight.w600),
         ),
-        leading: const AppBackButton(),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: AppColors.textPrimary,
+            size: 24.r,
+          ),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(24.r),
@@ -88,7 +94,7 @@ class CopyTradingInternalTransferScreen extends StatelessWidget {
           decoration: InputDecoration(
             hintText: value.isEmpty ? 'Enter $label' : value,
             filled: true,
-            fillColor: Colors.grey.withOpacity(0.05),
+            fillColor: AppColors.border.withValues(alpha: 0.05),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16.w,
               vertical: 14.h,

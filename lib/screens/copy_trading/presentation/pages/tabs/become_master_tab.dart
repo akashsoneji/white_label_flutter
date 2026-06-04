@@ -75,7 +75,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
               BlendMode.srcIn,
             ),
           ),
-          onPressed: () => Get.offAll(() => const TradingMainScreen()),
+          onPressed: () => Get.offAll(() => TradingMainScreen()),
         ),
         title: Text(
           'Become a Master Trader',
@@ -134,7 +134,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
               // ── Step checklist cards ──
               GridView.count(
                 shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+                physics: NeverScrollableScrollPhysics(),
                 crossAxisCount: 2,
                 mainAxisSpacing: 10.h,
                 crossAxisSpacing: 10.w,
@@ -308,7 +308,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                     BoxShadow(
                       color: AppColors.textPrimary.withValues(alpha: 0.02),
                       blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      offset: Offset(0, 4),
                     ),
                   ],
                 ),
@@ -500,7 +500,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                                               message:
                                                   res.message ??
                                                   'Application submitted',
-                                              duration: const Duration(
+                                              duration: Duration(
                                                 milliseconds: 2500,
                                               ),
                                             );
@@ -510,7 +510,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                                               message:
                                                   res.message ??
                                                   hub.errorMessage.value,
-                                              duration: const Duration(
+                                              duration: Duration(
                                                 milliseconds: 2500,
                                               ),
                                             );
@@ -624,7 +624,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                 Icon(icon, size: 18.r, color: statusColor),
               ],
             ),
-            const Spacer(),
+            Spacer(),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
               decoration: BoxDecoration(

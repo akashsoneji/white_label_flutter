@@ -1,24 +1,15 @@
+import 'package:crm_app/screens/home/trading_main_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_copiers_controller.dart';
-import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_details_controller.dart';
-import 'package:crm_app/screens/copy_trading/presentation/pages/hub/subscribe_to_plan_screen.dart';
-import 'package:crm_app/widgets/AppTextField.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
-
-/// SVG action icons (tinted with [AppColors.primary] via [ColorFilter]).
-class _MyCopiesSvg {
-  _MyCopiesSvg._();
-  static const edit = 'assets/svg/copy_trading/my_copies/ct_edit.svg';
-  static const pause = 'assets/svg/copy_trading/my_copies/ct_pause.svg';
-  static const play = 'assets/svg/copy_trading/my_copies/ct_play.svg';
-  static const target = 'assets/svg/copy_trading/my_copies/ct_target.svg';
-}
+import 'package:crm_app/screens/copy_trading/presentation/pages/hub/subscribe_to_plan_screen.dart';
+import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_details_controller.dart';
 
 class MyCopiesScreen extends StatefulWidget {
   const MyCopiesScreen({super.key});
@@ -29,56 +20,40 @@ class MyCopiesScreen extends StatefulWidget {
 
 class _MyCopiesScreenState extends State<MyCopiesScreen> {
   late final CopyTradingMasterCopiersController controller;
-  final _searchCtrl = TextEditingController();
-  final _statusFilter = 'all'.obs; // all | active | paused | stopped
-
-  void _toastError(String message) {
-    final msg = message.trim();
-    if (msg.isEmpty) return;
-    CustomToastService.showError(
-      title: 'Error',
-      message: msg,
-      duration: const Duration(milliseconds: 2500),
-      position: SnackPosition.TOP,
-    );
-  }
-
-  void _toastSuccess(String message) {
-    final msg = message.trim();
-    if (msg.isEmpty) return;
-    CustomToastService.showSuccess(
-      title: 'Success',
-      message: msg,
-      duration: const Duration(milliseconds: 2500),
-      position: SnackPosition.TOP,
-    );
-  }
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     controller = Get.put(CopyTradingMasterCopiersController());
+    _searchController.addListener(() {
+      final query = _searchController.text;
+      if (controller.searchQuery.value != query) {
+        controller.searchQuery.value = query;
+        controller.currentPage.value = 1;
+        controller.load(showLoading: false);
+      }
+    });
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        if (controller.hasMore &&
+            !controller.isLoadingMore.value &&
+            !controller.isLoading.value) {
+          controller.loadMore();
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
-    _searchCtrl.dispose();
+    _searchController.dispose();
+    _scrollController.dispose();
     Get.delete<CopyTradingMasterCopiersController>(force: true);
     super.dispose();
-  }
-
-  List<MasterCopierItem> _filtered(List<MasterCopierItem> all) {
-    final q = _searchCtrl.text.trim().toLowerCase();
-    final status = _statusFilter.value;
-    return all.where((s) {
-      final statusOk =
-          status == 'all' ? true : s.status.toLowerCase() == status;
-      if (!statusOk) return false;
-      if (q.isEmpty) return true;
-      return s.userName.toLowerCase().contains(q) ||
-          s.planName.toLowerCase().contains(q) ||
-          s.accountNumber.toLowerCase().contains(q);
-    }).toList();
   }
 
   @override
@@ -90,676 +65,532 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
         centerTitle: true,
-        title: Text('My Copies', style: AppTextStyles.screenTitle),
-        leading: const AppBackButton(),
+        title: Text('My Copiers', style: AppTextStyles.screenTitle),
+        leading: IconButton(
+          icon: SvgPicture.asset(
+            'assets/svg/ib_dashboard/home.svg',
+            colorFilter: ColorFilter.mode(
+              AppColors.textPrimary,
+              BlendMode.srcIn,
+            ),
+          ),
+          onPressed: () => Get.offAll(() => TradingMainScreen()),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () => controller.load(showLoading: true),
+            icon: Icon(Icons.refresh, size: 20.r, color: AppColors.textPrimary),
+          ),
+        ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => controller.load(showLoading: false),
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification is ScrollUpdateNotification) {
-              final metrics = notification.metrics;
-              if (metrics.pixels >= metrics.maxScrollExtent - 200 &&
-                  controller.hasMore &&
-                  !controller.isLoadingMore.value &&
-                  !controller.isLoading.value) {
-                controller.loadMore();
-              }
-            }
-            return false;
-          },
-          child: Obx(() {
-            final loading = controller.isLoading.value;
-            final err = controller.errorMessage.value;
-            final list = controller.copiers.toList();
-            final filtered = _filtered(list);
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          children: [
+            // Sticky Header Section (Filters, Search, Stats Grid) - Outside RefreshIndicator to fix RenderViewportBase._paintContents viewport error
+            Container(
+              color: AppColors.tradeBackgroundCenterColor,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Portfolio Summary Cards (2x2 Grid)
+                  _buildSummaryGrid(context),
+                  SizedBox(height: 12.h),
 
-            if (loading && list.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
+                  // Status Tabs Row with badges and checkmarks
+                  _buildStatusTabs(),
+                  SizedBox(height: 12.h),
 
-            return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
-              children: [
-                if (err.isNotEmpty)
-                  _InlineError(
-                    message: err,
-                    onRetry: () {
-                      CustomToastService.showError(
-                        message: err,
-                        title: 'Error',
-                      );
-                      controller.load(showLoading: true);
-                    },
-                  ),
-                if (err.isNotEmpty) SizedBox(height: 12.h),
-
-                _SearchBox(
-                  controller: _searchCtrl,
-                  onChanged: (_) => setState(() {}),
-                ),
-                SizedBox(height: 12.h),
-
-                Obx(() {
-                  return _FilterRow(
-                    selected: _statusFilter.value,
-                    onChanged: (v) => _statusFilter.value = v,
-                  );
-                }),
-                SizedBox(height: 12.h),
-
-                _SummaryCard(controller: controller),
-                SizedBox(height: 12.h),
-
-                if (filtered.isEmpty)
-                  _EmptyState(
-                    title: 'No copies found',
-                    subtitle:
-                        list.isEmpty
-                            ? 'Explore masters and subscribe to start copy trading.'
-                            : 'Try changing search or filter.',
-                  )
-                else
-                  ...filtered.map(
-                    (s) => _SubscriptionCard(
-                      item: s,
-                      actionLoading: controller.actionLoading,
-                      onEdit: () async {
-                        final plan = CopyTradingPlan(
-                          id: s.planId,
-                          planId: s.planId,
-                          planName: s.planName,
-                          commissionType: 'per_trade',
-                          commissionLabel: '',
-                          commissionPercentage: 0,
-                          subscriptionFee: 0,
-                          minimumCapital: 0,
-                          copyRatio: s.copyRatio,
-                          isFull: false,
-                          noFeeDays: 0,
-                          subscriptionPeriodDays: 0,
-                          activeCopiersCount: 0,
-                          totalAum: 0,
-                          isEnrolled: false,
-                        );
-                        await Get.to(
-                          () => SubscribeToPlanScreen(
-                            masterCode: '',
-                            plan: plan,
-                            editSubscription: null,
+                  // Plan Dropdown and Search input side-by-side
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 38.h,
+                          decoration: BoxDecoration(
+                            color: AppColors.whiteColor,
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(
+                              color: AppColors.border.withValues(alpha: 0.12),
+                            ),
                           ),
-                        );
-                      },
-                      onPause: () async {
-                        final res = await controller.pause(s.id);
-                        if (!res.success) {
-                          _toastError(res.message ?? 'Failed to pause');
-                        } else {
-                          _toastSuccess(res.message ?? 'Paused');
-                        }
-                      },
-                      onResume: () async {
-                        final res = await controller.resume(s.id);
-                        if (!res.success) {
-                          _toastError(res.message ?? 'Failed to resume');
-                        } else {
-                          _toastSuccess(res.message ?? 'Resumed');
-                        }
-                      },
-                      onStop: () async {
-                        final confirmed = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) {
-                            return AlertDialog(
-                              backgroundColor: AppColors.card,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16.r),
+                          child: TextField(
+                            controller: _searchController,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: AppColors.textPrimary,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Search copier...',
+                              hintStyle: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.textGrey,
                               ),
-                              title: Text(
-                                'Stop copy?',
-                                style: AppTextStyles.headingblack,
+                              prefixIcon: Icon(
+                                Icons.search,
+                                size: 16.r,
+                                color: AppColors.textGrey,
                               ),
-                              content: Text(
-                                'This is permanent. You can’t re-activate; you must re-subscribe.',
-                                style: AppTextStyles.subheading.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 14.sp,
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 10.h,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Obx(() {
+                        final plans = controller.masterPlans;
+                        return Container(
+                          height: 38.h,
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.whiteColor,
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(
+                              color: AppColors.border.withValues(alpha: 0.12),
+                            ),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<int?>(
+                              value: controller.planFilter.value,
+                              hint: Text(
+                                'All plans',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: AppColors.textGrey,
                                 ),
                               ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(ctx).pop(false),
+                              icon: Icon(
+                                Icons.keyboard_arrow_down,
+                                size: 16.r,
+                                color: AppColors.textGrey,
+                              ),
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                              onChanged: (newValue) {
+                                controller.planFilter.value = newValue;
+                                controller.currentPage.value = 1;
+                                controller.load(showLoading: false);
+                              },
+                              items: [
+                                DropdownMenuItem<int?>(
+                                  value: null,
                                   child: Text(
-                                    'Cancel',
-                                    style: TextStyle(
-                                      color: AppColors.textPrimary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    'All plans',
+                                    style: TextStyle(fontSize: 12.sp),
                                   ),
                                 ),
-                                TextButton(
-                                  onPressed: () => Navigator.of(ctx).pop(true),
-                                  child: Text(
-                                    'Stop',
-                                    style: TextStyle(
-                                      color: AppColors.error,
-                                      fontWeight: FontWeight.w600,
+                                ...plans.map(
+                                  (p) => DropdownMenuItem<int?>(
+                                    value: p.id,
+                                    child: Text(
+                                      p.planName,
+                                      style: TextStyle(fontSize: 12.sp),
                                     ),
                                   ),
                                 ),
                               ],
-                            );
-                          },
+                            ),
+                          ),
                         );
-                        if (confirmed != true) return;
-                        final res = await controller.stop(s.id);
-                        if (!res.success) {
-                          _toastError(res.message ?? 'Failed to stop');
-                        } else {
-                          _toastSuccess(res.message ?? 'Stopped');
-                        }
-                      },
-                    ),
-                  ),
-
-                if (loading) ...[
-                  SizedBox(height: 12.h),
-                  Center(
-                    child: SizedBox(
-                      width: 18.r,
-                      height: 18.r,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.primary,
-                      ),
-                    ),
+                      }),
+                    ],
                   ),
                 ],
+              ),
+            ),
 
-                Obx(() {
-                  if (!controller.isLoadingMore.value)
-                    return const SizedBox.shrink();
-                  return Column(
+            Expanded(
+              child: Obx(() {
+                final loading = controller.isLoading.value;
+                final err = controller.errorMessage.value;
+                final allCopiers = controller.copiers;
+
+                if (loading && allCopiers.isEmpty) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                Widget listChild;
+                if (err.isNotEmpty && allCopiers.isEmpty) {
+                  listChild = ListView(
+                    physics: AlwaysScrollableScrollPhysics(),
                     children: [
-                      SizedBox(height: 16.h),
-                      Center(
-                        child: SizedBox(
-                          width: 24.r,
-                          height: 24.r,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.primary,
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20.w,
+                          vertical: 100.h,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 40.r,
+                              color: AppColors.error,
+                            ),
+                            SizedBox(height: 10.h),
+                            Text(
+                              err,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+                            ElevatedButton(
+                              onPressed:
+                                  () => controller.load(showLoading: true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                              ),
+                              child: Text(
+                                'Retry',
+                                style: TextStyle(color: AppColors.whiteColor),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (allCopiers.isEmpty) {
+                  listChild = ListView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 100.h),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'No copiers found matching filters.',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            color: AppColors.textGrey,
                           ),
                         ),
                       ),
-                      SizedBox(height: 8.h),
-                      Center(
-                        child: Text(
-                          'Loading more...',
-                          style: AppTextStyles.caption,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
                     ],
                   );
-                }),
-              ],
-            );
-          }),
+                } else {
+                  listChild = ListView.separated(
+                    controller: _scrollController,
+                    physics: AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 80.h),
+                    itemCount:
+                        allCopiers.length +
+                        (controller.isLoadingMore.value ? 1 : 0),
+                    separatorBuilder: (_, index) => SizedBox(height: 12.h),
+                    itemBuilder: (context, index) {
+                      if (index == allCopiers.length) {
+                        return Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            child: SizedBox(
+                              width: 20.r,
+                              height: 20.r,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final item = allCopiers[index];
+                      return _CopierCardItem(
+                        item: item,
+                        controller: controller,
+                      );
+                    },
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () => controller.load(showLoading: false),
+                  child: listChild,
+                );
+              }),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-class _SearchBox extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-  const _SearchBox({required this.controller, required this.onChanged});
+  Widget _buildSummaryGrid(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final boxWidth = (screenWidth - 32.w - 10.w) / 2;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      // padding: EdgeInsets.symmetric(horizontal: 12.w),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.textGrey.withOpacity(0.18)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.border.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: AppTextField(
-        controller: controller,
-        onChanged: onChanged,
-        prefixIcon: Icon(Icons.search, color: AppColors.textGrey),
-        hintText: 'Search master / plan / account',
-        suffixIcon:
-            controller.text.isEmpty
-                ? null
-                : IconButton(
-                  onPressed: () {
-                    controller.clear();
-                    onChanged('');
-                  },
-                  icon: Icon(
-                    Icons.close,
-                    size: 18.r,
-                    color: AppColors.textGrey,
-                  ),
-                ),
-      ),
-    );
-  }
-}
-
-class _FilterRow extends StatelessWidget {
-  final String selected;
-  final ValueChanged<String> onChanged;
-  const _FilterRow({required this.selected, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8.w,
-      runSpacing: 8.h,
+      spacing: 10.w,
+      runSpacing: 10.h,
       children: [
-        _FilterChip(
-          label: 'All',
-          value: 'all',
-          selected: selected,
-          onChanged: onChanged,
+        _summaryBox(
+          boxWidth,
+          'TOTAL COPIERS',
+          controller.summaryTotal.value.toString(),
+          'All statuses combined',
         ),
-        _FilterChip(
-          label: 'Active',
-          value: 'active',
-          selected: selected,
-          onChanged: onChanged,
+        _summaryBox(
+          boxWidth,
+          'CAPITAL ALLOCATED',
+          '\$${controller.summaryTotalCapital.value.toStringAsFixed(2)}',
+          'Across all copiers (portfolio)',
         ),
-        _FilterChip(
-          label: 'Paused',
-          value: 'paused',
-          selected: selected,
-          onChanged: onChanged,
+        _summaryBox(
+          boxWidth,
+          'COMBINED P&L',
+          '\$${controller.summaryTotalPnl.value.toStringAsFixed(2)}',
+          'Lifetime copier P&L',
+          valueColor:
+              controller.summaryTotalPnl.value >= 0
+                  ? AppColors.green
+                  : AppColors.error,
         ),
-        _FilterChip(
-          label: 'Stopped',
-          value: 'stopped',
-          selected: selected,
-          onChanged: onChanged,
+        _summaryBox(
+          boxWidth,
+          'COMMISSION PAID TO YOU',
+          '\$${controller.summaryTotalCommissionPaid.value.toStringAsFixed(2)}',
+          'Lifetime from copiers',
         ),
       ],
     );
   }
-}
 
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final String selected;
-  final ValueChanged<String> onChanged;
-  const _FilterChip({
-    required this.label,
-    required this.value,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isOn = selected == value;
-    return InkWell(
-      onTap: () => onChanged(value),
-      borderRadius: BorderRadius.circular(999),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-        decoration: BoxDecoration(
-          color: isOn ? AppColors.primary : AppColors.card,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
-            color:
-                isOn ? AppColors.primary : AppColors.textGrey.withOpacity(0.2),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w600,
-            color: isOn ? AppColors.whiteColor : AppColors.textPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SummaryCard extends StatelessWidget {
-  final CopyTradingMasterCopiersController controller;
-  const _SummaryCard({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final active = controller.summaryActive.value;
-      final capital = controller.summaryTotalCapital.value;
-      final pnl = controller.summaryTotalPnl.value;
-      final commission = controller.summaryTotalCommissionPaid.value;
-      final total = controller.summaryTotal.value;
-      final pending = controller.summaryPending.value;
-      final paused = controller.summaryPaused.value;
-      final stopped = controller.summaryStopped.value;
-
-      return Container(
-        padding: EdgeInsets.all(16.r),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary.withValues(alpha: 0.12),
-              AppColors.primary.withValues(alpha: 0.04),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(6.r),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Icon(
-                    Icons.groups_outlined,
-                    size: 16.r,
-                    color: AppColors.primary,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  'My Copiers',
-                  style: AppTextStyles.labelOnChartPendingOrderBold,
-                ),
-                const Spacer(),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: Text(
-                    '$total total',
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 14.h),
-
-            // Status chips row
-            Wrap(
-              spacing: 6.w,
-              runSpacing: 6.h,
-              children: [
-                _StatusChip(
-                  label: 'Active',
-                  count: active,
-                  color: AppColors.green,
-                ),
-                _StatusChip(
-                  label: 'Pending',
-                  count: pending,
-                  color: AppColors.warning,
-                ),
-                _StatusChip(
-                  label: 'Paused',
-                  count: paused,
-                  color: AppColors.textGrey,
-                ),
-                _StatusChip(
-                  label: 'Stopped',
-                  count: stopped,
-                  color: AppColors.error,
-                ),
-              ],
-            ),
-            SizedBox(height: 14.h),
-
-            // Metrics row
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: AppColors.card.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _MiniMetric(
-                      label: 'Total Capital',
-                      value: '\$${capital.toStringAsFixed(0)}',
-                      icon: Icons.account_balance_wallet_outlined,
-                    ),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 36.h,
-                    color: AppColors.textGrey.withValues(alpha: 0.12),
-                  ),
-                  Expanded(
-                    child: _MiniMetric(
-                      label: 'Total P&L',
-                      value: '\$${pnl.toStringAsFixed(2)}',
-                      icon: Icons.trending_up,
-                      valueColor: pnl >= 0 ? AppColors.green : AppColors.error,
-                    ),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 36.h,
-                    color: AppColors.textGrey.withValues(alpha: 0.12),
-                  ),
-                  Expanded(
-                    child: _MiniMetric(
-                      label: 'Commission',
-                      value: '\$${commission.toStringAsFixed(2)}',
-                      icon: Icons.payments_outlined,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  final String label;
-  final int count;
-  final Color color;
-  const _StatusChip({
-    required this.label,
-    required this.count,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _summaryBox(
+    double width,
+    String title,
+    String value,
+    String desc, {
+    Color? valueColor,
+  }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      width: width,
+      padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6.r,
-            height: 6.r,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          SizedBox(width: 4.w),
-          Text(
-            '$count $label',
-            style: TextStyle(
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.border.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: Offset(0, 2),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _MiniMetric extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color? valueColor;
-  const _MiniMetric({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.valueColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 13.r, color: AppColors.textGrey),
-          SizedBox(height: 3.h),
           Text(
-            label,
+            title,
             style: TextStyle(
               fontSize: 9.sp,
+              fontWeight: FontWeight.w800,
               color: AppColors.textGrey,
-              fontWeight: FontWeight.w500,
+              letterSpacing: 0.3,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.bold,
+              color: valueColor ?? AppColors.textPrimary,
             ),
           ),
           SizedBox(height: 2.h),
           Text(
-            value,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w700,
-              color: valueColor ?? AppColors.textPrimary,
-            ),
+            desc,
+            style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildStatusTabs() {
+    final activeStatus = controller.statusFilter.value;
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _statusTabItem(
+            'All',
+            'all',
+            controller.summaryTotal.value,
+            activeStatus,
+          ),
+          SizedBox(width: 6.w),
+          _statusTabItem(
+            'Active',
+            'active',
+            controller.summaryActive.value,
+            activeStatus,
+          ),
+          SizedBox(width: 6.w),
+          _statusTabItem(
+            'Pending',
+            'pending',
+            controller.summaryPending.value,
+            activeStatus,
+          ),
+          SizedBox(width: 6.w),
+          _statusTabItem(
+            'Paused',
+            'paused',
+            controller.summaryPaused.value,
+            activeStatus,
+          ),
+          SizedBox(width: 6.w),
+          _statusTabItem(
+            'Stopped / Removed',
+            'stopped',
+            controller.summaryStoppedOrRemoved.value,
+            activeStatus,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statusTabItem(
+    String label,
+    String value,
+    int count,
+    String activeValue,
+  ) {
+    final isSelected = activeValue == value;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          controller.statusFilter.value = value;
+          controller.currentPage.value = 1;
+        });
+        controller.load(showLoading: false);
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color:
+              isSelected
+                  ? AppColors.primary.withValues(alpha: 0.12)
+                  : AppColors.whiteColor,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color:
+                isSelected
+                    ? AppColors.primary
+                    : AppColors.border.withValues(alpha: 0.15),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11.sp,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                color: isSelected ? AppColors.primary : AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(width: 4.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+              decoration: BoxDecoration(
+                color:
+                    isSelected
+                        ? AppColors.primary
+                        : AppColors.tradeBackgroundCenterColor,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 9.sp,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? AppColors.whiteColor : AppColors.textGrey,
+                ),
+              ),
+            ),
+            SizedBox(width: 4.w),
+            Icon(
+              Icons.check,
+              size: 10.r,
+              color:
+                  isSelected
+                      ? AppColors.primary
+                      : AppColors.textGrey.withValues(alpha: 0.3),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _SubscriptionCard extends StatefulWidget {
+class _CopierCardItem extends StatelessWidget {
   final MasterCopierItem item;
-  final RxBool actionLoading;
-  final Future<void> Function() onEdit;
-  final Future<void> Function() onPause;
-  final Future<void> Function() onResume;
-  final Future<void> Function() onStop;
+  final CopyTradingMasterCopiersController controller;
 
-  const _SubscriptionCard({
-    required this.item,
-    required this.actionLoading,
-    required this.onEdit,
-    required this.onPause,
-    required this.onResume,
-    required this.onStop,
-  });
+  const _CopierCardItem({required this.item, required this.controller});
 
-  @override
-  State<_SubscriptionCard> createState() => _SubscriptionCardState();
-}
-
-class _SubscriptionCardState extends State<_SubscriptionCard> {
-  bool _expanded = false;
-
-  static String _formatStatus(String s) {
-    if (s.isEmpty) return 'Unknown';
-    return '${s[0].toUpperCase()}${s.substring(1).toLowerCase()}';
-  }
-
-  static String _formatCopyMethod(String m) {
-    if (m.isEmpty) return '-';
-    final t = m.replaceAll('_', ' ').trim();
-    return t
-        .split(' ')
-        .map((w) {
-          if (w.isEmpty) return w;
-          return '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}';
-        })
-        .join(' ');
-  }
-
-  static String _getInitials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
-      return parts[0].substring(0, parts[0].length.clamp(0, 2)).toUpperCase();
+  Color _getStatusColor(String s) {
+    switch (s.toLowerCase()) {
+      case 'active':
+        return AppColors.green;
+      case 'pending':
+        return AppColors.warning;
+      case 'paused':
+        return AppColors.textGrey;
+      case 'stopped':
+      case 'cancelled':
+      case 'stopped_or_removed':
+        return AppColors.error;
+      default:
+        return AppColors.textGrey;
     }
-    return '?';
+  }
+
+  String _formatDate(String isoString) {
+    try {
+      final dt = DateTime.parse(isoString);
+      return DateFormat('dd MMM yyyy, HH:mm').format(dt);
+    } catch (_) {
+      return isoString;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final item = widget.item;
-    final status = item.status.toLowerCase();
+    final status = item.status;
+    final isApproved = status.toLowerCase() == 'active';
+    final isPaused = status.toLowerCase() == 'paused';
+    final canPauseResume = isApproved || isPaused;
+    final canStop = isApproved || isPaused;
 
-    final Color statusColor = switch (status) {
-      'active' => AppColors.green,
-      'paused' => AppColors.warning,
-      'stopped' => AppColors.error,
-      _ => AppColors.textGrey,
-    };
-
-    final displayName =
-        item.userName.isNotEmpty ? item.userName : 'Copier #${item.userId}';
-    final planDisplayName =
-        item.planName.isNotEmpty ? item.planName : 'Plan #${item.planId}';
-
-    final bool canPause = status == 'active';
-    final bool canResume = status == 'paused';
-    final bool canStop = status == 'active' || status == 'paused';
-    final bool canEdit = canPause || canResume;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cellWidth = (screenWidth - 32.w - 24.r - 8.w) / 2;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.textGrey.withOpacity(0.14)),
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.border.withValues(alpha: 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: AppColors.border.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -767,406 +598,236 @@ class _SubscriptionCardState extends State<_SubscriptionCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── HEADER: Avatar + Name + Plan badges + Status ─────────────────────
-          Material(
-            color: AppColors.card,
-            child: InkWell(
-              onTap: () => setState(() => _expanded = !_expanded),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 14.h, 10.w, 12.h),
-                child: Row(
-                  children: [
-                    // Avatar
-                    Container(
-                      width: 46.r,
-                      height: 46.r,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.primary,
-                            AppColors.primary.withOpacity(0.7),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _getInitials(displayName),
-                          style: TextStyle(
-                            color: AppColors.onColoredBackground,
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-
-                    // Name + Plan badges
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            displayName,
-                            style: AppTextStyles.black16600.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 4.h),
-                          Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 7.w,
-                                  vertical: 2.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.08),
-                                  borderRadius: BorderRadius.circular(6.r),
-                                ),
-                                child: Text(
-                                  planDisplayName,
-                                  style: TextStyle(
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.primary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (item.serverType.isNotEmpty) ...[
-                                SizedBox(width: 6.w),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 7.w,
-                                    vertical: 2.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.textGrey.withOpacity(0.08),
-                                    borderRadius: BorderRadius.circular(6.r),
-                                  ),
-                                  child: Text(
-                                    item.serverType.toUpperCase(),
-                                    style: TextStyle(
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textGrey,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Status badge
-                    _StatusPill(
-                      text: _formatStatus(status),
-                      color: statusColor,
-                      outline: status == 'active',
-                    ),
-                    SizedBox(width: 2.w),
-                    Icon(
-                      _expanded ? Icons.expand_less : Icons.expand_more,
-                      size: 22.r,
-                      color: AppColors.textGrey,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // ── QUICK STATS (always visible, NOT inside expanded) ──────────────────
+          // Header Purple / Color Bar
           Container(
-            margin: EdgeInsets.fromLTRB(14.w, 0, 14.w, 0),
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: AppColors.tradeBackgroundCenterColor.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+            color: AppColors.primary.withValues(alpha: 0.05),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: _QuickStat(
-                    label: 'Capital',
-                    value: '\$${item.capitalAmount.toStringAsFixed(0)}',
-                    icon: Icons.account_balance_wallet_outlined,
+                  child: Text(
+                    item.userName,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Container(
-                  width: 1,
-                  height: 28.h,
-                  color: AppColors.textGrey.withOpacity(0.15),
-                ),
-                Expanded(
-                  child: _QuickStat(
-                    label: 'P&L',
-                    value: '\$${item.totalPnl.toStringAsFixed(2)}',
-                    icon: Icons.trending_up,
-                    valueColor:
-                        item.totalPnl >= 0 ? AppColors.green : AppColors.error,
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(status).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(4.r),
                   ),
-                ),
-                Container(
-                  width: 1,
-                  height: 28.h,
-                  color: AppColors.textGrey.withOpacity(0.15),
-                ),
-                Expanded(
-                  child: _QuickStat(
-                    label: 'Commission',
-                    value: '\$${item.totalCommissionPaid.toStringAsFixed(2)}',
-                    icon: Icons.payments_outlined,
+                  child: Text(
+                    status.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      fontWeight: FontWeight.w800,
+                      color: _getStatusColor(status),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 8.h),
 
-          // ── EXPANDED SECTION ────────────────────────────────────────────────
-          AnimatedSize(
-            duration: const Duration(milliseconds: 280),
-            curve: Curves.easeInOutCubic,
-            alignment: Alignment.topCenter,
-            child:
-                _expanded
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // ── Details Grid (2 columns) ──────────────────────────────
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(14.w, 4.h, 14.w, 0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // LEFT COLUMN
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _GridLabel(
-                                      label: 'Account',
-                                      value: item.accountNumber,
-                                    ),
-                                    _GridLabel(
-                                      label: 'Plan Status',
-                                      value:
-                                          item.planStatus.isNotEmpty
-                                              ? _formatStatus(item.planStatus)
-                                              : '-',
-                                    ),
-                                    _GridLabel(
-                                      label: 'Copy Method',
-                                      value: _formatCopyMethod(item.copyMethod),
-                                    ),
-                                    if (item.sizingMethod.isNotEmpty)
-                                      _GridLabel(
-                                        label: 'Sizing',
-                                        value: _formatCopyMethod(
-                                          item.sizingMethod,
-                                        ),
-                                      ),
-                                    _GridLabel(
-                                      label: 'Open Trades',
-                                      value:
-                                          item.openTradesCount > 0
-                                              ? '${item.openTradesCount}'
-                                              : 'None',
-                                      valueColor:
-                                          item.openTradesCount > 0
-                                              ? AppColors.warning
-                                              : AppColors.textGrey,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 16.w),
-                              // RIGHT COLUMN
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _GridLabel(
-                                      label: 'Active Since',
-                                      value: item.formattedActiveSince,
-                                      valueColor: AppColors.primary,
-                                    ),
-                                    if (item.lotMultiplier > 0)
-                                      _GridLabel(
-                                        label: 'Lot Multiplier',
-                                        value: '${item.lotMultiplier}x',
-                                      ),
-                                    if (item.takeProfit.isNotEmpty)
-                                      _GridLabel(
-                                        label: 'Take Profit',
-                                        value: item.takeProfit,
-                                      ),
-                                    if (item.stopLoss.isNotEmpty)
-                                      _GridLabel(
-                                        label: 'Stop Loss',
-                                        value: item.stopLoss,
-                                      ),
-                                    _GridLabel(
-                                      label: 'Commission',
-                                      value: item.commissionDisplay,
-                                      valueColor: AppColors.primary,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 16.h),
-
-                        // ── ACTION BUTTONS ────────────────────────────────────────
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-                          child: Obx(() {
-                            final busy = widget.actionLoading.value;
-                            return Column(
-                              children: [
-                                _ActionButton(
-                                  icon: _MyCopiesSvg.edit,
-                                  label: 'Edit Settings',
-                                  color: AppColors.textGrey,
-                                  enabled: !busy && canEdit,
-                                  onTap: widget.onEdit,
-                                ),
-                                SizedBox(height: 8.h),
-                                Row(
-                                  children: [
-                                    if (canPause)
-                                      Expanded(
-                                        child: _ActionButton(
-                                          icon: _MyCopiesSvg.pause,
-                                          label: 'Pause',
-                                          color: AppColors.warning,
-                                          enabled: !busy,
-                                          onTap: widget.onPause,
-                                        ),
-                                      )
-                                    else if (canResume)
-                                      Expanded(
-                                        child: _ActionButton(
-                                          icon: _MyCopiesSvg.play,
-                                          label: 'Resume',
-                                          color: AppColors.green,
-                                          enabled: !busy,
-                                          onTap: widget.onResume,
-                                        ),
-                                      )
-                                    else
-                                      const Expanded(child: SizedBox.shrink()),
-                                    if (canStop) ...[
-                                      if (canPause || canResume)
-                                        SizedBox(width: 8.w),
-                                      Expanded(
-                                        child: _ActionButton(
-                                          icon: _MyCopiesSvg.target,
-                                          label: 'Stop Copy',
-                                          color: AppColors.error,
-                                          enabled: !busy,
-                                          onTap: widget.onStop,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ],
-                            );
-                          }),
-                        ),
-                      ],
-                    )
-                    : const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuickStat extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color? valueColor;
-  const _QuickStat({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.valueColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 14.r, color: AppColors.textGrey),
-          SizedBox(width: 5.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+          // Detail line (Plan Name / Commission Type)
+          Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 2.h),
+            child: Text(
+              '${item.planName}  •  ${item.commissionDisplay}',
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: AppColors.textGrey,
+                fontWeight: FontWeight.w600,
               ),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w700,
-                  color: valueColor ?? AppColors.textPrimary,
+            ),
+          ),
+
+          // Compact metrics grid
+          Padding(
+            padding: EdgeInsets.all(12.r),
+            child: Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: [
+                _metricBox(
+                  cellWidth,
+                  'CAPITAL ALLOCATED',
+                  '\$${item.capitalAmount.toStringAsFixed(2)}',
                 ),
-              ),
-            ],
+                _metricBox(
+                  cellWidth,
+                  'COMBINED P&L',
+                  '\$${item.totalPnl.toStringAsFixed(2)}',
+                  valueColor:
+                      item.totalPnl >= 0 ? AppColors.green : AppColors.error,
+                ),
+                _metricBox(
+                  cellWidth,
+                  'COMMISSION PAID',
+                  '\$${item.totalCommissionPaid.toStringAsFixed(2)}',
+                ),
+                _metricBox(
+                  cellWidth,
+                  'OPEN TRADES',
+                  item.openTradesCount.toString(),
+                ),
+                _metricBox(
+                  cellWidth,
+                  'METHOD',
+                  item.sizingMethod.replaceAll('_', ' ').toUpperCase(),
+                ),
+                _metricBox(
+                  cellWidth,
+                  'LAST UPDATE',
+                  _formatDate(item.updatedAt),
+                ),
+                _metricBox(cellWidth, 'ACCOUNT', item.accountNumber),
+              ],
+            ),
+          ),
+
+          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.1)),
+
+          // Actions Row
+          Padding(
+            padding: EdgeInsets.all(8.r),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () async {
+                    final plan = CopyTradingPlan(
+                      id: item.planId,
+                      planId: item.planId,
+                      planName: item.planName,
+                      commissionType: 'per_trade',
+                      commissionLabel: '',
+                      commissionPercentage: 0,
+                      subscriptionFee: 0,
+                      minimumCapital: 0,
+                      copyRatio: item.copyRatio,
+                      isFull: false,
+                      noFeeDays: 0,
+                      subscriptionPeriodDays: 0,
+                      activeCopiersCount: 0,
+                      totalAum: 0,
+                      isEnrolled: false,
+                    );
+                    await Get.to(
+                      () => SubscribeToPlanScreen(
+                        masterCode: '',
+                        plan: plan,
+                        editSubscription: null,
+                      ),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 8.h,
+                    ),
+                  ),
+                  child: Text(
+                    'Edit Settings',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                if (canPauseResume) ...[
+                  SizedBox(width: 4.w),
+                  TextButton(
+                    onPressed: () => _togglePauseResume(context),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 8.h,
+                      ),
+                    ),
+                    child: Text(
+                      isPaused ? 'Resume' : 'Pause',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
+                        color: isPaused ? AppColors.green : AppColors.warning,
+                      ),
+                    ),
+                  ),
+                ],
+                if (canStop) ...[
+                  SizedBox(width: 8.w),
+                  ElevatedButton(
+                    onPressed: () => _stopCopier(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      foregroundColor: AppColors.whiteColor,
+                      elevation: 0,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 8.h,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                    ),
+                    child: Text(
+                      'Stop Copy',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
-}
 
-class _GridLabel extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? valueColor;
-  const _GridLabel({required this.label, required this.value, this.valueColor});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
+  Widget _metricBox(
+    double width,
+    String label,
+    String value, {
+    Color? valueColor,
+  }) {
+    return Container(
+      width: width,
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: AppColors.tradeBackgroundCenterColor.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.1)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: TextStyle(
-              fontSize: 10.sp,
+              fontSize: 8.sp,
+              fontWeight: FontWeight.w800,
               color: AppColors.textGrey,
-              fontWeight: FontWeight.w400,
+              letterSpacing: 0.3,
             ),
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 3.h),
           Text(
             value,
             style: TextStyle(
               fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: valueColor ?? AppColors.textPrimary,
             ),
             maxLines: 1,
@@ -1176,153 +837,98 @@ class _GridLabel extends StatelessWidget {
       ),
     );
   }
-}
 
-class _ActionButton extends StatelessWidget {
-  final String icon;
-  final String label;
-  final Color color;
-  final bool enabled;
-  final Future<void> Function() onTap;
+  void _togglePauseResume(BuildContext context) {
+    final actionText =
+        item.status.toLowerCase() == 'paused'
+            ? 'Resume copying'
+            : 'Pause copying';
+    final confirmationMessage =
+        item.status.toLowerCase() == 'paused'
+            ? 'Are you sure you want to resume copying for this investor?'
+            : 'Are you sure you want to pause copying for this investor? Copying will be suspended.';
 
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final effectiveColor =
-        enabled ? color : AppColors.textGrey.withOpacity(0.4);
-    return Material(
-      color: effectiveColor.withOpacity(enabled ? 0.1 : 0.05),
-      borderRadius: BorderRadius.circular(10.r),
-      child: InkWell(
-        onTap: enabled ? () => onTap() : null,
-        borderRadius: BorderRadius.circular(10.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 10.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                icon,
-                width: 18.r,
-                height: 18.r,
-                colorFilter: ColorFilter.mode(effectiveColor, BlendMode.srcIn),
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text(actionText),
+            content: Text(confirmationMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text('Cancel'),
               ),
-              SizedBox(width: 7.w),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: effectiveColor,
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  final res =
+                      item.status.toLowerCase() == 'paused'
+                          ? await controller.resume(item.id)
+                          : await controller.pause(item.id);
+                  if (res.success) {
+                    CustomToastService.showSuccess(
+                      title: 'Success',
+                      message: res.message ?? 'State updated successfully',
+                    );
+                  } else {
+                    CustomToastService.showError(
+                      title: 'Failed',
+                      message:
+                          res.message ??
+                          'Failed to update copier copying state',
+                    );
+                  }
+                },
+                child: Text(
+                  item.status.toLowerCase() == 'paused' ? 'Resume' : 'Pause',
+                  style: TextStyle(
+                    color:
+                        item.status.toLowerCase() == 'paused'
+                            ? AppColors.green
+                            : AppColors.warning,
+                  ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
     );
   }
-}
 
-class _StatusPill extends StatelessWidget {
-  final String text;
-  final Color color;
-
-  /// When true (e.g. Active): outlined badge with primary-style border, no fill.
-  final bool outline;
-  const _StatusPill({
-    required this.text,
-    required this.color,
-    this.outline = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: outline ? Colors.transparent : color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: outline ? color.withOpacity(0.55) : color.withOpacity(0.25),
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const _EmptyState({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.textGrey.withOpacity(0.18)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: AppTextStyles.black16600),
-          SizedBox(height: 6.h),
-          Text(subtitle, style: AppTextStyles.cardSubtitle),
-        ],
-      ),
-    );
-  }
-}
-
-class _InlineError extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-  const _InlineError({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(12.r),
-      decoration: BoxDecoration(
-        color: AppColors.error.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.error.withOpacity(0.18)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline, color: AppColors.error, size: 18.r),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTextStyles.caption.copyWith(color: AppColors.error),
+  void _stopCopier(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text('Stop Copy'),
+            content: Text(
+              'Are you sure you want to permanently stop copying for this investor? This action cannot be undone.',
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(ctx).pop();
+                  final res = await controller.stop(item.id);
+                  if (res.success) {
+                    CustomToastService.showSuccess(
+                      title: 'Success',
+                      message: res.message ?? 'Copier stopped successfully',
+                    );
+                  } else {
+                    CustomToastService.showError(
+                      title: 'Failed',
+                      message: res.message ?? 'Failed to stop copier',
+                    );
+                  }
+                },
+                child: Text('Stop', style: TextStyle(color: AppColors.error)),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: onRetry,
-            style: TextButton.styleFrom(padding: EdgeInsets.zero),
-            child: Text('Retry', style: AppTextStyles.textButton),
-          ),
-        ],
-      ),
     );
   }
 }

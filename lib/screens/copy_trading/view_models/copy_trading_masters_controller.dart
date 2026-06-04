@@ -138,3 +138,4 @@ class CopyTradingMastersController extends GetxController {
     }
   }
 }
+

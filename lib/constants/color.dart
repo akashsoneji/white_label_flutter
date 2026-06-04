@@ -355,4 +355,10 @@ class AppColors {
 
   /// @deprecated Use `successText` instead
   static const Color successTextLight = Color(0xFF15803D);
+
+  // Copy Trading compatibility properties
+  static const Color quickActionPurple = Color(0xFF9C27B0);
+  static Color get errorText => isDarkMode ? const Color(0xFFEF9999) : const Color(0xFFD32F2F);
+  static Color shadowAlpha(double alpha) => textPrimary.withValues(alpha: alpha);
+  static Color get switchTrackOff => isDarkMode ? const Color(0xFF505050) : const Color(0xFFDCDCDC);
 }

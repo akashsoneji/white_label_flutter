@@ -366,3 +366,4 @@ class CopyTradingMasterPlanDetailController extends GetxController {
     }
   }
 }
+

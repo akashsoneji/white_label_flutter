@@ -1,5 +1,6 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_hub_controller.dart';
@@ -11,7 +12,6 @@ import 'explore_masters_screen.dart';
 import 'master_dashboard_screen.dart';
 import 'my_copies_screen.dart';
 import 'my_investments_screen.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 
 class CopyTradingHubScreen extends StatelessWidget {
   const CopyTradingHubScreen({super.key});
@@ -21,10 +21,10 @@ class CopyTradingHubScreen extends StatelessWidget {
     final controller = Get.put(CopyTradingHubController());
 
     return Scaffold(
-      backgroundColor: AppColors.tradeBackgroundCenterColor,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        backgroundColor: AppColors.tradeBackgroundCenterColor,
+        backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -35,12 +35,16 @@ class CopyTradingHubScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading: const AppBackButton(),
+        leading: AppBackButton(
+          onPressed: () => AppBackButton.popRoute(context),
+          
+          
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () => controller.refreshAll(showLoading: false),
         child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
           child: Obx(() {
             final status = controller.masterStatus.value;
@@ -52,33 +56,33 @@ class CopyTradingHubScreen extends StatelessWidget {
                   icon: Icons.access_time,
                   label: 'Pending Review',
                   subtitle: code.isEmpty ? null : 'Code: $code',
-                  trailing: _StatusPill(text: 'Pending', color: AppColors.statusYellow),
+                  trailing: _StatusPill(text: 'Pending', color: AppColors.warning),
                   onTap: () => Get.to(() => _PendingReviewScreen(masterCode: code)),
                 ),
               CopyTradingMasterApplicationStatus.approved => _HubMenuItem(
                   icon: Icons.verified,
                   label: 'Master Dashboard',
                   subtitle: code.isEmpty ? null : 'Code: $code',
-                  trailing: _StatusPill(text: 'Active', color: AppColors.statusGreen),
+                  trailing: _StatusPill(text: 'Active', color: AppColors.green),
                   onTap: () => Get.to(() => MasterDashboardScreen(masterCode: code)),
                 ),
               CopyTradingMasterApplicationStatus.rejected => _HubMenuItem(
                   icon: Icons.error_outline,
                   label: 'Become a Master',
                   subtitle: 'Application rejected — apply again',
-                  trailing: _StatusPill(text: 'Rejected', color: AppColors.statusRed),
-                  onTap: () => Get.to(() => const _BecomeMasterScreen()),
+                  trailing: _StatusPill(text: 'Rejected', color: AppColors.error),
+                  onTap: () => Get.to(() => _BecomeMasterScreen()),
                 ),
               CopyTradingMasterApplicationStatus.unknown => _HubMenuItem(
                   icon: Icons.help_outline,
                   label: 'Become a Master',
                   subtitle: 'Status unknown — try refresh',
-                  onTap: () => Get.to(() => const _BecomeMasterScreen()),
+                  onTap: () => Get.to(() => _BecomeMasterScreen()),
                 ),
               _ => _HubMenuItem(
                   icon: Icons.tune,
                   label: 'Become a Master',
-                  onTap: () => Get.to(() => const _BecomeMasterScreen()),
+                  onTap: () => Get.to(() => _BecomeMasterScreen()),
                 ),
             };
 
@@ -90,13 +94,13 @@ class CopyTradingHubScreen extends StatelessWidget {
                     margin: EdgeInsets.only(bottom: 12.h),
                     padding: EdgeInsets.all(12.r),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.06),
+                      color: AppColors.error.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.red.withOpacity(0.15)),
+                      border: Border.all(color: AppColors.error.withValues(alpha: 0.15)),
                     ),
                     child: Text(
                       controller.errorMessage.value,
-                      style: TextStyle(color: Colors.red.shade700, fontSize: 12.sp),
+                      style: TextStyle(color: AppColors.errorText, fontSize: 12.sp),
                     ),
                   ),
 
@@ -105,23 +109,21 @@ class CopyTradingHubScreen extends StatelessWidget {
                     _HubMenuItem(
                       icon: Icons.explore_outlined,
                       label: 'Explore Masters',
-                      onTap: () => Get.to(() => const ExploreMastersScreen()),
+                      onTap: () => Get.to(() => ExploreMastersScreen()),
                     ),
                     _divider(),
                     _HubMenuItem(
                       icon: Icons.copy_all_outlined,
-                      label: status == CopyTradingMasterApplicationStatus.approved
-                          ? 'My Copies'
-                          : 'My Investments',
+                      label: status == CopyTradingMasterApplicationStatus.approved ? 'My Copies' : 'My Investments',
                       trailing:
                           hasSubs
-                              ? const _StatusPill(text: 'Active', color: AppColors.statusGreen)
-                              : const _StatusPill(text: 'None', color: AppColors.statusGrey),
+                              ? _StatusPill(text: 'Active', color: AppColors.green)
+                              : _StatusPill(text: 'None', color: AppColors.textGrey),
                       onTap: () {
                         if (status == CopyTradingMasterApplicationStatus.approved) {
-                          Get.to(() => const MyCopiesScreen());
+                          Get.to(() => MyCopiesScreen());
                         } else {
-                          Get.to(() => const MyInvestmentsScreen());
+                          Get.to(() => MyInvestmentsScreen());
                         }
                       },
                     ),
@@ -152,7 +154,7 @@ class CopyTradingHubScreen extends StatelessWidget {
 
   Widget _divider() => Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
-        child: Divider(height: 1, thickness: 0.5, color: AppColors.textGrey.withOpacity(0.22)),
+        child: Divider(height: 1, thickness: 0.5, color: AppColors.icongrey.withValues(alpha: 0.14)),
       );
 }
 
@@ -166,12 +168,12 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.textGrey.withOpacity(0.18)),
+        border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: AppColors.border.withValues(alpha: 0.03),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -280,8 +282,7 @@ class _PendingReviewScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: const AppBackButton(),
-        title: const Text('Pending Review'),
+        title: Text('Pending Review'),
       ),
       body: Center(
         child: Container(
@@ -290,12 +291,12 @@ class _PendingReviewScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.card,
             borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: AppColors.textGrey.withOpacity(0.18)),
+            border: Border.all(color: AppColors.border),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.access_time, size: 42.r, color: AppColors.statusYellow),
+              Icon(Icons.access_time, size: 42.r, color: AppColors.warning),
               SizedBox(height: 10.h),
               Text(
                 'Your master application is under review.',
@@ -309,8 +310,14 @@ class _PendingReviewScreen extends StatelessWidget {
               SizedBox(height: 14.h),
               ElevatedButton(
                 onPressed: () => Get.back(),
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                child: const Text('OK'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor:
+                      AppColors.primary.computeLuminance() > 0.5
+                          ? AppColors.textPrimaryLight
+                          : AppColors.onColoredBackground,
+                ),
+                child: Text('OK'),
               ),
             ],
           ),
@@ -321,7 +328,7 @@ class _PendingReviewScreen extends StatelessWidget {
 }
 
 class _BecomeMasterScreen extends StatefulWidget {
-  const _BecomeMasterScreen();
+  _BecomeMasterScreen();
 
   @override
   State<_BecomeMasterScreen> createState() => _BecomeMasterScreenState();
@@ -329,6 +336,8 @@ class _BecomeMasterScreen extends StatefulWidget {
 
 class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
   final _nicknameCtrl = TextEditingController();
+  final _strategyCtrl = TextEditingController();
+  final _riskInfoCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -336,12 +345,15 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
     final hub = Get.find<CopyTradingHubController>();
     hub.resetMasterApplyForm();
     _nicknameCtrl.clear();
-    WidgetsBinding.instance.addPostFrameCallback((_) => hub.loadEligibleAccountsForMasterApply());
+    _strategyCtrl.clear();
+    _riskInfoCtrl.clear();
   }
 
   @override
   void dispose() {
     _nicknameCtrl.dispose();
+    _strategyCtrl.dispose();
+    _riskInfoCtrl.dispose();
     super.dispose();
   }
 
@@ -354,101 +366,64 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-         leading: const AppBackButton(),
+         leading: AppBackButton(
+          onPressed: () => AppBackButton.popRoute(context),
+        ),
         title: Text('Become a Master', style: AppTextStyles.screenTitle),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.r),
         child: Obx(() {
-          hub.masterApplyEligibleLoading.value;
-          hub.masterApplyEligibleAccounts.length;
-          hub.masterApplyEligibleError.value;
-          hub.masterApplySelectedAccountId.value;
           hub.masterApplyNicknameDraft.value;
+          hub.masterApplyStrategyDraft.value;
+          hub.masterApplyRiskInfoDraft.value;
           hub.masterApplyTermsAccepted.value;
           hub.isLoading.value;
 
-          final eligibleLoading = hub.masterApplyEligibleLoading.value;
-          final accounts = hub.masterApplyEligibleAccounts;
-          final err = hub.masterApplyEligibleError.value;
           final canSubmit = hub.canSubmitMasterApply;
           final applying = hub.isLoading.value;
+          final applyBtnFg =
+              AppColors.primary.computeLuminance() > 0.5
+                  ? AppColors.textPrimaryLight
+                  : AppColors.onColoredBackground;
+          final isDark = AppColors.isDarkMode;
+          final checkBorder = isDark ? AppColors.textPrimaryDark : AppColors.primary;
+          final checkFill = isDark ? AppColors.textPrimaryDark : AppColors.primary;
+          final checkMark = isDark ? AppColors.textPrimaryLight : AppColors.onColoredBackground;
 
           return Container(
             padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
               color: AppColors.card,
               borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(color: AppColors.textGrey.withOpacity(0.18)),
+              border: Border.all(color: AppColors.border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Trading account *',
-                  style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600),
-                ),
-                SizedBox(height: 8.h),
-                if (eligibleLoading)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24.h),
-                    child: Center(
-                      child: SizedBox(
-                        width: 22.r,
-                        height: 22.r,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-                      ),
-                    ),
-                  )
-                else if (accounts.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 8.h),
-                    child: Text(
-                      err.isNotEmpty ? err : 'No eligible accounts found.',
-                      style: AppTextStyles.cardSubtitle.copyWith(color: AppColors.textGrey),
-                    ),
-                  )
-                else
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 2.h),
-                    decoration: BoxDecoration(
-                      color: AppColors.whiteColor,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.grey.withOpacity(0.15)),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<int?>(
-                        value: hub.masterApplySelectedAccountId.value,
-                        isExpanded: true,
-                        hint: Text('-- Select account --', style: AppTextStyles.black14500.copyWith(color: AppColors.textGrey)),
-                        items: accounts
-                            .map(
-                              (a) => DropdownMenuItem<int>(
-                                value: a.id,
-                                child: Text(
-                                  '${a.metaAccountNumber} · ${a.accountType} · ${r'$'}${a.equity.toStringAsFixed(2)}',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.black14500,
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (v) => hub.masterApplySelectedAccountId.value = v,
-                      ),
-                    ),
-                  ),
-                if (err.isNotEmpty && accounts.isNotEmpty) ...[
-                  SizedBox(height: 8.h),
-                  Text(err, style: AppTextStyles.caption.copyWith(color: AppColors.textGrey)),
-                ],
-                SizedBox(height: 16.h),
+
                 LabeledAppTextField(
                   label: 'Nickname *',
                   controller: _nicknameCtrl,
                   keyboardType: TextInputType.text,
-                  // hintText: 'e.g. ',
+                  hintText: 'e.g. Alpha Trader',
                   onChanged: (s) => hub.masterApplyNicknameDraft.value = s,
+                ),
+                SizedBox(height: 16.h),
+                LabeledAppTextField(
+                  label: 'Strategy Description *',
+                  controller: _strategyCtrl,
+                  keyboardType: TextInputType.text,
+                  hintText: 'e.g. Conservative gold scalping strategy',
+                  onChanged: (s) => hub.masterApplyStrategyDraft.value = s,
+                ),
+                SizedBox(height: 16.h),
+                LabeledAppTextField(
+                  label: 'Risk Info *',
+                  controller: _riskInfoCtrl,
+                  keyboardType: TextInputType.text,
+                  hintText: 'e.g. Drawdown can reach up to 15%.',
+                  onChanged: (s) => hub.masterApplyRiskInfoDraft.value = s,
                 ),
                 SizedBox(height: 12.h),
                 Row(
@@ -458,13 +433,22 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
                       width: 26.r,
                       height: 26.r,
                       child: Checkbox(
-                        activeColor: AppColors.primary,
                         value: hub.masterApplyTermsAccepted.value,
+                        side: BorderSide(color: checkBorder, width: 1.5),
+                        fillColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return checkFill;
+                          }
+                          return Colors.transparent;
+                        }),
+                        checkColor: checkMark,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
                         onChanged: (v) => hub.masterApplyTermsAccepted.value = v ?? false,
                       ),
                     ),
                     Padding(
-                      padding:   EdgeInsets.only(left:4.w),
+                      padding: EdgeInsets.only(left: 4.w),
                       child: Text(
                         'I accept the Terms & Conditions',
                         style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
@@ -480,34 +464,36 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
                   child: ElevatedButton(
                     onPressed: canSubmit && !applying
                         ? () async {
-                            final id = hub.masterApplySelectedAccountId.value!;
                             final nick = hub.masterApplyNicknameDraft.value.trim();
+                            final strategy = hub.masterApplyStrategyDraft.value.trim();
+                            final riskInfo = hub.masterApplyRiskInfoDraft.value.trim();
                             final res = await hub.applyForMaster(
-                              mt5AccountId: id,
                               nickname: nick,
                               termsAccepted: hub.masterApplyTermsAccepted.value,
+                              strategy: strategy,
+                              riskInfo: riskInfo,
                             );
                             if (res.success) {
                               Get.back();
                               CustomToastService.showSuccess(
                                 title: 'Submitted',
                                 message: res.message ?? 'Application submitted',
-                                duration: const Duration(milliseconds: 2500),
+                                duration: Duration(milliseconds: 2500),
                               );
                             } else {
                               CustomToastService.showError(
                                 title: 'Failed',
                                 message: res.message ?? hub.errorMessage.value,
-                                duration: const Duration(milliseconds: 2500),
+                                duration: Duration(milliseconds: 2500),
                               );
                             }
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: AppColors.textGrey.withOpacity(0.35),
-                      disabledForegroundColor: Colors.white.withOpacity(0.85),
+                      foregroundColor: applyBtnFg,
+                      disabledBackgroundColor: AppColors.textGrey.withValues(alpha: 0.35),
+                      disabledForegroundColor: applyBtnFg.withValues(alpha: 0.45),
                       padding: EdgeInsets.zero,
                       minimumSize: Size(double.infinity, 44.h),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -517,9 +503,15 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
                         ? SizedBox(
                             width: 20.r,
                             height: 20.r,
-                            child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: applyBtnFg,
+                            ),
                           )
-                        : Text('Apply', style: AppTextStyles.button),
+                        : Text(
+                            'Apply',
+                            style: AppTextStyles.button.copyWith(color: applyBtnFg),
+                          ),
                   ),
                 ),
               ],

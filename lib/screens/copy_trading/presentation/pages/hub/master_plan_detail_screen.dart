@@ -1,10 +1,11 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_plan_detail_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:intl/intl.dart';
 
 class MasterPlanDetailScreen extends StatelessWidget {
   final int planId;
@@ -25,14 +26,18 @@ class MasterPlanDetailScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text('Plan Details', style: AppTextStyles.heading),
-        leading: const AppBackButton(),
+        leading: AppBackButton(
+          onPressed: () => AppBackButton.popRoute(context),
+          
+          
+        ),
       ),
       body: GetBuilder<CopyTradingMasterPlanDetailController>(
         tag: 'planDetail:$planId',
         builder: (_) {
           final c = controller;
           if (c.isLoading.value && c.detail.value == null) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           if (c.errorMessage.value.isNotEmpty && c.detail.value == null) {
@@ -42,13 +47,23 @@ class MasterPlanDetailScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error_outline, size: 40.r, color: AppColors.error),
+                    Icon(
+                      Icons.error_outline,
+                      size: 40.r,
+                      color: AppColors.error,
+                    ),
                     SizedBox(height: 10.h),
-                    Text(c.errorMessage.value, textAlign: TextAlign.center, style: AppTextStyles.error),
+                    Text(
+                      c.errorMessage.value,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.error,
+                    ),
                     SizedBox(height: 12.h),
                     ElevatedButton(
                       onPressed: () => c.loadPlanDetail(showLoading: true),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                      ),
                       child: Text('Retry', style: AppTextStyles.button),
                     ),
                   ],
@@ -65,151 +80,229 @@ class MasterPlanDetailScreen extends StatelessWidget {
           }
 
           final status = d.status.toLowerCase();
-          final statusColor = status == 'approved'
-              ? AppColors.statusGreen
-              : status.contains('inactive')
-                  ? AppColors.statusGrey
+          final statusColor =
+              (status == 'approved' || status == 'active')
+                  ? AppColors.green
+                  : status.contains('inactive')
+                  ? AppColors.textGrey
                   : status.contains('pending')
-                      ? AppColors.statusYellow
-                      : AppColors.statusRed;
+                  ? AppColors.warning
+                  : AppColors.error;
 
-          return DefaultTabController(
-            length: 2,
-            child: NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
-                      child: Container(
-                        padding: EdgeInsets.all(14.r),
-                        decoration: BoxDecoration(
-                          color: AppColors.whiteColor,
-                          borderRadius: BorderRadius.circular(14.r),
-                          border: Border.all(color: Colors.grey.withOpacity(0.15)),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+          return NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    d.planName.isNotEmpty ? d.planName : 'Plan ${d.id}',
-                                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                                  ),
+                            Expanded(
+                              child: Text(
+                                d.planName.isNotEmpty
+                                    ? d.planName
+                                    : 'Plan ${d.id}',
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textPrimary,
                                 ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                                  decoration: BoxDecoration(
-                                    color: statusColor.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                  child: Text(
-                                    d.status,
-                                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: statusColor),
-                                  ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 4.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              child: Text(
+                                d.status.toLowerCase() == 'pending_admin'
+                                    ? 'Pending Review'
+                                    : d.status,
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: statusColor,
                                 ),
-                              ],
-                            ),
-                            SizedBox(height: 10.h),
-                            _DetailRow(
-                              label: 'Commission',
-                              value: d.commissionLabel.isNotEmpty
-                                  ? d.commissionLabel
-                                  : (d.commissionType.isNotEmpty ? '${d.commissionType} (${d.commissionPercentage}%)' : '—'),
-                            ),
-                            _DetailRow(label: 'Subscription Fee', value: '\$${d.subscriptionFee.toStringAsFixed(2)}'),
-                            _DetailRow(label: 'Period (days)', value: d.subscriptionPeriodDays.toString()),
-                            _DetailRow(label: 'No-fee days', value: d.noFeeDays.toString()),
-                            _DetailRow(label: 'Min capital', value: '\$${d.minimumCapital.toStringAsFixed(2)}'),
-                            _DetailRow(label: 'Copy ratio', value: d.copyRatio.toString()),
-                            _DetailRow(label: 'Active copiers', value: d.activeCopiers.toString()),
-                            _DetailRow(label: 'Open positions', value: d.openPositions.toString()),
-                            _DetailRow(label: 'Total capital', value: '\$${d.totalCapital.toStringAsFixed(2)}'),
-                            _DetailRow(label: 'Commission earned', value: '\$${d.totalCommissionEarned.toStringAsFixed(2)}'),
-                            SizedBox(height: 6.h),
-                            Text(
-                              'TP/SL (pips)',
-                              style: AppTextStyles.cardSubtitle.copyWith(fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                            ),
-                            SizedBox(height: 6.h),
-                            Row(
-                              children: [
-                                Expanded(child: _DetailRow(label: 'Take Profit', value: d.takeProfitPips.toString())),
-                                SizedBox(width: 12.w),
-                                Expanded(child: _DetailRow(label: 'Stop Loss', value: d.stopLossPips.toString())),
-                              ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
+                        SizedBox(height: 14.h),
+
+                        // Top metrics grid
+                        _buildTopMetricsGrid(d),
+                        SizedBox(height: 14.h),
+
+                        // Commission & fees card
+                        _DetailSectionCard(
+                          title: 'Commission & fees',
+                          children: [
+                            _DetailRowWithDesc(
+                              label: 'Commission',
+                              value:
+                                  d.commissionLabel.isNotEmpty
+                                      ? d.commissionLabel
+                                      : (d.commissionPercentage > 0
+                                          ? '${d.commissionPercentage}% commission on profit'
+                                          : 'No fee'),
+                              desc: 'What copiers pay according to this plan.',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Commission type',
+                              value:
+                                  d.commissionType == 'per_trade'
+                                      ? 'Per trade'
+                                      : d.commissionType.capitalizeFirst ??
+                                          d.commissionType,
+                              desc: 'Per profitable trade vs subscription.',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Grace period (no fee)',
+                              value: '${d.noFeeDays} days',
+                              desc:
+                                  'Days after join with no commission on trades.',
+                            ),
+                          ],
+                        ),
+
+                        // Copier rules card
+                        _DetailSectionCard(
+                          title: 'Copier rules',
+                          children: [
+                            _DetailRowWithDesc(
+                              label: 'Min. capital',
+                              value: '\$${d.minimumCapital.toStringAsFixed(2)}',
+                              desc: 'Minimum balance to subscribe.',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Copy ratio',
+                              value: d.copyRatio.toString(),
+                              desc: 'Volume scaling for copiers.',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Max copiers',
+                              value:
+                                  d.maxCopiers > 0
+                                      ? d.maxCopiers.toString()
+                                      : 'Unlimited',
+                              desc:
+                                  'Cap on concurrent copiers (empty = unlimited).',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Active / cap',
+                              value:
+                                  '${d.activeCopiers} / ${d.maxCopiers > 0 ? d.maxCopiers.toString() : ''}',
+                              desc: 'Current copiers vs limit.',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Plan full',
+                              value: d.isFull ? 'Yes' : 'No',
+                              desc: 'No new copiers until someone leaves.',
+                            ),
+                          ],
+                        ),
+
+                        // Strategy & risk disclosure card
+                        _DetailSectionCard(
+                          title: 'Strategy & risk disclosure',
+                          children: [
+                            _DisclosureRow(
+                              title: 'Strategy description',
+                              content:
+                                  d.strategyDescription.trim().isNotEmpty
+                                      ? d.strategyDescription
+                                      : '— Not provided. Edit the plan to add a public description for copiers.',
+                            ),
+                            _DisclosureRow(
+                              title: 'Risk information',
+                              content:
+                                  d.riskInformation.trim().isNotEmpty
+                                      ? d.riskInformation
+                                      : '— Not provided. Edit the plan to disclose drawdown and risk.',
+                            ),
+                          ],
+                        ),
+
+                        // Account & system card
+                        _DetailSectionCard(
+                          title: 'Account & system',
+                          children: [
+                            _DetailRowWithDesc(
+                              label: 'Status',
+                              value:
+                                  d.status.toLowerCase() == 'pending_admin'
+                                      ? 'Pending Review'
+                                      : d.status,
+                              desc: 'Broker / admin approval state.',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Server / LP',
+                              value:
+                                  d.lpProviderName.isNotEmpty
+                                      ? d.lpProviderName
+                                      : d.tradingServer,
+                              desc: 'Execution routing label.',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Trading account',
+                              value: d.tradingAccountNumber,
+                              desc: 'Account number used for this plan.',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Initial equity snapshot',
+                              value:
+                                  '\$${d.initialEquitySnapshot.isNotEmpty ? double.tryParse(d.initialEquitySnapshot)?.toStringAsFixed(2) ?? d.initialEquitySnapshot : '0.00'}',
+                              desc:
+                                  'Captured when the plan was approved (if recorded).',
+                            ),
+                            _DetailRowWithDesc(
+                              label: 'Created',
+                              value: _formatDate(d.createdAt),
+                              desc: 'Plan creation timestamp.',
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
-                      child: Row(
-                        children: [
-                          Icon(Icons.filter_list, size: 18.r, color: AppColors.textGrey),
-                          SizedBox(width: 6.w),
-                          Expanded(
-                            child: Text(
-                              'Trade & Commission History',
-                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.filter_list,
+                          size: 18.r,
+                          color: AppColors.textGrey,
+                        ),
+                        SizedBox(width: 6.w),
+                        Expanded(
+                          child: Text(
+                            'Trade History',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _TabHeaderDelegate(
-                      height: 48.h,
-                      child: Container(
-                        color: AppColors.tradeBackgroundCenterColor,
-                        padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 0),
-                        child: Container(
-                          padding: EdgeInsets.all(4.r),
-                          decoration: BoxDecoration(
-                            color: AppColors.whiteColor,
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(color: Colors.grey.withOpacity(0.12)),
-                          ),
-                          child: TabBar(
-                            indicatorSize: TabBarIndicatorSize.tab,
-                            indicator: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                            labelPadding: EdgeInsets.zero,
-                            labelColor: AppColors.primary,
-                            unselectedLabelColor: AppColors.textGrey,
-                            labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
-                            unselectedLabelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
-                            dividerColor: Colors.transparent,
-                            tabs: const [
-                              Tab(text: 'Trades'),
-                              Tab(text: 'Commissions'),
-                            ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                ];
-              },
-              body: Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
-                child: TabBarView(
-                  children: [
-                    _TradesTab(trades: d.tradeHistory),
-                    _CommissionsTab(commissions: d.commissionHistory),
-                  ],
                 ),
-              ),
+              ];
+            },
+            body: Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
+              child: _TradesTab(trades: d.tradeHistory),
             ),
           );
         },
@@ -229,7 +322,7 @@ class _EmptyCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
       ),
       child: Text(message, style: AppTextStyles.caption),
     );
@@ -248,24 +341,135 @@ class _TradesTabState extends State<_TradesTab> {
   String? _symbol;
   String? _direction; // buy/sell
   String? _copierKey; // "account|name"
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _sort = 'newest'; // newest | oldest | profit_desc | profit_asc | volume_desc
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final symbols = _uniqueSorted(widget.trades.map((e) => e.symbol).where((s) => s.trim().isNotEmpty));
+    final symbols = _uniqueSorted(
+      widget.trades.map((e) => e.symbol).where((s) => s.trim().isNotEmpty),
+    );
     final copiers = _uniqueSorted(
-      widget.trades.map((e) => '${e.copierAccount}|${e.copierName}').where((s) => s.trim().isNotEmpty),
+      widget.trades
+          .map((e) => '${e.copierAccount}|${e.copierName}')
+          .where((s) => s.trim().isNotEmpty),
     );
 
-    final filtered = widget.trades.where((t) {
-      if (_symbol != null && t.symbol != _symbol) return false;
-      if (_direction != null && t.direction.toLowerCase() != _direction) return false;
-      if (_copierKey != null && '${t.copierAccount}|${t.copierName}' != _copierKey) return false;
-      return true;
-    }).toList();
+    final query = _searchCtrl.text.trim().toLowerCase();
+    final filtered =
+        widget.trades.where((t) {
+          if (_symbol != null && t.symbol != _symbol) return false;
+          if (_direction != null && t.direction.toLowerCase() != _direction)
+            return false;
+          if (_copierKey != null &&
+              '${t.copierAccount}|${t.copierName}' != _copierKey)
+            return false;
+          if (query.isNotEmpty) {
+            final hay = '${t.symbol} ${t.direction} ${t.copierAccount} ${t.copierName} ${t.status}'.toLowerCase();
+            if (!hay.contains(query)) return false;
+          }
+          return true;
+        }).toList();
+
+    int cmpByTime(CopyTradingMasterTradeHistoryItem a, CopyTradingMasterTradeHistoryItem b) {
+      return a.openTime.compareTo(b.openTime);
+    }
+    switch (_sort) {
+      case 'oldest':
+        filtered.sort((a, b) => cmpByTime(a, b));
+        break;
+      case 'profit_desc':
+        filtered.sort((a, b) => b.masterProfit.toDouble().compareTo(a.masterProfit.toDouble()));
+        break;
+      case 'profit_asc':
+        filtered.sort((a, b) => a.masterProfit.toDouble().compareTo(b.masterProfit.toDouble()));
+        break;
+      case 'volume_desc':
+        filtered.sort((a, b) => b.masterVolume.toDouble().compareTo(a.masterVolume.toDouble()));
+        break;
+      case 'newest':
+      default:
+        filtered.sort((a, b) => cmpByTime(b, a));
+        break;
+    }
 
     return ListView(
       padding: EdgeInsets.zero,
       children: [
+        // Search bar
+        Container(
+          height: 42.h,
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          decoration: BoxDecoration(
+            color: AppColors.whiteColor,
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.search, size: 18.r, color: AppColors.textGrey),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: TextField(
+                  controller: _searchCtrl,
+                  onChanged: (_) => setState(() {}),
+                  textInputAction: TextInputAction.search,
+                  style: TextStyle(fontSize: 13.sp, color: AppColors.textPrimary),
+                  decoration: InputDecoration(
+                    isCollapsed: true,
+                    border: InputBorder.none,
+                    hintText: 'Search symbol, copier, status…',
+                    hintStyle: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+                  ),
+                ),
+              ),
+              if (_searchCtrl.text.isNotEmpty)
+                GestureDetector(
+                  onTap: () {
+                    _searchCtrl.clear();
+                    setState(() {});
+                  },
+                  child: Icon(Icons.close, size: 16.r, color: AppColors.textGrey),
+                ),
+            ],
+          ),
+        ),
+        SizedBox(height: 10.h),
+
+        // Sort row
+        Row(
+          children: [
+            Icon(Icons.swap_vert, size: 16.r, color: AppColors.textGrey),
+            SizedBox(width: 6.w),
+            Text(
+              'Sort:',
+              style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600),
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _sortChip('newest', 'Newest'),
+                    _sortChip('oldest', 'Oldest'),
+                    _sortChip('profit_desc', 'Profit ↓'),
+                    _sortChip('profit_asc', 'Profit ↑'),
+                    _sortChip('volume_desc', 'Volume ↓'),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 10.h),
+
         _FilterRow(
           symbolValue: _symbol,
           directionValue: _direction,
@@ -280,72 +484,47 @@ class _TradesTabState extends State<_TradesTab> {
             if (name.isEmpty) return acc.isNotEmpty ? acc : 'Copier';
             return acc.isNotEmpty ? '$acc ($name)' : name;
           },
-          onChanged: (s, d, c) => setState(() {
-            _symbol = s;
-            _direction = d;
-            _copierKey = c;
-          }),
-        ),
-        SizedBox(height: 10.h),
-        if (filtered.isEmpty) _EmptyCard(message: 'No trades found') else ...filtered.map((t) => _TradeHistoryCard(item: t)),
-      ],
-    );
-  }
-}
-
-class _CommissionsTab extends StatefulWidget {
-  final List<CopyTradingMasterCommissionHistoryItem> commissions;
-  const _CommissionsTab({required this.commissions});
-
-  @override
-  State<_CommissionsTab> createState() => _CommissionsTabState();
-}
-
-class _CommissionsTabState extends State<_CommissionsTab> {
-  String? _symbol;
-  String? _copierKey; // "account|name"
-
-  @override
-  Widget build(BuildContext context) {
-    final symbols = _uniqueSorted(widget.commissions.map((e) => e.symbol).where((s) => s.trim().isNotEmpty));
-    final copiers = _uniqueSorted(
-      widget.commissions.map((e) => '${e.copierAccount}|${e.copierName}').where((s) => s.trim().isNotEmpty),
-    );
-
-    final filtered = widget.commissions.where((x) {
-      if (_symbol != null && x.symbol != _symbol) return false;
-      if (_copierKey != null && '${x.copierAccount}|${x.copierName}' != _copierKey) return false;
-      return true;
-    }).toList();
-
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        _FilterRow(
-          symbolValue: _symbol,
-          directionValue: null,
-          copierValue: _copierKey,
-          symbols: symbols,
-          directions: const [],
-          copiers: copiers,
-          copierLabelBuilder: (key) {
-            final parts = key.split('|');
-            final acc = (parts.isNotEmpty ? parts[0] : '').trim();
-            final name = (parts.length > 1 ? parts[1] : '').trim();
-            if (name.isEmpty) return acc.isNotEmpty ? acc : 'Copier';
-            return acc.isNotEmpty ? '$acc ($name)' : name;
-          },
-          onChanged: (s, d, c) => setState(() {
-            _symbol = s;
-            _copierKey = c;
-          }),
+          onChanged:
+              (s, d, c) => setState(() {
+                _symbol = s;
+                _direction = d;
+                _copierKey = c;
+              }),
         ),
         SizedBox(height: 10.h),
         if (filtered.isEmpty)
-          _EmptyCard(message: 'No commissions found')
+          _EmptyCard(message: 'No trades found')
         else
-          ...filtered.map((x) => _CommissionHistoryCard(item: x)),
+          ...filtered.map((t) => _TradeHistoryCard(item: t)),
       ],
+    );
+  }
+
+  Widget _sortChip(String value, String label) {
+    final selected = _sort == value;
+    return Padding(
+      padding: EdgeInsets.only(right: 6.w),
+      child: GestureDetector(
+        onTap: () => setState(() => _sort = value),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.primary.withValues(alpha: 0.12) : AppColors.whiteColor,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: selected ? AppColors.primary.withValues(alpha: 0.4) : AppColors.border.withValues(alpha: 0.15),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w700,
+              color: selected ? AppColors.primary : AppColors.textGrey,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -358,7 +537,8 @@ class _FilterRow extends StatelessWidget {
   final List<String> directions;
   final List<String> copiers;
   final String Function(String key) copierLabelBuilder;
-  final void Function(String? symbol, String? direction, String? copier) onChanged;
+  final void Function(String? symbol, String? direction, String? copier)
+  onChanged;
 
   const _FilterRow({
     required this.symbolValue,
@@ -386,22 +566,23 @@ class _FilterRow extends StatelessWidget {
         ),
         SizedBox(width: 10.w),
         Expanded(
-          child: directions.isEmpty
-              ? _DropdownFilter(
-                  title: 'All Directions',
-                  value: null,
-                  items: const [],
-                  itemLabelBuilder: (s) => s,
-                  enabled: false,
-                  onChanged: (_) {},
-                )
-              : _DropdownFilter(
-                  title: 'All Directions',
-                  value: directionValue,
-                  items: directions,
-                  itemLabelBuilder: (s) => s.toUpperCase(),
-                  onChanged: (v) => onChanged(symbolValue, v, copierValue),
-                ),
+          child:
+              directions.isEmpty
+                  ? _DropdownFilter(
+                    title: 'All Directions',
+                    value: null,
+                    items: const [],
+                    itemLabelBuilder: (s) => s,
+                    enabled: false,
+                    onChanged: (_) {},
+                  )
+                  : _DropdownFilter(
+                    title: 'All Directions',
+                    value: directionValue,
+                    items: directions,
+                    itemLabelBuilder: (s) => s.toUpperCase(),
+                    onChanged: (v) => onChanged(symbolValue, v, copierValue),
+                  ),
         ),
         SizedBox(width: 10.w),
         Expanded(
@@ -446,14 +627,28 @@ class _DropdownFilter extends StatelessWidget {
         final list = <PopupMenuEntry<String?>>[
           PopupMenuItem<String?>(
             value: null,
-            child: Text(title, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
         ];
         for (final it in items) {
           list.add(
             PopupMenuItem<String?>(
               value: it,
-              child: Text(itemLabelBuilder(it), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+              child: Text(
+                itemLabelBuilder(it),
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
             ),
           );
         }
@@ -462,9 +657,12 @@ class _DropdownFilter extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: enabled ? AppColors.whiteColor : AppColors.whiteColor.withOpacity(0.65),
+          color:
+              enabled
+                  ? AppColors.whiteColor
+                  : AppColors.whiteColor.withOpacity(0.65),
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: Colors.grey.withOpacity(0.18)),
+          border: Border.all(color: AppColors.border.withValues(alpha: 0.18)),
         ),
         child: Row(
           children: [
@@ -481,7 +679,14 @@ class _DropdownFilter extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            Icon(Icons.keyboard_arrow_down, size: 18.r, color: enabled ? AppColors.textGrey : AppColors.textGrey.withOpacity(0.7)),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: 18.r,
+              color:
+                  enabled
+                      ? AppColors.textGrey
+                      : AppColors.textGrey.withOpacity(0.7),
+            ),
           ],
         ),
       ),
@@ -489,28 +694,6 @@ class _DropdownFilter extends StatelessWidget {
   }
 }
 
-class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
-  final double height;
-  final Widget child;
-
-  const _TabHeaderDelegate({required this.height, required this.child});
-
-  @override
-  double get minExtent => height;
-
-  @override
-  double get maxExtent => height;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
-  }
-
-  @override
-  bool shouldRebuild(covariant _TabHeaderDelegate oldDelegate) {
-    return height != oldDelegate.height || child != oldDelegate.child;
-  }
-}
 
 List<String> _uniqueSorted(Iterable<String> values) {
   final set = <String>{};
@@ -518,7 +701,8 @@ List<String> _uniqueSorted(Iterable<String> values) {
     final s = v.trim();
     if (s.isNotEmpty) set.add(s);
   }
-  final list = set.toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+  final list =
+      set.toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
   return list;
 }
 
@@ -539,7 +723,7 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
     final dir = t.direction.toLowerCase();
     final isBuy = dir == 'buy';
     final profit = t.masterProfit.toDouble();
-    final profitColor = profit >= 0 ? AppColors.statusGreenDark : AppColors.statusRed;
+    final profitColor = profit >= 0 ? AppColors.green : AppColors.error;
     final status = t.status.isNotEmpty ? t.status : '—';
 
     return GestureDetector(
@@ -551,8 +735,14 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
         decoration: BoxDecoration(
           color: AppColors.whiteColor,
           borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: Colors.grey.withOpacity(0.15)),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+          border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.border.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -563,7 +753,7 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
                 // Container(
                 //   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 //   decoration: BoxDecoration(
-                //     color: (isBuy ? AppColors.statusGreen : AppColors.statusRed).withOpacity(0.12),
+                //     color: (isBuy ? AppColors.green : AppColors.error).withOpacity(0.12),
                 //     borderRadius: BorderRadius.circular(10.r),
                 //   ),
                 //   child: Text(
@@ -571,7 +761,7 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
                 //     style: TextStyle(
                 //       fontSize: 11.sp,
                 //       fontWeight: FontWeight.w800,
-                //       color: isBuy ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                //       color: isBuy ? AppColors.green : AppColors.error,
                 //       letterSpacing: 0.2,
                 //     ),
                 //   ),
@@ -589,21 +779,21 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
                           ),
                           SizedBox(width: 10.w),
                           Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: (isBuy ? AppColors.statusGreen : AppColors.statusRed).withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Text(
-                    isBuy ? 'BUY' : 'SELL',
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w800,
-                      color: isBuy ? AppColors.statusGreenDark : AppColors.statusRed,
-                      letterSpacing: 0.2,
-                    ),
-                  ),
-                ),
+                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: (isBuy ? AppColors.green : AppColors.error).withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Text(
+                              isBuy ? 'BUY' : 'SELL',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w800,
+                                color: isBuy ? AppColors.green : AppColors.error,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       SizedBox(height: 6.h),
@@ -641,7 +831,7 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
             ),
             if (_expanded) ...[
               SizedBox(height: 12.h),
-              Divider(color: Colors.grey.withOpacity(0.12), height: 1),
+              Divider(color: AppColors.border.withValues(alpha: 0.12), height: 1),
               SizedBox(height: 12.h),
               _KVRow(label: 'Trade ID', value: '#${t.id}'),
               _KVRow(label: 'Open time', value: _formatTime(t.openTime)),
@@ -651,138 +841,6 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
               _KVRow(label: 'Master vol', value: t.masterVolume.toString()),
               _KVRow(label: 'Copier vol', value: t.copierVolume.toString()),
               _KVRow(label: 'Copier P&L', value: '\$${t.copierProfit.toDouble().toStringAsFixed(2)}'),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatTime(String iso) {
-    final dt = DateTime.tryParse(iso);
-    if (dt == null) return iso;
-    final local = dt.toLocal();
-    final two = (int n) => n.toString().padLeft(2, '0');
-    return '${local.year}-${two(local.month)}-${two(local.day)} ${two(local.hour)}:${two(local.minute)}';
-  }
-}
-
-class _CommissionHistoryCard extends StatefulWidget {
-  final CopyTradingMasterCommissionHistoryItem item;
-  const _CommissionHistoryCard({required this.item});
-
-  @override
-  State<_CommissionHistoryCard> createState() => _CommissionHistoryCardState();
-}
-
-class _CommissionHistoryCardState extends State<_CommissionHistoryCard> {
-  bool _expanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final x = widget.item;
-    final credited = x.masterCommissionCredited.toDouble();
-    final creditedColor = credited >= 0 ? AppColors.statusGreenDark : AppColors.statusRed;
-    final inGrace = x.inGracePeriod;
-    final pillColor = inGrace ? AppColors.statusYellow : AppColors.statusGreen;
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() => _expanded = !_expanded),
-      child: Container(
-        margin: EdgeInsets.only(bottom: 10.h),
-        padding: EdgeInsets.all(14.r),
-        decoration: BoxDecoration(
-          color: AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: Colors.grey.withOpacity(0.15)),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Container(
-                //   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                //   decoration: BoxDecoration(
-                //     color: pillColor.withOpacity(0.12),
-                //     borderRadius: BorderRadius.circular(10.r),
-                //   ),
-                //   child: Text(
-                //     inGrace ? 'GRACE' : 'SETTLED',
-                //     style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: pillColor),
-                //   ),
-                // ),
-                // SizedBox(width: 10.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            x.symbol,
-                            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                          ),
-                          SizedBox(width: 10.w),
-                            Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: pillColor.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Text(
-                    inGrace ? 'GRACE' : 'SETTLED',
-                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: pillColor),
-                  ),
-                ),
-                        ],
-                      ),
-                      SizedBox(height: 6.h),
-                      Text(
-                        '${x.copierName.isNotEmpty ? x.copierName : 'Copier'}  •  ${x.copierAccount.isNotEmpty ? x.copierAccount : '—'}',
-                        style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '\$${credited.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: creditedColor),
-                    ),
-                    SizedBox(height: 6.h),
-                    Text(
-                      _formatTime(x.settledAt),
-                      style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-                SizedBox(width: 6.w),
-                Icon(
-                  _expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                  size: 20.r,
-                  color: AppColors.textPrimary,
-                ),
-              ],
-            ),
-            if (_expanded) ...[
-              SizedBox(height: 12.h),
-              Divider(color: Colors.grey.withOpacity(0.12), height: 1),
-              SizedBox(height: 12.h),
-              _KVRow(label: 'Commission ID', value: '#${x.id}'),
-              _KVRow(label: 'Status', value: x.status.isNotEmpty ? x.status : '—'),
-              _KVRow(label: 'Gross profit share', value: '\$${x.grossProfitShare.toDouble().toStringAsFixed(2)}'),
-              _KVRow(label: 'Commission charged', value: '\$${x.commissionCharged.toDouble().toStringAsFixed(2)}'),
-              _KVRow(label: 'Master credited', value: '\$${x.masterCommissionCredited.toDouble().toStringAsFixed(2)}'),
-              _KVRow(label: 'Grace period', value: x.inGracePeriod ? 'Yes' : 'No'),
             ],
           ],
         ),
@@ -815,14 +873,22 @@ class _KVRow extends StatelessWidget {
             width: 110.w,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: AppColors.textGrey,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: TextStyle(fontSize: 12.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -831,31 +897,224 @@ class _KVRow extends StatelessWidget {
   }
 }
 
-class _DetailRow extends StatelessWidget {
+class _DetailSectionCard extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _DetailSectionCard({required this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(14.r),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 10.h),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRowWithDesc extends StatelessWidget {
   final String label;
   final String value;
-  const _DetailRow({required this.label, required this.value});
+  final String? desc;
+
+  const _DetailRowWithDesc({
+    required this.label,
+    required this.value,
+    this.desc,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(label, style: AppTextStyles.caption.copyWith(color: AppColors.textGrey)),
-          Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.black14500,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  value,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+            ],
           ),
+          if (desc != null && desc!.isNotEmpty) ...[
+            SizedBox(height: 2.h),
+            Text(
+              desc!,
+              style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+            ),
+          ],
+          SizedBox(height: 4.h),
+          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.08)),
         ],
       ),
     );
   }
 }
 
+class _DisclosureRow extends StatelessWidget {
+  final String title;
+  final String content;
+
+  const _DisclosureRow({required this.title, required this.content});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textGrey,
+              letterSpacing: 0.3,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color:
+                  content.startsWith('—')
+                      ? AppColors.textGrey
+                      : AppColors.textPrimary,
+              height: 1.3,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.08)),
+        ],
+      ),
+    );
+  }
+}
+
+Widget _buildTopMetricsGrid(dynamic d) {
+  return Column(
+    children: [
+      Row(
+        children: [
+          Expanded(
+            child: _buildMetricCard(
+              'ACTIVE COPIERS',
+              d.activeCopiers.toString(),
+            ),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: _buildMetricCard(
+              'PLAN EQUITY (AUM)',
+              '\$${d.totalCapital.toStringAsFixed(2)}',
+            ),
+          ),
+        ],
+      ),
+      SizedBox(height: 10.h),
+      Row(
+        children: [
+          Expanded(
+            child: _buildMetricCard(
+              'COMMISSION EARNED',
+              '\$${d.totalCommissionEarned.toStringAsFixed(2)}',
+              valueColor: AppColors.green,
+            ),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: _buildMetricCard(
+              'OPEN POSITIONS',
+              d.openPositions.toString(),
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+Widget _buildMetricCard(String label, String value, {Color? valueColor}) {
+  return Container(
+    padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 10.w),
+    decoration: BoxDecoration(
+      color: AppColors.whiteColor,
+      borderRadius: BorderRadius.circular(10.r),
+      border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 9.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textGrey,
+            letterSpacing: 0.3,
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          value,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.bold,
+            color: valueColor ?? AppColors.textPrimary,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+String _formatDate(String isoString) {
+  try {
+    final dt = DateTime.parse(isoString);
+    return DateFormat('d MMM yyyy').format(dt);
+  } catch (_) {
+    return isoString;
+  }
+}

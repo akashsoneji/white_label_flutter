@@ -2,8 +2,8 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_dashboard_controller.dart';
 import 'package:crm_app/utils/app_logger.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/app_select_field.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +27,7 @@ class CopyTradingEditPlanScreen extends StatefulWidget {
 
 class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
   final _formKey = GlobalKey<FormState>();
-
+  
   late final TextEditingController _nameCtrl;
   late String _commissionType;
   late final TextEditingController _commissionCtrl;
@@ -48,28 +48,28 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
     final p = widget.plan;
     _nameCtrl = TextEditingController(text: p.planName);
     _commissionType = p.commissionType;
-
+    
     final commissionVal = p.commissionType == 'subscription' ? p.subscriptionFee : p.commissionPercentage;
     _commissionCtrl = TextEditingController(
       text: commissionVal == commissionVal.toInt() ? commissionVal.toInt().toString() : commissionVal.toString(),
     );
-
+    
     _noFeeDaysCtrl = TextEditingController(text: p.noFeeDays.toString());
-
+    
     _minCapitalCtrl = TextEditingController(
       text: p.minimumCapital == p.minimumCapital.toInt()
           ? p.minimumCapital.toInt().toString()
           : p.minimumCapital.toString(),
     );
-
+    
     _copyRatioCtrl = TextEditingController(
       text: p.copyRatio == p.copyRatio.toInt() ? p.copyRatio.toInt().toString() : p.copyRatio.toString(),
     );
-
+    
     _maxCopiersCtrl = TextEditingController(text: p.maxCopiers?.toString() ?? '');
     _strategyCtrl = TextEditingController(text: p.strategyDescription);
     _riskCtrl = TextEditingController(text: p.riskInformation);
-
+    
     _subscriptionPeriod = 'monthly';
   }
 
@@ -98,6 +98,8 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
         title: Text('Edit Plan', style: AppTextStyles.heading),
         leading: AppBackButton(
           onPressed: () => Get.back(closeOverlays: true),
+          
+          
         ),
       ),
       body: SingleChildScrollView(
@@ -383,7 +385,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
             TextFormField(
               controller: _noFeeDaysCtrl,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(),
+              decoration: InputDecoration(),
             ),
             SizedBox(height: 4.h),
             Text(
@@ -455,7 +457,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
             TextFormField(
               controller: _copyRatioCtrl,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '1',
               ),
             ),
@@ -580,9 +582,10 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
     final commissionValue = num.tryParse(_commissionCtrl.text.trim());
     final minCap = num.tryParse(_minCapitalCtrl.text.trim());
     if (commissionValue == null || minCap == null) {
-      CustomToastService.showError(
-        title: 'Invalid',
-        message: 'Enter valid numeric values',
+      Get.snackbar(
+        'Invalid',
+        'Enter valid numeric values',
+        snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
@@ -621,9 +624,10 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
         message: res.message ?? 'Plan updated successfully',
       );
     } else {
-      CustomToastService.showError(
-        title: 'Failed',
-        message: res.message ?? _controller.errorMessage.value,
+      Get.snackbar(
+        'Failed',
+        res.message ?? _controller.errorMessage.value,
+        snackPosition: SnackPosition.BOTTOM,
       );
     }
   }

@@ -2,8 +2,6 @@ import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
 import 'package:get/get.dart';
 
-import 'package:crm_app/screens/copy_trading/view_models/copy_trading_subscribe_controller.dart';
-
 enum CopyTradingMasterApplicationStatus { none, pending, approved, rejected, unknown }
 
 class CopyTradingHubController extends GetxController {
@@ -25,12 +23,6 @@ class CopyTradingHubController extends GetxController {
   final RxString masterApplyRiskInfoDraft = ''.obs;
   final RxBool masterApplyTermsAccepted = false.obs;
 
-  /// Copier eligible accounts (Become Master — pick MT5 account). GET without `plan_id`.
-  final RxList<EligibleCopyAccount> masterApplyEligibleAccounts = <EligibleCopyAccount>[].obs;
-  final RxBool masterApplyEligibleLoading = false.obs;
-  final RxString masterApplyEligibleError = ''.obs;
-  final Rxn<int> masterApplySelectedAccountId = Rxn<int>();
-
   bool get canSubmitMasterApply {
     if (masterApplyNicknameDraft.value.trim().isEmpty) return false;
     if (masterApplyStrategyDraft.value.trim().isEmpty) return false;
@@ -44,39 +36,6 @@ class CopyTradingHubController extends GetxController {
     masterApplyStrategyDraft.value = '';
     masterApplyRiskInfoDraft.value = '';
     masterApplyTermsAccepted.value = false;
-    masterApplySelectedAccountId.value = null;
-  }
-
-  Future<void> loadEligibleAccountsForMasterApply() async {
-    masterApplyEligibleLoading.value = true;
-    masterApplyEligibleError.value = '';
-    try {
-      final res = await ApiService.get(
-        endpoint: ApiConstants.copyTradingCopierEligibleAccounts,
-        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
-      );
-      if (!res.success || res.data == null) {
-        masterApplyEligibleAccounts.clear();
-        masterApplyEligibleError.value = res.message ?? 'Failed to load accounts';
-        return;
-      }
-      final data = res.data?['data'];
-      if (data is! List) {
-        masterApplyEligibleAccounts.clear();
-        masterApplyEligibleError.value = 'Invalid response';
-        return;
-      }
-      masterApplyEligibleAccounts.assignAll(
-        data
-            .whereType<Map>()
-            .map((e) => EligibleCopyAccount.fromJson(e.cast<String, dynamic>())),
-      );
-    } catch (e) {
-      masterApplyEligibleAccounts.clear();
-      masterApplyEligibleError.value = 'Load error: $e';
-    } finally {
-      masterApplyEligibleLoading.value = false;
-    }
   }
 
   @override
@@ -178,25 +137,22 @@ class CopyTradingHubController extends GetxController {
 
 
   Future<ApiResponse> applyForMaster({
-    int? mt5AccountId,
     required String nickname,
     required bool termsAccepted,
-    String? strategy,
-    String? riskInfo,
+    required String strategy,
+    required String riskInfo,
   }) async {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      final data = <String, dynamic>{
-        'nickname': nickname,
-        'terms_accepted': termsAccepted,
-      };
-      if (mt5AccountId != null) data['mt5_account_id'] = mt5AccountId;
-      if (strategy != null && strategy.trim().isNotEmpty) data['strategy'] = strategy;
-      if (riskInfo != null && riskInfo.trim().isNotEmpty) data['risk_info'] = riskInfo;
       final res = await ApiService.post(
         endpoint: ApiConstants.copyTradingMasterApply,
-        data: data,
+        data: {
+          'nickname': nickname,
+          'terms_accepted': termsAccepted,
+          'strategy': strategy,
+          'risk_info': riskInfo,
+        },
       );
       if (!res.success) {
         errorMessage.value = res.message ?? 'Failed to submit application';
@@ -212,3 +168,4 @@ class CopyTradingHubController extends GetxController {
     }
   }
 }
+

@@ -622,3 +622,4 @@ class CopyTradingMasterDashboardController extends GetxController {
     }
   }
 }
+

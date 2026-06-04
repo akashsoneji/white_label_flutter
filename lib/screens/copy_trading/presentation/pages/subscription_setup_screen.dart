@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/routes/app_pages.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
-import 'package:crm_app/widgets/custom_toast.dart';
 
 class SubscriptionSetupScreen extends StatefulWidget {
   const SubscriptionSetupScreen({super.key});
@@ -77,19 +74,25 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.tradeBackgroundCenterColor,
+      backgroundColor: AppColors.surface,
       appBar: AppBar(
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        leading: AppBackButton(onPressed: () => Get.back()),
-        title: const Text(
+        leading: IconButton(
+          icon: SvgPicture.asset(
+            'assets/svg/trade/arro_back.svg',
+            colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+          ),
+          onPressed: () => Get.back(),
+        ),
+        title: Text(
           'Subscription Setup',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: AppColors.primary,
           ),
         ),
       ),
@@ -102,22 +105,22 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
               child: Row(
                 children: [
                   SvgPicture.asset('assets/svg/copy_trading/person_svg.svg'),
-                  const SizedBox(width: 12),
-                  const Text(
+                  SizedBox(width: 12),
+                  Text(
                     'Prime_traders',
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
 
             // ── Funds in wallet ───────────────────────────────────────────
             _buildSectionCard(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Funds In Wallet',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
@@ -127,7 +130,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                         "assets/svg/copy_trading/investment/wallet.svg",
                         height: 20,
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       Text(
                         '50.01 USD',
                         style: TextStyle(
@@ -141,7 +144,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
 
             // ── Copy Proportion card ──────────────────────────────────────
             _buildSectionCard(
@@ -151,7 +154,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Copy Proportion',
                         style: TextStyle(
                           fontSize: 16,
@@ -176,7 +179,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
 
                   // Default mode: 3 proportion cards
                   if (!_isCustomMode) ...[
@@ -188,23 +191,20 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                             onTap:
                                 () => setState(() => _selectedProportion = i),
                             child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
+                              duration: Duration(milliseconds: 200),
                               margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
                                 vertical: 12,
                               ),
                               decoration: BoxDecoration(
-                                color:
-                                    selected
-                                        ? AppColors.primary
-                                        : Colors.grey.shade100,
+                                color: AppColors.surface,
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
                                   color:
                                       selected
                                           ? AppColors.primary
-                                          : Colors.grey.shade200,
+                                          : AppColors.border,
                                 ),
                               ),
                               child: Column(
@@ -221,7 +221,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                               : AppColors.textPrimary,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: 4),
                                   Text(
                                     '${_presets[i]['required']!} required',
                                     style: TextStyle(
@@ -229,12 +229,11 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                       fontWeight: FontWeight.w400,
                                       color:
                                           selected
-                                              ? AppColors.whiteColor
-                                                  .withOpacity(0.70)
+                                              ? AppColors.whiteColor.withOpacity(0.70)
                                               : AppColors.textPrimary,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: 8),
                                   Text(
                                     _presets[i]['volume']!,
                                     style: TextStyle(
@@ -242,8 +241,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                       fontWeight: FontWeight.w400,
                                       color:
                                           selected
-                                              ? AppColors.whiteColor
-                                                  .withOpacity(0.70)
+                                              ? AppColors.whiteColor.withOpacity(0.70)
                                               : AppColors.textPrimary,
                                     ),
                                   ),
@@ -254,7 +252,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                         );
                       }),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16),
                   ],
 
                   // Custom mode: text field
@@ -264,9 +262,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                       controller: _customValueCtrl,
                       keyboardType: TextInputType.text,
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Padding(
-                      padding: const EdgeInsets.only(left: 2),
+                      padding: EdgeInsets.only(left: 2),
                       child: Text(
                         'Required investment : \$188',
                         style: TextStyle(
@@ -276,7 +274,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    SizedBox(height: 14),
                   ],
 
                   // Support Funds toggle row
@@ -295,7 +293,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                 (v) => setState(() => _supportFundsEnabled = v),
                             activeThumbColor: AppColors.primary,
                             inactiveThumbColor: AppColors.whiteColor,
-                            inactiveTrackColor: const Color(0xffDCDCDC),
+                            inactiveTrackColor: AppColors.switchTrackOff,
                             overlayColor: MaterialStateProperty.all(
                               Colors.transparent,
                             ),
@@ -323,7 +321,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 5),
+                      SizedBox(width: 5),
                       Expanded(
                         child: RichText(
                           text: TextSpan(
@@ -350,7 +348,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
 
                   // Support amount field (only in custom + toggled mode)
                   if (_isCustomMode && _supportFundsEnabled) ...[
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     _buildLabeledField(
                       label: 'Support Amount',
                       controller: _supportAmountCtrl,
@@ -358,14 +356,14 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                         decimal: true,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    const Padding(
+                    SizedBox(height: 6),
+                    Padding(
                       padding: EdgeInsets.only(left: 2),
                       child: Text(
                         '39% of the required investment.',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.green,
+                          color: AppColors.green,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -374,18 +372,18 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
 
             // ── Summary card ──────────────────────────────────────────────
             _buildSectionCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Summary',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   _summaryRow('Copy proportion', _summaryProportion),
                   _summaryRow('Required Investment', _summaryRequired),
                   _summaryRow('Support Funds', _summarySupportFunds),
@@ -393,7 +391,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
         ),
       ),
@@ -407,12 +405,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
         ),
         child: ElevatedButton(
           onPressed: () {
-            // Legacy mock screen — route users to the live copy-trading hub flow.
-            Get.back();
-            CustomToastService.showInfo(
-              message: 'Use Explore Masters to subscribe with live API data.',
-            );
-            Get.toNamed(AppPages.COPY_TRADING_HUB);
+            // TODO: hook to API
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
@@ -422,7 +415,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
             ),
             elevation: 0,
           ),
-          child: Text(
+          child:   Text(
             'Start Copying',
             style: TextStyle(
               fontSize: 16,
@@ -445,9 +438,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade200,
+            color: AppColors.border,
             blurRadius: 6,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -467,7 +460,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
-          style: const TextStyle(fontSize: 15),
+          style: TextStyle(fontSize: 15),
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
@@ -475,11 +468,11 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -513,7 +506,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: isBold ? Colors.black : AppColors.icongrey,
+              color: isBold ? AppColors.textPrimary : AppColors.textGrey,
               fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
             ),
           ),

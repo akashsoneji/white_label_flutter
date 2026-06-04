@@ -4,12 +4,12 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/widgets/copy_trading_bottom_navigation.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_hub_controller.dart';
 
-import 'tabs/become_master_tab.dart';
-import 'tabs/my_plans_tab.dart';
-import 'hub/master_dashboard_screen.dart';
-import 'hub/my_copies_screen.dart';
-import 'hub/explore_masters_screen.dart';
-import 'hub/my_investments_screen.dart';
+import 'package:crm_app/screens/copy_trading/presentation/pages/tabs/become_master_tab.dart';
+import 'package:crm_app/screens/copy_trading/presentation/pages/tabs/my_plans_tab.dart';
+import 'package:crm_app/screens/copy_trading/presentation/pages/hub/master_dashboard_screen.dart';
+import 'package:crm_app/screens/copy_trading/presentation/pages/hub/my_copies_screen.dart';
+import 'package:crm_app/screens/copy_trading/presentation/pages/hub/explore_masters_screen.dart';
+import 'package:crm_app/screens/copy_trading/presentation/pages/hub/my_investments_screen.dart';
 
 class CopyTradingMainScreen extends StatefulWidget {
   final int? initialIndex;
@@ -46,7 +46,7 @@ class _CopyTradingMainScreenState extends State<CopyTradingMainScreen> {
               CopyTradingMasterApplicationStatus.none) {
         return Scaffold(
           backgroundColor: AppColors.tradeBackgroundCenterColor,
-          body: const Center(child: CircularProgressIndicator()),
+          body: Center(child: CircularProgressIndicator()),
         );
       }
 
@@ -63,15 +63,15 @@ class _CopyTradingMainScreenState extends State<CopyTradingMainScreen> {
                 MasterDashboardScreen(
                   masterCode: _hubController.masterCode.value,
                 ),
-                const MyPlansTab(),
-                const MyCopiesScreen(),
-                const ExploreMastersScreen(),
-                const MyInvestmentsScreen(),
+                MyPlansTab(),
+                MyCopiesScreen(),
+                ExploreMastersScreen(),
+                MyInvestmentsScreen(),
               ]
               : [
-                const BecomeMasterTab(),
-                const ExploreMastersScreen(),
-                const MyInvestmentsScreen(),
+                BecomeMasterTab(),
+                ExploreMastersScreen(),
+                MyInvestmentsScreen(),
               ];
 
       return Scaffold(

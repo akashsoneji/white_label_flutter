@@ -386,3 +386,4 @@ class CopyTradingSubscribeController extends GetxController {
     if (sld != null && sld > 0) stopLossDollar.value = sld.toDouble();
   }
 }
+

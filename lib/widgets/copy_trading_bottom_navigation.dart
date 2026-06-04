@@ -102,7 +102,7 @@ class CopyTradingBottomNavigation extends StatelessWidget {
                   BoxShadow(
                     color: AppColors.textPrimary.withValues(alpha: 0.15),
                     blurRadius: 16,
-                    offset: const Offset(0, 8),
+                    offset: Offset(0, 8),
                   ),
                 ],
               ),
@@ -127,7 +127,7 @@ class CopyTradingBottomNavigation extends StatelessWidget {
       ),
     );
   }
-
+ 
   Widget _buildNavItem(
     BuildContext context,
     int index,
@@ -136,12 +136,12 @@ class CopyTradingBottomNavigation extends StatelessWidget {
     String label,
   ) {
     final bool isSelected = currentIndex == index;
-
+ 
     return InkWell(
       borderRadius: BorderRadius.circular(50.r),
       onTap: () => onTap(index),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
+        duration: Duration(milliseconds: 220),
         curve: Curves.easeOut,
         padding: EdgeInsets.symmetric(
           horizontal:

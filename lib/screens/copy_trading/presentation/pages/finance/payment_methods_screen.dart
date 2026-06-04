@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:get/get.dart';
 
 class CopyTradingPaymentMethodsScreen extends StatelessWidget {
@@ -35,7 +34,14 @@ class CopyTradingPaymentMethodsScreen extends StatelessWidget {
             ),
           ],
         ),
-        leading: const AppBackButton(),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: AppColors.textPrimary,
+            size: 24.r,
+          ),
+          onPressed: () => Get.back(),
+        ),
       ),
       body: ListView(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -45,61 +51,61 @@ class CopyTradingPaymentMethodsScreen extends StatelessWidget {
             label: 'Bitcoin',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.currency_bitcoin_rounded,
-            iconColor: Colors.orange,
+            iconColor: AppColors.warning,
           ),
           _PaymentMethodTile(
             label: 'Litecoin',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.currency_lira_rounded, // Placeholder for Litecoin
-            iconColor: Colors.blue,
+            iconColor: AppColors.blue,
           ),
           _PaymentMethodTile(
             label: 'TRC20',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.token_rounded,
-            iconColor: Colors.teal,
+            iconColor: AppColors.quickActionGreen,
           ),
           _PaymentMethodTile(
             label: 'Ethereum',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.diamond_rounded, // Placeholder for ETH
-            iconColor: Colors.indigo,
+            iconColor: AppColors.blue,
           ),
           _PaymentMethodTile(
             label: 'GPay',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.account_balance_wallet_rounded,
-            iconColor: Colors.blue,
+            iconColor: AppColors.blue,
           ),
           _PaymentMethodTile(
             label: 'Phone Pe',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.mobile_friendly_rounded,
-            iconColor: Colors.purple,
+            iconColor: AppColors.quickActionPurple,
           ),
           _PaymentMethodTile(
             label: 'Paytm',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.payments_rounded,
-            iconColor: Colors.blueAccent,
+            iconColor: AppColors.blue,
           ),
           _PaymentMethodTile(
             label: 'UPI',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.account_balance_rounded,
-            iconColor: Colors.brown,
+            iconColor: AppColors.warning,
           ),
           _PaymentMethodTile(
             label: 'Local Exchange',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.currency_exchange_rounded,
-            iconColor: Colors.blueGrey,
+            iconColor: AppColors.textGrey,
           ),
           _PaymentMethodTile(
             label: 'Local Bank Transfer',
             sublabel: 'Instant upto 1 hours',
             icon: Icons.account_balance_outlined,
-            iconColor: Colors.deepPurple,
+            iconColor: AppColors.quickActionPurple,
           ),
         ],
       ),
@@ -132,7 +138,7 @@ class _PaymentMethodTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.whiteColor,
               borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: Colors.grey.withOpacity(0.1)),
+              border: Border.all(color: AppColors.border.withValues(alpha: 0.1)),
             ),
             child: Icon(icon, color: iconColor, size: 24.r),
           ),
@@ -151,11 +157,11 @@ class _PaymentMethodTile extends StatelessWidget {
           trailing: Icon(
             Icons.arrow_forward_ios,
             size: 14.r,
-            color: Colors.grey.withOpacity(0.5),
+            color: AppColors.textGrey.withValues(alpha: 0.5),
           ),
           onTap: () {},
         ),
-        Divider(height: 1, color: Colors.grey.withOpacity(0.05)),
+        Divider(height: 1, color: AppColors.border.withValues(alpha: 0.05)),
       ],
     );
   }

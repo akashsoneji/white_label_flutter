@@ -416,7 +416,7 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     if (subscriptions.isEmpty) {
       print('>>> loadTrades SKIPPED: subscriptions is empty (count=${subscriptions.length}), will retry...');
       // Retry after a short delay in case subscriptions are still loading
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(Duration(milliseconds: 500));
       if (subscriptions.isEmpty) {
         print('>>> loadTrades ABORTED: still no subscriptions');
         return;
@@ -557,3 +557,4 @@ class CopyTradingCopierSubscriptionsController extends GetxController {
     }
   }
 }
+

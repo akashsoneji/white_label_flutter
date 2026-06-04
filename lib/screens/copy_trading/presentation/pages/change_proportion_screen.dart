@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 
 class ChangeProportionScreen extends StatefulWidget {
   final String traderName;
@@ -28,7 +27,12 @@ class _ChangeProportionScreenState extends State<ChangeProportionScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: AppBackButton(onPressed: ()=> Get.back(),
+        leading: IconButton(
+          icon: SvgPicture.asset(
+            'assets/svg/trade/arro_back.svg',
+            colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+          ),
+          onPressed: () => Get.back(),
         ),
         title: Text('Change Copy Proportion', style: AppTextStyles.heading),
         centerTitle: true,
@@ -110,7 +114,7 @@ class _ChangeProportionScreenState extends State<ChangeProportionScreen> {
       elevation: 0.8,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: AppColors.surface),
       ),
       child: Padding(
         padding: EdgeInsets.all(10.0),
@@ -134,7 +138,7 @@ class _ChangeProportionScreenState extends State<ChangeProportionScreen> {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.surface),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

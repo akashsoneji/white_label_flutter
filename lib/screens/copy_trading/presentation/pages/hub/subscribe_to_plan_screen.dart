@@ -1,5 +1,5 @@
-import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_copier_subscriptions_controller.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_hub_controller.dart';
@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 
 class SubscribeToPlanScreen extends StatefulWidget {
   final String masterCode;
@@ -57,7 +57,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     CustomToastService.showError(
       title: 'Error',
       message: msg,
-      duration: const Duration(milliseconds: 2500),
+      duration: Duration(milliseconds: 2500),
       position: SnackPosition.TOP,
     );
   }
@@ -68,7 +68,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     CustomToastService.showSuccess(
       title: title,
       message: msg,
-      duration: const Duration(milliseconds: 2500),
+      duration: Duration(milliseconds: 2500),
       position: SnackPosition.TOP,
     );
   }
@@ -247,7 +247,8 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         }),
         leading: Obx(() {
           final s = _step.value;
-          return AppBackButton(onPressed: () {
+          return AppBackButton(
+            onPressed: () {
               if (_isEditMode) {
                 Get.back();
                 return;
@@ -273,7 +274,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         final sub = controller;
 
         if (masterController.isLoading.value && masterController.profile.value == null) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
         if (masterController.errorMessage.value.isNotEmpty && masterController.profile.value == null) {
           return _ErrorState(
@@ -289,7 +290,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         if (_isEditMode) {
           return Obx(() {
             if (_editLoading.value) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator());
             }
             if (_editLoadError.value.isNotEmpty) {
               return _ErrorState(
@@ -515,12 +516,6 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     if (_isEditMode) {
       final item = widget.editSubscription;
       if (item == null) return;
-      final acc = sub.selectedAccount.value;
-      if (acc == null) {
-        sub.errorMessage.value = 'Could not resolve trading account for this copy.';
-        _showTopError(sub.errorMessage.value);
-        return;
-      }
     } else {
       final acc = sub.selectedAccount.value;
       if (acc == null) {
@@ -640,6 +635,9 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         if (Get.isRegistered<CopyTradingCopierSubscriptionsController>(tag: 'copytrading:my_copies')) {
           await Get.find<CopyTradingCopierSubscriptionsController>(tag: 'copytrading:my_copies').load(showLoading: false);
         }
+        if (Get.isRegistered<CopyTradingCopierSubscriptionsController>(tag: 'copytrading:my_investments')) {
+          await Get.find<CopyTradingCopierSubscriptionsController>(tag: 'copytrading:my_investments').load(showLoading: false);
+        }
         if (mounted) {
           Get.back();
           _showTopSuccess(
@@ -738,7 +736,7 @@ class _AccountPickerCard extends StatelessWidget {
             Obx(() {
               final c = controller!;
               if (c.isLoading.value && c.eligibleAccounts.isEmpty) {
-              return const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()));
+              return Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()));
             }
             if (c.errorMessage.value.isNotEmpty && c.eligibleAccounts.isEmpty) {
               return _InlineError(
@@ -836,7 +834,7 @@ class _CopySettingsCard extends StatelessWidget {
                     hintText: 'e.g. 0.10',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      const SingleDecimalTextFormatter(),
+                      SingleDecimalTextFormatter(),
                     ],
                   ),
                 ],
@@ -849,7 +847,7 @@ class _CopySettingsCard extends StatelessWidget {
                 //     hintText: 'e.g. 2',
                 //     inputFormatters: [
                 //       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                //       const SingleDecimalTextFormatter(),
+                //       SingleDecimalTextFormatter(),
                 //     ],
                 //   ),
                 // ],
@@ -862,7 +860,7 @@ class _CopySettingsCard extends StatelessWidget {
                     hintText: 'e.g. 0.5',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      const SingleDecimalTextFormatter(),
+                      SingleDecimalTextFormatter(),
                     ],
                   ),
                 ],
@@ -875,7 +873,7 @@ class _CopySettingsCard extends StatelessWidget {
                     hintText: 'e.g. 2',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      const SingleDecimalTextFormatter(),
+                      SingleDecimalTextFormatter(),
                     ],
                   ),
                   SizedBox(height: 12.h),
@@ -913,7 +911,7 @@ class _CopySettingsCard extends StatelessWidget {
                     hintText: 'e.g. 20',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      const SingleDecimalTextFormatter(),
+                      SingleDecimalTextFormatter(),
                     ],
                   ),
                   SizedBox(height: 12.h),
@@ -924,7 +922,7 @@ class _CopySettingsCard extends StatelessWidget {
                     hintText: 'e.g. 0.5',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      const SingleDecimalTextFormatter(),
+                      SingleDecimalTextFormatter(),
                     ],
                   ),
                 ],
@@ -937,7 +935,7 @@ class _CopySettingsCard extends StatelessWidget {
                     hintText: 'e.g. 1000.00',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      const SingleDecimalTextFormatter(),
+                      SingleDecimalTextFormatter(),
                     ],
                   ),
                   SizedBox(height: 12.h),
@@ -948,7 +946,7 @@ class _CopySettingsCard extends StatelessWidget {
                     hintText: 'e.g. 0.01',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      const SingleDecimalTextFormatter(),
+                      SingleDecimalTextFormatter(),
                     ],
                   ),
                 ],
@@ -1034,19 +1032,19 @@ class _AdvancedSettingsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.10),
+            color: AppColors.border.withValues(alpha: 0.10),
             blurRadius: 16,
-            offset: const Offset(0, 6),
+            offset: Offset(0, 6),
           ),
         ],
       ),
       child: Theme(
         data: baseTheme.copyWith(
           dividerColor: Colors.transparent,
-          listTileTheme: const ListTileThemeData(
+          listTileTheme: ListTileThemeData(
             dense: true,
             visualDensity: VisualDensity.compact,
             minVerticalPadding: 0,
@@ -1065,12 +1063,12 @@ class _AdvancedSettingsCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.tradeBackgroundCenterColor.withOpacity(0.22),
                 borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(color: Colors.grey.withOpacity(0.12)),
+                border: Border.all(color: AppColors.border.withValues(alpha: 0.12)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: AppColors.border.withValues(alpha: 0.05),
                     blurRadius: 14,
-                    offset: const Offset(0, 6),
+                    offset: Offset(0, 6),
                   ),
                 ],
               ),
@@ -1135,7 +1133,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                             hintText: 'e.g. 2',
                             inputFormatters: [
                               FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                              const SingleDecimalTextFormatter(),
+                              SingleDecimalTextFormatter(),
                             ],
                           ),
                         ],
@@ -1145,7 +1143,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                           style: AppTextStyles.caption,
                         ),
                         SizedBox(height: 14.h),
-                        Divider(color: Colors.grey.withOpacity(0.16), height: 1),
+                        Divider(color: AppColors.border.withValues(alpha: 0.16), height: 1),
                         SizedBox(height: 14.h),
                       ],
                     );
@@ -1153,7 +1151,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                   Row(
                     children: [
                       Text('PER-TRADE TP / SL', style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                      const Spacer(),
+                      Spacer(),
                       Obx(() {
                         return Row(
                           children: [
@@ -1295,7 +1293,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                         : null,
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                                      // const SingleDecimalTextFormatter(),
+                                      // SingleDecimalTextFormatter(),
                                     ],
                                   ),
                                 ],
@@ -1329,7 +1327,7 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                         : null,
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                                      const SingleDecimalTextFormatter(),
+                                      SingleDecimalTextFormatter(),
                                     ],
                                   ),
                                 ],
@@ -1373,7 +1371,7 @@ class _SmallChoiceChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.whiteColor,
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(color: selected ? AppColors.primary : Colors.grey.withOpacity(0.18)),
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border.withValues(alpha: 0.18)),
         ),
         child: Text(
           label,
@@ -1402,9 +1400,9 @@ class _MiniPresetChip extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.inactivePlanBg,
+          color: selected ? AppColors.primary : AppColors.chipSurface,
           borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: selected ? AppColors.primary : Colors.grey.withOpacity(0.18)),
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border.withValues(alpha: 0.18)),
         ),
         child: Text(
           label,
@@ -1433,9 +1431,9 @@ class _ModeChip extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.inactivePlanBg,
+          color: selected ? AppColors.primary : AppColors.chipSurface,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: selected ? AppColors.primary : Colors.grey.withOpacity(0.18)),
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border.withValues(alpha: 0.18)),
         ),
         child: Text(
           label,
@@ -1469,7 +1467,7 @@ class _SelectTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -1513,7 +1511,7 @@ class _InvestmentCard extends StatelessWidget {
             hintText: minCapital > 0 ? 'e.g. 100.05 (Min $minCapital)' : 'e.g. 100.05',
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-              const SingleDecimalTextFormatter(),
+              SingleDecimalTextFormatter(),
             ],
             prefixIcon: Padding(
               padding: EdgeInsets.all(0.w),
@@ -1540,12 +1538,12 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(clamped),
+            color: AppColors.textPrimary.withValues(alpha: clamped),
             blurRadius: 16,
-            offset: const Offset(0, 6),
+            offset: Offset(0, 6),
           ),
         ],
       ),
@@ -1567,7 +1565,7 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 40.r, color: AppColors.red),
+            Icon(Icons.error_outline, size: 40.r, color: AppColors.error),
             SizedBox(height: 10.h),
             Text(message, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textGrey)),
             SizedBox(height: 12.h),
@@ -1598,7 +1596,7 @@ class _PlanInfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1606,7 +1604,7 @@ class _PlanInfoCard extends StatelessWidget {
           Row(
             children: [
               Text(plan.planName, style: AppTextStyles.cardTitle.copyWith(fontWeight: FontWeight.w600)),
-              const Spacer(),
+              Spacer(),
               if (plan.commissionType.isNotEmpty)
                 _Pill(
                   text: plan.commissionType.toUpperCase(),
@@ -1645,7 +1643,7 @@ class _PlanDropdown extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int?>(
@@ -1703,14 +1701,14 @@ class _AccountListPicker extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.whiteColor,
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.grey.withOpacity(0.15)),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
           ),
           child: ListView.separated(
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
             itemCount: accounts.length,
-            separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.withOpacity(0.12)),
+            separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.border.withValues(alpha: 0.12)),
             itemBuilder: (context, index) {
               final a = accounts[index];
               final belowMin = _isBelowMin(a);
@@ -1800,7 +1798,7 @@ class _BottomBar extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
       decoration: BoxDecoration(
         color: AppColors.tradeBackgroundCenterColor,
-        border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.15))),
+        border: Border(top: BorderSide(color: AppColors.border.withValues(alpha: 0.15))),
       ),
       child: Obx(() {
         final s = step.value;
@@ -1854,7 +1852,7 @@ class _BottomBar extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                     ),
                     child: loading
-                        ? SizedBox(width: 18.r, height: 18.r, child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        ? SizedBox(width: 18.r, height: 18.r, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onColoredBackground))
                         : Text(
                             isEditMode ? 'Save' : (s == 0 ? 'Next' : 'Subscribe'),
                             style: AppTextStyles.button,
@@ -1888,13 +1886,13 @@ class _Pill extends StatelessWidget {
       border = AppColors.primary.withOpacity(0.22);
       fg = AppColors.primary;
     } else if (tone == _PillTone.success) {
-      bg = AppColors.statusGreen.withOpacity(0.12);
-      border = AppColors.statusGreen.withOpacity(0.25);
-      fg = AppColors.statusGreen;
+      bg = AppColors.green.withOpacity(0.12);
+      border = AppColors.green.withOpacity(0.25);
+      fg = AppColors.green;
     } else {
-      bg = AppColors.statusYellow.withOpacity(0.12);
-      border = AppColors.statusYellow.withOpacity(0.25);
-      fg = AppColors.statusYellow;
+      bg = AppColors.warning.withOpacity(0.12);
+      border = AppColors.warning.withOpacity(0.25);
+      fg = AppColors.warning;
     }
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
