@@ -177,7 +177,7 @@ class TradingBottomNavigation extends StatelessWidget {
               curve: Curves.easeOut,
               height: _tabCapsuleHeight.h,
               padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? 16.w : 12.w,
+                horizontal: isSelected ? 12.w : 8.w,
               ),
               decoration: BoxDecoration(
                 color: isSelected

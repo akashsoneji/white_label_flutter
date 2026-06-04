@@ -343,6 +343,7 @@ Future<void> initServices() async {
 /// Build light theme
 ThemeData _buildLightTheme() {
   return ThemeData(
+    fontFamily: 'Roboto',
     primaryColor: FlavorConfig.instance.primaryColor,
     colorScheme: ColorScheme.light(
       primary: FlavorConfig.instance.primaryColor,
@@ -451,6 +452,7 @@ ThemeData _buildLightTheme() {
 /// Build dark theme
 ThemeData _buildDarkTheme() {
   return ThemeData(
+    fontFamily: 'Roboto',
     primaryColor: FlavorConfig.instance.primaryColor,
     colorScheme: ColorScheme.dark(
       primary: FlavorConfig.instance.primaryColor,

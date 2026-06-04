@@ -29,9 +29,12 @@ class _AppLockLifecycleState extends State<AppLockLifecycle>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.resumed) {
-      if (!Get.isRegistered<AppLockService>()) return;
-      final lock = Get.find<AppLockService>();
+    if (!Get.isRegistered<AppLockService>()) return;
+    final lock = Get.find<AppLockService>();
+
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      lock.markPaused();
+    } else if (state == AppLifecycleState.resumed) {
       lock.lockIfNeeded(reason: 'Unlock to continue');
     }
   }
