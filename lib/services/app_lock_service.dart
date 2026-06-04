@@ -12,12 +12,26 @@ class AppLockService extends GetxService {
   DateTime? _lastUnlockAttemptAt;
   DateTime? _lastSuccessfulUnlockAt;
   DateTime? _lastAuthUiAt;
+  DateTime? _pausedAt;
   static const Duration _resumeGrace = Duration(milliseconds: 1800);
+
+  void markPaused() {
+    _pausedAt = DateTime.now();
+  }
 
   /// Lock only when:
   /// - biometric enabled in app, AND
   /// - user session exists (token + logged-in status).
   Future<void> lockIfNeeded({required String reason}) async {
+    // If the app was paused/inactive and returned in less than 15 seconds, don't lock.
+    // This prevents locking on brief focus loss (e.g. permission prompts, native dialogs, Face ID sheets).
+    if (_pausedAt != null &&
+        DateTime.now().difference(_pausedAt!) < const Duration(seconds: 15)) {
+      _pausedAt = null;
+      return;
+    }
+    _pausedAt = null;
+
     // If we are currently showing auth UI (or just returned), don't immediately re-lock.
     if (_lastAuthUiAt != null &&
         DateTime.now().difference(_lastAuthUiAt!) < _resumeGrace) {
