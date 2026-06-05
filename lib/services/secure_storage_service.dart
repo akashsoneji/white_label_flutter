@@ -1,10 +1,26 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:crm_app/models/user_model.dart';
 
 class SecureStorageService {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  // Clear secure storage on first run to handle iOS Keychain persistent data on reinstall
+  static Future<void> clearSecureStorageOnFirstRun() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final isFirstRun = prefs.getBool('is_first_run') ?? true;
+      if (isFirstRun) {
+        print('SecureStorage: First run detected. Wiping Keychain to prevent stale login.');
+        await _storage.deleteAll();
+        await prefs.setBool('is_first_run', false);
+      }
+    } catch (e) {
+      print('SecureStorage: Error checking first run: $e');
+    }
+  }
 
   // Storage keys
   static const String _authTokenKey = 'auth_token';

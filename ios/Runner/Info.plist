@@ -35,6 +35,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>We need camera access for Identity verification.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Allow to upload document for validation</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>We use Face ID / Touch ID to secure your account.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -82,5 +84,10 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

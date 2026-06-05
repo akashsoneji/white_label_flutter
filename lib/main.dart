@@ -188,6 +188,9 @@ void main() async {
 }
 
 Future<void> initServices() async {
+  // Clear secure storage on first run after install (resolves iOS Keychain persistent state issue)
+  await SecureStorageService.clearSecureStorageOnFirstRun();
+
   // Brand selection must be ready before loading app_config so the correct
   // `assets/config/<brandId>/app_config.json` is used.
   final brandResolver = Get.put<BrandResolver>(
