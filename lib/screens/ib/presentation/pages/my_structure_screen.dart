@@ -1,5 +1,6 @@
+import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -54,7 +55,11 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: const AppBackButton(),
+        leading: AppSvgBackButton(
+          onPressed: () => Get.back(closeOverlays: true),
+          iconWidth: 30.w,
+          iconHeight: 30.h,
+        ),
         title: Text(
           'My Structure',
           style: TextStyle(
@@ -94,17 +99,17 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, size: 64.sp, color: Colors.red),
+                      Icon(Icons.error_outline, size: 64.sp, color: AppColors.error),
                       SizedBox(height: 16.h),
                       Text(
                         controller.errorMessage.value,
-                        style: TextStyle(fontSize: 16.sp, color: Colors.red),
+                        style: TextStyle(fontSize: 16.sp, color: AppColors.error),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 16.h),
                       ElevatedButton(
                         onPressed: _loadData,
-                        child: Text('Retry'),
+                        child: Text('Retry', style: AppTextStyles.textButton.copyWith(color: AppColors.whiteColor)),
                       ),
                     ],
                   ),
@@ -264,7 +269,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.border.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

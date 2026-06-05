@@ -7,7 +7,6 @@ import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import '../../../../routes/app_pages.dart';
 import '../../../../services/language_service.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 
 class IbDashboardScreen extends StatelessWidget {
   const IbDashboardScreen({super.key});
@@ -26,7 +25,12 @@ class IbDashboardScreen extends StatelessWidget {
           languageService.tr('general_finance'),
           style: AppTextStyles.screenTitle,
         ),
-        leading: AppBackButton(onPressed: ()=> Navigator.of(context).pop(),
+        leading: IconButton(
+          icon: SvgPicture.asset(
+            "assets/svg/trade/arro_back.svg",
+            colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+          ),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
       ),
@@ -110,6 +114,7 @@ class _MenuItem extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool showTopBorder;
+  final bool showBottomBorder;
   final Color color;
 
   const _MenuItem({
@@ -118,6 +123,7 @@ class _MenuItem extends StatelessWidget {
     required this.onTap,
     required this.color,
     this.showTopBorder = false,
+    this.showBottomBorder = true,
   });
 
   @override
@@ -133,10 +139,12 @@ class _MenuItem extends StatelessWidget {
           border: Border(
             top:
                 showTopBorder
-                    ? BorderSide(color: Colors.grey.shade300, width: 1)
+                    ? BorderSide(color: AppColors.border, width: 1)
                     : BorderSide.none,
             bottom:
-                BorderSide(color: Colors.grey.shade300, width: 1),
+                showBottomBorder
+                    ? BorderSide(color: AppColors.border, width: 1)
+                    : BorderSide.none,
           ),
         ),
         child: SizedBox(
@@ -159,11 +167,14 @@ class _MenuItem extends StatelessWidget {
                 color: color,
               ),
             ),
-            trailing: Icon(
-              Icons.arrow_forward_ios_sharp,
-              size: 14.h,
-              color: AppColors.icongrey,
-            ),
+            trailing:
+                showBottomBorder
+                    ? Icon(
+                      Icons.arrow_forward_ios_sharp,
+                      size: 14.h,
+                      color: AppColors.icongrey,
+                    )
+                    : null,
             onTap: onTap,
             minLeadingWidth: 10,
             horizontalTitleGap: 8.w,

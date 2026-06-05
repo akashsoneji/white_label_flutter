@@ -27,15 +27,15 @@ class IbBottomNavigation extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(32.r),
                 border: Border.all(
-                  color: AppColors.card.withOpacity(0.35),
+                  color: AppColors.whiteColor.withOpacity(0.35),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: AppColors.textPrimary.withValues(alpha: 0.15),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                   ),
@@ -52,8 +52,8 @@ class IbBottomNavigation extends StatelessWidget {
                   ),
                   _buildNavItem(
                     1,
-                    "assets/svg/ib_dashboard/myclient.svg",
-                    "assets/svg/ib_dashboard/myclient_bold.svg",
+                    "assets/svg/ib_dashboard/coin.svg",
+                    "assets/svg/ib_dashboard/coin_bold.svg",
                     "Structure",
                   ),
                   _buildNavItem(

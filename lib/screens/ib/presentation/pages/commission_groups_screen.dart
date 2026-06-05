@@ -5,7 +5,6 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:intl/intl.dart';
 import 'commission_group_form_screen.dart';
 
@@ -72,7 +71,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text('Delete', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -101,7 +100,10 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: const AppBackButton(),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Get.back(closeOverlays: true),
+        ),
         title: Text(
           'Commission Groups',
           style: TextStyle(
@@ -401,7 +403,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
@@ -411,7 +413,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
             width: 24.w,
             height: 24.w,
             decoration: BoxDecoration(
-              color: Colors.black,
+              color: AppColors.textPrimary,
               shape: BoxShape.circle,
             ),
           ),
@@ -456,7 +458,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: AppColors.border.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -581,7 +583,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                             child: TextButton(
                               onPressed: () => _navigateToEditGroup(group),
                               style: TextButton.styleFrom(
-                                backgroundColor: Colors.grey[200],
+                                backgroundColor: AppColors.surface,
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 8.w,
                                   vertical: 6.h,
@@ -606,7 +608,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                             child: TextButton(
                               onPressed: () => _deleteGroup(group),
                               style: TextButton.styleFrom(
-                                backgroundColor: Colors.grey[200],
+                                backgroundColor: AppColors.surface,
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 8.w,
                                   vertical: 6.h,

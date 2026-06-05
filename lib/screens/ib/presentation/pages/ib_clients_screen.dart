@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 
 class IBClientsScreen extends StatefulWidget {
   const IBClientsScreen({super.key});
@@ -157,7 +155,6 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: const AppBackButton(),
         title: Text(
           'My Clients',
           style: TextStyle(
@@ -224,7 +221,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.border.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -282,15 +279,10 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        SvgPicture.asset(
-                          AppBackButton.assetPath,
-                          width: 16.sp,
-                          height: 16.sp,
-                          fit: BoxFit.contain,
-                          colorFilter: ColorFilter.mode(
-                            AppColors.primary,
-                            BlendMode.srcIn,
-                          ),
+                        Icon(
+                          Icons.arrow_back,
+                          color: AppColors.primary,
+                          size: 16.sp,
                         ),
                         SizedBox(width: 4.w),
                         Text(
@@ -373,25 +365,25 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
             icon: Icons.people_outline,
             label: 'Total Clients',
             value: (stats.totalClients ?? 0).toString(),
-            color: Colors.blue,
+            color: AppColors.blue,
           ),
           _buildStatCard(
             icon: Icons.arrow_downward,
             label: 'Total Deposit',
             value: '\$${(stats.totalDeposited ?? 0).toStringAsFixed(2)}',
-            color: Colors.green,
+            color: AppColors.green,
           ),
           _buildStatCard(
             icon: Icons.arrow_upward,
             label: 'Total Withdraw',
             value: '\$${(stats.totalWithdrawal ?? 0).toStringAsFixed(2)}',
-            color: Colors.orange,
+            color: AppColors.warning,
           ),
           _buildStatCard(
             icon: Icons.account_balance_wallet,
             label: 'Available Rebate',
             value: '\$${stats.availableRebate ?? '0.00'}',
-            color: Colors.purple,
+            color: AppColors.quickActionPurple,
           ),
         ],
       ),
@@ -411,7 +403,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.border.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -470,7 +462,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.border.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -544,7 +536,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                   ]
                   : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: AppColors.border.withValues(alpha: 0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -710,7 +702,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.border.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -938,7 +930,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                         child: Container(
                           padding: EdgeInsets.all(4.w),
                           decoration: BoxDecoration(
-                            color: Colors.amber,
+                            color: AppColors.accentStatic,
                             shape: BoxShape.circle,
                             border: Border.all(color: AppColors.whiteColor, width: 2),
                           ),
@@ -1077,7 +1069,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.border.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1099,8 +1091,8 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                     decoration: BoxDecoration(
                       color:
                           isProfit
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
+                              ? AppColors.green.withValues(alpha: 0.1)
+                              : AppColors.error.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -1109,7 +1101,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
-                          color: isProfit ? Colors.green : Colors.red,
+                          color: isProfit ? AppColors.green : AppColors.error,
                         ),
                       ),
                     ),
@@ -1152,7 +1144,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
-                          color: isProfit ? Colors.green : Colors.red,
+                          color: isProfit ? AppColors.green : AppColors.error,
                         ),
                       ),
                       SizedBox(height: 4.h),

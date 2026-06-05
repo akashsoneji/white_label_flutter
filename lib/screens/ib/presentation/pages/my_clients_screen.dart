@@ -1,13 +1,16 @@
+import 'dart:async';
+
+import 'package:crm_app/screens/home/trading_main_screen.dart';
+import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 
 class MyClientsScreen extends StatefulWidget {
   const MyClientsScreen({super.key});
@@ -19,6 +22,11 @@ class MyClientsScreen extends StatefulWidget {
 class _MyClientsScreenState extends State<MyClientsScreen> {
   int _selectedTabIndex = 0; // 0: Client List, 1: IB List, 2: Trade History
   String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  final FocusNode _tradeHistorySearchFocusNode = FocusNode();
+  final ScrollController _pageScrollController = ScrollController();
+  bool _statsExpanded = false;
   IBClient? _selectedSubIB;
   List<IBClient> _ibHierarchy =
       []; // Track hierarchy: [Master, Sub-IB, Sub-IB's Sub-IB, ...]
@@ -27,6 +35,8 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
   bool _isLoadingMoreTrades = false;
   late IBController ibController;
   late AuthController authController;
+  final TextEditingController _clientSearchController = TextEditingController();
+  Timer? _clientSearchDebounce;
 
   @override
   void initState() {
@@ -41,8 +51,71 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     // Initialize hierarchy
     _ibHierarchy = [];
     _selectedSubIB = null;
+    _searchFocusNode.addListener(_onSearchFocusChanged);
+    _tradeHistorySearchFocusNode.addListener(_onSearchFocusChanged);
     // Load all data on screen load
     _loadMyClientsData();
+  }
+
+  void _onSearchFocusChanged() {
+    if (_searchFocusNode.hasFocus || _tradeHistorySearchFocusNode.hasFocus) {
+      if (_statsExpanded && mounted) {
+        setState(() => _statsExpanded = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.removeListener(_onSearchFocusChanged);
+    _searchFocusNode.dispose();
+    _tradeHistorySearchFocusNode.removeListener(_onSearchFocusChanged);
+    _tradeHistorySearchFocusNode.dispose();
+    _pageScrollController.dispose();
+    _clientSearchController.dispose();
+    _clientSearchDebounce?.cancel();
+    super.dispose();
+  }
+
+  /// Opens Trade History tab and loads trades for [client].
+  Future<void> _openTradeHistoryForClient(IBClient client) async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final clientId = client.id;
+    if (clientId == null) {
+      Get.snackbar(
+        'Unavailable',
+        'Cannot load trade history without a client ID',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.error,
+        colorText: AppColors.whiteColor,
+      );
+      return;
+    }
+
+    setState(() {
+      _selectedTabIndex = 2;
+      _expandedItems.clear();
+    });
+
+    await ibController.selectClientForTradeHistory(
+      clientId: clientId,
+      clientName: client.name ?? 'Client',
+    );
+    if (mounted) setState(() {});
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _searchQuery = '';
+    _expandedItems.clear();
+  }
+
+  void _onClientSearchChanged(IBController controller, String value) {
+    _clientSearchDebounce?.cancel();
+    _clientSearchDebounce = Timer(const Duration(milliseconds: 400), () {
+      controller.searchClients(query: value, page: 1);
+    });
   }
 
   Future<void> _loadMyClientsData({int? subIbId}) async {
@@ -222,7 +295,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
         _ibHierarchy.add(subIB);
       }
       _selectedSubIB = subIB;
-      _expandedItems.clear();
+      _clearSearch();
     });
 
     // CRITICAL: Clear old data immediately when switching sub-IBs
@@ -253,7 +326,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
       } else {
         _selectedSubIB = null;
       }
-      _expandedItems.clear();
+      _clearSearch();
     });
     // Load data for the parent level
     final parentId = _ibHierarchy.isNotEmpty ? _ibHierarchy.last.id : null;
@@ -363,43 +436,6 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
         .toList();
   }
 
-  List<IBTradeHistory> _getFilteredTradeHistory() {
-    final allTradeHistory = ibController.ibTradeHistory;
-    if (allTradeHistory.isEmpty) return [];
-
-    List<IBTradeHistory> filtered;
-
-    if (_searchQuery.isEmpty) {
-      filtered = allTradeHistory;
-    } else {
-      filtered =
-          allTradeHistory
-              .where(
-                (trade) =>
-                    (trade.clientName?.toLowerCase().contains(
-                          _searchQuery.toLowerCase(),
-                        ) ??
-                        false) ||
-                    (trade.clientEmail?.toLowerCase().contains(
-                          _searchQuery.toLowerCase(),
-                        ) ??
-                        false) ||
-                    (trade.symbol?.toLowerCase().contains(
-                          _searchQuery.toLowerCase(),
-                        ) ??
-                        false),
-              )
-              .toList();
-    }
-
-    // Limit displayed items (for performance)
-    // If search is active, show all filtered results
-    if (_searchQuery.isEmpty && filtered.length > _tradeHistoryDisplayLimit) {
-      return filtered.take(_tradeHistoryDisplayLimit).toList();
-    }
-    return filtered;
-  }
-
   void _toggleExpand(int index) {
     setState(() {
       _expandedItems[index] = !(_expandedItems[index] ?? false);
@@ -408,13 +444,15 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+
     return Scaffold(
-      backgroundColor: AppColors.tradeBackgroundCenterColor,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        backgroundColor: AppColors.tradeBackgroundCenterColor,
+        backgroundColor: AppColors.backgroundLight,
         elevation: 0,
-        automaticallyImplyLeading: false,
         title: Text(
           'My Client',
           style: TextStyle(
@@ -423,330 +461,478 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
             color: AppColors.textPrimary,
           ),
         ),
+        leading: IconButton(
+          icon: SvgPicture.asset(
+            "assets/svg/ib_dashboard/home.svg",
+            colorFilter: ColorFilter.mode(
+              AppColors.textPrimary,
+              BlendMode.srcIn,
+            ),
+          ),
+          onPressed: () => Get.offAll(() => const TradingMainScreen()),
+        ),
         centerTitle: true,
         // leading: IconButton(
-        //   icon: SvgPicture.asset("assets/svg/trade/arro_back.svg"),
+        //   icon: SvgPicture.asset(
+        //     "assets/svg/trade/arro_back.svg",
+        //     colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+        //   ),
         //   onPressed: () => Navigator.of(context).pop(),
         // ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () => _loadMyClientsData(subIbId: _selectedSubIB?.id),
-        backgroundColor: AppColors.whiteColor,
-        color: AppColors.primary,
-        child: GetBuilder<IBController>(
-          builder: (controller) {
-            if (controller.isLoading.value) {
-              return Center(
-                child: CommonLoadingWidget(
-                  message: 'Loading data...',
-                  size: 50.0,
-                  color: AppColors.primary,
+      body: GetBuilder<IBController>(
+        builder: (controller) {
+          if (controller.isLoading.value) {
+            return Center(
+              child: CommonLoadingWidget(
+                message: 'Loading data...',
+                size: 50.0,
+                color: AppColors.primary,
+              ),
+            );
+          }
+
+          final stats = controller.ibStats.value;
+          final userFullName = authController.userFullName ?? 'User';
+
+          // Check if we have any data at all (clients, sub-IBs, or stats)
+          final hasClients = controller.ibClients.isNotEmpty;
+          final hasSubIBs = controller.ibSubIBs.isNotEmpty;
+          final hasStats = stats != null;
+          final hasAnyData = hasClients || hasSubIBs || hasStats;
+
+          // Only show "No Data Found" if we truly have no data and not loading
+          if (!hasAnyData && !controller.isLoading.value) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.w),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(24.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.05),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.cloud_off_outlined,
+                        size: 64.sp,
+                        color: AppColors.primary.withOpacity(0.5),
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    Text(
+                      'No Data Found',
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'We couldn\'t find any records for this IB. Please check your connection or try again.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: AppColors.textGrey,
+                        height: 1.5,
+                      ),
+                    ),
+                    SizedBox(height: 32.h),
+                    ElevatedButton.icon(
+                      onPressed:
+                          () => _loadMyClientsData(subIbId: _selectedSubIB?.id),
+                      icon: Icon(Icons.refresh, size: 20.sp),
+                      label: Text('Retry Now'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.whiteColor,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24.w,
+                          vertical: 12.h,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.r),
+                        ),
+                        elevation: 0,
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            }
+              ),
+            );
+          }
 
-            final stats = controller.ibStats.value;
-            final userFullName = authController.userFullName ?? 'User';
+          return Obx(() {
+            final compactTradeSearch =
+                keyboardOpen &&
+                _selectedTabIndex == 2 &&
+                controller.selectedClientId.value == null;
 
-            // Check if we have any data at all (clients, sub-IBs, or stats)
-            final hasClients = controller.ibClients.isNotEmpty;
-            final hasSubIBs = controller.ibSubIBs.isNotEmpty;
-            final hasStats = stats != null;
-            final hasAnyData = hasClients || hasSubIBs || hasStats;
-
-            // Only show "No Data Found" if we truly have no data and not loading
-            if (!hasAnyData && !controller.isLoading.value) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.all(32.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(24.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.05),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.cloud_off_outlined,
-                          size: 64.sp,
-                          color: AppColors.primary.withOpacity(0.5),
-                        ),
-                      ),
-                      SizedBox(height: 24.h),
-                      Text(
-                        'No Data Found',
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'We couldn\'t find any records for this IB. Please check your connection or try again.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: AppColors.textGrey,
-                          height: 1.5,
-                        ),
-                      ),
-                      SizedBox(height: 32.h),
-                      ElevatedButton.icon(
-                        onPressed:
-                            () =>
-                                _loadMyClientsData(subIbId: _selectedSubIB?.id),
-                        icon: Icon(Icons.refresh, size: 20.sp),
-                        label: Text('Retry Now'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.whiteColor,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 24.w,
-                            vertical: 12.h,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.r),
-                          ),
-                          elevation: 0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+            // Subscribe to trade-history reactive updates.
+            if (_selectedTabIndex == 2) {
+              controller.selectedClientId.value;
+              controller.isHistoryLoading.value;
+              controller.ibTradeHistory.length;
             }
 
             return SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Hierarchy Breadcrumb at top (Master IB -> Sub IB -> Sub IB's Sub IB)
-                  _buildHierarchyBreadcrumb(userFullName),
-
-                  // Search Bar
-                  _buildSearchBar(),
-
-                  // Scrollable Content
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Statistics Cards Grid (4 cards in 2x2)
-                          Theme(
-                            data: Theme.of(
-                              context,
-                            ).copyWith(dividerColor: Colors.transparent),
-
-                            child: ExpansionTile(
-                              iconColor: AppColors.primary,
-                              backgroundColor: AppColors.whiteColor,
-                              title: Text("Show More"),
-                              children: [
-                                _buildStatisticsGrid(stats, userFullName),
-                                SizedBox(height: 16.h),
-                              ],
-                            ),
-                          ),
-
-                          // Tabs
-                          _buildTabs(),
-
-                          SizedBox(height: 12.h),
-
-                          // Tab Content
-                          _getTabContent(controller),
-
-                          // Bottom padding for floating navigation bar (safe area + nav bar height + extra spacing)
-                          SizedBox(height: 100.h),
-                        ],
-                      ),
+              bottom: false,
+              child: RefreshIndicator(
+                onRefresh:
+                    () => _loadMyClientsData(subIbId: _selectedSubIB?.id),
+                backgroundColor: AppColors.whiteColor,
+                color: AppColors.primary,
+                child: GestureDetector(
+                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                  behavior: HitTestBehavior.translucent,
+                  child: CustomScrollView(
+                    controller: _pageScrollController,
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: ClampingScrollPhysics(),
+                    ),
+                    slivers: _buildPageSlivers(
+                      controller,
+                      stats,
+                      userFullName,
+                      keyboardOpen,
+                      compactTradeSearch,
                     ),
                   ),
-                ],
+                ),
               ),
             );
-          },
+          });
+        },
+      ),
+    );
+  }
+
+  /// Space so last list row can scroll above the IB floating nav (extendBody).
+  double _fabScrollExtent(BuildContext context) =>
+      MediaQuery.paddingOf(context).bottom + 24.h + kBottomNavigationBarHeight;
+
+  List<Widget> _buildPageSlivers(
+    IBController controller,
+    dynamic stats,
+    String userFullName,
+    bool keyboardOpen,
+    bool compactTradeSearch,
+  ) {
+    if (compactTradeSearch) {
+      return [
+        ..._tradeHistorySearchSlivers(controller, keyboardOpen),
+        SliverPadding(
+          padding: EdgeInsets.only(bottom: _fabScrollExtent(context)),
         ),
+      ];
+    }
+
+    final slivers = <Widget>[
+      SliverToBoxAdapter(child: _buildHierarchyBreadcrumb(userFullName)),
+      if (_selectedTabIndex != 2) SliverToBoxAdapter(child: _buildSearchBar()),
+      if (stats != null && !keyboardOpen)
+        SliverToBoxAdapter(child: _buildStatsExpandable(stats, userFullName)),
+      SliverToBoxAdapter(child: _buildTabs()),
+      ..._tabContentSlivers(controller, keyboardOpen),
+      SliverPadding(
+        padding: EdgeInsets.only(bottom: _fabScrollExtent(context)),
+      ),
+    ];
+    return slivers;
+  }
+
+  List<Widget> _tabContentSlivers(IBController controller, bool keyboardOpen) {
+    switch (_selectedTabIndex) {
+      case 0:
+        return _clientListSlivers();
+      case 1:
+        return _ibListSlivers();
+      case 2:
+        return _tradeHistorySlivers(controller, keyboardOpen);
+      default:
+        return _clientListSlivers();
+    }
+  }
+
+  List<Widget> _clientListSlivers() {
+    final filteredClients = _getFilteredClients();
+    if (filteredClients.isEmpty) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Text(
+              'No clients found',
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+            ),
+          ),
+        ),
+      ];
+    }
+
+    return [
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final client = filteredClients[index];
+            final isExpanded = _expandedItems[index] ?? false;
+            return _buildExpandableClientCard(client, index, isExpanded);
+          }, childCount: filteredClients.length),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _ibListSlivers() {
+    final filteredSubIBs = _getFilteredSubIBs();
+    if (filteredSubIBs.isEmpty) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Text(
+              'No Sub-IBs found',
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+            ),
+          ),
+        ),
+      ];
+    }
+
+    return [
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final subIB = filteredSubIBs[index];
+            final isExpanded = _expandedItems[index] ?? false;
+            return _buildExpandableSubIBCard(subIB, index, isExpanded);
+          }, childCount: filteredSubIBs.length),
+        ),
+      ),
+    ];
+  }
+
+  List<Widget> _tradeHistorySlivers(
+    IBController controller,
+    bool keyboardOpen,
+  ) {
+    final selectedId = controller.selectedClientId.value;
+    if (selectedId == null) {
+      return _tradeHistorySearchSlivers(controller, keyboardOpen);
+    }
+
+    final slivers = <Widget>[
+      SliverToBoxAdapter(child: _buildTradeHistoryHeader(controller)),
+    ];
+
+    if (controller.isHistoryLoading.value &&
+        controller.ibTradeHistory.isEmpty) {
+      slivers.add(
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+        ),
+      );
+      return slivers;
+    }
+
+    final trades = controller.ibTradeHistory;
+    if (trades.isEmpty) {
+      slivers.add(
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Text(
+              'No trade history found.',
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+            ),
+          ),
+        ),
+      );
+      return slivers;
+    }
+
+    final hasMore =
+        controller.tradeHistoryPage < controller.tradeHistoryTotalPages;
+    slivers.add(
+      SliverPadding(
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            if (index == trades.length) {
+              return _buildLoadMoreButton(
+                isLoading: controller.isLoadingMoreTrades,
+                onTap: () => controller.loadMoreTradeHistory(),
+              );
+            }
+            return _buildTradeDetailCard(trades[index], index, false);
+          }, childCount: trades.length + (hasMore ? 1 : 0)),
+        ),
+      ),
+    );
+    return slivers;
+  }
+
+  Widget _buildTradeHistoryHeader(IBController controller) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () {
+              controller.clearClientSelection();
+              controller.clearTradeHistory();
+            },
+            child: Row(
+              children: [
+                Icon(Icons.arrow_back, size: 18.sp, color: AppColors.primary),
+                SizedBox(width: 6.w),
+                Text(
+                  'Select Client',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6.r),
+            ),
+            child: Text(
+              controller.selectedClientName.value ?? 'Client',
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildHierarchyBreadcrumb(String userFullName) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    final bannerTitle =
+        _selectedSubIB == null
+            ? '$userFullName (You)'
+            : (_selectedSubIB!.name ?? 'Sub IB');
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // First row: Master IB and Sub IB buttons
-          Row(
-            children: [
-              // Master IB (You)
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 10.h,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.star, color: AppColors.whiteColor, size: 16.sp),
-                      SizedBox(width: 6.w),
-                      Flexible(
-                        child: Text(
-                          '$userFullName (You)',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.whiteColor,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(12.r),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.22),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-              ),
-              // Show Sub IB if exists
-              if (_ibHierarchy.isNotEmpty && _ibHierarchy.length >= 1) ...[
-                SizedBox(width: 8.w),
+              ],
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.star_rounded,
+                  color: AppColors.whiteColor,
+                  size: 22.sp,
+                ),
+                SizedBox(width: 10.w),
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 10.h,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      elevation: 0,
+                  child: Text(
+                    bannerTitle,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.whiteColor,
+                      letterSpacing: 0.2,
                     ),
-                    icon: Icon(Icons.people, color: AppColors.whiteColor, size: 16.sp),
-                    // NOTE: Do NOT wrap label in Flexible here because
-                    // ElevatedButton.icon already manages its own Flexible/Expanded
-                    // internally. Wrapping Text in another Flexible causes
-                    // "Incorrect use of ParentDataWidget" errors.
-                    label: Text(
-                      _ibHierarchy[0].name ?? 'Sub IB',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.whiteColor,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
-              // Show Sub IB's Sub IB if exists (current selected)
-              if (_selectedSubIB != null && _ibHierarchy.length >= 2) ...[
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 10.h,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      elevation: 0,
-                    ),
-                    icon: Icon(Icons.person, color: AppColors.whiteColor, size: 16.sp),
-                    // NOTE: Same as above – avoid nesting Flexible inside the
-                    // internal Row used by ElevatedButton.icon.
-                    label: Text(
-                      _selectedSubIB!.name ?? 'Sub IB',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.whiteColor,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-              ],
-            ],
+            ),
           ),
-          // Second row: Back button and client count
           if (_selectedSubIB != null) ...[
-            SizedBox(height: 12.h),
+            SizedBox(height: 10.h),
             Row(
               children: [
-                InkWell(
-                  onTap: _backToMasterIB,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SvgPicture.asset(
-                          AppBackButton.assetPath,
-                          width: 16.sp,
-                          height: 16.sp,
-                          fit: BoxFit.contain,
-                          colorFilter: ColorFilter.mode(
-                            AppColors.primary,
-                            BlendMode.srcIn,
-                          ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _backToMasterIB,
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.2),
                         ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          _ibHierarchy.length > 1
-                              ? 'Back to Sub IB'
-                              : 'Back to Master IB',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.arrow_back_ios_new_rounded,
                             color: AppColors.primary,
+                            size: 14.sp,
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 4.w),
+                          Text(
+                            _ibHierarchy.length > 1
+                                ? 'Back to Sub IB'
+                                : 'Back to Master IB',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  'Showing ${ibController.ibClients.length} clients under ${_selectedSubIB?.name ?? "Sub IB"}',
-                  style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    '${ibController.ibClients.length} clients under ${_selectedSubIB?.name ?? "Sub IB"}',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: AppColors.textGrey,
+                    ),
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
@@ -756,9 +942,82 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     );
   }
 
+  Widget _buildStatsExpandable(dynamic stats, String userFullName) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
+      child: Material(
+        color: AppColors.whiteColor,
+        elevation: 0,
+        borderRadius: BorderRadius.circular(12.r),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.border.withValues(alpha: 0.06),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              InkWell(
+                onTap: () => setState(() => _statsExpanded = !_statsExpanded),
+                borderRadius: BorderRadius.circular(12.r),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 14.h,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Show More',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              'View statistics & performance overview',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: AppColors.textGrey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        _statsExpanded
+                            ? Icons.keyboard_arrow_up_rounded
+                            : Icons.keyboard_arrow_down_rounded,
+                        color: AppColors.primary,
+                        size: 24.sp,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (_statsExpanded) _buildStatisticsGrid(stats, userFullName),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTabs() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      margin: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
       child: Row(
         children: [
           Expanded(child: _buildTabButton('Client List', 0, Icons.person)),
@@ -775,21 +1034,35 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     final isSelected = _selectedTabIndex == index;
     return GestureDetector(
       onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
         setState(() {
           _selectedTabIndex = index;
           _expandedItems.clear();
         });
-        // If switching to Trade History tab, trigger background loading if needed
         if (index == 2) {
           _loadMoreTradesInBackground();
         }
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(vertical: 10.h),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: AppColors.primary, width: 1),
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: 1,
+          ),
+          boxShadow:
+              isSelected
+                  ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                  : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -800,12 +1073,15 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
               color: isSelected ? AppColors.whiteColor : AppColors.primary,
             ),
             SizedBox(width: 4.w),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? AppColors.whiteColor : AppColors.primary,
+            Flexible(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? AppColors.whiteColor : AppColors.primary,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             if (index == 2 && ibController.isHistoryLoading.value) ...[
@@ -828,34 +1104,91 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
   }
 
   Widget _buildSearchBar() {
-    String hintText;
-    if (_selectedSubIB == null) {
-      hintText = 'Search Sub IBs...';
-    } else {
-      hintText = 'Search Sub IB\'s Sub IBs...';
+    final String hintText;
+    switch (_selectedTabIndex) {
+      case 0:
+        hintText =
+            _selectedSubIB == null
+                ? 'Search clients by name or email...'
+                : 'Search clients under ${_selectedSubIB!.name ?? "Sub IB"}...';
+        break;
+      case 1:
+        hintText =
+            _selectedSubIB == null
+                ? 'Search Sub IBs by name or email...'
+                : 'Search nested Sub IBs...';
+        break;
+      default:
+        hintText = 'Search trade history...';
     }
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-      padding: EdgeInsets.symmetric(horizontal: 8.w),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundLight,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: TextField(
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value;
-            _expandedItems.clear();
-          });
-        },
-        decoration: InputDecoration(
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.border.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: RTLHelper.rtlTextField(
+          controller: _searchController,
+          focusNode: _searchFocusNode,
           hintText: hintText,
-          hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
-          border: InputBorder.none,
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value;
+              _expandedItems.clear();
+            });
+          },
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textPrimary,
+          ),
           prefixIcon: Icon(
-            Icons.search,
-            size: 20.sp,
+            Icons.search_rounded,
+            size: 22.sp,
             color: AppColors.textGrey,
+          ),
+          suffixIcon:
+              _searchQuery.isNotEmpty
+                  ? IconButton(
+                    onPressed: () {
+                      setState(() => _clearSearch());
+                    },
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 20.sp,
+                      color: AppColors.textGrey,
+                    ),
+                  )
+                  : null,
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+            filled: true,
+            fillColor: AppColors.whiteColor,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 12.w,
+              vertical: 12.h,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.r),
+              borderSide: BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.r),
+              borderSide: BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.r),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+            ),
           ),
         ),
       ),
@@ -882,74 +1215,79 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
             ? (double.tryParse(stats.totalRebateGenerated.toString()) ?? 0.0)
             : 0.0;
 
-    // Show 10 cards in 4-column grid (4+4+2 layout) matching the image
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      child: GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 3,
-        crossAxisSpacing: 12.w,
-        mainAxisSpacing: 12.h,
-        childAspectRatio: 0.85,
-        children: [
-          // Row 1: First card - Show "Master IB" or "Sub IB" based on selection
-          _buildStatCard(
-            icon: Icons.account_balance_wallet,
-            label: _selectedSubIB == null ? 'Master IB' : 'Sub IB',
-            value: _selectedSubIB?.name ?? userFullName,
-          ),
-          _buildStatCard(
-            icon: Icons.trending_up,
-            label: 'Total Clients',
-            value:
-                (stats.totalClients ?? ibController.ibClients.length)
-                    .toString(),
-          ),
-          _buildStatCard(
-            icon: Icons.arrow_downward,
-            label: 'Total Deposit',
-            value: '\$${(stats.totalDeposited ?? 0.0).toStringAsFixed(2)}',
-          ),
-          _buildStatCard(
-            icon: Icons.arrow_upward,
-            label: 'Total Withdraw',
-            value: '\$${(stats.totalWithdrawal ?? 0.0).toStringAsFixed(2)}',
-          ),
-          // Row 2: Next 4 cards
-          _buildStatCard(
-            icon: Icons.account_balance_wallet,
-            label: 'Total Equity',
-            value: '\$${(stats.totalEquity ?? 0.0).toStringAsFixed(2)}',
-          ),
-          _buildStatCard(
-            icon: Icons.people,
-            label: 'Total Sub IB',
-            value: totalSubIBs.toString(),
-          ),
-          _buildStatCard(
-            icon: Icons.description,
-            label: 'Total Lots',
-            value: (stats.totalLots ?? 0.0).toStringAsFixed(2),
-          ),
-          _buildStatCard(
-            icon: Icons.account_balance,
-            label: 'Total Rebate',
-            value: '\$${totalRebateValue.toStringAsFixed(2)}',
-          ),
-          // Row 3: Last 2 cards
-          _buildStatCard(
-            icon: Icons.wallet,
-            label: 'Total Withdrawal Rebate',
-            value: '\$${(stats.ibWithdrawalRebate ?? 0.0).toStringAsFixed(2)}',
-          ),
-          _buildStatCard(
-            icon: Icons.wallet,
-            label: 'Available Rebate',
-            value: '\$${availableRebateValue.toStringAsFixed(2)}',
-            isHighlighted: true,
-          ),
-        ],
+    final maxGridHeight = MediaQuery.sizeOf(context).height * 0.32;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxGridHeight),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
+        child: GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 3,
+          crossAxisSpacing: 12.w,
+          mainAxisSpacing: 12.h,
+          childAspectRatio: 0.85,
+          children: [
+            // Row 1: First card - Show "Master IB" or "Sub IB" based on selection
+            _buildStatCard(
+              icon: Icons.account_balance_wallet,
+              label: _selectedSubIB == null ? 'Master IB' : 'Sub IB',
+              value: _selectedSubIB?.name ?? userFullName,
+            ),
+            _buildStatCard(
+              icon: Icons.trending_up,
+              label: 'Total Clients',
+              value:
+                  (stats.totalClients ?? ibController.ibClients.length)
+                      .toString(),
+            ),
+            _buildStatCard(
+              icon: Icons.arrow_downward,
+              label: 'Total Deposit',
+              value: '\$${(stats.totalDeposited ?? 0.0).toStringAsFixed(2)}',
+            ),
+            _buildStatCard(
+              icon: Icons.arrow_upward,
+              label: 'Total Withdraw',
+              value: '\$${(stats.totalWithdrawal ?? 0.0).toStringAsFixed(2)}',
+            ),
+            // Row 2: Next 4 cards
+            _buildStatCard(
+              icon: Icons.account_balance_wallet,
+              label: 'Total Equity',
+              value: '\$${(stats.totalEquity ?? 0.0).toStringAsFixed(2)}',
+            ),
+            _buildStatCard(
+              icon: Icons.people,
+              label: 'Total Sub IB',
+              value: totalSubIBs.toString(),
+            ),
+            _buildStatCard(
+              icon: Icons.description,
+              label: 'Total Lots',
+              value: (stats.totalLots ?? 0.0).toStringAsFixed(2),
+            ),
+            _buildStatCard(
+              icon: Icons.account_balance,
+              label: 'Total Rebate',
+              value: '\$${totalRebateValue.toStringAsFixed(2)}',
+            ),
+            // Row 3: Last 2 cards
+            _buildStatCard(
+              icon: Icons.wallet,
+              label: 'Total Withdrawal Rebate',
+              value:
+                  '\$${(stats.ibWithdrawalRebate ?? 0.0).toStringAsFixed(2)}',
+            ),
+            _buildStatCard(
+              icon: Icons.wallet,
+              label: 'Available Rebate',
+              value: '\$${availableRebateValue.toStringAsFixed(2)}',
+              isHighlighted: true,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -963,15 +1301,15 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     return Container(
       padding: EdgeInsets.all(6.w),
       decoration: BoxDecoration(
-        color: isHighlighted ? Colors.green.shade50 : AppColors.whiteColor,
+        color: isHighlighted ? AppColors.successBg : AppColors.whiteColor,
         borderRadius: BorderRadius.circular(8.r),
         border:
             isHighlighted
-                ? Border.all(color: Colors.green.shade700, width: 1.5)
+                ? Border.all(color: AppColors.green, width: 1.5)
                 : Border.all(color: AppColors.border.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -1009,9 +1347,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                   color:
-                      isHighlighted
-                          ? Colors.green.shade700
-                          : AppColors.textPrimary,
+                      isHighlighted ? AppColors.green : AppColors.textPrimary,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -1021,49 +1357,6 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _getTabContent(IBController controller) {
-    switch (_selectedTabIndex) {
-      case 0:
-        return _buildClientList(controller);
-      case 1:
-        return _buildIbList(controller);
-      case 2:
-        return _buildTradeHistory(controller);
-      default:
-        return _buildClientList(controller);
-    }
-  }
-
-  Widget _buildClientList(IBController controller) {
-    final filteredClients = _getFilteredClients();
-    if (filteredClients.isEmpty) {
-      return Padding(
-        padding: EdgeInsets.all(20.w),
-        child: Center(
-          child: Text(
-            'No clients found',
-            style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
-          ),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 16.h,
-      ).copyWith(bottom: 20.h),
-      itemCount: filteredClients.length,
-      itemBuilder: (context, index) {
-        final client = filteredClients[index];
-        final isExpanded = _expandedItems[index] ?? false;
-        return _buildExpandableClientCard(client, index, isExpanded);
-      },
     );
   }
 
@@ -1085,26 +1378,35 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     final clientCount = client.totalClients ?? 0;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 8.h),
+      margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.border.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.45)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.border.withValues(alpha: 0.06),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
           InkWell(
-            onTap: () => _toggleExpand(index),
+            onTap: () => _openTradeHistoryForClient(client),
+            onLongPress: () => _toggleExpand(index),
+            borderRadius: BorderRadius.circular(12.r),
             child: Padding(
-              padding: EdgeInsets.all(12.w),
+              padding: EdgeInsets.all(14.w),
               child: Row(
                 children: [
                   // Avatar
                   Container(
-                    width: 40.w,
-                    height: 40.w,
+                    width: 44.w,
+                    height: 44.w,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.2),
+                      color: AppColors.primary.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -1177,17 +1479,6 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     ),
                   ),
                   // View and Arrow buttons
-                  IconButton(
-                    icon: Icon(
-                      Icons.visibility_outlined,
-                      size: 18.sp,
-                      color: AppColors.primary,
-                    ),
-                    onPressed: () {
-                      // View details
-                      _toggleExpand(index);
-                    },
-                  ),
                   Container(
                     width: 32.w,
                     height: 32.w,
@@ -1196,22 +1487,61 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: IconButton(
+                      iconSize: 20.sp,
                       padding: EdgeInsets.zero,
+                      tooltip: 'View details',
                       icon: Icon(
-                        Icons.arrow_forward,
-                        size: 16.sp,
+                        Icons.visibility_outlined,
+                        size: 18.sp,
                         color: AppColors.whiteColor,
                       ),
-                      onPressed: () {
-                        // Only navigate if this is a sub-IB
-                        if (client.ibType == 'sub-ib' &&
-                            client.isSubIbApproved == true &&
-                            client.id != null) {
-                          _onSubIBClicked(client);
-                        }
-                      },
+                      onPressed: () => _toggleExpand(index),
                     ),
                   ),
+                  SizedBox(width: 6.w),
+                  Container(
+                    width: 32.w,
+                    height: 32.w,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: IconButton(
+                      iconSize: 20.sp,
+                      padding: EdgeInsets.zero,
+                      tooltip: 'Trade history',
+                      icon: Icon(
+                        Icons.menu,
+                        size: 18.sp,
+                        color: AppColors.whiteColor,
+                      ),
+                      onPressed: () => _openTradeHistoryForClient(client),
+                    ),
+                  ),
+                  if (client.ibType == 'sub-ib' &&
+                      client.isSubIbApproved == true &&
+                      client.id != null) ...[
+                    SizedBox(width: 6.w),
+
+                    Container(
+                      width: 32.w,
+                      height: 32.w,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        tooltip: 'Open Sub IB',
+                        icon: Icon(
+                          Icons.arrow_forward,
+                          size: 16.sp,
+                          color: AppColors.whiteColor,
+                        ),
+                        onPressed: () => _onSubIBClicked(client),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -1288,36 +1618,6 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     );
   }
 
-  Widget _buildIbList(IBController controller) {
-    final filteredSubIBs = _getFilteredSubIBs();
-    if (filteredSubIBs.isEmpty) {
-      return Padding(
-        padding: EdgeInsets.all(20.w),
-        child: Center(
-          child: Text(
-            'No Sub-IBs found',
-            style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
-          ),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(
-        horizontal: 16.w,
-        vertical: 16.h,
-      ).copyWith(bottom: 20.h),
-      itemCount: filteredSubIBs.length,
-      itemBuilder: (context, index) {
-        final subIB = filteredSubIBs[index];
-        final isExpanded = _expandedItems[index] ?? false;
-        return _buildExpandableSubIBCard(subIB, index, isExpanded);
-      },
-    );
-  }
-
   Widget _buildExpandableSubIBCard(IBClient subIB, int index, bool isExpanded) {
     // Get ALL data dynamically from API response - NO static data
     // Sub-IB count from API
@@ -1338,26 +1638,35 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     }
 
     return Container(
-      margin: EdgeInsets.only(bottom: 8.h),
+      margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.border.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.45)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.border.withValues(alpha: 0.06),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
           InkWell(
-            onTap: () => _toggleExpand(index),
+            onTap: () => _openTradeHistoryForClient(subIB),
+            onLongPress: () => _toggleExpand(index),
+            borderRadius: BorderRadius.circular(12.r),
             child: Padding(
-              padding: EdgeInsets.all(12.w),
+              padding: EdgeInsets.all(14.w),
               child: Row(
                 children: [
                   // Avatar
                   Container(
-                    width: 40.w,
-                    height: 40.w,
+                    width: 44.w,
+                    height: 44.w,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.2),
+                      color: AppColors.primary.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -1428,16 +1737,23 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       ],
                     ),
                   ),
-                  // View and Arrow buttons
                   IconButton(
+                    tooltip: 'View details',
                     icon: Icon(
                       Icons.visibility_outlined,
                       size: 18.sp,
                       color: AppColors.primary,
                     ),
-                    onPressed: () {
-                      // View details
-                    },
+                    onPressed: () => _toggleExpand(index),
+                  ),
+                  IconButton(
+                    tooltip: 'Trade history',
+                    icon: Icon(
+                      Icons.history_rounded,
+                      size: 18.sp,
+                      color: AppColors.primary,
+                    ),
+                    onPressed: () => _openTradeHistoryForClient(subIB),
                   ),
                   Container(
                     width: 32.w,
@@ -1448,6 +1764,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
+                      tooltip: 'Open Sub IB',
                       icon: Icon(
                         Icons.arrow_forward,
                         size: 16.sp,
@@ -1509,305 +1826,550 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     );
   }
 
-  Widget _buildTradeHistory(IBController controller) {
-    final allTradeHistory = controller.ibTradeHistory;
-    final filteredTradeHistory = _getFilteredTradeHistory();
-    final hasMore =
-        allTradeHistory.length > _tradeHistoryDisplayLimit &&
-        _searchQuery.isEmpty;
-
-    // Show loading if controller is loading history and no data yet
-    if (controller.isHistoryLoading.value && allTradeHistory.isEmpty) {
-      return Padding(
-        padding: EdgeInsets.all(40.w),
-        child: Center(
-          child: Column(
+  List<Widget> _tradeHistorySearchSlivers(
+    IBController controller,
+    bool keyboardOpen,
+  ) {
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
+          child: Row(
             children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              Expanded(
+                child: TextField(
+                  controller: _clientSearchController,
+                  focusNode: _tradeHistorySearchFocusNode,
+                  style: TextStyle(fontSize: 13.sp),
+                  decoration: InputDecoration(
+                    hintText: 'Search name, email, or account...',
+                    hintStyle: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.textGrey,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      size: 20.sp,
+                      color: AppColors.textGrey,
+                    ),
+                    filled: true,
+                    fillColor: AppColors.whiteColor,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 12.h,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    _onClientSearchChanged(controller, value);
+                  },
+                  onSubmitted: (value) {
+                    controller.searchClients(query: value, page: 1);
+                  },
+                ),
               ),
-              SizedBox(height: 16.h),
-              Text(
-                'Fetching trade history...',
-                style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+              SizedBox(width: 8.w),
+              GestureDetector(
+                onTap: () {
+                  controller.searchClients(
+                    query: _clientSearchController.text,
+                    page: 1,
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    'Search',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.whiteColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
         ),
-      );
-    }
+      ),
+      ..._tradeHistorySearchResultSlivers(controller, keyboardOpen),
+    ];
+  }
 
-    if (filteredTradeHistory.isEmpty && !controller.isLoading.value) {
-      return Padding(
-        padding: EdgeInsets.all(20.w),
-        child: Center(
-          child: Text(
-            'No trade history found',
-            style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+  List<Widget> _tradeHistorySearchResultSlivers(
+    IBController controller,
+    bool keyboardOpen,
+  ) {
+    if (controller.isSearchingClients) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
           ),
         ),
-      );
+      ];
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Display filtered trade history (limited to _tradeHistoryDisplayLimit)
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 16.h,
-          ).copyWith(bottom: 20.h),
-          itemCount: filteredTradeHistory.length,
-          itemBuilder: (context, index) {
-            final trade = filteredTradeHistory[index];
-            final isExpanded = _expandedItems[index] ?? false;
-            return _buildExpandableTradeCard(trade, index, isExpanded);
-          },
-        ),
-        // Show loading indicator if loading more in background (local processing)
-        if (_isLoadingMoreTrades && hasMore)
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.h),
-            child: Row(
+    final results = controller.clientSearchResults;
+
+    if (results.isEmpty) {
+      if (_clientSearchController.text.isNotEmpty) {
+        return [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.w),
+                child: Text(
+                  'No clients found for "${_clientSearchController.text}"',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+                ),
+              ),
+            ),
+          ),
+        ];
+      }
+
+      if (!keyboardOpen) {
+        return [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  width: 16.w,
-                  height: 16.w,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.primary,
+                Icon(
+                  Icons.person_search,
+                  size: 40.sp,
+                  color: AppColors.textGrey.withValues(alpha: 0.4),
+                ),
+                SizedBox(height: 8.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: Text(
+                    'Search for a client to view their trade history',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.textGrey,
                     ),
                   ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  'Processing more trades...',
-                  style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
                 ),
               ],
             ),
           ),
-        // Show message if all trades are loaded
-        if (!_isLoadingMoreTrades &&
-            hasMore &&
-            filteredTradeHistory.length >= allTradeHistory.length)
-          Padding(
-            padding: EdgeInsets.all(8.w),
-            child: Text(
-              'All ${allTradeHistory.length} trades loaded',
-              style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
-            ),
-          ),
-      ],
+        ];
+      }
+
+      return [const SliverToBoxAdapter(child: SizedBox.shrink())];
+    }
+
+    return [
+      SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            if (index == results.length) {
+              return _buildLoadMoreButton(
+                isLoading: controller.isLoadingMoreClients,
+                onTap: () => controller.loadMoreSearchClients(),
+              );
+            }
+            return _buildClientSelectCard(results[index], controller);
+          },
+          childCount:
+              results.length +
+              (controller.clientsPage < controller.clientsTotalPages ? 1 : 0),
+        ),
+      ),
+    ];
+  }
+
+  /// Load more button widget
+  Widget _buildLoadMoreButton({
+    required bool isLoading,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: isLoading ? null : onTap,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: AppColors.whiteColor,
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Center(
+          child:
+              isLoading
+                  ? SizedBox(
+                    width: 20.w,
+                    height: 20.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
+                    ),
+                  )
+                  : Text(
+                    'Load More',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+        ),
+      ),
     );
   }
 
-  Widget _buildExpandableTradeCard(
+  /// Client selector card
+  Widget _buildClientSelectCard(IBClient client, IBController controller) {
+    return Obx(
+      () => GestureDetector(
+        onTap: () {
+          _clientSearchController.clear();
+          controller.selectClient(client.id ?? 0, client.name ?? 'Client');
+          setState(() {});
+        },
+        child: Container(
+          margin: EdgeInsets.only(bottom: 10.h),
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: AppColors.whiteColor,
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: AppColors.border.withOpacity(0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.textPrimary.withValues(alpha: 0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Avatar
+              Container(
+                width: 48.w,
+                height: 48.w,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    _getInitials(client.name),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      client.name ?? 'N/A',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      client.email ?? 'N/A',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppColors.textGrey,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        _buildClientBadge(
+                          'AC: ${client.accountNumber ?? 'N/A'}',
+                          AppColors.blue,
+                        ),
+                        SizedBox(width: 6.w),
+                        _buildClientBadge(
+                          'Lots: ${client.lots?.toStringAsFixed(1) ?? '0.0'}',
+                          AppColors.primary,
+                        ),
+                        SizedBox(width: 6.w),
+                        _buildClientBadge(
+                          'Rebate: \$${client.rebate?.toStringAsFixed(2) ?? '0.00'}',
+                          AppColors.green,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: AppColors.textGrey, size: 22.sp),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClientBadge(String text, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4.r),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  /// Trade detail card (per trade, with expandable details)
+  Widget _buildTradeDetailCard(
     IBTradeHistory trade,
     int index,
     bool isExpanded,
   ) {
     final isProfit = (trade.profit ?? 0) >= 0;
-    // Calculate deposit and withdrawal from trade data
-    // Assuming profit > 0 means deposit, profit < 0 means withdrawal
-    final deposit = isProfit ? (trade.profit ?? 0) : 0.0;
-    final withdrawal = !isProfit ? ((trade.profit ?? 0) * -1) : 0.0;
+    final isBuy = trade.type?.toLowerCase() == 'buy';
 
     return Container(
       margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: AppColors.border.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.textPrimary.withValues(alpha: 0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
+          // Header row
           InkWell(
-            onTap: () => _toggleExpand(index),
+            onTap: () {
+              setState(() {
+                _expandedItems[index] = !isExpanded;
+              });
+            },
             child: Padding(
               padding: EdgeInsets.all(12.w),
               child: Row(
                 children: [
-                  // Avatar
+                  // Type indicator (colored circle)
                   Container(
-                    width: 40.w,
-                    height: 40.w,
+                    width: 36.w,
+                    height: 36.w,
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.2),
+                      color:
+                          isBuy
+                              ? AppColors.success.withValues(alpha: 0.12)
+                              : AppColors.error.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
                       child: Text(
-                        _getInitials(trade.clientName),
+                        (trade.symbol?.length ?? 0) > 3
+                            ? trade.symbol!.substring(0, 3)
+                            : (trade.symbol ?? '--'),
                         style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w700,
+                          color: isBuy ? AppColors.success : AppColors.error,
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
-                  // Name and Symbol
+                  SizedBox(width: 10.w),
+                  // Symbol and type
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          trade.clientName ?? 'N/A',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              trade.symbol ?? 'N/A',
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(width: 6.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 5.w,
+                                vertical: 1.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    isBuy
+                                        ? AppColors.success.withValues(
+                                          alpha: 0.1,
+                                        )
+                                        : AppColors.error.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                              child: Text(
+                                trade.type?.toUpperCase() ?? '--',
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color:
+                                      isBuy
+                                          ? AppColors.success
+                                          : AppColors.error,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          '${trade.symbol ?? ''} - ${trade.type ?? ''}',
+                          'Vol: ${trade.volume?.toStringAsFixed(2) ?? '0.00'} | ${_formatDate(trade.openTime)}',
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 11.sp,
                             color: AppColors.textGrey,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  // Profit/Loss
-                  Text(
-                    '\$${trade.profit?.toStringAsFixed(2) ?? '0.00'}',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: isProfit ? Colors.green : Colors.red,
-                    ),
+                  // P/L and commission column
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${isProfit ? '+' : ''}\$${trade.profit?.toStringAsFixed(2) ?? '0.00'}',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w700,
+                          color: isProfit ? AppColors.success : AppColors.error,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        'Comm: \$${trade.commission?.toStringAsFixed(2) ?? '0.00'}',
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: AppColors.textGrey,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(width: 8.w),
                   Icon(
                     isExpanded
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
-                    color: AppColors.textPrimary,
+                    size: 20.sp,
+                    color: AppColors.textGrey,
                   ),
                 ],
               ),
             ),
           ),
+          // Expanded details
           if (isExpanded)
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
                 color: AppColors.backgroundLight,
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(8.r),
-                  bottomRight: Radius.circular(8.r),
+                  bottomLeft: Radius.circular(10.r),
+                  bottomRight: Radius.circular(10.r),
                 ),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDetailRow('Client Email', trade.clientEmail ?? 'N/A'),
-                  _buildDetailRow('MT5 Account', trade.mt5Account ?? 'N/A'),
-                  _buildDetailRow('Volume', '${trade.volume ?? 0}'),
+                  _buildDetailRow('Account', trade.mt5Account ?? 'N/A'),
+                  _buildDetailRow('Open Price', trade.openPrice ?? 'N/A'),
+                  _buildDetailRow('Close Price', trade.closePrice ?? 'N/A'),
+                  _buildDetailRow(
+                    'Volume',
+                    '${trade.volume?.toString() ?? '0'} lots',
+                  ),
                   _buildDetailRow(
                     'Commission',
-                    '\$${trade.commission ?? '0.00'}',
+                    '\$${trade.commission?.toStringAsFixed(2) ?? '0.00'}',
                   ),
-                  if (trade.openTime != null)
-                    _buildDetailRow('Open Time', trade.openTime!),
-                  if (trade.closeTime != null)
-                    _buildDetailRow('Close Time', trade.closeTime!),
-                  SizedBox(height: 8.h),
-                  // Deposit and Withdrawal with colors
-                  if (deposit > 0)
-                    Container(
-                      padding: EdgeInsets.all(8.w),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.arrow_downward,
-                                size: 16.sp,
-                                color: Colors.green,
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                'Deposit',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '\$${deposit.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (withdrawal > 0) ...[
-                    if (deposit > 0) SizedBox(height: 8.h),
-                    Container(
-                      padding: EdgeInsets.all(8.w),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.arrow_upward,
-                                size: 16.sp,
-                                color: Colors.red,
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                'Withdrawal',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '\$${withdrawal.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  _buildDetailRow(
+                    'P/L',
+                    '${isProfit ? '+' : ''}\$${trade.profit?.toStringAsFixed(2) ?? '0.00'}',
+                  ),
+                  _buildDetailRow('Open Time', _formatDateTime(trade.openTime)),
+                  _buildDetailRow(
+                    'Close Time',
+                    _formatDateTime(trade.closeTime),
+                  ),
                 ],
               ),
             ),
         ],
       ),
     );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'N/A';
+    try {
+      final dt = DateTime.parse(dateStr);
+      return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
+  String _formatDateTime(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return 'N/A';
+    try {
+      final dt = DateTime.parse(dateStr);
+      return '${dt.day}/${dt.month}/${dt.year} ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return dateStr;
+    }
   }
 }

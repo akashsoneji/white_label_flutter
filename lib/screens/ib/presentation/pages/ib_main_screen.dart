@@ -93,6 +93,7 @@ class _IbMainScreenState extends State<IbMainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
+      extendBody: true,
       body: SafeArea(
         child: IndexedStack(index: _currentIndex, children: _getScreens()),
       ),

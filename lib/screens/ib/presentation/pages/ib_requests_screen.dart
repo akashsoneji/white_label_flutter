@@ -1,12 +1,14 @@
+import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
-import 'package:intl/intl.dart';
 
 class IBRequestsScreen extends StatefulWidget {
   const IBRequestsScreen({super.key});
@@ -44,14 +46,14 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
         .toList();
   }
 
-  Color _getStatusColor(String? status) {
+  Color _getApprovalStatusColor(String? status) {
     switch (status?.toLowerCase()) {
       case 'inreview':
-        return Colors.orange;
+        return AppColors.warning;
       case 'approved':
-        return Colors.green;
+        return AppColors.green;
       case 'rejected':
-        return Colors.red;
+        return AppColors.error;
       default:
         return AppColors.textGrey;
     }
@@ -70,18 +72,6 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
     }
   }
 
-  // ignore: unused_element
-  String _formatSubmissionDate(String? createdAt) {
-    if (createdAt == null || createdAt.isEmpty) return 'N/A';
-    try {
-      final dt = DateTime.tryParse(createdAt);
-      if (dt == null) return createdAt;
-      return DateFormat('MMM d, yyyy').format(dt.toLocal());
-    } catch (_) {
-      return createdAt;
-    }
-  }
-
   String _getRequestName(IBApprovalRequest request) {
     final name = (request.fullname ?? '').trim();
     if (name.isNotEmpty) return name;
@@ -96,20 +86,6 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
     return (request.user?.email ?? '').trim();
   }
 
-  // ignore: unused_element
-  Color _getKycColor(String? kycStatus) {
-    switch (kycStatus?.toLowerCase()) {
-      case 'verified':
-        return Colors.green;
-      case 'unverified':
-        return Colors.orange;
-      case 'rejected':
-        return Colors.red;
-      default:
-        return AppColors.textGrey;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,7 +94,6 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        automaticallyImplyLeading: false,
         title: Text(
           'IB Requests',
           style: TextStyle(
@@ -126,6 +101,10 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
+        ),
+        leading: IconButton(
+          icon: SvgPicture.asset("assets/svg/ib_dashboard/home.svg", colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn)),
+          onPressed: () => Get.offAll(() => const TradingMainScreen()),
         ),
         centerTitle: true,
       ),
@@ -193,7 +172,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                           color:
                               isSelected
                                   ? AppColors.primary
-                                  : Colors.grey.shade300,
+                                  : AppColors.border,
                           width: 1,
                         ),
                         boxShadow:
@@ -282,15 +261,13 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
   }
 
   Widget _buildRequestCard(IBApprovalRequest request) {
-    final statusColor = _getStatusColor(request.status);
+    final statusColor = _getApprovalStatusColor(request.status);
     final name = _getRequestName(request);
     final email = _getRequestEmail(request);
-    final phone = request.mobile?.toString() ?? 'N/A';
     final assignedPlan =
         (request.assignedPlan ?? '').isNotEmpty
             ? request.assignedPlan!
             : 'Not Assigned';
-    // (removed unused locals: submissionDate, kycColor, kycLabel)
 
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
@@ -299,7 +276,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: AppColors.border.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -414,7 +391,6 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
             child: Column(
               children: [
                 _buildInfoGrid([
-                  _buildInfoItem(Icons.phone_outlined, 'Phone', phone),
                   _buildInfoItem(
                     Icons.assignment_outlined,
                     'Plan',
@@ -581,7 +557,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 14.h),
                       decoration: BoxDecoration(
-                        color: AppColors.iconBgPurple,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(8.r),
                       ),
                       alignment: Alignment.center,
@@ -625,7 +601,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       return Container(
                         padding: EdgeInsets.symmetric(horizontal: 12.w),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: AppColors.border),
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: DropdownButtonHideUnderline(
@@ -654,10 +630,12 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                     SizedBox(height: 8.h),
 
                     TextField(
+                      style: TextStyle(color: AppColors.textPrimary),
                       controller: reasonController,
                       maxLines: 4,
                       decoration: InputDecoration(
                         hintText: 'Please provide a reason...',
+                        hintStyle: TextStyle(color: AppColors.textGrey),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.r),
                         ),
@@ -701,7 +679,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                               _loadApprovalRequests();
                             }
                           },
-                          child: const Text('Submit'),
+                          child: Text('Submit', style: AppTextStyles.textButton.copyWith(color: AppColors.whiteColor)),
                         ),
                       ],
                     ),
@@ -725,7 +703,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
           color: AppColors.textPrimary,
         ),
         children: const [
-          TextSpan(text: '*', style: TextStyle(color: Colors.red)),
+          TextSpan(text: '*', style: TextStyle(color: AppColors.error)),
         ],
       ),
     );

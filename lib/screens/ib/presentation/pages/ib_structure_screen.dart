@@ -1,5 +1,7 @@
+import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
@@ -73,7 +75,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
             onPressed: () => Get.back(result: true),
             child: Text(
               'Delete',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: AppColors.error),
             ),
           ),
         ],
@@ -104,7 +106,10 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: SvgPicture.asset("assets/svg/ib_dashboard/home.svg", colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn)),
+          onPressed: () => Get.offAll(() => const TradingMainScreen()),
+        ),
         title: Text(
           'IB Structure',
           style: TextStyle(
@@ -141,42 +146,6 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Tab Navigation
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: AppColors.textGrey.withOpacity(0.2),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: AppColors.primary,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                          child: Text(
-                            'Standard Groups',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
                   // Header with Add Button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -184,38 +153,40 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          'Existing Standard Groups',
+                          'Commission Groups',
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       ),
                       SizedBox(width: 8.w),
-                      Flexible(
-                        child: ElevatedButton(
-                          onPressed: _navigateToAddGroup,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 12.w,
-                              vertical: 12.h,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
+                      GestureDetector(
+                        onTap: _navigateToAddGroup,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 14.w,
+                            vertical: 10.h,
                           ),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              'Add New Standard Group',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.whiteColor,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.add, color: AppColors.whiteColor, size: 16.sp),
+                              SizedBox(width: 4.w),
+                              Text(
+                                'Add Group',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.whiteColor,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -273,7 +244,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: AppColors.border.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -287,7 +258,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: AppColors.textGrey.withOpacity(0.2),
+                    color: AppColors.border,
                     width: 1,
                   ),
                 ),
@@ -398,7 +369,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                           TextButton(
                             onPressed: () => _navigateToEditGroup(group),
                             style: TextButton.styleFrom(
-                              backgroundColor: Colors.grey[200],
+                              backgroundColor: AppColors.surface,
                               padding: EdgeInsets.symmetric(
                                 horizontal: 12.w,
                                 vertical: 6.h,
@@ -414,7 +385,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                           TextButton(
                             onPressed: () => _deleteGroup(group),
                             style: TextButton.styleFrom(
-                              backgroundColor: Colors.grey[200],
+                              backgroundColor: AppColors.surface,
                               padding: EdgeInsets.symmetric(
                                 horizontal: 12.w,
                                 vertical: 6.h,

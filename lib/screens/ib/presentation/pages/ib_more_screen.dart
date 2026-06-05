@@ -1,6 +1,7 @@
-import 'package:crm_app/screens/trading/presentation/pages/trading_main_screen.dart';
+import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
@@ -44,7 +45,10 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        automaticallyImplyLeading: false,
+         leading: IconButton(
+          icon: SvgPicture.asset("assets/svg/ib_dashboard/home.svg", colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn)),
+          onPressed: () => Get.offAll(() => const TradingMainScreen()),
+        ),
         title: Text(
           'More',
           style: TextStyle(
@@ -85,7 +89,7 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
                       borderRadius: BorderRadius.circular(12.r),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: AppColors.border.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -140,7 +144,7 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
         decoration: BoxDecoration(
           border: Border(
             top: showTopBorder
-                ? BorderSide(color: Colors.grey.shade300, width: 1)
+                ? BorderSide(color: AppColors.border, width: 1)
                 : BorderSide.none,
           ),
         ),

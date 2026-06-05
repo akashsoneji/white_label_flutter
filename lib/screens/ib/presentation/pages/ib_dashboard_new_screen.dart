@@ -1,14 +1,12 @@
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
-import 'package:crm_app/routes/app_pages.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:share_plus/share_plus.dart';
 
 enum CommissionPeriod { thisMonth, thisQuarter, thisYear }
@@ -29,36 +27,21 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
   @override
   void initState() {
     super.initState();
-    // Get or create IBController
     if (Get.isRegistered<IBController>()) {
       ibController = Get.find<IBController>();
     } else {
       ibController = Get.put(IBController());
     }
-    // Load dashboard and stats data
     _loadDashboardData();
   }
 
   Future<void> _loadDashboardData() async {
     await ibController.loadDashboardData();
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   void _onShare(String text) async {
-    final params = ShareParams(text: '$text');
-    await SharePlus.instance.share(params);
-  }
-
-  // ignore: unused_element
-  void _copyReferenceLink(String? link) {
-    if (link != null && link.isNotEmpty) {
-      Clipboard.setData(ClipboardData(text: link));
-      CustomToastService.showSuccess(
-        message: 'Reference link copied to clipboard',
-      );
-    }
+    await SharePlus.instance.share(ShareParams(text: text));
   }
 
   String _getPeriodLabel(CommissionPeriod period) {
@@ -98,8 +81,14 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
     }
   }
 
-  double _getTotalCommission(CommissionPeriod period) {
-    return _getMyCommission(period) + _getSubIbCommission(period);
+  double _fabScrollExtent(BuildContext context) =>
+      MediaQuery.paddingOf(context).bottom + 32.h;
+
+  String? _buildReferenceUrl(dynamic dashboardData) {
+    final referenceLinkId = dashboardData?.referenceLinkId ?? '';
+    if (referenceLinkId.isEmpty) return null;
+    final baseUrl = FlavorConfig.instance.apiBaseUrl.replaceAll('api/', '');
+    return '${baseUrl}referral?sponsorcode=$referenceLinkId';
   }
 
   @override
@@ -110,10 +99,6 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: AppBackButton(
-          onPressed: () => Get.offAllNamed(AppPages.TRADING),
-        ),
-        automaticallyImplyLeading: false,
         title: Text(
           'IB Dashboard',
           style: TextStyle(
@@ -123,6 +108,17 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
           ),
         ),
         centerTitle: true,
+        leadingWidth: 75.w,
+        leading: IconButton(
+          icon: SvgPicture.asset(
+            'assets/svg/ib_dashboard/home.svg',
+            colorFilter: ColorFilter.mode(
+              AppColors.textPrimary,
+              BlendMode.srcIn,
+            ),
+          ),
+          onPressed: () => Get.offAll(() => const TradingMainScreen()),
+        ),
       ),
       body: Obx(() {
         if (ibController.isLoading.value) {
@@ -138,125 +134,183 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         final dashboardData =
             ibController.ibDashboardResponse.value?.data?.userIBDetails;
         final stats = ibController.ibStats.value;
+        final referenceUrl = _buildReferenceUrl(dashboardData);
+        final referenceLinksCount = stats?.referenceLinks ?? 0;
 
         return RefreshIndicator(
+          color: AppColors.primary,
+          backgroundColor: AppColors.whiteColor,
           onRefresh: _loadDashboardData,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 8.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // My Reference Links Card
-                  _buildReferenceLinksCard(dashboardData),
-
-                  SizedBox(height: 20.h),
-
-                  // Commission Summary Section
-                  _buildCommissionSummary(),
-
-                  SizedBox(height: 20.h),
-
-                  // Statistics Cards Grid
-                  _buildStatisticsGrid(stats),
-                  // Bottom padding for floating navigation bar (safe area + nav bar height + extra spacing)
-                  SizedBox(height: 100.h),
-                ],
-              ),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: ClampingScrollPhysics(),
             ),
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    _buildReferenceHeroCard(
+                      count: referenceLinksCount,
+                      referenceUrl: referenceUrl,
+                    ),
+                    SizedBox(height: 20.h),
+                    _buildSectionHeader(
+                      title: 'Commission Summary',
+                      trailing: _buildPeriodDropdown(),
+                    ),
+                    SizedBox(height: 12.h),
+                    _buildCommissionGrid(),
+                    SizedBox(height: 16.h),
+                    _buildSectionHeader(title: 'Overview'),
+                    SizedBox(height: 8.h),
+                  ]),
+                ),
+              ),
+              if (stats != null)
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8.w,
+                      mainAxisSpacing: 8.h,
+                      childAspectRatio: 1.39,
+                    ),
+                    delegate: SliverChildListDelegate(
+                      _buildStatGridChildren(stats),
+                    ),
+                  ),
+                ),
+              SliverPadding(
+                padding: EdgeInsets.only(bottom: _fabScrollExtent(context)+kBottomNavigationBarHeight),
+              ),
+            ],
           ),
         );
       }),
     );
   }
 
-  Widget _buildReferenceLinksCard(dynamic dashboardData) {
-    final referenceLinkId = dashboardData?.referenceLinkId ?? '';
-    final referenceLinksCount = ibController.ibStats.value?.referenceLinks ?? 0;
-    final baseUrl = FlavorConfig.instance.apiBaseUrl.replaceAll('api/', '');
-    final referenceLink =
-        referenceLinkId.isNotEmpty
-            ? '${baseUrl}referral?sponsorcode=$referenceLinkId'
-            : '';
-    // https: //my.pipze.com/referral?sponsorcode=IB_001160
+  Widget _buildSectionHeader({required String title, Widget? trailing}) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 17.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        if (trailing != null) trailing,
+      ],
+    );
+  }
+
+  Widget _buildReferenceHeroCard({
+    required int count,
+    required String? referenceUrl,
+  }) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.55)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: AppColors.textPrimary.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            referenceLinksCount.toString(),
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'My Reference Links',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textGrey,
+                ),
+              ),
+              Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
           ),
-          Text(
-            'My Reference Links Count',
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          if (referenceLink.isNotEmpty) ...[
-            SizedBox(height: 12.h),
+          if (referenceUrl != null && referenceUrl.isNotEmpty) ...[
+            SizedBox(height: 10.h),
             Container(
-              padding: EdgeInsets.all(12.w),
+              padding: EdgeInsets.fromLTRB(10.w, 10.h, 6.w, 10.h),
               decoration: BoxDecoration(
                 color: AppColors.cardBackGround,
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(
+                  color: AppColors.border.withValues(alpha: 0.45),
+                ),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: Text(
-                      referenceLink,
-                      maxLines: 2,
+                      referenceUrl,
+                      maxLines: 3,
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 10.5.sp,
                         fontWeight: FontWeight.w400,
                         color: AppColors.textPrimary,
+                        height: 1.35,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(width: 8.w),
-                  GestureDetector(
-                    // onTap: () => _copyReferenceLink(referenceLink),
-                    onTap: () => _onShare(referenceLink),
-                    child: Row(
-                      children: [
-                        Icon(Icons.share, color: AppColors.red, size: 16),
-                        // SvgPicture.asset(
-                        //   "assets/svg/ib_dashboard/copy.svg",
-                        //   height: 18,
-                        // ),
-                        SizedBox(width: 2.w),
-                        Text(
-                          'Share',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w400,
-                            color: AppColors.red,
-                            height: 1.4.h,
-                          ),
+                  SizedBox(width: 6.w),
+                  Material(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: InkWell(
+                      onTap: () => _onShare(referenceUrl),
+                      borderRadius: BorderRadius.circular(8.r),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 7.h,
                         ),
-                      ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.share_rounded,
+                              size: 14.sp,
+                              color: AppColors.whiteColor,
+                            ),
+                            SizedBox(width: 3.w),
+                            Text(
+                              'Share Link',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.whiteColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -268,328 +322,250 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
     );
   }
 
-  Widget _buildCommissionSummary() {
+  Widget _buildPeriodDropdown() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.35),
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<CommissionPeriod>(
+          value: _selectedPeriod,
+          isDense: true,
+          icon: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
+          borderRadius: BorderRadius.circular(12.r),
+          items:
+              CommissionPeriod.values.map((period) {
+                return DropdownMenuItem(
+                  value: period,
+                  child: Text(
+                    _getPeriodLabel(period),
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                );
+              }).toList(),
+          onChanged: (value) {
+            if (value != null) {
+              setState(() => _selectedPeriod = value);
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCommissionGrid() {
     final myCommission = _getMyCommission(_selectedPeriod);
     final subIbCommission = _getSubIbCommission(_selectedPeriod);
-    final totalCommission = _getTotalCommission(_selectedPeriod);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        // Header with dropdown
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Commission Summary',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.primary, width: 1),
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-              child: DropdownButton<CommissionPeriod>(
-                iconSize: 16,
-                value: _selectedPeriod,
-                underline: const SizedBox(),
-                icon: Icon(Icons.arrow_drop_down, color: AppColors.primary),
-                items:
-                    CommissionPeriod.values.map((period) {
-                      return DropdownMenuItem(
-                        value: period,
-                        child: Text(
-                          _getPeriodLabel(period),
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedPeriod = value;
-                    });
-                  }
-                },
-              ),
-            ),
-          ],
+        Expanded(
+          child: _buildCommissionTile(
+            label: 'My Commission',
+            amount: myCommission,
+            isPrimary: true,
+          ),
         ),
-        SizedBox(height: 16.h),
-        // Commission Cards
-        Row(
-          children: [
-            Expanded(
-              child: _buildCommissionCard(
-                'My Commission',
-                myCommission,
-                totalCommission > 0 ? myCommission / totalCommission : 0.0,
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: _buildCommissionCard(
-                'Sub-IB Commission',
-                subIbCommission,
-                totalCommission > 0 ? subIbCommission / totalCommission : 0.0,
-              ),
-            ),
-          ],
+        SizedBox(width: 12.w),
+        Expanded(
+          child: _buildCommissionTile(
+            label: 'Sub-IB Commission',
+            amount: subIbCommission,
+            isPrimary: false,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildCommissionCard(String title, double value, double progress) {
+  Widget _buildCommissionTile({
+    required String label,
+    required double amount,
+    required bool isPrimary,
+  }) {
     return Container(
-      padding: EdgeInsets.all(16.w),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textGrey,
+          Padding(
+            padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 8.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textGrey,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Text(
+                  '\$${amount.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.primary,
+                    height: 1.1,
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: 8.h),
-          Text(
-            '\$${value.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4.r),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6.h,
-              backgroundColor: AppColors.cardBackGround,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            ),
+          Container(
+            height: 4.h,
+            color:
+                isPrimary
+                    ? AppColors.primary
+                    : AppColors.border.withValues(alpha: 0.55),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatisticsGrid(dynamic stats) {
-    if (stats == null) {
-      return const SizedBox.shrink();
-    }
+  List<Widget> _buildStatGridChildren(dynamic stats) {
+    final availableRebate =
+        stats.availableRebate != null
+            ? double.tryParse(stats.availableRebate.toString()) ?? 0.0
+            : 0.0;
+    final totalRebate =
+        stats.totalRebateGenerated != null
+            ? double.tryParse(stats.totalRebateGenerated.toString()) ?? 0.0
+            : 0.0;
 
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 12.w,
-      mainAxisSpacing: 12.h,
-      childAspectRatio: 1.6,
-      children: [
-        _buildStatCard(
-          title: 'Total Clients',
-          value: (stats.totalClients ?? 0).toString(),
-          icon: 'assets/svg/more/ib_dashboard/my-clients.svg',
-          onTap: () {
-            // Navigate to Clients tab (index 2)
-            if (widget.onNavigateToTab != null) {
-              widget.onNavigateToTab!(2);
-            }
-          },
-        ),
-        _buildStatCard(
-          title: 'Total Lot',
-          value: (stats.totalLots ?? 0).toStringAsFixed(2),
-          icon: 'assets/svg/more/ib_dashboard/overview.svg',
-        ),
-        _buildStatCard(
-          isLongTitle: true,
-          title: 'Total Withdrawal Rebate',
-          value: '\$${(stats.ibWithdrawalRebate ?? 0).toStringAsFixed(2)}',
-          icon: 'assets/svg/more/ib_dashboard/payout-request.svg',
-        ),
-        _buildStatCard(
-          title: 'Available Rebate',
-          value: '\$${stats.availableRebate ?? '0.00'}',
-          icon: 'assets/svg/more/ib_dashboard/commisson-history.svg',
-          isHighlighted: false,
-        ),
-        _buildStatCard(
-          title: 'Total Deposited',
-          value: '\$${(stats.totalDeposited ?? 0).toStringAsFixed(2)}',
-          icon: 'assets/svg/more/ib_dashboard/overview.svg',
-        ),
-
-        _buildStatCard(
-          title: 'Total Withdrawal',
-          value: '\$${(stats.totalWithdrawal ?? 0).toStringAsFixed(2)}',
-          icon: 'assets/svg/more/ib_dashboard/overview.svg',
-        ),
-        _buildStatCard(
-          title: 'Total available equity',
-          value: '\$${(stats.totalEquity ?? 0).toStringAsFixed(2)}',
-          icon: 'assets/svg/more/ib_dashboard/overview.svg',
-        ),
-        _buildStatCard(
-          title: 'Margin Level below 100%',
-          value: (stats.marginLevelBelow100 ?? 0).toString(),
-          icon: 'assets/svg/chart_screen_icon/bell_icon.svg',
-          isLongTitle: true,
-        ),
-        _buildStatCard(
-          title: 'IB Pending Request',
-          value: (stats.ibPendingRequests ?? 0).toString(),
-          icon: 'assets/svg/more/ib_dashboard/overview.svg',
-          onTap: () {
-            // Navigate to Requests tab (index 3)
-            if (widget.onNavigateToTab != null) {
-              widget.onNavigateToTab!(3);
-            }
-          },
-        ),
-
-        _buildStatCard(
-          title: 'Total Rebate Gen.',
-          value: '\$${stats.totalRebateGenerated ?? '0.00'}',
-          icon: 'assets/svg/more/ib_dashboard/commisson-history.svg',
-        ),
-      ],
-    );
+    // 3×3 grid — order matches reference UI (left → right, top → bottom).
+    return [
+      _buildStatTile(
+        title: 'Total Clients',
+        value: (stats.totalClients ?? 0).toString(),
+        onTap:
+            widget.onNavigateToTab != null
+                ? () => widget.onNavigateToTab!(2)
+                : null,
+      ),
+      _buildStatTile(
+        title: 'Total Lot',
+        value: (stats.totalLots ?? 0).toStringAsFixed(2),
+      ),
+      _buildStatTile(
+        title: 'Total Rebate',
+        value: '\$${totalRebate.toStringAsFixed(2)}',
+      ),
+      _buildStatTile(
+        title: 'Rebate Withdrawal',
+        value: '\$${(stats.ibWithdrawalRebate ?? 0).toStringAsFixed(2)}',
+      ),
+      _buildStatTile(
+        title: 'Available Rebate',
+        value: '\$${availableRebate.toStringAsFixed(2)}',
+        highlight: true,
+      ),
+      _buildStatTile(
+        title: 'Total Equity',
+        value: '\$${(stats.totalEquity ?? 0).toStringAsFixed(2)}',
+      ),
+      _buildStatTile(
+        title: 'Total Deposit',
+        value: '\$${(stats.totalDeposited ?? 0).toStringAsFixed(2)}',
+      ),
+      _buildStatTile(
+        title: 'Total Withdrawal',
+        value: '\$${(stats.totalWithdrawal ?? 0).toStringAsFixed(2)}',
+      ),
+      _buildStatTile(
+        title: 'Pending Request',
+        value: (stats.ibPendingRequests ?? 0).toString(),
+        onTap:
+            widget.onNavigateToTab != null
+                ? () => widget.onNavigateToTab!(3)
+                : null,
+      ),
+    ];
   }
 
-  Widget _buildStatCard({
+  Widget _buildStatTile({
     required String title,
     required String value,
-    required String icon,
-    void Function()? onTap,
-
-    bool isHighlighted = false,
-    bool isLongTitle = false,
+    VoidCallback? onTap,
+    bool highlight = false,
   }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10.r),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: highlight ? AppColors.cardBackGround : AppColors.whiteColor,
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(8.w, 8.h, 6.w, 8.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textGrey,
+                    height: 1.15,
+                  ),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        value,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
+                          height: 1.1,
+                        ),
+                      ),
+                    ),
+                    if (onTap != null)
+                      Padding(
+                        padding: EdgeInsets.only(left: 2.w, bottom: 1.h),
+                        child: Icon(
+                          Icons.chevron_right_rounded,
+                          size: 16.sp,
+                          color: AppColors.textGrey.withValues(alpha: 0.65),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                // fontSize: title.toString().length >= 19?11.sp:12.sp,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textGrey,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              '${value}',
-              style: TextStyle(
-                fontSize: title.toString().length >= 19 ? 18.sp : 20.sp,
-                // fontSize: 20.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
-
-    //   child: Container(
-    //     padding: EdgeInsets.all(isLongTitle ? 12.w : 16.w),
-    //     decoration: BoxDecoration(
-    //       color: AppColors.whiteColor,
-    //       borderRadius: BorderRadius.circular(12.r),
-    //       border:
-    //           isHighlighted ? Border.all(color: Colors.green, width: 2) : null,
-    //       boxShadow: [
-    //         BoxShadow(
-    //           color: Colors.black.withValues(alpha: 0.1),
-    //           blurRadius: 8,
-    //           offset: const Offset(0, 2),
-    //         ),
-    //       ],
-    //     ),
-    //     child: Column(
-    //       crossAxisAlignment: CrossAxisAlignment.center,
-    //       mainAxisAlignment: MainAxisAlignment.center,
-    //       mainAxisSize: MainAxisSize.min,
-    //       children: [
-    //         if (icon.isNotEmpty)
-    //           SvgPicture.asset(
-    //             icon,
-    //             height: 20.h,
-    //             width: 20.w,
-    //             colorFilter: ColorFilter.mode(
-    //               AppColors.primary,
-    //               BlendMode.srcIn,
-    //             ),
-    //           ),
-    //         SizedBox(height: isLongTitle ? 6.h : 8.h),
-    //         Text(
-    //           value,
-    //           style: TextStyle(
-    //             fontSize: 18.sp,
-    //             fontWeight: FontWeight.w600,
-    //             color: AppColors.primary,
-    //             height: 1.2,
-    //           ),
-    //         ),
-    //         SizedBox(height: isLongTitle ? 4.h : 6.h),
-    //         Flexible(
-    //           child: Text(
-    //             title,
-    //             textAlign: TextAlign.center,
-    //             style: TextStyle(
-    //               fontSize: isLongTitle ? 11.sp : 12.sp,
-    //               fontWeight: FontWeight.w400,
-    //               color: AppColors.textPrimary,
-    //               height: 1.1,
-    //             ),
-    //             maxLines: isLongTitle ? 3 : 2,
-    //             overflow: TextOverflow.ellipsis,
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 }

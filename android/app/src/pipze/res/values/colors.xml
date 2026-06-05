@@ -2,7 +2,7 @@
 <resources>
     <color name="primary_color">#5F259E</color>
     <color name="secondary_color">#F8F3FF</color>
-    <color name="accent_color">#5F259E</color>
+    <color name="accent_color">#FFC93C</color>
     <!-- SR wants white native splash background -->
     <color name="my_splash_color">#5F259E</color> <!-- pipze -->
 </resources>

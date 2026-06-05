@@ -180,8 +180,9 @@ class IBClientsResponse {
   bool? success;
   String? message;
   List<IBClient>? data;
+  Map<String, dynamic>? meta;
 
-  IBClientsResponse({this.status, this.success, this.message, this.data});
+  IBClientsResponse({this.status, this.success, this.message, this.data, this.meta});
 
   factory IBClientsResponse.fromJson(Map<String, dynamic> json) {
     return IBClientsResponse(
@@ -194,6 +195,7 @@ class IBClientsResponse {
                 json['data'].map((x) => IBClient.fromJson(x)),
               )
               : null,
+      meta: json['meta'] as Map<String, dynamic>?,
     );
   }
 }
@@ -363,9 +365,9 @@ class IBTradeHistory {
   String? symbol;
   String? type;
   double? volume;
-  String? commission;
+  double? commission;
   double? profit;
-  double? openPrice;
+  String? openPrice;
   String? closePrice;
   String? openTime;
   String? closeTime;
@@ -400,19 +402,18 @@ class IBTradeHistory {
                   ? json['volume'].toDouble()
                   : json['volume'])
               : null,
-      commission: json['commission'],
+      commission: json['commission'] != null
+              ? (json['commission'] is int
+                  ? json['commission'].toDouble()
+                  : json['commission'])
+              : null,
       profit:
           json['profit'] != null
               ? (json['profit'] is int
                   ? json['profit'].toDouble()
                   : json['profit'])
               : null,
-      openPrice:
-          json['open_price'] != null
-              ? (json['open_price'] is int
-                  ? json['open_price'].toDouble()
-                  : json['open_price'])
-              : null,
+      openPrice: json['open_price'],
       closePrice: json['close_price'],
       openTime: json['open_time'],
       closeTime: json['close_time'],
