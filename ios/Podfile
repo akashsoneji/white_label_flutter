@@ -41,6 +41,13 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
       
+      # Generate dSYMs for all pods in Release/Profile configurations
+      if config.name == 'Release' || config.name == 'Profile'
+        config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
+      else
+        config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf'
+      end
+      
       # Configure preprocessor definitions for permission_handler
       # Enables only used permissions, avoiding App Store rejections for unused native APIs
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']

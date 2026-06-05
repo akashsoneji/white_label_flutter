@@ -591,7 +591,10 @@ class MyGetXApp extends StatelessWidget {
                     return Stack(
                       children: [
                         MediaQuery(
-                          data: mediaQuery.copyWith(textScaleFactor: 1.0),
+                          data: mediaQuery.copyWith(
+                            textScaleFactor: 1.0,
+                            boldText: false,
+                          ),
                           child: child!,
                         ),
                         // Global notification overlay
