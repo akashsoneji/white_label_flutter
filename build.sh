@@ -169,7 +169,8 @@ build_flavor() {
         local PUBSPEC_VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
         local VERSION_NAME=$(echo "$PUBSPEC_VERSION" | cut -d'+' -f1)
         local APK_OUTPUT_DIR="build/app/outputs/flutter-apk"
-        local OUTPUT_PREFIX="${FLAVOR^^}_V${VERSION_NAME}"
+        local FLAVOR_UPPER=$(echo "$FLAVOR" | tr '[:lower:]' '[:upper:]')
+        local OUTPUT_PREFIX="${FLAVOR_UPPER}_V${VERSION_NAME}"
 
         # Universal APK: single file app-{flavor}-{mode}.apk
         UNIVERSAL_APK_PATH="${APK_OUTPUT_DIR}/app-$FLAVOR-$MODE.apk"
@@ -356,7 +357,8 @@ if [ "$FLAVOR" == "all" ]; then
                 # Show split APKs
                 APK_FOUND=false
                 for ABI in arm64-v8a armeabi-v7a x86_64; do
-                    OUTPUT_PREFIX="${CLIENT^^}_V${VERSION_NAME}"
+                    local CLIENT_UPPER=$(echo "$CLIENT" | tr '[:lower:]' '[:upper:]')
+                    OUTPUT_PREFIX="${CLIENT_UPPER}_V${VERSION_NAME}"
                     APK_PATH="${APK_OUTPUT_DIR}/${OUTPUT_PREFIX}_${MODE}_${ABI}.apk"
                     if [ -f "$APK_PATH" ]; then
                         APK_SIZE=$(du -h "$APK_PATH" | cut -f1)
@@ -365,7 +367,8 @@ if [ "$FLAVOR" == "all" ]; then
                     fi
                 done
                 # Also check universal APK (when building universal or as fallback)
-                OUTPUT_PREFIX="${CLIENT^^}_V${VERSION_NAME}"
+                local CLIENT_UPPER=$(echo "$CLIENT" | tr '[:lower:]' '[:upper:]')
+                OUTPUT_PREFIX="${CLIENT_UPPER}_V${VERSION_NAME}"
                 UNIVERSAL_APK_PATH="${APK_OUTPUT_DIR}/${OUTPUT_PREFIX}_${MODE}.apk"
                 if [ -f "$UNIVERSAL_APK_PATH" ]; then
                     APK_SIZE=$(du -h "$UNIVERSAL_APK_PATH" | cut -f1)

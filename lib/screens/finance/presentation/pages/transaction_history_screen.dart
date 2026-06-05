@@ -125,7 +125,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
           // Filter by time period
           final transactionDate =
-              DateTime.tryParse(transaction.createdAt ?? '') ?? DateTime(1970);
+              DateTime.tryParse(transaction.createdAt ?? '')?.toLocal() ?? DateTime(1970);
           if (!_isTransactionInTimePeriod(transactionDate)) {
             return false;
           }
@@ -135,8 +135,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
     // Sort by newest first
     filtered.sort((a, b) {
-      final aDate = DateTime.tryParse(a.createdAt ?? '') ?? DateTime(1970);
-      final bDate = DateTime.tryParse(b.createdAt ?? '') ?? DateTime(1970);
+      final aDate = DateTime.tryParse(a.createdAt ?? '')?.toLocal() ?? DateTime(1970);
+      final bDate = DateTime.tryParse(b.createdAt ?? '')?.toLocal() ?? DateTime(1970);
       return bDate.compareTo(aDate);
     });
 
@@ -651,7 +651,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     ),
                   ),
                   Text(
-                    '${transaction.createdAt}',
+                    _formatDateTime(transaction.createdAt ?? ''),
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
@@ -745,6 +745,32 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       'Dec',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  String _formatDateTime(String dateStr) {
+    final date = DateTime.tryParse(dateStr)?.toLocal();
+    if (date == null) return dateStr;
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final day = date.day;
+    final month = months[date.month - 1];
+    final hour24 = date.hour;
+    final hour = hour24 > 12 ? hour24 - 12 : (hour24 == 0 ? 12 : hour24);
+    final period = hour24 >= 12 ? 'PM' : 'AM';
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '$day $month, $hour:$minute $period';
   }
 
   void _showCustomDatePicker(bool isStartDate) async {
