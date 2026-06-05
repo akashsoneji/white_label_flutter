@@ -80,26 +80,27 @@ class _VantageTransactionHistoryScreenState
   }
 
   List<Data> _computeFilteredTransactions(List<Data> allTransactions) {
-    List<Data> filtered = allTransactions.where((transaction) {
-      if (selectedAccount != 'All' &&
-          (transaction.mt5AccountId ?? '') != selectedAccount) {
-        return false;
-      }
+    List<Data> filtered =
+        allTransactions.where((transaction) {
+          if (selectedAccount != 'All' &&
+              (transaction.mt5AccountId ?? '') != selectedAccount) {
+            return false;
+          }
 
-      if (selectedTransactionType != 'All' &&
-          (transaction.transactionType?.toLowerCase() ?? '') !=
-              selectedTransactionType.toLowerCase()) {
-        return false;
-      }
+          if (selectedTransactionType != 'All' &&
+              (transaction.transactionType?.toLowerCase() ?? '') !=
+                  selectedTransactionType.toLowerCase()) {
+            return false;
+          }
 
-      final transactionDate =
-          DateTime.tryParse(transaction.createdAt ?? '') ?? DateTime.now();
-      if (!_isTransactionInTimePeriod(transactionDate)) {
-        return false;
-      }
+          final transactionDate =
+              DateTime.tryParse(transaction.createdAt ?? '') ?? DateTime.now();
+          if (!_isTransactionInTimePeriod(transactionDate)) {
+            return false;
+          }
 
-      return true;
-    }).toList();
+          return true;
+        }).toList();
 
     filtered.sort((a, b) {
       final aDate = DateTime.tryParse(a.createdAt ?? '') ?? DateTime.now();
@@ -148,9 +149,10 @@ class _VantageTransactionHistoryScreenState
       canPop: false,
       onPopInvoked: (didPop) {},
       child: Scaffold(
-        backgroundColor: AppColors.isDarkMode
-            ? AppColors.backgroundDarkAlt
-            : AppColors.backgroundLightAlt,
+        backgroundColor:
+            AppColors.isDarkMode
+                ? AppColors.backgroundDarkAlt
+                : AppColors.backgroundLightAlt,
         appBar: _buildAppBar(),
         body: SafeArea(
           child: RefreshIndicator(
@@ -234,11 +236,14 @@ class _VantageTransactionHistoryScreenState
       int withdrawalCount = 0;
 
       for (final t in filtered) {
-        final amount = double.tryParse(
-                t.amount?.replaceAll(RegExp(r'[^\d.-]'), '') ?? '0') ??
+        final amount =
+            double.tryParse(
+              t.amount?.replaceAll(RegExp(r'[^\d.-]'), '') ?? '0',
+            ) ??
             0;
-        final isDeposit =
-            (t.transactionType?.toLowerCase() ?? '').contains('deposit');
+        final isDeposit = (t.transactionType?.toLowerCase() ?? '').contains(
+          'deposit',
+        );
 
         if (isDeposit) {
           totalDeposits += amount;
@@ -325,10 +330,7 @@ class _VantageTransactionHistoryScreenState
           SizedBox(height: 2.h),
           Text(
             '$count transactions',
-            style: TextStyle(
-              fontSize: 10.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -339,22 +341,23 @@ class _VantageTransactionHistoryScreenState
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      child: _filterExpanded
-          ? Container(
-              margin: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                children: [
-                  _buildTimePeriodChips(),
-                  SizedBox(height: 12.h),
-                  if (selectedTimePeriod == 'Custom') ...[
-                    _buildCustomDateRange(),
+      child:
+          _filterExpanded
+              ? Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Column(
+                  children: [
+                    _buildTimePeriodChips(),
                     SizedBox(height: 12.h),
+                    if (selectedTimePeriod == 'Custom') ...[
+                      _buildCustomDateRange(),
+                      SizedBox(height: 12.h),
+                    ],
+                    _buildTransactionTypeSelector(),
                   ],
-                  _buildTransactionTypeSelector(),
-                ],
-              ),
-            )
-          : const SizedBox.shrink(),
+                ),
+              )
+              : const SizedBox.shrink(),
     );
   }
 
@@ -365,40 +368,48 @@ class _VantageTransactionHistoryScreenState
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: timePeriods.asMap().entries.map((entry) {
-            final period = entry.value;
-            final isSelected = period == selectedTimePeriod;
+          children:
+              timePeriods.asMap().entries.map((entry) {
+                final period = entry.value;
+                final isSelected = period == selectedTimePeriod;
 
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedTimePeriod = period;
-                  if (period != 'Custom') {
-                    customStartDate = null;
-                    customEndDate = null;
-                  }
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Colors.white.withOpacity(0.2)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  period,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedTimePeriod = period;
+                      if (period != 'Custom') {
+                        customStartDate = null;
+                        customEndDate = null;
+                      }
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 10.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          isSelected
+                              ? AppColors.textPrimary
+                              : AppColors.whiteColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      period,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isSelected
+                                ? AppColors.whiteColor
+                                : AppColors.textPrimary,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            );
-          }).toList(),
+                );
+              }).toList(),
         ),
       ),
     );
@@ -502,45 +513,50 @@ class _VantageTransactionHistoryScreenState
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: transactionTypes.asMap().entries.map((entry) {
-                  final type = entry.value;
-                  final isSelected = type == selectedTransactionType;
+                children:
+                    transactionTypes.asMap().entries.map((entry) {
+                      final type = entry.value;
+                      final isSelected = type == selectedTransactionType;
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedTransactionType = type;
-                      });
-                    },
-                    child: Container(
-                      margin: EdgeInsets.only(right: 8.w),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 14.w,
-                        vertical: 8.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.white.withOpacity(0.2)
-                            : AppColors.surface,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isSelected
-                              ? Colors.transparent
-                              : VantageUiTokens.borderColor,
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedTransactionType = type;
+                          });
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(right: 8.w),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 14.w,
+                            vertical: 8.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? Colors.white.withOpacity(0.2)
+                                    : AppColors.surface,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color:
+                                  isSelected
+                                      ? Colors.transparent
+                                      : VantageUiTokens.borderColor,
+                            ),
+                          ),
+                          child: Text(
+                            type,
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
+                              color:
+                                  isSelected
+                                      ? Colors.white
+                                      : AppColors.textSecondary,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        type,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w600,
-                          color:
-                              isSelected ? Colors.white : AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               ),
             ),
           ),
@@ -608,8 +624,9 @@ class _VantageTransactionHistoryScreenState
 
     for (final transaction in transactions) {
       final dateStr = transaction.createdAt ?? '';
-      final dateKey =
-          _formatDateHeader(DateTime.tryParse(dateStr) ?? DateTime.now());
+      final dateKey = _formatDateHeader(
+        DateTime.tryParse(dateStr) ?? DateTime.now(),
+      );
 
       if (grouped.containsKey(dateKey)) {
         grouped[dateKey]!.add(transaction);
@@ -638,8 +655,18 @@ class _VantageTransactionHistoryScreenState
 
   String _getMonthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return months[month - 1];
   }
@@ -699,7 +726,11 @@ class _VantageTransactionHistoryScreenState
     final Color amountColor = isDeposit ? Colors.green : Colors.red;
     final String amountPrefix = isDeposit ? '+' : '-';
     final String statusText = (transaction.status ?? '').trim().toLowerCase();
-    final bool isApproved = ['approved', 'success', 'completed'].contains(statusText);
+    final bool isApproved = [
+      'approved',
+      'success',
+      'completed',
+    ].contains(statusText);
 
     Color statusColor() {
       if (isApproved) return Colors.green;
@@ -708,16 +739,20 @@ class _VantageTransactionHistoryScreenState
     }
 
     IconData transactionIcon() {
-      if ((transaction.transactionType?.toLowerCase() ?? '').contains('deposit')) {
+      if ((transaction.transactionType?.toLowerCase() ?? '').contains(
+        'deposit',
+      )) {
         return Icons.arrow_downward_rounded;
-      } else if ((transaction.transactionType?.toLowerCase() ?? '')
-          .contains('withdraw')) {
+      } else if ((transaction.transactionType?.toLowerCase() ?? '').contains(
+        'withdraw',
+      )) {
         return Icons.arrow_upward_rounded;
       }
       return Icons.swap_horiz_rounded;
     }
 
-    final hasReceipt = (transaction.id ?? '').isNotEmpty &&
+    final hasReceipt =
+        (transaction.id ?? '').isNotEmpty &&
         !(transaction.amount?.trim().startsWith('-') ?? false) &&
         (transaction.transactionType?.toLowerCase() ?? '') != 'withdrawal';
 
@@ -857,10 +892,7 @@ class _VantageTransactionHistoryScreenState
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 8.w,
-                  vertical: 3.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
                   color: statusColor().withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
@@ -915,10 +947,7 @@ class _VantageTransactionHistoryScreenState
           Text(
             'Try adjusting your filters to find more transactions',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
           ),
           SizedBox(height: 24.h),
           TextButton.icon(
@@ -931,13 +960,8 @@ class _VantageTransactionHistoryScreenState
               });
             },
             icon: Icon(Icons.refresh_rounded, size: 16.sp),
-            label: Text(
-              'Reset Filters',
-              style: TextStyle(fontSize: 13.sp),
-            ),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.primary,
-            ),
+            label: Text('Reset Filters', style: TextStyle(fontSize: 13.sp)),
+            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
           ),
         ],
       ),
@@ -958,7 +982,6 @@ class _VantageTransactionHistoryScreenState
     final minute = date.minute.toString().padLeft(2, '0');
     return '$day $month, $hour:$minute $period';
   }
-
 
   void _showCustomDatePicker(bool isStartDate) async {
     final DateTime? picked = await AppPickerTheme.showAppDatePicker(

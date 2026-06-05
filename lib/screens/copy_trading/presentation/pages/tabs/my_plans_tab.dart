@@ -140,13 +140,13 @@ class _MyPlansTabState extends State<MyPlansTab> {
                     Icon(
                       Icons.add_rounded,
                       size: 15.sp,
-                      color: AppColors.onColoredBackground,
+                      color: AppColors.whiteColor,
                     ),
                     SizedBox(width: 4.w),
                     Text(
                       'Create Plan',
                       style: TextStyle(
-                        color: AppColors.onColoredBackground,
+                        color: AppColors.whiteColor,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.2,
@@ -338,10 +338,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                                       () => controller.refreshAll(
                                         showLoading: true,
                                       ),
-                                  icon: Icon(
-                                    Icons.refresh_rounded,
-                                    size: 16,
-                                  ),
+                                  icon: Icon(Icons.refresh_rounded, size: 16),
                                   label: Text('Try Again'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
