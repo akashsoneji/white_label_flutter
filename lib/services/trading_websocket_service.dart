@@ -273,51 +273,8 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-
-    switch (state) {
-      case AppLifecycleState.resumed:
-        // ✅ FIX: On resume, keep existing data visible while reconnecting in background.
-        // DO NOT call clearAllTradingData() here — that causes the list to flash empty
-        // before new data arrives. Instead, close stale connections and reconnect all
-        // channels; incoming data will overwrite old data seamlessly.
-        if (!_isDisposed) {
-          AppLogger.websocket('App resumed, reconnecting all channels');
-
-          // Close stale connections without clearing any data
-          _channel?.sink.close();
-          _marketWatchChannel?.sink.close();
-          _openPositionsChannel?.sink.close();
-          _pendingOrdersChannel?.sink.close();
-
-          // Clear connection flags
-          isConnected.value = false;
-          isMarketWatchConnected.value = false;
-          isOpenPositionsConnected.value = false;
-          isPendingOrdersConnected.value = false;
-
-          // Reset reconnect counters
-          _reconnectAttempts = 0;
-          _marketWatchReconnectAttempts = 0;
-          _openPositionsReconnectAttempts = 0;
-          _pendingOrdersReconnectAttempts = 0;
-
-          // Reconnect all channels — fresh data replaces old data without blank flash
-          _initializeWebSocket();
-          _connectToMarketWatch();
-          _connectToOpenPositions();
-          _connectToPendingOrders();
-        }
-        break;
-      case AppLifecycleState.paused:
-        break;
-      case AppLifecycleState.detached:
-        _disconnectWebSocket();
-        break;
-      case AppLifecycleState.inactive:
-        break;
-      case AppLifecycleState.hidden:
-        break;
-    }
+    // Connection state is centrally coordinated by AccountController to prevent race conditions and duplicate connections.
+    return;
   }
 
   // Initialize WebSocket connection - always use unified /ws/op endpoint
@@ -3853,12 +3810,69 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
     _disconnectWebSocket();
     _reconnectAttempts = 0;
     _initializeWebSocket();
+    _connectToMarketWatch();
+    _connectToOpenPositions();
+    _connectToPendingOrders();
   }
 
   // Manual disconnect
   void disconnect() {
     AppLogger.websocket('Trading WS: Manual disconnect requested');
     _disconnectWebSocket();
+  }
+
+  void disconnectAll() {
+    AppLogger.websocket('Trading WS: Disconnecting all channels and cancelling all timers/subscriptions');
+    
+    // Cancel all timers
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+    _openPositionsReconnectTimer?.cancel();
+    _openPositionsReconnectTimer = null;
+    _pendingOrdersReconnectTimer?.cancel();
+    _pendingOrdersReconnectTimer = null;
+    _marketWatchReconnectTimer?.cancel();
+    _marketWatchReconnectTimer = null;
+    _symbolsReconnectTimer?.cancel();
+    _symbolsReconnectTimer = null;
+    _subscriptionRefreshTimer?.cancel();
+    _subscriptionRefreshTimer = null;
+    _dataRetryTimer?.cancel();
+    _dataRetryTimer = null;
+    _updateDebounceTimer?.cancel();
+    _updateDebounceTimer = null;
+
+    // Cancel all subscriptions
+    _mainChannelSubscription?.cancel();
+    _mainChannelSubscription = null;
+    _openPositionsSubscription?.cancel();
+    _openPositionsSubscription = null;
+    _pendingOrdersSubscription?.cancel();
+    _pendingOrdersSubscription = null;
+    _marketWatchSubscription?.cancel();
+    _marketWatchSubscription = null;
+    _symbolsSubscription?.cancel();
+    _symbolsSubscription = null;
+
+    // Close and nullify channels
+    try { _channel?.sink.close(); } catch (_) {}
+    _channel = null;
+    try { _openPositionsChannel?.sink.close(); } catch (_) {}
+    _openPositionsChannel = null;
+    try { _pendingOrdersChannel?.sink.close(); } catch (_) {}
+    _pendingOrdersChannel = null;
+    try { _marketWatchChannel?.sink.close(); } catch (_) {}
+    _marketWatchChannel = null;
+    try { _symbolsChannel?.sink.close(); } catch (_) {}
+    _symbolsChannel = null;
+
+    isConnected.value = false;
+    isOpenPositionsConnected.value = false;
+    isPendingOrdersConnected.value = false;
+    isMarketWatchConnected.value = false;
+    isSymbolsConnected.value = false;
   }
 
   // Refresh trading data

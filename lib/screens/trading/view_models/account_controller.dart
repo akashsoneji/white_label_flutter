@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/models/account_models.dart';
@@ -16,8 +17,10 @@ import 'package:crm_app/services/account_service.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/services/account_websocket_service.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
+import 'package:crm_app/services/app_lock_service.dart';
+import 'package:crm_app/services/unified_websocket_service.dart';
 
-class AccountController extends GetxController {
+class AccountController extends GetxController with WidgetsBindingObserver {
   final AccountService _accountService = Get.find<AccountService>();
   final FinanceRepository _financeRepo = Get.find<FinanceRepository>();
   late final DashboardController _dashboardController;
@@ -74,8 +77,112 @@ class AccountController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     _initializeControllers();
     loadAccounts();
+
+    ever(Get.find<AppLockService>().isLocked, (bool locked) {
+      if (locked) {
+        print('=== WS CENTRAL: App locked, disconnecting all sockets ===');
+        _disconnectAllSocketsCentral();
+      } else {
+        // Reconnect only if app is currently resumed
+        if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+          print('=== WS CENTRAL: App unlocked while resumed, reconnecting all sockets ===');
+          final active = _activeMT5Account.value;
+          if (active != null) {
+            reconnectAllSocketsForAccount(active.metaAccountNumber);
+          }
+          refreshAccounts();
+        }
+      }
+    });
+  }
+
+  @override
+  void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.onClose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      print('=== WS CENTRAL: App minimized ($state), disconnecting all sockets ===');
+      _disconnectAllSocketsCentral();
+    } else if (state == AppLifecycleState.resumed) {
+      // ✅ Delay check slightly to let AppLockLifecycle evaluate lock status first
+      Future.delayed(const Duration(milliseconds: 100), () {
+        final isLocked = Get.find<AppLockService>().isLocked.value;
+        if (!isLocked) {
+          print('=== WS CENTRAL: App resumed and not locked, reconnecting all sockets ===');
+          final active = _activeMT5Account.value;
+          if (active != null) {
+            reconnectAllSocketsForAccount(active.metaAccountNumber);
+          }
+          refreshAccounts();
+        } else {
+          print('=== WS CENTRAL: App resumed but locked, keeping sockets disconnected ===');
+        }
+      });
+    }
+  }
+
+  void _disconnectAllSocketsCentral() {
+    print('=== WS CENTRAL: Disconnecting all sockets centrally ===');
+    // Instruments
+    try {
+      if (Get.isRegistered<InstrumentsController>()) {
+        Get.find<InstrumentsController>().disconnectWebSocket();
+      }
+    } catch (e) {
+      print('Error disconnecting Instruments WS: $e');
+    }
+
+    // Trading
+    try {
+      if (Get.isRegistered<TradingWebSocketService>()) {
+        Get.find<TradingWebSocketService>().disconnectAll();
+      }
+    } catch (e) {
+      print('Error disconnecting Trading WS: $e');
+    }
+
+    // Account
+    try {
+      if (Get.isRegistered<AccountWebSocketService>()) {
+        Get.find<AccountWebSocketService>().disconnectWebSocket();
+      }
+    } catch (e) {
+      print('Error disconnecting Account WS: $e');
+    }
+
+    // Chart
+    try {
+      if (Get.isRegistered<ChartSocketController>()) {
+        Get.find<ChartSocketController>().stopWebSocket();
+      }
+    } catch (e) {
+      print('Error stopping Chart WS: $e');
+    }
+
+    // Dashboard
+    try {
+      if (Get.isRegistered<DashboardController>()) {
+        Get.find<DashboardController>().disconnectWebSocket();
+      }
+    } catch (e) {
+      print('Error disconnecting Dashboard WS: $e');
+    }
+
+    // Unified WS Service
+    try {
+      if (Get.isRegistered<UnifiedWebSocketService>()) {
+        Get.find<UnifiedWebSocketService>().disconnectAll();
+      }
+    } catch (e) {
+      print('Error disconnecting Unified WS: $e');
+    }
   }
 
   void _initializeControllers() {

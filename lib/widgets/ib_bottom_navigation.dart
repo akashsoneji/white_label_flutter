@@ -20,61 +20,67 @@ class IbBottomNavigation extends StatelessWidget {
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(32.r),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: AppColors.whiteColor,
-                borderRadius: BorderRadius.circular(32.r),
-                border: Border.all(
-                  color: AppColors.whiteColor.withOpacity(0.35),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.textPrimary.withValues(alpha: 0.15),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32.r),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.textPrimary.withValues(alpha: AppColors.isDarkMode ? 0.22 : 0.15),
+                blurRadius: 22,
+                spreadRadius: 2,
+                offset: const Offset(0, 8),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildNavItem(
-                    0,
-                    "assets/svg/ib_dashboard/dashboard.svg",
-                    "assets/svg/ib_dashboard/dashboard_bold.svg",
-                    "Dashboard",
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32.r),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: AppColors.whiteColor,
+                  borderRadius: BorderRadius.circular(32.r),
+                  border: Border.all(
+                    color: AppColors.whiteColor.withOpacity(0.35),
+                    width: 1,
                   ),
-                  _buildNavItem(
-                    1,
-                    "assets/svg/ib_dashboard/coin.svg",
-                    "assets/svg/ib_dashboard/coin_bold.svg",
-                    "Structure",
-                  ),
-                  _buildNavItem(
-                    2,
-                    "assets/svg/ib_dashboard/myclient.svg",
-                    "assets/svg/ib_dashboard/myclient_bold.svg",
-                    "Clients",
-                  ),
-                  _buildNavItem(
-                    3,
-                    "assets/svg/ib_dashboard/marketing.svg",
-                    "assets/svg/ib_dashboard/marketing_bold.svg",
-                    "Requests",
-                  ),
-                  _buildNavItem(
-                    4,
-                    "assets/svg/bottom_navigation/setting.svg",
-                    "assets/svg/bottom_navigation/setting_bold.svg",
-                    "More",
-                  ),
-                ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildNavItem(
+                      0,
+                      "assets/svg/ib_dashboard/dashboard.svg",
+                      "assets/svg/ib_dashboard/dashboard_bold.svg",
+                      "Dashboard",
+                    ),
+                    _buildNavItem(
+                      1,
+                      "assets/svg/ib_dashboard/coin.svg",
+                      "assets/svg/ib_dashboard/coin_bold.svg",
+                      "Structure",
+                    ),
+                    _buildNavItem(
+                      2,
+                      "assets/svg/ib_dashboard/myclient.svg",
+                      "assets/svg/ib_dashboard/myclient_bold.svg",
+                      "Clients",
+                    ),
+                    _buildNavItem(
+                      3,
+                      "assets/svg/ib_dashboard/marketing.svg",
+                      "assets/svg/ib_dashboard/marketing_bold.svg",
+                      "Requests",
+                    ),
+                    _buildNavItem(
+                      4,
+                      "assets/svg/bottom_navigation/setting.svg",
+                      "assets/svg/bottom_navigation/setting_bold.svg",
+                      "More",
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

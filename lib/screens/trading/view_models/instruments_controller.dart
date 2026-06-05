@@ -1192,30 +1192,8 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-
-    switch (state) {
-      case AppLifecycleState.resumed:
-        print('App resumed - checking WebSocket connection');
-        if (!isConnected.value) {
-          Future.microtask(() async {
-            await startMarketWatchV2Only();
-          });
-        }
-        break;
-      case AppLifecycleState.paused:
-        print('App paused - WebSocket may disconnect');
-        break;
-      case AppLifecycleState.detached:
-        print('App detached - closing WebSocket');
-        _disconnectWebSocket();
-        break;
-      case AppLifecycleState.inactive:
-        print('App inactive');
-        break;
-      case AppLifecycleState.hidden:
-        print('App hidden');
-        break;
-    }
+    // Connection state is centrally coordinated by AccountController to prevent race conditions.
+    return;
   }
 
   void _scheduleReconnect() {

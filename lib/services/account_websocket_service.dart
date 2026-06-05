@@ -185,41 +185,17 @@ class AccountWebSocketService extends GetxService with WidgetsBindingObserver {
     super.onClose();
   }
 
+  void disconnectWebSocket() {
+    _requestDebounceTimer?.cancel();
+    _requestDebounceTimer = null;
+    _disconnectWebSocket();
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-
-    switch (state) {
-      case AppLifecycleState.resumed:
-        if (!isConnected.value && !_isDisposed) {
-          if (kDebugMode) {
-            dev.log('Account WS: App resumed, reconnecting...');
-          }
-          _initializeWebSocket();
-        }
-        break;
-      case AppLifecycleState.paused:
-        if (kDebugMode) {
-          dev.log('Account WS: App paused, maintaining connection');
-        }
-        break;
-      case AppLifecycleState.detached:
-        if (kDebugMode) {
-          dev.log('Account WS: App detached, closing connection');
-        }
-        _disconnectWebSocket();
-        break;
-      case AppLifecycleState.inactive:
-        if (kDebugMode) {
-          dev.log('Account WS: App inactive');
-        }
-        break;
-      case AppLifecycleState.hidden:
-        if (kDebugMode) {
-          dev.log('Account WS: App hidden');
-        }
-        break;
-    }
+    // Connection state is centrally coordinated by AccountController to prevent race conditions.
+    return;
   }
 
   // Check if primary account has trading_server="MT5"

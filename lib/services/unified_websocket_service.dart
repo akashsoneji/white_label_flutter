@@ -314,6 +314,29 @@ class UnifiedWebSocketService extends GetxService {
     }
   }
 
+  void disconnectAll() {
+    print('🔄 UNIFIED WEBSOCKET: Disconnecting all channels');
+    _mwSub?.cancel();
+    _symSub?.cancel();
+    _opSub?.cancel();
+    _poSub?.cancel();
+    _accSub?.cancel();
+    _mwSub = _symSub = _opSub = _poSub = _accSub = null;
+
+    try { _marketWatchChannel?.sink.close(); } catch (_) {}
+    try { _symbolsChannel?.sink.close(); } catch (_) {}
+    try { _opChannel?.sink.close(); } catch (_) {}
+    try { _poChannel?.sink.close(); } catch (_) {}
+    try { _accountChannel?.sink.close(); } catch (_) {}
+    _marketWatchChannel = _symbolsChannel = _opChannel = _poChannel = _accountChannel = null;
+
+    isMarketWatchConnected.value = false;
+    isSymbolsConnected.value = false;
+    isOpenPositionsConnected.value = false;
+    isPendingOrdersConnected.value = false;
+    isAccountConnected.value = false;
+  }
+
   void _disposeAll() {
     _mwSub?.cancel();
     _symSub?.cancel();

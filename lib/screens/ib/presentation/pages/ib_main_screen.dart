@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -24,6 +25,8 @@ class _IbMainScreenState extends State<IbMainScreen> {
   int _screenKey = 0; // Key to force rebuild screens
   bool _hasInitialized = false;
   DateTime? _lastResetTime;
+  late final PageController _pageController;
+
 
   @override
   void initState() {
@@ -39,6 +42,13 @@ class _IbMainScreenState extends State<IbMainScreen> {
     _resetIBState();
     _hasInitialized = true;
     _lastResetTime = DateTime.now();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -74,18 +84,35 @@ class _IbMainScreenState extends State<IbMainScreen> {
   List<Widget> _getScreens() {
     // Use key to force rebuild when navigating back
     return [
-      IbDashboardNewScreen(
+      KeepAliveWrapper(
         key: ValueKey('dashboard_$_screenKey'),
-        onNavigateToTab: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        child: IbDashboardNewScreen(
+          onNavigateToTab: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+            if (_pageController.hasClients) {
+              _pageController.jumpToPage(index);
+            }
+          },
+        ),
       ),
-      IBStructureScreen(key: ValueKey('structure_$_screenKey')),
-      MyClientsScreen(key: ValueKey('clients_$_screenKey')),
-      IBRequestsScreen(key: ValueKey('requests_$_screenKey')),
-      IBMoreScreen(key: ValueKey('more_$_screenKey')),
+      KeepAliveWrapper(
+        key: ValueKey('structure_$_screenKey'),
+        child: IBStructureScreen(),
+      ),
+      KeepAliveWrapper(
+        key: ValueKey('clients_$_screenKey'),
+        child: MyClientsScreen(),
+      ),
+      KeepAliveWrapper(
+        key: ValueKey('requests_$_screenKey'),
+        child: IBRequestsScreen(),
+      ),
+      KeepAliveWrapper(
+        key: ValueKey('more_$_screenKey'),
+        child: IBMoreScreen(),
+      ),
     ];
   }
 
@@ -95,13 +122,30 @@ class _IbMainScreenState extends State<IbMainScreen> {
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       extendBody: true,
       body: SafeArea(
-        child: IndexedStack(index: _currentIndex, children: _getScreens()),
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            if (_currentIndex == index) return;
+            setState(() {
+              if (index == 0 && _currentIndex != 0) {
+                _resetIBState();
+              }
+              _currentIndex = index;
+            });
+          },
+          physics: const NeverScrollableScrollPhysics(),
+          children: _getScreens(),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
       floatingActionButton: IbBottomNavigation(
         currentIndex: _currentIndex,
         onTap: (index) {
+          if (_currentIndex == index) return;
+          if (_pageController.hasClients) {
+            _pageController.jumpToPage(index);
+          }
           setState(() {
             // If switching to Dashboard, reset state
             if (index == 0 && _currentIndex != 0) {
@@ -114,3 +158,24 @@ class _IbMainScreenState extends State<IbMainScreen> {
     );
   }
 }
+
+class KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+  const KeepAliveWrapper({super.key, required this.child});
+
+  @override
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+

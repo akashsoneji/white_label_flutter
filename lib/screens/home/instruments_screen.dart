@@ -407,7 +407,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
     final enableReorder = isVantage && _isSearching;
     // ✅ PERFORMANCE OPTIMIZATION: Calculate time ONCE for all items
     // Instead of calling DateTime.now() 50+ times (once per item)
-    final currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
+    final currentTime = DateFormat('HH:mm:ss  dd/MM/yyyy').format(DateTime.now());
 
     return NotificationListener<ScrollNotification>(
       onNotification: (n) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -33,6 +34,8 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   int _currentIndex = 0;
   late List<Widget> _screens;
   late final bool _isVantage;
+  late PageController _pageController;
+
 
   // Get the instruments controller
   final InstrumentsController instrumentsController =
@@ -50,9 +53,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   // Tenax/default: switch to chart tab and set symbol.
   void _switchToChartTab(String symbol) {
     try {
-      setState(() {
-        _currentIndex = 1; // Chart tab index (Tenax/default)
-      });
+      _onTabChanged(1);
       ChartScreen.setSelectedSymbol(symbol);
     } catch (e) {
       print('🚨 TradingMainScreen: Error switching to chart tab: $e');
@@ -76,47 +77,47 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       }
     }
     
+    _pageController = PageController(initialPage: _currentIndex);
+
     if (_isVantage) {
       _screens = [
-        InstrumentsScreen(onNavigateToChart: _openChartScreenVantage),
-        TradeScreen(onNavigateToChart: _openChartScreenVantage),
-        DashboardScreen(
-          onNavigateToTab: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
+        KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _openChartScreenVantage)),
+        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _openChartScreenVantage)),
+        KeepAliveWrapper(
+          child: DashboardScreen(
+            onNavigateToTab: (index) {
+              _onTabChanged(index);
+            },
+          ),
         ),
-        const MoreScreen(),
+        const KeepAliveWrapper(child: MoreScreen()),
       ];
     } else {
       _screens = [
-        InstrumentsScreen(onNavigateToChart: _switchToChartTab),
-        ChartScreen(
-          onNavigateToTrade: (tabIndex) {
-            setState(() {
-              _currentIndex = 2; // Trade tab index (Tenax/default)
-            });
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              final tradingController = Get.find<TradingController>();
-              tradingController.setSelectedTab(tabIndex ?? 0);
-            });
-          },
-          onNavigateToTab: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
+        KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _switchToChartTab)),
+        KeepAliveWrapper(
+          child: ChartScreen(
+            onNavigateToTrade: (tabIndex) {
+              _onTabChanged(2); // Trade tab index (Tenax/default)
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                final tradingController = Get.find<TradingController>();
+                tradingController.setSelectedTab(tabIndex ?? 0);
+              });
+            },
+            onNavigateToTab: (index) {
+              _onTabChanged(index);
+            },
+          ),
         ),
-        TradeScreen(onNavigateToChart: _switchToChartTab),
-        DashboardScreen(
-          onNavigateToTab: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
+        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _switchToChartTab)),
+        KeepAliveWrapper(
+          child: DashboardScreen(
+            onNavigateToTab: (index) {
+              _onTabChanged(index);
+            },
+          ),
         ),
-        const MoreScreen(),
+        const KeepAliveWrapper(child: MoreScreen()),
       ];
     }
 
@@ -154,6 +155,12 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   // Ensure one-click trading is enabled (safety net)
   Future<void> _ensureOneClickTradingEnabled() async {
     try {
@@ -169,11 +176,17 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
   // Handle tab changes and manage WebSocket connections
   void _onTabChanged(int index) {
+    if (_currentIndex == index) return;
+
     final int previousIndex = _currentIndex;
 
     setState(() {
       _currentIndex = index;
     });
+
+    if (_pageController.hasClients && _pageController.page?.round() != index) {
+      _pageController.jumpToPage(index);
+    }
 
     final tradeIndex = _isVantage ? 1 : 2;
     final dashboardIndex = _isVantage ? 2 : 3;
@@ -235,7 +248,12 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
           backgroundColor: AppColors.tradeBackgroundCenterColor,
           // drawer: const GlobalDrawer(),
           body: SafeArea(
-            child: IndexedStack(index: _currentIndex, children: _screens),
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: _onTabChanged,
+              physics: const NeverScrollableScrollPhysics(),
+              children: _screens,
+            ),
           ),
 
           floatingActionButtonLocation:
@@ -293,3 +311,24 @@ class PlaceholderScreen extends StatelessWidget {
     );
   }
 }
+
+class KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+  const KeepAliveWrapper({super.key, required this.child});
+
+  @override
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+

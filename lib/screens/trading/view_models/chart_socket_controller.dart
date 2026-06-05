@@ -198,9 +198,9 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      handleAppRestart();
-    }
+    super.didChangeAppLifecycleState(state);
+    // Connection state is centrally coordinated by AccountController to prevent race conditions.
+    return;
   }
 
   // ---------- Public API ----------
