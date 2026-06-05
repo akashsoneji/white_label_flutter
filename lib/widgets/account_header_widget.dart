@@ -436,15 +436,10 @@ class AccountHeaderWidget extends StatelessWidget {
 
           // Compute insets for iOS/Android
           final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-          final systemPadding = MediaQuery.of(context).padding.bottom;
 
           return Padding(
             padding: EdgeInsets.only(
-              bottom:
-                  bottomInset +
-                  (defaultTargetPlatform == TargetPlatform.android
-                      ? systemPadding
-                      : 0),
+              bottom: bottomInset,
             ),
             child: Container(
               height: dynamicHeight,
@@ -496,7 +491,9 @@ class AccountHeaderWidget extends StatelessWidget {
                       )
                       : Expanded(
                         child: ListView.builder(
-                          padding: EdgeInsets.zero,
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).padding.bottom,
+                          ),
                           itemCount: accountController.mt5Accounts.length,
                           itemBuilder: (context, index) {
                             final account =
