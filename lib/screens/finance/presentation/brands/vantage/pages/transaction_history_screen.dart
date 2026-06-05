@@ -94,7 +94,8 @@ class _VantageTransactionHistoryScreenState
           }
 
           final transactionDate =
-              DateTime.tryParse(transaction.createdAt ?? '') ?? DateTime.now();
+              DateTime.tryParse(transaction.createdAt ?? '')?.toLocal() ??
+              DateTime.now();
           if (!_isTransactionInTimePeriod(transactionDate)) {
             return false;
           }
@@ -103,8 +104,10 @@ class _VantageTransactionHistoryScreenState
         }).toList();
 
     filtered.sort((a, b) {
-      final aDate = DateTime.tryParse(a.createdAt ?? '') ?? DateTime.now();
-      final bDate = DateTime.tryParse(b.createdAt ?? '') ?? DateTime.now();
+      final aDate =
+          DateTime.tryParse(a.createdAt ?? '')?.toLocal() ?? DateTime.now();
+      final bDate =
+          DateTime.tryParse(b.createdAt ?? '')?.toLocal() ?? DateTime.now();
       return bDate.compareTo(aDate);
     });
 
@@ -533,8 +536,8 @@ class _VantageTransactionHistoryScreenState
                           decoration: BoxDecoration(
                             color:
                                 isSelected
-                                    ? Colors.white.withOpacity(0.2)
-                                    : AppColors.surface,
+                                    ? AppColors.textPrimary
+                                    : AppColors.whiteColor,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
                               color:
@@ -625,7 +628,7 @@ class _VantageTransactionHistoryScreenState
     for (final transaction in transactions) {
       final dateStr = transaction.createdAt ?? '';
       final dateKey = _formatDateHeader(
-        DateTime.tryParse(dateStr) ?? DateTime.now(),
+        DateTime.tryParse(dateStr)?.toLocal() ?? DateTime.now(),
       );
 
       if (grouped.containsKey(dateKey)) {
@@ -973,12 +976,13 @@ class _VantageTransactionHistoryScreenState
   }
 
   String _formatDateTime(String dateStr) {
-    final date = DateTime.tryParse(dateStr);
+    final date = DateTime.tryParse(dateStr)?.toLocal();
     if (date == null) return '';
     final day = date.day;
     final month = _getMonthName(date.month);
-    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
-    final period = date.hour >= 12 ? 'PM' : 'AM';
+    final hour24 = date.hour;
+    final hour = hour24 > 12 ? hour24 - 12 : (hour24 == 0 ? 12 : hour24);
+    final period = hour24 >= 12 ? 'PM' : 'AM';
     final minute = date.minute.toString().padLeft(2, '0');
     return '$day $month, $hour:$minute $period';
   }

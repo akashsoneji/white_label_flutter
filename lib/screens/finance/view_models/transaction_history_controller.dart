@@ -97,7 +97,7 @@ class Data {
     proof = json['proof']?.toString();
     proofUrl = json['proof_url']?.toString();
     paymentDetails = json['payment_details']?.toString();
-    createdAt = json['created_at']?.toString();
+    createdAt = json['created_at_iso']?.toString() ?? json['created_at']?.toString();
     transactionType = json['transaction_type']?.toString();
     type = json['type']?.toString();
   }
