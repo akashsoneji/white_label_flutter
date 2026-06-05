@@ -112,7 +112,7 @@ class _MasterHeroCard extends StatelessWidget {
             ? primaryPlan!.commissionLabel
             : (primaryPlan?.commissionType ?? '');
 
-    final sinceDays = _daysSince(profile.memberSince);
+    final sinceDays = profile.withUsDays ?? _daysSince(profile.memberSince);
     final withUs = sinceDays == null ? '' : '${sinceDays}d';
 
     return Container(

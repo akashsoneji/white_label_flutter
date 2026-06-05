@@ -183,7 +183,10 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                   ),
                 ),
               SliverPadding(
-                padding: EdgeInsets.only(bottom: _fabScrollExtent(context)+kBottomNavigationBarHeight),
+                padding: EdgeInsets.only(
+                  bottom:
+                      _fabScrollExtent(context) + kBottomNavigationBarHeight,
+                ),
               ),
             ],
           ),
@@ -328,15 +331,16 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.35),
-        ),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<CommissionPeriod>(
           value: _selectedPeriod,
           isDense: true,
-          icon: Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary),
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: AppColors.primary,
+          ),
           borderRadius: BorderRadius.circular(12.r),
           items:
               CommissionPeriod.values.map((period) {
@@ -465,6 +469,10 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         value: (stats.totalLots ?? 0).toStringAsFixed(2),
       ),
       _buildStatTile(
+        title: 'Total Equity',
+        value: '\$${(stats.totalEquity ?? 0).toStringAsFixed(2)}',
+      ),
+      _buildStatTile(
         title: 'Total Rebate',
         value: '\$${totalRebate.toStringAsFixed(2)}',
       ),
@@ -477,10 +485,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         value: '\$${availableRebate.toStringAsFixed(2)}',
         highlight: true,
       ),
-      _buildStatTile(
-        title: 'Total Equity',
-        value: '\$${(stats.totalEquity ?? 0).toStringAsFixed(2)}',
-      ),
+
       _buildStatTile(
         title: 'Total Deposit',
         value: '\$${(stats.totalDeposited ?? 0).toStringAsFixed(2)}',

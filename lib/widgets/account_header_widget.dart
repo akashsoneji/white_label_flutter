@@ -171,9 +171,10 @@ class AccountHeaderWidget extends StatelessWidget {
                             height: 28.h,
                             padding: EdgeInsets.symmetric(horizontal: 10.w),
                             decoration: BoxDecoration(
-                              color: AppColors.isDarkMode
-                                  ? Colors.white.withOpacity(0.2)
-                                  : AppColors.card.withOpacity(0.06),
+                              color:
+                                  AppColors.isDarkMode
+                                      ? Colors.white.withOpacity(0.2)
+                                      : AppColors.card.withOpacity(0.06),
                               borderRadius: BorderRadius.circular(999),
                               border: Border.all(
                                 color: AppColors.border.withOpacity(0.18),
@@ -183,21 +184,23 @@ class AccountHeaderWidget extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                 Container(
+                                Container(
                                   width: 20.w,
                                   height: 20.w,
                                   decoration: BoxDecoration(
-                                    color: AppColors.isDarkMode
-                                        ? Colors.white.withOpacity(0.12)
-                                        : accountTypeColor,
+                                    color:
+                                        AppColors.isDarkMode
+                                            ? Colors.white.withOpacity(0.12)
+                                            : accountTypeColor,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
                                     Icons.account_balance_wallet_outlined,
                                     size: 12.sp,
-                                    color: AppColors.isDarkMode
-                                        ? Colors.white
-                                        : accountTypeTextColor,
+                                    color:
+                                        AppColors.isDarkMode
+                                            ? Colors.white
+                                            : accountTypeTextColor,
                                   ),
                                 ),
                                 SizedBox(width: 8.w),
@@ -220,17 +223,21 @@ class AccountHeaderWidget extends StatelessWidget {
                                     vertical: 3.h,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.isDarkMode
-                                        ? Colors.white.withOpacity(0.12)
-                                        : accountTypeColor.withOpacity(0.12),
+                                    color:
+                                        AppColors.isDarkMode
+                                            ? Colors.white.withOpacity(0.12)
+                                            : accountTypeColor.withOpacity(
+                                              0.12,
+                                            ),
                                     borderRadius: BorderRadius.circular(999),
                                   ),
                                   child: Text(
                                     accountTypeText.toUpperCase(),
                                     style: TextStyle(
-                                      color: AppColors.isDarkMode
-                                          ? Colors.white
-                                          : accountTypeColor,
+                                      color:
+                                          AppColors.isDarkMode
+                                              ? Colors.white
+                                              : accountTypeColor,
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -292,17 +299,7 @@ class AccountHeaderWidget extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Balance',
-                                  style: AppTextStyles.caption.copyWith(
-                                    fontSize: 10.sp,
-                                    color: AppColors.textGrey,
-                                  ),
-                                ),
-                                SizedBox(height: 2.h),
-                                valueRow,
-                              ],
+                              children: [SizedBox(height: 2.h), valueRow],
                             ),
                           ),
                           SizedBox(width: 4.w),
@@ -404,7 +401,8 @@ class AccountHeaderWidget extends StatelessWidget {
       }
       return const Color(0xFF1A1A1A); // Dark text for DEMO on light backgrounds
     }
-    return AppColors.whiteColor; // Light mode: always white on colored backgrounds
+    return AppColors
+        .whiteColor; // Light mode: always white on colored backgrounds
   }
 
   String _getAccountNumber(MT5Account? primaryAccount) {
@@ -513,18 +511,20 @@ class AccountHeaderWidget extends StatelessWidget {
                                 leading: Container(
                                   padding: EdgeInsets.all(8.w),
                                   decoration: BoxDecoration(
-                                    color: AppColors.isDarkMode
-                                        ? Colors.white.withOpacity(0.12)
-                                        : (account.accountType == 'live'
-                                            ? AppColors.primary
-                                            : AppColors.success),
+                                    color:
+                                        AppColors.isDarkMode
+                                            ? Colors.white.withOpacity(0.12)
+                                            : (account.accountType == 'live'
+                                                ? AppColors.primary
+                                                : AppColors.success),
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                   child: Icon(
                                     Icons.account_balance_wallet,
-                                    color: AppColors.isDarkMode
-                                        ? Colors.white
-                                        : AppColors.whiteColor,
+                                    color:
+                                        AppColors.isDarkMode
+                                            ? Colors.white
+                                            : AppColors.whiteColor,
                                     size: 20.h,
                                   ),
                                 ),
@@ -677,19 +677,23 @@ class AccountHeaderWidget extends StatelessWidget {
                     height: 18.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.isDarkMode
-                          ? Colors.white.withOpacity(0.12)
-                          : (type == 'LIVE'
-                                  ? AppColors.accent
-                                  : AppColors.primary)
-                              .withOpacity(0.16),
+                      color:
+                          AppColors.isDarkMode
+                              ? Colors.white.withOpacity(0.12)
+                              : (type == 'LIVE'
+                                      ? AppColors.accent
+                                      : AppColors.primary)
+                                  .withOpacity(0.16),
                     ),
                     child: Icon(
                       Icons.account_balance_wallet_outlined,
                       size: 12.sp,
-                      color: AppColors.isDarkMode
-                          ? Colors.white
-                          : (type == 'LIVE' ? AppColors.accent : AppColors.primary),
+                      color:
+                          AppColors.isDarkMode
+                              ? Colors.white
+                              : (type == 'LIVE'
+                                  ? AppColors.accent
+                                  : AppColors.primary),
                     ),
                   ),
                   SizedBox(width: 10.w),
@@ -711,20 +715,24 @@ class AccountHeaderWidget extends StatelessWidget {
                       vertical: 3.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.isDarkMode
-                          ? Colors.white.withOpacity(0.12)
-                          : (type == 'LIVE'
-                                  ? AppColors.accent
-                                  : AppColors.primary)
-                              .withOpacity(0.12),
+                      color:
+                          AppColors.isDarkMode
+                              ? Colors.white.withOpacity(0.12)
+                              : (type == 'LIVE'
+                                      ? AppColors.accent
+                                      : AppColors.primary)
+                                  .withOpacity(0.12),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
                       type,
                       style: TextStyle(
-                        color: AppColors.isDarkMode
-                            ? Colors.white
-                            : (type == 'LIVE' ? AppColors.accent : AppColors.primary),
+                        color:
+                            AppColors.isDarkMode
+                                ? Colors.white
+                                : (type == 'LIVE'
+                                    ? AppColors.accent
+                                    : AppColors.primary),
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
                       ),

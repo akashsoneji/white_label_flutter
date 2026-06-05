@@ -143,6 +143,7 @@ class CopyTradingMasterProfile {
   final String serverType;
   final String lpProviderName;
   final String memberSince;
+  final int? withUsDays;
   final int totalPlans;
   final int totalCopiers;
   final num totalGain;
@@ -168,6 +169,7 @@ class CopyTradingMasterProfile {
     required this.serverType,
     required this.lpProviderName,
     required this.memberSince,
+    this.withUsDays,
     required this.totalPlans,
     required this.totalCopiers,
     required this.totalGain,
@@ -213,6 +215,7 @@ class CopyTradingMasterProfile {
       serverType: (json['server_type'] ?? '').toString(),
       lpProviderName: (json['lp_provider_name'] ?? '').toString(),
       memberSince: (json['member_since'] ?? '').toString(),
+      withUsDays: json['with_us_days'] != null ? _parseInt(json['with_us_days'], 0) : null,
       totalPlans: _parseInt(json['total_plans'], 0),
       totalCopiers: _parseInt(json['total_copiers'], 0),
       totalGain: _parseNum(json['total_gain'], 0),

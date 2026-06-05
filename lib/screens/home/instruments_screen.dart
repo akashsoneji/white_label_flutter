@@ -1064,7 +1064,10 @@ class _BidPriceColumn extends StatelessWidget {
                         ),
                       ),
                       TextSpan(
-                        text: PrecisionHelper.formatPrice(dayLowValue, decimals: digits),
+                        text: PrecisionHelper.formatPrice(
+                          dayLowValue,
+                          decimals: digits,
+                        ),
                         style: AppTextStyles.caption.copyWith(
                           fontFamily: 'Roboto',
                           fontSize: 9.sp,
@@ -1209,7 +1212,10 @@ class _AskPriceColumn extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: PrecisionHelper.formatPrice(dayHighValue, decimals: digits),
+                    text: PrecisionHelper.formatPrice(
+                      dayHighValue,
+                      decimals: digits,
+                    ),
                     style: AppTextStyles.caption.copyWith(
                       fontFamily: 'Roboto',
                       fontSize: 9.sp,
