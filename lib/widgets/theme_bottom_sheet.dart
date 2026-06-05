@@ -56,16 +56,20 @@ void showThemeBottomSheet(BuildContext context) {
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
     builder: (sheetContext) => Container(
-      margin: EdgeInsets.symmetric(horizontal: 14.w, vertical: 16.h),
-      padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20.r),
+          topRight: Radius.circular(20.r),
+        ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 18.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
           Row(
             children: [
               Expanded(
@@ -102,7 +106,9 @@ void showThemeBottomSheet(BuildContext context) {
               );
             });
           }),
-        ],
+            ],
+          ),
+        ),
       ),
     ),
   );

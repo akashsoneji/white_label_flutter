@@ -35,6 +35,7 @@ class _AppLockLifecycleState extends State<AppLockLifecycle>
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       lock.markPaused();
     } else if (state == AppLifecycleState.resumed) {
+      if (lock.isUnlocking.value) return;
       lock.lockIfNeeded(reason: 'Unlock to continue');
     }
   }

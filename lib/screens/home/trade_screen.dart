@@ -2706,9 +2706,7 @@ class _TradeScreenState extends State<TradeScreen> {
     Get.bottomSheet(
       Padding(
         padding: EdgeInsets.only(
-          bottom:
-              MediaQuery.of(Get.context!).viewInsets.bottom +
-              MediaQuery.of(Get.context!).padding.bottom,
+          bottom: MediaQuery.of(Get.context!).viewInsets.bottom,
         ),
         child: bottomSheetContent,
       ),
@@ -3130,27 +3128,27 @@ class _TradeScreenState extends State<TradeScreen> {
     Get.bottomSheet(
       StatefulBuilder(
         builder: (context, setState) {
-          return Container(
-            height: screenHeight * 0.57,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 12.h),
-              child: Container(
-                constraints: BoxConstraints(
-                  maxHeight: screenHeight * 0.75,
-                  minHeight: 400.h,
-                  maxWidth: screenWidth,
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: screenHeight * 0.75,
+                minHeight: 320.h,
+                maxWidth: screenWidth,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.whiteColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
-                decoration:   BoxDecoration(
-                  color: AppColors.whiteColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                     Padding(
                       padding: EdgeInsets.all(16.w),
                       child: Text(
@@ -3164,7 +3162,7 @@ class _TradeScreenState extends State<TradeScreen> {
                       ),
                     ),
                     SizedBox(height: 8.h),
-                    Expanded(
+                    Flexible(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
                         child: SingleChildScrollView(
@@ -3345,10 +3343,9 @@ class _TradeScreenState extends State<TradeScreen> {
                   ],
                 ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        ),
       isScrollControlled: true,
       isDismissible: true,
       enableDrag: true,
