@@ -11,6 +11,7 @@ class VantageChartLayout extends StatelessWidget {
   final Widget chart;
   final Widget controlDock;
   final Widget? overlay;
+  final List<Widget>? actions;
 
   VantageChartLayout({
     super.key,
@@ -22,6 +23,7 @@ class VantageChartLayout extends StatelessWidget {
     required this.chart,
     required this.controlDock,
     this.overlay,
+    this.actions,
   }) : assert(
          titleWidget != null ||
              (title != null && title.isNotEmpty),
@@ -44,6 +46,7 @@ class VantageChartLayout extends StatelessWidget {
       appBar: VantageAppBar(
         title: appBarTitle,
         backgroundColor: backgroundColor,
+        actions: actions,
       ),
       body: SafeArea(
         child: Stack(
