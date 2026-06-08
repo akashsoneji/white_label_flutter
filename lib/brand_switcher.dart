@@ -5,9 +5,9 @@ import 'flavor_config.dart';
 /// This class provides easy methods to switch between different brands
 /// and get their configurations.
 class BrandSwitcher {
-  /// Tenax-only: ensure Tenax config is active.
+  /// Ensure Tenax config is active.
   static void switchToTenax() {
-    FlavorConfig.tenax;
+    FlavorConfig.activateByName('tenax');
     debugPrint('🎨 Switched to Tenax brand');
     debugPrint('   Primary Color: ${FlavorConfig.instance.primaryColor}');
     debugPrint('   App Name: ${FlavorConfig.instance.appName}');
@@ -37,9 +37,9 @@ class BrandSwitcher {
     'accent': FlavorConfig.instance.accentColor,
   };
 
-  /// Quick brand switching with hot reload
-  static void quickSwitchBrand() {
-    switchToTenax();
-    debugPrint('🔄 Tenax-only: brand switch is a no-op');
+  /// Quick brand switching with hot reload.
+  static void quickSwitchBrand([String brandName = 'tenax']) {
+    FlavorConfig.activateByName(brandName);
+    debugPrint('🔄 Switched to ${FlavorConfig.instance.appName}');
   }
 }

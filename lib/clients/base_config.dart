@@ -12,7 +12,8 @@ class BaseClientConfig {
   final Color secondaryColor;
   final Color accentColor;
 
-  // Asset paths (relative to clients/{client}/assets/)
+  // Asset filenames copied from editable assets/brands/{client}/ into prepared
+  // runtime assets/clients/{client}/ by scripts/prepare_flavor.dart.
   final String logoSvgPath;
   final String splashLogoPath;
   final String appIconPath;
@@ -36,7 +37,7 @@ class BaseClientConfig {
     required this.chartBaseUrl,
   });
 
-  /// Get the full asset path for a client asset
+  /// Get the full runtime asset path for a prepared client asset.
   String getAssetPath(String clientName, String assetPath) {
     return 'assets/clients/$clientName/$assetPath';
   }

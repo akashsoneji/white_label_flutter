@@ -84,3 +84,25 @@ brands:
       appIcon: assets/brands/pipze/icon.png
       logo: assets/brands/pipze/icon.png
       splashLogo: assets/brands/pipze/icon.png
+
+  - name: tenax
+    type: parent
+    label: Tenax
+    android:
+      applicationId: com.tenax.app
+      appName: Tenax
+    ios:
+      bundleId: com.tenax.app
+      appName: Tenax
+    colors:
+      primary: "#4A0C54"
+      secondary: "#F8F3FF"
+      accent: "#FFC93C"
+    urls:
+      api: https://my.pipze.com/api/
+      websocket: wss://my.pipze.com/trade-engine
+      chart: https://my.pipze.com
+    assets:
+      appIcon: assets/brands/tenax/icon.png
+      logo: assets/brands/tenax/logo.svg
+      splashLogo: assets/brands/tenax/splash_logo.svg

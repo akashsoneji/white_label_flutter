@@ -3,7 +3,7 @@
 # Build script for Flutter flavors with centralized asset management
 # This script automatically:
 #   1. Increments version code (for release builds) - allows users to update without uninstalling
-#   2. Copies client assets from lib/clients/{flavor}/assets/
+#   2. Copies client assets from assets/brands/{flavor}/ to assets/clients/{flavor}/
 #   3. Generates native splash screens with client colors
 #   4. Generates launcher icons from client assets
 #   5. Builds the app using centralized main.dart with auto flavor detection
@@ -13,7 +13,7 @@
 #   Single client: ./build.sh {flavor} {build_type} [mode]
 #   All clients:   ./build.sh all {build_type} [mode]
 # Example: 
-#   ./build.sh afx apk release
+#   ./build.sh pipze apk release
 #   ./build.sh all apk release
 
 # Colors for output
@@ -23,6 +23,27 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
+
+# Function to read brand names from generated brands.json or fallback brands.yaml
+load_clients() {
+    if [ -f "assets/config/brands/brands.json" ]; then
+        python3 - <<'PY'
+import json
+with open('assets/config/brands/brands.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
+print(' '.join(data.get('brands', [])))
+PY
+        return 0
+    fi
+
+    if [ -f "assets/config/brands/brands.yaml" ]; then
+        grep -E '^\s*-\s*name:' assets/config/brands/brands.yaml | sed 's/.*name:[[:space:]]*//' | tr '\n' ' '
+        echo ""
+        return 0
+    fi
+
+    return 1
+}
 
 # Function to increment full version in pubspec.yaml
 # Format: version: X.Y.Z+BUILD_NUMBER
@@ -246,17 +267,18 @@ if [ $# -lt 2 ]; then
     echo "  Single client: ./build.sh {flavor} {build_type} [mode] [universal]"
     echo "  All clients:   ./build.sh all {build_type} [mode] [universal]"
     echo ""
+    AVAILABLE_CLIENTS=$(load_clients 2>/dev/null)
     echo "Arguments:"
-    echo "  flavor: afx, kantara, pipze, onsa, tenax, profx, tradoxy, askbid, sr, vr19, or 'all'"
+    echo "  flavor: ${AVAILABLE_CLIENTS:-<generated brands>}, or 'all'"
     echo "  build_type: apk, appbundle"
     echo "  mode: release (default), debug, profile"
     echo "  universal: (optional) use 'universal' to build a single APK for all architectures (no split)"
     echo ""
     echo "Examples:"
-    echo "  ./build.sh afx apk release           # Split APKs (one per ABI)"
-    echo "  ./build.sh tenax apk release universal   # Single universal release APK"
+    echo "  ./build.sh pipze apk release              # Split APKs (one per ABI)"
+    echo "  ./build.sh tenax apk release universal    # Single universal release APK"
     echo "  ./build.sh all apk release"
-    echo "  ./build.sh pipze appbundle release"
+    echo "  ./build.sh vantage appbundle release"
     echo ""
     echo -e "${BLUE}ℹ️  Default APK: split per ABI. Add 'universal' for one APK for all devices.${NC}"
     exit 1
@@ -284,10 +306,29 @@ if [ "$MODE" != "release" ] && [ "$MODE" != "debug" ] && [ "$MODE" != "profile" 
     exit 1
 fi
 
+CLIENTS_STRING=$(load_clients)
+if [ -z "$CLIENTS_STRING" ]; then
+    echo -e "${RED}❌ Could not load brand list from assets/config/brands/brands.json or brands.yaml${NC}"
+    exit 1
+fi
+read -r -a CLIENTS <<< "$CLIENTS_STRING"
+
+is_known_client=false
+for CLIENT in "${CLIENTS[@]}"; do
+    if [ "$CLIENT" == "$FLAVOR" ]; then
+        is_known_client=true
+        break
+    fi
+done
+
+if [ "$FLAVOR" != "all" ] && [ "$is_known_client" != "true" ]; then
+    echo -e "${RED}❌ Unknown flavor: $FLAVOR${NC}"
+    echo -e "${BLUE}Known flavors: ${CLIENTS[*]}${NC}"
+    exit 1
+fi
+
 # Build all clients if "all" is specified
 if [ "$FLAVOR" == "all" ]; then
-    # Define all clients to build
-    CLIENTS=("tradoxy" "tenax" "afx" "kantara" "onsa" "pipze" "askbid" "profx" "sr" "vr19")
     
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${GREEN}🚀 Building ALL clients: ${CLIENTS[*]}${NC}"

@@ -34,6 +34,16 @@ ext.brandFlavors = [
         type: "child",
         inheritsFrom: "vantage",
     ],
+    [
+        name: "tenax",
+        label: "Tenax",
+        appId: "com.tenax.app",
+        appName: "Tenax",
+        primary: "#4A0C54",
+        secondary: "#F8F3FF",
+        accent: "#FFC93C",
+        type: "parent",
+    ],
 ]
 
 // Helper to get flavor by name

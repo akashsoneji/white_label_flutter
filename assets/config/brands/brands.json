@@ -1,4 +1,125 @@
 {
   "default": "vantage",
-  "brands": ["vantage", "celestial", "pipze"]
+  "brands": [
+    "vantage",
+    "celestial",
+    "pipze",
+    "tenax"
+  ],
+  "brandDetails": [
+    {
+      "name": "vantage",
+      "type": "parent",
+      "label": "Vantage",
+      "android": {
+        "applicationId": "com.vantage.app",
+        "appName": "Vantage"
+      },
+      "ios": {
+        "bundleId": "com.vantage.app",
+        "appName": "Vantage"
+      },
+      "colors": {
+        "primary": "#5F259E",
+        "secondary": "#F8F3FF",
+        "accent": "#FFC93C"
+      },
+      "urls": {
+        "api": "https://my.pipze.com/api/",
+        "websocket": "wss://my.pipze.com/trade-engine",
+        "chart": "https://my.pipze.com"
+      },
+      "assets": {
+        "appIcon": "assets/brands/vantage/icon.png",
+        "logo": "assets/brands/vantage/logo.svg",
+        "splashLogo": "assets/brands/vantage/splash_logo.svg"
+      }
+    },
+    {
+      "name": "celestial",
+      "type": "child",
+      "label": "Celestial",
+      "android": {
+        "applicationId": "com.celestial.app",
+        "appName": "Celestial"
+      },
+      "ios": {
+        "bundleId": "com.celestial.app",
+        "appName": "Celestial"
+      },
+      "colors": {
+        "primary": "#24324D",
+        "secondary": "#22D3EE",
+        "accent": "#24324D"
+      },
+      "urls": {
+        "api": "https://client.celestialtrader.com/api/",
+        "websocket": "wss://client.celestialtrader.com/trade-engine",
+        "chart": "https://client.celestialtrader.com"
+      },
+      "assets": {
+        "appIcon": "assets/brands/celestial/icon.png",
+        "logo": "assets/brands/celestial/logo.svg",
+        "splashLogo": "assets/brands/celestial/splash_logo.svg"
+      },
+      "inheritsFrom": "vantage"
+    },
+    {
+      "name": "pipze",
+      "type": "child",
+      "label": "Pipze",
+      "android": {
+        "applicationId": "com.pipze.app",
+        "appName": "Pipze"
+      },
+      "ios": {
+        "bundleId": "com.pipze.app",
+        "appName": "Pipze"
+      },
+      "colors": {
+        "primary": "#5F259E",
+        "secondary": "#F8F3FF",
+        "accent": "#FFC93C"
+      },
+      "urls": {
+        "api": "https://my.pipze.com/api/",
+        "websocket": "wss://my.pipze.com/trade-engine",
+        "chart": "https://my.pipze.com"
+      },
+      "assets": {
+        "appIcon": "assets/brands/pipze/icon.png",
+        "logo": "assets/brands/pipze/icon.png",
+        "splashLogo": "assets/brands/pipze/icon.png"
+      },
+      "inheritsFrom": "vantage"
+    },
+    {
+      "name": "tenax",
+      "type": "parent",
+      "label": "Tenax",
+      "android": {
+        "applicationId": "com.tenax.app",
+        "appName": "Tenax"
+      },
+      "ios": {
+        "bundleId": "com.tenax.app",
+        "appName": "Tenax"
+      },
+      "colors": {
+        "primary": "#4A0C54",
+        "secondary": "#F8F3FF",
+        "accent": "#FFC93C"
+      },
+      "urls": {
+        "api": "https://my.pipze.com/api/",
+        "websocket": "wss://my.pipze.com/trade-engine",
+        "chart": "https://my.pipze.com"
+      },
+      "assets": {
+        "appIcon": "assets/brands/tenax/icon.png",
+        "logo": "assets/brands/tenax/logo.svg",
+        "splashLogo": "assets/brands/tenax/splash_logo.svg"
+      }
+    }
+  ]
 }

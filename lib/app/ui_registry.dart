@@ -23,8 +23,8 @@ import 'ui_slots.dart';
 
 /// Build-time selected client (no runtime switching).
 ///
-/// Use: `--dart-define=CLIENT=tenax|vantage|celestial`
-/// Celestial inherits Vantage's screen files.
+/// Use: `--dart-define=CLIENT=tenax|vantage|celestial|pipze`
+/// Child brands inherit their parent screen files based on brands.yaml.
 const String activeClient = String.fromEnvironment(
   'CLIENT',
   defaultValue: 'tenax',
@@ -35,10 +35,18 @@ class UiRegistry implements UiSlots {
 
   const UiRegistry({required this.client});
 
-  bool get _usesVantageUi =>
-      client.toLowerCase() == 'vantage' ||
-      client.toLowerCase() == 'celestial' ||
-      client.toLowerCase() == 'pipze';
+  // Keep this synchronous for widget factories. Regenerate/update this map from
+  // assets/config/brands/brands.yaml when parent-child UI inheritance changes.
+  static const Map<String, String> _uiParentByClient = {
+    'vantage': 'vantage',
+    'celestial': 'vantage',
+    'pipze': 'vantage',
+    'tenax': 'tenax',
+  };
+
+  String get _uiBrand => _uiParentByClient[client.toLowerCase()] ?? client.toLowerCase();
+
+  bool get _usesVantageUi => _uiBrand == 'vantage';
 
   @override
   Widget splash() => const SplashScreen();

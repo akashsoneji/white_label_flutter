@@ -1,7 +1,7 @@
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/constants/api_const.dart';
-import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/models/search_instruments_model.dart';
 import 'package:crm_app/models/socket_response.dart';
 

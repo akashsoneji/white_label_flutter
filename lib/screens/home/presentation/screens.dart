@@ -62,7 +62,7 @@ export 'package:crm_app/screens/ib/presentation/pages/commission_history_screen.
 export 'package:crm_app/screens/ib/presentation/pages/ib_clients_screen.dart';
 export 'package:crm_app/screens/ib/presentation/pages/ib_dashboard_new_screen.dart';
 export 'package:crm_app/screens/ib/presentation/pages/ib_dashboard_screen.dart';
-export 'package:crm_app/screens/ib/presentation/pages/ib_main_screen.dart';
+// export 'package:crm_app/screens/ib/presentation/pages/ib_main_screen.dart';
 export 'package:crm_app/screens/ib/presentation/pages/ib_more_screen.dart';
 export 'package:crm_app/screens/ib/presentation/pages/ib_requests_screen.dart';
 export 'package:crm_app/screens/ib/presentation/pages/ib_structure_screen.dart';
@@ -74,4 +74,3 @@ export 'package:crm_app/screens/ib/presentation/pages/overview_screen.dart';
 export 'package:crm_app/screens/ib/presentation/pages/payout_request_screen.dart';
 export 'package:crm_app/screens/ib/presentation/pages/referral_links_screen.dart';
 export 'package:crm_app/screens/home/more/widgets/more_menu_widgets.dart';
-

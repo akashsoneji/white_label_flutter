@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +14,6 @@ import 'package:crm_app/models/search_instruments_model.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/services/favorites_storage_service.dart';
-import 'package:crm_app/screens/trading/view_models/account_controller.dart';
-import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -20,7 +21,6 @@ import 'package:crm_app/utils/message_pack_decoder.dart';
 import 'package:crm_app/services/websocket_endpoint_helper.dart';
 import 'package:crm_app/services/unified_websocket_service.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
-
 class InstrumentsController extends GetxController with WidgetsBindingObserver {
   final RxList<ListElement> allInstruments = <ListElement>[].obs;
   final RxList<ListElement> instruments = <ListElement>[].obs;
@@ -501,6 +501,12 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   // Check if we need to update defaults (for existing users)
   Future<void> _checkAndUpdateDefaults() async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final migrated = prefs.getBool('migrated_favorites_defaults_v2') ?? false;
+      if (migrated) {
+        return;
+      }
+
       final currentFavorites =
           await FavoritesStorageService.instance.getFavoriteInstruments();
       // If user has old defaults (USOIL, NAS100, BTCUSD), update to new ones
@@ -510,6 +516,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         print('🔄 Detected old default favorites, updating to new ones');
         await forceReinitializeDefaults();
       }
+
+      // Set migration flag so we don't wipe custom user favorites on next starts
+      await prefs.setBool('migrated_favorites_defaults_v2', true);
     } catch (e) {
       print('Error checking and updating defaults: $e');
     }
@@ -1334,7 +1343,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   }
 
   // Toggle favorite status for an instrument
-  Future<void> toggleFavorite(String instrumentSymbol) async {
+  Future<void> toggleFavorite(
+    String instrumentSymbol, {
+    SearchSymbol? searchSymbol,
+    bool hydrateAfterChange = true,
+  }) async {
     try {
       // Normalize symbol format - always store with .c suffix for consistency
       final normalizedSymbol =
@@ -1347,12 +1360,54 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       );
       if (success) {
         await _loadFavorites();
-        _updateFilteredInstruments();
-        await hydrateFavoritesFromRest();
+
+        if (searchSymbol != null) {
+          _syncSearchSymbolLocally(searchSymbol, isFavoriteNow: isFavorite(instrumentSymbol));
+        } else {
+          _updateFilteredInstruments();
+        }
+
+        if (hydrateAfterChange) {
+          await hydrateFavoritesFromRest();
+        }
       }
     } catch (e) {
       print('Error toggling favorite for $instrumentSymbol: $e');
     }
+  }
+
+  void _syncSearchSymbolLocally(
+    SearchSymbol searchSymbol, {
+    required bool isFavoriteNow,
+  }) {
+    final symbol = searchSymbol.displaySymbol;
+    final existingIndex = allInstruments.indexWhere(
+      (instrument) => instrument.symbol == symbol,
+    );
+
+    if (isFavoriteNow) {
+      if (existingIndex == -1) {
+        final item = ListElement(
+          symbol: symbol,
+          digits: searchSymbol.digits,
+          bid: 0,
+          ask: 0,
+          spreadDiff: 0,
+          last: 0,
+          volume: 0,
+          volumeReal: 0,
+          logo: '',
+          category: searchSymbol.categoryName,
+        );
+        allInstruments.add(item);
+        _applyPriceUpdate(item);
+      }
+    } else if (existingIndex != -1) {
+      allInstruments.removeAt(existingIndex);
+    }
+
+    _updateTradingGroups(allInstruments);
+    _updateFilteredInstruments();
   }
 
   // Check if an instrument is favorite
