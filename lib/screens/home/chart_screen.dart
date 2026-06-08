@@ -1,3 +1,4 @@
+import 'package:crm_app/widgets/app_svg_icon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
@@ -1495,12 +1496,12 @@ Placing Order:
 
   void _navigateToTradeHistory() {
     if (widget.onNavigateToTrade != null) {
-      widget.onNavigateToTrade!(2);
+      widget.onNavigateToTrade!(0);
     }
   }
 
   Widget _buildTradeHistoryButton({bool compact = false}) {
-    final size = compact ? 40.0 : 38.0;
+    final size = compact ? 28.0 : 22.0;
     final borderRadius = compact ? 14.0 : 8.0;
 
     return Padding(
@@ -1513,13 +1514,7 @@ Placing Order:
           child: SizedBox(
             height: size.h,
             width: size.w,
-            child: Center(
-              child: Icon(
-                Icons.manage_history_rounded,
-                color: AppColors.primary,
-                size: 24.sp,
-              ),
-            ),
+            child:AppSvgIcon(assetPath: "assets/svg/bottom_navigation/candle_bold.svg",height: 22.h,width: 24.w,)
           ),
         ),
       ),
