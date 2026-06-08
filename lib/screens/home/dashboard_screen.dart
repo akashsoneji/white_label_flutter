@@ -56,6 +56,40 @@ class DashboardScreen extends StatelessWidget {
   BoxDecoration _vantageSegmentedBarDecoration() =>
       VantageUiTokens.groupDecoration();
 
+  Widget _buildHeaderIconButton({
+    required String assetPath,
+    required VoidCallback onPressed,
+    EdgeInsets? margin,
+  }) {
+    return Container(
+      margin: margin,
+      height: 40.h,
+      width: 40.w,
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: AppSvgIcon(
+          assetPath: assetPath,
+          height: 20.h,
+          width: 20.w,
+          color: AppColors.primary,
+        ),
+        onPressed: onPressed,
+        padding: EdgeInsets.all(8.r),
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
   Widget _buildDashboardContent(
     BuildContext context, {
     required bool includeLoadingOverlay,
@@ -89,59 +123,15 @@ class DashboardScreen extends StatelessWidget {
                       centerTitle: true,
                       toolbarHeight: 56.h,
                       actions: [
-                        Container(
-                          margin: EdgeInsets.only(
-                            right: 16.w,
-                            top: 8.h,
-                            bottom: 8.h,
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 4.w),
-                          decoration: BoxDecoration(
-                            color: AppColors.whiteColor,
-                            borderRadius: BorderRadius.circular(24.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.12),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: AppSvgIcon(
-                                  assetPath:
-                                      'assets/svg/deshboard/empty-wallet-add.svg',
-                                  height: 18.h,
-                                  width: 18.w,
-                                  color: AppColors.primary,
-                                ),
-                                onPressed: () => Get.toNamed(AppPages.WALLET),
-                                padding: EdgeInsets.all(8.r),
-                                constraints: const BoxConstraints(),
-                              ),
-                              Container(
-                                width: 1,
-                                height: 14.h,
-                                color: AppColors.border.withValues(alpha: 0.15),
-                                margin: EdgeInsets.symmetric(horizontal: 2.w),
-                              ),
-                              IconButton(
-                                icon: AppSvgIcon(
-                                  assetPath:
-                                      'assets/svg/deshboard/add-square.svg',
-                                  height: 18.h,
-                                  width: 18.w,
-                                  color: AppColors.primary,
-                                ),
-                                onPressed: controller.showOpenAccountSheet,
-                                padding: EdgeInsets.all(8.r),
-                                constraints: const BoxConstraints(),
-                              ),
-                            ],
-                          ),
+                        _buildHeaderIconButton(
+                          assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
+                          onPressed: () => Get.toNamed(AppPages.WALLET),
+                        ),
+                        SizedBox(width: 8.w),
+                        _buildHeaderIconButton(
+                          assetPath: 'assets/svg/deshboard/add-square.svg',
+                          onPressed: controller.showOpenAccountSheet,
+                          margin: EdgeInsets.only(right: 16.w),
                         ),
                       ],
                     ),
@@ -304,31 +294,15 @@ class DashboardScreen extends StatelessWidget {
                 style: AppTextStyles.screenTitle,
               ),
               actions: [
-                Container(
-                  margin: EdgeInsets.only(right: 0),
-                  child: IconButton(
-                    icon: AppSvgIcon(
-                      assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
-                      height: 22.h,
-                      width: 22.w,
-                      color: AppColors.primary,
-                    ),
-                    onPressed: () {
-                      Get.toNamed(AppPages.WALLET);
-                    },
-                  ),
+                _buildHeaderIconButton(
+                  assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
+                  onPressed: () => Get.toNamed(AppPages.WALLET),
                 ),
-                Container(
-                  margin: EdgeInsets.only(right: 8),
-                  child: IconButton(
-                    icon: AppSvgIcon(
-                      assetPath: 'assets/svg/deshboard/add-square.svg',
-                      height: 22.h,
-                      width: 22.w,
-                      color: AppColors.primary,
-                    ),
-                    onPressed: controller.showOpenAccountSheet,
-                  ),
+                SizedBox(width: 8.w),
+                _buildHeaderIconButton(
+                  assetPath: 'assets/svg/deshboard/add-square.svg',
+                  onPressed: controller.showOpenAccountSheet,
+                  margin: EdgeInsets.only(right: 8.w),
                 ),
               ],
             )
@@ -343,31 +317,15 @@ class DashboardScreen extends StatelessWidget {
               ),
               centerTitle: true,
               actions: [
-                Container(
-                  margin: EdgeInsets.only(right: 0),
-                  child: IconButton(
-                    icon: AppSvgIcon(
-                      assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
-                      height: 22.h,
-                      width: 22.w,
-                      color: AppColors.primary,
-                    ),
-                    onPressed: () {
-                      Get.toNamed(AppPages.WALLET);
-                    },
-                  ),
+                _buildHeaderIconButton(
+                  assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
+                  onPressed: () => Get.toNamed(AppPages.WALLET),
                 ),
-                Container(
-                  margin: EdgeInsets.only(right: 8),
-                  child: IconButton(
-                    icon: AppSvgIcon(
-                      assetPath: 'assets/svg/deshboard/add-square.svg',
-                      height: 22.h,
-                      width: 22.w,
-                      color: AppColors.primary,
-                    ),
-                    onPressed: controller.showOpenAccountSheet,
-                  ),
+                SizedBox(width: 8.w),
+                _buildHeaderIconButton(
+                  assetPath: 'assets/svg/deshboard/add-square.svg',
+                  onPressed: controller.showOpenAccountSheet,
+                  margin: EdgeInsets.only(right: 8.w),
                 ),
               ],
             );

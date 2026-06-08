@@ -44,10 +44,32 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   void _openChartScreenVantage(String symbol) {
     try {
       ChartScreen.setSelectedSymbol(symbol);
-      Get.toNamed('/chart');
+      Get.to(
+        () => ChartScreen(
+          onNavigateToTrade: (tabIndex) {
+            Get.back();
+            _switchToTradeTab(tabIndex ?? 0);
+          },
+          onNavigateToTab: (index) {
+            Get.back();
+            _onTabChanged(index);
+          },
+        ),
+      );
     } catch (e) {
       print('🚨 TradingMainScreen: Error opening chart screen: $e');
     }
+  }
+
+  void _switchToTradeTab(int tabIndex) {
+    final tradeIndex = _isVantage ? 1 : 2;
+    _onTabChanged(tradeIndex);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.isRegistered<TradingController>()) {
+        final tradingController = Get.find<TradingController>();
+        tradingController.setSelectedTab(tabIndex);
+      }
+    });
   }
 
   // Tenax/default: switch to chart tab and set symbol.
@@ -98,11 +120,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         KeepAliveWrapper(
           child: ChartScreen(
             onNavigateToTrade: (tabIndex) {
-              _onTabChanged(2); // Trade tab index (Tenax/default)
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                final tradingController = Get.find<TradingController>();
-                tradingController.setSelectedTab(tabIndex ?? 0);
-              });
+              _switchToTradeTab(tabIndex ?? 0);
             },
             onNavigateToTab: (index) {
               _onTabChanged(index);

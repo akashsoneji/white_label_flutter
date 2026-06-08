@@ -1297,6 +1297,7 @@ Placing Order:
                 ),
           ),
         ),
+        actions: [_buildTradeHistoryButton(compact: true)],
         backgroundColor: baseBg,
         primaryColor: primary,
         chartFlex: chartFlex,
@@ -1479,10 +1480,50 @@ Placing Order:
 
       return AccountHeaderWidget(
         showSearchIcon: false,
-        rightWidget: symbolSelector,
+        rightWidget: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildTradeHistoryButton(),
+            SizedBox(width: 8.w),
+            symbolSelector,
+          ],
+        ),
         floatingProfit: floatingProfit, // ✅ ADD: Show floating P&L
       );
     });
+  }
+
+  void _navigateToTradeHistory() {
+    if (widget.onNavigateToTrade != null) {
+      widget.onNavigateToTrade!(2);
+    }
+  }
+
+  Widget _buildTradeHistoryButton({bool compact = false}) {
+    final size = compact ? 40.0 : 38.0;
+    final borderRadius = compact ? 14.0 : 8.0;
+
+    return Padding(
+      padding: EdgeInsets.only(right: compact ? 8.w : 0),
+      child: Tooltip(
+        message: languageService.tr('trade_history'),
+        child: InkWell(
+          onTap: _navigateToTradeHistory,
+          borderRadius: BorderRadius.circular(borderRadius.r),
+          child: SizedBox(
+            height: size.h,
+            width: size.w,
+            child: Center(
+              child: Icon(
+                Icons.manage_history_rounded,
+                color: AppColors.primary,
+                size: 24.sp,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildChartArea() {

@@ -406,23 +406,25 @@ class _TradeScreenState extends State<TradeScreen> {
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   children: [
-                                                    FutureBuilder<Widget>(
-                                                      future: _emptyStateSvgFuture,
-                                                      builder:
-                                                          (context, snapshot) {
-                                                        if (snapshot.hasData) {
-                                                          return snapshot.data!;
-                                                        }
-                                                        return SizedBox(
-                                                          height: 100.h,
-                                                          width: 100.w,
-                                                        );
-                                                      },
-                                                    ),
+                                                    // FutureBuilder<Widget>(
+                                                    //   future: _emptyStateSvgFuture,
+                                                    //   builder:
+                                                    //       (context, snapshot) {
+                                                    //     if (snapshot.hasData) {
+                                                    //       return snapshot.data!;
+                                                    //     }
+                                                    //     return SizedBox(
+                                                    //       height: 100.h,
+                                                    //       width: 100.w,
+                                                    //     );
+                                                    //   },
+                                                    // ),
                                                     SizedBox(height: 16.h),
                                                     SizedBox(height: 8.h),
                                                     Text(
-                                                      'You have no data',
+                                                      _getEmptyStateMessage(
+                                                        controller.selectedTab,
+                                                      ),
                                                       style: AppTextStyles
                                                           .subheading
                                                           .copyWith(
@@ -538,22 +540,24 @@ class _TradeScreenState extends State<TradeScreen> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
                                             children: [
-                                              FutureBuilder<Widget>(
-                                                future: _emptyStateSvgFuture,
-                                                builder: (context, snapshot) {
-                                                  if (snapshot.hasData) {
-                                                    return snapshot.data!;
-                                                  }
-                                                  return SizedBox(
-                                                    height: 100.h,
-                                                    width: 100.w,
-                                                  );
-                                                },
-                                              ),
-                                              SizedBox(height: 16.h),
+                                              // FutureBuilder<Widget>(
+                                              //   future: _emptyStateSvgFuture,
+                                              //   builder: (context, snapshot) {
+                                              //     if (snapshot.hasData) {
+                                              //       return snapshot.data!;
+                                              //     }
+                                              //     return SizedBox(
+                                              //       height: 100.h,
+                                              //       width: 100.w,
+                                              //     );
+                                              //   },
+                                              // ),
+                                              // SizedBox(height: 16.h),
                                               SizedBox(height: 8.h),
                                               Text(
-                                                'You have no data',
+                                                _getEmptyStateMessage(
+                                                  controller.selectedTab,
+                                                ),
                                                 style: AppTextStyles.subheading
                                                     .copyWith(
                                                   color: AppColors.textGrey,
@@ -629,6 +633,19 @@ class _TradeScreenState extends State<TradeScreen> {
     );
   }
 
+  String _getEmptyStateMessage(int selectedTab) {
+    switch (selectedTab) {
+      case 0:
+        return 'No Open Trade';
+      case 1:
+        return 'No Pending Order';
+      case 2:
+        return 'No Trade History';
+      default:
+        return 'No Open Trade';
+    }
+  }
+
   Widget _buildHeader(
     BuildContext context,
     AccountController accountController,
@@ -648,10 +665,10 @@ class _TradeScreenState extends State<TradeScreen> {
                   decoration: FlavorConfig.isVantage()
                       ? BoxDecoration(
                         color: AppColors.whiteColor,
-                        borderRadius: BorderRadius.circular(24.r),
+                        borderRadius: BorderRadius.circular(12.r),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.12),
+                            color: Colors.black.withValues(alpha: 0.10),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -662,7 +679,7 @@ class _TradeScreenState extends State<TradeScreen> {
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
-                          FlavorConfig.isVantage() ? 24.r : 10.r,
+                          FlavorConfig.isVantage() ? 12.r : 10.r,
                         ),
                       ),
                       backgroundColor:

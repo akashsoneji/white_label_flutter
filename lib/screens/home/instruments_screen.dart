@@ -231,7 +231,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                   margin: EdgeInsets.only(right: 0),
                   decoration: BoxDecoration(
                     color: AppColors.whiteColor,
-                    borderRadius: BorderRadius.circular(24.r),
+                    borderRadius: BorderRadius.circular(12.r),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.12),
@@ -404,7 +404,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
   Widget _buildInstrumentsList(List<ListElement> instruments) {
     final isVantage = FlavorConfig.isVantage();
     final showFavoritesToggle = !isVantage || _isSearching;
-    final enableReorder = isVantage && _isSearching;
+    final enableReorder = isVantage && !_isSearching;
     // ✅ PERFORMANCE OPTIMIZATION: Calculate time ONCE for all items
     // Instead of calling DateTime.now() 50+ times (once per item)
     final currentTime = DateFormat('HH:mm:ss').format(DateTime.now());
@@ -509,11 +509,17 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                 ReorderableDragStartListener(
                   index: reorderIndex,
                   child: Padding(
-                    padding: EdgeInsets.only(right: 8.w),
-                    child: Icon(
-                      Icons.drag_indicator,
-                      size: 18.sp,
-                      color: AppColors.textGrey,
+                    padding: EdgeInsets.only(right: 2.w),
+                    child: SizedBox(
+                      height: 30.h,
+                      width: 24.w,
+                      child: Center(
+                        child: Icon(
+                          Icons.drag_indicator_rounded,
+                          size: 18.sp,
+                          color: AppColors.primary,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -537,7 +543,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                         size: (isVantage ? 34.0 : 40.0).w,
                       ),
                     ),
-                    SizedBox(width: (isVantage ? 8.0 : 10.0).w),
+                    SizedBox(width: (isVantage ? 4.0 : 10.0).w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

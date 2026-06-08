@@ -25,7 +25,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # for OTHERS 
 # version: 2.0.7+8
 #For PIPZE
-version: 2.3.4+5
+version: 2.3.2+3
 
 environment:
   sdk: ^3.7.0
@@ -153,9 +153,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND
-    - assets/clients/pipze/
-    # END GENERATED ACTIVE CLIENT ASSETS
+    - assets/clients/celestial/
 
     - assets/translations/
     - assets/config/
