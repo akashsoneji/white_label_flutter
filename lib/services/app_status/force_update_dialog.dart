@@ -8,6 +8,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/app_status/app_status_controller.dart';
 import 'package:crm_app/services/app_status/in_app_update_service.dart';
+import 'package:crm_app/screens/common/webview_screen.dart';
 
 enum UpdateDialogState {
   idle,
@@ -44,19 +45,15 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
       return;
     }
 
-    final isPlayStoreUrl = updateUrl.contains('play.google.com') ||
-        updateUrl.contains('market.android.com') ||
-        updateUrl.toLowerCase().endsWith('.aab');
+    final isApk = InAppUpdateService.instance.isApkUrl(updateUrl);
 
-    if (isPlayStoreUrl) {
-      setState(() => _state = UpdateDialogState.openingStore);
-      await Future.delayed(const Duration(milliseconds: 800));
-      if (!mounted) return;
-      controller.openAppStore();
-      setState(() => _state = UpdateDialogState.idle);
+    // If NOT an APK URL, open in WebView
+    if (!isApk) {
+      Get.to(() => WebViewScreen(url: updateUrl, title: 'Update'));
       return;
     }
 
+    // APK URL — download and install
     setState(() {
       _state = UpdateDialogState.downloading;
       _downloadProgress = 0.0;
@@ -80,7 +77,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
     if (!mounted) return;
 
     switch (result) {
-      case DownloadResult.downloading:
+      case DownloadResult.success:
         setState(() {
           _state = UpdateDialogState.installing;
           _downloadProgress = 1.0;
@@ -88,20 +85,6 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
         });
         await Future.delayed(const Duration(seconds: 2));
         if (mounted) setState(() => _state = UpdateDialogState.idle);
-        break;
-      case DownloadResult.playStore:
-        setState(() => _state = UpdateDialogState.openingStore);
-        await Future.delayed(const Duration(milliseconds: 800));
-        if (!mounted) return;
-        controller.openAppStore();
-        setState(() => _state = UpdateDialogState.idle);
-        break;
-      case DownloadResult.aabPlayStore:
-        setState(() => _state = UpdateDialogState.openingStore);
-        await Future.delayed(const Duration(milliseconds: 800));
-        if (!mounted) return;
-        controller.openAppStore();
-        setState(() => _state = UpdateDialogState.idle);
         break;
       case DownloadResult.error:
         setState(() {
@@ -142,8 +125,10 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
     final latestVersion =
         controller.statusData.value?.appVersion ??
         controller.latestVersion.value;
+    final androidUrl = controller.statusData.value?.updateUrlAndroid ?? '';
     final hasApkUrl = Platform.isAndroid &&
-        controller.statusData.value?.updateUrlAndroid?.isNotEmpty == true;
+        androidUrl.isNotEmpty &&
+        InAppUpdateService.instance.isApkUrl(androidUrl);
 
     final bool isDark = AppColors.isDarkMode;
     final Color cardColor = isDark

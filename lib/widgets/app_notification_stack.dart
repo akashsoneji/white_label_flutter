@@ -4,13 +4,25 @@ import 'package:get/get.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/widgets/app_notification_item.dart';
 
-/// Stack widget to display multiple app-wide notifications
+/// Stack widget to display multiple app-wide notifications.
+/// Must always return a Positioned widget since it lives inside a Stack.
 class AppNotificationStack extends StatelessWidget {
   const AppNotificationStack({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Get the notification controller
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 10.h,
+      left: 16.w,
+      right: 16.w,
+      child: _NotificationContent(),
+    );
+  }
+}
+
+class _NotificationContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     if (!Get.isRegistered<AppNotificationController>()) {
       return const SizedBox.shrink();
     }
@@ -23,19 +35,17 @@ class AppNotificationStack extends StatelessWidget {
         return const SizedBox.shrink();
       }
 
-      return Positioned(
-        top: MediaQuery.of(context).padding.top + 10.h,
-        left: 16.w, // Add horizontal padding
-        right: 16.w, // Add horizontal padding
+      return Material(
+        color: Colors.transparent,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          children: notifications.map((notification) {
-            return AppNotificationItem(notification: notification);
-          }).toList(),
+          children:
+              notifications.map((notification) {
+                return AppNotificationItem(notification: notification);
+              }).toList(),
         ),
       );
     });
   }
 }
-

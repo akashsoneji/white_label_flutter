@@ -15,11 +15,18 @@ class BrandDetails {
   final String? inheritsFrom;
   final String label;
 
+  /// Brand theme mode:
+  ///   'dark'  → forced dark, theme switcher hidden
+  ///   'light' → forced light, theme switcher hidden
+  ///   'both'  → user can pick light/dark/system
+  final String themeMode;
+
   const BrandDetails({
     required this.name,
     required this.type,
     this.inheritsFrom,
     required this.label,
+    this.themeMode = 'both',
   });
 
   factory BrandDetails.fromJson(Map<String, dynamic> json) {
@@ -28,8 +35,18 @@ class BrandDetails {
       type: json['type'] as String? ?? 'parent',
       inheritsFrom: json['inheritsFrom'] as String?,
       label: json['label'] as String? ?? '',
+      themeMode: json['themeMode'] as String? ?? 'both',
     );
   }
+
+  /// True when the brand is locked to dark (no user choice).
+  bool get isDarkOnly => themeMode.toLowerCase() == 'dark';
+
+  /// True when the brand is locked to light (no user choice).
+  bool get isLightOnly => themeMode.toLowerCase() == 'light';
+
+  /// True when the user can pick light/dark/system.
+  bool get isUserSelectable => themeMode.toLowerCase() == 'both';
 }
 
 /// Resolves the active brand at runtime and applies it to existing branding
@@ -73,8 +90,10 @@ class BrandResolver extends GetxService {
     final detail = details[brandName];
     if (detail == null) return brandName;
 
-    if (detail.type == 'child' && detail.inheritsFrom != null) {
-      // Recursively resolve in case the parent is also a child
+    if (detail.type == 'child' && detail.inheritsFrom != null && details.containsKey(detail.inheritsFrom)) {
+      // Recursively resolve in case the parent is also a child.
+      // If parent metadata is intentionally not bundled in a single-client build,
+      // fall back to the active brand name so APK decompile does not expose parent/child registry data.
       return resolveUiBrand(detail.inheritsFrom!, details);
     }
 
@@ -125,21 +144,7 @@ class BrandResolver extends GetxService {
     activeBrand.value = allowed;
 
     // Initialize FlavorConfig from build-time client defaults early.
-    switch (allowed.value) {
-      case 'vantage':
-        FlavorConfig.vantage;
-        break;
-      case 'celestial':
-        FlavorConfig.celestial;
-        break;
-      case 'pipze':
-        FlavorConfig.pipze;
-        break;
-      case 'tenax':
-      default:
-        FlavorConfig.tenax;
-        break;
-    }
+    FlavorConfig.activateByName(allowed.value);
   }
 
   Future<void> setActiveBrand(BrandId id) async {

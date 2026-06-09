@@ -22,7 +22,7 @@ class BrandSwitcher {
     debugPrint('   App Title: ${FlavorConfig.instance.appTitle}');
   }
 
-  static bool get isTenax => FlavorConfig.instance.flavor == Flavor.tenax;
+  static bool get isTenax => FlavorConfig.instance.flavor.name == 'tenax';
 
   /// Get current brand name
   static String get currentBrandName => FlavorConfig.instance.appName;

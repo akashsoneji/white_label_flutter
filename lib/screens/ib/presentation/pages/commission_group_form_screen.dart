@@ -1,5 +1,6 @@
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -139,12 +140,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
 
   Future<void> _saveGroup() async {
     if (_groupNameController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter a group name',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.whiteColor,
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Please enter a group name',
       );
       return;
     }
@@ -190,12 +188,9 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
         Get.back();
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to save group: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.whiteColor,
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Failed to save group: $e',
       );
     } finally {
       setState(() {

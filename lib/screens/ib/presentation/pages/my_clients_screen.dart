@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -83,12 +84,9 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     final clientId = client.id;
     if (clientId == null) {
-      Get.snackbar(
-        'Unavailable',
-        'Cannot load trade history without a client ID',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.whiteColor,
+      CustomToastService.showError(
+        title: 'Unavailable',
+        message: 'Cannot load trade history without a client ID',
       );
       return;
     }

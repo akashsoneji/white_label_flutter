@@ -595,6 +595,7 @@ class MyGetXApp extends StatelessWidget {
       builder: (context, child) {
         return Obx(() {
           final languageService = Get.find<LanguageService>();
+          final themeService = Get.find<ThemeService>();
           final isRTL = languageService.isRTL();
 
           return Directionality(
@@ -629,7 +630,7 @@ class MyGetXApp extends StatelessWidget {
                   debugShowCheckedModeBanner: false,
                   // showPerformanceOverlay: true, // Removed in favor of custom overlay
                   locale: languageService.getCurrentLocale(),
-                  themeMode: Get.find<ThemeService>().themeMode,
+                  themeMode: themeService.themeMode,
                   theme: _buildLightTheme(),
                   darkTheme: _buildDarkTheme(),
                   initialRoute: AppPages.SPLASH,
@@ -820,27 +821,12 @@ Future<void> _initializeFlavor() async {
       clientFromDefine.isNotEmpty ? clientFromDefine : flavorFromDefine;
   final selected = selectedRaw.trim().toLowerCase();
 
-  switch (selected) {
-    case 'vantage':
-      FlavorConfig.vantage;
-      AppLogger.debug('Flavor initialized: vantage');
-      return;
-    case 'celestial':
-      FlavorConfig.celestial;
-      AppLogger.debug('Flavor initialized: celestial');
-      return;
-    case 'pipze':
-      FlavorConfig.pipze;
-      AppLogger.debug('Flavor initialized: pipze');
-      return;
-    case 'tenax':
-    default:
-      AppLogger.error(
-        'Unsupported flavor/client "$selectedRaw". Falling back to tenax.',
-      );
-      FlavorConfig.tenax;
-      AppLogger.debug('Flavor initialized: tenax');
-      return;
+  FlavorConfig.activateByName(selected);
+  AppLogger.debug('Flavor initialized: ${FlavorConfig.instance.flavor.name}');
+  if (selectedRaw.isNotEmpty && FlavorConfig.instance.flavor.name != selected) {
+    AppLogger.error(
+      'Unsupported flavor/client "$selectedRaw". Falling back to ${FlavorConfig.instance.flavor.name}.',
+    );
   }
 }
 

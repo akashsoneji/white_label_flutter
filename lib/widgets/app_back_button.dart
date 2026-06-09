@@ -3,7 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
+import 'package:crm_app/constants/color.dart';
+
 /// App-wide back control: same SVG asset, size, and tap target on every screen.
+/// Uses AppColors.textPrimary which automatically supports dark/light mode.
 class AppBackButton extends StatelessWidget {
   static const String assetPath = 'assets/svg/trade/arro_back.svg';
 
@@ -29,9 +32,8 @@ class AppBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Theme-aware icon color: white in dark mode, black in light mode.
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconColor = isDark ? Colors.white : Colors.black;
+    // Uses AppColors.textPrimary which is theme-aware (white in dark mode, black in light mode)
+    final iconColor = AppColors.textPrimary;
 
     return SizedBox(
       width: leadingSlotSize.w,

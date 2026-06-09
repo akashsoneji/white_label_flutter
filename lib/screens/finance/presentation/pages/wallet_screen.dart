@@ -60,7 +60,8 @@ class _WalletScreenState extends State<WalletScreen> {
         elevation: 0,
         leading: Padding(
           padding: EdgeInsets.only(left: 10.w),
-          child: AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
+          child: AppBackButton(
+            onPressed: () => NavigationHelper.safeBack(context: context),
           ),
         ),
 
@@ -347,11 +348,10 @@ class _WalletScreenState extends State<WalletScreen> {
                                 final otp =
                                     otpControllers.map((c) => c.text).join();
                                 if (otp.isEmpty || otp.length != 6) {
-                                  CustomToastService.show(
+                                  CustomToastService.showError(
                                     message: languageService.tr(
                                       'wallet_validation_otp',
                                     ),
-                                    type: ToastType.error,
                                   );
                                   return;
                                 }
@@ -609,7 +609,10 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
             child:
                 controller.isLoading.value
-                    ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
+                    ? ButtonLoadingWidget(
+                      size: 20.0,
+                      color: AppColors.whiteColor,
+                    )
                     : Text(
                       languageService.tr('internal_transfer'),
                       style: TextStyle(

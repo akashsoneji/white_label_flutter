@@ -27,6 +27,7 @@ void main(List<String> args) async {
 
     await cleanOtherClientAssets(flavor, allFlavors);
     await copyClientAssets(flavor);
+    await writeBuildBrandRegistry(flavor);
     await updatePubspec(flavor, allFlavors);
     await generateNativeSplash(flavor);
     await generateLauncherIcons(flavor);
@@ -113,6 +114,54 @@ Future<void> copyClientAssets(String flavor) async {
   }
 }
 
+Future<void> writeBuildBrandRegistry(String flavor) async {
+  print('\n🔒 Writing build-scoped brand registry...');
+
+  final registryFile = File('assets/config/brands/brands.json');
+  if (!await registryFile.exists()) {
+    print('  ⚠️  Warning: brands.json not found, skipping registry trim');
+    return;
+  }
+
+  final decoded = jsonDecode(await registryFile.readAsString());
+  if (decoded is! Map<String, dynamic>) {
+    print('  ⚠️  Warning: invalid brands.json, skipping registry trim');
+    return;
+  }
+
+  final details = decoded['brandDetails'];
+  Map<String, dynamic>? activeDetails;
+  if (details is List) {
+    for (final item in details) {
+      if (item is Map && item['name']?.toString().toLowerCase() == flavor) {
+        activeDetails = item.cast<String, dynamic>();
+        break;
+      }
+    }
+  }
+
+  final safeRegistry = <String, dynamic>{
+    'default': flavor,
+    'brands': <String>[flavor],
+    if (activeDetails != null)
+      'brandDetails': <Map<String, dynamic>>[
+        {
+          'name': activeDetails['name'],
+          // Keep this parent in the build-scoped registry so parent/child
+          // relationship metadata for other clients is not bundled in the APK.
+          'type': 'parent',
+          'label': activeDetails['label'],
+          // Keep only the active brand theme lock/selectability. Without this,
+          // forced-light brands (e.g. Pipze) may incorrectly behave as both.
+          'themeMode': activeDetails['themeMode'] ?? 'both',
+        },
+      ],
+  };
+
+  await registryFile.writeAsString('${const JsonEncoder.withIndent('  ').convert(safeRegistry)}\n');
+  print('  ✓ brands.json now contains only $flavor metadata');
+}
+
 Future<void> updatePubspec(String flavor, List<String> allFlavors) async {
   print('\n📝 Updating pubspec.yaml...');
 
@@ -123,34 +172,40 @@ Future<void> updatePubspec(String flavor, List<String> allFlavors) async {
 
   final managedBlock = '''    # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND
     - assets/clients/$flavor/
+    - assets/config/brands/brands.json
+    - assets/config/$flavor/app_config.json
     # END GENERATED ACTIVE CLIENT ASSETS''';
 
   final managedPattern = RegExp(
-    r'    # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND\n'
-    r'    - assets/clients/[^\n]+/\n'
-    r'    # END GENERATED ACTIVE CLIENT ASSETS',
+    r'    # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND[\s\S]*?'
+    r'    # END GENERATED ACTIVE CLIENT ASSETS\n?',
     multiLine: true,
   );
 
   if (managedPattern.hasMatch(content)) {
-    content = content.replaceFirst(managedPattern, managedBlock);
-  } else {
-    for (final f in allFlavors) {
-      content = content.replaceAll(
-        RegExp(r'^\s*-\s*assets/clients/' + RegExp.escape(f) + r'/\s*$', multiLine: true),
-        '',
-      );
-    }
-    content = content.replaceAll(RegExp(r'\n{3,}'), '\n\n');
-
-    final assetsIndex = content.indexOf('  assets:');
-    if (assetsIndex == -1) throw Exception('Could not find flutter assets section in pubspec.yaml');
-    final insertIndex = content.indexOf('\n', assetsIndex) + 1;
-    content = content.substring(0, insertIndex) + managedBlock + '\n' + content.substring(insertIndex);
+    content = content.replaceAll(managedPattern, '');
   }
+
+  for (final f in allFlavors) {
+    content = content.replaceAll(
+      RegExp(r'^\s*-\s*assets/clients/' + RegExp.escape(f) + r'/\s*$', multiLine: true),
+      '',
+    );
+  }
+  content = content.replaceAll(RegExp(r'^\s*-\s*assets/config/\s*$', multiLine: true), '');
+  content = content.replaceAll(RegExp(r'^\s*-\s*assets/config/brands/brands\.json\s*$', multiLine: true), '');
+  content = content.replaceAll(RegExp(r'^\s*-\s*assets/config/[^/]+/app_config\.json\s*$', multiLine: true), '');
+  content = content.replaceAll(RegExp(r'\n{3,}'), '\n\n');
+
+  final assetsIndex = content.indexOf('  assets:');
+  if (assetsIndex == -1) throw Exception('Could not find flutter assets section in pubspec.yaml');
+  final insertIndex = content.indexOf('\n', assetsIndex) + 1;
+  content = content.substring(0, insertIndex) + managedBlock + '\n' + content.substring(insertIndex);
+  content = content.replaceAll(RegExp(r'\n{3,}'), '\n\n');
 
   await pubspecFile.writeAsString(content);
   print('  ✓ Active client assets set to assets/clients/$flavor/');
+  print('  ✓ Active config assets set to assets/config/$flavor/app_config.json only');
 }
 
 Future<void> generateNativeSplash(String flavor) async {

@@ -14,13 +14,12 @@ class ConnectivityOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!Get.isRegistered<ConnectivityController>()) {
-      return const SizedBox.shrink();
+      return const Positioned(top: 0, left: 0, child: SizedBox.shrink());
     }
 
     final controller = Get.find<ConnectivityController>();
 
     return Obx(() {
-      // Show no-internet screen only when disconnected
       final disconnected = !controller.isConnected.value;
 
       if (disconnected) {
@@ -32,7 +31,7 @@ class ConnectivityOverlay extends StatelessWidget {
         );
       }
 
-      return const SizedBox.shrink();
+      return const Positioned(top: 0, left: 0, child: SizedBox.shrink());
     });
   }
 }

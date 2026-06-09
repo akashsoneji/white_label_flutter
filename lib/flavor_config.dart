@@ -3,16 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
-import 'clients/vantage/config.dart';
-import 'clients/celestial/config.dart';
 import 'clients/pipze/config.dart';
-import 'clients/tenax/config.dart';
 
 enum Flavor {
-  vantage,
-  celestial,
   pipze,
-  tenax,
 }
 
 class FlavorConfig {
@@ -89,7 +83,7 @@ class FlavorConfig {
     required this.selectedBrokerData,
   }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.vantage);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.pipze);
 
   static void reset() {
     _instance = null;
@@ -105,43 +99,26 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.vantage,
+      orElse: () => Flavor.pipze,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
-      case Flavor.vantage:
-        const config = VantageConfig();
-        return config.toFlavorConfig(Flavor.vantage, 'vantage');
-      case Flavor.celestial:
-        const config = CelestialConfig();
-        return config.toFlavorConfig(Flavor.celestial, 'celestial');
       case Flavor.pipze:
         const config = PipzeConfig();
         return config.toFlavorConfig(Flavor.pipze, 'pipze');
-      case Flavor.tenax:
-        const config = TenaxConfig();
-        return config.toFlavorConfig(Flavor.tenax, 'tenax');
     }
   }
-
-  static FlavorConfig get vantage => activate(Flavor.vantage);
-
-  static bool isCelestial() => _instance?.flavor == Flavor.celestial;
-  static FlavorConfig get celestial => activate(Flavor.celestial);
 
   static bool isPipze() => _instance?.flavor == Flavor.pipze;
   static FlavorConfig get pipze => activate(Flavor.pipze);
 
-  static bool isTenax() => _instance?.flavor == Flavor.tenax;
-  static FlavorConfig get tenax => activate(Flavor.tenax);
-
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.pipze.name).toLowerCase();
     return const {'vantage', 'celestial', 'pipze'}.contains(name);
   }
 

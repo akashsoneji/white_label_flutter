@@ -265,7 +265,7 @@ class OneClickTradingQueueService {
           CustomToastService.showSuccess(
             message: message,
             duration: const Duration(seconds: 2),
-            position: SnackPosition.TOP,
+            // position: SnackPosition.TOP,
           );
         }
 

@@ -9,6 +9,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/services/theme_service.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
@@ -759,7 +760,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
 
   List<_CompactMenuItem> _buildSecuritySectionItems() {
     return [
-      if (main_config.enableDarkModeGlobal)
+      if (Get.find<ThemeService>().canUserChangeTheme)
         _CompactMenuItem(
           iconData: Icons.color_lens_rounded,
           label: languageService.tr('settings_theme'),

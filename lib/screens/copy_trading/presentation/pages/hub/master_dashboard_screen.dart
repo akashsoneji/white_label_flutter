@@ -314,10 +314,9 @@ class _MasterProfileCard extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () async {
                     await Clipboard.setData(ClipboardData(text: masterCode));
-                    Get.snackbar(
-                      'Copied',
-                      'Master code copied to clipboard',
-                      snackPosition: SnackPosition.BOTTOM,
+                    CustomToastService.showSuccess(
+                      message: 'Master code copied to clipboard',
+                      title: 'Copied',
                     );
                   },
                   style: OutlinedButton.styleFrom(

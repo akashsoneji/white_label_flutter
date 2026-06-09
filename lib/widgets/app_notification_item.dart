@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/models/app_notification.dart';
 import 'package:crm_app/utils/precision_helper.dart';
@@ -25,7 +26,8 @@ class AppNotificationItem extends StatelessWidget {
 
   /// Build trading notification (for chart screen compatibility)
   Widget _buildTradingNotification() {
-    final typeText = notification.tradeType?.toLowerCase() == 'buy' ? 'Buy' : 'Sell';
+    final typeText =
+        notification.tradeType?.toLowerCase() == 'buy' ? 'Buy' : 'Sell';
 
     // Determine background color based on status
     Color backgroundColor;
@@ -61,18 +63,16 @@ class AppNotificationItem extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Notification text
           Text(
             '${notification.symbol} $typeText ${PrecisionHelper.formatVolume(notification.volume ?? 0)}',
             style: TextStyle(
-              fontSize: 13.sp, // Increased by 2 pixels (from 11.sp)
-              fontWeight: FontWeight.w400, // Default font weight
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w400,
               color: AppColors.whiteColor,
               decoration: TextDecoration.none,
             ),
           ),
           SizedBox(width: 8.w),
-          // Status indicator (loading spinner or text)
           if (notification.status == NotificationStatus.loading)
             SizedBox(
               width: 16.w,
@@ -86,8 +86,8 @@ class AppNotificationItem extends StatelessWidget {
             Text(
               statusText,
               style: TextStyle(
-                fontSize: 13.sp, // Increased by 2 pixels (from 11.sp)
-                fontWeight: FontWeight.w500, // Default font weight
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
                 color: leftBorderColor,
                 decoration: TextDecoration.none,
               ),
@@ -127,7 +127,8 @@ class AppNotificationItem extends StatelessWidget {
     }
 
     // Use error message if available, otherwise use message
-    final displayMessage = notification.errorMessage ?? notification.message ?? '';
+    final displayMessage =
+        notification.errorMessage ?? notification.message ?? '';
 
     return Container(
       margin: EdgeInsets.only(bottom: 4.h),
@@ -141,40 +142,39 @@ class AppNotificationItem extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Title and message
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (notification.title != null && notification.title!.isNotEmpty)
+                if (notification.title != null &&
+                    notification.title!.isNotEmpty)
                   Text(
                     notification.title!,
                     style: TextStyle(
-                      fontSize: 14.sp, // Increased by 2 pixels (from 12.sp)
-                      fontWeight: FontWeight.w500, // Default font weight for titles
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.whiteColor,
                       decoration: TextDecoration.none,
                     ),
                   ),
-                if (notification.title != null && notification.title!.isNotEmpty)
+                if (notification.title != null &&
+                    notification.title!.isNotEmpty)
                   SizedBox(height: 2.h),
                 Text(
                   displayMessage,
                   style: TextStyle(
-                    fontSize: 13.sp, // Increased by 2 pixels (from 11.sp)
-                    fontWeight: FontWeight.w400, // Default font weight
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w400,
                     color: AppColors.whiteColor,
                     decoration: TextDecoration.none,
                   ),
-                  // Allow multiple lines - expand height if needed
-                  maxLines: null, // Allow unlimited lines
+                  maxLines: null,
                   overflow: TextOverflow.visible,
                 ),
               ],
             ),
           ),
-          // Only show loading spinner, no status text
           if (notification.status == NotificationStatus.loading)
             Padding(
               padding: EdgeInsets.only(left: 8.w),
@@ -192,4 +192,3 @@ class AppNotificationItem extends StatelessWidget {
     );
   }
 }
-

@@ -173,7 +173,7 @@ class AccountHeaderWidget extends StatelessWidget {
                             decoration: BoxDecoration(
                               color:
                                   AppColors.isDarkMode
-                                      ? Colors.white.withOpacity(0.2)
+                                      ? AppColors.surfaceSecondary
                                       : AppColors.card.withOpacity(0.06),
                               borderRadius: BorderRadius.circular(999),
                               border: Border.all(
@@ -190,7 +190,7 @@ class AccountHeaderWidget extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     color:
                                         AppColors.isDarkMode
-                                            ? Colors.white.withOpacity(0.12)
+                                            ? AppColors.surfaceSecondary
                                             : accountTypeColor,
                                     shape: BoxShape.circle,
                                   ),
@@ -199,7 +199,7 @@ class AccountHeaderWidget extends StatelessWidget {
                                     size: 12.sp,
                                     color:
                                         AppColors.isDarkMode
-                                            ? Colors.white
+                                            ? AppColors.whiteColor
                                             : accountTypeTextColor,
                                   ),
                                 ),
@@ -225,7 +225,7 @@ class AccountHeaderWidget extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     color:
                                         AppColors.isDarkMode
-                                            ? Colors.white.withOpacity(0.12)
+                                            ? AppColors.surfaceSecondary
                                             : accountTypeColor.withOpacity(
                                               0.12,
                                             ),
@@ -236,7 +236,7 @@ class AccountHeaderWidget extends StatelessWidget {
                                     style: TextStyle(
                                       color:
                                           AppColors.isDarkMode
-                                              ? Colors.white
+                                              ? AppColors.whiteColor
                                               : accountTypeColor,
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w700,
@@ -330,7 +330,7 @@ class AccountHeaderWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(24.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
+                        color: AppColors.shadow,
                         blurRadius: 10,
                         offset: const Offset(0, 3),
                       ),
@@ -510,7 +510,7 @@ class AccountHeaderWidget extends StatelessWidget {
                                   decoration: BoxDecoration(
                                     color:
                                         AppColors.isDarkMode
-                                            ? Colors.white.withOpacity(0.12)
+                                            ? AppColors.surfaceSecondary
                                             : (account.accountType == 'live'
                                                 ? AppColors.primary
                                                 : AppColors.success),
@@ -520,7 +520,7 @@ class AccountHeaderWidget extends StatelessWidget {
                                     Icons.account_balance_wallet,
                                     color:
                                         AppColors.isDarkMode
-                                            ? Colors.white
+                                            ? AppColors.whiteColor
                                             : AppColors.whiteColor,
                                     size: 20.h,
                                   ),
@@ -676,7 +676,7 @@ class AccountHeaderWidget extends StatelessWidget {
                       shape: BoxShape.circle,
                       color:
                           AppColors.isDarkMode
-                              ? Colors.white.withOpacity(0.12)
+                              ? AppColors.surfaceSecondary
                               : (type == 'LIVE'
                                       ? AppColors.accent
                                       : AppColors.primary)
@@ -687,7 +687,7 @@ class AccountHeaderWidget extends StatelessWidget {
                       size: 12.sp,
                       color:
                           AppColors.isDarkMode
-                              ? Colors.white
+                              ? AppColors.whiteColor
                               : (type == 'LIVE'
                                   ? AppColors.accent
                                   : AppColors.primary),
@@ -714,7 +714,7 @@ class AccountHeaderWidget extends StatelessWidget {
                     decoration: BoxDecoration(
                       color:
                           AppColors.isDarkMode
-                              ? Colors.white.withOpacity(0.12)
+                              ? AppColors.surfaceSecondary
                               : (type == 'LIVE'
                                       ? AppColors.accent
                                       : AppColors.primary)
@@ -726,7 +726,7 @@ class AccountHeaderWidget extends StatelessWidget {
                       style: TextStyle(
                         color:
                             AppColors.isDarkMode
-                                ? Colors.white
+                                ? AppColors.whiteColor
                                 : (type == 'LIVE'
                                     ? AppColors.accent
                                     : AppColors.primary),

@@ -4,6 +4,10 @@
 # type: parent  → brand has its own screen files in lib/screens/*/brands/{name}/
 # type: child   → brand has NO screen files; uses inheritsFrom parent's screens
 #
+# themeMode: dark  → brand is DARK ONLY (no theme switcher shown)
+# themeMode: light → brand is LIGHT ONLY (no theme switcher shown)
+# themeMode: both → user can pick light / dark / system (default)
+#
 # Adding a new brand:
 #   1. Add entry below
 #   2. Run: dart run scripts/generate_brand_config.dart
@@ -17,6 +21,8 @@ brands:
   - name: vantage
     type: parent
     label: Vantage
+    # themeMode options: 'dark' | 'light' | 'both' (default)
+    themeMode: both
     android:
       applicationId: com.vantage.app
       appName: Vantage
@@ -43,6 +49,8 @@ brands:
     type: child
     inheritsFrom: vantage
     label: Celestial
+    # Celestial is DARK ONLY — theme switcher is hidden, dark forced
+    themeMode: dark
     android:
       applicationId: com.celestial.app
       appName: Celestial
@@ -66,6 +74,8 @@ brands:
     type: child
     inheritsFrom: vantage
     label: Pipze
+    # Pipze is LIGHT ONLY — theme switcher is hidden, light forced
+    themeMode: light
     android:
       applicationId: com.pipze.app
       appName: Pipze
@@ -88,6 +98,8 @@ brands:
   - name: tenax
     type: parent
     label: Tenax
+    # Tenax supports both — user can switch light/dark/system
+    themeMode: both
     android:
       applicationId: com.tenax.app
       appName: Tenax

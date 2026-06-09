@@ -2,16 +2,15 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:crm_app/models/app_notification.dart';
 
-/// Global controller to manage app-wide notifications
+/// Global controller to manage app-wide notifications.
 class AppNotificationController extends GetxController {
   static const int maxNotifications = 5;
   static const Duration defaultAutoHideDuration = Duration(seconds: 3);
-  static const Duration shortAutoHideDuration = Duration(milliseconds: 200); // For trading notifications
+  static const Duration shortAutoHideDuration = Duration(milliseconds: 200);
 
   final RxList<AppNotification> _notifications = <AppNotification>[].obs;
   final Map<String, Timer> _hideTimers = {};
 
-  /// Observable list of notifications
   List<AppNotification> get notifications => _notifications.toList();
 
   /// Show a success notification
@@ -32,7 +31,9 @@ class AppNotificationController extends GetxController {
     _addNotification(notification);
     _scheduleAutoHide(id, duration ?? defaultAutoHideDuration);
 
-    print('📢 AppNotificationController: Showing success notification: $message');
+    print(
+      '📢 AppNotificationController: Showing success notification: $message',
+    );
     return id;
   }
 
@@ -99,7 +100,9 @@ class AppNotificationController extends GetxController {
     _addNotification(notification);
     _scheduleAutoHide(id, duration ?? defaultAutoHideDuration);
 
-    print('📢 AppNotificationController: Showing warning notification: $message');
+    print(
+      '📢 AppNotificationController: Showing warning notification: $message',
+    );
     return id;
   }
 
@@ -162,11 +165,12 @@ class AppNotificationController extends GetxController {
     if (!notification.isTradingNotification) {
       // Clear all previous generic notifications before adding new one
       // This ensures only one generic notification is shown at a time
-      final genericNotificationIds = _notifications
-          .where((n) => !n.isTradingNotification)
-          .map((n) => n.id)
-          .toList();
-      
+      final genericNotificationIds =
+          _notifications
+              .where((n) => !n.isTradingNotification)
+              .map((n) => n.id)
+              .toList();
+
       for (final id in genericNotificationIds) {
         final index = _notifications.indexWhere((n) => n.id == id);
         if (index != -1) {
@@ -174,16 +178,17 @@ class AppNotificationController extends GetxController {
           _cancelHideTimer(id);
         }
       }
-      
+
       if (genericNotificationIds.isNotEmpty) {
-        print('📢 AppNotificationController: Cleared ${genericNotificationIds.length} previous generic notification(s)');
+        print(
+          '📢 AppNotificationController: Cleared ${genericNotificationIds.length} previous generic notification(s)',
+        );
       }
     } else {
       // For trading notifications, remove oldest trading notification if we're at the limit
       // This maintains the multiple notification behavior for chart screen
-      final tradingNotifications = _notifications
-          .where((n) => n.isTradingNotification)
-          .toList();
+      final tradingNotifications =
+          _notifications.where((n) => n.isTradingNotification).toList();
       if (tradingNotifications.length >= maxNotifications) {
         final oldest = tradingNotifications.first;
         final index = _notifications.indexWhere((n) => n.id == oldest.id);
@@ -245,4 +250,3 @@ class AppNotificationController extends GetxController {
     super.onClose();
   }
 }
-

@@ -21,7 +21,7 @@ class LoginLoadingOverlay extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: Colors.black.withOpacity(0.4),
+      color: AppColors.surface.withOpacity(0.4),
       child: Center(
         child: Container(
           padding: EdgeInsets.all(24.w),
@@ -30,7 +30,7 @@ class LoginLoadingOverlay extends StatelessWidget {
             borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: AppColors.border.withOpacity(0.3),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),

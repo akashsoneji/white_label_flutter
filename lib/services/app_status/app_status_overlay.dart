@@ -12,13 +12,12 @@ class AppStatusOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!Get.isRegistered<AppStatusController>()) {
-      return const SizedBox.shrink();
+      return const Positioned(top: 0, left: 0, child: SizedBox.shrink());
     }
 
     final controller = Get.find<AppStatusController>();
 
     return Obx(() {
-      // Show maintenance screen if maintenance mode is active
       final isMaintenance = controller.isMaintenanceMode.value;
       
       if (isMaintenance) {
@@ -30,8 +29,7 @@ class AppStatusOverlay extends StatelessWidget {
         );
       }
 
-      // Return empty widget if not in maintenance mode
-      return const SizedBox.shrink();
+      return const Positioned(top: 0, left: 0, child: SizedBox.shrink());
     });
   }
 }

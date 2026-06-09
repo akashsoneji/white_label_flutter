@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
 /// @deprecated Use [AppBackButton] — kept for existing imports.
@@ -22,8 +23,7 @@ class AppSvgBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (iconWidth != null || iconHeight != null) {
-      final isDark = Theme.of(context).brightness == Brightness.dark;
-      final iconColor = isDark ? Colors.white : Colors.black;
+      final iconColor = AppColors.textPrimary;
       return IconButton(
         onPressed: onPressed ?? () => AppBackButton.popRoute(context),
         icon: SvgPicture.asset(

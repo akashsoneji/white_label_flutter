@@ -1,9 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 
 enum ToastType { success, error, info, warning }
@@ -37,7 +37,7 @@ class CustomToast extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
+            color: AppColors.textPrimary.withValues(alpha: 0.15),
             blurRadius: 15,
             offset: const Offset(0, 4),
             spreadRadius: 0,
@@ -54,22 +54,16 @@ class CustomToast extends StatelessWidget {
                 width: 24.w,
                 height: 24.h,
                 decoration: BoxDecoration(
-                  color: AppColors.isDarkMode
-                      ? _getStatusColor()
-                      : AppColors.whiteColor.withValues(alpha: 0.25),
+                  color: AppColors.whiteColor.withValues(alpha: 0.25),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.isDarkMode
-                        ? _getStatusColor().withValues(alpha: 0.2)
-                        : AppColors.whiteColor.withValues(alpha: 0.3),
+                    color: AppColors.whiteColor.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 ),
                 child: Icon(
                   _getIcon(),
-                  color: AppColors.isDarkMode
-                      ? Colors.white
-                      : AppColors.whiteColor,
+                  color: AppColors.whiteColor,
                   size: 16.h,
                 ),
               ),
@@ -119,7 +113,11 @@ class CustomToast extends StatelessWidget {
                     color: AppColors.whiteColor.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.close, color: AppColors.whiteColor, size: 18.h),
+                  child: Icon(
+                    Icons.close,
+                    color: AppColors.whiteColor,
+                    size: 18.h,
+                  ),
                 ),
               ),
             ],
@@ -130,29 +128,13 @@ class CustomToast extends StatelessWidget {
   }
 
   Color _getBackgroundColor() {
-    if (AppColors.isDarkMode) {
-      return Colors.white;
-    }
-    switch (type) {
-      case ToastType.success:
-        return AppColors.success;
-      case ToastType.error:
-        return FlavorConfig.instance.primaryColor;
-      case ToastType.info:
-        return AppColors.primary;
-      case ToastType.warning:
-        return AppColors.warning;
-    }
-  }
-
-  Color _getStatusColor() {
     switch (type) {
       case ToastType.success:
         return AppColors.success;
       case ToastType.error:
         return AppColors.error;
       case ToastType.info:
-        return AppColors.blue;
+        return AppColors.primary;
       case ToastType.warning:
         return AppColors.warning;
     }
@@ -231,21 +213,21 @@ class CustomToastService {
     }
 
     if (overlayState == null || overlayContext == null) {
-      final errorMsg = 'CustomToastService: No valid overlay context found for showing toast';
+      final errorMsg =
+          'CustomToastService: No valid overlay context found for showing toast';
       debugPrint(errorMsg);
       print('❌ $errorMsg');
       print('   Get.overlayContext: ${Get.overlayContext}');
       print('   Get.context: ${Get.context}');
       print('   Get.key.currentContext: ${Get.key.currentContext}');
+
       // Try fallback to Get.snackbar
       try {
         Get.snackbar(
           title ?? 'Error',
           message,
           snackPosition: position,
-          backgroundColor: AppColors.isDarkMode
-              ? Colors.white
-              : FlavorConfig.instance.primaryColor,
+          backgroundColor: AppColors.error,
           colorText: AppColors.whiteColor,
           duration: duration,
         );
@@ -256,6 +238,7 @@ class CustomToastService {
       }
       return;
     }
+
     final isTop = position == SnackPosition.TOP;
 
     _overlayEntry = OverlayEntry(
@@ -312,13 +295,16 @@ class CustomToastService {
         title: title,
         duration: duration,
       );
+
       // Call onClose callback if provided
       if (onClose != null) {
         Future.delayed(duration, onClose);
       }
     } else {
       // Fallback to old method if controller not registered
-      print('⚠️ CustomToastService: AppNotificationController not registered, using fallback');
+      print(
+        '⚠️ CustomToastService: AppNotificationController not registered, using fallback',
+      );
       show(
         message: message,
         title: title,
@@ -340,18 +326,17 @@ class CustomToastService {
     // Use AppNotificationController instead of overlay
     if (Get.isRegistered<AppNotificationController>()) {
       final controller = Get.find<AppNotificationController>();
-      controller.showError(
-        message: message,
-        title: title,
-        duration: duration,
-      );
+      controller.showError(message: message, title: title, duration: duration);
+
       // Call onClose callback if provided
       if (onClose != null) {
         Future.delayed(duration, onClose);
       }
     } else {
       // Fallback to old method if controller not registered
-      print('⚠️ CustomToastService: AppNotificationController not registered, using fallback');
+      print(
+        '⚠️ CustomToastService: AppNotificationController not registered, using fallback',
+      );
       show(
         message: message,
         title: title,
@@ -373,18 +358,17 @@ class CustomToastService {
     // Use AppNotificationController instead of overlay
     if (Get.isRegistered<AppNotificationController>()) {
       final controller = Get.find<AppNotificationController>();
-      controller.showInfo(
-        message: message,
-        title: title,
-        duration: duration,
-      );
+      controller.showInfo(message: message, title: title, duration: duration);
+
       // Call onClose callback if provided
       if (onClose != null) {
         Future.delayed(duration, onClose);
       }
     } else {
       // Fallback to old method if controller not registered
-      print('⚠️ CustomToastService: AppNotificationController not registered, using fallback');
+      print(
+        '⚠️ CustomToastService: AppNotificationController not registered, using fallback',
+      );
       show(
         message: message,
         title: title,
@@ -411,13 +395,16 @@ class CustomToastService {
         title: title,
         duration: duration,
       );
+
       // Call onClose callback if provided
       if (onClose != null) {
         Future.delayed(duration, onClose);
       }
     } else {
       // Fallback to old method if controller not registered
-      print('⚠️ CustomToastService: AppNotificationController not registered, using fallback');
+      print(
+        '⚠️ CustomToastService: AppNotificationController not registered, using fallback',
+      );
       show(
         message: message,
         title: title,

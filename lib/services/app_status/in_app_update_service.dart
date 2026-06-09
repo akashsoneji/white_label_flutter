@@ -5,15 +5,9 @@ import 'package:open_filex/open_filex.dart';
 import 'package:crm_app/utils/app_logger.dart';
 
 /// Service for in-app APK download and installation.
-/// Handles:
-/// - Downloading APK from direct URL (current flow: APK hosted on your server)
-/// - Future-ready: Detecting Play Store AAB URLs and redirecting to Play Store
-/// - Showing download progress
-/// - Installing APK with system permission prompt
 class InAppUpdateService {
   static InAppUpdateService? _instance;
 
-  /// Singleton
   static InAppUpdateService get instance {
     _instance ??= InAppUpdateService._();
     return _instance!;
@@ -21,62 +15,41 @@ class InAppUpdateService {
 
   InAppUpdateService._();
 
-  /// Check if the given URL is a direct APK file URL.
-  bool _isApkUrl(String url) {
-    return url.toLowerCase().endsWith('.apk');
+  /// Check if the given URL contains an APK reference.
+  /// Handles URLs with query parameters like:
+  /// https://example.com/download.php?filename=app.apk&t=123
+  bool isApkUrl(String url) {
+    final lower = url.toLowerCase();
+    if (lower.endsWith('.apk')) return true;
+    try {
+      final uri = Uri.parse(lower);
+      if (uri.path.endsWith('.apk')) return true;
+      for (final value in uri.queryParameters.values) {
+        if (value.endsWith('.apk')) return true;
+      }
+    } catch (_) {}
+    return lower.contains('.apk');
   }
 
-  /// Check if the given URL is a Play Store URL.
-  bool _isPlayStoreUrl(String url) {
-    return url.contains('play.google.com') ||
-        url.contains('market.android.com');
-  }
-
-  /// Check if the given URL is a direct AAB file URL.
-  bool _isAabUrl(String url) {
-    return url.toLowerCase().endsWith('.aab');
-  }
-
-  /// Download and install update.
+  /// Download APK and install it.
   ///
   /// Returns:
-  /// - `DownloadResult.downloading` if download started/completed
-  /// - `DownloadResult.playStore` if URL is Play Store (caller should open Play Store)
-  /// - `DownloadResult.aabPlayStore` if URL is AAB (caller should open Play Store)
+  /// - `DownloadResult.success` if download completed and installer opened
   /// - `DownloadResult.error` on failure
   Future<DownloadResult> downloadAndInstall(
     String updateUrl, {
     void Function(double progress)? onProgress,
   }) async {
     try {
-      // Route based on URL type
-      if (_isPlayStoreUrl(updateUrl) || _isAabUrl(updateUrl)) {
-        AppLogger.debug(
-          'InAppUpdateService: URL is Play Store/AAB — caller should open store',
-        );
-        return _isAabUrl(updateUrl)
-            ? DownloadResult.aabPlayStore
-            : DownloadResult.playStore;
-      }
-
-      if (!_isApkUrl(updateUrl)) {
-        AppLogger.error(
-          'InAppUpdateService: Unknown update URL format: $updateUrl',
-        );
-        return DownloadResult.error;
-      }
-
       AppLogger.debug('InAppUpdateService: Starting APK download: $updateUrl');
 
-      // Download APK to app's cache directory
       final file = await _downloadFile(updateUrl, onProgress: onProgress);
       if (file == null) {
         return DownloadResult.error;
       }
 
-      // Install APK (opens system installer, shows "Install unknown apps?" permission)
       await _installApk(file);
-      return DownloadResult.downloading;
+      return DownloadResult.success;
     } catch (e, stackTrace) {
       AppLogger.error(
         'InAppUpdateService: Error during download/install',
@@ -87,7 +60,6 @@ class InAppUpdateService {
     }
   }
 
-  /// Internal download helper.
   Future<File?> _downloadFile(
     String url, {
     void Function(double progress)? onProgress,
@@ -126,7 +98,6 @@ class InAppUpdateService {
         if (contentLength > 0) {
           final progress = downloadedBytes / contentLength;
 
-          // Log every 10%
           final percent = (progress * 10).floor();
           if (percent != lastLoggedPercent) {
             lastLoggedPercent = percent;
@@ -156,9 +127,6 @@ class InAppUpdateService {
     }
   }
 
-  /// Trigger Android system APK installer.
-  /// Android will automatically prompt the user with
-  /// "Install unknown apps?" permission if needed.
   Future<void> _installApk(File apkFile) async {
     final result = await OpenFilex.open(
       apkFile.path,
@@ -192,18 +160,7 @@ class InAppUpdateService {
   }
 }
 
-/// Result of the download-and-install flow.
 enum DownloadResult {
-  /// APK is being downloaded (progress will be reported via callback).
-  downloading,
-
-  /// URL is a Play Store URL — caller should open Play Store in browser.
-  playStore,
-
-  /// URL is a direct AAB file URL — caller should open Play Store.
-  /// AAB files cannot be installed directly; must go through Play Store.
-  aabPlayStore,
-
-  /// An error occurred.
+  success,
   error,
 }

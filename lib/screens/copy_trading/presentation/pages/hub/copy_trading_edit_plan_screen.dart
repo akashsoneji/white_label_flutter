@@ -582,10 +582,9 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
     final commissionValue = num.tryParse(_commissionCtrl.text.trim());
     final minCap = num.tryParse(_minCapitalCtrl.text.trim());
     if (commissionValue == null || minCap == null) {
-      Get.snackbar(
-        'Invalid',
-        'Enter valid numeric values',
-        snackPosition: SnackPosition.BOTTOM,
+      CustomToastService.showError(
+        title: 'Invalid',
+        message: 'Enter valid numeric values',
       );
       return;
     }
@@ -624,10 +623,9 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
         message: res.message ?? 'Plan updated successfully',
       );
     } else {
-      Get.snackbar(
-        'Failed',
-        res.message ?? _controller.errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
+      CustomToastService.showError(
+        title: 'Failed',
+        message: res.message ?? _controller.errorMessage.value,
       );
     }
   }

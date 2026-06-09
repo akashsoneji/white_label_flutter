@@ -106,6 +106,12 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
       continue;
     }
 
+    if (trimmed.startsWith('themeMode:')) {
+      currentEntry['themeMode'] = _extractValue(line).toLowerCase();
+      currentSection = '';
+      continue;
+    }
+
     var foundSection = false;
     for (final section in ['android', 'ios', 'colors', 'urls', 'assets']) {
       if (trimmed.startsWith('$section:')) {
@@ -150,6 +156,46 @@ String _brandClassName(String name) {
 }
 
 String _dartString(String value) => value.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
+
+String _envClientName() {
+  final direct = Platform.environment['CLIENT'] ?? Platform.environment['FLAVOR'];
+  if (direct != null && direct.trim().isNotEmpty) return direct.trim().toLowerCase();
+
+  final define = Platform.environment['DART_DEFINES'];
+  if (define == null || define.trim().isEmpty) return '';
+
+  for (final encoded in define.split(',')) {
+    try {
+      final decoded = utf8.decode(base64.decode(encoded));
+      final separator = decoded.indexOf('=');
+      if (separator <= 0) continue;
+      final key = decoded.substring(0, separator);
+      final value = decoded.substring(separator + 1).trim().toLowerCase();
+      if ((key == 'CLIENT' || key == 'FLAVOR') && value.isNotEmpty) return value;
+    } catch (_) {
+      // Ignore non-base64 values.
+    }
+  }
+
+  return '';
+}
+
+List<Map<String, dynamic>> _brandsForCurrentBuild(
+  String defaultBrand,
+  List<Map<String, dynamic>> brands,
+) {
+  final selected = _envClientName();
+  if (selected.isEmpty || selected == 'all') return brands;
+
+  final buildBrand = brands.where((brand) => (brand['name'] as String).toLowerCase() == selected).toList();
+  if (buildBrand.isEmpty) {
+    print('  ⚠️  CLIENT/FLAVOR=$selected does not match brands.yaml; generating all flavors.');
+    return brands;
+  }
+
+  print('  🔒 Single-client Dart config enabled: $selected');
+  return buildBrand;
+}
 
 Future<void> generateBrandConfigs(List<Map<String, dynamic>> brands) async {
   print('1. Generating brand config Dart files...');
@@ -237,6 +283,7 @@ Future<void> generateBrandsJson(String defaultBrand, List<Map<String, dynamic>> 
       'name': brand['name'],
       'type': brand['type'],
       'label': brand['label'],
+      'themeMode': brand['themeMode'] ?? 'both',
       'android': brand['android'],
       'ios': brand['ios'],
       'colors': brand['colors'],
@@ -261,18 +308,22 @@ Future<void> generateBrandsJson(String defaultBrand, List<Map<String, dynamic>> 
 Future<void> generateFlavorConfig(String defaultBrand, List<Map<String, dynamic>> brands) async {
   print('\n3. Generating lib/flavor_config.dart...');
 
-  final imports = brands
+  final buildBrands = _brandsForCurrentBuild(defaultBrand, brands);
+  final fallbackBrand = buildBrands.any((brand) => brand['name'] == defaultBrand)
+      ? defaultBrand
+      : buildBrands.first['name'] as String;
+  final imports = buildBrands
       .map((brand) => "import 'clients/${brand['name']}/config.dart';")
       .join('\n');
-  final enumValues = brands.map((brand) => '  ${brand['name']},').join('\n');
-  final cases = brands.map((brand) {
+  final enumValues = buildBrands.map((brand) => '  ${brand['name']},').join('\n');
+  final cases = buildBrands.map((brand) {
     final name = brand['name'] as String;
     final className = _brandClassName(name);
     return '''      case Flavor.$name:
         const config = ${className}Config();
         return config.toFlavorConfig(Flavor.$name, '$name');''';
   }).join('\n');
-  final getters = brands.map((brand) {
+  final getters = buildBrands.map((brand) {
     final name = brand['name'] as String;
     final configGetter = '  static FlavorConfig get $name => activate(Flavor.$name);';
     if (name == 'vantage') return configGetter;
@@ -365,7 +416,7 @@ class FlavorConfig {
     required this.selectedBrokerData,
   }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.$defaultBrand);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.$fallbackBrand);
 
   static void reset() {
     _instance = null;
@@ -381,7 +432,7 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.$defaultBrand,
+      orElse: () => Flavor.$fallbackBrand,
     );
     return activate(flavor);
   }
@@ -397,7 +448,7 @@ $getters
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.$defaultBrand.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.$fallbackBrand.name).toLowerCase();
     return const {'vantage', 'celestial', 'pipze'}.contains(name);
   }
 

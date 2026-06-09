@@ -24,8 +24,17 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Function to read brand names from generated brands.json or fallback brands.yaml
+# Function to read the full brand list from the source-of-truth YAML.
+# Do NOT prefer brands.json here: prepare_flavor.dart intentionally trims
+# brands.json to the active client only, so using it would make the next build
+# reject valid clients like pipze/tenax/vantage as "Unknown flavor".
 load_clients() {
+    if [ -f "assets/config/brands/brands.yaml" ]; then
+        grep -E '^\s*-\s*name:' assets/config/brands/brands.yaml | sed 's/.*name:[[:space:]]*//' | tr '\n' ' '
+        echo ""
+        return 0
+    fi
+
     if [ -f "assets/config/brands/brands.json" ]; then
         python3 - <<'PY'
 import json
@@ -33,12 +42,6 @@ with open('assets/config/brands/brands.json', 'r', encoding='utf-8') as f:
     data = json.load(f)
 print(' '.join(data.get('brands', [])))
 PY
-        return 0
-    fi
-
-    if [ -f "assets/config/brands/brands.yaml" ]; then
-        grep -E '^\s*-\s*name:' assets/config/brands/brands.yaml | sed 's/.*name:[[:space:]]*//' | tr '\n' ' '
-        echo ""
         return 0
     fi
 
@@ -131,9 +134,9 @@ build_flavor() {
         echo ""
     fi
     
-    # Step 1: Run brand config generator (auto-regenerates if needed)
+    # Step 1: Run brand config generator for this build client only (prevents other client constants in decompiled output)
     echo -e "${YELLOW}📦 Step 1: Running brand config generator...${NC}"
-    if ! dart run scripts/generate_brand_config.dart; then
+    if ! CLIENT=$FLAVOR FLAVOR=$FLAVOR dart run scripts/generate_brand_config.dart; then
         echo -e "${RED}❌ Failed to run brand config generator${NC}"
         return 1
     fi

@@ -1,3 +1,4 @@
+import 'package:crm_app/constants/color.dart';
 import 'package:flutter/material.dart';
 
 /// Simple toast service for showing messages
@@ -12,7 +13,7 @@ class ToastService {
       SnackBar(
         content: Text(message),
         duration: duration,
-        backgroundColor: Colors.blue,
+        backgroundColor: AppColors.blue,
       ),
     );
   }
@@ -27,7 +28,7 @@ class ToastService {
       SnackBar(
         content: Text(message),
         duration: duration,
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.green,
       ),
     );
   }
@@ -42,7 +43,7 @@ class ToastService {
       SnackBar(
         content: Text(message),
         duration: duration,
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.error,
       ),
     );
   }
@@ -57,7 +58,7 @@ class ToastService {
       SnackBar(
         content: Text(message),
         duration: duration,
-        backgroundColor: Colors.orange,
+        backgroundColor: AppColors.warning,
       ),
     );
   }
@@ -67,17 +68,19 @@ class ToastService {
     BuildContext context,
     String message, {
     Duration duration = const Duration(seconds: 2),
-    Color backgroundColor = Colors.black87,
-    Color textColor = Colors.white,
+    Color? backgroundColor,
+    Color? textColor,
   }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           message,
-          style: TextStyle(color: textColor),
+          style: TextStyle(
+            color: textColor ?? AppColors.onColoredBackground,
+          ),
         ),
         duration: duration,
-        backgroundColor: backgroundColor,
+        backgroundColor: backgroundColor ?? AppColors.toastBackground,
       ),
     );
   }

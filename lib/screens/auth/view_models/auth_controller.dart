@@ -6,7 +6,7 @@ import 'package:get/get.dart' as g;
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/account_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
-import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+
 import 'package:crm_app/routes/app_pages.dart';
 import 'dart:convert';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
@@ -1362,36 +1362,9 @@ class AuthController extends GetxController {
   }
 
   void _setError(String error) {
-    print('🔴 AuthController._setError() called with: "$error"');
     _errorMessage.value = error;
     if (error.isNotEmpty) {
-      print('🔴 Attempting to show error toast: "$error"');
-      try {
-        CustomToastService.showError(
-          message: error,
-          position: SnackPosition.TOP,
-        );
-        print('🔴 CustomToastService.showError() called successfully');
-      } catch (e, stackTrace) {
-        print('❌ Error showing toast: $e');
-        print('❌ Stack trace: $stackTrace');
-        // Fallback: Use AppNotificationController if CustomToastService fails
-        try {
-          if (Get.isRegistered<AppNotificationController>()) {
-            Get.find<AppNotificationController>().showError(
-              message: error,
-              title: 'Error',
-            );
-            print('🔴 Fallback: AppNotificationController called successfully');
-          }
-        } catch (fallbackError) {
-          print('❌ Fallback notification also failed: $fallbackError');
-          // Last resort: just print it
-          print('🔴 ERROR MESSAGE (Toast failed): $error');
-        }
-      }
-    } else {
-      print('⚠️ _setError called with empty error message');
+      CustomToastService.showError(message: error);
     }
   }
 

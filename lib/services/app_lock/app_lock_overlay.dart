@@ -21,9 +21,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
   @override
   Widget build(BuildContext context) {
     if (!Get.isRegistered<AppLockService>()) {
-      // Avoid crashing if overlay builds before services are registered.
-      // main.dart should register it early, but keep this extra guard.
-      return const SizedBox.shrink();
+      return const Positioned(top: 0, left: 0, child: SizedBox.shrink());
     }
 
     final lock = Get.find<AppLockService>();
@@ -33,7 +31,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
       final locked = lock.isLocked.value;
       if (!locked) {
         _autoPromptedForCurrentLock = false;
-        return const SizedBox.shrink();
+        return const Positioned(top: 0, left: 0, child: SizedBox.shrink());
       }
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {

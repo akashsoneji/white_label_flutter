@@ -553,7 +553,7 @@ class _VantageTransactionHistoryScreenState
                               fontWeight: FontWeight.w600,
                               color:
                                   isSelected
-                                      ? Colors.white
+                                      ? AppColors.whiteColor
                                       : AppColors.textSecondary,
                             ),
                           ),
