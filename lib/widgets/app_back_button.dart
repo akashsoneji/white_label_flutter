@@ -47,8 +47,8 @@ class AppBackButton extends StatelessWidget {
         icon: SvgPicture.asset(
           assetPath,
           width: iconSize.w,
-          height: iconSize.w,
-          fit: BoxFit.contain,
+          height: iconSize.h+5.sp,
+          // fit: BoxFit.contain,
           colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
         ),
       ),

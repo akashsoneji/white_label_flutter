@@ -73,6 +73,11 @@ abstract class Routes {
   static const CREGIS_CHECKOUT = _Paths.CREGIS_CHECKOUT;
   static const CREGIS_ADDRESS = _Paths.CREGIS_ADDRESS;
   static const CREGIS_SUCCESS = _Paths.CREGIS_SUCCESS;
+
+  // ── Support Ticket Routes ──
+  static const TICKET_LIST = _Paths.TICKET_LIST;
+  static const TICKET_CREATE = _Paths.TICKET_CREATE;
+  static const TICKET_DETAIL = _Paths.TICKET_DETAIL;
 }
 
 abstract class _Paths {
@@ -158,4 +163,9 @@ abstract class _Paths {
   static const CREGIS_CHECKOUT = '/cregis-checkout';
   static const CREGIS_ADDRESS = '/cregis-address';
   static const CREGIS_SUCCESS = '/cregis-success';
+
+  // ── Support Ticket Paths ──
+  static const TICKET_LIST = '/ticket-list';
+  static const TICKET_CREATE = '/ticket-create';
+  static const TICKET_DETAIL = '/ticket-detail';
 }

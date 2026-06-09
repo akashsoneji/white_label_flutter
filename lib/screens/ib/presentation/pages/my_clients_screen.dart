@@ -2298,14 +2298,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(width: 8.w),
-                  Icon(
-                    isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    size: 20.sp,
-                    color: AppColors.textGrey,
-                  ),
+                 
                 ],
               ),
             ),

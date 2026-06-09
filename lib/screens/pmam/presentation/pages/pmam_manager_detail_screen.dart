@@ -132,13 +132,22 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                           child: DropdownButton<PmamPlan>(
                             isExpanded: true,
                             value: _selectedPlan,
+                            dropdownColor: AppColors.card,
+                            iconEnabledColor: AppColors.textPrimary,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              color: AppColors.textPrimary,
+                            ),
                             items:
                                 _manager.plans.map((p) {
                                   return DropdownMenuItem(
                                     value: p,
                                     child: Text(
                                       p.planName,
-                                      style: TextStyle(fontSize: 14.sp),
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: AppColors.textPrimary,
+                                      ),
                                     ),
                                   );
                                 }).toList(),
@@ -189,9 +198,19 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                           child: DropdownButton<Map<String, dynamic>>(
                             isExpanded: true,
                             value: _selectedAccount,
+                            dropdownColor: AppColors.card,
+                            iconEnabledColor: AppColors.textPrimary,
+                            iconDisabledColor: AppColors.textGrey,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: AppColors.textPrimary,
+                            ),
                             hint: Text(
                               'Choose an account',
-                              style: TextStyle(fontSize: 14.sp),
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: AppColors.textGrey,
+                              ),
                             ),
                             items:
                                 _ctrl.eligibleAccounts.map((acc) {
@@ -212,7 +231,10 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                                     value: acc,
                                     child: Text(
                                       '$accNo — Balance: \$${bal.toStringAsFixed(2)} (Available: \$${availBal.toStringAsFixed(2)})',
-                                      style: TextStyle(fontSize: 13.sp),
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        color: AppColors.textPrimary,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -313,11 +335,11 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                           onPressed:
                               canInvest
                                   ? () {
-//                                     print('''
-//  _selectedAccount!['id'],${ _selectedAccount!['id']},
-                                     
-//                                       _selectedPlan!.id,${ _selectedPlan!.id},
-//                                       invest_amount(balance),$balance,''');
+                                    //                                     print('''
+                                    //  _selectedAccount!['id'],${ _selectedAccount!['id']},
+
+                                    //                                       _selectedPlan!.id,${ _selectedPlan!.id},
+                                    //                                       invest_amount(balance),$balance,''');
                                     Navigator.pop(ctx);
                                     _ctrl.joinPlan(
                                       _selectedAccount!['id'],
@@ -365,11 +387,14 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
             .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
             .join();
 
+    final hasActivePlan = _manager.plans.isNotEmpty && _selectedPlan != null;
     final gain = _manager.profitPercentage;
     final aum = _fmt(_manager.totalAum);
-    final commission = '${_selectedPlan?.commissionPercentage ?? 0}%';
+    final commission =
+        hasActivePlan ? '${_selectedPlan!.commissionPercentage}%' : 'N/A';
     final investors = '${_manager.totalInvestors}';
-    final minInvest = _fmt(_selectedPlan?.minimumInvestment ?? 0);
+    final minInvest =
+        hasActivePlan ? _fmt(_selectedPlan!.minimumInvestment) : 'N/A';
 
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
@@ -445,48 +470,91 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                   ),
                   SizedBox(height: 14.h),
 
-                  // Invest Now button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 44.h,
-                    child: ElevatedButton(
-                      onPressed: _showInvestSheet,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
+                  if (hasActivePlan) ...[
+                    // Invest Now button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44.h,
+                      child: ElevatedButton(
+                        onPressed: _showInvestSheet,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_rounded,
+                              color: AppColors.whiteColor,
+                              size: 18.sp,
+                            ),
+                            SizedBox(width: 6.w),
+                            Text(
+                              'INVEST NOW',
+                              style: TextStyle(
+                                color: AppColors.whiteColor,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Min. Investment: $minInvest',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppColors.textGrey,
+                      ),
+                    ),
+                  ] else ...[
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 12.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.warning.withOpacity(0.10),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: AppColors.warning.withOpacity(0.35),
                         ),
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(
-                            Icons.add_rounded,
-                            color: AppColors.whiteColor,
-                            size: 18.sp,
+                            Icons.info_outline_rounded,
+                            color: AppColors.warning,
+                            size: 20.sp,
                           ),
-                          SizedBox(width: 6.w),
-                          Text(
-                            'INVEST NOW',
-                            style: TextStyle(
-                              color: AppColors.whiteColor,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
+                          SizedBox(width: 10.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'No Active Plan Yet',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    'Min. Investment: $minInvest',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColors.textGrey,
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),

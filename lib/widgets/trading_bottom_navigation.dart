@@ -33,10 +33,10 @@ class TradingBottomNavigation extends StatelessWidget {
             borderRadius: BorderRadius.circular(32.r),
             boxShadow: [
               BoxShadow(
-                color: AppColors.textPrimary.withValues(alpha: AppColors.isDarkMode ? 0.22 : 0.15),
+                color: AppColors.textPrimary.withValues(alpha: AppColors.isDarkMode ? 0.18 : 0.15),
                 blurRadius: 22,
                 spreadRadius: 2,
-                offset: const Offset(0, 8),
+                offset: const Offset(2, 0),
               ),
             ],
           ),

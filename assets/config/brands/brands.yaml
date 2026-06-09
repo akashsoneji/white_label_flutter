@@ -75,7 +75,7 @@ brands:
     inheritsFrom: vantage
     label: Pipze
     # Pipze is LIGHT ONLY — theme switcher is hidden, light forced
-    themeMode: light
+    themeMode: both
     android:
       applicationId: com.pipze.app
       appName: Pipze

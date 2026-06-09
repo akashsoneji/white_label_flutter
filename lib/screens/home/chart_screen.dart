@@ -1514,7 +1514,7 @@ Placing Order:
           child: SizedBox(
             height: size.h,
             width: size.w,
-            child:AppSvgIcon(assetPath: "assets/svg/bottom_navigation/candle_bold.svg",height: 22.h,width: 24.w,)
+            child:AppSvgIcon(assetPath: "assets/svg/bottom_navigation/candle_bold.svg",height: 22.h,width: 24.w,color: AppColors.primary,)
           ),
         ),
       ),

@@ -107,11 +107,11 @@ void main() async {
   // Configure audio players to respect system silent/mute settings
   try {
     await AudioPlayer.global.setAudioContext(
-      AudioContextConfig(
-        respectSilence: true,
-      ).build(),
+      AudioContextConfig(respectSilence: true).build(),
     );
-    print('=== AUDIO SERVICE: Global audio context initialized (respectSilence: true) ===');
+    print(
+      '=== AUDIO SERVICE: Global audio context initialized (respectSilence: true) ===',
+    );
   } catch (e) {
     print('=== AUDIO SERVICE: Error setting global audio context: $e ===');
   }
@@ -372,6 +372,11 @@ ThemeData _buildLightTheme() {
     ),
     useMaterial3: true,
     scaffoldBackgroundColor: AppColors.whiteColor,
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: AppColors.primary,
+      selectionColor: AppColors.primary.withOpacity(0.25),
+      selectionHandleColor: AppColors.primary,
+    ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -463,6 +468,11 @@ ThemeData _buildLightTheme() {
     ),
     iconTheme: IconThemeData(color: AppColors.textPrimary),
     textTheme: TextTheme(bodyLarge: TextStyle(color: AppColors.textPrimary)),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: AppColors.primary,
+      circularTrackColor: Colors.transparent,
+      refreshBackgroundColor: AppColors.card,
+    ),
   );
 }
 
@@ -481,6 +491,11 @@ ThemeData _buildDarkTheme() {
     ),
     useMaterial3: true,
     scaffoldBackgroundColor: AppColors.scaffold,
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: AppColors.primary,
+      selectionColor: AppColors.primary.withOpacity(0.3),
+      selectionHandleColor: AppColors.primary,
+    ),
     inputDecorationTheme: InputDecorationTheme(
       fillColor: AppColors.textFieldBg,
       filled: true,
@@ -580,6 +595,11 @@ ThemeData _buildDarkTheme() {
       bodyMedium: TextStyle(color: AppColors.textPrimary),
       bodySmall: TextStyle(color: AppColors.textGrey),
     ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: AppColors.primary,
+      circularTrackColor: Colors.transparent,
+      refreshBackgroundColor: AppColors.card,
+    ),
   );
 }
 
@@ -606,6 +626,17 @@ class MyGetXApp extends StatelessWidget {
                 child: GetMaterialApp(
                   builder: (context, child) {
                     final mediaQuery = MediaQuery.of(context);
+                    final brandPrimary = AppColors.primary;
+                    final themedChild = Theme(
+                      data: Theme.of(context).copyWith(
+                        textSelectionTheme: TextSelectionThemeData(
+                          cursorColor: brandPrimary,
+                          selectionColor: brandPrimary.withOpacity(0.25),
+                          selectionHandleColor: brandPrimary,
+                        ),
+                      ),
+                      child: child!,
+                    );
                     return Stack(
                       children: [
                         MediaQuery(
@@ -613,7 +644,7 @@ class MyGetXApp extends StatelessWidget {
                             textScaleFactor: 1.0,
                             boldText: false,
                           ),
-                          child: child!,
+                          child: themedChild,
                         ),
                         // Global notification overlay
                         const AppNotificationStack(),

@@ -49,6 +49,8 @@ class AppTextField extends StatelessWidget {
           SizedBox(height: 8.h),
         ],
         TextFormField(
+          cursorColor: AppColors.primary,
+          selectionControls: MaterialTextSelectionControls(),
           controller: controller,
           validator: validator,
           onChanged: onChanged,
@@ -57,6 +59,10 @@ class AppTextField extends StatelessWidget {
           maxLines: maxLines,
           enabled: enabled,
           focusNode: focusNode,
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14.sp,
+          ),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
@@ -64,11 +70,11 @@ class AppTextField extends StatelessWidget {
             prefixIcon: prefixIcon,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide:   BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide:   BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),

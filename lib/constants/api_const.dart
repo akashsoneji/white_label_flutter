@@ -115,6 +115,14 @@ class ApiConstants {
   // Enabled modules (per-user feature flags)
   static const String enabledModules = '${ajax}enabled-modules';
 
+  // Support Ticket APIs
+  static const String ticketDepartments = '${ajax}tickets/departments';
+  static const String tickets = '${ajax}tickets';
+  static String ticketDetail(String ticketId) => '${ajax}tickets/$ticketId';
+  static String ticketReply(String ticketId) => '${ajax}tickets/$ticketId/reply';
+  static String ticketClose(String ticketId) => '${ajax}tickets/$ticketId/close';
+  static const String ticketAttachment = '${ajax}tickets/attachment';
+
   // Trade & Win APIs
   static const String tradeWinProducts = 'v1/user/trade-win/products';
   static const String tradeWinPastWins = 'v1/user/trade-win/past-wins';

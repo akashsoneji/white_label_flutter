@@ -48,6 +48,14 @@ class SupportScreen extends StatelessWidget {
                 color: AppColors.textPrimary,
               ),
               _MenuItem(
+                icon: 'contact-us',
+                label: languageService.tr('ticket_title'),
+                onTap: () {
+                  Get.toNamed(AppPages.TICKET_LIST);
+                },
+                color: AppColors.textPrimary,
+              ),
+              _MenuItem(
                 icon: 'help-center',
                 label: languageService.tr('help_center'),
                 onTap: () {

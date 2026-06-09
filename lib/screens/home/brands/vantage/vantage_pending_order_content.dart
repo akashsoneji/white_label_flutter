@@ -659,7 +659,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
             title,
             style: AppTextStyles.label.copyWith(
               fontSize: 12.5.sp,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
             ),
           ),
@@ -992,7 +992,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+        decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: borderColor),
       ),
@@ -1260,9 +1260,9 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
       child: Row(
         children: [
           _roundActionButton(
-            borderColor: VantageUiTokens.borderColor,
+            borderColor: AppColors.primary,
             icon: Icons.remove,
-            iconColor: AppColors.textGrey,
+            iconColor: AppColors.primary,
             onTap: onMinus,
             size: 32.w,
             iconSize: 16.w,

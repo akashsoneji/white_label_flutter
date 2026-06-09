@@ -78,6 +78,9 @@ class DashboardController extends GetxController {
   // Unsubscribe/resubscribe state
   Completer<void>? _unsubscribeCompleter;
 
+  // One-time worker that retries the initial account fetch once auth resolves.
+  Worker? _authReadySub;
+
   // Prevent duplicate account data requests
   bool _isRequestingAccountData = false;
 
@@ -93,24 +96,53 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
 
-    // Check if user is authenticated before making API calls
+    // Fetch accounts as soon as a valid session is available.
+    // NOTE: On cold start (especially when the app launches in the background or
+    // on another screen) the DashboardController can be created before
+    // AuthController has finished restoring the session, so `isAuthenticated`
+    // is still false here. Previously we skipped the fetch entirely and never
+    // retried, so accounts only appeared after a manual pull-to-refresh.
+    // Now we also fall back to the stored token and retry once auth resolves.
+    _ensureAccountsFetched();
+
+    _bindUnifiedAccountStream();
+  }
+
+  // Kicks off the initial MT5 account fetch, tolerating the auth-not-ready race.
+  Future<void> _ensureAccountsFetched() async {
     try {
       final authController = Get.find<AuthController>();
       if (authController.isAuthenticated) {
         checkMT5Accounts();
+        return;
+      }
+
+      // Auth flag not set yet: if a token is already persisted, fetch anyway
+      // (checkMT5Accounts re-validates the token before calling the API).
+      final token = await SecureStorageService.getAuthToken();
+      if (token != null && token.isNotEmpty) {
+        print(
+          'DashboardController: Auth flag not ready but token present, fetching accounts',
+        );
+        checkMT5Accounts();
       } else {
         print(
-          'DashboardController: User not authenticated, skipping checkMT5Accounts',
+          'DashboardController: User not authenticated, deferring checkMT5Accounts until auth resolves',
         );
       }
+
+      // Retry as soon as auth becomes true (handles async session restore).
+      _authReadySub ??= ever<bool>(authController.isAuthenticatedRx, (isAuth) {
+        if (isAuth && mt5Accounts.isEmpty) {
+          checkMT5Accounts();
+        }
+      });
     } catch (e) {
       final errorMsg = e.toString();
       errorMessage.value = errorMsg;
       print('DashboardController: Error checking auth status: $e');
       CustomToastService.showError(message: errorMsg);
     }
-
-    _bindUnifiedAccountStream();
   }
 
   void _bindUnifiedAccountStream() {
@@ -134,6 +166,7 @@ class DashboardController extends GetxController {
   @override
   void onClose() {
     _isDisposed = true;
+    _authReadySub?.dispose();
     _unifiedAccountSub?.cancel();
     _disconnectWebSocket();
     super.onClose();

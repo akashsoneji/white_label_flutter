@@ -803,6 +803,14 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
   ) {
     return [
       _CompactMenuItem(
+        iconData: Icons.support,
+        color: AppColors.iconPink,
+                label: languageService.tr('ticket_title'),
+                onTap: () {
+                  Get.toNamed(AppPages.TICKET_LIST);
+                },
+      ),
+      _CompactMenuItem(
         iconData: Icons.delete_forever_rounded,
         label: languageService.tr('delete_account'),
         color: AppColors.iconPink,

@@ -220,12 +220,12 @@ class _MasterHeroCard extends StatelessWidget {
                   value: '\$${profile.masterEquity.toStringAsFixed(2)}',
                 ),
               ),
-              Expanded(
-                child: _HeroStat(
-                  label: 'Commission',
-                  value: commission.isNotEmpty ? commission : '-',
-                ),
-              ),
+              // Expanded(
+              //   child: _HeroStat(
+              //     label: 'Commission',
+              //     value: commission.isNotEmpty ? commission : '-',
+              //   ),
+              // ),
               Expanded(
                 child: _HeroStat(
                   label: 'With Us',
@@ -234,6 +234,12 @@ class _MasterHeroCard extends StatelessWidget {
               ),
             ],
           ),
+          SizedBox(height: 12.h),
+           _HeroStat(
+                  label: 'Commission',
+                  value: commission.isNotEmpty ? commission : '-',
+                ),
+              
           SizedBox(height: 12.h),
           SizedBox(
             width: double.infinity,

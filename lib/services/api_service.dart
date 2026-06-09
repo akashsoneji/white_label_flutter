@@ -444,6 +444,63 @@ class ApiService {
     }
   }
 
+  /// POST: Multipart form data with a single optional file field.
+  static Future<ApiResponse> postFormWithFile({
+    required String endpoint,
+    required Map<String, dynamic> formData,
+    File? file,
+    String fileField = 'attachment',
+    String? token,
+  }) async {
+    try {
+      String? authToken = token;
+      if (authToken == null) {
+        authToken = await SecureStorageService.getAuthToken();
+      }
+
+      final headers = {
+        'Accept': 'application/json',
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      };
+
+      _logRequest(
+        'POST_FORM_FILE',
+        endpoint,
+        data: formData,
+        extraHeaders: headers,
+      );
+
+      final uri = Uri.parse('${ApiConstants.baseUrl}$endpoint');
+      final request =
+          http.MultipartRequest('POST', uri)
+            ..headers.addAll(headers)
+            ..fields.addAll(
+              formData.map((key, value) => MapEntry(key, value.toString())),
+            );
+
+      if (file != null && await file.exists()) {
+        request.files.add(
+          await http.MultipartFile.fromPath(fileField, file.path),
+        );
+      }
+
+      final streamedResponse = await request.send().timeout(_timeout);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      _logResponse(response);
+
+      if (response.statusCode == 401) {
+        return _handleError(response);
+      }
+
+      return _parseApiResponse(response.body);
+    } catch (e, t) {
+      _logError('POST_FORM_FILE', endpoint, e, t);
+      return _handleError(e);
+    }
+  }
+
   /// Helper method to parse API response and check status
   static ApiResponse _parseApiResponse(String responseBody) {
     try {

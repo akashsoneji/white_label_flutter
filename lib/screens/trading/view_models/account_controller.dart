@@ -88,12 +88,13 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       } else {
         // Reconnect only if app is currently resumed
         if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
-          print('=== WS CENTRAL: App unlocked while resumed, reconnecting all sockets ===');
+          print('=== WS CENTRAL: App unlocked while resumed, silently reconnecting sockets (preserving UI state) ===');
           final active = _activeMT5Account.value;
           if (active != null) {
-            reconnectAllSocketsForAccount(active.metaAccountNumber);
+            // ✅ FIX: Same as app resume — do NOT wipe trading/instrument data,
+            // just reopen the socket connections behind the scenes.
+            silentlyReconnectAllSockets(active.metaAccountNumber);
           }
-          refreshAccounts();
         }
       }
     });
@@ -115,12 +116,15 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       Future.delayed(const Duration(milliseconds: 100), () {
         final isLocked = Get.find<AppLockService>().isLocked.value;
         if (!isLocked) {
-          print('=== WS CENTRAL: App resumed and not locked, reconnecting all sockets ===');
+          print('=== WS CENTRAL: App resumed and not locked, silently reconnecting sockets (preserving UI state) ===');
           final active = _activeMT5Account.value;
           if (active != null) {
-            reconnectAllSocketsForAccount(active.metaAccountNumber);
+            // ✅ FIX: On resume, only reconnect sockets WITHOUT clearing trading data,
+            // instruments data, or triggering a full account refresh. The previous
+            // logic re-used the account-switch path which wiped the UI and caused a
+            // visible "refresh" flash every time the user came back to the app.
+            silentlyReconnectAllSockets(active.metaAccountNumber);
           }
-          refreshAccounts();
         } else {
           print('=== WS CENTRAL: App resumed but locked, keeping sockets disconnected ===');
         }
@@ -811,6 +815,81 @@ class AccountController extends GetxController with WidgetsBindingObserver {
         } catch (_) {}
       }),
     ]);
+  }
+
+  /// Silently re-open all WebSocket connections for the current account
+  /// WITHOUT clearing any UI state.
+  ///
+  /// Use this on app resume / unlock — the user expects to see the same
+  /// screen (positions, instruments, chart) they left, with fresh prices
+  /// streaming in once the socket comes back. This is intentionally
+  /// different from [reconnectAllSocketsForAccount], which is the
+  /// account-switch path and wipes trading + instrument data.
+  Future<void> silentlyReconnectAllSockets(String accountNumber) async {
+    try {
+      final account = _mt5Accounts.firstWhereOrNull(
+        (acc) => acc.metaAccountNumber == accountNumber,
+      );
+      if (account == null) return;
+
+      // Trading WS
+      try {
+        if (Get.isRegistered<TradingWebSocketService>()) {
+          final tradingWS = Get.find<TradingWebSocketService>();
+          if (!tradingWS.isConnected.value) {
+            await tradingWS.disconnectAndReconnect();
+          }
+        }
+      } catch (_) {}
+
+      // Account WS
+      try {
+        if (Get.isRegistered<AccountWebSocketService>()) {
+          final accountWS = Get.find<AccountWebSocketService>();
+          if (!accountWS.isConnected.value) {
+            await accountWS.disconnectAndReconnect();
+          }
+        }
+      } catch (_) {}
+
+      // Instruments WS — reconnect without clearing the cached instrument list
+      try {
+        if (Get.isRegistered<InstrumentsController>()) {
+          final instrumentsController = Get.find<InstrumentsController>();
+          if (!instrumentsController.isConnected.value) {
+            instrumentsController.startWebSocket();
+            Future.delayed(const Duration(milliseconds: 150), () {
+              try {
+                if (Get.isRegistered<MarketWatchV2Service>()) {
+                  Get.find<MarketWatchV2Service>()
+                      .reconnectAndResyncFavorites();
+                }
+              } catch (_) {}
+            });
+          }
+        }
+      } catch (_) {}
+
+      // Chart WS — resume the existing symbol stream
+      try {
+        if (Get.isRegistered<ChartSocketController>()) {
+          final chartSocketController = Get.find<ChartSocketController>();
+          if (!chartSocketController.isConnected.value) {
+            chartSocketController.handleAppRestart();
+          }
+        }
+      } catch (_) {}
+
+      // Dashboard WS
+      try {
+        if (Get.isRegistered<DashboardController>()) {
+          final dashboardController = Get.find<DashboardController>();
+          await dashboardController.disconnectAndReconnect();
+        }
+      } catch (_) {}
+    } catch (e) {
+      print('AccountController: Error in silentlyReconnectAllSockets: $e');
+    }
   }
 
   // Public method to trigger WebSocket reconnection after account change

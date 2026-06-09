@@ -206,6 +206,7 @@ class RTLHelper {
             fontWeight: FontWeight.w400,
           ),
       cursorColor: AppColors.primary,
+      selectionControls: MaterialTextSelectionControls(),
       readOnly: readOnly,
       textInputAction: TextInputAction.next,
       onChanged: onChanged,

@@ -68,6 +68,10 @@ import '../screens/trade_win/trade_win_past_win_detail_screen.dart';
 import '../bindings/account_binding.dart';
 import '../bindings/trading_binding.dart';
 import '../screens/pmam/feature_di/pmam_binding.dart';
+import '../bindings/ticket_binding.dart';
+import '../screens/home/more/ticket/ticket_list_screen.dart';
+import '../screens/home/more/ticket/create_ticket_screen.dart';
+import '../screens/home/more/ticket/ticket_detail_screen.dart';
 
 part 'app_routes.dart';
 
@@ -151,6 +155,11 @@ class AppPages {
   static const PMAM_MANAGER_PLAN_DETAIL = _Paths.PMAM_MANAGER_PLAN_DETAIL;
   static const CREGIS_ADDRESS = _Paths.CREGIS_ADDRESS;
   static const CREGIS_SUCCESS = _Paths.CREGIS_SUCCESS;
+
+  // ── Support Ticket ──
+  static const TICKET_LIST = _Paths.TICKET_LIST;
+  static const TICKET_CREATE = _Paths.TICKET_CREATE;
+  static const TICKET_DETAIL = _Paths.TICKET_DETAIL;
 
   static final routes = [
     GetPage(
@@ -470,6 +479,22 @@ class AppPages {
     GetPage(
       name: _Paths.TRADE_WIN_PAST_WIN_DETAIL,
       page: () => const TradeWinPastWinDetailScreen(),
+    ),
+    // ── Support Ticket ──
+    GetPage(
+      name: _Paths.TICKET_LIST,
+      page: () => const TicketListScreen(),
+      binding: TicketBinding(),
+    ),
+    GetPage(
+      name: _Paths.TICKET_CREATE,
+      page: () => const CreateTicketScreen(),
+      binding: TicketBinding(),
+    ),
+    GetPage(
+      name: _Paths.TICKET_DETAIL,
+      page: () => const TicketDetailScreen(),
+      binding: TicketBinding(),
     ),
   ];
 }

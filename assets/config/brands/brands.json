@@ -8,7 +8,7 @@
       "name": "pipze",
       "type": "parent",
       "label": "Pipze",
-      "themeMode": "light"
+      "themeMode": "both"
     }
   ]
 }

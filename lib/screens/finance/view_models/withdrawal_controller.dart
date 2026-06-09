@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/models/bank_withdralList_model.dart'
+    show AllowedCryptoNetwork;
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
@@ -31,7 +33,7 @@ class WithdrawalMethodDetailResponse {
 
 class WithdrawalMethodDetailData {
   final WithdrawalMethod? withdrawalMethod;
-  final List<dynamic>? userWithdrawalMethods;
+  final List<UserWithdrawalMethod>? userWithdrawalMethods;
   final List<MT5Account>? userMT5Accounts;
   final Wallet? wallet;
   final IbAccount? ibaccount;
@@ -50,7 +52,16 @@ class WithdrawalMethodDetailData {
           json['withdrawalMethod'] != null
               ? WithdrawalMethod.fromJson(json['withdrawalMethod'])
               : null,
-      userWithdrawalMethods: json['userWithdrawalMethods'] ?? [],
+      userWithdrawalMethods:
+          json['userWithdrawalMethods'] != null &&
+                  json['userWithdrawalMethods'] is List
+              ? List<UserWithdrawalMethod>.from(
+                (json['userWithdrawalMethods'] as List).map(
+                  (x) =>
+                      UserWithdrawalMethod.fromJson(x as Map<String, dynamic>),
+                ),
+              )
+              : [],
       userMT5Accounts:
           json['userMT5Accounts'] != null && json['userMT5Accounts'] is List
               ? List<MT5Account>.from(
@@ -64,6 +75,65 @@ class WithdrawalMethodDetailData {
               : null,
     );
   }
+}
+
+class UserWithdrawalMethod {
+  final String? id;
+  final String? withdrawalSlug;
+  final String? withdrawalMethod;
+  final String? holderName;
+  final String? bankName;
+  final String? bankAccountNo;
+  final String? cryptoAddress;
+  final String? upiAddress;
+  final String? status;
+
+  UserWithdrawalMethod({
+    this.id,
+    this.withdrawalSlug,
+    this.withdrawalMethod,
+    this.holderName,
+    this.bankName,
+    this.bankAccountNo,
+    this.cryptoAddress,
+    this.upiAddress,
+    this.status,
+  });
+
+  factory UserWithdrawalMethod.fromJson(Map<String, dynamic> json) {
+    return UserWithdrawalMethod(
+      id: json['id']?.toString(),
+      withdrawalSlug: json['withdrawal_slug']?.toString(),
+      withdrawalMethod: json['withdrawal_method']?.toString(),
+      holderName: json['holder_name']?.toString(),
+      bankName: json['bank_name']?.toString(),
+      bankAccountNo: json['bank_account_no']?.toString(),
+      cryptoAddress: json['crypto_address']?.toString(),
+      upiAddress: json['upi_address']?.toString(),
+      status: json['status']?.toString(),
+    );
+  }
+
+  String get toAccountDisplayLabel {
+    final method = withdrawalMethod?.toLowerCase() ?? '';
+    if (method == 'crypto') {
+      return 'Crypto (${cryptoAddress ?? ''})';
+    }
+    if (method == 'bank') {
+      final label = bankName?.isNotEmpty == true ? bankName! : holderName ?? '';
+      if (label.isNotEmpty && (bankAccountNo?.isNotEmpty ?? false)) {
+        return '$label (${bankAccountNo!})';
+      }
+      return label.isNotEmpty ? label : (bankAccountNo ?? 'Bank Account');
+    }
+    if (method == 'upi') {
+      return 'UPI (${upiAddress ?? ''})';
+    }
+    return holderName ?? id ?? 'Account';
+  }
+
+  bool get isApproved =>
+      status == null || status!.isEmpty || status!.toLowerCase() == 'approved';
 }
 
 class Wallet {
@@ -154,6 +224,12 @@ class WithdrawalMethod {
   final String? createdAt;
   final String? updatedAt;
   final String? deletedAt;
+  final bool? cryptoMethod;
+  final List<AllowedCryptoNetwork>? allowedCryptoNetworks;
+  final String? currencyName;
+  final String? conversionRate;
+  final bool? hasConversion;
+  final num? withdrawalMargin;
 
   WithdrawalMethod({
     this.id,
@@ -171,6 +247,12 @@ class WithdrawalMethod {
     this.createdAt,
     this.updatedAt,
     this.deletedAt,
+    this.cryptoMethod,
+    this.allowedCryptoNetworks,
+    this.currencyName,
+    this.conversionRate,
+    this.hasConversion,
+    this.withdrawalMargin,
   });
 
   factory WithdrawalMethod.fromJson(Map<String, dynamic> json) {
@@ -196,6 +278,24 @@ class WithdrawalMethod {
       createdAt: json['created_at']?.toString(),
       updatedAt: json['updated_at']?.toString(),
       deletedAt: json['deleted_at']?.toString(),
+      cryptoMethod: json['crypto_method'] == true,
+      allowedCryptoNetworks:
+          json['allowed_crypto_networks'] != null
+              ? (json['allowed_crypto_networks'] as List)
+                  .map(
+                    (e) => AllowedCryptoNetwork.fromJson(
+                      e as Map<String, dynamic>,
+                    ),
+                  )
+                  .toList()
+              : [],
+      currencyName: json['currency_name']?.toString(),
+      conversionRate: json['conversion_rate']?.toString(),
+      hasConversion: json['has_conversion'] == true,
+      withdrawalMargin:
+          json['withdrawal_margin'] is num
+              ? json['withdrawal_margin']
+              : num.tryParse(json['withdrawal_margin']?.toString() ?? ''),
     );
   }
 
@@ -215,6 +315,9 @@ class WithdrawalMethod {
     'created_at': createdAt,
     'updated_at': updatedAt,
     'deleted_at': deletedAt,
+    'crypto_method': cryptoMethod,
+    'allowed_crypto_networks':
+        allowedCryptoNetworks?.map((e) => e.toJson()).toList(),
   };
 }
 
@@ -251,6 +354,63 @@ class WithdrawalController extends GetxController {
 
   // Flag to track if we've received the initial response (prevents flash of form)
   final hasReceivedInitialResponse = false.obs;
+
+  List<UserWithdrawalMethod> get userWithdrawalMethods =>
+      withdrawalMethodDetail.value?.data?.userWithdrawalMethods ?? [];
+
+  UserWithdrawalMethod? get selectedCryptoMethod {
+    final id = selectedCryptoAccount.value;
+    if (id == null || id.isEmpty) return null;
+    try {
+      return userWithdrawalMethods.firstWhere((method) => method.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String get selectedCryptoDisplayLabel =>
+      selectedCryptoMethod?.toAccountDisplayLabel ?? '';
+
+  String get selectedPaymentMethodDisplayLabel {
+    final method = selectedWithdrawalMethod.value;
+    if (method == null) return selectedPaymentMethod.value;
+    final name = _formatPaymentMethodName(method.methodName ?? '');
+    final slug = method.methodSlug ?? '';
+    if (slug.isEmpty) return name;
+    return '$name ($slug)';
+  }
+
+  String _formatPaymentMethodName(String methodName) {
+    if (methodName.isEmpty) return methodName;
+    return methodName[0].toUpperCase() + methodName.substring(1).toLowerCase();
+  }
+
+  double _parseWithdrawalAmount(String value) {
+    final cleaned = value.replaceAll('\$', '').replaceAll(',', '').trim();
+    return double.tryParse(cleaned) ?? 0;
+  }
+
+  void _autoSelectDefaultToAccount() {
+    final methods = userWithdrawalMethods;
+    if (methods.isEmpty) return;
+
+    final paymentMethod = selectedPaymentMethod.value.toLowerCase();
+    if (paymentMethod == 'crypto') {
+      final approvedMethods = methods.where((m) => m.isApproved).toList();
+      final selectableMethods =
+          approvedMethods.isNotEmpty ? approvedMethods : methods;
+      selectedCryptoAccount.value = selectableMethods.first.id;
+      return;
+    }
+
+    if (paymentMethod == 'bank') {
+      final firstMethod = methods.first;
+      selectedBankAccount.value =
+          firstMethod.bankAccountNo?.isNotEmpty == true
+              ? firstMethod.bankAccountNo
+              : firstMethod.id;
+    }
+  }
 
   @override
   void onInit() {
@@ -514,6 +674,8 @@ class WithdrawalController extends GetxController {
                 );
               }
             }
+
+            _autoSelectDefaultToAccount();
           } else {
             // API returned status: false - show no data view with message
             print("Status false - showing no data view: ${data.message}");
@@ -667,6 +829,7 @@ class WithdrawalController extends GetxController {
     String? upiAddress,
     String? cryptoHolderName,
     String? cryptoAddress,
+    String? cryptoNetwork,
     String? localHolderName,
     String? proofImagePath, // Path to image file
   }) async {
@@ -692,6 +855,7 @@ class WithdrawalController extends GetxController {
         upiAddress: upiAddress,
         cryptoHolderName: cryptoHolderName,
         cryptoAddress: cryptoAddress,
+        cryptoNetwork: cryptoNetwork,
         localHolderName: localHolderName,
         proofImagePath: proofImagePath,
       );
@@ -798,6 +962,7 @@ class WithdrawalController extends GetxController {
     String? upiAddress,
     String? cryptoHolderName,
     String? cryptoAddress,
+    String? cryptoNetwork,
     String? localHolderName,
     String? proofImagePath,
   }) {
@@ -818,6 +983,7 @@ class WithdrawalController extends GetxController {
       params.addAll({
         "crypto_holder_name": cryptoHolderName ?? '',
         "crypto_address": cryptoAddress ?? '',
+        "crypto_network": cryptoNetwork ?? '',
       });
     } else if (withdrawalMethod.toLowerCase() == "upi") {
       params.addAll({
@@ -941,16 +1107,37 @@ class WithdrawalController extends GetxController {
       _clearError();
 
       final token = await SecureStorageService.getAuthToken();
+      final paymentMethod = selectedPaymentMethod.value.toLowerCase();
+      final amount = _parseWithdrawalAmount(withdrawalAmount.value);
+
+      final Map<String, dynamic> payload;
+      if (paymentMethod == 'crypto') {
+        final toAccountId = selectedCryptoAccount.value ?? '';
+        payload = {
+          'payment_method': _formatPaymentMethodName(
+            selectedPaymentMethod.value,
+          ),
+          'withdrawal_method_id': toAccountId,
+          'withdrawal_method_slug':
+              selectedWithdrawalMethod.value?.methodSlug ?? '',
+          'mt5_account_id': selectedAccount.value ?? '',
+          'to_account': toAccountId,
+          'amount': amount,
+          'currency': 'USD',
+          'otp': otp,
+        };
+      } else {
+        payload = {
+          'amount': amount,
+          'currency': 'USD',
+          'otp': otp,
+          'mt5_account_id': selectedAccount.value ?? '',
+        };
+      }
+
       final response = await _repo.submitWithdrawal(
         token: token ?? '',
-        payload: {
-          // "withdrawal_method_id":
-          // selectedWithdrawalMethod.value?.methodName ?? 1,
-          "amount": withdrawalAmount.value,
-          "currency": "USD",
-          "otp": otp,
-          "mt5_account_id": selectedAccount.value ?? '',
-        },
+        payload: payload,
       );
 
       if (response.success && response.data != null) {

@@ -649,10 +649,10 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       alignment: WrapAlignment.end,
                       spacing: 8.w,
                       children: [
-                        OutlinedButton(
-                          onPressed: Get.back,
-                          child: const Text('Close'),
-                        ),
+                        // OutlinedButton(
+                        //   onPressed: Get.back,
+                        //   child: const Text('Close'),
+                        // ),
                         ElevatedButton(
                           onPressed: () async {
                             if (selectedGroup == null ||

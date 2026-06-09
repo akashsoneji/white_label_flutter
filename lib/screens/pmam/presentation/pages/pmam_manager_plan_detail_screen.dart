@@ -320,7 +320,10 @@ class _PmamManagerPlanDetailScreenState
                 ),
                 child: Text(
                   'Apply',
-                  style: TextStyle(color: AppColors.whiteColor, fontSize: 13.sp),
+                  style: TextStyle(
+                    color: AppColors.whiteColor,
+                    fontSize: 13.sp,
+                  ),
                 ),
               ),
             ],
@@ -455,7 +458,10 @@ class _PmamManagerPlanDetailScreenState
                 ),
                 child: Text(
                   'Apply',
-                  style: TextStyle(color: AppColors.whiteColor, fontSize: 13.sp),
+                  style: TextStyle(
+                    color: AppColors.whiteColor,
+                    fontSize: 13.sp,
+                  ),
                 ),
               ),
             ],
@@ -588,7 +594,9 @@ class _PmamManagerPlanDetailScreenState
             child: DropdownButton<String>(
               value: value,
               isExpanded: true,
-
+              dropdownColor: AppColors.card,
+              iconEnabledColor: AppColors.textGrey,
+              style: TextStyle(fontSize: 12.sp, color: AppColors.textPrimary),
               icon: Icon(
                 Icons.keyboard_arrow_down,
                 // wn_rounded,
@@ -600,7 +608,13 @@ class _PmamManagerPlanDetailScreenState
                       .map(
                         (e) => DropdownMenuItem(
                           value: e,
-                          child: Text(e, style: TextStyle(fontSize: 12.sp)),
+                          child: Text(
+                            e,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
                         ),
                       )
                       .toList(),
@@ -749,6 +763,9 @@ class _PmamManagerPlanDetailScreenState
             child: DropdownButton<String>(
               value: safeValue,
               isExpanded: true,
+              dropdownColor: AppColors.card,
+              iconEnabledColor: AppColors.textGrey,
+              style: TextStyle(fontSize: 12.sp, color: AppColors.textPrimary),
               icon: Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 16.sp,
@@ -762,7 +779,10 @@ class _PmamManagerPlanDetailScreenState
                           value: e.key,
                           child: Text(
                             e.value,
-                            style: TextStyle(fontSize: 12.sp),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: AppColors.textPrimary,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -820,6 +840,9 @@ class _PmamManagerPlanDetailScreenState
               child: DropdownButton<String>(
                 value: safeValue,
                 isExpanded: true,
+                dropdownColor: AppColors.card,
+                iconEnabledColor: AppColors.textGrey,
+                style: TextStyle(fontSize: 12.sp, color: AppColors.textPrimary),
                 icon: Icon(
                   Icons.keyboard_arrow_down_rounded,
                   size: 16.sp,
@@ -833,7 +856,10 @@ class _PmamManagerPlanDetailScreenState
                             value: e.key,
                             child: Text(
                               e.value,
-                              style: TextStyle(fontSize: 12.sp),
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.textPrimary,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),

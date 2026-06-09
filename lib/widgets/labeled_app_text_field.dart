@@ -35,6 +35,7 @@ class LabeledAppTextField extends StatelessWidget {
     return RTLHelper.rtlTextField(
       style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400),
       controller: controller!,
+      
       onChanged: onChanged,
       // focusNode: amountFocusNode,
       keyboardType: keyboardType,

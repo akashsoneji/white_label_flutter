@@ -25,8 +25,9 @@ class BankWithdrawleList {
 class Data {
   List<WithdrawalMethods>? withdrawalMethods;
   List<Currencies>? currencies;
+  List<AllowedCryptoNetwork>? allowedCryptoNetworks;
 
-  Data({this.withdrawalMethods, this.currencies});
+  Data({this.withdrawalMethods, this.currencies, this.allowedCryptoNetworks});
 
   Data.fromJson(Map<String, dynamic> json) {
     if (json['withdrawalMethods'] != null) {
@@ -41,6 +42,12 @@ class Data {
         currencies!.add(new Currencies.fromJson(v));
       });
     }
+    if (json['allowed_crypto_networks'] != null) {
+      allowedCryptoNetworks = <AllowedCryptoNetwork>[];
+      json['allowed_crypto_networks'].forEach((v) {
+        allowedCryptoNetworks!.add(AllowedCryptoNetwork.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -52,6 +59,29 @@ class Data {
     if (this.currencies != null) {
       data['currencies'] = this.currencies!.map((v) => v.toJson()).toList();
     }
+    if (this.allowedCryptoNetworks != null) {
+      data['allowed_crypto_networks'] =
+          this.allowedCryptoNetworks!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class AllowedCryptoNetwork {
+  String? slug;
+  String? label;
+
+  AllowedCryptoNetwork({this.slug, this.label});
+
+  AllowedCryptoNetwork.fromJson(Map<String, dynamic> json) {
+    slug = json['slug']?.toString();
+    label = json['label']?.toString();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['slug'] = slug;
+    data['label'] = label;
     return data;
   }
 }
@@ -67,8 +97,10 @@ class WithdrawalMethods {
   String? ifscIban;
   String? upiAddress;
   String? cryptoAddress;
+  String? cryptoNetwork;
   String? proofImg;
   String? status;
+  String? approvalRejectionReason;
 
   WithdrawalMethods({
     this.id,
@@ -81,8 +113,10 @@ class WithdrawalMethods {
     this.ifscIban,
     this.upiAddress,
     this.cryptoAddress,
+    this.cryptoNetwork,
     this.proofImg,
     this.status,
+    this.approvalRejectionReason,
   });
 
   WithdrawalMethods.fromJson(Map<String, dynamic> json) {
@@ -96,8 +130,10 @@ class WithdrawalMethods {
     ifscIban = json['ifsc_iban'];
     upiAddress = json['upi_address'];
     cryptoAddress = json['crypto_address'];
+    cryptoNetwork = json['crypto_network']?.toString();
     proofImg = json['proof_img'];
     status = json['status'];
+    approvalRejectionReason = json['approval_rejection_reason']?.toString();
   }
 
   Map<String, dynamic> toJson() {
@@ -112,8 +148,10 @@ class WithdrawalMethods {
     data['ifsc_iban'] = this.ifscIban;
     data['upi_address'] = this.upiAddress;
     data['crypto_address'] = this.cryptoAddress;
+    data['crypto_network'] = this.cryptoNetwork;
     data['proof_img'] = this.proofImg;
     data['status'] = this.status;
+    data['approval_rejection_reason'] = this.approvalRejectionReason;
     return data;
   }
 }

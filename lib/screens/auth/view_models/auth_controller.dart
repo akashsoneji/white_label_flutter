@@ -69,6 +69,7 @@ class AuthController extends GetxController {
   bool get isLoading => _isLoading.value;
   String get errorMessage => _errorMessage.value;
   bool get isAuthenticated => _isAuthenticated.value;
+  RxBool get isAuthenticatedRx => _isAuthenticated;
   LoginResponseModel? get loginResponse => _loginResponse.value;
   UserModel? get userData => _userData.value;
   String get otpSentEmail => _otpSentEmail.value;

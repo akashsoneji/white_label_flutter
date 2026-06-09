@@ -170,7 +170,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         elevation: 0,
         leading: Padding(
           padding: EdgeInsets.only(left: 10.w),
-          child: AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
+          child: AppBackButton(
+            onPressed: () => NavigationHelper.safeBack(context: context),
           ),
         ),
         shape: Border(
@@ -554,29 +555,22 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           controller.selectedCryptoAccount.value!.isNotEmpty) {
         // Find the selected method to get display text
         final selectedValue = controller.selectedCryptoAccount.value!;
-        for (var method in userWithdrawalMethods) {
-          final methodMap = method as Map<String, dynamic>;
-          final cryptoAddress = methodMap['crypto_address']?.toString() ?? '';
-          final holderName = methodMap['holder_name']?.toString() ?? '';
-          final currency = methodMap['currency']?.toString() ?? '';
+        for (final method in userWithdrawalMethods) {
+          final cryptoAddress = method.cryptoAddress ?? '';
+          final holderName = method.holderName ?? '';
+          final methodId = method.id ?? '';
 
-          if (cryptoAddress == selectedValue ||
-              selectedValue.contains(cryptoAddress)) {
+          if (methodId == selectedValue ||
+              (cryptoAddress.isNotEmpty &&
+                  (cryptoAddress == selectedValue ||
+                      selectedValue.contains(cryptoAddress)))) {
             // Build display text
             if (cryptoAddress.isNotEmpty) {
-              if (cryptoAddress.length > 12) {
-                displayText =
-                    '${cryptoAddress.substring(0, 8)}...${cryptoAddress.substring(cryptoAddress.length - 4)}';
-              } else {
-                displayText = cryptoAddress;
-              }
+              displayText = cryptoAddress;
             } else if (holderName.isNotEmpty) {
               displayText = holderName;
             }
 
-            if (currency.isNotEmpty) {
-              displayText += ' ($currency)';
-            }
             break;
           }
         }
@@ -791,6 +785,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
       focusNode: _otpFocusNodes[index],
       keyboardType: TextInputType.number,
       textAlign: TextAlign.center,
+      cursorColor: AppColors.primary,
+      selectionControls: MaterialTextSelectionControls(),
       maxLength: index == 0 ? 6 : 1,
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
@@ -872,6 +868,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           focusNode: _otpFocusNodes[index],
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
+          cursorColor: AppColors.primary,
+          selectionControls: MaterialTextSelectionControls(),
           maxLength: 6, // Allow paste of full OTP in first field
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
@@ -945,6 +943,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             focusNode: _otpFocusNodes[index],
             keyboardType: TextInputType.number,
             textAlign: TextAlign.center,
+            cursorColor: AppColors.primary,
+            selectionControls: MaterialTextSelectionControls(),
             maxLength: 1,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
@@ -1598,15 +1598,10 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                         shrinkWrap: true,
                         itemCount: userWithdrawalMethods.length,
                         itemBuilder: (context, index) {
-                          final methodMap =
-                              userWithdrawalMethods[index]
-                                  as Map<String, dynamic>;
-                          final bankName =
-                              methodMap['bank_name']?.toString() ?? '';
-                          final accountNumber =
-                              methodMap['account_number']?.toString() ?? '';
-                          final holderName =
-                              methodMap['holder_name']?.toString() ?? '';
+                          final method = userWithdrawalMethods[index];
+                          final bankName = method.bankName ?? '';
+                          final accountNumber = method.bankAccountNo ?? '';
+                          final holderName = method.holderName ?? '';
                           final displayLabel =
                               bankName.isNotEmpty ? bankName : holderName;
                           final isSelected =
@@ -1883,56 +1878,34 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                           (_, __) =>
                               Divider(height: 1, color: Colors.grey.shade300),
                       itemBuilder: (context, index) {
-                        final method =
-                            userWithdrawalMethods[index]
-                                as Map<String, dynamic>;
-                        final cryptoAddress =
-                            method['crypto_address']?.toString() ?? '';
-                        final holderName =
-                            method['holder_name']?.toString() ?? '';
-                        final currency = method['currency']?.toString() ?? '';
-                        final status =
-                            method['status']?.toString().toLowerCase() ?? '';
+                        final method = userWithdrawalMethods[index];
+                        final cryptoAddress = method.cryptoAddress ?? '';
+                        final holderName = method.holderName ?? '';
+                        final status = method.status?.toLowerCase() ?? '';
+                        final methodId = method.id ?? '';
 
                         // Create display text
                         String displayText = '';
                         if (cryptoAddress.isNotEmpty) {
-                          // Show first 8 and last 4 characters of address
-                          if (cryptoAddress.length > 12) {
-                            displayText =
-                                '${cryptoAddress.substring(0, 8)}...${cryptoAddress.substring(cryptoAddress.length - 4)}';
-                          } else {
-                            displayText = cryptoAddress;
-                          }
+                          displayText = cryptoAddress;
                         } else if (holderName.isNotEmpty) {
                           displayText = holderName;
                         } else {
                           displayText = 'Crypto Method ${index + 1}';
                         }
 
-                        // Add currency if available
-                        if (currency.isNotEmpty) {
-                          displayText += ' ($currency)';
-                        }
-
                         final isSelected =
-                            controller.selectedCryptoAccount.value ==
-                                cryptoAddress ||
-                            controller.selectedCryptoAccount.value ==
-                                displayText;
+                            controller.selectedCryptoAccount.value == methodId;
 
-                        // Only show approved methods
-                        if (status != 'approved') {
+                        // API may not return status for existing methods.
+                        // Hide only explicitly rejected/inactive methods.
+                        if (status == 'rejected' || status == 'inactive') {
                           return SizedBox.shrink();
                         }
 
                         return InkWell(
                           onTap: () {
-                            // Store the crypto address or a unique identifier
-                            controller.selectedCryptoAccount.value =
-                                cryptoAddress.isNotEmpty
-                                    ? cryptoAddress
-                                    : displayText;
+                            controller.selectedCryptoAccount.value = methodId;
                             Navigator.pop(context);
                           },
                           child: Container(
