@@ -12,6 +12,7 @@ class VantageConfig extends BaseClientConfig {
           brandName: 'Vantage',
           appTitle: 'Vantage',
           primaryColor: const Color(0xFF5F259E),
+          darkPrimaryColor: const Color(0xFFFFFFFF),
           secondaryColor: const Color(0xFFF8F3FF),
           accentColor: const Color(0xFFFFC93C),
           logoSvgPath: 'logo.svg',

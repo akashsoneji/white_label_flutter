@@ -1,0 +1,30 @@
+name: celestial
+type: child
+inheritsFrom: vantage
+label: Celestial
+themeMode: dark
+
+android:
+  applicationId: com.celestial.app
+  appName: Celestial
+
+ios:
+  bundleId: com.celestial.app
+  appName: Celestial
+
+colors:
+  primary: "#24324D"
+  secondary: "#22D3EE"
+  accent: "#24324D"
+  splashColor: "#24324D"
+  launcherBackground: "#24324D"
+
+urls:
+  api: https://client.celestialtrader.com/api/
+  websocket: wss://client.celestialtrader.com/trade-engine
+  chart: https://client.celestialtrader.com
+
+assets:
+  appIcon: icon.png
+  logo: logo.svg
+  splashLogo: splash_logo.svg

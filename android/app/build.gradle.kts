@@ -8,6 +8,8 @@ plugins {
 import java.util.Properties
 import java.io.FileInputStream
 
+apply(from = rootProject.file("brand_flavors.gradle"))
+
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
@@ -58,44 +60,21 @@ android {
     flavorDimensions += "brand"
 
     productFlavors {
-        // Tenax — legacy flavor (not in brands.yaml)
-        create("tenax") {
-            dimension = "brand"
-            applicationId = "com.tenax.app"
-            resValue("string", "app_name", "Tenax")
-            resValue("color", "primary_color", "#4A0C54")
-            resValue("color", "secondary_color", "#E8F5E8")
-            resValue("color", "accent_color", "#4A0C54")
-            buildConfigField("String", "FLAVOR", "\"tenax\"")
-            manifestPlaceholders["FLAVOR"] = "tenax"
-        }
-
-        // Vantage — parent brand (has its own screen files)
-        // Colors are in android/app/src/vantage/res/values/colors.xml
-        create("vantage") {
-            dimension = "brand"
-            applicationId = "com.vantage.app"
-            resValue("string", "app_name", "Vantage")
-            buildConfigField("String", "FLAVOR", "\"vantage\"")
-            manifestPlaceholders["FLAVOR"] = "vantage"
-        }
-
-        // Celestial — child brand (inherits Vantage's screen files, different colors/icons/URLs)
-        create("celestial") {
-            dimension = "brand"
-            applicationId = "com.celestial.app"
-            resValue("string", "app_name", "Celestial")
-            buildConfigField("String", "FLAVOR", "\"celestial\"")
-            manifestPlaceholders["FLAVOR"] = "celestial"
-        }
-
-        // Pipze — child brand (inherits Vantage's screen files, different colors/icons/URLs)
-        create("pipze") {
-            dimension = "brand"
-            applicationId = "com.pipze.app"
-            resValue("string", "app_name", "Pipze")
-            buildConfigField("String", "FLAVOR", "\"pipze\"")
-            manifestPlaceholders["FLAVOR"] = "pipze"
+        val brandFlavors = extra["brandFlavors"] as List<Map<String, Any?>>
+        brandFlavors.forEach { brand ->
+            val name = brand["name"] as String
+            create(name) {
+                dimension = "brand"
+                applicationId = brand["appId"] as String
+                resValue("string", "app_name", brand["appName"] as String)
+                resValue("color", "primary_color", brand["primary"] as String)
+                resValue("color", "secondary_color", brand["secondary"] as String)
+                resValue("color", "accent_color", brand["accent"] as String)
+                resValue("color", "my_splash_color", brand["splashColor"] as String)
+                resValue("color", "ic_launcher_background", brand["launcherBackground"] as String)
+                buildConfigField("String", "FLAVOR", "\"$name\"")
+                manifestPlaceholders["FLAVOR"] = name
+            }
         }
     }
 
@@ -140,9 +119,14 @@ dependencies {
 // Skip Google Services task for flavors without Firebase config
 // to avoid requiring google-services.json.
 afterEvaluate {
-    // Vantage, Celestial, and Pipze flavors have no Firebase config.
+    val brandFlavors = extra["brandFlavors"] as List<Map<String, Any?>>
+    val flavorsWithoutFirebase = brandFlavors
+        .map { it["name"] as String }
+        .filter { name -> !file("src/$name/google-services.json").exists() }
+        .map { name -> name.replaceFirstChar { char -> char.uppercaseChar() } }
+
     tasks.matching {
-        (it.name.startsWith("processVantage") || it.name.startsWith("processCelestial") || it.name.startsWith("processPipze")) &&
+        flavorsWithoutFirebase.any { flavor -> it.name.startsWith("process$flavor") } &&
             it.name.endsWith("GoogleServices")
     }.configureEach {
         enabled = false

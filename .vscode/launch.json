@@ -2,34 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "🔵 Vantage (debug)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "vantage", "--dart-define=CLIENT=vantage", "--dart-define=FLAVOR=vantage", "--no-enable-impeller"],
-            "flutterMode": "debug",
-            "console": "terminal"
-        },
-        {
-            "name": "🔵 Vantage (profile)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "vantage", "--dart-define=CLIENT=vantage", "--dart-define=FLAVOR=vantage"],
-            "flutterMode": "profile",
-            "console": "terminal"
-        },
-        {
-            "name": "🔵 Vantage (release)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "vantage", "--dart-define=CLIENT=vantage", "--dart-define=FLAVOR=vantage"],
-            "flutterMode": "release",
-            "console": "terminal"
-        },
-        {
-            "name": "🟡 Celestial (debug)",
+            "name": "🔵 Celestial (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -38,7 +11,7 @@
             "console": "terminal"
         },
         {
-            "name": "🟡 Celestial (profile)",
+            "name": "🔵 Celestial (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -47,7 +20,7 @@
             "console": "terminal"
         },
         {
-            "name": "🟡 Celestial (release)",
+            "name": "🔵 Celestial (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -56,7 +29,7 @@
             "console": "terminal"
         },
         {
-            "name": "🟢 Pipze (debug)",
+            "name": "🟡 Pipze (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -65,7 +38,7 @@
             "console": "terminal"
         },
         {
-            "name": "🟢 Pipze (profile)",
+            "name": "🟡 Pipze (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -74,11 +47,38 @@
             "console": "terminal"
         },
         {
-            "name": "🟢 Pipze (release)",
+            "name": "🟡 Pipze (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
             "args": ["--flavor", "pipze", "--dart-define=CLIENT=pipze", "--dart-define=FLAVOR=pipze"],
+            "flutterMode": "release",
+            "console": "terminal"
+        },
+        {
+            "name": "🟢 Skyriss (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "skyriss", "--dart-define=CLIENT=skyriss", "--dart-define=FLAVOR=skyriss", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal"
+        },
+        {
+            "name": "🟢 Skyriss (profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "skyriss", "--dart-define=CLIENT=skyriss", "--dart-define=FLAVOR=skyriss"],
+            "flutterMode": "profile",
+            "console": "terminal"
+        },
+        {
+            "name": "🟢 Skyriss (release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "skyriss", "--dart-define=CLIENT=skyriss", "--dart-define=FLAVOR=skyriss"],
             "flutterMode": "release",
             "console": "terminal"
         },
@@ -106,6 +106,33 @@
             "type": "dart",
             "program": "lib/main.dart",
             "args": ["--flavor", "tenax", "--dart-define=CLIENT=tenax", "--dart-define=FLAVOR=tenax"],
+            "flutterMode": "release",
+            "console": "terminal"
+        },
+        {
+            "name": "🟣 Vantage (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "vantage", "--dart-define=CLIENT=vantage", "--dart-define=FLAVOR=vantage", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal"
+        },
+        {
+            "name": "🟣 Vantage (profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "vantage", "--dart-define=CLIENT=vantage", "--dart-define=FLAVOR=vantage"],
+            "flutterMode": "profile",
+            "console": "terminal"
+        },
+        {
+            "name": "🟣 Vantage (release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "vantage", "--dart-define=CLIENT=vantage", "--dart-define=FLAVOR=vantage"],
             "flutterMode": "release",
             "console": "terminal"
         }

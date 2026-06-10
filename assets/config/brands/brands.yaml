@@ -1,120 +1,135 @@
-# brands.yaml — Single Source of Truth
-# One file drives Android flavors, Dart config, assets, and launch configs.
-#
-# type: parent  → brand has its own screen files in lib/screens/*/brands/{name}/
-# type: child   → brand has NO screen files; uses inheritsFrom parent's screens
-#
-# themeMode: dark  → brand is DARK ONLY (no theme switcher shown)
-# themeMode: light → brand is LIGHT ONLY (no theme switcher shown)
-# themeMode: both → user can pick light / dark / system (default)
-#
-# Adding a new brand:
-#   1. Add entry below
-#   2. Run: dart run scripts/generate_brand_config.dart
-#   3. Build: ./build.sh {brand} apk release
+# GENERATED — Do not edit manually when using assets/brands/{brand}/brand.yaml.
+# Source of truth: assets/brands/*/brand.yaml
 
 default: vantage
 
 brands:
-  # ─── PARENT BRAND ──────────────────────────────────────────────────────────
-  # Vantage has its own screen/design files. All child flavors inherit from it.
-  - name: vantage
-    type: parent
-    label: Vantage
-    # themeMode options: 'dark' | 'light' | 'both' (default)
-    themeMode: both
-    android:
-      applicationId: com.vantage.app
-      appName: Vantage
-    ios:
-      bundleId: com.vantage.app
-      appName: Vantage
-    colors:
-      primary: "#5F259E"
-      secondary: "#F8F3FF"
-      accent: "#FFC93C"
-    urls:
-      api: https://my.pipze.com/api/
-      websocket: wss://my.pipze.com/trade-engine
-      chart: https://my.pipze.com
-    assets:
-      appIcon: assets/brands/vantage/icon.png
-      logo: assets/brands/vantage/logo.svg
-      splashLogo: assets/brands/vantage/splash_logo.svg
-
-  # ─── CHILD BRAND ───────────────────────────────────────────────────────────
-  # Celestial has NO screen files. Uses Vantage's screens with Celestial's theme.
-  # To give Celestial its own design: create files in lib/screens/*/brands/celestial/
   - name: celestial
     type: child
     inheritsFrom: vantage
     label: Celestial
-    # Celestial is DARK ONLY — theme switcher is hidden, dark forced
     themeMode: dark
     android:
-      applicationId: com.celestial.app
-      appName: Celestial
+      applicationId: "com.celestial.app"
+      appName: "Celestial"
     ios:
-      bundleId: com.celestial.app
-      appName: Celestial
+      bundleId: "com.celestial.app"
+      appName: "Celestial"
     colors:
       primary: "#24324D"
       secondary: "#22D3EE"
       accent: "#24324D"
+      splashColor: "#24324D"
+      launcherBackground: "#24324D"
     urls:
-      api: https://client.celestialtrader.com/api/
-      websocket: wss://client.celestialtrader.com/trade-engine
-      chart: https://client.celestialtrader.com
+      api: "https://client.celestialtrader.com/api/"
+      websocket: "wss://client.celestialtrader.com/trade-engine"
+      chart: "https://client.celestialtrader.com"
     assets:
-      appIcon: assets/brands/celestial/icon.png
-      logo: assets/brands/celestial/logo.svg
-      splashLogo: assets/brands/celestial/splash_logo.svg
+      appIcon: "assets/brands/celestial/icon.png"
+      logo: "assets/brands/celestial/logo.svg"
+      splashLogo: "assets/brands/celestial/splash_logo.svg"
 
   - name: pipze
     type: child
     inheritsFrom: vantage
     label: Pipze
-    # Pipze is LIGHT ONLY — theme switcher is hidden, light forced
     themeMode: both
     android:
-      applicationId: com.pipze.app
-      appName: Pipze
+      applicationId: "com.pipze.app"
+      appName: "Pipze"
     ios:
-      bundleId: com.pipze.app
-      appName: Pipze
+      bundleId: "com.pipze.app"
+      appName: "Pipze"
     colors:
       primary: "#5F259E"
       secondary: "#F8F3FF"
       accent: "#FFC93C"
+      splashColor: "#5F259E"
+      launcherBackground: "#5F259E"
     urls:
-      api: https://my.pipze.com/api/
-      websocket: wss://my.pipze.com/trade-engine
-      chart: https://my.pipze.com
+      api: "https://my.pipze.com/api/"
+      websocket: "wss://my.pipze.com/trade-engine"
+      chart: "https://my.pipze.com"
     assets:
-      appIcon: assets/brands/pipze/icon.png
-      logo: assets/brands/pipze/icon.png
-      splashLogo: assets/brands/pipze/icon.png
+      appIcon: "assets/brands/pipze/icon.png"
+      logo: "assets/brands/pipze/icon.png"
+      splashLogo: "assets/brands/pipze/icon.png"
+
+  - name: skyriss
+    type: child
+    inheritsFrom: vantage
+    label: Skyriss
+    themeMode: dark
+    android:
+      applicationId: "com.skyriss.app"
+      appName: "Skyriss"
+    ios:
+      bundleId: "com.skyriss.app"
+      appName: "Skyriss"
+    colors:
+      primary: "#0BFF00"
+      darkPrimary: "#0BFF00"
+      secondary: "#F8F3FF"
+      accent: "#E77930"
+      splashColor: "#000000"
+      launcherBackground: "#000000"
+    urls:
+      api: "https://login.skyriss.com/api/"
+      websocket: "wss://login.skyriss.com/trade-engine"
+      chart: "https://login.skyriss.com"
+    assets:
+      appIcon: "assets/brands/skyriss/icon.png"
+      logo: "assets/brands/skyriss/logo.svg"
+      splashLogo: "assets/brands/skyriss/splash_logo.svg"
 
   - name: tenax
     type: parent
     label: Tenax
-    # Tenax supports both — user can switch light/dark/system
     themeMode: both
     android:
-      applicationId: com.tenax.app
-      appName: Tenax
+      applicationId: "com.tenax.app"
+      appName: "Tenax"
     ios:
-      bundleId: com.tenax.app
-      appName: Tenax
+      bundleId: "com.tenax.app"
+      appName: "Tenax"
     colors:
       primary: "#4A0C54"
       secondary: "#F8F3FF"
       accent: "#FFC93C"
+      splashColor: "#4A0C54"
+      launcherBackground: "#4A0C54"
     urls:
-      api: https://my.pipze.com/api/
-      websocket: wss://my.pipze.com/trade-engine
-      chart: https://my.pipze.com
+      api: "https://my.pipze.com/api/"
+      websocket: "wss://my.pipze.com/trade-engine"
+      chart: "https://my.pipze.com"
     assets:
-      appIcon: assets/brands/tenax/icon.png
-      logo: assets/brands/tenax/logo.svg
-      splashLogo: assets/brands/tenax/splash_logo.svg
+      appIcon: "assets/brands/tenax/icon.png"
+      logo: "assets/brands/tenax/logo.svg"
+      splashLogo: "assets/brands/tenax/splash_logo.svg"
+
+  - name: vantage
+    type: parent
+    label: Vantage
+    themeMode: both
+    android:
+      applicationId: "com.vantage.app"
+      appName: "Vantage"
+    ios:
+      bundleId: "com.vantage.app"
+      appName: "Vantage"
+    colors:
+      primary: "#5F259E"
+      secondary: "#F8F3FF"
+      accent: "#FFC93C"
+      splashColor: "#5F259E"
+      launcherBackground: "#5F259E"
+    urls:
+      api: "https://my.pipze.com/api/"
+      websocket: "wss://my.pipze.com/trade-engine"
+      chart: "https://my.pipze.com"
+    assets:
+      appIcon: "assets/brands/vantage/icon.png"
+      logo: "assets/brands/vantage/logo.svg"
+      splashLogo: "assets/brands/vantage/splash_logo.svg"
+

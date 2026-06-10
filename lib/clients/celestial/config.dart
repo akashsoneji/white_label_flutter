@@ -12,6 +12,7 @@ class CelestialConfig extends BaseClientConfig {
           brandName: 'Celestial',
           appTitle: 'Celestial',
           primaryColor: const Color(0xFF24324D),
+          darkPrimaryColor: const Color(0xFFFFFFFF),
           secondaryColor: const Color(0xFF22D3EE),
           accentColor: const Color(0xFF24324D),
           logoSvgPath: 'logo.svg',

@@ -12,6 +12,7 @@ class TenaxConfig extends BaseClientConfig {
           brandName: 'Tenax',
           appTitle: 'Tenax',
           primaryColor: const Color(0xFF4A0C54),
+          darkPrimaryColor: const Color(0xFFFFFFFF),
           secondaryColor: const Color(0xFFF8F3FF),
           accentColor: const Color(0xFFFFC93C),
           logoSvgPath: 'logo.svg',

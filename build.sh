@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# Build script for Flutter flavors with centralized asset management
+# Build script for Flutter flavors with simple per-client folders
 # This script automatically:
 #   1. Increments version code (for release builds) - allows users to update without uninstalling
-#   2. Copies client assets from assets/brands/{flavor}/ to assets/clients/{flavor}/
-#   3. Generates native splash screens with client colors
-#   4. Generates launcher icons from client assets
-#   5. Builds the app using centralized main.dart with auto flavor detection
-#   6. Builds APK/AAB for all Android devices (supports all architectures)
+#   2. Runs brand config generator to update lib/clients/ & resources from assets/brands/{flavor}/
+#   3. Prepares client assets (copies artwork, generates splash screen & launcher icons)
+#   4. Builds the app using centralized main.dart with auto flavor detection
+#   5. Builds APK/AAB for all Android devices (supports split APKs or universal APKs)
 #
 # Usage: 
 #   Single client: ./build.sh {flavor} {build_type} [mode]
@@ -24,11 +23,17 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Function to read the full brand list from the source-of-truth YAML.
-# Do NOT prefer brands.json here: prepare_flavor.dart intentionally trims
-# brands.json to the active client only, so using it would make the next build
-# reject valid clients like pipze/tenax/vantage as "Unknown flavor".
+# Function to read the full brand list from per-client brand.yaml files.
+# Fallback is kept to legacy brands.yaml/brands.json for backward compatibility.
 load_clients() {
+    if [ -d "assets/brands" ] && find assets/brands -mindepth 2 -maxdepth 2 -name brand.yaml | grep -q .; then
+        find assets/brands -mindepth 2 -maxdepth 2 -name brand.yaml | while read -r file; do
+            grep -E '^\s*name:' "$file" | head -1 | sed 's/.*name:[[:space:]]*//' | tr -d '"' | tr -d "'"
+        done | tr '\n' ' '
+        echo ""
+        return 0
+    fi
+
     if [ -f "assets/config/brands/brands.yaml" ]; then
         grep -E '^\s*-\s*name:' assets/config/brands/brands.yaml | sed 's/.*name:[[:space:]]*//' | tr '\n' ' '
         echo ""
@@ -311,7 +316,7 @@ fi
 
 CLIENTS_STRING=$(load_clients)
 if [ -z "$CLIENTS_STRING" ]; then
-    echo -e "${RED}❌ Could not load brand list from assets/config/brands/brands.json or brands.yaml${NC}"
+    echo -e "${RED}❌ Could not load brand list from assets/brands/*/brand.yaml or assets/config/brands/brands.yaml${NC}"
     exit 1
 fi
 read -r -a CLIENTS <<< "$CLIENTS_STRING"

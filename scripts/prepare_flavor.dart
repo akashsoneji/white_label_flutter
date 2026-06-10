@@ -3,6 +3,14 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+String colorToHex(String color) {
+  var hex = color.replaceAll('#', '').replaceAll('0x', '').toUpperCase();
+  if (hex.length == 8) return hex.substring(2);
+  return hex;
+}
+
+String colorWithHash(String color) => '#${colorToHex(color)}';
+
 /// Prepares brand-specific assets for Flutter build.
 /// Usage: dart run scripts/prepare_flavor.dart {flavor}
 /// Example: dart run scripts/prepare_flavor.dart pipze
@@ -25,11 +33,15 @@ void main(List<String> args) async {
       );
     }
 
+    final brandColors = await loadBrandColors(flavor);
+
     await cleanOtherClientAssets(flavor, allFlavors);
     await copyClientAssets(flavor);
+
+    await copyGoogleServicesIfPresent(flavor);
     await writeBuildBrandRegistry(flavor);
     await updatePubspec(flavor, allFlavors);
-    await generateNativeSplash(flavor);
+    await generateNativeSplash(flavor, brandColors: brandColors);
     await generateLauncherIcons(flavor);
 
     print('\n✅ Successfully prepared $flavor flavor!');
@@ -65,6 +77,64 @@ Future<List<String>> loadBrandNames() async {
     if (match != null) names.add(match.group(1)!.trim().toLowerCase());
   }
   return names;
+}
+
+Future<Map<String, String>> loadBrandColors(String flavor) async {
+  final brandYaml = File(path.join('assets', 'brands', flavor, 'brand.yaml'));
+  if (await brandYaml.exists()) {
+    final colors = <String, String>{};
+    var inColors = false;
+    for (final line in (await brandYaml.readAsString()).split('\n')) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+      if (trimmed == 'colors:') {
+        inColors = true;
+        continue;
+      }
+      if (inColors && RegExp(r'^[A-Za-z_][A-Za-z0-9_]*:\s*$').hasMatch(trimmed)) {
+        break;
+      }
+      if (!inColors) continue;
+      final match = RegExp(r'^([^:#]+):\s*(.*)$').firstMatch(trimmed);
+      if (match == null) continue;
+      final key = match.group(1)!.trim();
+      final value = match.group(2)!.trim().replaceAll('"', '').replaceAll("'", '');
+      if (key.isNotEmpty && value.isNotEmpty) colors[key] = value;
+    }
+    if (colors.isNotEmpty) return colors;
+  }
+
+  final generated = File('assets/config/brands/brands.json');
+  if (await generated.exists()) {
+    final decoded = jsonDecode(await generated.readAsString());
+    final details = decoded is Map ? decoded['brandDetails'] : null;
+    if (details is List) {
+      for (final item in details) {
+        if (item is Map && item['name']?.toString().toLowerCase() == flavor) {
+          final colors = item['colors'];
+          if (colors is Map) {
+            return colors.map(
+              (key, value) => MapEntry(key.toString(), value.toString()),
+            );
+          }
+        }
+      }
+    }
+  }
+
+  return <String, String>{};
+}
+
+String brandColorValue(
+  Map<String, String> colors,
+  List<String> keys,
+  String fallback,
+) {
+  for (final key in keys) {
+    final value = colors[key]?.trim();
+    if (value != null && value.isNotEmpty) return value;
+  }
+  return fallback;
 }
 
 Future<void> cleanOtherClientAssets(String currentFlavor, List<String> allFlavors) async {
@@ -112,6 +182,29 @@ Future<void> copyClientAssets(String flavor) async {
       print('  ✓ Copied: $relativePath');
     }
   }
+}
+
+// No longer copying app_config.json as it is removed.
+
+Future<void> copyGoogleServicesIfPresent(String flavor) async {
+  print('\n🔥 Preparing Firebase config...');
+
+  final sourceFile = File(path.join('assets', 'brands', flavor, 'google-services.json'));
+  final targetFile = File(path.join('android', 'app', 'src', flavor, 'google-services.json'));
+
+  if (!await sourceFile.exists()) {
+    if (await targetFile.exists()) {
+      await targetFile.delete();
+      print('  ✓ Removed stale android/app/src/$flavor/google-services.json');
+    } else {
+      print('  ℹ️  No google-services.json for $flavor');
+    }
+    return;
+  }
+
+  await targetFile.parent.create(recursive: true);
+  await sourceFile.copy(targetFile.path);
+  print('  ✓ Copied google-services.json to android/app/src/$flavor/google-services.json');
 }
 
 Future<void> writeBuildBrandRegistry(String flavor) async {
@@ -173,7 +266,6 @@ Future<void> updatePubspec(String flavor, List<String> allFlavors) async {
   final managedBlock = '''    # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND
     - assets/clients/$flavor/
     - assets/config/brands/brands.json
-    - assets/config/$flavor/app_config.json
     # END GENERATED ACTIVE CLIENT ASSETS''';
 
   final managedPattern = RegExp(
@@ -195,6 +287,7 @@ Future<void> updatePubspec(String flavor, List<String> allFlavors) async {
   content = content.replaceAll(RegExp(r'^\s*-\s*assets/config/\s*$', multiLine: true), '');
   content = content.replaceAll(RegExp(r'^\s*-\s*assets/config/brands/brands\.json\s*$', multiLine: true), '');
   content = content.replaceAll(RegExp(r'^\s*-\s*assets/config/[^/]+/app_config\.json\s*$', multiLine: true), '');
+  content = content.replaceAll(RegExp(r'^\s*-\s*assets/clients/[^/]+/app_config\.json\s*$', multiLine: true), '');
   content = content.replaceAll(RegExp(r'\n{3,}'), '\n\n');
 
   final assetsIndex = content.indexOf('  assets:');
@@ -205,10 +298,13 @@ Future<void> updatePubspec(String flavor, List<String> allFlavors) async {
 
   await pubspecFile.writeAsString(content);
   print('  ✓ Active client assets set to assets/clients/$flavor/');
-  print('  ✓ Active config assets set to assets/config/$flavor/app_config.json only');
+  print('  ✓ Active config assets included from assets/clients/$flavor/');
 }
 
-Future<void> generateNativeSplash(String flavor) async {
+Future<void> generateNativeSplash(
+  String flavor, {
+  Map<String, String> brandColors = const <String, String>{},
+}) async {
   print('\n🎨 Generating native splash resources...');
 
   final configFile = File(path.join('lib', 'clients', flavor, 'config.dart'));
@@ -226,7 +322,17 @@ Future<void> generateNativeSplash(String flavor) async {
     return;
   }
 
-  final colorHex = '#${colorMatch.group(1)!.substring(2)}';
+  final primaryColorHex = '#${colorMatch.group(1)!.substring(2)}';
+  final splashColorHex = colorWithHash(
+    brandColorValue(brandColors, ['splashColor', 'splash'], primaryColorHex),
+  );
+  final launcherBackgroundHex = colorWithHash(
+    brandColorValue(
+      brandColors,
+      ['launcherBackground', 'icLauncherBackground', 'adaptiveIconBackground'],
+      primaryColorHex,
+    ),
+  );
 
   final drawableDir = Directory(path.join('android', 'app', 'src', flavor, 'res', 'drawable'));
   final drawableV21Dir = Directory(path.join('android', 'app', 'src', flavor, 'res', 'drawable-v21'));
@@ -253,15 +359,15 @@ Future<void> generateNativeSplash(String flavor) async {
   ).firstMatch(configContent);
 
   final secondaryColorHex = secondaryColorMatch != null ? '#${secondaryColorMatch.group(1)!.substring(2)}' : '#FFFFFF';
-  final accentColorHex = accentColorMatch != null ? '#${accentColorMatch.group(1)!.substring(2)}' : colorHex;
+  final accentColorHex = accentColorMatch != null ? '#${accentColorMatch.group(1)!.substring(2)}' : primaryColorHex;
 
   final colorsXml = '''<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary_color">$colorHex</color>
+    <color name="primary_color">$primaryColorHex</color>
     <color name="secondary_color">$secondaryColorHex</color>
     <color name="accent_color">$accentColorHex</color>
-    <color name="my_splash_color">${flavor == 'sr' ? '#FFFFFF' : colorHex}</color>
-    <color name="ic_launcher_background">$colorHex</color>
+    <color name="my_splash_color">$splashColorHex</color>
+    <color name="ic_launcher_background">$launcherBackgroundHex</color>
 </resources>
 ''';
 
@@ -269,7 +375,8 @@ Future<void> generateNativeSplash(String flavor) async {
 
   print('  ✓ Created launch_background.xml');
   print('  ✓ Created colors.xml');
-  print('  ✓ Splash color: $colorHex');
+  print('  ✓ Splash color: $splashColorHex');
+  print('  ✓ Launcher background color: $launcherBackgroundHex');
 }
 
 Future<void> generateLauncherIcons(String flavor) async {

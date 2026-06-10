@@ -76,21 +76,36 @@ class UserModel {
     };
   }
 
-  UserModel copyWith({bool? googleOtpEnabled}) {
+  UserModel copyWith({
+    int? id,
+    String? email,
+    String? emailVerifiedAt,
+    String? createdAt,
+    String? updatedAt,
+    String? userSlug,
+    String? firstName,
+    String? lastName,
+    String? mobile,
+    String? mobileVerifiedAt,
+    String? status,
+    int? regComplete,
+    String? deletedAt,
+    bool? googleOtpEnabled,
+  }) {
     return UserModel(
-      id: id,
-      email: email,
-      emailVerifiedAt: emailVerifiedAt,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      userSlug: userSlug,
-      firstName: firstName,
-      lastName: lastName,
-      mobile: mobile,
-      mobileVerifiedAt: mobileVerifiedAt,
-      status: status,
-      regComplete: regComplete,
-      deletedAt: deletedAt,
+      id: id ?? this.id,
+      email: email ?? this.email,
+      emailVerifiedAt: emailVerifiedAt ?? this.emailVerifiedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      userSlug: userSlug ?? this.userSlug,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      mobile: mobile ?? this.mobile,
+      mobileVerifiedAt: mobileVerifiedAt ?? this.mobileVerifiedAt,
+      status: status ?? this.status,
+      regComplete: regComplete ?? this.regComplete,
+      deletedAt: deletedAt ?? this.deletedAt,
       googleOtpEnabled: googleOtpEnabled ?? this.googleOtpEnabled,
     );
   }

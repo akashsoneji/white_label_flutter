@@ -480,9 +480,9 @@ ThemeData _buildLightTheme() {
 ThemeData _buildDarkTheme() {
   return ThemeData(
     fontFamily: 'Roboto',
-    primaryColor: FlavorConfig.instance.primaryColor,
+    primaryColor: FlavorConfig.instance.darkPrimaryColor,
     colorScheme: ColorScheme.dark(
-      primary: FlavorConfig.instance.primaryColor,
+      primary: FlavorConfig.instance.darkPrimaryColor,
       secondary: FlavorConfig.instance.secondaryColor,
       surface: AppColors.surfaceDarkTheme,
       onPrimary: AppColors.whiteColor,
@@ -510,7 +510,7 @@ ThemeData _buildDarkTheme() {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: FlavorConfig.instance.primaryColor,
+          color: FlavorConfig.instance.darkPrimaryColor,
           width: 2,
         ),
       ),
@@ -525,7 +525,7 @@ ThemeData _buildDarkTheme() {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: FlavorConfig.instance.primaryColor,
+        backgroundColor: FlavorConfig.instance.darkPrimaryColor,
         foregroundColor: Colors.white,
         minimumSize: Size(double.infinity, 40.h),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -558,7 +558,7 @@ ThemeData _buildDarkTheme() {
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: AppColors.surface,
-      selectedItemColor: FlavorConfig.instance.primaryColor,
+      selectedItemColor: FlavorConfig.instance.darkPrimaryColor,
       unselectedItemColor: AppColors.textGrey,
       type: BottomNavigationBarType.fixed,
       elevation: 8,

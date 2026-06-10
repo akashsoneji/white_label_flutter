@@ -109,7 +109,7 @@ class _LogoBubble extends StatelessWidget {
       height: 72.w,
       width: 72.w,
       decoration: BoxDecoration(
-        color: VantageAuthTheme.primary,
+        color: VantageAuthTheme.primary.withAlpha(40),
         shape: BoxShape.circle,
       ),
       padding: EdgeInsets.all(14.w),

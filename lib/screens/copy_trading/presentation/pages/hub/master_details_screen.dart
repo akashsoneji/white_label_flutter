@@ -263,7 +263,11 @@ class _MasterHeroCard extends StatelessWidget {
                       },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
+                disabledBackgroundColor: AppColors.textGrey.withValues(
+                  alpha: 0.18,
+                ),
                 foregroundColor: AppColors.whiteColor,
+                disabledForegroundColor: AppColors.textGrey,
                 padding: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -271,7 +275,7 @@ class _MasterHeroCard extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                'Subscribe',
+                primaryPlan == null ? 'Not yet plan' : 'Subscribe',
                 style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400),
               ),
             ),

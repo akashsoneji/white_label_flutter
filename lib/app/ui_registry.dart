@@ -41,6 +41,7 @@ class UiRegistry implements UiSlots {
     'vantage': 'vantage',
     'celestial': 'vantage',
     'pipze': 'vantage',
+    'skyriss': 'vantage',
     'tenax': 'tenax',
   };
 

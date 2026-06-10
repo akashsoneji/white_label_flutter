@@ -1,0 +1,31 @@
+name: skyriss
+type: child
+inheritsFrom: vantage
+label: Skyriss
+themeMode: dark
+
+android:
+  applicationId: com.skyriss.app
+  appName: Skyriss
+
+ios:
+  bundleId: com.skyriss.app
+  appName: Skyriss
+
+colors:
+  primary: "#0BFF00"
+  darkPrimary: "#0BFF00"
+  secondary: "#F8F3FF"
+  accent: "#E77930"
+  splashColor: "#000000"
+  launcherBackground: "#000000"
+
+urls:
+  api: https://login.skyriss.com/api/
+  websocket: wss://login.skyriss.com/trade-engine
+  chart: https://login.skyriss.com
+
+assets:
+  appIcon: icon.png
+  logo: logo.svg
+  splashLogo: splash_logo.svg

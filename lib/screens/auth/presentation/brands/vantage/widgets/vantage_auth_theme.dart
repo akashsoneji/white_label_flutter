@@ -16,8 +16,7 @@ class VantageAuthTheme {
           ? AppColors.primary.withValues(alpha: 0.12)
           : Colors.white;
 
-  static Color get primary =>
-      AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
+  static Color get primary => AppColors.primary;
 
   static Color get text => AppColors.textPrimary;
 

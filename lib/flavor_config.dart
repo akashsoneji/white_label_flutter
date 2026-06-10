@@ -3,10 +3,18 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
+import 'clients/celestial/config.dart';
 import 'clients/pipze/config.dart';
+import 'clients/skyriss/config.dart';
+import 'clients/tenax/config.dart';
+import 'clients/vantage/config.dart';
 
 enum Flavor {
+  celestial,
   pipze,
+  skyriss,
+  tenax,
+  vantage,
 }
 
 class FlavorConfig {
@@ -14,6 +22,7 @@ class FlavorConfig {
   final String appName;
   final String appTitle;
   final Color primaryColor;
+  final Color darkPrimaryColor;
   final Color secondaryColor;
   final Color accentColor;
   final String apiBaseUrl;
@@ -33,6 +42,7 @@ class FlavorConfig {
     required String appName,
     required String appTitle,
     required Color primaryColor,
+    required Color darkPrimaryColor,
     required Color secondaryColor,
     required Color accentColor,
     required String apiBaseUrl,
@@ -50,6 +60,7 @@ class FlavorConfig {
         appName: appName,
         title: appTitle,
         primaryColor: primaryColor,
+        darkPrimaryColor: darkPrimaryColor,
         secondaryColor: secondaryColor,
         accentColor: accentColor,
         apiBaseUrl: apiBaseUrl,
@@ -71,6 +82,7 @@ class FlavorConfig {
     required String title,
     required this.appName,
     required this.primaryColor,
+    required this.darkPrimaryColor,
     required this.secondaryColor,
     required this.accentColor,
     required this.apiBaseUrl,
@@ -83,7 +95,7 @@ class FlavorConfig {
     required this.selectedBrokerData,
   }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.pipze);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.vantage);
 
   static void reset() {
     _instance = null;
@@ -99,27 +111,50 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.pipze,
+      orElse: () => Flavor.vantage,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
+      case Flavor.celestial:
+        const config = CelestialConfig();
+        return config.toFlavorConfig(Flavor.celestial, 'celestial');
       case Flavor.pipze:
         const config = PipzeConfig();
         return config.toFlavorConfig(Flavor.pipze, 'pipze');
+      case Flavor.skyriss:
+        const config = SkyrissConfig();
+        return config.toFlavorConfig(Flavor.skyriss, 'skyriss');
+      case Flavor.tenax:
+        const config = TenaxConfig();
+        return config.toFlavorConfig(Flavor.tenax, 'tenax');
+      case Flavor.vantage:
+        const config = VantageConfig();
+        return config.toFlavorConfig(Flavor.vantage, 'vantage');
     }
   }
+
+  static bool isCelestial() => _instance?.flavor == Flavor.celestial;
+  static FlavorConfig get celestial => activate(Flavor.celestial);
 
   static bool isPipze() => _instance?.flavor == Flavor.pipze;
   static FlavorConfig get pipze => activate(Flavor.pipze);
 
+  static bool isSkyriss() => _instance?.flavor == Flavor.skyriss;
+  static FlavorConfig get skyriss => activate(Flavor.skyriss);
+
+  static bool isTenax() => _instance?.flavor == Flavor.tenax;
+  static FlavorConfig get tenax => activate(Flavor.tenax);
+
+  static FlavorConfig get vantage => activate(Flavor.vantage);
+
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.pipze.name).toLowerCase();
-    return const {'vantage', 'celestial', 'pipze'}.contains(name);
+    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
+    return const <String>{'celestial', 'pipze', 'skyriss', 'vantage'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;
@@ -141,6 +176,7 @@ class FlavorConfig {
       title: config['appTitle']?.toString() ?? current.appTitle,
       appName: brokerName ?? config['appName']?.toString() ?? current.appName,
       primaryColor: _parseColor(config['primaryColor']) ?? current.primaryColor,
+      darkPrimaryColor: _parseColor(config['darkPrimaryColor']) ?? current.darkPrimaryColor,
       secondaryColor: _parseColor(config['secondaryColor']) ?? current.secondaryColor,
       accentColor: _parseColor(config['accentColor']) ?? current.accentColor,
       apiBaseUrl: config['apiBaseUrl']?.toString() ?? current.apiBaseUrl,
@@ -175,6 +211,7 @@ extension _BaseClientConfigFlavorConfigX on BaseClientConfig {
       appName: brandName,
       appTitle: appTitle,
       primaryColor: primaryColor,
+      darkPrimaryColor: darkPrimaryColor,
       secondaryColor: secondaryColor,
       accentColor: accentColor,
       websocketUrl: websocketUrl,

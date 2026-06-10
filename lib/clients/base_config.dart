@@ -9,6 +9,7 @@ class BaseClientConfig {
 
   // Colors
   final Color primaryColor;
+  final Color darkPrimaryColor;
   final Color secondaryColor;
   final Color accentColor;
 
@@ -27,6 +28,7 @@ class BaseClientConfig {
     required this.brandName,
     required this.appTitle,
     required this.primaryColor,
+    Color? darkPrimaryColor,
     required this.secondaryColor,
     required this.accentColor,
     required this.logoSvgPath,
@@ -35,7 +37,7 @@ class BaseClientConfig {
     required this.apiBaseUrl,
     required this.websocketUrl,
     required this.chartBaseUrl,
-  });
+  }) : darkPrimaryColor = darkPrimaryColor ?? primaryColor;
 
   /// Get the full runtime asset path for a prepared client asset.
   String getAssetPath(String clientName, String assetPath) {

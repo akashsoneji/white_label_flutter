@@ -240,9 +240,10 @@ class _MasterCard extends StatelessWidget {
         "\$${item.minInvestment.toStringAsFixed(item.minInvestment % 1 == 0 ? 0 : 2)}";
 
     final displayName = item.nickname.isNotEmpty ? item.nickname : item.name;
+    final hasPlan = item.planCount > 0;
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: hasPlan ? onTap : null,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
         decoration: BoxDecoration(
@@ -505,10 +506,14 @@ class _MasterCard extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: onTap,
+                onPressed: hasPlan ? onTap : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
+                  disabledBackgroundColor: AppColors.textGrey.withValues(
+                    alpha: 0.18,
+                  ),
                   foregroundColor: AppColors.onColoredBackground,
+                  disabledForegroundColor: AppColors.textGrey,
                   elevation: 0,
                   padding: EdgeInsets.symmetric(
                     horizontal: 20.w,
@@ -521,11 +526,11 @@ class _MasterCard extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Copy',
+                  hasPlan ? 'Copy' : 'Not Yet Plan',
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.whiteColor,
+                    color: hasPlan ? AppColors.whiteColor : AppColors.textGrey,
                   ),
                 ),
               ),

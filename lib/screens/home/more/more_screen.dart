@@ -27,7 +27,7 @@ import 'package:crm_app/screens/home/brands/vantage/vantage_more_layout.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
-import 'package:crm_app/main.dart' as main_config;
+import 'package:crm_app/widgets/brand_logo.dart';
 
 class MoreScreen extends StatefulWidget {
   const MoreScreen({super.key});
@@ -276,7 +276,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 16.h),
-            _buildCompactProfileCard(authController),
+            Obx(() => _buildCompactProfileCard(authController)),
             SizedBox(height: 12.h),
             _buildCompactVerificationCard(languageService),
             SizedBox(height: 16.h),
@@ -991,16 +991,17 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 60.w,
-                height: 60.w,
+                width: 64.w,
+                height: 64.w,
+                padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
-                  color: AppColors.red.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.logout_rounded,
-                  size: 28.sp,
-                  color: AppColors.red,
+                child: BrandLogo(
+                  source: FlavorConfig.effectiveLogo,
+                  fit: BoxFit.contain,
+                  isCircle: true,
                 ),
               ),
               SizedBox(height: 16.h),

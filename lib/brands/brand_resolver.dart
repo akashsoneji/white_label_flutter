@@ -100,10 +100,11 @@ class BrandResolver extends GetxService {
     return brandName;
   }
 
-  /// Returns the expected path for the given brand's config.
-  /// Convention: `assets/config/<brandId>/app_config.json`
+  /// Returns the expected path for the given brand's runtime config.
+  /// The build step copies it from `assets/brands/<brand>/app_config.json` to
+  /// `assets/clients/<brand>/app_config.json` so every client stays self-contained.
   static String appConfigAssetPathFor(BrandId brandId) {
-    return 'assets/config/${brandId.value}/app_config.json';
+    return 'assets/clients/${brandId.value}/app_config.json';
   }
 
   Future<void> _initialize() async {

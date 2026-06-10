@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:crm_app/models/login_response_model.dart';
 import 'package:crm_app/models/user_model.dart';
-import 'package:crm_app/models/settings_profile_model.dart';
+import 'package:crm_app/models/settings_profile_model.dart' as profile_model;
 import 'package:get/get.dart' as g;
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/account_cache_service.dart';
@@ -63,7 +63,7 @@ class AuthController extends GetxController {
   final _verifiedEmail = ''.obs;
   final _verifiedOtp = ''.obs;
   final _registerData = Rxn<Map<String, dynamic>>();
-  final _profileData = Rxn<SettingsProfileData>();
+  final _profileData = Rxn<profile_model.SettingsProfileData>();
 
   // Getters
   bool get isLoading => _isLoading.value;
@@ -77,7 +77,7 @@ class AuthController extends GetxController {
   String get verifiedEmail => _verifiedEmail.value;
   String get verifiedOtp => _verifiedOtp.value;
   Map<String, dynamic>? get registerData => _registerData.value;
-  SettingsProfileData? get profileData => _profileData.value;
+  profile_model.SettingsProfileData? get profileData => _profileData.value;
   bool get isGoogleOtpEnabled => _userData.value?.googleOtpEnabled ?? false;
 
   // User data getters
@@ -1374,7 +1374,7 @@ class AuthController extends GetxController {
   }
 
   // Get Profile Method
-  Future<SettingsProfileData?> getProfile() async {
+  Future<profile_model.SettingsProfileData?> getProfile() async {
     try {
       _isLoading.value = true;
       _clearError();
@@ -1384,8 +1384,11 @@ class AuthController extends GetxController {
       final response = await _authRepo.fetchProfile(token: token);
 
       if (response.success && response.data != null) {
-        final profileData = SettingsProfileData.fromJson(response.data);
+        final profileData = profile_model.SettingsProfileData.fromJson(
+          response.data,
+        );
         _profileData.value = profileData;
+        await _syncUserDataFromProfile(profileData);
         return profileData;
       } else {
         CustomToastService.showError(
@@ -1400,6 +1403,46 @@ class AuthController extends GetxController {
       return null;
     } finally {
       _isLoading.value = false;
+    }
+  }
+
+  Future<void> _syncUserDataFromProfile(
+    profile_model.SettingsProfileData profileData,
+  ) async {
+    final profileUser = profileData.data.user;
+    if (profileUser.id == 0) return;
+
+    final currentUser = _userData.value ?? await SecureStorageService.getUserData();
+    final updatedUser = UserModel(
+      id: profileUser.id,
+      email: profileUser.email,
+      emailVerifiedAt:
+          profileUser.emailVerifiedAt.toIso8601String(),
+      createdAt: profileUser.createdAt.toIso8601String(),
+      updatedAt: profileUser.updatedAt.toIso8601String(),
+      userSlug: profileUser.userSlug,
+      firstName: profileUser.firstName,
+      lastName: profileUser.lastName,
+      mobile: profileUser.mobile,
+      mobileVerifiedAt:
+          profileUser.mobileVerifiedAt.trim().isEmpty
+              ? currentUser?.mobileVerifiedAt
+              : profileUser.mobileVerifiedAt,
+      status: profileUser.status,
+      regComplete: profileUser.regComplete,
+      deletedAt:
+          profileUser.deletedAt.trim().isEmpty
+              ? currentUser?.deletedAt
+              : profileUser.deletedAt,
+      googleOtpEnabled: currentUser?.googleOtpEnabled ?? false,
+    );
+
+    _userData.value = updatedUser;
+
+    final loginData = await SecureStorageService.getCompleteLoginData();
+    if (loginData != null) {
+      loginData['user'] = updatedUser.toJson();
+      await SecureStorageService.saveUserData(jsonEncode(loginData));
     }
   }
 

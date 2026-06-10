@@ -20,9 +20,9 @@ class AppColors {
   }
 
   // ── Brand Colors (flavor-driven) ──────────────────────────────────────────
-  // Primary color - white in dark mode for text visibility, brand color in light
+  // Primary color - brand-specific in both modes, with darkPrimaryColor for dark mode.
   static Color get primary =>
-      isDarkMode ? const Color(0xFFFFFFFF) : FlavorConfig.instance.primaryColor;
+      isDarkMode ? FlavorConfig.instance.darkPrimaryColor : FlavorConfig.instance.primaryColor;
   static Color get secondary => FlavorConfig.instance.secondaryColor;
   static Color get accent => FlavorConfig.instance.accentColor;
   static const Color _pureBlack = Color(0xFF000000);
