@@ -142,6 +142,13 @@ class BrandResolver extends GetxService {
         ? buildTime
         : _registry!.defaultBrand;
 
+    debugPrint(
+      '[BrandResolver] CLIENT=$_client FLAVOR=$_flavor selected=$selected '
+      'registryDefault=${_registry!.defaultBrand.value} '
+      'registryBrands=${_registry!.brands.map((brand) => brand.value).join(',')} '
+      'resolved=${allowed.value}',
+    );
+
     activeBrand.value = allowed;
 
     // Initialize FlavorConfig from build-time client defaults early.

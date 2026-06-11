@@ -43,6 +43,7 @@ void main() async {
   await generateAndroidFlavors(brands);
   await createAndroidFlavorDirs(brands);
   await updateLaunchJson(brands);
+  await updateTasksJson(brands);
 
   print('\nBrand config generation complete!');
   print('Run: ./build.sh <brand> apk release');
@@ -864,6 +865,7 @@ Future<void> updateLaunchJson(List<Map<String, dynamic>> brands) async {
         'args': args,
         'flutterMode': mode,
         'console': 'terminal',
+        'preLaunchTask': 'prepare-$name',
       });
     }
   }
@@ -872,6 +874,64 @@ Future<void> updateLaunchJson(List<Map<String, dynamic>> brands) async {
   File('.vscode/launch.json').writeAsStringSync(_generateLaunchJson(configs));
   print('  Updated: .vscode/launch.json');
   print('  Total configurations: ${configs.length}');
+}
+
+Future<void> updateTasksJson(List<Map<String, dynamic>> brands) async {
+  print('\n7. Updating .vscode/tasks.json...');
+
+  final tasks = <Map<String, dynamic>>[];
+
+  // Legacy scripts
+  tasks.add({
+    'label': 'Set Android icon (vantage)',
+    'type': 'shell',
+    'command': 'bash',
+    'args': ['scripts/set_vantage_android_launcher_icon.sh'],
+    'options': {
+      'cwd': '\${workspaceFolder}'
+    },
+    'problemMatcher': []
+  });
+  tasks.add({
+    'label': 'Set Android icon (tenax)',
+    'type': 'shell',
+    'command': 'bash',
+    'args': ['scripts/set_tenax_android_launcher_icon.sh'],
+    'options': {
+      'cwd': '\${workspaceFolder}'
+    },
+    'problemMatcher': []
+  });
+
+  // Dynamic prepare tasks for all brands
+  for (final brand in brands) {
+    final name = brand['name'] as String;
+    tasks.add({
+      'label': 'prepare-$name',
+      'type': 'shell',
+      'command': 'bash',
+      'args': ['-lc', 'dart run scripts/prepare_flavor.dart $name && rm -rf .dart_tool/flutter_build'],
+      'options': {
+        'cwd': '\${workspaceFolder}'
+      },
+      'problemMatcher': [],
+      'presentation': {
+        'reveal': 'always',
+        'panel': 'dedicated',
+        'focus': false,
+        'clear': true
+      }
+    });
+  }
+
+  final jsonStr = const JsonEncoder.withIndent('  ').convert({
+    'version': '2.0.0',
+    'tasks': tasks,
+  });
+
+  Directory('.vscode').createSync(recursive: true);
+  File('.vscode/tasks.json').writeAsStringSync('$jsonStr\n');
+  print('  Updated: .vscode/tasks.json');
 }
 
 String _generateLaunchJson(List<Map<String, dynamic>> configs) {
@@ -891,7 +951,8 @@ String _generateLaunchJson(List<Map<String, dynamic>> configs) {
     buffer.write((config['args'] as List<String>).map((a) => '"${_escapeJson(a)}"').join(', '));
     buffer.writeln('],');
     buffer.writeln('            "flutterMode": "${config['flutterMode']}",');
-    buffer.writeln('            "console": "${config['console']}"');
+    buffer.writeln('            "console": "${config['console']}",');
+    buffer.writeln('            "preLaunchTask": "${config['preLaunchTask']}"');
     buffer.write('        }');
     if (i < configs.length - 1) buffer.write(',');
     buffer.writeln();

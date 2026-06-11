@@ -55,20 +55,30 @@ void main(List<String> args) async {
 }
 
 Future<List<String>> loadBrandNames() async {
-  final generated = File('assets/config/brands/brands.json');
-  if (await generated.exists()) {
-    final decoded = jsonDecode(await generated.readAsString());
-    if (decoded is Map && decoded['brands'] is List) {
-      return (decoded['brands'] as List)
-          .map((value) => value.toString().trim().toLowerCase())
-          .where((value) => value.isNotEmpty)
-          .toList();
+  // IMPORTANT: Do not read the scoped runtime registry first.
+  // prepare_flavor.dart intentionally rewrites assets/config/brands/brands.json
+  // to contain ONLY the active build flavor. If we read it first, switching
+  // Pipze -> Skyriss/Celestial later fails with "Unknown flavor".
+  // The source of truth for all available flavors is assets/brands/*/brand.yaml.
+  final brandRoot = Directory(path.join('assets', 'brands'));
+  if (await brandRoot.exists()) {
+    final names = <String>[];
+    await for (final entity in brandRoot.list()) {
+      if (entity is! Directory) continue;
+      final brandYaml = File(path.join(entity.path, 'brand.yaml'));
+      if (!await brandYaml.exists()) continue;
+
+      final name = await readBrandNameFromYaml(brandYaml);
+      if (name.isNotEmpty) names.add(name);
     }
+
+    names.sort();
+    if (names.isNotEmpty) return names;
   }
 
   final yaml = File('assets/config/brands/brands.yaml');
   if (!await yaml.exists()) {
-    throw Exception('Brand registry not found: assets/config/brands/brands.json or brands.yaml');
+    throw Exception('Brand registry not found: assets/brands/*/brand.yaml or assets/config/brands/brands.yaml');
   }
 
   final names = <String>[];
@@ -77,6 +87,16 @@ Future<List<String>> loadBrandNames() async {
     if (match != null) names.add(match.group(1)!.trim().toLowerCase());
   }
   return names;
+}
+
+Future<String> readBrandNameFromYaml(File brandYaml) async {
+  for (final line in (await brandYaml.readAsString()).split('\n')) {
+    final match = RegExp(r'^\s*name:\s*(\S+)\s*$').firstMatch(line);
+    if (match != null) {
+      return match.group(1)!.replaceAll('"', '').replaceAll("'", '').trim().toLowerCase();
+    }
+  }
+  return '';
 }
 
 Future<Map<String, String>> loadBrandColors(String flavor) async {
@@ -210,49 +230,57 @@ Future<void> copyGoogleServicesIfPresent(String flavor) async {
 Future<void> writeBuildBrandRegistry(String flavor) async {
   print('\n🔒 Writing build-scoped brand registry...');
 
+  final activeDetails = await loadBrandDetailsFromSource(flavor);
+  final safeRegistry = <String, dynamic>{
+    'default': flavor,
+    'brands': <String>[flavor],
+    'brandDetails': <Map<String, dynamic>>[
+      {
+        'name': flavor,
+        // Keep this parent in the build-scoped registry so parent/child
+        // relationship metadata for other clients is not bundled in the APK.
+        'type': 'parent',
+        'label': activeDetails['label'] ?? flavor,
+        // Keep only the active brand theme lock/selectability.
+        'themeMode': activeDetails['themeMode'] ?? 'both',
+      },
+    ],
+  };
+
   final registryFile = File('assets/config/brands/brands.json');
-  if (!await registryFile.exists()) {
-    print('  ⚠️  Warning: brands.json not found, skipping registry trim');
-    return;
-  }
+  await registryFile.parent.create(recursive: true);
+  await registryFile.writeAsString('${const JsonEncoder.withIndent('  ').convert(safeRegistry)}\n');
+  print('  ✓ brands.json now contains only $flavor metadata');
+}
 
-  final decoded = jsonDecode(await registryFile.readAsString());
-  if (decoded is! Map<String, dynamic>) {
-    print('  ⚠️  Warning: invalid brands.json, skipping registry trim');
-    return;
-  }
+Future<Map<String, String>> loadBrandDetailsFromSource(String flavor) async {
+  final brandYaml = File(path.join('assets', 'brands', flavor, 'brand.yaml'));
+  final details = <String, String>{};
 
-  final details = decoded['brandDetails'];
-  Map<String, dynamic>? activeDetails;
-  if (details is List) {
-    for (final item in details) {
-      if (item is Map && item['name']?.toString().toLowerCase() == flavor) {
-        activeDetails = item.cast<String, dynamic>();
-        break;
+  if (await brandYaml.exists()) {
+    for (final line in (await brandYaml.readAsString()).split('\n')) {
+      final trimmed = line.trim();
+      if (trimmed.startsWith('label:')) {
+        details['label'] = _yamlValue(trimmed);
+      } else if (trimmed.startsWith('themeMode:')) {
+        details['themeMode'] = _yamlValue(trimmed).toLowerCase();
       }
     }
   }
 
-  final safeRegistry = <String, dynamic>{
-    'default': flavor,
-    'brands': <String>[flavor],
-    if (activeDetails != null)
-      'brandDetails': <Map<String, dynamic>>[
-        {
-          'name': activeDetails['name'],
-          // Keep this parent in the build-scoped registry so parent/child
-          // relationship metadata for other clients is not bundled in the APK.
-          'type': 'parent',
-          'label': activeDetails['label'],
-          // Keep only the active brand theme lock/selectability. Without this,
-          // forced-light brands (e.g. Pipze) may incorrectly behave as both.
-          'themeMode': activeDetails['themeMode'] ?? 'both',
-        },
-      ],
-  };
+  details['label'] ??= flavor;
+  details['themeMode'] ??= 'both';
+  return details;
+}
 
-  await registryFile.writeAsString('${const JsonEncoder.withIndent('  ').convert(safeRegistry)}\n');
-  print('  ✓ brands.json now contains only $flavor metadata');
+String _yamlValue(String line) {
+  return line
+      .split(':')
+      .sublist(1)
+      .join(':')
+      .trim()
+      .replaceAll('"', '')
+      .replaceAll("'", '');
 }
 
 Future<void> updatePubspec(String flavor, List<String> allFlavors) async {

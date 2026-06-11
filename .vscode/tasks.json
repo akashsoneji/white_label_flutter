@@ -5,7 +5,9 @@
       "label": "Set Android icon (vantage)",
       "type": "shell",
       "command": "bash",
-      "args": ["scripts/set_vantage_android_launcher_icon.sh"],
+      "args": [
+        "scripts/set_vantage_android_launcher_icon.sh"
+      ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -15,37 +17,101 @@
       "label": "Set Android icon (tenax)",
       "type": "shell",
       "command": "bash",
-      "args": ["scripts/set_tenax_android_launcher_icon.sh"],
+      "args": [
+        "scripts/set_tenax_android_launcher_icon.sh"
+      ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
     },
     {
-      "label": "Set Android icon (celestial)",
+      "label": "prepare-celestial",
       "type": "shell",
-      "command": "dart",
-      "args": ["run", "scripts/prepare_flavor.dart", "celestial"],
+      "command": "bash",
+      "args": [
+        "-lc",
+        "dart run scripts/prepare_flavor.dart celestial && rm -rf .dart_tool/flutter_build"
+      ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": true
+      }
     },
     {
-      "label": "Set Android icon (pipze)",
+      "label": "prepare-pipze",
       "type": "shell",
-      "command": "dart",
-      "args": ["run", "scripts/prepare_flavor.dart", "pipze"],
+      "command": "bash",
+      "args": [
+        "-lc",
+        "dart run scripts/prepare_flavor.dart pipze && rm -rf .dart_tool/flutter_build"
+      ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": true
+      }
     },
     {
-      "label": "prepare-flavor-afx",
+      "label": "prepare-skyriss",
       "type": "shell",
-      "command": "dart",
-      "args": ["run", "scripts/prepare_flavor.dart", "afx"],
+      "command": "bash",
+      "args": [
+        "-lc",
+        "dart run scripts/prepare_flavor.dart skyriss && rm -rf .dart_tool/flutter_build"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "prepare-tenax",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "dart run scripts/prepare_flavor.dart tenax && rm -rf .dart_tool/flutter_build"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": true
+      }
+    },
+    {
+      "label": "prepare-vantage",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "dart run scripts/prepare_flavor.dart vantage && rm -rf .dart_tool/flutter_build"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": [],
       "presentation": {
         "reveal": "always",
