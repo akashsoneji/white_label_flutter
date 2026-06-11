@@ -1584,12 +1584,14 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
               ],
             ),
             child: ExpansionTile(
+              collapsedIconColor:AppColors.primary,
+              iconColor: AppColors.primary,
               shape: const RoundedRectangleBorder(side: BorderSide.none),
               collapsedShape: const RoundedRectangleBorder(
                 side: BorderSide.none,
               ),
               title: Text(
-                'Fund Entries (Deposit History)',
+                'Fund Entries',
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
@@ -1635,165 +1637,203 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                     padding: EdgeInsets.only(
                       left: 14.w,
                       right: 14.w,
-                      bottom: 12.h,
+                      bottom: 14.h,
                     ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(minWidth: 520.w),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(bottom: 8.h),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      'Plan',
-                                      style: TextStyle(
-                                        fontSize: 11.sp,
-                                        color: AppColors.textGrey,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      'Amount',
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
-                                        fontSize: 11.sp,
-                                        color: AppColors.textGrey,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 12.w),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      'Type',
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
-                                        fontSize: 11.sp,
-                                        color: AppColors.textGrey,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 12.w),
-                                  Expanded(
-                                    flex: 5,
-                                    child: Text(
-                                      'Date',
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
-                                        fontSize: 11.sp,
-                                        color: AppColors.textGrey,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                    child: Column(
+                      children: [
+                        ...fundEntries.asMap().entries.map((entry) {
+                          final idx = entry.key;
+                          final e = entry.value;
+                          final plan =
+                              (e['plan_name'] ??
+                                      e['plan']?['plan_name'] ??
+                                      e['plan'] ??
+                                      '-')
+                                  .toString();
+                          final rawAmount = e['amount'] ?? e['invested_amount'];
+                          final amountText =
+                              rawAmount == null ? '-' : _fmtMoney(rawAmount);
+                          final type =
+                              (e['type_label'] ??
+                                      e['type'] ??
+                                      e['entry_type'] ??
+                                      '-')
+                                  .toString();
+                          final status = (e['status'] ?? '-').toString();
+                          final statusLower = status.toLowerCase();
+                          final isDeposit = type.toLowerCase() == 'deposit';
+                          final statusColor = statusLower == 'active'
+                              ? AppColors.green
+                              : statusLower == 'withdrawn'
+                                  ? AppColors.red
+                                  : AppColors.textGrey;
+                          final date =
+                              e['entry_time'] ??
+                              e['date'] ??
+                              e['created_at'] ??
+                              e['open_time'];
+
+                          final transactionColor =
+                              isDeposit ? AppColors.green : AppColors.red;
+                          
+
+                          return Container(
+                            margin: EdgeInsets.only(
+                              top: idx == 0 ? 2.h : 10.h,
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            decoration: BoxDecoration(
+                              color: AppColors.whiteColor,
+                              borderRadius: BorderRadius.circular(14.r),
+                              border: Border.all(
+                                color: AppColors.dividerLight,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.03),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            Container(
-                              height: 1,
-                              color: AppColors.dividerLight,
-                            ),
-                            ...fundEntries.asMap().entries.expand((entry) {
-                              final idx = entry.key;
-                              final e = entry.value;
-                              final plan =
-                                  (e['plan_name'] ??
-                                          e['plan']?['plan_name'] ??
-                                          e['plan'] ??
-                                          '-')
-                                      .toString();
-                              final rawAmount =
-                                  e['amount'] ?? e['invested_amount'];
-                              final amountText =
-                                  rawAmount == null
-                                      ? '-'
-                                      : _fmtMoney(rawAmount);
-                              final type =
-                                  (e['type'] ?? e['entry_type'] ?? '-')
-                                      .toString();
-                              final date =
-                                  e['date'] ??
-                                  e['created_at'] ??
-                                  e['open_time'];
-                              return [
-                                if (idx == 0) SizedBox(height: 2.h),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 10.h),
-                                  child: Row(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  left: BorderSide(
+                                    color: transactionColor,
+                                    width: 4.w,
+                                  ),
+                                ),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 14.w,
+                                vertical: 12.h,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Row 1: Type (+ / - Label) & Amount
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '$type',
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          color: transactionColor,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      Text(
+                                        amountText,
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: AppColors.textPrimary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8.h),
+                                  // Row 2: Plan and Status Badge
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
-                                        flex: 5,
-                                        child: Text(
-                                          plan,
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: AppColors.textPrimary,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                        child: RichText(
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 3,
-                                        child: Text(
-                                          amountText,
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: AppColors.textPrimary,
-                                            fontWeight: FontWeight.w700,
+                                          text: TextSpan(
+                                            style: TextStyle(
+                                              fontSize: 11.sp,
+                                              color: AppColors.textGrey,
+                                            ),
+                                            children: [
+                                              const TextSpan(
+                                                text: 'Plan: ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: plan,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                      SizedBox(width: 12.w),
-                                      Expanded(
-                                        flex: 3,
-                                        child: Text(
-                                          type,
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(
-                                            fontSize: 12.sp,
-                                            color: AppColors.textPrimary,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w,
+                                          vertical: 3.h,
                                         ),
-                                      ),
-                                      SizedBox(width: 12.w),
-                                      Expanded(
-                                        flex: 5,
+                                        decoration: BoxDecoration(
+                                          color: statusColor.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(20.r),
+                                        ),
                                         child: Text(
-                                          _fmtDateTimeShort(date),
-                                          textAlign: TextAlign.right,
+                                          status == '-'
+                                              ? '-'
+                                              : status.toUpperCase(),
                                           style: TextStyle(
-                                            fontSize: 11.sp,
-                                            color: AppColors.textGrey,
+                                            fontSize: 9.sp,
+                                            color: statusColor,
+                                            fontWeight: FontWeight.w800,
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                if (idx != fundEntries.length - 1)
+                                  SizedBox(height: 8.h),
+                                  // Divider line
                                   Container(
                                     height: 1,
-                                    color: AppColors.dividerLightAlt,
+                                    color: AppColors.dividerLight.withOpacity(0.5),
                                   ),
-                              ];
-                            }),
-                          ],
-                        ),
-                      ),
+                                  SizedBox(height: 8.h),
+                                  // Row 3: Date
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today_rounded,
+                                        size: 13.sp,
+                                        color: AppColors.textGrey,
+                                      ),
+                                      SizedBox(width: 6.w),
+                                      RichText(
+                                        text: TextSpan(
+                                          style: TextStyle(
+                                            fontSize: 11.sp,
+                                            color: AppColors.textGrey,
+                                          ),
+                                          children: [
+                                            const TextSpan(
+                                              text: 'Date: ',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            TextSpan(
+                                              text: _fmtDateTimeShort(date),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                        SizedBox(height: 2.h),
+                      ],
                     ),
                   ),
               ],
