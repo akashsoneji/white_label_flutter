@@ -152,7 +152,11 @@ class TradeWinBottomNavigation extends StatelessWidget {
                 child: Icon(
                   item.icon,
                   size: selected ? 22.sp : 20.sp,
-                  color: selected ? AppColors.pureWhite : inactiveColor,
+                  color: selected
+                      ? (ThemeData.estimateBrightnessForColor(AppColors.primary) == Brightness.light
+                          ? Colors.black
+                          : AppColors.pureWhite)
+                      : inactiveColor,
                 ),
               ),
               SizedBox(height: 6.h),

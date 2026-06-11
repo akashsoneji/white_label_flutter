@@ -300,7 +300,11 @@ class _TradeWinProductDetailScreenState
                           ? AppColors.primary
                           : AppColors.icongrey.withValues(alpha: 0.35),
                   foregroundColor:
-                      _canRedeem ? Colors.white : AppColors.textGrey,
+                      _canRedeem
+                          ? (ThemeData.estimateBrightnessForColor(AppColors.primary) == Brightness.light
+                              ? Colors.black
+                              : Colors.white)
+                          : AppColors.textGrey,
                   disabledBackgroundColor: AppColors.icongrey.withValues(
                     alpha: 0.35,
                   ),

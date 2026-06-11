@@ -450,7 +450,7 @@ class _CatalogInfoChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 7.sp,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: labelColor,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -593,7 +593,9 @@ class _ProductCatalogCard extends StatelessWidget {
               onPressed: () => _onRedeem(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: ThemeData.estimateBrightnessForColor(AppColors.primary) == Brightness.light
+                    ? Colors.black
+                    : Colors.white,
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -605,7 +607,9 @@ class _ProductCatalogCard extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 15.sp,
-                  color: Colors.white,
+                  color: ThemeData.estimateBrightnessForColor(AppColors.primary) == Brightness.light
+                      ? Colors.black
+                      : Colors.white,
                 ),
               ),
             ),

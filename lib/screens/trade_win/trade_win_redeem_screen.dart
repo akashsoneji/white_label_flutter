@@ -797,6 +797,10 @@ class _BottomActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final btnTextColor = ThemeData.estimateBrightnessForColor(AppColors.primary) == Brightness.light
+        ? Colors.black
+        : Colors.white;
+
     return Obx(() {
       final step = controller.currentStep.value;
       final submitting = controller.isSubmitting.value;
@@ -814,7 +818,7 @@ class _BottomActions extends StatelessWidget {
                     onPressed: onDone,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: btnTextColor,
                       padding: EdgeInsets.symmetric(vertical: 14.h),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
@@ -825,7 +829,7 @@ class _BottomActions extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16.sp,
-                        color: Colors.white,
+                        color: btnTextColor,
                       ),
                     ),
                   ),
@@ -837,7 +841,7 @@ class _BottomActions extends StatelessWidget {
                     onPressed: () => controller.goToStep(2),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: btnTextColor,
                       padding: EdgeInsets.symmetric(vertical: 12.h),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.r),
@@ -845,7 +849,7 @@ class _BottomActions extends StatelessWidget {
                     ),
                     child: Text(
                       languageService.tr('tw_continue'),
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: btnTextColor),
                     ),
                   ),
                 ),
@@ -872,7 +876,7 @@ class _BottomActions extends StatelessWidget {
                     onPressed: submitting ? null : onSubmit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: btnTextColor,
                       padding: EdgeInsets.symmetric(vertical: 12.h),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.r),
@@ -883,14 +887,14 @@ class _BottomActions extends StatelessWidget {
                             ? SizedBox(
                               height: 20.h,
                               width: 20.w,
-                              child: const CircularProgressIndicator(
+                              child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: btnTextColor,
                               ),
                             )
                             : Text(
                               languageService.tr('tw_submit_redemption'),
-                              style: const TextStyle(color: Colors.white),
+                              style: TextStyle(color: btnTextColor),
                             ),
                   ),
                 ),
