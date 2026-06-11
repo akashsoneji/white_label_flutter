@@ -27,6 +27,7 @@ import 'package:crm_app/screens/home/brands/vantage/vantage_dashboard_layout.dar
 import 'package:crm_app/screens/home/brands/vantage/vantage_glass_tokens.dart';
 import 'package:crm_app/widgets/app_svg_icon.dart';
 import 'package:crm_app/widgets/vantage/vantage_app_bar.dart';
+import 'package:crm_app/screens/wallet/view_models/wallet_controller.dart';
 
 class DashboardScreen extends StatelessWidget {
   final Function(int)? onNavigateToTab;
@@ -38,6 +39,13 @@ class DashboardScreen extends StatelessWidget {
   Future<void> _onRefresh() async {
     // Call account get API when refresh is triggered
     await controller.refreshMT5Accounts(force: true);
+    // Refresh wallet balance
+    try {
+      final walletCtrl = Get.isRegistered<WalletController>()
+          ? Get.find<WalletController>()
+          : Get.put(WalletController());
+      walletCtrl.fetchWalletData();
+    } catch (_) {}
     // Also request account data from WebSocket
     try {
       if (Get.isRegistered<AccountWebSocketService>()) {
@@ -55,6 +63,64 @@ class DashboardScreen extends StatelessWidget {
 
   BoxDecoration _vantageSegmentedBarDecoration() =>
       VantageUiTokens.groupDecoration();
+
+  Widget _buildWalletHeaderButton() {
+    final walletCtrl = Get.isRegistered<WalletController>()
+        ? Get.find<WalletController>()
+        : Get.put(WalletController());
+
+    return Container(
+      height: 40.h,
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadow,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Get.toNamed(AppPages.WALLET),
+          borderRadius: BorderRadius.circular(12.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppSvgIcon(
+                  assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
+                  height: 20.h,
+                  width: 20.w,
+                  color: AppColors.primary,
+                ),
+                SizedBox(width: 6.w),
+                Obx(() {
+                  final bal = walletCtrl.balance.value;
+                  final displayBal = bal.isEmpty ? '0.00' : bal;
+                  final formattedBal = displayBal.startsWith('\$')
+                      ? displayBal
+                      : '\$$displayBal';
+                  return Text(
+                    formattedBal,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildHeaderIconButton({
     required String assetPath,
@@ -123,10 +189,7 @@ class DashboardScreen extends StatelessWidget {
                       centerTitle: true,
                       toolbarHeight: 56.h,
                       actions: [
-                        _buildHeaderIconButton(
-                          assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
-                          onPressed: () => Get.toNamed(AppPages.WALLET),
-                        ),
+                        _buildWalletHeaderButton(),
                         SizedBox(width: 8.w),
                         _buildHeaderIconButton(
                           assetPath: 'assets/svg/deshboard/add-square.svg',
@@ -276,6 +339,13 @@ class DashboardScreen extends StatelessWidget {
       controller.ensureWebSocketInitialized();
       // Always call get account API when dashboard appears (bypass throttling)
       controller.refreshMT5Accounts(force: true);
+      // Fetch wallet balance
+      try {
+        final walletCtrl = Get.isRegistered<WalletController>()
+            ? Get.find<WalletController>()
+            : Get.put(WalletController());
+        walletCtrl.fetchWalletData();
+      } catch (_) {}
       // Dashboard controller will handle account data request via _requestAccountData()
     });
     // Set the navigation callback in the controller
@@ -294,10 +364,7 @@ class DashboardScreen extends StatelessWidget {
                 style: AppTextStyles.screenTitle,
               ),
               actions: [
-                _buildHeaderIconButton(
-                  assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
-                  onPressed: () => Get.toNamed(AppPages.WALLET),
-                ),
+                _buildWalletHeaderButton(),
                 SizedBox(width: 8.w),
                 _buildHeaderIconButton(
                   assetPath: 'assets/svg/deshboard/add-square.svg',
@@ -317,10 +384,7 @@ class DashboardScreen extends StatelessWidget {
               ),
               centerTitle: true,
               actions: [
-                _buildHeaderIconButton(
-                  assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
-                  onPressed: () => Get.toNamed(AppPages.WALLET),
-                ),
+                _buildWalletHeaderButton(),
                 SizedBox(width: 8.w),
                 _buildHeaderIconButton(
                   assetPath: 'assets/svg/deshboard/add-square.svg',

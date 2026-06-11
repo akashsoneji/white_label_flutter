@@ -268,27 +268,38 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
               ),
 
               // Save Button
-              ElevatedButton(
-                onPressed: () {
-                  // Dismiss keyboard when save button is tapped
-                  FocusScope.of(context).unfocus();
-                  _handleSave();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.whiteColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  padding: EdgeInsets.all(0),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Save',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.whiteColor,
+              Obx(
+                () => SizedBox(
+                  width: double.infinity,
+                  height: 44.h,
+                  child: ElevatedButton(
+                    onPressed:
+                        authController.isLoading
+                            ? null
+                            : () {
+                              // Dismiss keyboard when save button is tapped
+                              FocusScope.of(context).unfocus();
+                              _handleSave();
+                            },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.whiteColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      padding: EdgeInsets.zero,
+                      elevation: 0,
+                    ),
+                    child: authController.isLoading
+                        ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
+                        : Text(
+                          'Save',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.whiteColor,
+                          ),
+                        ),
                   ),
                 ),
               ),

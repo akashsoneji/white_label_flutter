@@ -154,7 +154,7 @@ class FlavorConfig {
 
   static bool usesVantageUi() {
     final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
-    return const <String>{'celestial', 'pipze', 'skyriss', 'vantage'}.contains(name);
+    return const <String>{'celestial', 'pipze', 'skyriss', 'tenax', 'vantage'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;

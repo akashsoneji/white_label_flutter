@@ -77,6 +77,7 @@ class TradingBottomNavigation extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
           child: Container(
+            height: 64.h,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(32.r),
               boxShadow: [
@@ -93,6 +94,7 @@ class TradingBottomNavigation extends StatelessWidget {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                 child: Container(
+                  height: 64.h,
                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                   decoration: BoxDecoration(
                     // Glass effect
@@ -192,30 +194,33 @@ class TradingBottomNavigation extends StatelessWidget {
                     : Colors.transparent,
                 borderRadius: _tabCapsuleRadius,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AppSvgIcon(
-                    assetPath: isSelected ? iconBold : icon,
-                    height: (isSelected ? _selectedIconSize : _unselectedIconSize).h,
-                    width: (isSelected ? _selectedIconSize : _unselectedIconSize).w,
-                    color: isSelected ? AppColors.primary : AppColors.textGrey,
-                  ),
-                  if (isSelected) ...[
-                    SizedBox(width: 8.w),
-                    Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.subheading.copyWith(
-                        fontSize: 13.sp,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AppSvgIcon(
+                      assetPath: isSelected ? iconBold : icon,
+                      height: (isSelected ? _selectedIconSize : _unselectedIconSize).h,
+                      width: (isSelected ? _selectedIconSize : _unselectedIconSize).w,
+                      color: isSelected ? AppColors.primary : AppColors.textGrey,
                     ),
+                    if (isSelected) ...[
+                      SizedBox(width: 8.w),
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.subheading.copyWith(
+                          fontSize: 13.sp,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

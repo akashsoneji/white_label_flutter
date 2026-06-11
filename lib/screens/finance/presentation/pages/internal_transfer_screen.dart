@@ -1193,18 +1193,21 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         return;
       }
 
-      // 4. Check balance
+      // 4. Set submitting to true BEFORE checking balance to disable the button instantly
+      _isSubmitting.value = true;
+
+      // Check balance
       final isValid = await controller.checkBalance(
         fromAccountId,
         parsedAmount,
       );
       if (!isValid) {
         // Error already shown in checkBalance method
+        _isSubmitting.value = false;
         return;
       }
 
       // 5. Send OTP
-      _isSubmitting.value = true;
       final otpSent = await controller.sendOTP(fromAccountId);
       _isSubmitting.value = false;
       if (otpSent) {

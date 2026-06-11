@@ -84,7 +84,8 @@ brands:
       splashLogo: "assets/brands/skyriss/splash_logo.svg"
 
   - name: tenax
-    type: parent
+    type: child
+    inheritsFrom: vantage
     label: Tenax
     themeMode: both
     android:
@@ -100,9 +101,9 @@ brands:
       splashColor: "#4A0C54"
       launcherBackground: "#4A0C54"
     urls:
-      api: "https://my.pipze.com/api/"
-      websocket: "wss://my.pipze.com/trade-engine"
-      chart: "https://my.pipze.com"
+      api: "https://demo.tenaxcode.com/api/"
+      websocket: "wss://demo.tenaxcode.com/trade-engine"
+      chart: "https://demo.tenaxcode.com"
     assets:
       appIcon: "assets/brands/tenax/icon.png"
       logo: "assets/brands/tenax/logo.svg"

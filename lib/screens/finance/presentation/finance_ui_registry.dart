@@ -31,7 +31,9 @@ class FinanceUiRegistry implements FinanceUiSlots {
   bool get _usesVantageUi =>
       _activeClient.toLowerCase() == 'vantage' ||
       _activeClient.toLowerCase() == 'celestial' ||
-      _activeClient.toLowerCase() == 'pipze';
+      _activeClient.toLowerCase() == 'pipze' ||
+      _activeClient.toLowerCase() == 'skyriss' ||
+      _activeClient.toLowerCase() == 'tenax';
 
   @override
   Widget paymentMethods({required String accountNumber}) {

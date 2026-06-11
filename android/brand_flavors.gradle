@@ -51,7 +51,8 @@ ext.brandFlavors = [
         accent: "#FFC93C",
         splashColor: "#4A0C54",
         launcherBackground: "#4A0C54",
-        type: "parent",
+        type: "child",
+        inheritsFrom: "vantage",
     ],
     [
         name: "vantage",

@@ -42,7 +42,7 @@ class UiRegistry implements UiSlots {
     'celestial': 'vantage',
     'pipze': 'vantage',
     'skyriss': 'vantage',
-    'tenax': 'tenax',
+    'tenax': 'vantage',
   };
 
   String get _uiBrand => _uiParentByClient[client.toLowerCase()] ?? client.toLowerCase();
