@@ -20,11 +20,17 @@ colors:
   launcherBackground: "#4A0C54"
 
 urls:
-  api: https://demo.tenaxcode.com/api/
-  websocket: wss://demo.tenaxcode.com/trade-engine
-  chart: https://demo.tenaxcode.com
+  api: https://app.tenaxcode.com/api/
+  websocket: wss://app.tenaxcode.com/trade-engine
+  chart: https://app.tenaxcode.com
 
 assets:
   appIcon: icon.png
   logo: logo.svg
   splashLogo: splash_logo.svg
+
+# ✅ WebSocket configuration per brand
+# Set unifiedStreamSocket to true to use the new single-socket path (/ws/stream with MessagePack)
+# Set to false to use the legacy 5-socket path
+featureFlags:
+  unifiedStreamSocket: true

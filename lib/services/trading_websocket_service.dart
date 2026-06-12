@@ -4513,4 +4513,103 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
   void disconnectFromSymbols() {
     _disconnectSymbols();
   }
+
+  // ───────────────────────────────────────────────────────────────────────
+  // UNIFIED STREAM INJECTION (added by white_label: /ws/stream adapter)
+  // ───────────────────────────────────────────────────────────────────────
+  //
+  // Public hook for [UnifiedStreamAdapter] to feed positions / pending
+  // orders frames from the new single-stream WebSocket into this service
+  // without going through the legacy multi-socket decode path. The
+  // payload here is already the **inner** content (the engine has stripped
+  // the `[tag, payload]` envelope for us; [UnifiedStreamAdapter] does the
+  // demux).
+  //
+  // We translate each "tag" into the same call as the legacy multi-socket
+  // path, so the rest of the service (batching, zombie-filter,
+  // account-match) keeps working unchanged.
+  void injectFromStream({required String tag, required dynamic payload}) {
+    if (_isDisposed) return;
+
+    // Bring session up-to-date so reconnect/watchdog timers are happy.
+    _lastDataReceived = DateHelper.nowUtc();
+    _dataRetryTimer?.cancel();
+
+    switch (tag) {
+      case 'pos':
+        _handlePositionsStreamPayload(payload);
+        break;
+      case 'po':
+        _handleOrdersStreamPayload(payload);
+        break;
+      default:
+        AppLogger.warning(
+          'TradingWS: injectFromStream: unsupported tag "$tag"',
+        );
+    }
+  }
+
+  // Handle a `pos` payload from /ws/stream.
+  //
+  // Server can send:
+  //   - ['op'|'a'|'u', id, account, symbol, side, lots, open, current,
+  //      profit, swap, sl, tp, server, openTime, digits, contractSize]
+  //   - ['r', account, ...ids]
+  //   - a batch of the above
+  void _handlePositionsStreamPayload(dynamic payload) {
+    if (payload is! List || payload.isEmpty) return;
+
+    final items = (payload[0] is List) ? payload : [payload];
+
+    for (final raw in items) {
+      if (raw is! List || raw.isEmpty) continue;
+      final action = raw.first.toString();
+      if (action == 'r') {
+        _handleRemoveFromStream(raw);
+      } else {
+        // 'op' | 'a' | 'u' — same shape as the legacy /ws/op add/update
+        // lines. Reuse the existing handler.
+        _handleSinglePositionOpFormat(raw);
+      }
+    }
+  }
+
+  // ['r', account, ...ids] — single or bulk
+  void _handleRemoveFromStream(List raw) {
+    if (raw.length < 2) return;
+    final account = raw[1]?.toString() ?? '';
+    final currentAccount =
+        _accountController.activeMT5Account?.metaAccountNumber;
+    if (currentAccount != null &&
+        account.isNotEmpty &&
+        account != 'N/A' &&
+        account != currentAccount) {
+      return; // not for this account
+    }
+    final ids = raw.sublist(2);
+    for (final id in ids) {
+      final positionId = id.toString();
+      _removedPositionIds.add(positionId);
+      _tradingController.removePositionFromList(positionId);
+    }
+  }
+
+  // Handle a `po` payload from /ws/stream.
+  //
+  // Server can send:
+  //   - ['a'|'u', orderId, account, symbol, type, lots, orderPx,
+  //      currentPx, sl, tp, server, createdAt, swap, digits]
+  //   - ['r', account, ...orderIds]
+  //   - a batch
+  void _handleOrdersStreamPayload(dynamic payload) {
+    if (payload is! List || payload.isEmpty) return;
+
+    final items = (payload[0] is List) ? payload : [payload];
+
+    for (final raw in items) {
+      if (raw is! List || raw.isEmpty) continue;
+      // The legacy handler can deal with all of these formats directly.
+      _handlePendingOrderMessage(raw);
+    }
+  }
 }

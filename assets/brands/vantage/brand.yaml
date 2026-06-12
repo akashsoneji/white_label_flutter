@@ -27,3 +27,9 @@ assets:
   appIcon: icon.png
   logo: logo.svg
   splashLogo: splash_logo.svg
+
+# ✅ WebSocket configuration per brand
+# Set unifiedStreamSocket to true to use the new single-socket path (/ws/stream with MessagePack)
+# Set to false to use the legacy 5-socket path
+featureFlags:
+  unifiedStreamSocket: true

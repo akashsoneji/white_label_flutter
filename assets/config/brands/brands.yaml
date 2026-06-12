@@ -29,6 +29,8 @@ brands:
       appIcon: "assets/brands/celestial/icon.png"
       logo: "assets/brands/celestial/logo.svg"
       splashLogo: "assets/brands/celestial/splash_logo.svg"
+      featureFlags: ""
+      unifiedStreamSocket: "true"
 
   - name: pipze
     type: child
@@ -55,6 +57,8 @@ brands:
       appIcon: "assets/brands/pipze/icon.png"
       logo: "assets/brands/pipze/icon.png"
       splashLogo: "assets/brands/pipze/icon.png"
+      featureFlags: ""
+      unifiedStreamSocket: "true"
 
   - name: skyriss
     type: child
@@ -82,6 +86,8 @@ brands:
       appIcon: "assets/brands/skyriss/icon.png"
       logo: "assets/brands/skyriss/logo.svg"
       splashLogo: "assets/brands/skyriss/splash_logo.svg"
+      featureFlags: ""
+      unifiedStreamSocket: "true"
 
   - name: tenax
     type: child
@@ -101,13 +107,15 @@ brands:
       splashColor: "#4A0C54"
       launcherBackground: "#4A0C54"
     urls:
-      api: "https://demo.tenaxcode.com/api/"
-      websocket: "wss://demo.tenaxcode.com/trade-engine"
-      chart: "https://demo.tenaxcode.com"
+      api: "https://app.tenaxcode.com/api/"
+      websocket: "wss://app.tenaxcode.com/trade-engine"
+      chart: "https://app.tenaxcode.com"
     assets:
       appIcon: "assets/brands/tenax/icon.png"
       logo: "assets/brands/tenax/logo.svg"
       splashLogo: "assets/brands/tenax/splash_logo.svg"
+      featureFlags: ""
+      unifiedStreamSocket: "true"
 
   - name: vantage
     type: parent
@@ -133,4 +141,6 @@ brands:
       appIcon: "assets/brands/vantage/icon.png"
       logo: "assets/brands/vantage/logo.svg"
       splashLogo: "assets/brands/vantage/splash_logo.svg"
+      featureFlags: ""
+      unifiedStreamSocket: "true"
 

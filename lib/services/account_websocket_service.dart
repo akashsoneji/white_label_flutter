@@ -1287,4 +1287,43 @@ class AccountWebSocketService extends GetxService with WidgetsBindingObserver {
       });
     }
   }
+
+  // ───────────────────────────────────────────────────────────────────────
+  // UNIFIED STREAM INJECTION (added by white_label: /ws/stream adapter)
+  // ───────────────────────────────────────────────────────────────────────
+  //
+  // Public hook for [UnifiedStreamAdapter] to feed account-metric frames
+  // from the new single-stream WebSocket into this service. The payload
+  // is the **inner** content (the [SingleStreamWebSocketService] has
+  // already stripped the `[tag, payload]` envelope and normalized it
+  // back into the legacy-compatible shape with an `'ac'` marker).
+  //
+  // The actual parser is [_parseAccountArray] — we simply rebuild the
+  // message envelope it expects.
+  void injectFromStream(dynamic payload) {
+    if (_isDisposed) return;
+
+    // Mark the service as live so the watchdog doesn't try to reconnect.
+    isConnected.value = true;
+    _lastSubscribedAccount ??=
+        _accountController.activeMT5Account?.metaAccountNumber;
+
+    if (payload is List) {
+      if (payload.isEmpty) return;
+      if (payload.first is List) {
+        // Multiple rows
+        for (final row in payload) {
+          if (row is List) _parseAccountArray(row);
+        }
+      } else {
+        // Single row
+        _parseAccountArray(payload);
+      }
+      return;
+    }
+
+    if (payload is Map<String, dynamic>) {
+      _handleJsonResponse(payload);
+    }
+  }
 }

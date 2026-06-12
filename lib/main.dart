@@ -64,6 +64,8 @@ import 'services/crm_settings_service.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'services/account_service.dart';
 import 'services/websocket_endpoint_helper.dart';
+import 'services/unified_stream_adapter.dart';
+import 'core/feature_flags/feature_keys.dart';
 import 'routes/app_pages.dart';
 import 'widgets/exit_confirmation_wrapper.dart';
 import 'widgets/app_notification_stack.dart';
@@ -332,6 +334,16 @@ Future<void> initServices() async {
   Get.put<ChartSocketController>(ChartSocketController(), permanent: true);
   Get.put<TradingController>(TradingController(), permanent: true);
   await PriceAlertService().initialize();
+
+  // ========================================================================
+  // ✅ UNIFIED STREAM ADAPTER - Condition-based WebSocket routing
+  // If unifiedStreamSocket feature flag is true:
+  //   - Uses new /ws/stream single connection with MessagePack binary
+  //   - Falls back to legacy 5-socket path on repeated auth failures
+  // If feature flag is false:
+  //   - Legacy services (TradingWebSocketService, AccountWebSocketService) drive the app
+  // ========================================================================
+  Get.put<UnifiedStreamAdapter>(UnifiedStreamAdapter(), permanent: true);
 
   // Initialize app notification controller for global notifications
   Get.put<AppNotificationController>(
