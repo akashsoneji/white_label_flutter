@@ -15,6 +15,8 @@ import 'package:crm_app/utils/message_pack_decoder.dart'; // ✅ ADD: For binary
 import 'package:crm_app/utils/app_logger.dart'; // ✅ CENTRALIZED: Logging
 import 'package:crm_app/utils/date_helper.dart'; // ✅ UTC timezone support
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:crm_app/core/config/app_config_service.dart';
+import 'package:crm_app/services/unified_stream_adapter.dart';
 
 class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
   // Connection state - support multiple concurrent connections
@@ -72,6 +74,25 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
   // Session gating to ignore late frames from previous connections
   int _sessionId = 0;
   int _activeSessionId = 0;
+
+  bool _shouldUseUnified() {
+    try {
+      if (Get.isRegistered<AppConfigService>()) {
+        final config = Get.find<AppConfigService>();
+        if (config.useUnifiedStreamSocket) {
+          if (Get.isRegistered<UnifiedStreamAdapter>()) {
+            final adapter = Get.find<UnifiedStreamAdapter>();
+            if (adapter.useUnified) {
+              return true;
+            }
+          } else {
+            return true;
+          }
+        }
+      }
+    } catch (_) {}
+    return false;
+  }
 
   // Normalize account numbers (string/int, leading zeros) for safe comparison
   bool _accountMatches(String? expected, String actual) {
@@ -280,6 +301,10 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
   // Initialize WebSocket connection - always use unified /ws/op endpoint
   // Main channel handles both positions and orders (batched)
   void _initializeWebSocket() {
+    if (_shouldUseUnified()) {
+      _disconnectWebSocket();
+      return;
+    }
     // ✅ Always use unified endpoint - account type detection happens on Trade Engine side
     final endpoint = WebSocketEndpointHelper.getOpenPositionsEndpoint(null);
 
@@ -392,6 +417,7 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Request trading data from WebSocket
   void _requestTradingData() async {
+    if (_shouldUseUnified()) return;
     if (_isDisposed || !isConnected.value) {
       if (kDebugMode) {
         // dev.log('Trading WS: Cannot request data - disposed or not connected');
@@ -468,6 +494,7 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Setup retry timer if data doesn't arrive
   void _setupDataRetryTimer() {
+    if (_shouldUseUnified()) return;
     _dataRetryTimer?.cancel();
     _dataRetryTimer = Timer(const Duration(seconds: 3), () async {
       if (_isDisposed || !isConnected.value) return;
@@ -496,6 +523,7 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Start periodic refresh to maintain subscription
   void _startPeriodicRefresh() {
+    if (_shouldUseUnified()) return;
     _subscriptionRefreshTimer?.cancel();
     // Refresh subscription every 30 seconds to maintain connection
     _subscriptionRefreshTimer = Timer.periodic(const Duration(seconds: 30), (
@@ -609,6 +637,10 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Connect to open positions endpoint with conditional MT5 prefix
   void _connectToOpenPositions() {
+    if (_shouldUseUnified()) {
+      _disconnectOpenPositions();
+      return;
+    }
     if (_isDisposed || _isConnectingOpenPositions) return;
 
     final activeAccount = _accountController.activeMT5Account;
@@ -723,6 +755,10 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Connect to pending orders endpoint
   void _connectToPendingOrders() {
+    if (_shouldUseUnified()) {
+      _disconnectPendingOrders();
+      return;
+    }
     if (_isDisposed || _isConnectingPendingOrders) return;
 
     final activeAccount = _accountController.activeMT5Account;
@@ -847,6 +883,7 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Schedule pending orders reconnection
   void _schedulePendingOrdersReconnect() {
+    if (_shouldUseUnified()) return;
     if (_isDisposed ||
         _pendingOrdersReconnectAttempts >= _maxReconnectAttempts) {
       return;
@@ -884,6 +921,10 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Connect to symbols endpoint with conditional MT5 prefix
   void _connectToSymbols() {
+    if (_shouldUseUnified()) {
+      _disconnectSymbols();
+      return;
+    }
     if (_isDisposed || _isConnectingSymbols) return;
 
     final activeAccount = _accountController.activeMT5Account;
@@ -1012,6 +1053,7 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Schedule reconnect for open positions
   void _scheduleOpenPositionsReconnect() {
+    if (_shouldUseUnified()) return;
     if (_isDisposed ||
         _openPositionsReconnectAttempts >= _maxReconnectAttempts) {
       return;
@@ -1046,6 +1088,7 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Schedule reconnect for symbols
   void _scheduleSymbolsReconnect() {
+    if (_shouldUseUnified()) return;
     if (_isDisposed || _symbolsReconnectAttempts >= _maxReconnectAttempts) {
       return;
     }
@@ -1062,6 +1105,10 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // ✅ FIX: Start heartbeat to keep WebSocket connections alive
   void _startHeartbeat() {
+    if (_shouldUseUnified()) {
+      _stopHeartbeat();
+      return;
+    }
     _stopHeartbeat(); // Clear any existing timer
     _heartbeatTimer = Timer.periodic(_heartbeatInterval, (timer) {
       if (_isDisposed) {
@@ -3008,6 +3055,7 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Schedule reconnection
   void _scheduleReconnect() {
+    if (_shouldUseUnified()) return;
     if (_isDisposed || _reconnectAttempts >= _maxReconnectAttempts) {
       return;
     }
@@ -3923,6 +3971,13 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
     if (_isDisposed) {
       return;
     }
+    if (_shouldUseUnified()) {
+      _tradingController.clearAllTradingData();
+      _removedPositionIds.clear();
+      _removedPendingOrderIds.clear();
+      _lastSubscribedAccount = _accountController.activeMT5Account?.metaAccountNumber;
+      return;
+    }
 
     // Prevent concurrent reconnection attempts
     if (_isConnecting) {
@@ -4186,6 +4241,14 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
     if (_isDisposed) {
       return;
     }
+    if (_shouldUseUnified()) {
+      _disconnectWebSocket();
+      _disconnectOpenPositions();
+      _disconnectPendingOrders();
+      _disconnectMarketWatch();
+      _disconnectSymbols();
+      return;
+    }
 
     // Prevent concurrent reconnection attempts
     if (_isConnecting) {
@@ -4249,6 +4312,13 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
   Future<void> switchAccount(String newAccountNumber) async {
     if (_isDisposed) return;
+    if (_shouldUseUnified()) {
+      _tradingController.clearAllTradingData();
+      _removedPositionIds.clear();
+      _removedPendingOrderIds.clear();
+      _lastSubscribedAccount = newAccountNumber;
+      return;
+    }
 
     // If not connected, fall back to normal reconnect flow
     if (!isConnected.value) {

@@ -16,6 +16,8 @@ import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/services/websocket_endpoint_helper.dart';
 import 'package:crm_app/utils/message_pack_decoder.dart'; // ✅ ADD: For binary decoding
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:crm_app/core/config/app_config_service.dart';
+import 'package:crm_app/services/unified_stream_adapter.dart';
 
 class AccountWebSocketService extends GetxService with WidgetsBindingObserver {
   // Connection state
@@ -66,6 +68,25 @@ class AccountWebSocketService extends GetxService with WidgetsBindingObserver {
     // ✅ FIX: Check authentication before setting up listeners
     // Don't initialize WebSocket until user is logged in
     _checkAuthAndSetup();
+  }
+
+  bool _shouldUseUnified() {
+    try {
+      if (Get.isRegistered<AppConfigService>()) {
+        final config = Get.find<AppConfigService>();
+        if (config.useUnifiedStreamSocket) {
+          if (Get.isRegistered<UnifiedStreamAdapter>()) {
+            final adapter = Get.find<UnifiedStreamAdapter>();
+            if (adapter.useUnified) {
+              return true;
+            }
+          } else {
+            return true;
+          }
+        }
+      }
+    } catch (_) {}
+    return false;
   }
 
   /// Check authentication status before setting up WebSocket
@@ -306,6 +327,10 @@ class AccountWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Initialize WebSocket connection
   void _initializeWebSocket() {
+    if (_shouldUseUnified()) {
+      _disconnectWebSocket();
+      return;
+    }
     if (isConnected.value || _isConnecting) return;
 
     _isConnecting = true;
@@ -403,6 +428,7 @@ class AccountWebSocketService extends GetxService with WidgetsBindingObserver {
 
   // Request account data from WebSocket
   void requestAccountData() async {
+    if (_shouldUseUnified()) return;
     // ✅ FIX: Debounce to prevent double calls during account switch
     // Cancel any pending request timer
     _requestDebounceTimer?.cancel();
