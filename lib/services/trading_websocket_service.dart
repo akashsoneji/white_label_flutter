@@ -3087,44 +3087,16 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
         return;
       }
 
-      // Get current positions once
-      final currentPositions =
-          _tradingController.marketPositions
-              .map(
-                (p) => TradingPosition(
-                  mt5Account: int.tryParse(p.accountId) ?? 0,
-                  position: int.tryParse(p.orderId) ?? 0,
-                  action: p.action,
-                  volume: p.volume.toString(),
-                  priceOpen: p.entryPrice,
-                  priceSL:
-                      p.stopLoss.isEmpty || p.stopLoss == '-'
-                          ? '0'
-                          : p.stopLoss,
-                  priceTP:
-                      p.takeProfit.isEmpty || p.takeProfit == '-'
-                          ? '0'
-                          : p.takeProfit,
-                  priceCurrent: p.currentPrice,
-                  closeTime: p.closeTime,
-                  timeCreate: p.openTime,
-                  symbol: p.symbol,
-                  logo: p.flag,
-                  profit: p.profitLoss,
-                  digits: p.digits > 0 ? p.digits : 5,
-                  swap: p.swap,
-                ),
-              )
-              .toList();
-
-      // ✅ OPTIMIZATION: Build position map once for O(1) lookups (essential for 100+ positions)
-      // This reduces complexity from O(n²) to O(n) for large batches
-      final positionMap = <int, int>{}; // positionId -> index
-      for (int i = 0; i < currentPositions.length; i++) {
-        positionMap[currentPositions[i].position] = i;
-      }
-
-      // Process all positions in batch
+      // ✅ CRITICAL PERFORMANCE FIX:
+      // The old code rebuilt `currentPositions` by mapping over EVERY existing
+      // position in `_tradingController.marketPositions` on every batch, then
+      // passed the full list to `updateWebSocketData` which re-queued every
+      // position. That made the change-detection guard ineffective because
+      // every position got re-queued (and re-formatted) on each tick.
+      //
+      // New path: parse each item, then call `queuePositionUpdate` for the
+      // items that actually changed. The change-detection guard in
+      // `_updateMarketPositions` then filters out the no-op ones cheaply.
       for (final item in batchItems) {
         if (item is! List || item.length < 13) continue;
 
@@ -3143,7 +3115,6 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           if (!isAFormat && !isUFormat && !isOpFormat) continue;
 
           final isAddOnly = isAFormat;
-          final isUpdate = isUFormat || isOpFormat;
           final offset = (isAFormat || isUFormat) ? 2 : 1;
 
           final positionId = int.tryParse(item[offset].toString()) ?? 0;
@@ -3260,47 +3231,21 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
             swap: swap,
           );
 
-          // ✅ OPTIMIZATION: Use O(1) Map lookup instead of O(n) indexWhere
-          // This is critical for handling 100+ position batches efficiently
-          final index = positionMap[position.position] ?? -1;
-
+          // ✅ Performance: queuePositionUpdate is O(1). The change-detection
+          // guard in `_updateMarketPositions` / `queuePositionUpdate` will
+          // short-circuit unchanged positions. For "isAddOnly", guard against
+          // duplicate adds here (avoids growing the list with duplicates).
           if (isAddOnly) {
-            // ✅ FIX: Prevent duplicate additions in batch processing
-            if (index == -1) {
-              currentPositions.add(position);
-              // Update map for future lookups
-              positionMap[position.position] = currentPositions.length - 1;
-            } else {
-              // Position already exists - skip to prevent duplicate
-            }
-          } else if (isUpdate) {
-            // ✅ FIX: Process updates immediately - update existing or add new
-            if (index != -1) {
-              currentPositions[index] = position;
-            } else {
-              currentPositions.add(position);
-              // Update map for future lookups
-              positionMap[position.position] = currentPositions.length - 1;
-            }
+            final existing = _tradingController.getMarketPositionById(
+              positionIdStr,
+            );
+            if (existing != null) continue; // duplicate
           }
+          _tradingController.queuePositionUpdate(position.toTradePosition());
         } catch (e) {
           AppLogger.error('Trading WS: Error processing batch item', error: e);
         }
       }
-
-      // ✅ FIX: Update UI immediately with all positions - no delays for real-time trading
-      // Process batch updates instantly to match website behavior (millisecond updates)
-      _tradingController.updateWebSocketData(
-        WebSocketTradingResponse(
-          openPositions: OpenPositionsData(
-            positions: currentPositions,
-            accountinfo: [],
-          ),
-          pendingOrders: null,
-          realtime: true,
-          serverTimestamp: DateHelper.nowUtc().millisecondsSinceEpoch ~/ 1000,
-        ),
-      );
     } catch (e, stackTrace) {
       AppLogger.error(
         'Trading WS: Error handling batch positions',
@@ -3464,83 +3409,47 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
         swap: swap,
       );
 
-      // Get current positions and update
-      final currentPositions =
-          _tradingController.marketPositions
-              .map(
-                (p) => TradingPosition(
-                  mt5Account: int.tryParse(p.accountId) ?? 0,
-                  position: int.tryParse(p.orderId) ?? 0,
-                  action: p.action,
-                  volume: p.volume.toString(),
-                  priceOpen: p.entryPrice,
-                  priceSL:
-                      p.stopLoss.isEmpty || p.stopLoss == '-'
-                          ? '0'
-                          : p.stopLoss,
-                  priceTP:
-                      p.takeProfit.isEmpty || p.takeProfit == '-'
-                          ? '0'
-                          : p.takeProfit,
-                  priceCurrent: p.currentPrice,
-                  closeTime: p.closeTime,
-                  timeCreate: p.openTime,
-                  symbol: p.symbol,
-                  logo: p.flag,
-                  profit: p.profitLoss,
-                  digits:
-                      p.digits > 0
-                          ? p.digits
-                          : 5, // Use digits from TradePosition
-                  swap: p.swap,
-                ),
-              )
-              .toList();
-
-      // Handle add vs update to avoid conflicts
-      final index = currentPositions.indexWhere(
-        (p) => p.position == position.position,
-      );
-
+      // ✅ CRITICAL PERFORMANCE FIX:
+      // The previous code rebuilt the ENTIRE list of TradingPosition objects
+      // (for ALL positions, not just the one that changed) and called
+      // `updateWebSocketData` with the full list. That made `_updateMarketPositions`
+      // re-queue every position on every WebSocket tick, even when only a single
+      // position had changed. With 9-15 positions on the Market tab, this caused
+      // a noticeable lag (≈50-150ms) before the list refreshed.
+      //
+      // New path: pass a single-item list so the change-detection guard in
+      // `_updateMarketPositions` only queues the row that actually changed.
+      // For the "isUpdate" path, the guard already prevents re-queuing identical
+      // values, so we can also short-circuit if the data hasn't moved.
       if (isAddOnly) {
-        // "a"/"add" flag: Only add if position doesn't exist
-        // ✅ FIX: Prevent duplicate additions - if position already exists, skip entirely
-        if (index == -1) {
-          currentPositions.add(position);
-        } else {
-          // ✅ FIX: Position already exists - skip to prevent duplicate
-          // Return early to avoid unnecessary UI update
-          return; // Skip processing to avoid duplicate
+        // Add: only push if the position doesn't already exist.
+        // `addOrUpdate` on the controller is safer than building the full list.
+        final existing = _tradingController.getMarketPositionById(
+          positionIdStr,
+        );
+        if (existing != null) {
+          // Already present — skip to avoid duplicate.
+          return;
         }
+        _tradingController.queuePositionUpdate(position.toTradePosition());
       } else if (isUpdate) {
-        // "u" flag or "op" format: Update if exists, add if doesn't exist
-        // ✅ FIX: Process updates immediately without any delays
-        if (index != -1) {
-          currentPositions[index] = position;
-        } else {
-          // Position doesn't exist - add it (this handles late-arriving positions)
-          currentPositions.add(position);
+        // Update: if the position already exists and nothing visible has
+        // changed (pnlString / currentPrice / entryPrice / swap), skip the
+        // update entirely. The server can re-send identical rows on reconnect.
+        final existing = _tradingController.getMarketPositionById(
+          positionIdStr,
+        );
+        if (existing != null) {
+          final newTp = position.toTradePosition();
+          if (existing.pnlString == newTp.pnlString &&
+              existing.currentPrice == newTp.currentPrice &&
+              existing.entryPrice == newTp.entryPrice &&
+              existing.swap == newTp.swap) {
+            // No visible change — skip the entire UI update cycle.
+            return;
+          }
         }
-      }
-
-      // ✅ FIX: Update TradingController immediately for real-time updates
-      // No debounce or delays - instant UI refresh for trading data
-      _tradingController.updateWebSocketData(
-        WebSocketTradingResponse(
-          openPositions: OpenPositionsData(
-            positions: currentPositions,
-            accountinfo: [],
-          ),
-          pendingOrders: null,
-          realtime: true,
-          serverTimestamp: DateHelper.nowUtc().millisecondsSinceEpoch ~/ 1000,
-        ),
-      );
-
-      if (kDebugMode) {
-        // dev.log(
-        //   'Trading WS: Updated position ${position.symbol} (ID: ${position.position}) from /ws/op',
-        // );
+        _tradingController.queuePositionUpdate(position.toTradePosition());
       }
     } catch (e, t) {
       AppLogger.error(

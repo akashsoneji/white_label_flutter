@@ -297,7 +297,34 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       }
     } catch (_) {}
 
-    _processDecodedMarketPayload(decodedData);
+    // ✅ PERFORMANCE: Batch process to avoid per-tick UI rebuilds
+    _enqueueDecodedPayload(decodedData);
+  }
+
+  // ✅ PERFORMANCE: Batch process incoming price updates to reduce UI rebuilds
+  final List<dynamic> _pendingDecodedPayloads = [];
+  Timer? _processBatchTimer;
+  static const Duration _processBatchInterval = Duration(milliseconds: 50);
+
+  void _enqueueDecodedPayload(dynamic decodedData) {
+    _pendingDecodedPayloads.add(decodedData);
+    _processBatchTimer ??= Timer(_processBatchInterval, _flushDecodedBatch);
+  }
+
+  void _flushDecodedBatch() {
+    _processBatchTimer = null;
+    if (_pendingDecodedPayloads.isEmpty) return;
+    if (_isClearingData) {
+      _pendingDecodedPayloads.clear();
+      return;
+    }
+
+    final batch = List<dynamic>.from(_pendingDecodedPayloads);
+    _pendingDecodedPayloads.clear();
+
+    for (final payload in batch) {
+      _processDecodedMarketPayload(payload);
+    }
   }
 
   /// Public hook: subscribe or unsubscribe on `marketwatchv2` after favorite changes (Search + Instruments).

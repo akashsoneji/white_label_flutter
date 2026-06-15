@@ -2,7 +2,7 @@ name: celestial
 type: child
 inheritsFrom: vantage
 label: Celestial
-themeMode: dark
+themeMode: both//dark
 
 android:
   applicationId: com.celestial.app
@@ -14,6 +14,7 @@ ios:
 
 colors:
   primary: "#24324D"
+  darkPrimary: "#22D3EE"
   secondary: "#22D3EE"
   accent: "#24324D"
   splashColor: "#24324D"
@@ -33,4 +34,4 @@ assets:
 # Set unifiedStreamSocket to true to use the new single-socket path (/ws/stream with MessagePack)
 # Set to false to use the legacy 5-socket path
 featureFlags:
-  unifiedStreamSocket: true
+  unifiedStreamSocket: false

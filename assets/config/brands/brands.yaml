@@ -8,7 +8,7 @@ brands:
     type: child
     inheritsFrom: vantage
     label: Celestial
-    themeMode: dark
+    themeMode: both//dark
     android:
       applicationId: "com.celestial.app"
       appName: "Celestial"
@@ -17,6 +17,7 @@ brands:
       appName: "Celestial"
     colors:
       primary: "#24324D"
+      darkPrimary: "#22D3EE"
       secondary: "#22D3EE"
       accent: "#24324D"
       splashColor: "#24324D"
@@ -30,7 +31,7 @@ brands:
       logo: "assets/brands/celestial/logo.svg"
       splashLogo: "assets/brands/celestial/splash_logo.svg"
       featureFlags: ""
-      unifiedStreamSocket: "true"
+      unifiedStreamSocket: "false"
 
   - name: pipze
     type: child

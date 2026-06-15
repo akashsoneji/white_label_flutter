@@ -1055,6 +1055,10 @@ class _TradeScreenState extends State<TradeScreen> {
                             tradingController.selectedTab == 1
                                 ? '${positions.length} orders'
                                 : '\$${PrecisionHelper.formatPnL(totalProfitLoss)}',
+                        // ✅ PERFORMANCE: totalProfitLoss is a single double
+                        // computed once for the summary, not per-card, so
+                        // formatPnL is called at most ~30 times/sec here
+                        // (vs 13,500+ per second for the position list).
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color:
@@ -1510,12 +1514,24 @@ class _TradeScreenState extends State<TradeScreen> {
                                   ),
 
                                   // Second line: Price range
-                                  Text(
-                                    '${position.entryPrice} -> ${position.currentPrice}',
-                                    style: AppTextStyles.label.copyWith(
-                                      fontSize: 12.sp,
-                                      color: AppColors.textGrey,
-                                    ),
+                                  // ✅ PERFORMANCE: static for close tab (price doesn't move)
+                                  // but still use GetBuilder so it stays consistent.
+                                  GetBuilder<TradingController>(
+                                    id: 'price_${position.orderId}',
+                                    builder: (c) {
+                                      final p =
+                                          c.getClosedPositionById(
+                                                position.orderId,
+                                              ) ??
+                                              position;
+                                      return Text(
+                                        '${p.entryPrice} -> ${p.currentPrice}',
+                                        style: AppTextStyles.label.copyWith(
+                                          fontSize: 12.sp,
+                                          color: AppColors.textGrey,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
@@ -1538,16 +1554,25 @@ class _TradeScreenState extends State<TradeScreen> {
                                 ),
 
                                 // P/L (blue for positive, red for negative)
-                                Text(
-                                  '\$${PrecisionHelper.formatPnL(position.profitLoss)}',
-                                  style: AppTextStyles.heading.copyWith(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color:
-                                        isPositive
+                                // ✅ PERFORMANCE: memoized pnlString in own
+                                // GetBuilder so only this Text rebuilds
+                                GetBuilder<TradingController>(
+                                  id: 'pnl_${position.orderId}',
+                                  builder: (c) {
+                                    final p = c.getClosedPositionById(
+                                            position.orderId) ??
+                                        position;
+                                    return Text(
+                                      '\$${p.pnlString}',
+                                      style: AppTextStyles.heading.copyWith(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: p.isPnLPositive
                                             ? AppColors.green
                                             : AppColors.red,
-                                  ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
@@ -1689,25 +1714,37 @@ class _TradeScreenState extends State<TradeScreen> {
 
     // For pending orders, show status instead of P/L
     // For market positions, show P/L
-    final rightSideContent =
-        isPendingTab
-            ? Text(
-                'placed',
-                style: AppTextStyles.heading.copyWith(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textGrey,
-                ),
-              )
-            : Text(
-                '${PrecisionHelper.formatPnL(position.profitLoss)}',
+    // ✅ PERFORMANCE: Use memoized pnlString & isPnLPositive on the position
+    // object to avoid re-formatting on every tick. With 450+ positions and
+    // 30 ticks/sec, this saves thousands of formatPnL calls per second.
+    final orderId = position.orderId;
+    final rightSideContent = isPendingTab
+        ? Text(
+            'placed',
+            style: AppTextStyles.heading.copyWith(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textGrey,
+            ),
+          )
+        : GetBuilder<TradingController>(
+            // ✅ CRITICAL PERFORMANCE: Isolate the PnL text in its own
+            // GetBuilder so only this Text rebuilds on P&L change, not the
+            // whole card chrome (Container, Border, GestureDetector, etc).
+            id: 'pnl_$orderId',
+            builder: (c) {
+              final p = c.getMarketPositionById(orderId) ?? position;
+              return Text(
+                p.pnlString,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.heading.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
-                  color: isPositive ? AppColors.green : AppColors.red,
+                  color: p.isPnLPositive ? AppColors.green : AppColors.red,
                 ),
               );
+            },
+          );
 
     if (FlavorConfig.isVantage()) {
       return Container(
@@ -1716,7 +1753,7 @@ class _TradeScreenState extends State<TradeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Left side: Icon + Symbol/Action
+            // Left side: Icon + Symbol/Action (STATIC - never rebuilds on tick)
             Expanded(
               flex: 3,
               child: Row(
@@ -1761,6 +1798,7 @@ class _TradeScreenState extends State<TradeScreen> {
               ),
             ),
             // Center: Price Range
+            // ✅ Granular: only the price text rebuilds on tick
             Expanded(
               flex: 3,
               child: Column(
@@ -1773,18 +1811,24 @@ class _TradeScreenState extends State<TradeScreen> {
                       color: AppColors.textGrey,
                     ),
                   ),
-                  Text(
-                    '${position.entryPrice} → ${position.currentPrice}',
-                    style: AppTextStyles.label.copyWith(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
-                    ),
+                  GetBuilder<TradingController>(
+                    id: 'price_${position.orderId}',
+                    builder: (c) {
+                      final p = c.getMarketPositionById(position.orderId) ?? position;
+                      return Text(
+                        '${p.entryPrice} → ${p.currentPrice}',
+                        style: AppTextStyles.label.copyWith(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-            // Right side: P/L
+            // Right side: P/L (already granular)
             Expanded(
               flex: 2,
               child: Column(
@@ -1807,6 +1851,8 @@ class _TradeScreenState extends State<TradeScreen> {
     }
 
     // ORIGINAL DESIGN: 2-column Row for other flavors
+    // ✅ Granular: the price line and PnL line are isolated GetBuilders so
+    // they rebuild on tick; everything else (symbol, action, volume) is static.
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -1835,12 +1881,18 @@ class _TradeScreenState extends State<TradeScreen> {
               ],
             ),
             SizedBox(height: 4.h),
-            Text(
-              '${position.entryPrice} -> ${position.currentPrice}',
-              style: AppTextStyles.label.copyWith(
-                fontSize: 12.sp,
-                color: AppColors.textGrey,
-              ),
+            GetBuilder<TradingController>(
+              id: 'price_${position.orderId}',
+              builder: (c) {
+                final p = c.getMarketPositionById(position.orderId) ?? position;
+                return Text(
+                  '${p.entryPrice} -> ${p.currentPrice}',
+                  style: AppTextStyles.label.copyWith(
+                    fontSize: 12.sp,
+                    color: AppColors.textGrey,
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -2813,10 +2865,12 @@ class _TradeScreenState extends State<TradeScreen> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
+                            // ✅ PERFORMANCE: Use memoized pnlString on the
+                            // currentPosition to avoid re-formatting.
                             Text(
                               tradingController.selectedTab == 1
                                   ? 'Pending'
-                                  : '\$${PrecisionHelper.formatPnL(currentProfitLoss)}',
+                                  : '\$${currentPosition.pnlString}',
                               style: AppTextStyles.heading.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
