@@ -326,6 +326,7 @@ class TradingPosition {
       orderId: position.toString(),
       openTime: timeCreate,
       closeTime: closeTime == '-' ? '' : closeTime,
+      time: timeCreate,
       takeProfit:
           (priceTPDouble == 0.0 ||
                   priceTP == '0' ||

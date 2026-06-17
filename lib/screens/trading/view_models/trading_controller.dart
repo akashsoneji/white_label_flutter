@@ -1354,17 +1354,19 @@ class TradingController extends GetxController {
       final payload = {'mt5_account': mt5Account, 'position_id': positionId};
 
       // Add optional TP/SL values
-      if (stopLoss != null && stopLoss > 0) {
-        payload['stop_loss'] =
-            digits != null
+      if (stopLoss != null) {
+        payload['stop_loss'] = stopLoss == 0
+            ? 0
+            : (digits != null
                 ? PrecisionHelper.round(stopLoss, decimals: digits)
-                : stopLoss;
+                : stopLoss);
       }
-      if (takeProfit != null && takeProfit > 0) {
-        payload['take_profit'] =
-            digits != null
+      if (takeProfit != null) {
+        payload['take_profit'] = takeProfit == 0
+            ? 0
+            : (digits != null
                 ? PrecisionHelper.round(takeProfit, decimals: digits)
-                : takeProfit;
+                : takeProfit);
       }
 
       // Call the API to update TP/SL

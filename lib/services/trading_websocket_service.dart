@@ -2294,11 +2294,12 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           final profit = double.tryParse(positionData[7].toString()) ?? 0.0;
 
           // Extract SL and TP if available (indices 8 and 9 for 10-element arrays)
-          final priceSL =
+          // Index 8 is TP and Index 9 is SL from backend
+          final priceTP =
               positionData.length >= 9
                   ? (double.tryParse(positionData[8].toString()) ?? 0.0)
                   : 0.0;
-          final priceTP =
+          final priceSL =
               positionData.length >= 10
                   ? (double.tryParse(positionData[9].toString()) ?? 0.0)
                   : 0.0;
@@ -2740,9 +2741,10 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
         final priceOrder = double.tryParse(message[7].toString()) ?? 0.0;
         final priceCurrent = double.tryParse(message[8].toString()) ?? 0.0;
         // Parse price_sl and price_tp - handle empty strings, null, or "0" values
-        final priceSLStr =
-            message.length > 9 ? message[9].toString().trim() : '0';
+        // Index 9 is TP and Index 10 is SL from backend
         final priceTPStr =
+            message.length > 9 ? message[9].toString().trim() : '0';
+        final priceSLStr =
             message.length > 10 ? message[10].toString().trim() : '0';
         final priceSL =
             (priceSLStr.isEmpty ||
@@ -2920,11 +2922,12 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           final volume = double.tryParse(orderData[5].toString()) ?? 0.0;
 
           // Parse optional SL and TP (indices 7 and 8)
-          final priceSL =
+          // Index 7 is TP and Index 8 is SL from backend
+          final priceTP =
               orderData.length > 7
                   ? (double.tryParse(orderData[7].toString()) ?? 0.0)
                   : 0.0;
-          final priceTP =
+          final priceSL =
               orderData.length > 8
                   ? (double.tryParse(orderData[8].toString()) ?? 0.0)
                   : 0.0;
@@ -3140,19 +3143,18 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           final _bHasExtra = _bRaw8 is int && (_bRaw9 is String || _bRaw9 == null);
           final _bXo = _bHasExtra ? 1 : 0;
 
-          final swap =
-              item.length > offset + 8 + _bXo
-                  ? (double.tryParse(item[offset + 8 + _bXo].toString()) ?? 0.0)
-                  : 0.0;
-
           final priceSLStr =
+              item.length > offset + 8 + _bXo
+                  ? item[offset + 8 + _bXo].toString().trim()
+                  : '0';
+          final priceTPStr =
               item.length > offset + 9 + _bXo
                   ? item[offset + 9 + _bXo].toString().trim()
                   : '0';
-          final priceTPStr =
-              !_bHasExtra && item.length > offset + 10
-                  ? item[offset + 10].toString().trim()
-                  : '0';
+          final swap =
+              item.length > offset + 10 + _bXo
+                  ? (double.tryParse(item[offset + 10 + _bXo].toString()) ?? 0.0)
+                  : 0.0;
           final priceSL =
               (priceSLStr.isEmpty ||
                       priceSLStr == '0' ||

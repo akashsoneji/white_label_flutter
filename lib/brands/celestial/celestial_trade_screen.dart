@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -5,6 +7,11 @@ import 'package:get/get.dart';
 import 'package:crm_app/models/order_types.dart';
 import 'package:crm_app/models/websocket_trading_response.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
+import 'package:crm_app/services/trading_websocket_service.dart';
+import 'package:crm_app/services/account_websocket_service.dart';
+import 'package:crm_app/widgets/AppTextField.dart';
 import 'celestial_theme.dart';
 
 double _d(String? v) => double.tryParse(v ?? '') ?? 0;
@@ -23,6 +30,97 @@ class CelestialTradeScreen extends StatefulWidget {
 class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
   TradingController get _c => Get.find<TradingController>();
   int _tab = 0; // 0 Active  1 Pending
+  StreamSubscription? _accountChangeSubscription;
+  String? _lastAccountNumber;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWebSocketServices();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final tradingController = Get.find<TradingController>();
+      final currentTab = tradingController.selectedTab;
+      if (currentTab == 0) {
+        tradingController.setSelectedTab(0);
+      }
+
+      _initializeTradeScreenWebSockets();
+      _listenForAccountChanges();
+    });
+  }
+
+  void _initializeWebSocketServices() {
+    if (!Get.isRegistered<TradingWebSocketService>()) {
+      Get.put(TradingWebSocketService(), permanent: true);
+    }
+    if (!Get.isRegistered<AccountWebSocketService>()) {
+      Get.put(AccountWebSocketService(), permanent: true);
+    }
+  }
+
+  void _initializeTradeScreenWebSockets() {
+    try {
+      if (Get.isRegistered<TradingWebSocketService>()) {
+        final wsService = Get.find<TradingWebSocketService>();
+        wsService.ensureOpenPositionsConnection();
+        wsService.ensurePendingOrdersConnection();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Celestial Trade Screen: Error ensuring WebSocket connections: $e');
+      }
+    }
+  }
+
+  void _listenForAccountChanges() {
+    try {
+      final accountController = Get.find<AccountController>();
+      final currentAccount = accountController.activeMT5Account;
+      _lastAccountNumber = currentAccount?.metaAccountNumber;
+
+      _accountChangeSubscription?.cancel();
+      _accountChangeSubscription = accountController.activeMT5AccountRx.listen((account) {
+        if (!mounted) return;
+
+        final newAccountNumber = account?.metaAccountNumber;
+        if (newAccountNumber != null && newAccountNumber != _lastAccountNumber) {
+          _lastAccountNumber = newAccountNumber;
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+
+            try {
+              if (Get.isRegistered<TradingController>()) {
+                final tradingController = Get.find<TradingController>();
+                tradingController.clearAllTradingData();
+              }
+
+              _initializeTradeScreenWebSockets();
+
+              if (mounted) {
+                setState(() {});
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print('Celestial Trade Screen: Error handling account change: $e');
+              }
+            }
+          });
+        }
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Celestial Trade Screen: Error setting up account change listener: $e');
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _accountChangeSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,46 +264,18 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
           SizedBox(width: 10.w),
           pill('Pending', pendingCount, 1),
           const Spacer(),
-          // Close all (only active tab)
-          if (_tab == 0 && activeCount > 0)
-            Obx(() => _c.isLoading
-                ? SizedBox(
-                    width: 18.w,
-                    height: 18.h,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: CelTheme.sell(context)))
-                : GestureDetector(
-                    onTap: () => _confirmCloseAll(context),
-                    child: Text('Close All',
-                        style: TextStyle(
-                            color: CelTheme.sell(context),
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w700)),
-                  )),
-          SizedBox(width: 12.w),
+          // + new order button
           GestureDetector(
             onTap: _openOrderTicket,
-            child: Container(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: CelTheme.buy(context),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.add, color: Colors.white, size: 14.sp),
-                  SizedBox(width: 4.w),
-                  Text('Order',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w700)),
-                ],
-              ),
-            ),
+            child: Icon(Icons.add,
+                color: CelTheme.mainText(context), size: 22.sp),
+          ),
+          SizedBox(width: 14.w),
+          // ... three-dot close-positions menu
+          GestureDetector(
+            onTap: () => _showCloseMenu(context),
+            child: Icon(Icons.more_horiz,
+                color: CelTheme.mainText(context), size: 22.sp),
           ),
         ],
       ),
@@ -369,31 +439,108 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
   }
 
   // ── Close all confirm ──────────────────────────────────────────────────────
-  void _confirmCloseAll(BuildContext c) {
-    showDialog(
-      context: c,
-      builder: (_) => AlertDialog(
-        backgroundColor: CelTheme.card(c),
-        title: Text('Close All Positions',
-            style: TextStyle(color: CelTheme.mainText(c), fontSize: 16.sp)),
-        content: Text(
-            'Close all ${_c.marketPositions.length} open position(s)?',
-            style: TextStyle(color: CelTheme.subText(c), fontSize: 13.sp)),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(c),
-              child: Text('Cancel',
-                  style: TextStyle(color: CelTheme.subText(c)))),
-          TextButton(
-              onPressed: () async {
-                Navigator.pop(c);
-                await _c.closeAllPositions();
-              },
-              child: Text('Close All',
-                  style: TextStyle(
-                      color: CelTheme.sell(c), fontWeight: FontWeight.w700))),
-        ],
-      ),
+  void _showCloseMenu(BuildContext ctx) {
+    final positions = _c.marketPositions;
+
+    // Determine the dominant symbol in the list for the "All {sym} with loss" item
+    String? dominantSym;
+    if (positions.isNotEmpty) {
+      final freq = <String, int>{};
+      for (final p in positions) {
+        freq[p.symbol] = (freq[p.symbol] ?? 0) + 1;
+      }
+      dominantSym =
+          freq.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+    }
+
+    Future<void> closeWith(List<TradePosition> list) async {
+      Navigator.pop(ctx);
+      for (final p in list) {
+        await _c.closePosition(p.orderId);
+      }
+    }
+
+    showModalBottomSheet(
+      context: ctx,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        final bg = CelTheme.card(ctx);
+        final text = CelTheme.mainText(ctx);
+        final sub = CelTheme.subText(ctx);
+
+        Widget _item(String label, VoidCallback? onTap,
+            {bool isHeader = false, bool isCancel = false}) {
+          return InkWell(
+            onTap: onTap,
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 16.h),
+              decoration: BoxDecoration(
+                border: Border(
+                    bottom: BorderSide(color: sub.withOpacity(.15), width: .5)),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: isHeader
+                      ? sub
+                      : isCancel
+                          ? sub
+                          : text,
+                  fontSize: isHeader ? 13.sp : 15.sp,
+                  fontWeight: isHeader ? FontWeight.w400 : FontWeight.w400,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(16.r)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 6.h),
+              Container(
+                  width: 36.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                      color: sub.withOpacity(.3),
+                      borderRadius: BorderRadius.circular(2.r))),
+              _item('Close Positions', null, isHeader: true),
+              _item('All', positions.isEmpty
+                  ? null
+                  : () => closeWith(positions)),
+              _item('With profit', () {
+                final list =
+                    positions.where((p) => p.profitLoss > 0).toList();
+                closeWith(list);
+              }),
+              _item('With loss', () {
+                final list =
+                    positions.where((p) => p.profitLoss < 0).toList();
+                closeWith(list);
+              }),
+              if (dominantSym != null)
+                _item('All $dominantSym With Loss', () {
+                  final list = positions
+                      .where((p) =>
+                          p.symbol == dominantSym && p.profitLoss < 0)
+                      .toList();
+                  closeWith(list);
+                }),
+              _item('Cancel', () => Navigator.pop(ctx),
+                  isCancel: true),
+              SizedBox(height: 16.h + MediaQuery.of(ctx).padding.bottom),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -465,154 +612,159 @@ class _DetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext c) {
-    final p     = position;
-    final isBuy = p.action.toUpperCase().contains('BUY');
-    final plCol = p.profitLoss >= 0 ? CelTheme.tpGreen : CelTheme.sell(c);
-    final side  = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
-    final entry = _d(p.entryPrice);
-    final cur   = _d(p.currentPrice);
-    final pct   = entry == 0 ? 0.0 : (cur - entry) / entry * 100;
-    final tp    = _d(p.takeProfit);
-    final sl    = _d(p.stopLoss);
-
+    final TradingController _c = Get.find<TradingController>();
     return _Sheet(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Symbol header card
-          Container(
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              color: isBuy ? CelTheme.buyTint(c) : CelTheme.pillBg(c),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(p.symbol,
-                        style: TextStyle(
-                            color: CelTheme.mainText(c),
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.w800)),
-                    SizedBox(width: 8.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                      decoration: BoxDecoration(
-                          color: side,
-                          borderRadius: BorderRadius.circular(6.r)),
-                      child: Text(
-                          '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
+      child: Obx(() {
+        final p = _c.marketPositions.firstWhereOrNull((pos) => pos.orderId == position.orderId) 
+               ?? _c.pendingPositions.firstWhereOrNull((pos) => pos.orderId == position.orderId) 
+               ?? position;
+        final isBuy = p.action.toUpperCase().contains('BUY');
+        final plCol = p.profitLoss >= 0 ? CelTheme.tpGreen : CelTheme.sell(c);
+        final side  = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
+        final entry = _d(p.entryPrice);
+        final cur   = _d(p.currentPrice);
+        final pct   = entry == 0 ? 0.0 : (cur - entry) / entry * 100;
+        final tp    = _d(p.takeProfit);
+        final sl    = _d(p.stopLoss);
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Symbol header card
+            Container(
+              padding: EdgeInsets.all(14.w),
+              decoration: BoxDecoration(
+                color: isBuy ? CelTheme.buyTint(c) : CelTheme.pillBg(c),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(p.symbol,
                           style: TextStyle(
-                              color: Colors.white,
+                              color: CelTheme.mainText(c),
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.w800)),
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                        decoration: BoxDecoration(
+                            color: side,
+                            borderRadius: BorderRadius.circular(6.r)),
+                        child: Text(
+                            '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  Row(
+                    children: [
+                      Text(
+                          '${_fmt(entry, p.digits)}  →  ${_fmt(cur, p.digits)}',
+                          style: TextStyle(
+                              color: CelTheme.mainText(c),
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w700)),
+                      SizedBox(width: 8.w),
+                      Text('${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(2)}%',
+                          style: TextStyle(
+                              color: plCol,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w700)),
+                      const Spacer(),
+                      Icon(
+                          p.profitLoss >= 0
+                              ? Icons.trending_up
+                              : Icons.trending_down,
+                          color: plCol,
+                          size: 18.sp),
+                      SizedBox(width: 4.w),
+                      Text(_fmtPL(p.profitLoss),
+                          style: TextStyle(
+                              color: plCol,
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w800)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 14.h),
+            // ID / Time / Swap / Commission
+            Row(
+              children: [
+                Expanded(child: _kv(c, 'ID', p.orderId)),
+                Expanded(child: _kv(c, 'TIME', p.time)),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                Expanded(child: _kv(c, 'SWAP', p.swap.toStringAsFixed(2))),
+                Expanded(
+                    child: _kv(c, 'COMMISSION', p.commission.toStringAsFixed(2))),
+              ],
+            ),
+            SizedBox(height: 14.h),
+            // Risk management row
+            Row(
+              children: [
+                Text('Risk Management',
+                    style: TextStyle(
+                        color: CelTheme.mainText(c),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w800)),
+                const Spacer(),
+                GestureDetector(
+                  onTap: onModify,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: CelTheme.buyTint(c),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
-                  ],
-                ),
-                SizedBox(height: 10.h),
-                Row(
-                  children: [
-                    Text(
-                        '${_fmt(entry, p.digits)}  →  ${_fmt(cur, p.digits)}',
-                        style: TextStyle(
-                            color: CelTheme.mainText(c),
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700)),
-                    SizedBox(width: 8.w),
-                    Text('${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(2)}%',
-                        style: TextStyle(
-                            color: plCol,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w700)),
-                    const Spacer(),
-                    Icon(
-                        p.profitLoss >= 0
-                            ? Icons.trending_up
-                            : Icons.trending_down,
-                        color: plCol,
-                        size: 18.sp),
-                    SizedBox(width: 4.w),
-                    Text(_fmtPL(p.profitLoss),
-                        style: TextStyle(
-                            color: plCol,
-                            fontSize: 22.sp,
-                            fontWeight: FontWeight.w800)),
-                  ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.edit_outlined,
+                            color: CelTheme.buy(c), size: 14.sp),
+                        SizedBox(width: 4.w),
+                        Text('Modify',
+                            style: TextStyle(
+                                color: CelTheme.buy(c),
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-          SizedBox(height: 14.h),
-          // ID / Time / Swap / Commission
-          Row(
-            children: [
-              Expanded(child: _kv(c, 'ID', p.orderId)),
-              Expanded(child: _kv(c, 'TIME', p.time)),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Row(
-            children: [
-              Expanded(child: _kv(c, 'SWAP', p.swap.toStringAsFixed(2))),
-              Expanded(
-                  child: _kv(c, 'COMMISSION', p.commission.toStringAsFixed(2))),
-            ],
-          ),
-          SizedBox(height: 14.h),
-          // Risk management row
-          Row(
-            children: [
-              Text('Risk Management',
-                  style: TextStyle(
-                      color: CelTheme.mainText(c),
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w800)),
-              const Spacer(),
-              GestureDetector(
-                onTap: onModify,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                  decoration: BoxDecoration(
-                    color: CelTheme.buyTint(c),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.edit_outlined,
-                          color: CelTheme.buy(c), size: 14.sp),
-                      SizedBox(width: 4.w),
-                      Text('Modify',
-                          style: TextStyle(
-                              color: CelTheme.buy(c),
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700)),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            children: [
-              Expanded(
-                  child: _riskBox(c, 'Stop Loss',
-                      sl > 0 ? _fmt(sl, p.digits) : 'Not Set')),
-              SizedBox(width: 12.w),
-              Expanded(
-                  child: _riskBox(c, 'Take Profit',
-                      tp > 0 ? _fmt(tp, p.digits) : 'Not Set')),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          _btn(c, 'Close Position', CelTheme.slRed, onClose),
-          SizedBox(height: 8.h),
-        ],
-      ),
+            SizedBox(height: 10.h),
+            Row(
+              children: [
+                Expanded(
+                    child: _riskBox(c, 'Stop Loss',
+                        sl > 0 ? _fmt(sl, p.digits) : 'Not Set')),
+                SizedBox(width: 12.w),
+                Expanded(
+                    child: _riskBox(c, 'Take Profit',
+                        tp > 0 ? _fmt(tp, p.digits) : 'Not Set')),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            _btn(c, 'Close Position', CelTheme.slRed, onClose),
+            SizedBox(height: 8.h),
+          ],
+        );
+      }),
     );
   }
 }
@@ -629,100 +781,205 @@ class _ModifySheet extends StatefulWidget {
 class _ModifySheetState extends State<_ModifySheet> {
   late bool _tpOn;
   late bool _slOn;
-  late double _tpVal;
-  late double _slVal;
+  late final TextEditingController _tpController;
+  late final TextEditingController _slController;
+  late final TradingController _c;
 
   @override
   void initState() {
     super.initState();
+    _c = Get.find<TradingController>();
     final tp = _d(widget.position.takeProfit);
     final sl = _d(widget.position.stopLoss);
     _tpOn  = tp > 0;
     _slOn  = sl > 0;
-    _tpVal = tp;
-    _slVal = sl;
+    
+    // Format TP/SL according to digits
+    _tpController = TextEditingController(text: _tpOn ? _fmt(tp, widget.position.digits) : '');
+    _slController = TextEditingController(text: _slOn ? _fmt(sl, widget.position.digits) : '');
+
+    // Pre-connect/ensure socket connection is active for this symbol
+    try {
+      if (Get.isRegistered<ChartSocketController>()) {
+        final chartSocketController = Get.find<ChartSocketController>();
+        chartSocketController.changeSymbol(widget.position.symbol);
+        Future.delayed(const Duration(milliseconds: 100), () {
+          chartSocketController.getSocketData();
+        });
+      }
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _tpController.dispose();
+    _slController.dispose();
+    super.dispose();
+  }
+
+  void _calculateTPFromRiskReward() {
+    if (!_slOn || !_tpOn) return;
+
+    final slPrice = double.tryParse(_slController.text.replaceAll(',', '')) ?? 0.0;
+    final entryPrice = double.tryParse(widget.position.entryPrice) ?? 0.0;
+
+    if (slPrice <= 0 || entryPrice <= 0) return;
+
+    final isBuy = widget.position.action.toLowerCase() == 'buy';
+    double tpPrice;
+
+    if (isBuy) {
+      final risk = entryPrice - slPrice;
+      tpPrice = entryPrice + (2 * risk);
+    } else {
+      final risk = slPrice - entryPrice;
+      tpPrice = entryPrice - (2 * risk);
+    }
+
+    _tpController.text = _fmt(tpPrice, widget.position.digits);
+  }
+
+  void _incrementValue(TextEditingController controller, double step, bool isTP) {
+    final currentValue = double.tryParse(controller.text.replaceAll(',', '')) ?? 
+        (double.tryParse(widget.position.currentPrice) ?? 0.0);
+    final newValue = currentValue + step;
+    controller.text = _fmt(newValue, widget.position.digits);
+    if (!isTP) {
+      _calculateTPFromRiskReward();
+    }
+  }
+
+  void _decrementValue(TextEditingController controller, double step, bool isTP) {
+    final currentValue = double.tryParse(controller.text.replaceAll(',', '')) ?? 
+        (double.tryParse(widget.position.currentPrice) ?? 0.0);
+    final newValue = (currentValue - step).clamp(0.0, double.infinity);
+    controller.text = _fmt(newValue, widget.position.digits);
+    if (!isTP) {
+      _calculateTPFromRiskReward();
+    }
   }
 
   @override
   Widget build(BuildContext c) {
-    final p     = widget.position;
-    final isBuy = p.action.toUpperCase().contains('BUY');
-    final side  = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
-    final step  = 1 / pow10(p.digits);
-
     return _Sheet(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              color: CelTheme.buyTint(c),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Row(
-              children: [
-                Text(p.symbol,
-                    style: TextStyle(
-                        color: CelTheme.mainText(c),
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w800)),
-                SizedBox(width: 8.w),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                      color: side, borderRadius: BorderRadius.circular(4.r)),
-                  child: Text(
-                      '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
+      child: Obx(() {
+        // Find the live position to get real-time price/profit updates
+        final p = _c.marketPositions.firstWhereOrNull((pos) => pos.orderId == widget.position.orderId) 
+               ?? _c.pendingPositions.firstWhereOrNull((pos) => pos.orderId == widget.position.orderId) 
+               ?? widget.position;
+               
+        final isBuy = p.action.toUpperCase().contains('BUY');
+        final side  = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
+        final step  = 1 / pow10(p.digits);
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              padding: EdgeInsets.all(14.w),
+              decoration: BoxDecoration(
+                color: CelTheme.buyTint(c),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Row(
+                children: [
+                  Text(p.symbol,
                       style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w700)),
-                ),
-                const Spacer(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text('OPEN',
-                        style: CelTheme.label(c).copyWith(fontSize: 10.sp)),
-                    Text(_fmt(_d(p.entryPrice), p.digits),
+                          color: CelTheme.mainText(c),
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w800)),
+                  SizedBox(width: 8.w),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                        color: side, borderRadius: BorderRadius.circular(4.r)),
+                    child: Text(
+                        '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
                         style: TextStyle(
-                            color: CelTheme.mainText(c),
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w800)),
-                  ],
-                ),
-              ],
+                            color: Colors.white,
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w700)),
+                  ),
+                  const Spacer(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text('CURRENT',
+                          style: CelTheme.label(c).copyWith(fontSize: 10.sp)),
+                      Text(_fmt(_d(p.currentPrice), p.digits),
+                          style: TextStyle(
+                              color: CelTheme.mainText(c),
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w800)),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: 4.h),
-          Padding(
-            padding: EdgeInsets.only(left: 4.w),
-            child: Text('#${p.orderId}',
-                style: CelTheme.label(c).copyWith(fontSize: 11.sp)),
-          ),
-          SizedBox(height: 14.h),
-          _stepper(c, 'TAKE PROFIT', _tpOn, _tpVal, CelTheme.tpGreen,
-              (v) => setState(() => _tpOn = v),
-              () => setState(() => _tpVal = (_tpVal - step).clamp(0, 1e9)),
-              () => setState(() => _tpVal += step)),
-          SizedBox(height: 10.h),
-          _stepper(c, 'STOP LOSS', _slOn, _slVal, CelTheme.slRed,
-              (v) => setState(() => _slOn = v),
-              () => setState(() => _slVal = (_slVal - step).clamp(0, 1e9)),
-              () => setState(() => _slVal += step)),
-          SizedBox(height: 18.h),
-          _btn(c, 'Modify', CelTheme.buy(c), () => Navigator.pop(c)),
-          SizedBox(height: 8.h),
-        ],
-      ),
+            SizedBox(height: 4.h),
+            Padding(
+              padding: EdgeInsets.only(left: 4.w, right: 4.w),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('#${p.orderId}',
+                      style: CelTheme.label(c).copyWith(fontSize: 11.sp)),
+                  Text(p.time,
+                      style: CelTheme.label(c).copyWith(fontSize: 11.sp)),
+                ],
+              ),
+            ),
+            SizedBox(height: 14.h),
+            _stepper(c, 'TAKE PROFIT', _tpOn, _tpController, CelTheme.tpGreen,
+                (v) => setState(() => _tpOn = v),
+                () => _decrementValue(_tpController, step, true),
+                () => _incrementValue(_tpController, step, true),
+                (val) {}),
+            SizedBox(height: 10.h),
+            _stepper(c, 'STOP LOSS', _slOn, _slController, CelTheme.slRed,
+                (v) => setState(() => _slOn = v),
+                () => _decrementValue(_slController, step, false),
+                () => _incrementValue(_slController, step, false),
+                (val) => _calculateTPFromRiskReward()),
+            SizedBox(height: 18.h),
+            _btn(c, 'Modify', CelTheme.buy(c), () async {
+              final double takeProfit = _tpOn && _tpController.text.isNotEmpty
+                  ? (double.tryParse(_tpController.text.replaceAll(',', '')) ?? 0.0)
+                  : 0.0;
+              final double stopLoss = _slOn && _slController.text.isNotEmpty
+                  ? (double.tryParse(_slController.text.replaceAll(',', '')) ?? 0.0)
+                  : 0.0;
+
+              final positionId = int.tryParse(p.orderId) ?? 0;
+              final activeAccount = Get.find<AccountController>().activeMT5Account;
+              if (activeAccount == null) {
+                Get.snackbar('Error', 'No active account found');
+                return;
+              }
+
+              final success = await _c.updateTPSL(
+                mt5Account: activeAccount.metaAccountNumber,
+                positionId: positionId,
+                stopLoss: stopLoss,
+                takeProfit: takeProfit,
+                digits: p.digits,
+              );
+
+              if (success) {
+                Navigator.pop(c);
+              }
+            }),
+            SizedBox(height: 8.h),
+          ],
+        );
+      }),
     );
   }
 
-  Widget _stepper(BuildContext c, String label, bool on, double val,
+  Widget _stepper(BuildContext c, String label, bool on, TextEditingController controller,
       Color color, ValueChanged<bool> toggle, VoidCallback minus,
-      VoidCallback plus) {
+      VoidCallback plus, ValueChanged<String> onChanged) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -741,7 +998,34 @@ class _ModifySheetState extends State<_ModifySheet> {
           ),
           Switch(
             value: on,
-            onChanged: toggle,
+            onChanged: (val) {
+              toggle(val);
+              if (val) {
+                // Set default value if empty
+                final currentText = controller.text;
+                if (currentText.isEmpty || double.tryParse(currentText.replaceAll(',', '')) == 0.0) {
+                  final entryPrice = double.tryParse(widget.position.entryPrice) ?? 0.0;
+                  if (entryPrice > 0) {
+                    final isBuy = widget.position.action.toLowerCase() == 'buy';
+                    final isJPY = widget.position.symbol.contains('JPY') || widget.position.symbol.contains('GOLD') || widget.position.symbol.contains('XAU');
+                    if (label.contains('TAKE PROFIT')) {
+                      final standardReward = isJPY ? 1.00 : 0.0100;
+                      final defaultTP = isBuy ? entryPrice + standardReward : entryPrice - standardReward;
+                      controller.text = _fmt(defaultTP, widget.position.digits);
+                    } else {
+                      final standardRisk = isJPY ? 0.50 : 0.0050;
+                      final defaultSL = isBuy ? entryPrice - standardRisk : entryPrice + standardRisk;
+                      controller.text = _fmt(defaultSL, widget.position.digits);
+                    }
+                  }
+                }
+              } else {
+                controller.clear();
+              }
+              if (label.contains('STOP LOSS')) {
+                _calculateTPFromRiskReward();
+              }
+            },
             activeColor: Colors.white,
             activeTrackColor: color,
           ),
@@ -753,11 +1037,40 @@ class _ModifySheetState extends State<_ModifySheet> {
                 size: 20.sp),
           ),
           SizedBox(width: 14.w),
-          Text(val.toStringAsFixed(2),
+          SizedBox(
+            width: 100.w,
+            child: AppTextFormField(
+              controller: controller,
+              enabled: on,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              textAlign: TextAlign.center,
               style: TextStyle(
-                  color: CelTheme.mainText(c),
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w700)),
+                color: CelTheme.mainText(c),
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+              ),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: on ? CelTheme.card(c) : CelTheme.divider(c).withOpacity(0.1),
+                contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: CelTheme.divider(c)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: CelTheme.divider(c)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide(color: color, width: 1.5),
+                ),
+              ),
+              onChanged: (val) {
+                onChanged(val);
+              },
+            ),
+          ),
           SizedBox(width: 14.w),
           GestureDetector(
             onTap: on ? plus : null,
@@ -1109,9 +1422,12 @@ class _Sheet extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
-          child: child,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
+            child: child,
+          ),
         ),
       ),
     );

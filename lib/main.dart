@@ -57,6 +57,8 @@ import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+import 'package:crm_app/services/trading_websocket_service.dart';
+import 'package:crm_app/services/account_websocket_service.dart';
 import 'services/auth_service.dart';
 import 'services/google_otp_service.dart';
 import 'services/enabled_modules_service.dart';
@@ -331,6 +333,8 @@ Future<void> initServices() async {
   Get.put<InstrumentsController>(InstrumentsController(), permanent: true);
   Get.put<ChartSocketController>(ChartSocketController(), permanent: true);
   Get.put<TradingController>(TradingController(), permanent: true);
+  Get.put<TradingWebSocketService>(TradingWebSocketService(), permanent: true);
+  Get.put<AccountWebSocketService>(AccountWebSocketService(), permanent: true);
   await PriceAlertService().initialize();
 
   // Initialize app notification controller for global notifications
