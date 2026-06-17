@@ -4,17 +4,9 @@
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
 import 'clients/celestial/config.dart';
-import 'clients/pipze/config.dart';
-import 'clients/skyriss/config.dart';
-import 'clients/tenax/config.dart';
-import 'clients/vantage/config.dart';
 
 enum Flavor {
   celestial,
-  pipze,
-  skyriss,
-  tenax,
-  vantage,
 }
 
 class FlavorConfig {
@@ -95,7 +87,7 @@ class FlavorConfig {
     required this.selectedBrokerData,
   }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.vantage);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.celestial);
 
   static void reset() {
     _instance = null;
@@ -111,7 +103,7 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.vantage,
+      orElse: () => Flavor.celestial,
     );
     return activate(flavor);
   }
@@ -121,40 +113,17 @@ class FlavorConfig {
       case Flavor.celestial:
         const config = CelestialConfig();
         return config.toFlavorConfig(Flavor.celestial, 'celestial');
-      case Flavor.pipze:
-        const config = PipzeConfig();
-        return config.toFlavorConfig(Flavor.pipze, 'pipze');
-      case Flavor.skyriss:
-        const config = SkyrissConfig();
-        return config.toFlavorConfig(Flavor.skyriss, 'skyriss');
-      case Flavor.tenax:
-        const config = TenaxConfig();
-        return config.toFlavorConfig(Flavor.tenax, 'tenax');
-      case Flavor.vantage:
-        const config = VantageConfig();
-        return config.toFlavorConfig(Flavor.vantage, 'vantage');
     }
   }
 
   static bool isCelestial() => _instance?.flavor == Flavor.celestial;
   static FlavorConfig get celestial => activate(Flavor.celestial);
 
-  static bool isPipze() => _instance?.flavor == Flavor.pipze;
-  static FlavorConfig get pipze => activate(Flavor.pipze);
-
-  static bool isSkyriss() => _instance?.flavor == Flavor.skyriss;
-  static FlavorConfig get skyriss => activate(Flavor.skyriss);
-
-  static bool isTenax() => _instance?.flavor == Flavor.tenax;
-  static FlavorConfig get tenax => activate(Flavor.tenax);
-
-  static FlavorConfig get vantage => activate(Flavor.vantage);
-
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
-    return const <String>{'celestial', 'pipze', 'skyriss', 'tenax', 'vantage'}.contains(name);
+    final name = (_instance?.flavor.name ?? Flavor.celestial.name).toLowerCase();
+    return const <String>{}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;

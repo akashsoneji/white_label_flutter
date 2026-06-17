@@ -6,6 +6,7 @@ class BrandId {
   const BrandId._(this.value);
 
   static const BrandId tenax = BrandId._('tenax');
+  static const BrandId celestial = BrandId._('celestial');
 
   static BrandId fromString(String raw) {
     final normalized = raw.trim().toLowerCase();

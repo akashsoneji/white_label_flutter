@@ -17,9 +17,12 @@ class SearchInstrumentsController extends GetxController {
   /// Default tab is Currency (Forex/Currency API names via aliases).
   var currentCategory = 'Currency'.obs;
 
-  static const List<String> _categoryChipOrder = [
+  // Preferred display order — API categories that don't appear here are
+  // appended alphabetically at the end.
+  static const List<String> _preferredOrder = [
     'All',
     'Currency',
+    'Forex',
     'Metals',
     'Crypto',
     'Indices',
@@ -30,7 +33,7 @@ class SearchInstrumentsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    availableCategories.assignAll(_categoryChipOrder);
+    availableCategories.assignAll(['All']); // will be expanded after fetch
     fetchInstruments();
   }
 
@@ -77,8 +80,31 @@ class SearchInstrumentsController extends GetxController {
   }
 
   void _updateAvailableCategories() {
-    // Fixed chip order (not driven by API category list order).
-    availableCategories.assignAll(_categoryChipOrder);
+    // Build category list dynamically from API data.
+    // Preserve preferred order; append unknown categories alphabetically.
+    final fromApi =
+        allSymbols.map((s) => s.categoryName.trim()).where((c) => c.isNotEmpty).toSet();
+
+    final ordered = <String>['All'];
+    for (final preferred in _preferredOrder) {
+      if (preferred == 'All') continue;
+      // Match case-insensitively against API values
+      String? match;
+      for (final c in fromApi) {
+        if (c.toLowerCase() == preferred.toLowerCase()) {
+          match = c;
+          break;
+        }
+      }
+      if (match != null) ordered.add(match);
+    }
+    // Append any API categories not in the preferred list
+    final remaining =
+        fromApi.where((c) => !ordered.any((o) => o.toLowerCase() == c.toLowerCase())).toList()
+          ..sort();
+    ordered.addAll(remaining);
+
+    availableCategories.assignAll(ordered);
   }
 
   /// Maps a symbol's API [categoryName] to the chip bucket [selectedChip], or false if no match.

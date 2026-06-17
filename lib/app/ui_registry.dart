@@ -1,23 +1,31 @@
 import 'package:flutter/widgets.dart';
 
-import '../screens/auth/presentation/pages/create_account_screen.dart';
-import '../screens/auth/presentation/pages/create_new_password_screen.dart';
-import '../screens/auth/presentation/pages/forgot_password_screen.dart';
-import '../screens/auth/presentation/pages/get_started_screen.dart';
-import '../screens/auth/presentation/pages/login_screen.dart';
-import '../screens/auth/presentation/pages/splash_screen.dart';
-import '../screens/auth/presentation/pages/verify_code_screen.dart';
-import '../screens/finance/presentation/pages/finance_screen.dart';
-import '../screens/home/more/more_screen.dart';
-import '../screens/kyc/presentation/pages/kyc_intro_screen.dart';
-import '../screens/trading/presentation/pages/trading_main_screen.dart';
+import '../brands/celestial/celestial_main_shell.dart';
+import 'package:crm_app/screens/auth/presentation/pages/create_account_screen.dart';
+import 'package:crm_app/screens/auth/presentation/pages/create_new_password_screen.dart';
+import 'package:crm_app/screens/auth/presentation/pages/forgot_password_screen.dart';
+import 'package:crm_app/screens/auth/presentation/pages/get_started_screen.dart';
+import 'package:crm_app/screens/auth/presentation/pages/login_screen.dart';
+import 'package:crm_app/screens/auth/presentation/pages/splash_screen.dart';
+import 'package:crm_app/screens/auth/presentation/pages/verify_code_screen.dart';
 
-import '../screens/auth/presentation/brands/vantage/pages/create_account_screen.dart';
-import '../screens/auth/presentation/brands/vantage/pages/create_new_password_screen.dart';
-import '../screens/auth/presentation/brands/vantage/pages/forgot_password_screen.dart';
-import '../screens/auth/presentation/brands/vantage/pages/get_started_screen.dart';
-import '../screens/auth/presentation/brands/vantage/pages/login_screen.dart';
-import '../screens/auth/presentation/brands/vantage/pages/verify_code_screen.dart';
+import 'package:crm_app/screens/finance/presentation/pages/finance_screen.dart';
+import 'package:crm_app/screens/home/more/more_screen.dart';
+import 'package:crm_app/screens/kyc/presentation/pages/kyc_intro_screen.dart';
+import 'package:crm_app/screens/trading/presentation/pages/trading_main_screen.dart';
+
+import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/create_account_screen.dart'
+    as vantage_auth;
+import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/create_new_password_screen.dart'
+    as vantage_auth;
+import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/forgot_password_screen.dart'
+    as vantage_auth;
+import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/get_started_screen.dart'
+    as vantage_auth;
+import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/login_screen.dart'
+    as vantage_auth;
+import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/verify_code_screen.dart'
+    as vantage_auth;
 
 import 'ui_slots.dart';
 
@@ -39,14 +47,16 @@ class UiRegistry implements UiSlots {
   // assets/config/brands/brands.yaml when parent-child UI inheritance changes.
   static const Map<String, String> _uiParentByClient = {
     'vantage': 'vantage',
-    'celestial': 'vantage',
+    'celestial': 'celestial',
     'pipze': 'vantage',
     'skyriss': 'vantage',
     'tenax': 'vantage',
   };
 
-  String get _uiBrand => _uiParentByClient[client.toLowerCase()] ?? client.toLowerCase();
+  String get _uiBrand =>
+      _uiParentByClient[client.toLowerCase()] ?? client.toLowerCase();
 
+  bool get _usesCelestialUi => _uiBrand == 'celestial';
   bool get _usesVantageUi => _uiBrand == 'vantage';
 
   @override
@@ -54,42 +64,45 @@ class UiRegistry implements UiSlots {
 
   @override
   Widget getStarted() {
-    if (_usesVantageUi) return VantageGetStartedScreen();
+    if (_usesVantageUi) return vantage_auth.VantageGetStartedScreen();
     return GetStartedScreen();
   }
 
   @override
   Widget login() {
-    if (_usesVantageUi) return const VantageLoginScreen();
+    if (_usesVantageUi) return const vantage_auth.VantageLoginScreen();
     return const LoginScreen();
   }
 
   @override
   Widget createAccount() {
-    if (_usesVantageUi) return const VantageCreateAccountScreen();
+    if (_usesVantageUi) return const vantage_auth.VantageCreateAccountScreen();
     return const CreateAccountScreen();
   }
 
   @override
   Widget forgotPassword() {
-    if (_usesVantageUi) return const VantageForgotPasswordScreen();
+    if (_usesVantageUi) return const vantage_auth.VantageForgotPasswordScreen();
     return const ForgotPasswordScreen();
   }
 
   @override
   Widget verifyCode({required String email}) {
-    if (_usesVantageUi) return VantageVerifyCodeScreen(email: email);
+    if (_usesVantageUi) return vantage_auth.VantageVerifyCodeScreen(email: email);
     return VerifyCodeScreen(email: email);
   }
 
   @override
   Widget createNewPassword() {
-    if (_usesVantageUi) return const VantageCreateNewPasswordScreen();
+    if (_usesVantageUi) return const vantage_auth.VantageCreateNewPasswordScreen();
     return const CreateNewPasswordScreen();
   }
 
   @override
-  Widget tradingMain() => const TradingMainScreen();
+  Widget tradingMain() {
+    if (_usesCelestialUi) return const CelestialMainShell();
+    return const TradingMainScreen();
+  }
 
   @override
   Widget more() => const MoreScreen();
@@ -100,4 +113,3 @@ class UiRegistry implements UiSlots {
   @override
   Widget kycIntro() => KycIntroScreen(stageCompletion: null);
 }
-

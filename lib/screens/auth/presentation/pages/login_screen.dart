@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Center(
                                     child: BrandLogo(
                                       source: FlavorConfig.effectiveLogo,
-                                      color: AppColors.primary,
+                                      // color: AppColors.primary,
                                       height: 100.h,
                                       width: 120.w,
                                     ),

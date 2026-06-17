@@ -2077,10 +2077,26 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
       //   - Element [6] is entry price (number), [7] is profit/loss (number)
       // Pending orders format: [778926, 76356, "USDJPY", 154.091, 152.1, 0.01, "buy", 0.0, 0.0] (7-9 elements)
       //   - Element [6] is action (string like "buy"), [7] is SL (optional), [8] is TP (optional)
+      // Self-hosted format: ["a","op",posId,account,symbol,action,vol,priceOpen,priceCurrent,profit,extra,swap,sl,serverType,openedAt,digits,extra]
       if (decoded is List) {
         // Check if it's an array of arrays
         if (decoded.isNotEmpty && decoded[0] is List) {
           final firstItem = decoded[0] as List;
+
+          // Check for self-hosted ["a"/"u","op",...] batch format FIRST
+          final isBatchOpFormat =
+              firstItem.length >= 14 &&
+              firstItem[0] is String &&
+              (firstItem[0] == 'a' ||
+                  firstItem[0] == 'u' ||
+                  firstItem[0] == 'add') &&
+              firstItem[1] is String &&
+              firstItem[1] == 'op';
+
+          if (isBatchOpFormat) {
+            _handleBatchPositions(decoded);
+            return;
+          }
 
           // Check if element [6] is a string (pending order) or number (position)
           // Positions: element [6] is entry price (number), [7] is profit/loss (number)
@@ -3117,17 +3133,24 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           final priceCurrent =
               double.tryParse(item[offset + 6].toString()) ?? 0.0;
           final profit = double.tryParse(item[offset + 7].toString()) ?? 0.0;
+
+          // Detect 17-element self-hosted format with extra integer field at offset+8.
+          final _bRaw8 = item.length > offset + 8 ? item[offset + 8] : null;
+          final _bRaw9 = item.length > offset + 9 ? item[offset + 9] : null;
+          final _bHasExtra = _bRaw8 is int && (_bRaw9 is String || _bRaw9 == null);
+          final _bXo = _bHasExtra ? 1 : 0;
+
           final swap =
-              item.length > offset + 8
-                  ? (double.tryParse(item[offset + 8].toString()) ?? 0.0)
+              item.length > offset + 8 + _bXo
+                  ? (double.tryParse(item[offset + 8 + _bXo].toString()) ?? 0.0)
                   : 0.0;
 
           final priceSLStr =
-              item.length > offset + 9
-                  ? item[offset + 9].toString().trim()
+              item.length > offset + 9 + _bXo
+                  ? item[offset + 9 + _bXo].toString().trim()
                   : '0';
           final priceTPStr =
-              item.length > offset + 10
+              !_bHasExtra && item.length > offset + 10
                   ? item[offset + 10].toString().trim()
                   : '0';
           final priceSL =
@@ -3146,12 +3169,12 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
                   : (double.tryParse(priceTPStr) ?? 0.0);
 
           final openedAt =
-              item.length > offset + 12
-                  ? (int.tryParse(item[offset + 12].toString()) ?? 0)
+              item.length > offset + 11 + _bXo
+                  ? (int.tryParse(item[offset + 11 + _bXo].toString()) ?? 0)
                   : 0;
           final digits =
-              item.length > offset + 13
-                  ? (int.tryParse(item[offset + 13].toString()) ?? 5)
+              item.length > offset + 12 + _bXo
+                  ? (int.tryParse(item[offset + 12 + _bXo].toString()) ?? 5)
                   : 5;
 
           // ✅ FIX: Handle "zombie" positions that come back after removal.
@@ -3326,17 +3349,33 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
       final priceOpen = double.tryParse(item[offset + 5].toString()) ?? 0.0;
       final priceCurrent = double.tryParse(item[offset + 6].toString()) ?? 0.0;
       final profit = double.tryParse(item[offset + 7].toString()) ?? 0.0;
-      // Parse swap (index 10) - NEW position
+
+      // Detect 17-element self-hosted format which has an extra integer field at
+      // offset+8 (before swap). We identify it by checking whether the value at
+      // offset+8 is a raw integer while offset+9 is a string — e.g. 0 vs "0.00".
+      // In the legacy 16-element format offset+8 is already the swap string.
+      final _raw8 = item.length > offset + 8 ? item[offset + 8] : null;
+      final _raw9 = item.length > offset + 9 ? item[offset + 9] : null;
+      final _hasExtraField =
+          _raw8 is int && (_raw9 is String || _raw9 == null);
+      final _xo = _hasExtraField ? 1 : 0; // extra-field offset shift
+
+      // swap is at offset+8 (legacy) or offset+9 (17-element format)
       final swap =
-          item.length > offset + 8
-              ? (double.tryParse(item[offset + 8].toString()) ?? 0.0)
+          item.length > offset + 8 + _xo
+              ? (double.tryParse(item[offset + 8 + _xo].toString()) ?? 0.0)
               : 0.0;
-      // Parse price_sl and price_tp - handle empty strings, null, or "0" values
-      // New format: swap is at index 10, price_sl at index 11, price_tp at index 12
+      // SL is at offset+9 (legacy) or offset+10 (17-element format)
       final priceSLStr =
-          item.length > offset + 9 ? item[offset + 9].toString().trim() : '0';
+          item.length > offset + 9 + _xo
+              ? item[offset + 9 + _xo].toString().trim()
+              : '0';
+      // TP: not present in 17-element self-hosted format; keep at offset+10 (legacy)
+      // In 17-element format offset+10+_xo is SL, so TP falls back to '0'.
       final priceTPStr =
-          item.length > offset + 10 ? item[offset + 10].toString().trim() : '0';
+          !_hasExtraField && item.length > offset + 10
+              ? item[offset + 10].toString().trim()
+              : '0';
       final priceSL =
           (priceSLStr.isEmpty ||
                   priceSLStr == '0' ||
@@ -3351,15 +3390,16 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
                   priceTPStr == '-')
               ? 0.0
               : (double.tryParse(priceTPStr) ?? 0.0);
-      // server_type is at offset+11, opened_at is at offset+12
-      // digits is always the last element in the array
+      // server_type is at offset+10+_xo (17-el) or offset+11 (legacy)
+      // opened_at is at offset+11+_xo (17-el) or offset+12 (legacy)
+      // digits   is at offset+12+_xo (17-el) or offset+13 (legacy)
       final openedAt =
-          item.length > offset + 12
-              ? (int.tryParse(item[offset + 12].toString()) ?? 0)
+          item.length > offset + 11 + _xo
+              ? (int.tryParse(item[offset + 11 + _xo].toString()) ?? 0)
               : 0;
       final digits =
-          item.length > offset + 13
-              ? (int.tryParse(item[offset + 13].toString()) ?? 5)
+          item.length > offset + 12 + _xo
+              ? (int.tryParse(item[offset + 12 + _xo].toString()) ?? 5)
               : 5;
 
       // ✅ FIX: Handle "zombie" positions for single updates

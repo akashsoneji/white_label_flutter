@@ -1,8 +1,7 @@
 name: celestial
-type: child
-inheritsFrom: vantage
+type: parent
 label: Celestial
-themeMode: dark
+themeMode: both
 
 android:
   applicationId: com.celestial.app
@@ -20,10 +19,13 @@ colors:
   launcherBackground: "#24324D"
 
 urls:
-  api: https://client.celestialtrader.com/api/
-  websocket: wss://client.celestialtrader.com/trade-engine
-  chart: https://client.celestialtrader.com
-
+  # api: https://client.celestialtrader.com/api/
+  # websocket: wss://client.celestialtrader.com/trade-engine
+  # chart: https://client.celestialtrader.com
+  api: https://app.tenaxcode.com/api/
+  websocket: wss://app.tenaxcode.com/trade-engine
+  chart: https://app.tenaxcode.custom
+  
 assets:
   appIcon: icon.png
   logo: logo.svg

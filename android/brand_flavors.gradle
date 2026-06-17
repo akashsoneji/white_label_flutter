@@ -12,8 +12,7 @@ ext.brandFlavors = [
         accent: "#24324D",
         splashColor: "#24324D",
         launcherBackground: "#24324D",
-        type: "child",
-        inheritsFrom: "vantage",
+        type: "parent",
     ],
     [
         name: "pipze",

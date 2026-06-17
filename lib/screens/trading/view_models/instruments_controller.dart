@@ -1361,11 +1361,19 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       if (success) {
         await _loadFavorites();
 
+        final isFavNow = isFavorite(instrumentSymbol);
+
         if (searchSymbol != null) {
-          _syncSearchSymbolLocally(searchSymbol, isFavoriteNow: isFavorite(instrumentSymbol));
+          _syncSearchSymbolLocally(searchSymbol, isFavoriteNow: isFavNow);
         } else {
           _updateFilteredInstruments();
         }
+
+        // Always sync socket subscription immediately on favorite change.
+        await syncMarketWatchV2AfterFavoriteChange(
+          instrumentSymbol,
+          isFavoriteNow: isFavNow,
+        );
 
         if (hydrateAfterChange) {
           await hydrateFavoritesFromRest();

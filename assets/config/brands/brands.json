@@ -1,13 +1,13 @@
 {
-  "default": "tenax",
+  "default": "celestial",
   "brands": [
-    "tenax"
+    "celestial"
   ],
   "brandDetails": [
     {
-      "name": "tenax",
+      "name": "celestial",
       "type": "parent",
-      "label": "Tenax",
+      "label": "Celestial",
       "themeMode": "both"
     }
   ]
