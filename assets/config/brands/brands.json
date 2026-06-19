@@ -1,13 +1,13 @@
 {
-  "default": "tenax",
+  "default": "telifox",
   "brands": [
-    "tenax"
+    "telifox"
   ],
   "brandDetails": [
     {
-      "name": "tenax",
+      "name": "telifox",
       "type": "parent",
-      "label": "Tenax",
+      "label": "Telifox",
       "themeMode": "both"
     }
   ]

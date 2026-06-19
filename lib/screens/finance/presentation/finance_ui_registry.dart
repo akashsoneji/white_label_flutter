@@ -18,22 +18,23 @@ import 'brands/vantage/pages/withdrawal_screen.dart' as vantage;
 
 /// Build-time selected client (no runtime switching).
 ///
-/// Use: `--dart-define=CLIENT=tenax|vantage|celestial`
-/// Celestial inherits Vantage's finance screen files.
+/// Use: `--dart-define=CLIENT=tenax|vantage|celestial|pipze|skyriss|telifox`
+/// All non-parent clients inherit Vantage's finance screen files.
 const String _activeClient = String.fromEnvironment(
-  'CLIENT',
-  defaultValue: 'tenax',
+ 'CLIENT',
+ defaultValue: 'tenax',
 );
 
 class FinanceUiRegistry implements FinanceUiSlots {
-  const FinanceUiRegistry();
+ const FinanceUiRegistry();
 
-  bool get _usesVantageUi =>
-      _activeClient.toLowerCase() == 'vantage' ||
-      _activeClient.toLowerCase() == 'celestial' ||
-      _activeClient.toLowerCase() == 'pipze' ||
-      _activeClient.toLowerCase() == 'skyriss' ||
-      _activeClient.toLowerCase() == 'tenax';
+ bool get _usesVantageUi =>
+ _activeClient.toLowerCase() == 'vantage' ||
+ _activeClient.toLowerCase() == 'celestial' ||
+ _activeClient.toLowerCase() == 'pipze' ||
+ _activeClient.toLowerCase() == 'skyriss' ||
+ _activeClient.toLowerCase() == 'telifox' ||
+ _activeClient.toLowerCase() == 'tenax';
 
   @override
   Widget paymentMethods({required String accountNumber}) {

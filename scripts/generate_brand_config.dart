@@ -116,11 +116,18 @@ Map<String, dynamic> parseSingleBrandYaml(String yaml, String brandDir) {
   final label = (brand['label'] as String).trim();
   brand['label'] = label.isEmpty ? name : label;
 
-  final assets = brand['assets'] as Map<String, dynamic>;
-  assets['appIcon'] = _resolveBrandAssetPath(brandDir, name, assets['appIcon'] ?? 'icon.png');
-  assets['logo'] = _resolveBrandAssetPath(brandDir, name, assets['logo'] ?? 'logo.svg');
-  assets['splashLogo'] = _resolveBrandAssetPath(brandDir, name, assets['splashLogo'] ?? 'splash_logo.svg');
-  return brand;
+ final assets = brand['assets'] as Map<String, dynamic>;
+ assets['appIcon'] = _resolveBrandAssetPath(brandDir, name, assets['appIcon'] ?? 'icon.png');
+ assets['logo'] = _resolveBrandAssetPath(brandDir, name, assets['logo'] ?? 'logo.svg');
+ assets['splashLogo'] = _resolveBrandAssetPath(brandDir, name, assets['splashLogo'] ?? 'splash_logo.svg');
+
+ // Ensure features section exists with sensible defaults.
+ final features = brand['features'] as Map<String, dynamic>;
+ if (!features.containsKey('useNewChart')) {
+ features['useNewChart'] = 'false';
+ }
+ brand['features'] = features;
+ return brand;
 }
 
 String _resolveBrandAssetPath(String brandDir, String name, dynamic value) {
@@ -149,17 +156,18 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
 
     if (trimmed.startsWith('- name:') || trimmed.startsWith('name:')) {
       if (currentEntry != null) brands.add(currentEntry);
-      currentEntry = {
-        'name': _extractValue(line),
-        'type': 'child',
-        'inheritsFrom': null,
-        'label': '',
-        'android': <String, dynamic>{},
-        'ios': <String, dynamic>{},
-        'colors': <String, dynamic>{},
-        'urls': <String, dynamic>{},
-        'assets': <String, dynamic>{},
-      };
+ currentEntry = {
+ 'name': _extractValue(line),
+ 'type': 'child',
+ 'inheritsFrom': null,
+ 'label': '',
+ 'android': <String, dynamic>{},
+ 'ios': <String, dynamic>{},
+ 'colors': <String, dynamic>{},
+ 'urls': <String, dynamic>{},
+ 'assets': <String, dynamic>{},
+ 'features': <String, dynamic>{},
+ };
       currentSection = '';
       continue;
     }
@@ -191,8 +199,8 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
       continue;
     }
 
-    var foundSection = false;
-    for (final section in ['android', 'ios', 'colors', 'urls', 'assets']) {
+ var foundSection = false;
+ for (final section in ['android', 'ios', 'colors', 'urls', 'assets', 'features']) {
       if (trimmed.startsWith('$section:')) {
         currentSection = section;
         foundSection = true;
@@ -302,13 +310,19 @@ Future<void> generateBrandConfigs(List<Map<String, dynamic>> brands) async {
     final darkPrimary = colors['darkPrimary'] ?? '#FFFFFF';
     final secondary = colors['secondary'] ?? '#FFFFFF';
     final accent = colors['accent'] ?? primary;
-    final api = urls['api'] ?? 'https://example.com/api/';
-    final websocket = urls['websocket'] ?? 'wss://example.com/ws';
-    final chart = urls['chart'] ?? 'https://example.com';
-    final appIcon = assets['appIcon'] ?? 'assets/brands/$name/icon.png';
-    final logo = assets['logo'] ?? 'assets/brands/$name/logo.svg';
-    final splashLogo = assets['splashLogo'] ?? 'assets/brands/$name/splash_logo.svg';
-    final className = _brandClassName(name);
+ final api = urls['api'] ?? 'https://example.com/api/';
+ final websocket = urls['websocket'] ?? 'wss://example.com/ws';
+ final chart = urls['chart'] ?? 'https://example.com';
+ final appIcon = assets['appIcon'] ?? 'assets/brands/$name/icon.png';
+ final logo = assets['logo'] ?? 'assets/brands/$name/logo.svg';
+ final splashLogo = assets['splashLogo'] ?? 'assets/brands/$name/splash_logo.svg';
+ final className = _brandClassName(name);
+
+ // Features
+ final features = brand['features'] is Map<String, dynamic>
+ ? brand['features'] as Map<String, dynamic>
+ : <String, dynamic>{};
+ final useNewChart = (features['useNewChart']?.toString().toLowerCase() == 'true');
 
     final clientDir = Directory('lib/clients/$name');
     if (!clientDir.existsSync()) clientDir.createSync(recursive: true);
@@ -333,10 +347,11 @@ class ${className}Config extends BaseClientConfig {
           logoSvgPath: '${_dartString(_assetFilename(logo))}',
           splashLogoPath: '${_dartString(_assetFilename(splashLogo))}',
           appIconPath: '${_dartString(_assetFilename(appIcon))}',
-          apiBaseUrl: '${_dartString(api)}',
-          websocketUrl: '${_dartString(websocket)}',
-          chartBaseUrl: '${_dartString(chart)}',
-        );
+ apiBaseUrl: '${_dartString(api)}',
+ websocketUrl: '${_dartString(websocket)}',
+ chartBaseUrl: '${_dartString(chart)}',
+ useNewChart: $useNewChart,
+ );
 }
 ''';
 
@@ -387,15 +402,15 @@ Future<void> generateLegacyBrandsYaml(String defaultBrand, List<Map<String, dyna
     if (brand['inheritsFrom'] != null) buffer.writeln('    inheritsFrom: ${brand['inheritsFrom']}');
     buffer.writeln('    label: ${brand['label']}');
     buffer.writeln('    themeMode: ${brand['themeMode'] ?? 'both'}');
-    for (final section in ['android', 'ios', 'colors', 'urls', 'assets']) {
-      final values = brand[section] as Map<String, dynamic>;
-      buffer.writeln('    $section:');
-      values.forEach((key, value) {
-        buffer.writeln('      $key: "$value"');
-      });
-    }
-    buffer.writeln();
-  }
+ for (final section in ['android', 'ios', 'colors', 'urls', 'assets', 'features']) {
+ final values = brand[section] as Map<String, dynamic>;
+ buffer.writeln(' $section:');
+ values.forEach((key, value) {
+ buffer.writeln(' $key: "$value"');
+ });
+ }
+ buffer.writeln();
+ }
 
   File(yamlPath).writeAsStringSync(buffer.toString());
   print('  Updated: $yamlPath');
@@ -405,18 +420,19 @@ Future<void> generateBrandsJson(String defaultBrand, List<Map<String, dynamic>> 
   print('\n2. Generating brands.json...');
 
   final simpleList = brands.map((b) => b['name'] as String).toList();
-  final details = brands.map((brand) {
-    final map = <String, dynamic>{
-      'name': brand['name'],
-      'type': brand['type'],
-      'label': brand['label'],
-      'themeMode': brand['themeMode'] ?? 'both',
-      'android': brand['android'],
-      'ios': brand['ios'],
-      'colors': brand['colors'],
-      'urls': brand['urls'],
-      'assets': brand['assets'],
-    };
+ final details = brands.map((brand) {
+ final map = <String, dynamic>{
+ 'name': brand['name'],
+ 'type': brand['type'],
+ 'label': brand['label'],
+ 'themeMode': brand['themeMode'] ?? 'both',
+ 'android': brand['android'],
+ 'ios': brand['ios'],
+ 'colors': brand['colors'],
+ 'urls': brand['urls'],
+ 'assets': brand['assets'],
+ 'features': brand['features'] ?? <String, dynamic>{'useNewChart': 'false'},
+ };
     if (brand['inheritsFrom'] != null) map['inheritsFrom'] = brand['inheritsFrom'];
     return map;
   }).toList();
@@ -484,72 +500,76 @@ class FlavorConfig {
   final String apiBaseUrl;
   final String chartBaseUrl;
   final String websocketUrl;
-  final String appIconPath;
-  final String svgLogoPath;
-  final String splashLogoPath;
-  final String? remoteLogoUrl;
-  final Map<String, dynamic>? selectedBrokerData;
+ final String appIconPath;
+ final String svgLogoPath;
+ final String splashLogoPath;
+ final String? remoteLogoUrl;
+ final Map<String, dynamic>? selectedBrokerData;
+ final bool useNewChart;
 
-  static FlavorConfig? _instance;
-  static Flavor? _selectedFlavor;
+ static FlavorConfig? _instance;
+ static Flavor? _selectedFlavor;
 
-  factory FlavorConfig({
-    required Flavor flavor,
-    required String appName,
-    required String appTitle,
-    required Color primaryColor,
-    required Color darkPrimaryColor,
-    required Color secondaryColor,
-    required Color accentColor,
-    required String apiBaseUrl,
-    required String websocketUrl,
-    required String chartBaseUrl,
-    required String appIconPath,
-    required String svgLogoPath,
-    required String splashLogoPath,
-    String? remoteLogoUrl,
-    Map<String, dynamic>? selectedBrokerData,
-  }) {
-    if (_selectedFlavor == null || _selectedFlavor == flavor) {
-      _instance = FlavorConfig._internal(
-        flavor: flavor,
-        appName: appName,
-        title: appTitle,
-        primaryColor: primaryColor,
-        darkPrimaryColor: darkPrimaryColor,
-        secondaryColor: secondaryColor,
-        accentColor: accentColor,
-        apiBaseUrl: apiBaseUrl,
-        websocketUrl: websocketUrl,
-        chartBaseUrl: chartBaseUrl,
-        appIconPath: appIconPath,
-        svgLogoPath: svgLogoPath,
-        splashLogoPath: splashLogoPath,
-        remoteLogoUrl: remoteLogoUrl,
-        selectedBrokerData: selectedBrokerData,
-      );
-      _selectedFlavor = flavor;
-    }
-    return _instance!;
-  }
+ factory FlavorConfig({
+ required Flavor flavor,
+ required String appName,
+ required String appTitle,
+ required Color primaryColor,
+ required Color darkPrimaryColor,
+ required Color secondaryColor,
+ required Color accentColor,
+ required String apiBaseUrl,
+ required String websocketUrl,
+ required String chartBaseUrl,
+ required String appIconPath,
+ required String svgLogoPath,
+ required String splashLogoPath,
+ String? remoteLogoUrl,
+ Map<String, dynamic>? selectedBrokerData,
+ bool useNewChart = false,
+ }) {
+ if (_selectedFlavor == null || _selectedFlavor == flavor) {
+ _instance = FlavorConfig._internal(
+ flavor: flavor,
+ appName: appName,
+ title: appTitle,
+ primaryColor: primaryColor,
+ darkPrimaryColor: darkPrimaryColor,
+ secondaryColor: secondaryColor,
+ accentColor: accentColor,
+ apiBaseUrl: apiBaseUrl,
+ websocketUrl: websocketUrl,
+ chartBaseUrl: chartBaseUrl,
+ appIconPath: appIconPath,
+ svgLogoPath: svgLogoPath,
+ splashLogoPath: splashLogoPath,
+ remoteLogoUrl: remoteLogoUrl,
+ selectedBrokerData: selectedBrokerData,
+ useNewChart: useNewChart,
+ );
+ _selectedFlavor = flavor;
+ }
+ return _instance!;
+ }
 
-  FlavorConfig._internal({
-    required this.flavor,
-    required String title,
-    required this.appName,
-    required this.primaryColor,
-    required this.darkPrimaryColor,
-    required this.secondaryColor,
-    required this.accentColor,
-    required this.apiBaseUrl,
-    required this.websocketUrl,
-    required this.chartBaseUrl,
-    required this.appIconPath,
-    required this.svgLogoPath,
-    required this.splashLogoPath,
-    required this.remoteLogoUrl,
-    required this.selectedBrokerData,
-  }) : appTitle = title;
+ FlavorConfig._internal({
+ required this.flavor,
+ required String title,
+ required this.appName,
+ required this.primaryColor,
+ required this.darkPrimaryColor,
+ required this.secondaryColor,
+ required this.accentColor,
+ required this.apiBaseUrl,
+ required this.websocketUrl,
+ required this.chartBaseUrl,
+ required this.appIconPath,
+ required this.svgLogoPath,
+ required this.splashLogoPath,
+ required this.remoteLogoUrl,
+ required this.selectedBrokerData,
+ this.useNewChart = false,
+ }) : appTitle = title;
 
   static FlavorConfig get instance => _instance ?? activate(Flavor.$fallbackBrand);
 
@@ -601,24 +621,27 @@ $getters
     Map<String, dynamic>? brokerData,
   }) {
     final current = instance;
-    _instance = FlavorConfig._internal(
-      flavor: current.flavor,
-      title: config['appTitle']?.toString() ?? current.appTitle,
-      appName: brokerName ?? config['appName']?.toString() ?? current.appName,
-      primaryColor: _parseColor(config['primaryColor']) ?? current.primaryColor,
-      darkPrimaryColor: _parseColor(config['darkPrimaryColor']) ?? current.darkPrimaryColor,
-      secondaryColor: _parseColor(config['secondaryColor']) ?? current.secondaryColor,
-      accentColor: _parseColor(config['accentColor']) ?? current.accentColor,
-      apiBaseUrl: config['apiBaseUrl']?.toString() ?? current.apiBaseUrl,
-      websocketUrl: config['websocketUrl']?.toString() ?? current.websocketUrl,
-      chartBaseUrl: config['chartBaseUrl']?.toString() ?? current.chartBaseUrl,
-      appIconPath: config['appIconPath']?.toString() ?? current.appIconPath,
-      svgLogoPath: brokerLogoUrl ?? config['logoSvgPath']?.toString() ?? current.svgLogoPath,
-      splashLogoPath: config['splashLogoPath']?.toString() ?? current.splashLogoPath,
-      remoteLogoUrl: config['remoteLogoUrl']?.toString() ?? current.remoteLogoUrl,
-      selectedBrokerData: brokerData ?? (config['selectedBrokerData'] as Map<String, dynamic>?) ?? current.selectedBrokerData,
-    );
-  }
+ _instance = FlavorConfig._internal(
+ flavor: current.flavor,
+ title: config['appTitle']?.toString() ?? current.appTitle,
+ appName: brokerName ?? config['appName']?.toString() ?? current.appName,
+ primaryColor: _parseColor(config['primaryColor']) ?? current.primaryColor,
+ darkPrimaryColor: _parseColor(config['darkPrimaryColor']) ?? current.darkPrimaryColor,
+ secondaryColor: _parseColor(config['secondaryColor']) ?? current.secondaryColor,
+ accentColor: _parseColor(config['accentColor']) ?? current.accentColor,
+ apiBaseUrl: config['apiBaseUrl']?.toString() ?? current.apiBaseUrl,
+ websocketUrl: config['websocketUrl']?.toString() ?? current.websocketUrl,
+ chartBaseUrl: config['chartBaseUrl']?.toString() ?? current.chartBaseUrl,
+ appIconPath: config['appIconPath']?.toString() ?? current.appIconPath,
+ svgLogoPath: brokerLogoUrl ?? config['logoSvgPath']?.toString() ?? current.svgLogoPath,
+ splashLogoPath: config['splashLogoPath']?.toString() ?? current.splashLogoPath,
+ remoteLogoUrl: config['remoteLogoUrl']?.toString() ?? current.remoteLogoUrl,
+ selectedBrokerData: brokerData ?? (config['selectedBrokerData'] as Map<String, dynamic>?) ?? current.selectedBrokerData,
+ useNewChart: config['useNewChart'] is bool
+ ? config['useNewChart'] as bool
+ : current.useNewChart,
+ );
+ }
 
   static Color? _parseColor(dynamic value) {
     if (value == null) return null;
@@ -634,27 +657,28 @@ $getters
   }
 }
 
-extension _BaseClientConfigFlavorConfigX on BaseClientConfig {
-  FlavorConfig toFlavorConfig(Flavor flavor, String clientName) {
-    return FlavorConfig(
-      flavor: flavor,
-      appName: brandName,
-      appTitle: appTitle,
-      primaryColor: primaryColor,
-      darkPrimaryColor: darkPrimaryColor,
-      secondaryColor: secondaryColor,
-      accentColor: accentColor,
-      websocketUrl: websocketUrl,
-      chartBaseUrl: chartBaseUrl,
-      apiBaseUrl: apiBaseUrl,
-      appIconPath: getAssetPath(clientName, appIconPath),
-      svgLogoPath: getAssetPath(clientName, logoSvgPath),
-      splashLogoPath: getAssetPath(clientName, splashLogoPath),
-      remoteLogoUrl: null,
-      selectedBrokerData: null,
-    );
-  }
-}
+ extension _BaseClientConfigFlavorConfigX on BaseClientConfig {
+ FlavorConfig toFlavorConfig(Flavor flavor, String clientName) {
+ return FlavorConfig(
+ flavor: flavor,
+ appName: brandName,
+ appTitle: appTitle,
+ primaryColor: primaryColor,
+ darkPrimaryColor: darkPrimaryColor,
+ secondaryColor: secondaryColor,
+ accentColor: accentColor,
+ websocketUrl: websocketUrl,
+ chartBaseUrl: chartBaseUrl,
+ apiBaseUrl: apiBaseUrl,
+ appIconPath: getAssetPath(clientName, appIconPath),
+ svgLogoPath: getAssetPath(clientName, logoSvgPath),
+ splashLogoPath: getAssetPath(clientName, splashLogoPath),
+ remoteLogoUrl: null,
+ selectedBrokerData: null,
+ useNewChart: useNewChart,
+ );
+ }
+ }
 ''';
 
   File('lib/flavor_config.dart').writeAsStringSync(content);

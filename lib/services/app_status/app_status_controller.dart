@@ -52,9 +52,9 @@ class AppStatusController extends GetxController {
       bool computedForceUpdate = status.isForceUpdate;
 
       // If not marked as force update by backend, check the later_date
-      if (!computedForceUpdate && status.laterDate != null) {
+      if (!computedForceUpdate && status.laterDate != null && status.laterDate!.trim().isNotEmpty) {
         try {
-          final DateTime laterDate = DateTime.parse(status.laterDate!);
+          final DateTime laterDate = DateTime.parse(status.laterDate!.trim());
           if (DateTime.now().isAfter(laterDate)) {
             computedForceUpdate = true;
           }

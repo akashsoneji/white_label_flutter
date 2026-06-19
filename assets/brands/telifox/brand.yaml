@@ -1,0 +1,33 @@
+name: telifox
+type: child
+inheritsFrom: vantage
+label: Telifox
+themeMode: both
+
+android:
+ applicationId: com.telifox.app
+ appName: Telifox
+
+ios:
+ bundleId: com.telifox.app
+ appName: Telifox
+
+colors:
+ primary: "#052B48"
+ secondary: "#D7B466"
+ accent: "#D7B466"
+ splashColor: "#052B48"
+ launcherBackground: "#052B48"
+
+urls:
+ api: "https://client.kantaracapital.io/api/"
+ websocket: "wss://client.kantaracapital.io/trade-engine"
+ chart: "https://client.kantaracapital.io"
+
+assets:
+ appIcon: icon.png
+ logo: icon.png
+ splashLogo: icon.png
+
+features:
+ useNewChart: true

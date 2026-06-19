@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # of the product and file versions while build-number is used as the build suffix.
 # version: 1.0.10+11
 
-version: 1.0.95+92
+version: 1.0.97+94
 
 # FOR STAGING
 # version: 1.0.99+96
@@ -155,7 +155,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND
-    - assets/clients/tenax/
+    - assets/clients/telifox/
     - assets/config/brands/brands.json
     # END GENERATED ACTIVE CLIENT ASSETS
 
@@ -181,8 +181,8 @@ flutter:
     - assets/animation/
     - assets/svg/partnership_program/
     - assets/svg/ib_dashboard/
-
     - assets/chart/index.html
+    - assets/chart/advanced/
     - assets/svg/flags/
     - assets/mock/
     - assets/svg/copy_trading/

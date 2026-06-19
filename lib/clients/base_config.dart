@@ -19,25 +19,32 @@ class BaseClientConfig {
   final String splashLogoPath;
   final String appIconPath;
 
-  // URLs
-  final String apiBaseUrl;
-  final String websocketUrl;
-  final String chartBaseUrl;
+ // URLs
+ final String apiBaseUrl;
+ final String websocketUrl;
+ final String chartBaseUrl;
 
-  const BaseClientConfig({
-    required this.brandName,
-    required this.appTitle,
-    required this.primaryColor,
-    Color? darkPrimaryColor,
-    required this.secondaryColor,
-    required this.accentColor,
-    required this.logoSvgPath,
-    required this.splashLogoPath,
-    required this.appIconPath,
-    required this.apiBaseUrl,
-    required this.websocketUrl,
-    required this.chartBaseUrl,
-  }) : darkPrimaryColor = darkPrimaryColor ?? primaryColor;
+ // Feature flags
+ /// When true, ChartScreen will render the new advanced chart widget
+ /// (TradingView charting_library + custom Datafeed bridge) instead of
+ /// the legacy `ChartInAppWebView`. Default: false (no behavior change).
+ final bool useNewChart;
+
+ const BaseClientConfig({
+ required this.brandName,
+ required this.appTitle,
+ required this.primaryColor,
+ Color? darkPrimaryColor,
+ required this.secondaryColor,
+ required this.accentColor,
+ required this.logoSvgPath,
+ required this.splashLogoPath,
+ required this.appIconPath,
+ required this.apiBaseUrl,
+ required this.websocketUrl,
+ required this.chartBaseUrl,
+ this.useNewChart = false,
+ }) : darkPrimaryColor = darkPrimaryColor ?? primaryColor;
 
   /// Get the full runtime asset path for a prepared client asset.
   String getAssetPath(String clientName, String assetPath) {

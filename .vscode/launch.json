@@ -92,7 +92,37 @@
             "preLaunchTask": "prepare-skyriss"
         },
         {
-            "name": "🔴 Tenax (debug)",
+            "name": "🔴 Telifox (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "telifox", "--dart-define=CLIENT=telifox", "--dart-define=FLAVOR=telifox", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal",
+            "preLaunchTask": "prepare-telifox"
+        },
+        {
+            "name": "🔴 Telifox (profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "telifox", "--dart-define=CLIENT=telifox", "--dart-define=FLAVOR=telifox"],
+            "flutterMode": "profile",
+            "console": "terminal",
+            "preLaunchTask": "prepare-telifox"
+        },
+        {
+            "name": "🔴 Telifox (release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "telifox", "--dart-define=CLIENT=telifox", "--dart-define=FLAVOR=telifox"],
+            "flutterMode": "release",
+            "console": "terminal",
+            "preLaunchTask": "prepare-telifox"
+        },
+        {
+            "name": "🟣 Tenax (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -102,7 +132,7 @@
             "preLaunchTask": "prepare-tenax"
         },
         {
-            "name": "🔴 Tenax (profile)",
+            "name": "🟣 Tenax (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -112,7 +142,7 @@
             "preLaunchTask": "prepare-tenax"
         },
         {
-            "name": "🔴 Tenax (release)",
+            "name": "🟣 Tenax (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -122,7 +152,7 @@
             "preLaunchTask": "prepare-tenax"
         },
         {
-            "name": "🟣 Vantage (debug)",
+            "name": "🟠 Vantage (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -132,7 +162,7 @@
             "preLaunchTask": "prepare-vantage"
         },
         {
-            "name": "🟣 Vantage (profile)",
+            "name": "🟠 Vantage (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -142,7 +172,7 @@
             "preLaunchTask": "prepare-vantage"
         },
         {
-            "name": "🟣 Vantage (release)",
+            "name": "🟠 Vantage (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",

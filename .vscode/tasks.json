@@ -83,6 +83,25 @@
       }
     },
     {
+      "label": "prepare-telifox",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "dart run scripts/prepare_flavor.dart telifox && rm -rf .dart_tool/flutter_build"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": true
+      }
+    },
+    {
       "label": "prepare-tenax",
       "type": "shell",
       "command": "bash",

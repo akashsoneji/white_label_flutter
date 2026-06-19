@@ -24,6 +24,9 @@ urls:
   chart: https://my.pipze.com
 
 assets:
-  appIcon: icon.png
-  logo: logo.svg
-  splashLogo: splash_logo.svg
+ appIcon: icon.png
+ logo: logo.svg
+ splashLogo: splash_logo.svg
+
+features:
+ useNewChart: false

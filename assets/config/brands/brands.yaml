@@ -9,128 +9,166 @@ brands:
     inheritsFrom: vantage
     label: Celestial
     themeMode: dark
-    android:
-      applicationId: "com.celestial.app"
-      appName: "Celestial"
-    ios:
-      bundleId: "com.celestial.app"
-      appName: "Celestial"
-    colors:
-      primary: "#24324D"
-      secondary: "#22D3EE"
-      accent: "#24324D"
-      splashColor: "#24324D"
-      launcherBackground: "#24324D"
-    urls:
-      api: "https://client.celestialtrader.com/api/"
-      websocket: "wss://client.celestialtrader.com/trade-engine"
-      chart: "https://client.celestialtrader.com"
-    assets:
-      appIcon: "assets/brands/celestial/icon.png"
-      logo: "assets/brands/celestial/logo.svg"
-      splashLogo: "assets/brands/celestial/splash_logo.svg"
+ android:
+ applicationId: "com.celestial.app"
+ appName: "Celestial"
+ ios:
+ bundleId: "com.celestial.app"
+ appName: "Celestial"
+ colors:
+ primary: "#24324D"
+ secondary: "#22D3EE"
+ accent: "#24324D"
+ splashColor: "#24324D"
+ launcherBackground: "#24324D"
+ urls:
+ api: "https://client.celestialtrader.com/api/"
+ websocket: "wss://client.celestialtrader.com/trade-engine"
+ chart: "https://client.celestialtrader.com"
+ assets:
+ appIcon: "assets/brands/celestial/icon.png"
+ logo: "assets/brands/celestial/logo.svg"
+ splashLogo: "assets/brands/celestial/splash_logo.svg"
+ features:
+ useNewChart: "false"
 
   - name: pipze
     type: child
     inheritsFrom: vantage
     label: Pipze
     themeMode: both
-    android:
-      applicationId: "com.pipze.app"
-      appName: "Pipze"
-    ios:
-      bundleId: "com.pipze.app"
-      appName: "Pipze"
-    colors:
-      primary: "#5F259E"
-      secondary: "#F8F3FF"
-      accent: "#FFC93C"
-      splashColor: "#5F259E"
-      launcherBackground: "#5F259E"
-    urls:
-      api: "https://my.pipze.com/api/"
-      websocket: "wss://my.pipze.com/trade-engine"
-      chart: "https://my.pipze.com"
-    assets:
-      appIcon: "assets/brands/pipze/icon.png"
-      logo: "assets/brands/pipze/icon.png"
-      splashLogo: "assets/brands/pipze/icon.png"
+ android:
+ applicationId: "com.pipze.app"
+ appName: "Pipze"
+ ios:
+ bundleId: "com.pipze.app"
+ appName: "Pipze"
+ colors:
+ primary: "#5F259E"
+ secondary: "#F8F3FF"
+ accent: "#FFC93C"
+ splashColor: "#5F259E"
+ launcherBackground: "#5F259E"
+ urls:
+ api: "https://my.pipze.com/api/"
+ websocket: "wss://my.pipze.com/trade-engine"
+ chart: "https://my.pipze.com"
+ assets:
+ appIcon: "assets/brands/pipze/icon.png"
+ logo: "assets/brands/pipze/icon.png"
+ splashLogo: "assets/brands/pipze/icon.png"
+ features:
+ useNewChart: "false"
 
   - name: skyriss
     type: child
     inheritsFrom: vantage
     label: Skyriss
     themeMode: dark
-    android:
-      applicationId: "com.skyriss.app"
-      appName: "Skyriss"
-    ios:
-      bundleId: "com.skyriss.app"
-      appName: "Skyriss"
-    colors:
-      primary: "#0BFF00"
-      darkPrimary: "#0BFF00"
-      secondary: "#F8F3FF"
-      accent: "#E77930"
-      splashColor: "#000000"
-      launcherBackground: "#000000"
-    urls:
-      api: "https://login.skyriss.com/api/"
-      websocket: "wss://login.skyriss.com/trade-engine"
-      chart: "https://login.skyriss.com"
-    assets:
-      appIcon: "assets/brands/skyriss/icon.png"
-      logo: "assets/brands/skyriss/logo.svg"
-      splashLogo: "assets/brands/skyriss/splash_logo.svg"
+ android:
+ applicationId: "com.skyriss.app"
+ appName: "Skyriss"
+ ios:
+ bundleId: "com.skyriss.app"
+ appName: "Skyriss"
+ colors:
+ primary: "#0BFF00"
+ darkPrimary: "#0BFF00"
+ secondary: "#F8F3FF"
+ accent: "#E77930"
+ splashColor: "#000000"
+ launcherBackground: "#000000"
+ urls:
+ api: "https://login.skyriss.com/api/"
+ websocket: "wss://login.skyriss.com/trade-engine"
+ chart: "https://login.skyriss.com"
+ assets:
+ appIcon: "assets/brands/skyriss/icon.png"
+ logo: "assets/brands/skyriss/logo.svg"
+ splashLogo: "assets/brands/skyriss/splash_logo.svg"
+ features:
+ useNewChart: "false"
+
+  - name: telifox
+    type: child
+    inheritsFrom: vantage
+    label: Telifox
+    themeMode: both
+ android:
+ applicationId: "com.telifox.app"
+ appName: "Telifox"
+ ios:
+ bundleId: "com.telifox.app"
+ appName: "Telifox"
+ colors:
+ primary: "#052B48"
+ secondary: "#D7B466"
+ accent: "#D7B466"
+ splashColor: "#052B48"
+ launcherBackground: "#052B48"
+ urls:
+ api: "https://client.kantaracapital.io/api/"
+ websocket: "wss://client.kantaracapital.io/trade-engine"
+ chart: "https://client.kantaracapital.io"
+ assets:
+ appIcon: "assets/brands/telifox/icon.png"
+ logo: "assets/brands/telifox/icon.png"
+ splashLogo: "assets/brands/telifox/icon.png"
+ features:
+ useNewChart: "true"
 
   - name: tenax
     type: child
     inheritsFrom: vantage
     label: Tenax
     themeMode: both
-    android:
-      applicationId: "com.tenax.app"
-      appName: "Tenax"
-    ios:
-      bundleId: "com.tenax.app"
-      appName: "Tenax"
-    colors:
-      primary: "#4A0C54"
-      secondary: "#F8F3FF"
-      accent: "#FFC93C"
-      splashColor: "#4A0C54"
-      launcherBackground: "#4A0C54"
-    urls:
-      api: "https://demo.tenaxcode.com/api/"
-      websocket: "wss://demo.tenaxcode.com/trade-engine"
-      chart: "https://demo.tenaxcode.com"
-    assets:
-      appIcon: "assets/brands/tenax/icon.png"
-      logo: "assets/brands/tenax/logo.svg"
-      splashLogo: "assets/brands/tenax/splash_logo.svg"
+ android:
+ applicationId: "com.tenax.app"
+ appName: "Tenax"
+ ios:
+ bundleId: "com.tenax.app"
+ appName: "Tenax"
+ colors:
+ primary: "#4A0C54"
+ secondary: "#F8F3FF"
+ accent: "#FFC93C"
+ splashColor: "#4A0C54"
+ launcherBackground: "#4A0C54"
+ urls:
+ api: "https://demo.tenaxcode.com/api/"
+ websocket: "wss://demo.tenaxcode.com/trade-engine"
+ chart: "https://demo.tenaxcode.com"
+ assets:
+ appIcon: "assets/brands/tenax/icon.png"
+ logo: "assets/brands/tenax/logo.svg"
+ splashLogo: "assets/brands/tenax/splash_logo.svg"
+ features:
+ useNewChart: "false"
 
   - name: vantage
     type: parent
     label: Vantage
     themeMode: both
-    android:
-      applicationId: "com.vantage.app"
-      appName: "Vantage"
-    ios:
-      bundleId: "com.vantage.app"
-      appName: "Vantage"
-    colors:
-      primary: "#5F259E"
-      secondary: "#F8F3FF"
-      accent: "#FFC93C"
-      splashColor: "#5F259E"
-      launcherBackground: "#5F259E"
-    urls:
-      api: "https://my.pipze.com/api/"
-      websocket: "wss://my.pipze.com/trade-engine"
-      chart: "https://my.pipze.com"
-    assets:
-      appIcon: "assets/brands/vantage/icon.png"
-      logo: "assets/brands/vantage/logo.svg"
-      splashLogo: "assets/brands/vantage/splash_logo.svg"
+ android:
+ applicationId: "com.vantage.app"
+ appName: "Vantage"
+ ios:
+ bundleId: "com.vantage.app"
+ appName: "Vantage"
+ colors:
+ primary: "#5F259E"
+ secondary: "#F8F3FF"
+ accent: "#FFC93C"
+ splashColor: "#5F259E"
+ launcherBackground: "#5F259E"
+ urls:
+ api: "https://my.pipze.com/api/"
+ websocket: "wss://my.pipze.com/trade-engine"
+ chart: "https://my.pipze.com"
+ assets:
+ appIcon: "assets/brands/vantage/icon.png"
+ logo: "assets/brands/vantage/logo.svg"
+ splashLogo: "assets/brands/vantage/splash_logo.svg"
+ features:
+ useNewChart: "false"
 

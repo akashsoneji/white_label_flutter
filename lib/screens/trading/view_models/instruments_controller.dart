@@ -477,17 +477,20 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       '═══════════════════════════════════════════════════════════',
     );
     
-    // ✅ FIX: Cancel unified subscription FIRST to stop data flow
+    // Cancel unified subscription FIRST to stop data flow
     if (_unifiedMwSub != null) {
-      print(
-        '   Cancelling unified WebSocket subscription...',
-      );
+      print('   Cancelling unified WebSocket subscription...');
       _unifiedMwSub?.cancel();
       _unifiedMwSub = null;
       isConnected.value = false;
     }
-    
-    // ✅ FIX: Set clearing flag to block any remaining messages
+
+    // Cancel marketwatchv2 listener and reset bound flag so it can rebind cleanly
+    _marketWatchV2Sub?.cancel();
+    _marketWatchV2Sub = null;
+    _marketWatchV2ListenerBound = false;
+
+    // Set clearing flag to block any remaining in-flight messages
     _isClearingData = true;
     
     // Disconnect direct WebSocket if using it
@@ -912,7 +915,14 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         _applyPriceUpdate(newItem);
 
         if (!existingSymbols.contains(newItem.symbol)) {
-          allInstruments.add(newItem);
+          // Extra guard: also verify it's not already in allInstruments
+          // (handles race conditions between two concurrent update paths)
+          final alreadyExists = allInstruments.any(
+            (e) => e.symbol == newItem.symbol,
+          );
+          if (!alreadyExists) {
+            allInstruments.add(newItem);
+          }
           existingSymbols.add(newItem.symbol);
           structureChanged = true;
         }
@@ -1158,8 +1168,13 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       }
     }
 
-    // Update the observable list (order is preserved from newInstruments)
-    allInstruments.assignAll(updatedInstruments.toSet().toList());
+    // Deduplicate by symbol (preserves first occurrence order)
+    final seen = <String>{};
+    final deduped = <ListElement>[];
+    for (final item in updatedInstruments) {
+      if (seen.add(item.symbol)) deduped.add(item);
+    }
+    allInstruments.assignAll(deduped);
   }
 
   // Send event with parameters over WebSocket
@@ -1180,10 +1195,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
     // Cancel reconnect timer
     _reconnectTimer?.cancel();
+    _socketDataDebounceTimer?.cancel();
     _unifiedMwSub?.cancel();
     _marketWatchV2Sub?.cancel();
     _marketWatchV2Sub = null;
-    _marketWatchV2ListenerBound = false;
+    _marketWatchV2ListenerBound = false; // reset so rebind works on next init
     _priceFlushTimer?.cancel();
     _scrollIdleTimer?.cancel();
 
@@ -1578,8 +1594,13 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         !currentSymbols.containsAll(_previousFilteredSymbols) ||
         !_previousFilteredSymbols.containsAll(currentSymbols);
 
-    // Update the filtered list (RxList will trigger reactive updates automatically)
-    instruments.assignAll(filteredInstruments);
+    // Deduplicate by symbol before assigning — prevents ReorderableListView GlobalKey crash
+    final seenSymbols = <String>{};
+    final dedupedFiltered = <ListElement>[];
+    for (final item in filteredInstruments) {
+      if (seenSymbols.add(item.symbol)) dedupedFiltered.add(item);
+    }
+    instruments.assignAll(dedupedFiltered);
 
     // ✅ PERFORMANCE FIX: Only call update() when list structure changes
     // Price updates will be handled reactively by RxList, no need for full GetBuilder rebuild

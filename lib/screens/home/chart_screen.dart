@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/screens/trading/view_models/chart_controller.dart';
 import 'package:crm_app/models/socket_response.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
+import 'package:crm_app/widgets/advanced_chart_inapp_webview.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
@@ -166,9 +167,35 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
   // GetX reactive listener worker to be disposed
   Worker? _instrumentsWorker;
 
-  // GlobalKey to access WebView state for explicit symbol updates
-  final GlobalKey<ChartInAppWebViewState> _webViewKey =
-      GlobalKey<ChartInAppWebViewState>();
+ // GlobalKeys to access WebView state for explicit symbol updates.
+ // Two keys: one for the legacy chart (ChartInAppWebView) and one for the
+ // new advanced chart (AdvancedChartInAppWebView). The active flavor's
+ // `useNewChart` flag decides which one `chart_screen` actually mounts in
+ // `_buildChartArea()`. Both widgets expose the same public API
+ // (`updateSymbol`, `updateNativeTrades`) so the helper methods below
+ // route calls transparently.
+ final GlobalKey<ChartInAppWebViewState> _legacyChartKey =
+ GlobalKey<ChartInAppWebViewState>();
+ final GlobalKey<AdvancedChartInAppWebViewState> _advancedChartKey =
+ GlobalKey<AdvancedChartInAppWebViewState>();
+
+ /// Route symbol-update calls to whichever chart is currently mounted.
+ void _wvUpdateSymbol(String chartSymbol) {
+ if (FlavorConfig.instance.useNewChart) {
+ _advancedChartKey.currentState?.updateSymbol(chartSymbol);
+ } else {
+ _legacyChartKey.currentState?.updateSymbol(chartSymbol);
+ }
+ }
+
+ /// Route trade-overlay calls to whichever chart is currently mounted.
+ void _wvUpdateNativeTrades(String jsonString) {
+ if (FlavorConfig.instance.useNewChart) {
+ _advancedChartKey.currentState?.updateNativeTrades(jsonString);
+ } else {
+ _legacyChartKey.currentState?.updateNativeTrades(jsonString);
+ }
+ }
 
   // Helper method to remove symbol suffixes (.c, .r, etc.)
   // IMPORTANT: Use this ONLY for display and chart iframe
@@ -442,19 +469,19 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
     }
   }
 
-  /// Inject open trades into the WebView Chart
-  void _updateTradesOnChart() {
-    if (!mounted || _webViewKey.currentState == null) return;
+ /// Inject open trades into the WebView Chart
+ void _updateTradesOnChart() {
+ if (!mounted) return;
 
-    try {
-      final tradingController = Get.find<TradingController>();
-      final positions = tradingController.marketPositions;
+ try {
+ final tradingController = Get.find<TradingController>();
+ final positions = tradingController.marketPositions;
 
-      // Debounce frequent socket updates (especially when 100-200+ positions update in batches)
-      // to avoid UI jank and "stuck" transitions between tabs.
-      _tradesInjectDebounce?.cancel();
-      _tradesInjectDebounce = Timer(const Duration(milliseconds: 250), () {
-        if (!mounted || _webViewKey.currentState == null) return;
+ // Debounce frequent socket updates (especially when 100-200+ positions update in batches)
+ // to avoid UI jank and "stuck" transitions between tabs.
+ _tradesInjectDebounce?.cancel();
+ _tradesInjectDebounce = Timer(const Duration(milliseconds: 250), () {
+ if (!mounted) return;
 
         // Build a lightweight signature first; skip inject if nothing meaningful changed.
         // (orderId + PnL + entry/current prices are enough for chart markers)
@@ -492,8 +519,8 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
                 )
                 .toList();
 
-        final jsonString = jsonEncode(tradesList);
-        _webViewKey.currentState?.updateNativeTrades(jsonString);
+ final jsonString = jsonEncode(tradesList);
+ _wvUpdateNativeTrades(jsonString);
       });
     } catch (e) {
       print('❌ Error injecting trades to chart: $e');
@@ -860,34 +887,22 @@ Placing Order:
     // Change symbol in socket controller (this will handle disconnect/reconnect)
     _changeChartSymbol(newSymbol);
 
-    // Explicitly trigger WebView update after setState completes
-    // Use post-frame callback to ensure widget tree has updated
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _webViewKey.currentState != null) {
-        print('📊 Explicitly updating WebView with symbol: $selectedSymbol');
-        // Remove suffix for chart display
-        String chartSymbol = selectedSymbol;
-        if (chartSymbol.contains('.')) {
-          chartSymbol = chartSymbol.substring(0, chartSymbol.lastIndexOf('.'));
-        }
-        _webViewKey.currentState?.updateSymbol(chartSymbol);
-      } else {
-        print('⚠️ WebView not ready yet, will update via didUpdateWidget');
-        // If WebView isn't ready, schedule another attempt
-        Future.delayed(Duration(milliseconds: 500), () {
-          if (mounted && _webViewKey.currentState != null) {
-            String chartSymbol = selectedSymbol;
-            if (chartSymbol.contains('.')) {
-              chartSymbol = chartSymbol.substring(
-                0,
-                chartSymbol.lastIndexOf('.'),
-              );
-            }
-            _webViewKey.currentState?.updateSymbol(chartSymbol);
-          }
-        });
-      }
-    });
+ // Explicitly trigger WebView update after setState completes
+ // Use post-frame callback to ensure widget tree has updated
+ WidgetsBinding.instance.addPostFrameCallback((_) {
+ if (!mounted) return;
+ print('📊 Explicitly updating WebView with symbol: $selectedSymbol');
+ // Remove suffix for chart display
+ String chartSymbol = selectedSymbol;
+ if (chartSymbol.contains('.')) {
+ chartSymbol = chartSymbol.substring(0, chartSymbol.lastIndexOf('.'));
+ }
+ _wvUpdateSymbol(chartSymbol);
+ // If the chart wasn't ready at the moment of setState, the widget
+ // itself will be re-built with the new symbol URL and will fire
+ // `didUpdateWidget` -> `updateSymbol` once it's mounted, so we don't
+ // need a manual retry here.
+ });
 
     print('✅ ChartScreen: Updated selectedSymbol to $selectedSymbol');
   }
@@ -1601,21 +1616,27 @@ Placing Order:
       _lastDebugPrintedChartUrl = chartUrl;
       debugPrint('📈 Chart URL: $chartUrl');
     }
-    return Container(
-      width: double.infinity,
-      height: MediaQuery.of(context).size.height * 0.4, // Responsive height
-      padding: EdgeInsets.zero,
-      margin: EdgeInsets.zero,
+ return Container(
+ width: double.infinity,
+ height: MediaQuery.of(context).size.height * 0.4, // Responsive height
+ padding: EdgeInsets.zero,
+ margin: EdgeInsets.zero,
 
-      // margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      child: ChartInAppWebView(
-        key: _webViewKey,
-        symbol: selectedSymbol,
-        // Removed ValueKey to allow didUpdateWidget to handle symbol changes
-        // This enables JavaScript-based updates instead of full widget recreation
-        url: chartUrl,
-      ),
-    );
+ // margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+ child: FlavorConfig.instance.useNewChart
+ ? AdvancedChartInAppWebView(
+ key: _advancedChartKey,
+ symbol: selectedSymbol,
+ theme: themeParam,
+ )
+ : ChartInAppWebView(
+ key: _legacyChartKey,
+ symbol: selectedSymbol,
+ // Removed ValueKey to allow didUpdateWidget to handle symbol changes
+ // This enables JavaScript-based updates instead of full widget recreation
+ url: chartUrl,
+ ),
+ );
   }
 
   /// Build notification stack overlay (only shown when one-click trading is enabled)

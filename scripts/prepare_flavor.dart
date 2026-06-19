@@ -44,6 +44,10 @@ void main(List<String> args) async {
     await generateNativeSplash(flavor, brandColors: brandColors);
     await generateLauncherIcons(flavor);
 
+    // iOS preparation (data-driven from brand.yaml). Keeps iOS in sync so the
+    // app can be run directly from Xcode after a single terminal command.
+    await prepareIos(flavor, brandColors: brandColors);
+
     print('\n✅ Successfully prepared $flavor flavor!');
     print(
       '📦 You can now build with: flutter build apk --flavor $flavor --dart-define=CLIENT=$flavor --dart-define=FLAVOR=$flavor',
@@ -520,4 +524,219 @@ Future<void> copyIconsToFlavorFolder(String flavor) async {
   }
 
   print('  ✓ Icons copied to $flavor flavor folder');
+}
+
+// ===========================================================================
+// iOS preparation (data-driven from assets/brands/<flavor>/brand.yaml).
+// No flavor name is ever hardcoded here — every value is read from brand.yaml
+// so that any current or future flavor works with a single prepare command.
+// ===========================================================================
+
+Future<void> prepareIos(
+  String flavor, {
+  Map<String, String> brandColors = const <String, String>{},
+}) async {
+  print('\n🍎 Preparing iOS for $flavor...');
+
+  final iosMeta = await loadIosMeta(flavor);
+  await generateBrandXcconfig(flavor, iosMeta);
+  await wireXcconfigIncludes();
+  await generateIosLauncherIcons(flavor);
+  await writeIosSplashColor(flavor, brandColors: brandColors);
+  await copyIosGoogleServicesIfPresent(flavor);
+
+  print('  ✓ iOS prepared. Open ios/Runner.xcworkspace in Xcode and Run.');
+}
+
+/// Reads `ios.bundleId` and `ios.appName` from the brand.yaml. Falls back to
+/// `com.<flavor>.app` and the brand `label` (or flavor) when absent.
+Future<Map<String, String>> loadIosMeta(String flavor) async {
+  final meta = <String, String>{
+    'bundleId': 'com.$flavor.app',
+    'appName': flavor,
+  };
+
+  final brandYaml = File(path.join('assets', 'brands', flavor, 'brand.yaml'));
+  if (!await brandYaml.exists()) return meta;
+
+  var inIos = false;
+  String? label;
+  for (final line in (await brandYaml.readAsString()).split('\n')) {
+    final trimmed = line.trim();
+    if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+
+    if (trimmed.startsWith('label:')) {
+      label = _yamlValue(trimmed);
+      continue;
+    }
+
+    if (trimmed == 'ios:') {
+      inIos = true;
+      continue;
+    }
+    // A new top-level (non-indented) section ends the ios block.
+    if (inIos && RegExp(r'^[A-Za-z_][A-Za-z0-9_]*:\s*$').hasMatch(trimmed)) {
+      inIos = false;
+    }
+    if (!inIos) continue;
+
+    if (trimmed.startsWith('bundleId:')) {
+      final value = _yamlValue(trimmed);
+      if (value.isNotEmpty) meta['bundleId'] = value;
+    } else if (trimmed.startsWith('appName:')) {
+      final value = _yamlValue(trimmed);
+      if (value.isNotEmpty) meta['appName'] = value;
+    }
+  }
+
+  if (meta['appName'] == flavor && label != null && label.isNotEmpty) {
+    meta['appName'] = label;
+  }
+  return meta;
+}
+
+/// Writes ios/Flutter/Brand.xcconfig with the active flavor's bundle id,
+/// display name, dart-defines (so Xcode-direct runs select the right flavor),
+/// and the Flutter target. Overwritten on every prepare run.
+Future<void> generateBrandXcconfig(String flavor, Map<String, String> iosMeta) async {
+  final bundleId = iosMeta['bundleId'] ?? 'com.$flavor.app';
+  final displayName = iosMeta['appName'] ?? flavor;
+
+  final dartDefines = <String>[
+    base64.encode(utf8.encode('CLIENT=$flavor')),
+    base64.encode(utf8.encode('FLAVOR=$flavor')),
+  ].join(',');
+
+  final content = '''// GENERATED — Do not edit manually. Regenerate with:
+//   dart run scripts/prepare_flavor.dart $flavor
+// Active flavor: $flavor
+PRODUCT_BUNDLE_IDENTIFIER=$bundleId
+BRAND_DISPLAY_NAME=$displayName
+FLUTTER_TARGET=lib/main.dart
+DART_DEFINES=$dartDefines
+''';
+
+  final file = File(path.join('ios', 'Flutter', 'Brand.xcconfig'));
+  await file.parent.create(recursive: true);
+  await file.writeAsString(content);
+  print('  ✓ ios/Flutter/Brand.xcconfig (bundle: $bundleId, name: $displayName)');
+}
+
+/// Ensures Debug.xcconfig and Release.xcconfig include Brand.xcconfig.
+/// Idempotent: only appends the include line once.
+Future<void> wireXcconfigIncludes() async {
+  const includeLine = '#include? "Brand.xcconfig"';
+  for (final name in ['Debug.xcconfig', 'Release.xcconfig']) {
+    final file = File(path.join('ios', 'Flutter', name));
+    if (!await file.exists()) {
+      print('  ⚠️  $name not found, skipping include wiring');
+      continue;
+    }
+    var content = await file.readAsString();
+    if (content.contains(includeLine)) continue;
+    if (!content.endsWith('\n')) content += '\n';
+    content += '$includeLine\n';
+    await file.writeAsString(content);
+    print('  ✓ Wired Brand.xcconfig into $name');
+  }
+}
+
+/// Generates iOS app icons from lib/clients/<flavor>/launcher_icons.yaml
+/// (which already has `ios: true`), overwriting AppIcon.appiconset.
+Future<void> generateIosLauncherIcons(String flavor) async {
+  final configFile = File(path.join('lib', 'clients', flavor, 'launcher_icons.yaml'));
+  if (!await configFile.exists()) {
+    print('  ⚠️  Launcher icons config not found, skipping iOS icon generation');
+    return;
+  }
+
+  print('  ⏳ Generating iOS app icons...');
+  final result = await Process.run('dart', [
+    'run',
+    'flutter_launcher_icons',
+    '-f',
+    configFile.path,
+  ], workingDirectory: Directory.current.path);
+
+  if (result.exitCode == 0) {
+    print('  ✓ iOS app icons generated (AppIcon.appiconset)');
+  } else {
+    print('  ⚠️  iOS icon generation failed');
+    print('  Error: ${result.stderr}');
+  }
+}
+
+/// Writes the iOS launch-screen background color (appColor.colorset) from the
+/// brand splash/primary color so the native launch screen matches the brand.
+Future<void> writeIosSplashColor(
+  String flavor, {
+  Map<String, String> brandColors = const <String, String>{},
+}) async {
+  final colorSet = File(path.join(
+    'ios', 'Runner', 'Assets.xcassets', 'appColor.colorset', 'Contents.json',
+  ));
+  if (!await colorSet.parent.exists()) {
+    print('  ⚠️  appColor.colorset not found, skipping iOS splash color');
+    return;
+  }
+
+  final hex = colorToHex(
+    brandColorValue(
+      brandColors,
+      ['splashColor', 'splash', 'primary'],
+      '#5F259E',
+    ),
+  );
+  final r = (int.parse(hex.substring(0, 2), radix: 16) / 255).toStringAsFixed(3);
+  final g = (int.parse(hex.substring(2, 4), radix: 16) / 255).toStringAsFixed(3);
+  final b = (int.parse(hex.substring(4, 6), radix: 16) / 255).toStringAsFixed(3);
+
+  String colorEntry({List<Map<String, String>>? appearances}) {
+    final appearanceJson = appearances == null
+        ? ''
+        : '      "appearances" : [\n        {\n          "appearance" : "luminosity",\n          "value" : "dark"\n        }\n      ],\n';
+    return '''    {
+$appearanceJson      "color" : {
+        "color-space" : "srgb",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "$b",
+          "green" : "$g",
+          "red" : "$r"
+        }
+      },
+      "idiom" : "universal"
+    }''';
+  }
+
+  final content = '''{
+  "colors" : [
+${colorEntry()},
+${colorEntry(appearances: const [{}])}
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
+''';
+
+  await colorSet.writeAsString(content);
+  print('  ✓ iOS splash color set to #$hex');
+}
+
+/// Copies the iOS Firebase config (GoogleService-Info.plist) from the brand
+/// folder into ios/Runner/ if present; removes a stale one otherwise.
+Future<void> copyIosGoogleServicesIfPresent(String flavor) async {
+  final sourceFile = File(path.join('assets', 'brands', flavor, 'GoogleService-Info.plist'));
+  final targetFile = File(path.join('ios', 'Runner', 'GoogleService-Info.plist'));
+
+  if (!await sourceFile.exists()) {
+    print('  ℹ️  No GoogleService-Info.plist for $flavor (iOS Firebase optional)');
+    return;
+  }
+
+  await targetFile.parent.create(recursive: true);
+  await sourceFile.copy(targetFile.path);
+  print('  ✓ Copied GoogleService-Info.plist to ios/Runner/');
 }

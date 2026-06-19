@@ -1,0 +1,7 @@
+// GENERATED — Do not edit manually. Regenerate with:
+//   dart run scripts/prepare_flavor.dart telifox
+// Active flavor: telifox
+PRODUCT_BUNDLE_IDENTIFIER=com.telifox.app
+BRAND_DISPLAY_NAME=Telifox
+FLUTTER_TARGET=lib/main.dart
+DART_DEFINES=Q0xJRU5UPXRlbGlmb3g=,RkxBVk9SPXRlbGlmb3g=
