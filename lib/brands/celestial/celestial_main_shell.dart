@@ -28,7 +28,9 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
     CelestialChartScreen(),
     CelestialTradeScreen(),
     CelestialHistoryScreen(),
-    CelestialSettingsScreen(),
+    CelestialSettingsScreen(
+      onNavigateToTab: (i) => setState(() => _index = i),
+    ),
   ];
 
   static const List<_NavTab> _tabs = <_NavTab>[
