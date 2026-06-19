@@ -321,18 +321,20 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
     final sideColor = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
     final profit = double.tryParse(t.tradeProfit) ?? 0;
     final plColor = profit >= 0 ? CelTheme.tpGreen : CelTheme.sell(c);
-    final vol = t.tradeVolume;
+    // Use volumeDisplay for consistent 8-decimal MT5-style formatting (e.g. 0.01000000)
+    final vol = t.volumeDisplay;
     final open = t.tradePriceOrder;
     final close = t.tradePriceClose;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Left colour bar
           Container(
             width: 3.w,
-            height: 44.h,
+            height: 52.h,
             decoration: BoxDecoration(
               color: plColor,
               borderRadius: BorderRadius.circular(2.r),
@@ -344,61 +346,63 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Symbol + side badge row
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('${t.tradeSymbol}',
+                    Text(t.tradeSymbol,
                         style: TextStyle(
                             color: CelTheme.mainText(c),
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w800)),
                     SizedBox(width: 6.w),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                       decoration: BoxDecoration(
                         color: sideColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
-                          '${isBuy ? 'BUY' : 'SELL'} $vol',
-                          style: TextStyle(
-                              color: sideColor,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w700)),
+                        '${isBuy ? 'BUY' : 'SELL'} $vol',
+                        style: TextStyle(
+                            color: sideColor,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ],
                 ),
                 SizedBox(height: 3.h),
+                // Open → Close price
                 Text('$open  →  $close',
                     style: TextStyle(
                         color: CelTheme.subText(c),
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600)),
                 SizedBox(height: 2.h),
-                Row(
-                  children: [
-                    Text(t.tradeOpenTime,
-                        style: TextStyle(
-                            color: CelTheme.subText(c),
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w500)),
-                    if (t.tradeCloseTime.isNotEmpty) ...[
-                      Text(' → ${t.tradeCloseTime}',
-                          style: TextStyle(
-                              color: CelTheme.subText(c),
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w500)),
-                    ],
-                  ],
+                // Open time → Close time
+                Text(
+                  t.tradeCloseTime.isNotEmpty
+                      ? '${t.tradeOpenTime}  →  ${t.tradeCloseTime}'
+                      : t.tradeOpenTime,
+                  style: TextStyle(
+                      color: CelTheme.subText(c),
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w500),
                 ),
               ],
             ),
           ),
+          SizedBox(width: 8.w),
           // P/L
-          Text('${profit >= 0 ? '+' : ''}${profit.toStringAsFixed(2)}',
-              style: TextStyle(
-                  color: plColor,
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w800)),
+          Text(
+            '${profit >= 0 ? '+' : ''}${profit.toStringAsFixed(2)}',
+            style: TextStyle(
+                color: plColor,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w800),
+          ),
         ],
       ),
     );

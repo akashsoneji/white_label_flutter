@@ -4,6 +4,7 @@ class TradeHistoryResponse {
   final List<TradeHistoryItem> data;
   final PaginationInfo pagination;
   final TradeHistoryTotals? totals;
+  final TradeHistorySummary? summary;
 
   TradeHistoryResponse({
     required this.message,
@@ -11,48 +12,39 @@ class TradeHistoryResponse {
     required this.data,
     required this.pagination,
     this.totals,
+    this.summary,
   });
 
   factory TradeHistoryResponse.fromJson(Map<String, dynamic> json) {
-    // ✅ SIMPLIFIED: Handle flat structure from Laravel API
-    // New structure: data (array), pagination, totals, summary at root level
-    // Also support nested structure for backward compatibility
-    
     final dataField = json['data'];
     List<TradeHistoryItem> tradeHistoryItems;
     Map<String, dynamic> paginationData;
     Map<String, dynamic>? totalsData;
+    Map<String, dynamic>? summaryData;
 
     if (dataField is List<dynamic>) {
-      // ✅ NEW FLAT STRUCTURE: data is directly a list at root level
-      tradeHistoryItems =
-          dataField
-              .map(
-                (item) =>
-                    TradeHistoryItem.fromJson(item as Map<String, dynamic>),
-              )
-              .toList();
-      // Pagination and totals are at root level
+      // Flat structure: data is directly a list at root level
+      tradeHistoryItems = dataField
+          .map((item) => TradeHistoryItem.fromJson(item as Map<String, dynamic>))
+          .toList();
       paginationData = json['pagination'] as Map<String, dynamic>? ?? {};
-      totalsData = json['totals'] as Map<String, dynamic>?;
+      totalsData  = json['totals']  as Map<String, dynamic>?;
+      summaryData = json['summary'] as Map<String, dynamic>?;
     } else if (dataField is Map<String, dynamic>) {
-      // Nested structure (backward compatibility): data.data, data.pagination, data.totals
+      // Nested structure (backward compatibility)
       final nestedData = dataField['data'] as List<dynamic>?;
-      tradeHistoryItems =
-          nestedData
-              ?.map(
-                (item) =>
-                    TradeHistoryItem.fromJson(item as Map<String, dynamic>),
-              )
+      tradeHistoryItems = nestedData
+              ?.map((item) => TradeHistoryItem.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [];
       paginationData = dataField['pagination'] as Map<String, dynamic>? ?? {};
-      totalsData = dataField['totals'] as Map<String, dynamic>?;
+      totalsData  = dataField['totals']  as Map<String, dynamic>?;
+      summaryData = dataField['summary'] as Map<String, dynamic>?;
     } else {
-      // Fallback: empty data
       tradeHistoryItems = [];
       paginationData = json['pagination'] as Map<String, dynamic>? ?? {};
-      totalsData = json['totals'] as Map<String, dynamic>?;
+      totalsData  = json['totals']  as Map<String, dynamic>?;
+      summaryData = json['summary'] as Map<String, dynamic>?;
     }
 
     return TradeHistoryResponse(
@@ -60,17 +52,18 @@ class TradeHistoryResponse {
       status: json['status'] ?? false,
       data: tradeHistoryItems,
       pagination: PaginationInfo.fromJson(paginationData),
-      totals:
-          totalsData != null ? TradeHistoryTotals.fromJson(totalsData) : null,
+      totals:  totalsData  != null ? TradeHistoryTotals.fromJson(totalsData)   : null,
+      summary: summaryData != null ? TradeHistorySummary.fromJson(summaryData) : null,
     );
   }
 }
 
 class TradeHistoryItem {
-  final int mt5Account;
-  final int tradePositionId;
+  final int    mt5Account;
+  final int    tradePositionId;
   final String tradeType;
   final String tradeSymbol;
+  /// Stored as raw string from API; use [volume] getter for numeric value.
   final String tradeVolume;
   final String tradePriceOrder;
   final String tradeOpenTime;
@@ -101,47 +94,48 @@ class TradeHistoryItem {
     required this.duration,
   });
 
+  /// Parses [tradeVolume] to double and returns it.
+  double get volume => _parseNumericValue(tradeVolume);
+
+  /// Volume formatted to 2 decimal places (e.g. "0.01000000" → "0.01").
+  String get volumeFormatted => volume.toStringAsFixed(2);
+
+  /// Volume formatted to 8 decimal places matching MT5 display style (e.g. "0.01000000").
+  String get volumeDisplay => volume.toStringAsFixed(8);
+
   factory TradeHistoryItem.fromJson(Map<String, dynamic> json) {
-    // Helper to get profit value with fallback
-    String _getProfitValue(Map<String, dynamic> json) {
-      // Try trade_profit first, then profit, then default to '0'
-      final tradeProfit = json['trade_profit'];
-      if (tradeProfit != null) {
-        return tradeProfit.toString();
-      }
-      final profit = json['profit'];
-      if (profit != null) {
-        return profit.toString();
-      }
+    String _getProfitValue(Map<String, dynamic> j) {
+      final tp = j['trade_profit'];
+      if (tp != null) return tp.toString();
+      final p = j['profit'];
+      if (p != null) return p.toString();
       return '0';
     }
 
     return TradeHistoryItem(
-      mt5Account: _parseIntValue(json['mt5_account']),
+      mt5Account:      _parseIntValue(json['mt5_account']),
       tradePositionId: _parseIntValue(json['trade_position_id']),
-      tradeType: json['trade_type'] ?? '',
-      tradeSymbol: json['trade_symbol'] ?? '',
-      tradeVolume: json['trade_volume'] ?? '0',
-      tradePriceOrder: json['trade_price_order'] ?? '0',
-      tradeOpenTime: json['trade_open_time'] ?? '',
-      tradeCloseTime: json['trade_close_time'] ?? '',
-      tradePriceClose: json['trade_price_close'] ?? '0',
-      tradeProfit: _getProfitValue(json),
-      tradePriceTp: json['trade_price_tp'] ?? '0',
-      tradePriceSl: json['trade_price_sl'] ?? '0',
-      tradeCommission: json['trade_commission'] ?? '0',
-      swap: _parseNumericValue(json['swap']),
-      duration: json['duration'] ?? '',
+      // Support both 'trade_type' and 'action' keys
+      tradeType:       json['trade_type'] ?? json['action'] ?? '',
+      tradeSymbol:     json['trade_symbol'] ?? '',
+      tradeVolume:     json['trade_volume']?.toString() ?? '0',
+      tradePriceOrder: json['trade_price_order']?.toString() ?? '0',
+      tradeOpenTime:   json['trade_open_time']  ?? '',
+      tradeCloseTime:  json['trade_close_time'] ?? '',
+      tradePriceClose: json['trade_price_close']?.toString() ?? '0',
+      tradeProfit:     _getProfitValue(json),
+      tradePriceTp:    json['trade_price_tp']?.toString() ?? '0',
+      tradePriceSl:    json['trade_price_sl']?.toString() ?? '0',
+      tradeCommission: json['trade_commission']?.toString() ?? '0',
+      swap:            _parseNumericValue(json['swap']),
+      duration:        json['duration'] ?? '',
     );
   }
 
   static double _parseNumericValue(dynamic value) {
     if (value == null) return 0.0;
     if (value is num) return value.toDouble();
-    if (value is String) {
-      final cleaned = value.replaceAll(',', '').trim();
-      return double.tryParse(cleaned) ?? 0.0;
-    }
+    if (value is String) return double.tryParse(value.replaceAll(',', '').trim()) ?? 0.0;
     return 0.0;
   }
 
@@ -149,74 +143,56 @@ class TradeHistoryItem {
     if (value == null) return 0;
     if (value is int) return value;
     if (value is num) return value.toInt();
-    if (value is String) {
-      return int.tryParse(value) ?? 0;
-    }
+    if (value is String) return int.tryParse(value) ?? 0;
     return 0;
   }
 
-  // Convert to TradePosition for compatibility with existing UI
   Map<String, dynamic> toTradePositionMap() {
-    // Helper to parse numeric strings, removing commas if present
-    double _parseNumericString(String value) {
-      if (value.isEmpty || value == '0') return 0.0;
-      // Remove commas and any whitespace, then parse
-      final cleaned = value.replaceAll(',', '').trim();
-      // Handle negative values correctly
+    double _parseStr(String v) {
+      if (v.isEmpty || v == '0') return 0.0;
+      final cleaned = v.replaceAll(',', '').trim();
       final parsed = double.tryParse(cleaned);
-      if (parsed == null) {
-        // If parsing fails, try to extract number from string
-        final numberMatch = RegExp(r'-?\d+\.?\d*').firstMatch(cleaned);
-        if (numberMatch != null) {
-          return double.tryParse(numberMatch.group(0) ?? '0') ?? 0.0;
-        }
-        return 0.0;
-      }
-      return parsed;
+      if (parsed != null) return parsed;
+      final m = RegExp(r'-?\d+\.?\d*').firstMatch(cleaned);
+      return m != null ? double.tryParse(m.group(0) ?? '0') ?? 0.0 : 0.0;
     }
 
-    // Parse profit with special handling
-    final profitValue = _parseNumericString(tradeProfit);
+    final profitValue = _parseStr(tradeProfit);
 
-    // Normalize tradeType to "Buy" or "Sell" for filtering
     String normalizedAction = tradeType;
-    final tradeTypeLower = tradeType.toLowerCase().trim();
-    if (tradeTypeLower.contains('buy') || tradeTypeLower == '0') {
+    final lower = tradeType.toLowerCase().trim();
+    if (lower.contains('buy') || lower == '0') {
       normalizedAction = 'Buy';
-    } else if (tradeTypeLower.contains('sell') || tradeTypeLower == '1') {
+    } else if (lower.contains('sell') || lower == '1') {
       normalizedAction = 'Sell';
-    } else {
-      // Default fallback - keep original if can't determine
-      normalizedAction = tradeType;
     }
 
     return {
-      'symbol': tradeSymbol,
-      'flag': _getFlagForSymbol(tradeSymbol),
-      'action': normalizedAction,
-      'volume': _parseNumericString(tradeVolume),
-      'profitLoss': profitValue, // Ensure profit is correctly parsed
-      'entryPrice': tradePriceOrder,
+      'symbol':       tradeSymbol,
+      'flag':         _getFlagForSymbol(tradeSymbol),
+      'action':       normalizedAction,
+      'volume':       volume,           // parsed double, not raw string
+      'profitLoss':   profitValue,
+      'entryPrice':   tradePriceOrder,
       'currentPrice': tradePriceClose,
-      'accountId': mt5Account.toString(),
-      'orderId': tradePositionId.toString(),
-      'isFavorite': false,
-      'openTime': tradeOpenTime,
-      'closeTime': tradeCloseTime,
-      'reason': '',
-      'orderNo': tradePositionId.toString(),
-      'commission': _parseNumericString(tradeCommission),
-      'swap': swap,
-      'takeProfit': tradePriceTp,
-      'stopLoss': tradePriceSl,
-      'mt5Account': mt5Account.toString(),
-      'time': tradeCloseTime,
-      'duration': duration,
+      'accountId':    mt5Account.toString(),
+      'orderId':      tradePositionId.toString(),
+      'isFavorite':   false,
+      'openTime':     tradeOpenTime,
+      'closeTime':    tradeCloseTime,
+      'reason':       '',
+      'orderNo':      tradePositionId.toString(),
+      'commission':   _parseStr(tradeCommission),
+      'swap':         swap,
+      'takeProfit':   tradePriceTp,
+      'stopLoss':     tradePriceSl,
+      'mt5Account':   mt5Account.toString(),
+      'time':         tradeCloseTime,
+      'duration':     duration,
     };
   }
 
   String _getFlagForSymbol(String symbol) {
-    // Map common symbols to flags
     if (symbol.contains('EUR')) return '🇪🇺';
     if (symbol.contains('USD')) return '🇺🇸';
     if (symbol.contains('GBP')) return '🇬🇧';
@@ -233,10 +209,10 @@ class TradeHistoryItem {
 }
 
 class PaginationInfo {
-  final int currentPage;
-  final int lastPage;
-  final int perPage;
-  final int total;
+  final int    currentPage;
+  final int    lastPage;
+  final int    perPage;
+  final int    total;
   final String? nextPageUrl;
   final String? prevPageUrl;
 
@@ -251,12 +227,12 @@ class PaginationInfo {
 
   factory PaginationInfo.fromJson(Map<String, dynamic> json) {
     return PaginationInfo(
-      currentPage: json['current_page'] ?? 1,
-      lastPage: json['last_page'] ?? 1,
-      perPage: json['per_page'] ?? 10,
-      total: json['total'] ?? 0,
-      nextPageUrl: json['next_page_url'],
-      prevPageUrl: json['prev_page_url'],
+      currentPage:  json['current_page']  ?? 1,
+      lastPage:     json['last_page']     ?? 1,
+      perPage:      json['per_page']      ?? 10,
+      total:        json['total']         ?? 0,
+      nextPageUrl:  json['next_page_url'] as String?,
+      prevPageUrl:  json['prev_page_url'] as String?,
     );
   }
 
@@ -283,11 +259,11 @@ class TradeHistoryTotals {
 
   factory TradeHistoryTotals.fromJson(Map<String, dynamic> json) {
     return TradeHistoryTotals(
-      balance: _parseDouble(json['balance']),
+      balance:    _parseDouble(json['balance']),
       commission: _parseDouble(json['commission']),
-      deposit: _parseDouble(json['deposit']),
-      profit: _parseDouble(json['profit']),
-      swap: _parseDouble(json['swap']),
+      deposit:    _parseDouble(json['deposit']),
+      profit:     _parseDouble(json['profit']),
+      swap:       _parseDouble(json['swap']),
       withdrawal: _parseDouble(json['withdrawal']),
     );
   }
@@ -297,6 +273,42 @@ class TradeHistoryTotals {
     if (value is double) return value;
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+}
+
+/// Summary metadata returned by the API alongside paginated results.
+class TradeHistorySummary {
+  final int    filteredCount;
+  final int    totalDeals;
+  final double totalClosedVolume;
+
+  TradeHistorySummary({
+    required this.filteredCount,
+    required this.totalDeals,
+    required this.totalClosedVolume,
+  });
+
+  factory TradeHistorySummary.fromJson(Map<String, dynamic> json) {
+    return TradeHistorySummary(
+      filteredCount:     _parseInt(json['filtered_count']),
+      totalDeals:        _parseInt(json['total_deals']),
+      totalClosedVolume: _parseDouble(json['total_closed_volume']),
+    );
+  }
+
+  static int _parseInt(dynamic v) {
+    if (v == null) return 0;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
+
+  static double _parseDouble(dynamic v) {
+    if (v == null) return 0.0;
+    if (v is num) return v.toDouble();
+    if (v is String) return double.tryParse(v) ?? 0.0;
     return 0.0;
   }
 }

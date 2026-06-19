@@ -414,6 +414,7 @@ class TradingController extends GetxController {
   final _tradeHistory = <TradeHistoryItem>[].obs;
   final _paginationInfo = Rxn<PaginationInfo>();
   final _tradeHistoryTotals = Rxn<TradeHistoryTotals>();
+  final _tradeHistorySummary = Rxn<TradeHistorySummary>();
   final _isLoadingHistory = false.obs;
   final _hasDateFilter = false.obs; // Track if date filter is active
   // Store all current filter parameters for pagination (includes timestamps, symbol, action, etc.)
@@ -449,6 +450,7 @@ class TradingController extends GetxController {
   List<TradeHistoryItem> get tradeHistory => _tradeHistory;
   PaginationInfo? get paginationInfo => _paginationInfo.value;
   TradeHistoryTotals? get tradeHistoryTotals => _tradeHistoryTotals.value;
+  TradeHistorySummary? get tradeHistorySummary => _tradeHistorySummary.value;
   bool get isLoadingHistory => _isLoadingHistory.value;
 
   // ✅ NEW: Getter for last data tab
@@ -2049,6 +2051,7 @@ class TradingController extends GetxController {
         'page': page.toString(),
         'per_page': '10',
         'mt5_account': mt5Account,
+        '_t': (DateTime.now().millisecondsSinceEpoch ~/ 1000).toString(),
       };
 
       // Add additional parameters if provided (including date filters)
@@ -2060,8 +2063,8 @@ class TradingController extends GetxController {
       final hasDateFilter =
           queryParams.containsKey('from') || queryParams.containsKey('to');
       if (!hasDateFilter) {
-        queryParams['from'] = defaultFromStr; // Default: 7 days ago
-        queryParams['to'] = defaultToStr; // Default: today
+        queryParams['from'] = defaultFromStr;
+        queryParams['to'] = defaultToStr;
       }
 
       final response = await _tradingRepo.getTradeHistory(
@@ -2074,27 +2077,24 @@ class TradingController extends GetxController {
         );
 
         if (refresh || page == 1) {
-          // Clear old data and replace with new data for refresh or first page
           _tradeHistory.clear();
           _tradeHistory.value = tradeHistoryResponse.data;
         } else {
-          // Append data for pagination
           _tradeHistory.addAll(tradeHistoryResponse.data);
         }
 
         _paginationInfo.value = tradeHistoryResponse.pagination;
 
-        // Store totals data
-        _tradeHistoryTotals.value = tradeHistoryResponse.totals;
-        // ✅ NEW: Mark that we have data for History tab (2) only if totals exists
-        // If totals is null, keep _lastDataTab as null to show placeholder
+        // Store totals and summary
+        _tradeHistoryTotals.value  = tradeHistoryResponse.totals;
+        _tradeHistorySummary.value = tradeHistoryResponse.summary;
+
         if (tradeHistoryResponse.totals != null) {
           _lastDataTab.value = 2;
         } else {
           _lastDataTab.value = null;
         }
 
-        // ✅ FIX: Update UI to show History tab values when data loads
         update(['account_info']);
 
         // Update closed positions for compatibility with existing UI
@@ -2338,7 +2338,8 @@ class TradingController extends GetxController {
     // ✅ FIX: Only clear History data if not preserving it
     // This prevents History tab data from disappearing during account switches
     if (!shouldPreserveHistory) {
-      _tradeHistoryTotals.value = null;
+      _tradeHistoryTotals.value  = null;
+      _tradeHistorySummary.value = null;
       _lastDataTab.value = null;
     }
 
