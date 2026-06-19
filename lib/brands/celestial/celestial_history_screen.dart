@@ -17,14 +17,12 @@ class CelestialHistoryScreen extends StatefulWidget {
 class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
   TradingController get _c => Get.find<TradingController>();
 
-  int _subTab = 0; // 0 Positions  1 Deals  2 Orders  3 Balances
   String _periodLabel = 'Today';
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _c.setSelectedTab(2); // history tab in controller
       _applyPeriod('Today');
     });
   }
@@ -82,7 +80,6 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
           children: [
             _header(context),
             _summaryRow(context),
-            _subTabs(context),
             Divider(
                 height: 1,
                 thickness: 0.5,
@@ -223,47 +220,6 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
 
   String _n(num? v) => (v ?? 0).toStringAsFixed(2);
 
-  // ── Sub-tabs ───────────────────────────────────────────────────────────────
-  Widget _subTabs(BuildContext c) {
-    final labels = ['Positions', 'Deals', 'Orders', 'Balances'];
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: List.generate(labels.length, (i) {
-            final active = i == _subTab;
-            return Padding(
-              padding: EdgeInsets.only(right: 6.w),
-              child: GestureDetector(
-                onTap: () => setState(() => _subTab = i),
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-                  decoration: BoxDecoration(
-                    color: active
-                        ? Colors.transparent
-                        : CelTheme.softBg(c),
-                    borderRadius: BorderRadius.circular(20.r),
-                    border: active
-                        ? Border.all(color: CelTheme.mainText(c), width: 1)
-                        : null,
-                  ),
-                  child: Text(labels[i],
-                      style: TextStyle(
-                          color: active
-                              ? CelTheme.mainText(c)
-                              : CelTheme.subText(c),
-                          fontSize: 12.sp,
-                          fontWeight: active ? FontWeight.w800 : FontWeight.w600)),
-                ),
-              ),
-            );
-          }),
-        ),
-      ),
-    );
-  }
-
   // ── Body ──────────────────────────────────────────────────────────────────
   Widget _body(BuildContext c) {
     return Obx(() {
@@ -322,7 +278,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
     final profit = double.tryParse(t.tradeProfit) ?? 0;
     final plColor = profit >= 0 ? CelTheme.tpGreen : CelTheme.sell(c);
     // Use volumeDisplay for consistent 8-decimal MT5-style formatting (e.g. 0.01000000)
-    final vol = t.volumeDisplay;
+    final vol = t.volume;
     final open = t.tradePriceOrder;
     final close = t.tradePriceClose;
 

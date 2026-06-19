@@ -105,6 +105,7 @@ class TradeHistoryItem {
 
   factory TradeHistoryItem.fromJson(Map<String, dynamic> json) {
     String _getProfitValue(Map<String, dynamic> j) {
+      // Support both legacy 'trade_profit' and new 'profit' keys
       final tp = j['trade_profit'];
       if (tp != null) return tp.toString();
       final p = j['profit'];
@@ -113,20 +114,55 @@ class TradeHistoryItem {
     }
 
     return TradeHistoryItem(
-      mt5Account:      _parseIntValue(json['mt5_account']),
-      tradePositionId: _parseIntValue(json['trade_position_id']),
+      // Support 'mt5_account', 'login' (MT5 account number in new API)
+      mt5Account:      _parseIntValue(json['mt5_account'] ?? json['login']),
+      // Support 'trade_position_id', 'position_id', 'deal_id'
+      tradePositionId: _parseIntValue(
+          json['trade_position_id'] ?? json['position_id'] ?? json['deal_id']),
       // Support both 'trade_type' and 'action' keys
       tradeType:       json['trade_type'] ?? json['action'] ?? '',
-      tradeSymbol:     json['trade_symbol'] ?? '',
-      tradeVolume:     json['trade_volume']?.toString() ?? '0',
-      tradePriceOrder: json['trade_price_order']?.toString() ?? '0',
-      tradeOpenTime:   json['trade_open_time']  ?? '',
-      tradeCloseTime:  json['trade_close_time'] ?? '',
-      tradePriceClose: json['trade_price_close']?.toString() ?? '0',
+      // Support both 'trade_symbol' and 'symbol' keys
+      tradeSymbol:     json['trade_symbol'] ?? json['symbol'] ?? '',
+      // Support 'trade_volume', 'volume', 'lots'
+      tradeVolume:     (json['trade_volume'] ?? json['volume'] ?? json['lots'])
+              ?.toString() ??
+          '0',
+      // Support 'trade_price_order', 'price_open', 'price'
+      tradePriceOrder: (json['trade_price_order'] ??
+              json['price_open'] ??
+              json['price'])
+          ?.toString() ??
+          '0',
+      // Support 'trade_open_time', 'open_time', 'time'
+      tradeOpenTime:   json['trade_open_time'] ??
+          json['open_time'] ??
+          json['time'] ??
+          '',
+      // Support 'trade_close_time', 'close_time'
+      tradeCloseTime:  json['trade_close_time'] ?? json['close_time'] ?? '',
+      // Support 'trade_price_close', 'price_close', 'close_price'
+      tradePriceClose: (json['trade_price_close'] ??
+              json['price_close'] ??
+              json['close_price'])
+          ?.toString() ??
+          '0',
       tradeProfit:     _getProfitValue(json),
-      tradePriceTp:    json['trade_price_tp']?.toString() ?? '0',
-      tradePriceSl:    json['trade_price_sl']?.toString() ?? '0',
-      tradeCommission: json['trade_commission']?.toString() ?? '0',
+      // Support 'trade_price_tp', 'tp', 'take_profit'
+      tradePriceTp:    (json['trade_price_tp'] ??
+              json['tp'] ??
+              json['take_profit'])
+          ?.toString() ??
+          '0',
+      // Support 'trade_price_sl', 'sl', 'stop_loss'
+      tradePriceSl:    (json['trade_price_sl'] ??
+              json['sl'] ??
+              json['stop_loss'])
+          ?.toString() ??
+          '0',
+      // Support 'trade_commission', 'commission'
+      tradeCommission: (json['trade_commission'] ?? json['commission'])
+              ?.toString() ??
+          '0',
       swap:            _parseNumericValue(json['swap']),
       duration:        json['duration'] ?? '',
     );
