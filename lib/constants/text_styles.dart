@@ -72,8 +72,8 @@ class AppTextStyles {
 
   // Button Style (for buttons on dark backgrounds)
   static TextStyle get button => TextStyle(
-    fontSize: 16.sp,
-    fontWeight: FontWeight.w600,
+    fontSize: 14.sp,
+    fontWeight: FontWeight.w400,
     color: AppColors.whiteColor,  // Theme-aware: white in light, dark in dark
   );
 

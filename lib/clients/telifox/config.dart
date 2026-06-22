@@ -18,9 +18,9 @@ class TelifoxConfig extends BaseClientConfig {
           logoSvgPath: 'icon.png',
           splashLogoPath: 'icon.png',
           appIconPath: 'icon.png',
-          apiBaseUrl: 'https://client.kantaracapital.io/api/',
-          websocketUrl: 'wss://client.kantaracapital.io/trade-engine',
-          chartBaseUrl: 'https://client.kantaracapital.io',
-          useNewChart: false,
+ apiBaseUrl: 'https://client.kantaracapital.io/api/',
+ websocketUrl: 'wss://client.kantaracapital.io/trade-engine',
+ chartBaseUrl: 'https://client.kantaracapital.io',
+ useNewChart: true,
  );
 }

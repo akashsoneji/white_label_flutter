@@ -32,6 +32,35 @@ brands:
  features:
  useNewChart: "false"
 
+  - name: gtxprime
+    type: child
+    inheritsFrom: vantage
+    label: GTX Prime
+    themeMode: both
+ android:
+ applicationId: "com.gtxprime.app"
+ appName: "GTX Prime"
+ ios:
+ bundleId: "com.gtxprime.app"
+ appName: "GTX Prime"
+ colors:
+ primary: "#01061A"
+ darkPrimary: "#01061A"
+ secondary: "#011947"
+ accent: "#011947"
+ splashColor: "#01061A"
+ launcherBackground: "#01061A"
+ urls:
+ api: "https://demo.tenaxcode.com/api/"
+ websocket: "wss://demo.tenaxcode.com/trade-engine"
+ chart: "https://demo.tenaxcode.com"
+ assets:
+ appIcon: "assets/brands/gtxprime/icon.png"
+ logo: "assets/brands/gtxprime/logo.svg"
+ splashLogo: "assets/brands/gtxprime/splash_logo.svg"
+ features:
+ useNewChart: "false"
+
   - name: pipze
     type: child
     inheritsFrom: vantage

@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart telifox
-// Active flavor: telifox
-PRODUCT_BUNDLE_IDENTIFIER=com.telifox.app
-BRAND_DISPLAY_NAME=Telifox
+//   dart run scripts/prepare_flavor.dart gtxprime
+// Active flavor: gtxprime
+PRODUCT_BUNDLE_IDENTIFIER=com.gtxprime.app
+BRAND_DISPLAY_NAME=GTX Prime
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPXRlbGlmb3g=,RkxBVk9SPXRlbGlmb3g=
+DART_DEFINES=Q0xJRU5UPWd0eHByaW1l,RkxBVk9SPWd0eHByaW1l

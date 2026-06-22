@@ -1,13 +1,13 @@
 {
-  "default": "telifox",
+  "default": "gtxprime",
   "brands": [
-    "telifox"
+    "gtxprime"
   ],
   "brandDetails": [
     {
-      "name": "telifox",
+      "name": "gtxprime",
       "type": "parent",
-      "label": "Telifox",
+      "label": "GTX Prime",
       "themeMode": "both"
     }
   ]

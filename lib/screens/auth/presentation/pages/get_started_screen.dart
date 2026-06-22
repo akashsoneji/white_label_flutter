@@ -1,3 +1,4 @@
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -61,7 +62,7 @@ class GetStartedScreen extends StatelessWidget {
                           ),
                           child: Text(
                             languageService.tr("onboarding_get_started"),
-                            style: TextStyle(color: AppColors.secondary),
+                            style: AppTextStyles.button,
                           ),
                         ),
                       ),
