@@ -60,8 +60,6 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   String _tf        = '1h';
   double _lot       = 0.01;
   bool   _tradeOpen = false;
-  bool   _isBuyingBuy  = false;
-  bool   _isBuyingSell = false;
 
 
 
@@ -194,56 +192,27 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   // ─────────────────────────────────────────────────────────────────────
 
   void _placeOrder(String side) {
-    if (_isBuyingBuy || _isBuyingSell) return;
-
     // Get primary/active MT5 account
     final accountCtrl = Get.find<AccountController>();
     final mt5Account  = accountCtrl.activeMT5Account?.metaAccountNumber;
 
     if (mt5Account == null || mt5Account.isEmpty) {
-      Get.snackbar(
-        'No Account',
-        'Please select a trading account first.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: CelTheme.sellRed.withValues(alpha: 0.9),
-        colorText: Colors.white,
-        margin: EdgeInsets.all(12.w),
-      );
       return;
     }
-
-    setState(() {
-      if (side == 'buy')  _isBuyingBuy  = true;
-      if (side == 'sell') _isBuyingSell = true;
-    });
 
     final sym  = _chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value;
     final type = side == 'sell' ? OrderType.sellMarket : OrderType.buyMarket;
 
+    HapticFeedback.mediumImpact();
+
+    // Success/error feedback is shown by the app's unified top popup inside
+    // placeTradeOrder — no local spinner or bottom toast here.
     _trade.placeTradeOrder(
       symbol:     sym,
       volume:     _lot.toStringAsFixed(2),
       orderType:  type,
       mt5Account: mt5Account,
-    ).then((ok) {
-      if (mounted) setState(() => _isBuyingBuy = _isBuyingSell = false);
-      if (ok) {
-        HapticFeedback.mediumImpact();
-        Get.snackbar(
-          side == 'buy' ? 'Buy Order Placed' : 'Sell Order Placed',
-          '$sym  ${_lot.toStringAsFixed(2)} lots',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: (side == 'buy' ? CelTheme.tpGreen : CelTheme.sellRed)
-              .withValues(alpha: 0.9),
-          colorText: Colors.white,
-          margin: EdgeInsets.all(12.w),
-          duration: const Duration(seconds: 3),
-        );
-      }
-    }).catchError((_) {
-      if (mounted) setState(() => _isBuyingBuy = _isBuyingSell = false);
-      HapticFeedback.vibrate();
-    });
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -405,7 +374,6 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
             label: 'Sell',
             sub:   price.bid.toStringAsFixed(dig),
             color: CelTheme.sell(c),
-            loading: _isBuyingSell,
             onTap: () => _placeOrder('sell'),
           )),
           SizedBox(width: 6.w),
@@ -415,7 +383,6 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
             label: 'Buy',
             sub:   price.ask.toStringAsFixed(dig),
             color: CelTheme.buy(c),
-            loading: _isBuyingBuy,
             onTap: () => _placeOrder('buy'),
           )),
         ]),
@@ -442,35 +409,25 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
     required String label,
     required String sub,
     required Color color,
-    required bool loading,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
-      onTap: loading ? null : onTap,
-      child: AnimatedOpacity(
-        opacity: loading ? 0.6 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        child: Container(
-          // Thicker buttons — matches image 2
-          padding: EdgeInsets.symmetric(vertical: 2.h),
-          decoration: BoxDecoration(
-              color: color, borderRadius: BorderRadius.circular(8.r)),
-          alignment: Alignment.center,
-          child: loading
-              ? SizedBox(
-                  width: 18.w, height: 18.w,
-                  child: const CircularProgressIndicator(
-                      strokeWidth: 2, color: Colors.white))
-              : Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text(label, style: TextStyle(
-                      color: Colors.white, fontSize: 15.sp,
-                      fontWeight: FontWeight.w800)),
-                  SizedBox(height: 2.h),
-                  Text(sub, style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: 11.sp, fontWeight: FontWeight.w500)),
-                ]),
-        ),
+      onTap: onTap,
+      child: Container(
+        // Thicker buttons — matches image 2
+        padding: EdgeInsets.symmetric(vertical: 2.h),
+        decoration: BoxDecoration(
+            color: color, borderRadius: BorderRadius.circular(8.r)),
+        alignment: Alignment.center,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text(label, style: TextStyle(
+              color: Colors.white, fontSize: 15.sp,
+              fontWeight: FontWeight.w800)),
+          SizedBox(height: 2.h),
+          Text(sub, style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 11.sp, fontWeight: FontWeight.w500)),
+        ]),
       ),
     );
   }
@@ -660,32 +617,37 @@ class _SymbolPickerState extends State<_SymbolPicker> {
   @override
   Widget build(BuildContext c) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
+      padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 16.h),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Select Symbol',
-              style: CelTheme.title(c).copyWith(fontSize: 18.sp)),
-          SizedBox(height: 10.h),
+              style: TextStyle(
+                  color: CelTheme.headerText(c),
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500)),
+          SizedBox(height: 8.h),
           TextField(
             decoration: InputDecoration(
               hintText: 'Search...',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search, size: 18),
               filled: true,
               fillColor: CelTheme.softBg(c),
-              contentPadding: EdgeInsets.symmetric(vertical: 8.h),
+              isDense: true,
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(6.r),
                 borderSide: BorderSide.none,
               ),
             ),
-            style: TextStyle(color: CelTheme.mainText(c), fontSize: 14.sp),
+            style: TextStyle(color: CelTheme.mainText(c), fontSize: 13.sp),
             onChanged: (v) => setState(() => _query = v.toLowerCase()),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 4.h),
           ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: 0.5.sh),
+            constraints: BoxConstraints(maxHeight: 0.55.sh),
             child: Obx(() {
               final items = widget.instruments.instruments
                   .where((i) => _query.isEmpty ||
@@ -693,21 +655,22 @@ class _SymbolPickerState extends State<_SymbolPicker> {
                   .toList();
               return ListView.builder(
                 shrinkWrap: true,
+                padding: EdgeInsets.zero,
                 itemCount: items.length,
                 itemBuilder: (_, i) {
-                  final item  = items[i];
-                  final price = widget.instruments.priceRx(item.symbol).value;
-                  final dig   = price.digits > 0 ? price.digits : item.digits;
-                  return ListTile(
-                    title: Text(item.symbol, style: TextStyle(
-                        color: CelTheme.mainText(c), fontSize: 14.sp,
-                        fontWeight: FontWeight.w700)),
-                    subtitle: Text(item.category ?? '',
-                        style: TextStyle(color: CelTheme.subText(c), fontSize: 11.sp)),
-                    trailing: Text(price.ask.toStringAsFixed(dig),
-                        style: TextStyle(color: CelTheme.buy(c), fontSize: 13.sp,
-                            fontWeight: FontWeight.w700)),
+                  final item = items[i];
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => widget.onSelected(item.symbol),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 4.w, vertical: 6.h),
+                      child: Text(item.symbol,
+                          style: TextStyle(
+                              color: CelTheme.mainText(c),
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500)),
+                    ),
                   );
                 },
               );

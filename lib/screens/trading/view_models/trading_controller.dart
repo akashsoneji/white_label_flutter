@@ -1243,11 +1243,7 @@ class TradingController extends GetxController {
         // Play trade close sound when positions are closed successfully
         try {
           await AudioService.playTradeCloseSound();
-          print(
-            '🔊 TradingController: Played trade close sound for closed positions',
-          );
         } catch (e) {
-          print('⚠️ TradingController: Error playing trade close sound: $e');
         }
       } else {
         // Use API response error message if available
@@ -1306,11 +1302,7 @@ class TradingController extends GetxController {
         // Play trade close sound when position is closed successfully
         try {
           await AudioService.playTradeCloseSound();
-          print(
-            '🔊 TradingController: Played trade close sound for closed position',
-          );
         } catch (e) {
-          print('⚠️ TradingController: Error playing trade close sound: $e');
         }
 
         return true;
@@ -1446,11 +1438,7 @@ class TradingController extends GetxController {
       // Play trade close sound when positions are closed successfully
       try {
         await AudioService.playTradeCloseSound();
-        print(
-          '🔊 TradingController: Played trade close sound for closed profitable positions',
-        );
       } catch (e) {
-        print('⚠️ TradingController: Error playing trade close sound: $e');
       }
     } catch (e) {
       _setError('Failed to close profitable positions: $e');
@@ -1513,11 +1501,7 @@ class TradingController extends GetxController {
       // Play trade close sound when positions are closed successfully
       try {
         await AudioService.playTradeCloseSound();
-        print(
-          '🔊 TradingController: Played trade close sound for closed losing positions',
-        );
       } catch (e) {
-        print('⚠️ TradingController: Error playing trade close sound: $e');
       }
     } catch (e) {
       _setError('Failed to close losing positions: $e');
@@ -1571,11 +1555,7 @@ class TradingController extends GetxController {
       // Play trade close sound when positions are closed successfully
       try {
         await AudioService.playTradeCloseSound();
-        print(
-          '🔊 TradingController: Played trade close sound for closed long positions',
-        );
       } catch (e) {
-        print('⚠️ TradingController: Error playing trade close sound: $e');
       }
     } catch (e) {
       _setError('Failed to close long positions: $e');
@@ -1631,11 +1611,7 @@ class TradingController extends GetxController {
       // Play trade close sound when positions are closed successfully
       try {
         await AudioService.playTradeCloseSound();
-        print(
-          '🔊 TradingController: Played trade close sound for closed short positions',
-        );
       } catch (e) {
-        print('⚠️ TradingController: Error playing trade close sound: $e');
       }
     } catch (e) {
       _setError('Failed to close short positions: $e');
@@ -1764,9 +1740,6 @@ class TradingController extends GetxController {
     } else {
       // Position not found - might have been removed already or ID format mismatch
       // Log for debugging
-      print(
-        'TradingController: Position $orderId not found in list (total positions: ${_marketPositions.length})',
-      );
       // Still call update() in case the position was already removed but UI needs refresh
       update();
     }
@@ -1809,7 +1782,6 @@ class TradingController extends GetxController {
         try {
           await AudioService.playTradeCloseSound();
         } catch (e) {
-          print('⚠️ Error playing trade close sound: $e');
         }
       } else {
         // Failure: Un-mark as deleted so it can resume receiving WebSocket updates
@@ -2114,13 +2086,9 @@ class TradingController extends GetxController {
     final pagination = _paginationInfo.value;
     if (pagination != null && pagination.hasNextPage) {
       final nextPage = pagination.currentPage + 1;
-      print(
-        '📄 Loading next page: $nextPage (current: ${pagination.currentPage}, last: ${pagination.lastPage})',
-      );
 
       // Preserve all filter parameters if any filters are active
       if (_currentFilterParams != null && _currentFilterParams!.isNotEmpty) {
-        print('🔍 Loading with filters: $_currentFilterParams');
         await loadTradeHistory(
           page: nextPage,
           refresh: false, // Important: don't clear existing data
@@ -2134,9 +2102,6 @@ class TradingController extends GetxController {
         );
       }
     } else {
-      print(
-        '⚠️ Cannot load next page - hasNextPage: ${pagination?.hasNextPage}, pagination: $pagination',
-      );
     }
   }
 

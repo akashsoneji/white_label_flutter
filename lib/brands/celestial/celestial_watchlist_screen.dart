@@ -67,15 +67,16 @@ class _CelestialWatchlistScreenState
       padding: EdgeInsets.fromLTRB(16.w, 12.h, 8.w, 4.h),
       child: Row(
         children: [
-          Expanded(child: Text('WatchList', style: CelTheme.title(c))),
-          Obx(() => Icon(
-                _c.isConnected.value ? Icons.wifi : Icons.wifi_off,
-                size: 14.sp,
-                color: _c.isConnected.value
-                    ? CelTheme.tpGreen
-                    : CelTheme.subText(c),
-              )),
-          SizedBox(width: 4.w),
+          Expanded(
+            child: Text(
+              'WatchList',
+              style: TextStyle(
+                color: CelTheme.headerText(c),
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
           IconButton(
             icon: Icon(Icons.search,
                 color: CelTheme.mainText(c), size: 22.sp),
@@ -120,70 +121,21 @@ class _CelestialWatchlistScreenState
     );
   }
 
-  // ── Instrument list with column headers ───────────────────────────────────
+  // ── Instrument list — no column headers (matches screenshot) ──────────────
   Widget _instrumentList(BuildContext c, List<ListElement> items,
       {required bool showStar}) {
-    return Column(
-      children: [
-        // Column header row
-        Padding(
-          padding: EdgeInsets.fromLTRB(14.w, 6.h, 14.w, 4.h),
-          child: Row(
-            children: [
-              // Symbol column
-              SizedBox(
-                width: 110.w,
-                child: Text('SYMBOL',
-                    style: TextStyle(
-                        color: CelTheme.subText(c),
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5)),
-              ),
-              const Spacer(),
-              // BID header
-              SizedBox(
-                width: 94.w,
-                child: Text('BID',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: CelTheme.sell(c),
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5)),
-              ),
-              // ASK header
-              SizedBox(
-                width: 94.w,
-                child: Text('ASK',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: CelTheme.buy(c),
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5)),
-              ),
-              if (showStar) SizedBox(width: 28.w),
-            ],
-          ),
-        ),
-        Divider(
-            height: 1, thickness: 0.5, color: CelTheme.divider(c)),
-        Expanded(
-          child: ListView.separated(
-            padding: EdgeInsets.only(bottom: 12.h),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => Divider(
-                color: CelTheme.divider(c), height: 1, thickness: 0.5),
-            itemBuilder: (_, i) =>
-                _row(c, items[i], showStar: showStar),
-          ),
-        ),
-      ],
+    return ListView.separated(
+      padding: EdgeInsets.only(bottom: 8.h),
+      itemCount: items.length,
+      separatorBuilder: (_, __) => Divider(
+          color: CelTheme.divider(c), height: 1, thickness: 0.5),
+      itemBuilder: (_, i) =>
+          _row(c, items[i], showStar: showStar),
     );
   }
 
-  // ── Single instrument row ─────────────────────────────────────────────────
+  // ── Single instrument row — matches Screenshot 3 layout ─────────────────
+  //  change% / SYMBOL / time+sync      |  BID / L  |  ASK / H
   Widget _row(BuildContext c, ListElement item, {required bool showStar}) {
     return Obx(() {
       final price = _c.priceRx(item.symbol).value;
@@ -193,47 +145,64 @@ class _CelestialWatchlistScreenState
       final mid = (price.dayHigh + price.dayLow) / 2;
       final change = mid == 0 ? 0.0 : price.ask - mid;
       final pct = mid == 0 ? 0.0 : (change / mid) * 100;
-      final up = change >= 0;
-      final changeColor = up ? CelTheme.buy(c) : CelTheme.sell(c);
+      // green when up, red when down, app/neutral color when unchanged
+      final changeColor = change > 0
+          ? CelTheme.buy(c)
+          : change < 0
+              ? CelTheme.sell(c)
+              : CelTheme.mainText(c);
 
       return InkWell(
         onTap: () => _onSymbolTap(item.symbol),
         child: Padding(
           padding:
-              EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // ── Left block: change% + symbol name + spread ────────────
-              SizedBox(
-                width: 110.w,
+              // ── Left block: change% + symbol + (time + tick) ──────────
+              Expanded(
+                flex: 5,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Change — clipped, never overflows
                     Text(
                       '${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(2)}%'
-                      ' ${change >= 0 ? '+' : ''}${change.toStringAsFixed(digits)}',
+                      '  ${change >= 0 ? '+' : ''}${change.toStringAsFixed(digits)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                           color: changeColor,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w600),
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(height: 2.h),
+                    SizedBox(height: 1.h),
                     Text(
                       item.symbol,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                          color: CelTheme.mainText(c),
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w800),
+                          color: CelTheme.headerText(c),
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w500),
                     ),
+                  ],
+                ),
+              ),
+
+              // ── BID column ────────────────────────────────────────────
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _fractionPrice(
+                        c,
+                        price.bid.toStringAsFixed(digits),
+                        CelTheme.sell(c)),
                     SizedBox(height: 1.h),
                     Text(
-                      'Spread ${price.spreadDiff.round()}',
+                      'L: ${price.dayLow.toStringAsFixed(digits)}',
                       style: TextStyle(
                           color: CelTheme.subText(c), fontSize: 10.sp),
                     ),
@@ -241,69 +210,27 @@ class _CelestialWatchlistScreenState
                 ),
               ),
 
-              // ── Spacer pushes BID/ASK to the right ───────────────────
-              const Spacer(),
-
-              // ── BID column ────────────────────────────────────────────
-              SizedBox(
-                width: 94.w,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _fractionPrice(
-                        c,
-                        price.bid.toStringAsFixed(digits),
-                        CelTheme.sell(c)),
-                    SizedBox(height: 2.h),
-                    Text(
-                      'L ${price.dayLow.toStringAsFixed(digits)}',
-                      style: TextStyle(
-                          color: CelTheme.subText(c), fontSize: 9.sp),
-                    ),
-                  ],
-                ),
-              ),
+              SizedBox(width: 8.w),
 
               // ── ASK column ────────────────────────────────────────────
-              SizedBox(
-                width: 94.w,
+              Expanded(
+                flex: 3,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     _fractionPrice(
                         c,
                         price.ask.toStringAsFixed(digits),
-                        CelTheme.buy(c)),
-                    SizedBox(height: 2.h),
+                        CelTheme.tpGreen),
+                    SizedBox(height: 1.h),
                     Text(
-                      'H ${price.dayHigh.toStringAsFixed(digits)}',
+                      'H: ${price.dayHigh.toStringAsFixed(digits)}',
                       style: TextStyle(
-                          color: CelTheme.subText(c), fontSize: 9.sp),
+                          color: CelTheme.subText(c), fontSize: 10.sp),
                     ),
                   ],
                 ),
               ),
-
-              // ── Star toggle (catalog tabs only) ───────────────────────
-              if (showStar)
-                Obx(() {
-                  final isFav = _c.isFavorite(item.symbol);
-                  return GestureDetector(
-                    onTap: () => _c.toggleFavorite(item.symbol),
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 6.w),
-                      child: Icon(
-                        isFav
-                            ? Icons.star_rounded
-                            : Icons.star_outline_rounded,
-                        size: 18.sp,
-                        color: isFav
-                            ? CelTheme.accentYellow
-                            : CelTheme.subText(c),
-                      ),
-                    ),
-                  );
-                }),
             ],
           ),
         ),
@@ -315,14 +242,14 @@ class _CelestialWatchlistScreenState
   Widget _fractionPrice(BuildContext c, String value, Color color) {
     if (value.length < 3) {
       return Text(value,
-          style: CelTheme.bigPrice(c, color: color)
-              .copyWith(fontSize: 16.sp));
+          style: TextStyle(
+              color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
     }
     final dotIdx = value.indexOf('.');
     if (dotIdx < 0 || dotIdx >= value.length - 2) {
       return Text(value,
-          style: CelTheme.bigPrice(c, color: color)
-              .copyWith(fontSize: 16.sp));
+          style: TextStyle(
+              color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
     }
     final head = value.substring(0, value.length - 2);
     final tail = value.substring(value.length - 2);
@@ -330,30 +257,29 @@ class _CelestialWatchlistScreenState
       text: TextSpan(children: [
         TextSpan(
             text: head,
-            style: CelTheme.bigPrice(c, color: color)
-                .copyWith(fontSize: 14.sp)),
+            style: TextStyle(
+                color: color, fontSize: 13.sp, fontWeight: FontWeight.w400)),
         TextSpan(
             text: tail,
-            style: CelTheme.bigPrice(c, color: color)
-                .copyWith(
-                    fontSize: 18.sp, fontWeight: FontWeight.w900)),
+            style: TextStyle(
+                color: color, fontSize: 16.sp, fontWeight: FontWeight.w500)),
       ]),
     );
   }
 
   // ── Search sheet ──────────────────────────────────────────────────────────
   void _openSearchSheet(BuildContext c) {
-    showModalBottomSheet(
-      context: c,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: CelTheme.card(c),
-      shape: RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(16.r))),
-      builder: (_) => _SearchSheet(
-        ic: _c,
-        onTap: _onSymbolTap,
+    Navigator.of(c).push(
+      PageRouteBuilder(
+        opaque: true,
+        barrierColor: Colors.black.withValues(alpha: 0.0),
+        transitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (_, __, ___) => _SearchSheet(
+          ic: _c,
+          onTap: _onSymbolTap,
+        ),
+        transitionsBuilder: (_, anim, __, child) =>
+            FadeTransition(opacity: anim, child: child),
       ),
     );
   }
@@ -394,111 +320,106 @@ class _SearchSheetState extends State<_SearchSheet> {
 
   @override
   Widget build(BuildContext c) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.92,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      expand: false,
-      builder: (_, scrollCtrl) => Column(
-        children: [
-          // Drag handle
-          Container(
-            margin: EdgeInsets.only(top: 8.h, bottom: 4.h),
-            width: 36.w,
-            height: 4.h,
-            decoration: BoxDecoration(
-              color: CelTheme.divider(c),
-              borderRadius: BorderRadius.circular(2.r),
-            ),
-          ),
-          // Title
-          Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Search symbol',
-                  style: CelTheme.title(c).copyWith(fontSize: 18.sp)),
-            ),
-          ),
-          // Search field
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
-            child: TextField(
-              controller: _ctrl,
-              autofocus: false,
-              onChanged: (v) {
-                _sic.searchInstruments(v);
-                setState(() {}); // refresh clear button
-              },
-              style: TextStyle(color: CelTheme.mainText(c)),
-              decoration: InputDecoration(
-                hintText: 'Type a symbol e.g. XAUUSD',
-                hintStyle: TextStyle(color: CelTheme.subText(c)),
-                prefixIcon:
-                    Icon(Icons.search, color: CelTheme.subText(c)),
-                suffixIcon: _ctrl.text.isNotEmpty
-                    ? IconButton(
-                        icon: Icon(Icons.clear,
-                            color: CelTheme.subText(c)),
-                        onPressed: () {
-                          _ctrl.clear();
-                          _sic.searchInstruments('');
-                          setState(() {});
-                        })
-                    : null,
-                filled: true,
-                fillColor: CelTheme.softBg(c),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                    borderSide: BorderSide.none),
+    return Scaffold(
+      backgroundColor: CelTheme.bg(c),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ── Top bar: search field + X close ─────────────────────────
+            Padding(
+              padding: EdgeInsets.fromLTRB(12.w, 8.h, 8.w, 4.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _ctrl,
+                      autofocus: true,
+                      onChanged: (v) {
+                        _sic.searchInstruments(v);
+                        setState(() {});
+                      },
+                      style: TextStyle(
+                          color: CelTheme.mainText(c), fontSize: 14.sp),
+                      decoration: InputDecoration(
+                        hintText: 'Search',
+                        hintStyle: TextStyle(
+                            color: CelTheme.subText(c), fontSize: 14.sp),
+                        prefixIcon: Icon(Icons.search,
+                            color: CelTheme.subText(c), size: 20.sp),
+                        suffixIcon: _ctrl.text.isNotEmpty
+                            ? IconButton(
+                                icon: Icon(Icons.close,
+                                    color: CelTheme.subText(c), size: 18.sp),
+                                onPressed: () {
+                                  _ctrl.clear();
+                                  _sic.searchInstruments('');
+                                  setState(() {});
+                                },
+                              )
+                            : null,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 12.w, vertical: 10.h),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: CelTheme.divider(c), width: 0.5),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: CelTheme.subText(c), width: 0.5),
+                        ),
+                        border: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color: CelTheme.divider(c), width: 0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 4.w),
+                  IconButton(
+                    icon: Icon(Icons.close,
+                        color: CelTheme.mainText(c), size: 22.sp),
+                    onPressed: () => Navigator.of(c).pop(),
+                  ),
+                ],
               ),
             ),
-          ),
-          // Category tabs — hidden when user is actively typing a search query
-          Obx(() {
-            if (_sic.searchQuery.value.isNotEmpty) return const SizedBox.shrink();
-            return _categoryTabs(c);
-          }),
-          Divider(
-              height: 1,
-              thickness: 0.5,
-              color: CelTheme.divider(c)),
-          // Results — fills remaining sheet, scrollable
-          Expanded(
-            child: Obx(() {
-              final results = _sic.filteredSymbols;
-              if (_sic.isLoading.value && results.isEmpty) {
-                return const Center(
-                    child: CircularProgressIndicator());
-              }
-              if (results.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(24.h),
-                    child: Text('No results',
-                        style: TextStyle(
-                            color: CelTheme.subText(c),
-                            fontSize: 13.sp)),
-                  ),
+            // ── Category tabs (underline style) ─────────────────────────
+            _categoryTabs(c),
+            // ── Results list ────────────────────────────────────────────
+            Expanded(
+              child: Obx(() {
+                final results = _sic.filteredSymbols;
+                if (_sic.isLoading.value && results.isEmpty) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (results.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24.h),
+                      child: Text('No results',
+                          style: TextStyle(
+                              color: CelTheme.subText(c), fontSize: 13.sp)),
+                    ),
+                  );
+                }
+                return ListView.separated(
+                  padding: EdgeInsets.only(bottom: 16.h),
+                  itemCount: results.length,
+                  separatorBuilder: (_, __) => Divider(
+                      color: CelTheme.divider(c),
+                      height: 1,
+                      thickness: 0.5),
+                  itemBuilder: (_, i) {
+                    final SearchSymbol s = results[i];
+                    final symbol = s.displaySymbol;
+                    return _searchRow(c, s, symbol);
+                  },
                 );
-              }
-              return ListView.separated(
-                controller: scrollCtrl,
-                itemCount: results.length,
-                separatorBuilder: (_, __) => Divider(
-                    color: CelTheme.divider(c),
-                    height: 1,
-                    thickness: 0.5),
-                itemBuilder: (_, i) {
-                  final SearchSymbol s = results[i];
-                  final symbol = s.displaySymbol;
-                  return _searchRow(c, s, symbol);
-                },
-              );
-            }),
-          ),
-        ],
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -508,29 +429,39 @@ class _SearchSheetState extends State<_SearchSheet> {
       final categories = _sic.availableCategories;
       final current = _sic.currentCategory.value;
       return SizedBox(
-        height: 42.h,
+        height: 38.h,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w),
           itemCount: categories.length,
-          separatorBuilder: (_, __) => SizedBox(width: 8.w),
+          separatorBuilder: (_, __) => SizedBox(width: 18.w),
           itemBuilder: (_, i) {
             final cat = categories[i];
             final active = cat == current;
             return GestureDetector(
               onTap: () => _sic.filterByCategory(cat),
+              behavior: HitTestBehavior.opaque,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: active ? CelTheme.buy(c) : CelTheme.softBg(c),
-                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: active
+                          ? CelTheme.mainText(c)
+                          : Colors.transparent,
+                      width: 2.0,
+                    ),
+                  ),
                 ),
                 child: Text(
                   cat,
                   style: TextStyle(
-                    color: active ? Colors.white : CelTheme.subText(c),
-                    fontSize: 12.sp,
-                    fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                    color: active
+                        ? CelTheme.mainText(c)
+                        : CelTheme.subText(c),
+                    fontSize: 14.sp,
+                    fontWeight:
+                        active ? FontWeight.w700 : FontWeight.w500,
                   ),
                 ),
               ),
@@ -542,58 +473,68 @@ class _SearchSheetState extends State<_SearchSheet> {
   }
 
   Widget _searchRow(BuildContext c, SearchSymbol s, String symbol) {
-    // Show first 3 letters of the symbol as a text avatar
-    final initials = symbol.length >= 3 ? symbol.substring(0, 3) : symbol;
-    return ListTile(
-      contentPadding:
-          EdgeInsets.symmetric(horizontal: 16.w, vertical: 2.h),
-      leading: Container(
-        width: 40.w,
-        height: 40.h,
-        decoration: BoxDecoration(
-          color: CelTheme.buyTint(c),
-          borderRadius: BorderRadius.circular(10.r),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          initials,
-          style: TextStyle(
-            color: CelTheme.buy(c),
-            fontSize: 10.sp,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.3,
-          ),
-        ),
-      ),
-      title: Text(symbol,
-          style: TextStyle(
-              color: CelTheme.mainText(c),
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700)),
-      subtitle: Text(s.categoryName,
-          style: TextStyle(
-              color: CelTheme.subText(c), fontSize: 11.sp)),
-      // Star: tap → subscribe + add to favorites (exact same as old code)
-      trailing: GestureDetector(
-        onTap: () => widget.ic.toggleFavorite(
-          symbol,
-          searchSymbol: s,
-          hydrateAfterChange: true,
-        ),
-        child: Obx(() {
-          final isFav = widget.ic.isFavorite(symbol);
-          return Icon(
-            isFav ? Icons.star_rounded : Icons.star_outline_rounded,
-            color:
-                isFav ? CelTheme.accentYellow : CelTheme.subText(c),
-            size: 22.sp,
-          );
-        }),
-      ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
-        Navigator.pop(c);
+        Navigator.of(c).pop();
         widget.onTap(symbol);
       },
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        child: Row(
+          children: [
+            // ── Add / Added circular toggle on the LEFT ───────────────
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => widget.ic.toggleFavorite(
+                symbol,
+                searchSymbol: s,
+                hydrateAfterChange: true,
+              ),
+              child: Obx(() {
+                final isFav = widget.ic.isFavorite(symbol);
+                if (isFav) {
+                  return Container(
+                    width: 22.w,
+                    height: 22.w,
+                    decoration: const BoxDecoration(
+                      color: CelTheme.tpGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(Icons.check,
+                        color: Colors.white, size: 14.sp),
+                  );
+                }
+                return Icon(Icons.add,
+                    color: CelTheme.subText(c), size: 22.sp);
+              }),
+            ),
+            SizedBox(width: 12.w),
+            // ── Symbol + description ──────────────────────────────────
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(symbol,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: CelTheme.headerText(c),
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w500)),
+                  Text(s.categoryName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: CelTheme.subText(c), fontSize: 11.sp)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
