@@ -24,6 +24,9 @@ class BaseClientConfig {
   final String websocketUrl;
   final String chartBaseUrl;
 
+  // Feature flags
+  final bool useNewChart;
+
   const BaseClientConfig({
     required this.brandName,
     required this.appTitle,
@@ -37,6 +40,7 @@ class BaseClientConfig {
     required this.apiBaseUrl,
     required this.websocketUrl,
     required this.chartBaseUrl,
+    this.useNewChart = false,
   }) : darkPrimaryColor = darkPrimaryColor ?? primaryColor;
 
   /// Get the full runtime asset path for a prepared client asset.
