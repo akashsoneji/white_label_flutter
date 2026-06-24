@@ -1,6 +1,8 @@
+
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as path;
 
 String colorToHex(String color) {
@@ -8,7 +10,6 @@ String colorToHex(String color) {
   if (hex.length == 8) return hex.substring(2);
   return hex;
 }
-
 String colorWithHash(String color) => '#${colorToHex(color)}';
 
 /// Prepares brand-specific assets for Flutter build.
@@ -42,6 +43,7 @@ void main(List<String> args) async {
     await writeBuildBrandRegistry(flavor);
     await updatePubspec(flavor, allFlavors);
     await generateNativeSplash(flavor, brandColors: brandColors);
+    await prepareAdaptiveForeground(flavor);
     await generateLauncherIcons(flavor);
 
     // iOS preparation (data-driven from brand.yaml). Keeps iOS in sync so the
@@ -411,6 +413,76 @@ Future<void> generateNativeSplash(
   print('  ✓ Launcher background color: $launcherBackgroundHex');
 }
 
+/// Builds a 1024x1024 transparent PNG with the brand icon centered and
+/// scaled to fit inside the Android adaptive-icon safe zone (~66%).
+/// The adaptive icon foreground MUST respect this safe zone; without it,
+/// launchers mask + crop full-bleed logos so the brand mark looks tiny
+/// or invisible. Output: assets/clients/<flavor>/ic_adaptive_foreground.png
+Future<void> prepareAdaptiveForeground(String flavor) async {
+  print('\n🖼️  Preparing adaptive-icon foreground (safe-zone padded)...');
+
+  final sourceIcon = File(path.join('assets', 'clients', flavor, 'icon.png'));
+  if (!await sourceIcon.exists()) {
+    print('  ⚠️  No icon.png for $flavor, skipping foreground prep');
+    return;
+  }
+
+  final foregroundPath = path.join(
+    'assets', 'clients', flavor, 'ic_adaptive_foreground.png',
+  );
+
+  // Output canvas is 1024x1024. Source is scaled to 66% (safe-zone diameter)
+  // and centered. The remaining 17% margin on each side guarantees the logo
+  // survives any launcher mask (circle, squircle, teardrop).
+  const canvasSize = 1024;
+  const targetSize = 676; // ~66% of canvas
+
+  final sourceBytes = await sourceIcon.readAsBytes();
+  final decoded = img.decodeImage(sourceBytes);
+  if (decoded == null) {
+    print('  ⚠️  Failed to decode ${sourceIcon.path}, skipping');
+    return;
+  }
+
+  final resized = img.copyResize(
+    decoded,
+    width: targetSize,
+    height: targetSize,
+    interpolation: img.Interpolation.cubic,
+  );
+
+  final canvas = img.Image(width: canvasSize, height: canvasSize, numChannels: 4);
+  // Fill with fully-transparent pixels (default for Image() with alpha).
+  final offsetX = (canvasSize - targetSize) ~/ 2;
+  final offsetY = (canvasSize - targetSize) ~/ 2;
+  img.compositeImage(canvas, resized, dstX: offsetX, dstY: offsetY);
+
+  final outFile = File(foregroundPath);
+  await outFile.parent.create(recursive: true);
+  await outFile.writeAsBytes(img.encodePng(canvas));
+  print('  ✓ Wrote $foregroundPath (${targetSize}x$targetSize centered)');
+
+  // Point the generated launcher_icons.yaml at the padded foreground so
+  // flutter_launcher_icons uses it instead of the full-bleed source.
+  await rewriteLauncherForeground(flavor, foregroundPath);
+}
+
+/// Rewrites lib/clients/<flavor>/launcher_icons.yaml so adaptive_icon_foreground
+/// points at the padded foreground PNG (relative to project root).
+Future<void> rewriteLauncherForeground(String flavor, String foregroundPath) async {
+  final yamlFile = File(path.join('lib', 'clients', flavor, 'launcher_icons.yaml'));
+  if (!await yamlFile.exists()) return;
+
+  var content = await yamlFile.readAsString();
+  final relPath = foregroundPath; // already project-root relative
+  content = content.replaceAllMapped(
+    RegExp(r'^(\s*adaptive_icon_foreground:\s*).*$', multiLine: true),
+    (m) => '${m.group(1)}"$relPath"',
+  );
+  await yamlFile.writeAsString(content);
+  print('  ✓ Updated adaptive_icon_foreground in ${yamlFile.path}');
+}
+
 Future<void> generateLauncherIcons(String flavor) async {
   print('\n🎨 Generating launcher icons...');
 
@@ -431,6 +503,7 @@ Future<void> generateLauncherIcons(String flavor) async {
   if (result.exitCode == 0) {
     print('  ✓ Launcher icons generated successfully');
     await copyIconsToFlavorFolder(flavor);
+    await removeAdaptiveIconInset(flavor);
     await cleanMainResMipmapFolders();
   } else {
     print('  ⚠️  Warning: Launcher icon generation failed');
@@ -524,6 +597,33 @@ Future<void> copyIconsToFlavorFolder(String flavor) async {
   }
 
   print('  ✓ Icons copied to $flavor flavor folder');
+}
+
+/// flutter_launcher_icons 0.14.x wraps the adaptive-icon foreground in
+/// `<inset android:inset="16%"/>`. Because prepareAdaptiveForeground already
+/// scales the logo to the adaptive-icon safe zone (66%), the extra inset
+/// shrinks the logo a second time. Strip the inset so the logo renders at
+/// the intended ~66% size inside the masked launcher icon.
+Future<void> removeAdaptiveIconInset(String flavor) async {
+  final anydpiDir = Directory(
+    path.join('android', 'app', 'src', flavor, 'res', 'mipmap-anydpi-v26'),
+  );
+  final xml = File(path.join(anydpiDir.path, 'ic_launcher.xml'));
+  if (!await xml.exists()) return;
+
+  var content = await xml.readAsString();
+  final before = content;
+  // Drop the inset wrapper — point foreground directly at the drawable.
+  content = content.replaceAll(
+    RegExp(
+      r'<inset\s+android:drawable="@drawable/ic_launcher_foreground"\s+android:inset="16%"\s*/>',
+    ),
+    '<bitmap android:src="@drawable/ic_launcher_foreground" android:gravity="center" />',
+  );
+  if (content != before) {
+    await xml.writeAsString(content);
+    print('  ✓ Removed extra 16% inset from adaptive icon (uses safe-zone foreground)');
+  }
 }
 
 // ===========================================================================

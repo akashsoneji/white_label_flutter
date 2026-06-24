@@ -45,19 +45,19 @@ brands:
  appName: "GTX Prime"
  colors:
  primary: "#01061A"
- darkPrimary: "#01061A"
+ darkPrimary: "#F8F3FF"
  secondary: "#011947"
  accent: "#011947"
  splashColor: "#01061A"
  launcherBackground: "#01061A"
  urls:
- api: "https://demo.tenaxcode.com/api/"
- websocket: "wss://demo.tenaxcode.com/trade-engine"
- chart: "https://demo.tenaxcode.com"
+ api: "https://member.gtxprime.com/api/"
+ websocket: "wss://member.gtxprime.com/trade-engine"
+ chart: "https://member.gtxprime.com"
  assets:
  appIcon: "assets/brands/gtxprime/icon.png"
- logo: "assets/brands/gtxprime/logo.svg"
- splashLogo: "assets/brands/gtxprime/splash_logo.svg"
+ logo: "assets/brands/gtxprime/logo.png"
+ splashLogo: "assets/brands/gtxprime/splash_logo.png"
  features:
  useNewChart: "false"
 

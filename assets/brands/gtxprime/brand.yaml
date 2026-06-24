@@ -14,21 +14,21 @@ ios:
 
 colors:
   primary: "#01061A"
-  darkPrimary: "#01061A"
+  darkPrimary: "#F8F3FF"
   secondary: "#011947"
   accent: "#011947"
   splashColor: "#01061A"
   launcherBackground: "#01061A"
 
 urls:
-  api: https://demo.tenaxcode.com/api/
-  websocket: wss://demo.tenaxcode.com/trade-engine
-  chart: https://demo.tenaxcode.com
+  api: https://member.gtxprime.com/api/
+  websocket: wss://member.gtxprime.com/trade-engine
+  chart: https://member.gtxprime.com
 
 assets:
   appIcon: icon.png
-  logo: logo.svg
-  splashLogo: splash_logo.svg
+  logo: logo.png
+  splashLogo: splash_logo.png
 
 features:
   useNewChart: false

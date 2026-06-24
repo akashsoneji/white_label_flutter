@@ -62,7 +62,7 @@ class GetStartedScreen extends StatelessWidget {
                           ),
                           child: Text(
                             languageService.tr("onboarding_get_started"),
-                            style: AppTextStyles.button,
+                            style: AppTextStyles.button.copyWith(fontSize: 13),
                           ),
                         ),
                       ),
@@ -138,4 +138,3 @@ class GetStartedScreen extends StatelessWidget {
     );
   }
 }
-
