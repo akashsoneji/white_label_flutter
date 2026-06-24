@@ -477,9 +477,11 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
     bool showReorderHandle = false,
     int? reorderIndex,
   }) {
+    final bool isFavoriteFilter = _controller.currentFilter.value == 'Favorites';
+
     // ✅ PERFORMANCE: Wrap entire item in RepaintBoundary
     // This isolates repaints - when one item updates, others don't repaint
-    return RepaintBoundary(
+    Widget itemWidget = RepaintBoundary(
       child: GestureDetector(
         onTap: () {
           _navigateToChartWithSymbol(instrument.symbol);
@@ -668,6 +670,32 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
         ),
       ),
     );
+
+    if (isFavoriteFilter) {
+      return Dismissible(
+        key: Key('dismiss_${instrument.symbol}'),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: EdgeInsets.only(right: 20.w),
+          color: Colors.red,
+          child: Icon(Icons.delete, color: Colors.white, size: 24.sp),
+        ),
+        onDismissed: (direction) async {
+          final ic = _controller;
+          if (ic.isFavorite(instrument.symbol)) {
+            await ic.toggleFavorite(instrument.symbol);
+            await ic.syncMarketWatchV2AfterFavoriteChange(
+              instrument.symbol,
+              isFavoriteNow: ic.isFavorite(instrument.symbol),
+            );
+          }
+        },
+        child: itemWidget,
+      );
+    }
+
+    return itemWidget;
   }
 
   void _navigateToChartWithSymbol(String symbol) {

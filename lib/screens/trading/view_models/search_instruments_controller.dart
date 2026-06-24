@@ -15,7 +15,7 @@ class SearchInstrumentsController extends GetxController {
   var searchQuery = ''.obs;
   /// Chips order: All, Currency, Metals, Crypto, Indices, Energy, Commodities.
   /// Default tab is Currency (Forex/Currency API names via aliases).
-  var currentCategory = 'Currency'.obs;
+  var currentCategory = 'All'.obs;
 
   static const List<String> _categoryChipOrder = [
     'All',
@@ -53,7 +53,7 @@ class SearchInstrumentsController extends GetxController {
           _updateAvailableCategories();
 
           if (!availableCategories.contains(currentCategory.value)) {
-            currentCategory.value = 'Currency';
+            currentCategory.value = 'All';
           }
 
           _applyFilter();

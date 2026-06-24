@@ -28,7 +28,7 @@ class KycBankController extends GetxController {
 
   // Account type selection
   final RxString selectedAccountType = 'Bank'.obs;
-  final RxString selectedRelationship = 'Other'.obs;
+  final RxString selectedRelationship = 'Self'.obs;
   final RxList<String> accountTypes = ['Bank', 'Crypto', 'UPI'].obs;
   final RxList<String> relationShips =
       ['Self','Other'].obs;
@@ -38,8 +38,11 @@ class KycBankController extends GetxController {
   final RxList<String> currencies = <String>[].obs;
   final RxList<WithdrawalMethods> bankWithdrawalList =
       <WithdrawalMethods>[].obs;
+  final RxList<AllowedCryptoNetwork> allowedCryptoNetworks =
+      <AllowedCryptoNetwork>[].obs;
   final RxString selectedCurrency = 'USD'.obs;
   final RxString selectedIfscIban = 'IFSCs'.obs;
+  final RxString selectedCryptoNetwork = ''.obs;
 
   // Form fields
   final RxString ifscIbanType = ''.obs;
@@ -82,6 +85,7 @@ class KycBankController extends GetxController {
     super.onInit();
 
     fetchCurrencyList();
+    fetchWithdrawalList();
     // Initialize camera
     initializeCamera();
 
@@ -156,19 +160,22 @@ class KycBankController extends GetxController {
       final response = await _repo.getBankWithdrawalList(token: token ?? '');
 
       if (response.success) {
-        print('✅ Currency list fetched successfully');
+        print('✅ Withdrawal list fetched successfully');
         final currencyListModel = BankWithdrawleList.fromJson(response.data);
         bankWithdrawalList.value =
             currencyListModel.data?.withdrawalMethods ?? [];
-        print('💰 Found ${currencies.length} currencies');
+        allowedCryptoNetworks.value =
+            currencyListModel.data?.allowedCryptoNetworks ?? [];
+        print('💰 Found ${bankWithdrawalList.length} withdrawal methods');
+        print('🔌 Found ${allowedCryptoNetworks.length} crypto networks');
       } else {
         errorMessage.value =
-            response.message ?? 'Failed to fetch currency list';
-        print('❌ Failed to fetch currency list: ${response.message}');
+            response.message ?? 'Failed to fetch withdrawal list';
+        print('❌ Failed to fetch withdrawal list: ${response.message}');
       }
     } catch (e) {
-      errorMessage.value = 'Error fetching currency list: $e';
-      print('❌ Error fetching currency list: $e');
+      errorMessage.value = 'Error fetching withdrawal list: $e';
+      print('❌ Error fetching withdrawal list: $e');
     } finally {
       isLoading.value = false;
       hasLoadedOnce.value = true; // Mark first load complete
@@ -199,6 +206,7 @@ class KycBankController extends GetxController {
     bankSwiftCode.value = '';
     cryptoAddress.value = '';
     upiAddress.value = '';
+    selectedCryptoNetwork.value = '';
     otp.value = '';
     isOtpSent.value = false;
     proofFile.value = null;
@@ -423,6 +431,15 @@ class KycBankController extends GetxController {
         return false;
       }
     } else if (selectedAccountType.value.toLowerCase() == "crypto") {
+      if (selectedCryptoNetwork.value.isEmpty) {
+        errorMessage.value = 'Please select network';
+        if (Get.isRegistered<AppNotificationController>()) {
+          Get.find<AppNotificationController>().showError(
+            message: 'Please select network',
+          );
+        }
+        return false;
+      }
       if (cryptoAddress.value.isEmpty) {
         errorMessage.value = 'Please enter crypto address';
         if (Get.isRegistered<AppNotificationController>()) {
@@ -478,6 +495,7 @@ class KycBankController extends GetxController {
       params.addAll({
         "crypto_holder_name": accountHolderName.value,
         "crypto_address": cryptoAddress.value,
+        "crypto_network": selectedCryptoNetwork.value,
       });
     } else {
       // UPI case
@@ -627,6 +645,7 @@ class KycBankController extends GetxController {
     selectedAccountType.value = 'Bank';
     selectedCurrency.value = 'USD';
     currencies.clear();
+    allowedCryptoNetworks.clear();
     errorMessage.value = '';
     successMessage.value = '';
 

@@ -1,3 +1,4 @@
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:flutter/material.dart';
@@ -306,9 +307,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       child: Text(
                                         languageService.tr("login_button"),
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
+                                          color: AppColors.isDarkMode ? AppColors.textPrimaryLight : AppColors.textPrimaryDark,
                                         ),
                                       ),
                                     );

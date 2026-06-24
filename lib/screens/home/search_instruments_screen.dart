@@ -37,7 +37,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
     super.initState();
     _searchController.addListener(_onSearchTextChanged);
     // Reset each visit: controller may be reused via Get.put with a stale tab.
-    _controller.filterByCategory('Currency');
+    _controller.filterByCategory('All');
   }
 
   @override

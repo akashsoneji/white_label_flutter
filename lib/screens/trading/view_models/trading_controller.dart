@@ -916,15 +916,18 @@ class TradingController extends GetxController {
   // Direction filtering
   void setSelectedDirection(String direction) {
     _selectedDirection.value = direction;
+    update();
   }
 
   // Tab-specific direction filtering
   void setPendingDirection(String direction) {
     _pendingDirection.value = direction;
+    update();
   }
 
   void setClosedDirection(String direction) {
     _closedDirection.value = direction;
+    update();
   }
 
   // Get current direction filter based on active tab
@@ -1022,7 +1025,8 @@ class TradingController extends GetxController {
 
   /// Check if any filter is currently active (direction, instrument, or date)
   bool get isAnyFilterActive {
-    final directionActive = getCurrentDirectionFilter() != 'All';
+    if (_selectedTab.value != 2) return false;
+    final directionActive = _closedDirection.value != 'All';
     final instrumentActive = _selectedInstruments.isNotEmpty;
     final dateActive = _hasDateFilter.value;
     return directionActive || instrumentActive || dateActive;
@@ -1031,8 +1035,6 @@ class TradingController extends GetxController {
   // Get all available instruments
   Set<String> get availableInstruments {
     Set<String> instruments = {};
-    instruments.addAll(_marketPositions.map((p) => p.symbol));
-    instruments.addAll(_pendingPositions.map((p) => p.symbol));
     instruments.addAll(_closedPositions.map((p) => p.symbol));
     return instruments;
   }
@@ -1053,44 +1055,35 @@ class TradingController extends GetxController {
         break;
     }
 
-    // Apply instrument filter (match base symbols too)
-    if (_selectedInstruments.isNotEmpty) {
-      positions =
-          positions.where((p) {
-            // Check if exact symbol matches
-            if (_selectedInstruments.contains(p.symbol)) {
-              return true;
-            }
-            // Check if base symbol (without .c suffix) matches
-            final baseSymbol = p.symbol.replaceFirst('.c', '');
-            return _selectedInstruments.contains(baseSymbol) ||
-                _selectedInstruments.any(
-                  (selected) => selected.replaceFirst('.c', '') == baseSymbol,
-                );
-          }).toList();
-    }
+    // Apply filters ONLY on the History tab (tab index 2)
+    if (_selectedTab.value == 2) {
+      // Apply instrument filter (match base symbols too)
+      if (_selectedInstruments.isNotEmpty) {
+        positions =
+            positions.where((p) {
+              // Check if exact symbol matches
+              if (_selectedInstruments.contains(p.symbol)) {
+                return true;
+              }
+              // Check if base symbol (without .c suffix) matches
+              final baseSymbol = p.symbol.replaceFirst('.c', '');
+              return _selectedInstruments.contains(baseSymbol) ||
+                  _selectedInstruments.any(
+                    (selected) => selected.replaceFirst('.c', '') == baseSymbol,
+                  );
+            }).toList();
+      }
 
-    // Apply direction filter (case-insensitive comparison) - tab-specific
-    String directionFilter = 'All';
-    switch (_selectedTab.value) {
-      case 1: // Pending tab
-        directionFilter = _pendingDirection.value;
-        break;
-      case 2: // Closed tab
-        directionFilter = _closedDirection.value;
-        break;
-      default: // Market tab (0)
-        directionFilter = _selectedDirection.value;
-        break;
-    }
-
-    if (directionFilter != 'All') {
-      positions =
-          positions.where((p) {
-            final positionAction = p.action.trim().toLowerCase();
-            final selectedDirection = directionFilter.trim().toLowerCase();
-            return positionAction == selectedDirection;
-          }).toList();
+      // Apply direction filter (case-insensitive comparison) - tab-specific (tab 2 only)
+      final directionFilter = _closedDirection.value;
+      if (directionFilter != 'All') {
+        positions =
+            positions.where((p) {
+              final positionAction = p.action.trim().toLowerCase();
+              final selectedDirection = directionFilter.trim().toLowerCase();
+              return positionAction == selectedDirection;
+            }).toList();
+      }
     }
 
     // Sort Market and Pending tabs positions by timestamp (newest first)

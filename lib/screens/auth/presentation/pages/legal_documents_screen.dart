@@ -150,7 +150,9 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
                 _validateForm();
               });
             },
-            activeColor: AppColors.primary,
+            activeColor: AppColors.whiteColor,
+            checkColor: AppColors.primary,
+            side: BorderSide(color: AppColors.border),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4),
             ),

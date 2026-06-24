@@ -1675,7 +1675,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 15.h),
@@ -1716,7 +1716,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                                       color:
                                           isSelected
                                               ? AppColors.primary
-                                              : Colors.black87,
+                                              : AppColors.textPrimary,
                                     ),
                                   ),
                                 ),
