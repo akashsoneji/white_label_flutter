@@ -89,7 +89,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           _firstNameController.text.isNotEmpty &&
           _lastNameController.text.isNotEmpty &&
           _isPhoneValid() &&
-          _emailController.text.isNotEmpty &&
+          _isValidEmail(_emailController.text.trim()) &&
           _passwordController.text.isNotEmpty;
     });
   }
@@ -130,13 +130,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final digits = _phoneDigits;
     if (digits.isEmpty) return false;
     final iso = _selectedIsoCode;
-    if (iso == null) return digits.length >= 6;
+    if (iso == null) return digits.length >= 6 && digits.length <= 15;
     try {
       final number = PhoneNumber.parse(digits, destinationCountry: iso);
-      return number.isValid(type: PhoneNumberType.mobile) || number.isValid();
-    } catch (_) {
-      return false;
-    }
+      if (number.isValid(type: PhoneNumberType.mobile) || number.isValid()) {
+        return true;
+      }
+    } catch (_) {}
+    // Fallback: If library parsing fails or says it is invalid (e.g. mock/test numbers or unassigned area codes),
+    // we accept it if the length of the digits is reasonable (e.g., between 7 and 15 digits).
+    return digits.length >= 7 && digits.length <= 15;
   }
 
   /// Formats the entered national number for display (country specific).
@@ -485,7 +488,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 setState(() => _enableBiometricAfterRegister = true);
               },
               activeColor: AppColors.primary,
-              checkColor: AppColors.primary,
+              checkColor: AppColors.pureWhite,
               side: BorderSide(color: AppColors.border),
             ),
             Expanded(
@@ -591,7 +594,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   return _languageService.tr('validation_required');
                 }
                 if (!_isPhoneValid()) {
-                  return _languageService.tr('validation_invalid_phone');
+                  return _languageService.tr('create_account_validation_phone');
                 }
                 return null;
               },

@@ -363,7 +363,8 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
             ),
             child: Center(
               child: Text(
-                (authController.userFullName ?? 'U').isNotEmpty
+                (authController.userFullName != null &&
+                        authController.userFullName!.isNotEmpty)
                     ? authController.userFullName![0].toUpperCase()
                     : 'U',
                 style: TextStyle(
