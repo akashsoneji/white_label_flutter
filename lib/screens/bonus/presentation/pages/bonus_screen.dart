@@ -849,46 +849,41 @@ class BonusScreen extends StatelessWidget {
               }
 
               final claim = controller.claims[index];
+
+              double progressPercent = 0.0;
+              try {
+                final current = claim.currentLots;
+                final total = double.tryParse(claim.lotSize) ?? 0.0;
+                if (total > 0.0) {
+                  progressPercent = (current / total).clamp(0.0, 1.0);
+                }
+              } catch (_) {}
+
               return Container(
-                padding: EdgeInsets.all(14.w),
+                padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
                   color: AppColors.card,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: AppColors.border, width: 1),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(
+                    color: AppColors.border.withOpacity(0.4),
+                    width: 1,
+                  ),
+                  boxShadow: !AppColors.isDarkMode
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      : null,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top header row: Claim date & status
+                    // Top Row: Title, Date, Status
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today_outlined,
-                              size: 12.h,
-                              color: AppColors.textSecondary,
-                            ),
-                            SizedBox(width: 6.w),
-                            Text(
-                              _formatDateTime(claim.claimDate),
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        _buildStatusBadge(claim.status),
-                      ],
-                    ),
-                    SizedBox(height: 10.h),
-                    Divider(height: 1, color: AppColors.border),
-                    SizedBox(height: 12.h),
-                    // Amount and details middle row
-                    Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
@@ -898,26 +893,18 @@ class BonusScreen extends StatelessWidget {
                               Text(
                                 claim.bonusAmount,
                                 style: TextStyle(
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22.sp,
+                                  fontWeight: FontWeight.w800,
                                   color: AppColors.textPrimary,
                                 ),
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                '${claim.bonusPercentage} ${claim.bonusType}',
+                                '${claim.bonusPercentage} ${claim.bonusType.capitalizeFirst} Bonus',
                                 style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                'Dep Ref: ${claim.depositRequestId}',
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  color: AppColors.textSecondary.withOpacity(0.8),
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ],
@@ -926,85 +913,161 @@ class BonusScreen extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
+                            _buildStatusBadge(claim.status),
+                            SizedBox(height: 4.h),
                             Text(
-                              'Account: ${claim.mt5Account}',
+                              _formatDateTime(claim.claimDate),
                               style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              'Deposit: ${claim.depositAmount}',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: AppColors.textSecondary,
+                                  fontSize: 11.sp,
+                                  color: AppColors.textSecondary,
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                    SizedBox(height: 12.h),
-                    Divider(height: 1, color: AppColors.border),
-                    SizedBox(height: 12.h),
-                    // Bottom row: progress and remaining days
+
+                    SizedBox(height: 16.h),
+                    Divider(height: 1, color: AppColors.border.withOpacity(0.4)),
+                    SizedBox(height: 14.h),
+
+                    // Middle Row: Details Grid
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Progress (Lots)',
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              claim.lotSize == '0.00'
-                                  ? '—'
-                                  : '${claim.currentLots} / ${claim.lotSize}',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
+                        _buildDetailItem(
+                          label: 'MT5 ACCOUNT',
+                          value: claim.mt5Account,
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'Remaining Time',
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              claim.remainingDays.isEmpty
-                                  ? 'Expired'
-                                  : claim.remainingDays,
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: claim.remainingDays.isEmpty
-                                    ? const Color(0xFFEF4444)
-                                    : AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
+                        _buildDetailItem(
+                          label: 'DEPOSIT',
+                          value: claim.depositAmount,
+                        ),
+                        _buildDetailItem(
+                          label: 'DEP REF',
+                          value: claim.depositRequestId,
                         ),
                       ],
                     ),
+
+                    SizedBox(height: 16.h),
+
+                    // Bottom Section: Progress bar
+                    if (claim.lotSize != '0.00' && claim.lotSize.isNotEmpty) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Trading Progress',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            '${(progressPercent * 100).toStringAsFixed(1)}%',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 6.h),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4.r),
+                        child: LinearProgressIndicator(
+                          value: progressPercent,
+                          minHeight: 6.h,
+                          backgroundColor: AppColors.isDarkMode
+                              ? const Color(0xFF2C2C2E)
+                              : const Color(0xFFF2F2F7),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            progressPercent >= 1.0
+                                ? const Color(0xFF10B981)
+                                : AppColors.primary,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '${claim.currentLots} / ${claim.lotSize} Lots',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_filled_rounded,
+                                size: 12.h,
+                                color: claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
+                                    ? const Color(0xFFEF4444)
+                                    : AppColors.textSecondary,
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
+                                    ? 'Expired'
+                                    : '${claim.remainingDays} left',
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
+                                      ? const Color(0xFFEF4444)
+                                      : AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Remaining Time',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_filled_rounded,
+                                size: 12.h,
+                                color: claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
+                                    ? const Color(0xFFEF4444)
+                                    : AppColors.textSecondary,
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
+                                    ? 'Expired'
+                                    : claim.remainingDays,
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
+                                      ? const Color(0xFFEF4444)
+                                      : AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               );
