@@ -227,8 +227,12 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
               ? (int.tryParse(priceData['digits'].toString()) ?? 5)
               : 5;
 
-      // Format values properly
-      final volumeStr = volume.toString();
+      // Format volume preserving actual decimal precision (e.g. 0.10→"0.10", 0.001→"0.001")
+      final _volStr = volume.toString(); // e.g. "0.1", "0.001", "1.0"
+      final _dotIndex = _volStr.indexOf('.');
+      final _actualDecimals = _dotIndex == -1 ? 0 : _volStr.length - _dotIndex - 1;
+      final _decimals = _actualDecimals < 2 ? 2 : _actualDecimals; // minimum 2
+      final volumeStr = volume.toStringAsFixed(_decimals);
 
       final limitPriceControllerValue = _limitPriceController.text.trim();
       final limitPriceFromController =
@@ -276,7 +280,6 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
                 decimals: decimals,
               )
               : null;
-
       // Place the order using TradingController
       final success = await tradingController.placeTradeOrder(
         symbol: selectedSymbol,
