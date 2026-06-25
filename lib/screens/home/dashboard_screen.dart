@@ -1697,22 +1697,15 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     Get.to(() => InternalTransferScreen());
                   },
                 ),
-                // SizedBox(height: 16),
-                // _buildMenuItem(
-                //   icon: Icons.card_giftcard,
-                //   label: languageService.tr('dashboard_bonus'),
-                //   onTap: () {
-                //     Get.back(closeOverlays: true);
-                //     if (Get.isRegistered<AppNotificationController>()) {
-                //       Get.find<AppNotificationController>().showInfo(
-                //         message: languageService.tr(
-                //           'dashboard_bonus_coming_soon_message',
-                //         ),
-                //         title: languageService.tr('common_coming_soon'),
-                //       );
-                //     }
-                //   },
-                // ),
+                SizedBox(height: 16),
+                _buildMenuItem(
+                  icon: Icons.card_giftcard,
+                  label: languageService.tr('dashboard_bonus'),
+                  onTap: () {
+                    Get.back(closeOverlays: true);
+                    Get.toNamed(AppPages.BONUS);
+                  },
+                ),
                 SizedBox(height: 16),
                 _buildMenuItem(
                   icon: Icons.history,

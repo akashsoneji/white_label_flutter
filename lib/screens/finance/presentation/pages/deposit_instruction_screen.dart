@@ -23,12 +23,14 @@ class DepositInstructionScreen extends StatefulWidget {
   final String amountString;
   final String selectedMT5AccountID;
   final String? currency;
+  final bool fromBonus;
   const DepositInstructionScreen({
     super.key,
     required this.object,
     required this.amountString,
     required this.selectedMT5AccountID,
     this.currency,
+    this.fromBonus = false,
   });
 
   @override
@@ -1104,6 +1106,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                       payload["utr"] = utrValue;
                       payload["transaction_number"] = utrValue;
                       payload["transaction_id"] = utrValue;
+                    }
+
+                    if (widget.fromBonus) {
+                      payload["is_bonus"] = 1;
                     }
 
                     controller.submitDepositInstruction(payload);
