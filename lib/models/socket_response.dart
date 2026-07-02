@@ -109,20 +109,16 @@ class ListElement {
     return ListElement(
       symbol: json['Symbol'] ?? '',
       digits: json['Digits'] ?? 0,
-      bid: (json['Bid'] ?? 0.0).toDouble(),
-      ask: (json['Ask'] ?? 0.0).toDouble(),
+      bid: _parseDoubleFlexible(json['Bid']),
+      ask: _parseDoubleFlexible(json['Ask']),
       last: json['Last'] ?? 0,
       volume: json['Volume'] ?? 0,
       volumeReal: json['VolumeReal'] ?? 0,
       logo: json['logo'] ?? '',
-      spreadDiff: (json['SpreadDiff'] ?? 0.0).toDouble(),
+      spreadDiff: _parseDoubleFlexible(json['SpreadDiff']),
       category: json['category'] ?? json['Category'],
-      dayHigh:
-          json['day_high'] != null
-              ? (json['day_high'] as num).toDouble()
-              : null,
-      dayLow:
-          json['day_low'] != null ? (json['day_low'] as num).toDouble() : null,
+      dayHigh: _parseNullableDoubleFlexible(json['day_high']),
+      dayLow: _parseNullableDoubleFlexible(json['day_low']),
     );
   }
 
@@ -142,4 +138,28 @@ class ListElement {
       'day_low': dayLow,
     };
   }
+}
+
+double _parseDoubleFlexible(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) {
+    final t = value.trim();
+    if (t.isEmpty) return 0.0;
+    return double.tryParse(t) ?? 0.0;
+  }
+  return 0.0;
+}
+
+double? _parseNullableDoubleFlexible(dynamic value) {
+  if (value == null) return null;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) {
+    final t = value.trim();
+    if (t.isEmpty) return null;
+    return double.tryParse(t);
+  }
+  return null;
 }
