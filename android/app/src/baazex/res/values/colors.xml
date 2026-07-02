@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_color">#BF235C</color>
+    <color name="secondary_color">#212121</color>
+    <color name="accent_color">#BF235C</color>
+    <color name="my_splash_color">#BF235C</color>
+    <color name="ic_launcher_background">#BF235C</color>
+</resources>

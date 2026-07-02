@@ -3,5 +3,5 @@
          Flavor-specific overrides live under android/app/src/<flavor>/res/values/colors.xml -->
     <color name="primary_color">#4A0C54</color>
     <color name="my_splash_color">#4A0C54</color>
-    <color name="ic_launcher_background">#01061A</color>
+    <color name="ic_launcher_background">#BF235C</color>
 </resources>

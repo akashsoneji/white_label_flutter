@@ -11,7 +11,7 @@ class CelestialConfig extends BaseClientConfig {
       : super(
           brandName: 'Celestial',
           appTitle: 'Celestial',
-          primaryColor: const Color(0xFF24324D),
+          primaryColor: const Color(0xFF324D69),
           darkPrimaryColor: const Color(0xFFFFFFFF),
           secondaryColor: const Color(0xFF22D3EE),
           accentColor: const Color(0xFF24324D),
