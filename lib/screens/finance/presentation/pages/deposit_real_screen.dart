@@ -355,7 +355,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         _SingleDecimalTextFormatter(),
       ],
       decoration: InputDecoration(
-        labelText: 'Amount',
+        labelText: _amountLabel(),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -377,6 +377,41 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     );
   }
 
+  bool get _hasConversion {
+    final m = controller.depositMethod.value;
+    return m != null && m['has_conversion'] == true;
+  }
+
+  String get _sourceCurrency {
+    final m = controller.depositMethod.value;
+    final name = m?['currency_name']?.toString();
+    return (name == null || name.isEmpty) ? selectedCurrency : name;
+  }
+
+  double get _conversionRate {
+    final m = controller.depositMethod.value;
+    final raw = m?['conversion_rate'];
+    if (raw == null) return 0;
+    return double.tryParse(raw.toString()) ?? 0;
+  }
+
+  String _amountLabel() {
+    if (_hasConversion) {
+      return 'Amount ($_sourceCurrency)';
+    }
+    return 'Amount';
+  }
+
+  String _convertedDepositText() {
+    final raw = amountController.text.trim();
+    final entered = double.tryParse(raw.isEmpty ? '0' : raw) ?? 0;
+    if (_hasConversion && _conversionRate > 0) {
+      final converted = entered / _conversionRate;
+      return '${converted.toStringAsFixed(2)} $selectedCurrency';
+    }
+    return '${raw.isEmpty ? "0.00" : raw} $selectedCurrency';
+  }
+
   Widget _buildToBeDepositedSection() {
     return Container(
       width: double.infinity,
@@ -396,14 +431,17 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
               color: AppColors.icongrey,
             ),
           ),
-          Text(
-            '${amountController.text.isEmpty ? "0.00" : amountController.text} $selectedCurrency',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
-            ),
-          ),
+          Obx(() {
+            controller.depositMethod.value; // reactive trigger
+            return Text(
+              _convertedDepositText(),
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            );
+          }),
         ],
       ),
     );

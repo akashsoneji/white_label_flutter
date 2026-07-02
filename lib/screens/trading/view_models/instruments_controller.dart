@@ -40,16 +40,28 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  double _preserveNonZero(double incoming, double current) {
+    if (incoming != 0) return incoming;
+    return current != 0 ? current : incoming;
+  }
+
+  double _preserveOptionalNonZero(double? incoming, double current) {
+    if (incoming != null && incoming != 0) return incoming;
+    return current != 0 ? current : (incoming ?? 0);
+  }
+
   void _applyPriceUpdate(ListElement item) {
     // Queue and batch UI updates to keep scrolling smooth.
+    // During reconnect/REST hydrate the backend can send placeholder zero values.
+    // Preserve the last non-zero price until a valid new value arrives.
     final current = priceRx(item.symbol).value;
     _pendingPriceUpdates[item.symbol] = current.copyWith(
-      bid: item.bid,
-      ask: item.ask,
+      bid: _preserveNonZero(item.bid, current.bid),
+      ask: _preserveNonZero(item.ask, current.ask),
       digits: item.digits,
-      spreadDiff: item.spreadDiff,
-      dayLow: item.dayLow ?? current.dayLow,
-      dayHigh: item.dayHigh ?? current.dayHigh,
+      spreadDiff: _preserveNonZero(item.spreadDiff, current.spreadDiff),
+      dayLow: _preserveOptionalNonZero(item.dayLow, current.dayLow),
+      dayHigh: _preserveOptionalNonZero(item.dayHigh, current.dayHigh),
     );
     _schedulePriceFlush();
   }
@@ -100,7 +112,8 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Favorites management
   final RxList<String> favoriteInstruments = <String>[].obs;
-  final RxBool isLoadingFavorites = false.obs;
+  final RxBool isLoadingFavorites = true.obs;
+  final RxBool hasAttemptedInitialLoad = false.obs;
 
   // Put your WebSocket URL here
   late WebSocketChannel channel;
@@ -111,7 +124,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   // Connection management
   final RxBool isConnected = false.obs;
   /// True while initial REST hydrate + v2 subscribe runs ([startMarketWatchV2Only]).
-  final RxBool isHydratingInstrumentCatalog = false.obs;
+  /// Start as true so the very first Instruments frame cannot flash the empty
+  /// state before the post-frame hydrate begins.
+  final RxBool isHydratingInstrumentCatalog = true.obs;
   final RxBool isReconnecting = false.obs;
   Timer? _reconnectTimer;
 
@@ -224,6 +239,15 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // _initializeWebSocket();
   }
 
+  /// Called synchronously from InstrumentsScreen.initState before the first
+  /// frame. This prevents the initial empty/no-data widget from flashing while
+  /// the post-frame background hydrate is about to start.
+  void markInitialScreenOpening() {
+    if (allInstruments.isEmpty && !hasAttemptedInitialLoad.value) {
+      isHydratingInstrumentCatalog.value = true;
+    }
+  }
+
   // Method to start WebSocket when screen becomes visible
   void startWebSocket() async {
     final isLoggedIn = await SecureStorageService.isUserLoggedIn();
@@ -237,6 +261,44 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     print('🔌 InstrumentsController: Starting marketwatchv2 (legacy unified WS disabled)');
     _bindMarketWatchV2DecodedListener();
     await startMarketWatchV2Only();
+  }
+
+  /// Resume/foreground path: restore only price streaming for current favorites.
+  ///
+  /// Do NOT call REST hydrate and do NOT assign/clear instrument lists here.
+  /// That prevents full-screen refresh when returning from background/another app.
+  Future<void> resumePriceStreamOnly() async {
+    final isLoggedIn = await SecureStorageService.isUserLoggedIn();
+    if (!isLoggedIn) return;
+
+    _isClearingData = false;
+    _bindMarketWatchV2DecodedListener();
+
+    try {
+      final accountController = Get.find<AccountController>();
+      _currentAccountNumber =
+          accountController.activeMT5Account?.metaAccountNumber;
+    } catch (_) {}
+
+    if (!Get.isRegistered<MarketWatchV2Service>()) {
+      isConnected.value = false;
+      return;
+    }
+
+    final v2 = Get.find<MarketWatchV2Service>();
+    final syms =
+        favoriteInstruments
+            .map(MarketWatchV2Service.normalizeSymbol)
+            .where((s) => s.isNotEmpty)
+            .toSet()
+            .toList();
+
+    if (syms.isNotEmpty) {
+      await v2.resumeSubscribeSymbols(syms);
+    } else {
+      await v2.ensureAuthenticatedConnection();
+    }
+    isConnected.value = true;
   }
 
   /// REST snapshot for current favorites + v2 subscribe (replaces legacy `/ws/marketwatch`).
@@ -273,6 +335,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       isConnected.value = true;
     } finally {
       isHydratingInstrumentCatalog.value = false;
+      hasAttemptedInitialLoad.value = true;
     }
   }
 
@@ -355,23 +418,49 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       final incoming = <ListElement>[];
       for (final s in symbols) {
         if (!isFavorite(s.displaySymbol)) continue;
+        final current = priceRx(s.displaySymbol).value;
         incoming.add(
           ListElement(
             symbol: s.displaySymbol,
             digits: s.digits,
-            bid: 0,
-            ask: 0,
-            spreadDiff: 0,
+            bid: current.bid,
+            ask: current.ask,
+            spreadDiff: current.spreadDiff,
             last: 0,
             volume: 0,
             volumeReal: 0,
             logo: '',
             category: s.categoryName,
+            dayLow: current.dayLow > 0 ? current.dayLow : null,
+            dayHigh: current.dayHigh > 0 ? current.dayHigh : null,
           ),
         );
       }
 
-      allInstruments.assignAll(incoming);
+      final existingBySymbol = {
+        for (final item in allInstruments) item.symbol: item,
+      };
+      final merged = <ListElement>[];
+      for (final it in incoming) {
+        final existing = existingBySymbol[it.symbol];
+        if (existing != null) {
+          merged.add(
+            existing.copyWith(
+              digits: it.digits,
+              category: it.category,
+              bid: it.bid,
+              ask: it.ask,
+              spreadDiff: it.spreadDiff,
+              dayLow: it.dayLow,
+              dayHigh: it.dayHigh,
+            ),
+          );
+        } else {
+          merged.add(it);
+        }
+      }
+
+      allInstruments.assignAll(merged);
       for (final it in incoming) {
         _applyPriceUpdate(it);
       }
@@ -490,12 +579,14 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     _marketWatchV2Sub = null;
     _marketWatchV2ListenerBound = false;
 
-    // Set clearing flag to block any remaining in-flight messages
-    _isClearingData = true;
-    
+    // Lifecycle/navigation stop should not enter the full-reset clearing mode;
+    // otherwise marketwatchv2 frames after resume can be blocked. Full clearing
+    // is handled by clearInstrumentsData() for actual account switches.
+    _isClearingData = false;
+
     // Disconnect direct WebSocket if using it
     _disconnectWebSocket();
-    
+
     print(
       '✅ WebSocket stopped and data flow blocked',
     );

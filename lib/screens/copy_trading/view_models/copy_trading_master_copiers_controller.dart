@@ -19,9 +19,12 @@ class MasterCopierItem {
   final String copyMethod;
   final num totalPnl;
   final num totalCommissionPaid;
+  final num pendingCommission;
   final String commissionType;
   final num commissionPercentage;
   final num subscriptionFee;
+  final String noFeeUntil;
+  final String subscriptionLastBilledAt;
   final String activeSince;
   final String subscriptionStartedAt;
   final String pausedAt;
@@ -36,6 +39,10 @@ class MasterCopierItem {
   final String slTpMode;
   final String sizingMethod;
   final num lotMultiplier;
+  final String fixedLotSize;
+  final String mirrorRatio;
+  final bool isReverse;
+  final String riskPercent;
 
   const MasterCopierItem({
     required this.id,
@@ -53,9 +60,12 @@ class MasterCopierItem {
     required this.copyMethod,
     required this.totalPnl,
     required this.totalCommissionPaid,
+    required this.pendingCommission,
     required this.commissionType,
     required this.commissionPercentage,
     required this.subscriptionFee,
+    required this.noFeeUntil,
+    required this.subscriptionLastBilledAt,
     required this.activeSince,
     required this.subscriptionStartedAt,
     required this.pausedAt,
@@ -70,6 +80,10 @@ class MasterCopierItem {
     required this.slTpMode,
     required this.sizingMethod,
     required this.lotMultiplier,
+    required this.fixedLotSize,
+    required this.mirrorRatio,
+    required this.isReverse,
+    required this.riskPercent,
   });
 
   factory MasterCopierItem.fromJson(Map<String, dynamic> json) {
@@ -102,9 +116,12 @@ class MasterCopierItem {
       copyMethod: (json['copy_method'] ?? '').toString(),
       totalPnl: asNum(json['total_pnl']),
       totalCommissionPaid: asNum(json['total_commission_paid']),
+      pendingCommission: asNum(json['pending_commission']),
       commissionType: (json['commission_type'] ?? '').toString(),
       commissionPercentage: asNum(json['commission_percentage']),
       subscriptionFee: asNum(json['subscription_fee']),
+      noFeeUntil: (json['no_fee_until'] ?? '').toString(),
+      subscriptionLastBilledAt: (json['subscription_last_billed_at'] ?? '').toString(),
       activeSince: (json['active_since'] ?? '').toString(),
       subscriptionStartedAt: (json['subscription_started_at'] ?? '').toString(),
       pausedAt: (json['paused_at'] ?? '').toString(),
@@ -119,6 +136,10 @@ class MasterCopierItem {
       slTpMode: (json['sl_tp_mode'] ?? '').toString(),
       sizingMethod: (json['sizing_method'] ?? '').toString(),
       lotMultiplier: asNum(json['lot_multiplier']),
+      fixedLotSize: (json['fixed_lot_size'] ?? '').toString(),
+      mirrorRatio: (json['mirror_ratio'] ?? '').toString(),
+      isReverse: json['is_reverse'] == true,
+      riskPercent: (json['risk_percent'] ?? '').toString(),
     );
   }
 
@@ -181,6 +202,8 @@ class CopyTradingMasterCopiersController extends GetxController {
   final Rx<num> summaryTotalCapital = 0.0.obs;
   final Rx<num> summaryTotalPnl = 0.0.obs;
   final Rx<num> summaryTotalCommissionPaid = 0.0.obs;
+  final Rx<num> summaryTotalFloatingCommission = 0.0.obs;
+  final Rx<num> summaryTotalCommissionEarned = 0.0.obs;
 
   final RxList<CopyTradingMasterPlanItem> masterPlans = <CopyTradingMasterPlanItem>[].obs;
 
@@ -369,6 +392,8 @@ class CopyTradingMasterCopiersController extends GetxController {
     summaryTotalCapital.value = asNum(apiSummary['total_capital']);
     summaryTotalPnl.value = asNum(apiSummary['total_pnl']);
     summaryTotalCommissionPaid.value = asNum(apiSummary['total_commission_paid']);
+    summaryTotalFloatingCommission.value = asNum(apiSummary['total_floating_commission']);
+    summaryTotalCommissionEarned.value = asNum(apiSummary['total_commission_earned']);
   }
 
   Future<ApiResponse> pause(int copierId) async {

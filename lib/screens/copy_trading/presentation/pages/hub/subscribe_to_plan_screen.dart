@@ -10,22 +10,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
 class SubscribeToPlanScreen extends StatefulWidget {
   final String masterCode;
   final CopyTradingPlan plan;
-
   /// When set, opens on copy settings (step 2) and saves via PUT `.../subscriptions/{id}/update`.
   final CopierSubscriptionItem? editSubscription;
-  const SubscribeToPlanScreen({
-    super.key,
-    required this.masterCode,
-    required this.plan,
-    this.editSubscription,
-  });
+  const SubscribeToPlanScreen({super.key, required this.masterCode, required this.plan, this.editSubscription});
 
   @override
   State<SubscribeToPlanScreen> createState() => _SubscribeToPlanScreenState();
@@ -63,7 +57,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     CustomToastService.showError(
       title: 'Error',
       message: msg,
-      duration: Duration(milliseconds: 2500),
+      duration: const Duration(milliseconds: 2500),
       position: SnackPosition.TOP,
     );
   }
@@ -74,7 +68,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     CustomToastService.showSuccess(
       title: title,
       message: msg,
-      duration: Duration(milliseconds: 2500),
+      duration: const Duration(milliseconds: 2500),
       position: SnackPosition.TOP,
     );
   }
@@ -94,9 +88,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     if (_isEditMode) {
       _step.value = 1;
       _editLoading.value = true;
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _loadEditSubscription(),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadEditSubscription());
     } else {
       _editLoading.value = false;
     }
@@ -110,9 +102,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     try {
       final res = await ApiService.get(
         endpoint: ApiConstants.copyTradingCopierSubscriptionDetail(item.id),
-        queryParameters: {
-          '_t': DateTime.now().millisecondsSinceEpoch.toString(),
-        },
+        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
       );
       if (!res.success || res.data == null) {
         _editLoadError.value = res.message ?? 'Failed to load subscription';
@@ -138,11 +128,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       _syncControllersFromSubscribe(sub);
 
       await sub.loadEligibleAccounts(showLoading: true);
-      final matched = _matchEligibleAccount(
-        sub.eligibleAccounts,
-        item,
-        subJson,
-      );
+      final matched = _matchEligibleAccount(sub.eligibleAccounts, item, subJson);
       if (matched != null) {
         sub.selectedAccount.value = matched;
       }
@@ -221,15 +207,9 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     _slCtrl.dispose();
     final current = controller;
     if (current != null) {
-      Get.delete<CopyTradingSubscribeController>(
-        tag: '${widget.masterCode}:${current.planId}',
-        force: true,
-      );
+      Get.delete<CopyTradingSubscribeController>(tag: '${widget.masterCode}:${current.planId}', force: true);
     }
-    Get.delete<CopyTradingMasterDetailsController>(
-      tag: 'master:${widget.masterCode}',
-      force: true,
-    );
+    Get.delete<CopyTradingMasterDetailsController>(tag: 'master:${widget.masterCode}', force: true);
     super.dispose();
   }
 
@@ -238,17 +218,10 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     if (existing != null && existing.planId == planId) return;
 
     if (existing != null) {
-      Get.delete<CopyTradingSubscribeController>(
-        tag: '${widget.masterCode}:${existing.planId}',
-        force: true,
-      );
+      Get.delete<CopyTradingSubscribeController>(tag: '${widget.masterCode}:${existing.planId}', force: true);
     }
     controller = Get.put(
-      CopyTradingSubscribeController(
-        masterCode: widget.masterCode,
-        planId: planId,
-        autoSelectFirstAccount: false,
-      ),
+      CopyTradingSubscribeController(masterCode: widget.masterCode, planId: planId, autoSelectFirstAccount: false),
       tag: '${widget.masterCode}:$planId',
     );
   }
@@ -264,10 +237,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         centerTitle: false,
         title: Obx(() {
           final p = masterController.profile.value;
-          final name =
-              (p?.nickname.isNotEmpty ?? false)
-                  ? p!.nickname
-                  : widget.masterCode;
+          final name = (p?.nickname.isNotEmpty ?? false) ? p!.nickname : widget.masterCode;
           return Text(
             _isEditMode ? 'Edit copy settings' : 'Start Copy to $name',
             maxLines: 1,
@@ -277,7 +247,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         }),
         leading: Obx(() {
           final s = _step.value;
-          return AppBackButton(
+          return AppSvgBackButton(
             onPressed: () {
               if (_isEditMode) {
                 Get.back();
@@ -303,12 +273,10 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         final selectedPlan = _selectedPlan.value;
         final sub = controller;
 
-        if (masterController.isLoading.value &&
-            masterController.profile.value == null) {
-          return Center(child: CircularProgressIndicator());
+        if (masterController.isLoading.value && masterController.profile.value == null) {
+          return const Center(child: CircularProgressIndicator());
         }
-        if (masterController.errorMessage.value.isNotEmpty &&
-            masterController.profile.value == null) {
+        if (masterController.errorMessage.value.isNotEmpty && masterController.profile.value == null) {
           return _ErrorState(
             message: masterController.errorMessage.value,
             onRetry: () => masterController.loadProfile(showLoading: true),
@@ -322,7 +290,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         if (_isEditMode) {
           return Obx(() {
             if (_editLoading.value) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
             if (_editLoadError.value.isNotEmpty) {
               return _ErrorState(
@@ -342,9 +310,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                   ),
                 ),
                 Obx(() {
-                  final loading =
-                      (controller?.isLoading.value ?? false) ||
-                      _editLoading.value;
+                  final loading = (controller?.isLoading.value ?? false) || _editLoading.value;
                   return _BottomBar(
                     isLoading: loading,
                     step: _step,
@@ -373,8 +339,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
               }),
             ),
             Obx(() {
-              final loading =
-                  (controller?.isLoading.value ?? false) || _editLoading.value;
+              final loading = (controller?.isLoading.value ?? false) || _editLoading.value;
               return _BottomBar(
                 isLoading: loading,
                 step: _step,
@@ -389,15 +354,12 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
                   }
                   final acc = sub?.selectedAccount.value;
                   if (sub == null || acc == null) {
-                    if (sub != null)
-                      sub.errorMessage.value = 'Select an account';
+                    if (sub != null) sub.errorMessage.value = 'Select an account';
                     _showTopError('Select an account');
                     return;
                   }
-                  if (plan.minimumCapital > 0 &&
-                      acc.equity < plan.minimumCapital) {
-                    sub.errorMessage.value =
-                        'Account equity is below minimum required (${plan.minimumCapital}).';
+                  if (plan.minimumCapital > 0 && acc.equity < plan.minimumCapital) {
+                    sub.errorMessage.value = 'Account equity is below minimum required (${plan.minimumCapital}).';
                     _showTopError(sub.errorMessage.value);
                     return;
                   }
@@ -429,128 +391,120 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     return ListView(
       padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 22.h),
       children: [
-        if (effectiveStep == 0) ...[
-          _PlanPickerCard(
-            plans: plans.isNotEmpty ? plans : [widget.plan],
-            selectedPlan: effectivePlan,
-            onPlanChanged: (p) {
-              _selectedPlan.value = p;
-              _step.value = 0;
-              _investmentCtrl.text = '';
-              _fixedLotCtrl.text = '';
-              _tpCtrl.text = '';
-              _slCtrl.text = '';
-              _multiplierCtrl.text = '';
-              _customMultiplier.value = false;
-              _ensureSubscribeController(p.planId);
-            },
-          ),
-          if (effectivePlan != null) ...[
-            SizedBox(height: 12.h),
-            _PlanInfoCard(plan: effectivePlan),
-            SizedBox(height: 12.h),
-            _AccountPickerCard(
-              controller: controller,
-              minCapital: effectivePlan.minimumCapital,
-            ),
-          ] else ...[
-            SizedBox(height: 12.h),
-            _Card(
-              child: Text(
-                'Select a plan to view eligible accounts.',
-                style: AppTextStyles.cardSubtitle,
-              ),
-            ),
-          ],
-          SizedBox(height: 90.h),
-        ] else ...[
-          if (effectivePlan != null && sub != null) ...[
-            if (isEditMode && widget.editSubscription != null) ...[
-              _EditSubscriptionSummaryCard(
-                item: widget.editSubscription!,
-                plan: effectivePlan,
-              ),
-              SizedBox(height: 12.h),
-            ] else ...[
-              _InvestmentCard(
-                investmentCtrl: _investmentCtrl,
-                minCapital: effectivePlan.minimumCapital,
-                onQuickFill: (value) => _investmentCtrl.text = value,
-              ),
-              SizedBox(height: 12.h),
-            ],
-            _CopySettingsCard(
-              controller: sub,
-              fixedLotCtrl: _fixedLotCtrl,
-              multiplierOnlyCtrl: _multiplierOnlyCtrl,
-              mirrorRatioCtrl: _mirrorRatioCtrl,
-              riskPercentCtrl: _riskPercentCtrl,
-              riskSlPipsCtrl: _riskSlPipsCtrl,
-              dynamicDdCtrl: _dynamicDdCtrl,
-              dynamicReduceCtrl: _dynamicReduceCtrl,
-              fixedRatioProfitStepCtrl: _fixedRatioProfitStepCtrl,
-              fixedRatioLotStepCtrl: _fixedRatioLotStepCtrl,
-            ),
-            SizedBox(height: 12.h),
-            _AdvancedSettingsCard(
-              controller: sub,
-              tpCtrl: _tpCtrl,
-              slCtrl: _slCtrl,
-              customMultiplier: _customMultiplier,
-              multiplierCtrl: _multiplierCtrl,
-              onMultiplierPreset: (v) {
-                sub.lotMultiplier.value = v;
-                _multiplierCtrl.text = '';
-                _customMultiplier.value = false;
-              },
-              onMultiplierCustom: () {
-                _customMultiplier.value = true;
-                if (sub.lotMultiplier.value > 0) {
-                  _multiplierCtrl.text = sub.lotMultiplier.value.toString();
-                }
-              },
-              onTpPreset: (v) {
-                _tpCtrl.text = v.toString();
-                final sub = controller;
-                if (sub == null) return;
-                if (sub.slTpMode.value == 'pip') {
-                  sub.takeProfitPips.value = v.toDouble();
-                } else {
-                  sub.takeProfitDollar.value = v.toDouble();
-                }
-              },
-              onSlPreset: (v) {
-                _slCtrl.text = v.toString();
-                final sub = controller;
-                if (sub == null) return;
-                if (sub.slTpMode.value == 'pip') {
-                  sub.stopLossPips.value = v.toDouble();
-                } else {
-                  sub.stopLossDollar.value = v.toDouble();
-                }
-              },
-            ),
-            SizedBox(height: 12.h),
-            Obx(() {
-              final err = sub.errorMessage.value;
-              if (err.isEmpty) return const SizedBox.shrink();
-              return Padding(
-                padding: EdgeInsets.only(bottom: 10.h),
-                child: Text(err, style: AppTextStyles.error),
-              );
-            }),
-            SizedBox(height: 90.h),
-          ] else ...[
-            _Card(
-              child: Text(
-                'Please go back and select a plan/account.',
-                style: AppTextStyles.cardSubtitle,
-              ),
-            ),
-            SizedBox(height: 90.h),
-          ],
-        ],
-      ],
+                    if (effectiveStep == 0) ...[
+                      _PlanPickerCard(
+                        plans: plans.isNotEmpty ? plans : [widget.plan],
+                        selectedPlan: effectivePlan,
+                        onPlanChanged: (p) {
+                          _selectedPlan.value = p;
+                          _step.value = 0;
+                          _investmentCtrl.text = '';
+                          _fixedLotCtrl.text = '';
+                          _tpCtrl.text = '';
+                          _slCtrl.text = '';
+                          _multiplierCtrl.text = '';
+                          _customMultiplier.value = false;
+                          _ensureSubscribeController(p.planId);
+                        },
+                      ),
+                      if (effectivePlan != null) ...[
+                        SizedBox(height: 12.h),
+                        _PlanInfoCard(plan: effectivePlan),
+                        SizedBox(height: 12.h),
+                        _AccountPickerCard(
+                          controller: controller,
+                          minCapital: effectivePlan.minimumCapital,
+                        ),
+                      ] else ...[
+                        SizedBox(height: 12.h),
+                        _Card(
+                          child: Text(
+                            'Select a plan to view eligible accounts.',
+                            style: AppTextStyles.cardSubtitle,
+                          ),
+                        ),
+                      ],
+                      SizedBox(height: 90.h),
+                    ] else ...[
+                      if (effectivePlan != null && sub != null) ...[
+                        if (isEditMode && widget.editSubscription != null) ...[
+                          _EditSubscriptionSummaryCard(item: widget.editSubscription!, plan: effectivePlan),
+                          SizedBox(height: 12.h),
+                        ] else ...[
+                          _InvestmentCard(
+                            investmentCtrl: _investmentCtrl,
+                            minCapital: effectivePlan.minimumCapital,
+                            onQuickFill: (value) => _investmentCtrl.text = value,
+                          ),
+                          SizedBox(height: 12.h),
+                        ],
+                        _CopySettingsCard(
+                          controller: sub,
+                          fixedLotCtrl: _fixedLotCtrl,
+                          multiplierOnlyCtrl: _multiplierOnlyCtrl,
+                          mirrorRatioCtrl: _mirrorRatioCtrl,
+                          riskPercentCtrl: _riskPercentCtrl,
+                          riskSlPipsCtrl: _riskSlPipsCtrl,
+                          dynamicDdCtrl: _dynamicDdCtrl,
+                          dynamicReduceCtrl: _dynamicReduceCtrl,
+                          fixedRatioProfitStepCtrl: _fixedRatioProfitStepCtrl,
+                          fixedRatioLotStepCtrl: _fixedRatioLotStepCtrl,
+                        ),
+                        SizedBox(height: 12.h),
+                        _AdvancedSettingsCard(
+                          controller: sub,
+                          tpCtrl: _tpCtrl,
+                          slCtrl: _slCtrl,
+                          customMultiplier: _customMultiplier,
+                          multiplierCtrl: _multiplierCtrl,
+                          onMultiplierPreset: (v) {
+                            sub.lotMultiplier.value = v;
+                            _multiplierCtrl.text = '';
+                            _customMultiplier.value = false;
+                          },
+                          onMultiplierCustom: () {
+                            _customMultiplier.value = true;
+                            if (sub.lotMultiplier.value > 0) {
+                              _multiplierCtrl.text = sub.lotMultiplier.value.toString();
+                            }
+                          },
+                          onTpPreset: (v) {
+                            _tpCtrl.text = v.toString();
+                            final sub = controller;
+                            if (sub == null) return;
+                            if (sub.slTpMode.value == 'pip') {
+                              sub.takeProfitPips.value = v.toDouble();
+                            } else {
+                              sub.takeProfitDollar.value = v.toDouble();
+                            }
+                          },
+                          onSlPreset: (v) {
+                            _slCtrl.text = v.toString();
+                            final sub = controller;
+                            if (sub == null) return;
+                            if (sub.slTpMode.value == 'pip') {
+                              sub.stopLossPips.value = v.toDouble();
+                            } else {
+                              sub.stopLossDollar.value = v.toDouble();
+                            }
+                          },
+                        ),
+                        SizedBox(height: 12.h),
+                        Obx(() {
+                          final err = sub.errorMessage.value;
+                          if (err.isEmpty) return const SizedBox.shrink();
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 10.h),
+                            child: Text(err, style: AppTextStyles.error),
+                          );
+                        }),
+                        SizedBox(height: 90.h),
+                      ] else ...[
+                        _Card(child: Text('Please go back and select a plan/account.', style: AppTextStyles.cardSubtitle)),
+                        SizedBox(height: 90.h),
+                      ],
+                    ],
+                  ],
     );
   }
 
@@ -571,8 +525,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         return;
       }
       if (plan.minimumCapital > 0 && acc.equity < plan.minimumCapital) {
-        sub.errorMessage.value =
-            'Account equity is below minimum required (${plan.minimumCapital}).';
+        sub.errorMessage.value = 'Account equity is below minimum required (${plan.minimumCapital}).';
         _showTopError(sub.errorMessage.value);
         _step.value = 0;
         return;
@@ -590,8 +543,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         return;
       }
       if (acc.equity > 0 && investment > acc.equity) {
-        sub.errorMessage.value =
-            'Investment cannot exceed account equity (${acc.equity})';
+        sub.errorMessage.value = 'Investment cannot exceed account equity (${acc.equity})';
         _showTopError(sub.errorMessage.value);
         return;
       }
@@ -678,23 +630,13 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
       final res = await sub.updateSubscription(subscriptionId: item.id);
       if (res.success) {
         if (Get.isRegistered<CopyTradingHubController>()) {
-          await Get.find<CopyTradingHubController>().refreshAll(
-            showLoading: false,
-          );
+          await Get.find<CopyTradingHubController>().refreshAll(showLoading: false);
         }
-        if (Get.isRegistered<CopyTradingCopierSubscriptionsController>(
-          tag: 'copytrading:my_copies',
-        )) {
-          await Get.find<CopyTradingCopierSubscriptionsController>(
-            tag: 'copytrading:my_copies',
-          ).load(showLoading: false);
+        if (Get.isRegistered<CopyTradingCopierSubscriptionsController>(tag: 'copytrading:my_copies')) {
+          await Get.find<CopyTradingCopierSubscriptionsController>(tag: 'copytrading:my_copies').load(showLoading: false);
         }
-        if (Get.isRegistered<CopyTradingCopierSubscriptionsController>(
-          tag: 'copytrading:my_investments',
-        )) {
-          await Get.find<CopyTradingCopierSubscriptionsController>(
-            tag: 'copytrading:my_investments',
-          ).load(showLoading: false);
+        if (Get.isRegistered<CopyTradingCopierSubscriptionsController>(tag: 'copytrading:my_investments')) {
+          await Get.find<CopyTradingCopierSubscriptionsController>(tag: 'copytrading:my_investments').load(showLoading: false);
         }
         if (mounted) {
           Get.back();
@@ -714,9 +656,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
     final res = await sub.subscribe(investmentAmount: investment);
     if (res.success) {
       if (Get.isRegistered<CopyTradingHubController>()) {
-        await Get.find<CopyTradingHubController>().refreshAll(
-          showLoading: false,
-        );
+        await Get.find<CopyTradingHubController>().refreshAll(showLoading: false);
       }
       if (mounted) {
         Get.back();
@@ -743,23 +683,13 @@ class _EditSubscriptionSummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Plan & account',
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-            ),
-          ),
+          Text('Plan & account', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           SizedBox(height: 10.h),
           Text(plan.planName, style: AppTextStyles.black14600),
           SizedBox(height: 6.h),
           Text('Account: ${item.accountNumber}', style: AppTextStyles.caption),
           SizedBox(height: 4.h),
-          Text(
-            'Capital: \$${item.capitalAmount.toStringAsFixed(2)}',
-            style: AppTextStyles.caption,
-          ),
+          Text('Capital: \$${item.capitalAmount.toStringAsFixed(2)}', style: AppTextStyles.caption),
         ],
       ),
     );
@@ -770,11 +700,7 @@ class _PlanPickerCard extends StatelessWidget {
   final List<CopyTradingPlan> plans;
   final CopyTradingPlan? selectedPlan;
   final ValueChanged<CopyTradingPlan> onPlanChanged;
-  const _PlanPickerCard({
-    required this.plans,
-    required this.selectedPlan,
-    required this.onPlanChanged,
-  });
+  const _PlanPickerCard({required this.plans, required this.selectedPlan, required this.onPlanChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -782,16 +708,9 @@ class _PlanPickerCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Select a Plan *',
-            style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600),
-          ),
+          Text('Select a Plan *', style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600)),
           SizedBox(height: 10.h),
-          _PlanDropdown(
-            plans: plans,
-            selected: selectedPlan,
-            onChanged: onPlanChanged,
-          ),
+          _PlanDropdown(plans: plans, selected: selectedPlan, onChanged: onPlanChanged),
         ],
       ),
     );
@@ -801,10 +720,7 @@ class _PlanPickerCard extends StatelessWidget {
 class _AccountPickerCard extends StatelessWidget {
   final CopyTradingSubscribeController? controller;
   final num minCapital;
-  const _AccountPickerCard({
-    required this.controller,
-    required this.minCapital,
-  });
+  const _AccountPickerCard({required this.controller, required this.minCapital});
 
   @override
   Widget build(BuildContext context) {
@@ -812,10 +728,7 @@ class _AccountPickerCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Select Your Trading Account *',
-            style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600),
-          ),
+          Text('Select Your Trading Account *', style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600)),
           SizedBox(height: 10.h),
           if (controller == null)
             Text('Select a plan first.', style: AppTextStyles.cardSubtitle)
@@ -823,40 +736,31 @@ class _AccountPickerCard extends StatelessWidget {
             Obx(() {
               final c = controller!;
               if (c.isLoading.value && c.eligibleAccounts.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(12),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-              if (c.errorMessage.value.isNotEmpty &&
-                  c.eligibleAccounts.isEmpty) {
-                return _InlineError(
-                  message: c.errorMessage.value,
-                  onRetry: () => c.loadEligibleAccounts(showLoading: true),
-                );
-              }
-              return Column(
-                children: [
-                  _AccountListPicker(
-                    accounts: c.eligibleAccounts,
-                    selected: c.selectedAccount.value,
-                    minCapital: minCapital,
-                    onChanged: (a) => c.selectedAccount.value = a,
-                  ),
-                  if (c.eligibleAccounts.isEmpty &&
-                      c.errorMessage.value.isEmpty)
-                    Padding(
-                      padding: EdgeInsets.only(top: 6.h),
-                      child: Text(
-                        'No eligible accounts found.',
-                        style: AppTextStyles.cardSubtitle,
-                      ),
-                    ),
-                ],
+              return const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()));
+            }
+            if (c.errorMessage.value.isNotEmpty && c.eligibleAccounts.isEmpty) {
+              return _InlineError(
+                message: c.errorMessage.value,
+                onRetry: () => c.loadEligibleAccounts(showLoading: true),
               );
-            }),
+            }
+            return Column(
+              children: [
+                _AccountListPicker(
+                  accounts: c.eligibleAccounts,
+                  selected: c.selectedAccount.value,
+                  minCapital: minCapital,
+                  onChanged: (a) => c.selectedAccount.value = a,
+                ),
+                if (c.eligibleAccounts.isEmpty && c.errorMessage.value.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: 6.h),
+                    child: Text('No eligible accounts found.', style: AppTextStyles.cardSubtitle),
+                  ),
+              ],
+            );
+          }),
+         
         ],
       ),
     );
@@ -894,14 +798,7 @@ class _CopySettingsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Copy settings',
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-            ),
-          ),
+          Text('Copy settings', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           SizedBox(height: 10.h),
           Obx(() {
             final method = controller.sizingMethod.value;
@@ -911,49 +808,19 @@ class _CopySettingsCard extends StatelessWidget {
                 _SelectTile(
                   value: method,
                   items: const [
-                    _SelectItem(
-                      value: 'fixed',
-                      label: 'Fixed Lot — e.g. always trade 0.10 lot',
-                    ),
-                    _SelectItem(
-                      value: 'proportional_equity',
-                      label:
-                          'Equity-Based — scales by your equity vs master\'s',
-                    ),
-                    _SelectItem(
-                      value: 'proportional_balance',
-                      label:
-                          'Balance-Based — scales by your balance vs master\'s',
-                    ),
-                    _SelectItem(
-                      value: 'multiplier_only',
-                      label: 'Multiplier — master lots × your multiplier',
-                    ),
-                    _SelectItem(
-                      value: 'mirror_ratio',
-                      label: 'Mirror Ratio — master lots × fixed ratio',
-                    ),
-                    _SelectItem(
-                      value: 'percentage_risk',
-                      label: 'Percentage Risk — risk % of balance per trade',
-                    ),
-                    _SelectItem(
-                      value: 'reverse',
-                      label: 'Reverse — master buys, you sell (vice versa)',
-                    ),
-                    _SelectItem(
-                      value: 'dynamic_lot',
-                      label: 'Dynamic Lot — reduces lots on drawdown',
-                    ),
-                    _SelectItem(
-                      value: 'fixed_ratio',
-                      label: 'Fixed Ratio — adds lots per profit milestone',
-                    ),
+                    _SelectItem(value: 'fixed', label: 'Fixed Lot — e.g. always trade 0.10 lot'),
+                    _SelectItem(value: 'proportional_equity', label: 'Equity-Based — scales by your equity vs master\'s'),
+                    _SelectItem(value: 'proportional_balance', label: 'Balance-Based — scales by your balance vs master\'s'),
+                    _SelectItem(value: 'multiplier_only', label: 'Multiplier — master lots × your multiplier'),
+                    _SelectItem(value: 'mirror_ratio', label: 'Mirror Ratio — master lots × fixed ratio'),
+                    _SelectItem(value: 'percentage_risk', label: 'Percentage Risk — risk % of balance per trade'),
+                    _SelectItem(value: 'reverse', label: 'Reverse — master buys, you sell (vice versa)'),
+                    _SelectItem(value: 'dynamic_lot', label: 'Dynamic Lot — reduces lots on drawdown'),
+                    _SelectItem(value: 'fixed_ratio', label: 'Fixed Ratio — adds lots per profit milestone'),
                   ],
                   onChanged: (v) {
                     controller.sizingMethod.value = v;
-                    controller.copyingMethod.value =
-                        v == 'fixed' ? 'fixed' : 'proportional';
+                    controller.copyingMethod.value = v == 'fixed' ? 'fixed' : 'proportional';
                   },
                 ),
                 SizedBox(height: 8.h),
@@ -963,13 +830,11 @@ class _CopySettingsCard extends StatelessWidget {
                   LabeledAppTextField(
                     label: 'Fixed Lot Size *',
                     controller: fixedLotCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     hintText: 'e.g. 0.10',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      SingleDecimalTextFormatter(),
+                      const SingleDecimalTextFormatter(),
                     ],
                   ),
                 ],
@@ -982,7 +847,7 @@ class _CopySettingsCard extends StatelessWidget {
                 //     hintText: 'e.g. 2',
                 //     inputFormatters: [
                 //       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                //       SingleDecimalTextFormatter(),
+                //       const SingleDecimalTextFormatter(),
                 //     ],
                 //   ),
                 // ],
@@ -991,13 +856,11 @@ class _CopySettingsCard extends StatelessWidget {
                   LabeledAppTextField(
                     label: 'Ratio *',
                     controller: mirrorRatioCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     hintText: 'e.g. 0.5',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      SingleDecimalTextFormatter(),
+                      const SingleDecimalTextFormatter(),
                     ],
                   ),
                 ],
@@ -1006,13 +869,11 @@ class _CopySettingsCard extends StatelessWidget {
                   LabeledAppTextField(
                     label: 'Risk % per trade *',
                     controller: riskPercentCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     hintText: 'e.g. 2',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      SingleDecimalTextFormatter(),
+                      const SingleDecimalTextFormatter(),
                     ],
                   ),
                   SizedBox(height: 12.h),
@@ -1027,8 +888,7 @@ class _CopySettingsCard extends StatelessWidget {
                         child: Obx(() {
                           return Checkbox(
                             value: controller.isReverse.value,
-                            onChanged:
-                                (v) => controller.isReverse.value = v ?? true,
+                            onChanged: (v) => controller.isReverse.value = v ?? true,
                           );
                         }),
                       ),
@@ -1040,32 +900,29 @@ class _CopySettingsCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  
                 ],
                 if (method == 'dynamic_lot') ...[
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
                     label: 'Drawdown threshold (%) *',
                     controller: dynamicDdCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     hintText: 'e.g. 20',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      SingleDecimalTextFormatter(),
+                      const SingleDecimalTextFormatter(),
                     ],
                   ),
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
                     label: 'Reduction ratio (0–1) *',
                     controller: dynamicReduceCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     hintText: 'e.g. 0.5',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      SingleDecimalTextFormatter(),
+                      const SingleDecimalTextFormatter(),
                     ],
                   ),
                 ],
@@ -1074,26 +931,22 @@ class _CopySettingsCard extends StatelessWidget {
                   LabeledAppTextField(
                     label: 'Profit milestone (USD) *',
                     controller: fixedRatioProfitStepCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     hintText: 'e.g. 1000.00',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      SingleDecimalTextFormatter(),
+                      const SingleDecimalTextFormatter(),
                     ],
                   ),
                   SizedBox(height: 12.h),
                   LabeledAppTextField(
                     label: 'Lot increase per milestone *',
                     controller: fixedRatioLotStepCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     hintText: 'e.g. 0.01',
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      SingleDecimalTextFormatter(),
+                      const SingleDecimalTextFormatter(),
                     ],
                   ),
                 ],
@@ -1115,39 +968,31 @@ class _MethodHelpText extends StatelessWidget {
     String text;
     switch (method) {
       case 'fixed':
-        text =
-            'Example: You set 0.10 lot. Master opens 1.00 lot → your order is placed at 0.10 lot (always same fixed size).';
+        text = 'Example: You set 0.10 lot. Master opens 1.00 lot → your order is placed at 0.10 lot (always same fixed size).';
         break;
       case 'proportional_equity':
-        text =
-            'Example: Your equity \$5,000, master equity \$50,000 (ratio 10%). Master opens 1.00 lot → your order is placed at 0.10 lot.';
+        text = 'Example: Your equity \$5,000, master equity \$50,000 (ratio 10%). Master opens 1.00 lot → your order is placed at 0.10 lot.';
         break;
       case 'proportional_balance':
-        text =
-            'Example: Your balance \$5,000, master balance \$50,000 (ratio 10%). Master opens 1.00 lot → your order is placed at 0.10 lot.';
+        text = 'Example: Your balance \$5,000, master balance \$50,000 (ratio 10%). Master opens 1.00 lot → your order is placed at 0.10 lot.';
         break;
       case 'multiplier_only':
-        text =
-            'Example: Multiplier set to 2×. Master opens 0.50 lot → your order is placed at 1.00 lot (0.50 × 2 = 1.00).';
+        text = 'Example: Multiplier set to 2×. Master opens 0.50 lot → your order is placed at 1.00 lot (0.50 × 2 = 1.00).';
         break;
       case 'mirror_ratio':
-        text =
-            'Example: Ratio set to 0.5. Master opens 1.00 lot → your order is placed at 0.50 lot (1.00 × 0.5 = 0.50).';
+        text = 'Example: Ratio set to 0.5. Master opens 1.00 lot → your order is placed at 0.50 lot (1.00 × 0.5 = 0.50).';
         break;
       case 'percentage_risk':
-        text =
-            'Example: Risk 2% of your \$10,000 balance = \$200 at risk. With 50‑pip SL → lot is auto-calculated.';
+        text = 'Example: Risk 2% of your \$10,000 balance = \$200 at risk. With 50‑pip SL → lot is auto-calculated.';
         break;
       case 'reverse':
         text = 'Lots follow the selected sizing method; only direction flips.';
         break;
       case 'dynamic_lot':
-        text =
-            'Example: Equity-based → your order is placed at 0.10 lot. If drawdown exceeds your threshold, future orders reduce (e.g. to 0.05 lot).';
+        text = 'Example: Equity-based → your order is placed at 0.10 lot. If drawdown exceeds your threshold, future orders reduce (e.g. to 0.05 lot).';
         break;
       case 'fixed_ratio':
-        text =
-            'Example: Equity-based → your order is placed at 0.10 lot. For every \$1,000 profit earned, future orders increase by 0.01 lot.';
+        text = 'Example: Equity-based → your order is placed at 0.10 lot. For every \$1,000 profit earned, future orders increase by 0.01 lot.';
         break;
       default:
         text = '';
@@ -1192,14 +1037,14 @@ class _AdvancedSettingsCard extends StatelessWidget {
           BoxShadow(
             color: AppColors.border.withValues(alpha: 0.10),
             blurRadius: 16,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Theme(
         data: baseTheme.copyWith(
           dividerColor: Colors.transparent,
-          listTileTheme: ListTileThemeData(
+          listTileTheme: const ListTileThemeData(
             dense: true,
             visualDensity: VisualDensity.compact,
             minVerticalPadding: 0,
@@ -1218,14 +1063,12 @@ class _AdvancedSettingsCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.tradeBackgroundCenterColor.withOpacity(0.22),
                 borderRadius: BorderRadius.circular(14.r),
-                border: Border.all(
-                  color: AppColors.border.withValues(alpha: 0.12),
-                ),
+                border: Border.all(color: AppColors.border.withValues(alpha: 0.12)),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.border.withValues(alpha: 0.05),
                     blurRadius: 14,
-                    offset: Offset(0, 6),
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
@@ -1233,24 +1076,17 @@ class _AdvancedSettingsCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Obx(() {
-                    final proportional =
-                        controller.copyingMethod.value == 'proportional';
+                    final proportional = controller.copyingMethod.value == 'proportional';
                     if (!proportional) return const SizedBox.shrink();
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Lot Multiplier',
-                          style: AppTextStyles.caption.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textGrey,
-                          ),
+                          style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600, color: AppColors.textGrey),
                         ),
                         SizedBox(height: 8.h),
-                        Text(
-                          'Multiply master lot size',
-                          style: AppTextStyles.black14500,
-                        ),
+                        Text('Multiply master lot size', style: AppTextStyles.black14500),
                         SizedBox(height: 10.h),
                         Wrap(
                           spacing: 8.w,
@@ -1258,37 +1094,27 @@ class _AdvancedSettingsCard extends StatelessWidget {
                           children: [
                             _SmallChoiceChip(
                               label: '1x',
-                              selected:
-                                  !customMultiplier.value &&
-                                  controller.lotMultiplier.value == 1,
+                              selected: !customMultiplier.value && controller.lotMultiplier.value == 1,
                               onTap: () => onMultiplierPreset(1),
                             ),
                             _SmallChoiceChip(
                               label: '2x',
-                              selected:
-                                  !customMultiplier.value &&
-                                  controller.lotMultiplier.value == 2,
+                              selected: !customMultiplier.value && controller.lotMultiplier.value == 2,
                               onTap: () => onMultiplierPreset(2),
                             ),
                             _SmallChoiceChip(
                               label: '3x',
-                              selected:
-                                  !customMultiplier.value &&
-                                  controller.lotMultiplier.value == 3,
+                              selected: !customMultiplier.value && controller.lotMultiplier.value == 3,
                               onTap: () => onMultiplierPreset(3),
                             ),
                             _SmallChoiceChip(
                               label: '4x',
-                              selected:
-                                  !customMultiplier.value &&
-                                  controller.lotMultiplier.value == 4,
+                              selected: !customMultiplier.value && controller.lotMultiplier.value == 4,
                               onTap: () => onMultiplierPreset(4),
                             ),
                             _SmallChoiceChip(
                               label: '5x',
-                              selected:
-                                  !customMultiplier.value &&
-                                  controller.lotMultiplier.value == 5,
+                              selected: !customMultiplier.value && controller.lotMultiplier.value == 5,
                               onTap: () => onMultiplierPreset(5),
                             ),
                             _SmallChoiceChip(
@@ -1303,15 +1129,11 @@ class _AdvancedSettingsCard extends StatelessWidget {
                           LabeledAppTextField(
                             label: '',
                             controller: multiplierCtrl,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             hintText: 'e.g. 2',
                             inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'[0-9.]'),
-                              ),
-                              SingleDecimalTextFormatter(),
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                              const SingleDecimalTextFormatter(),
                             ],
                           ),
                         ],
@@ -1321,24 +1143,15 @@ class _AdvancedSettingsCard extends StatelessWidget {
                           style: AppTextStyles.caption,
                         ),
                         SizedBox(height: 14.h),
-                        Divider(
-                          color: AppColors.border.withValues(alpha: 0.16),
-                          height: 1,
-                        ),
+                        Divider(color: AppColors.border.withValues(alpha: 0.16), height: 1),
                         SizedBox(height: 14.h),
                       ],
                     );
                   }),
                   Row(
                     children: [
-                      Text(
-                        'PER-TRADE TP / SL',
-                        style: AppTextStyles.caption.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Spacer(),
+                      Text('PER-TRADE TP / SL', style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      const Spacer(),
                       Obx(() {
                         return Row(
                           children: [
@@ -1347,16 +1160,10 @@ class _AdvancedSettingsCard extends StatelessWidget {
                               height: 35.h,
                               child: Checkbox(
                                 value: controller.overridesSlTp.value,
-                                onChanged:
-                                    (v) =>
-                                        controller.overridesSlTp.value =
-                                            v ?? false,
+                                onChanged: (v) => controller.overridesSlTp.value = v ?? false,
                               ),
                             ),
-                            Text(
-                              'Override master',
-                              style: AppTextStyles.textButton,
-                            ),
+                            Text('Override master', style: AppTextStyles.textButton),
                           ],
                         );
                       }),
@@ -1367,77 +1174,59 @@ class _AdvancedSettingsCard extends StatelessWidget {
                     'Set your own TP / SL in pips or a fixed dollar amount. Pip mode: 1 pip = 0.0001 for EURUSD · 0.01 for JPY pairs · \$1.00 for XAUUSD / metals. Dollar mode: trade closes when profit or loss reaches the dollar target you set.',
                     style: AppTextStyles.caption,
                   ),
-
+                  
                   SizedBox(height: 10.h),
                   Obx(() {
                     final enabled = controller.overridesSlTp.value;
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (!enabled) ...[
+                        if(!enabled)...[
                           SizedBox(height: 10.h),
-                          Text(
-                            'No TP/SL configured by master — trades will open without automatic TP/SL.',
-                            style: AppTextStyles.caption,
-                          ),
-                          SizedBox(height: 10.h),
-                          Text(
-                            'Using master\'s TP/SL. Enable "Override master" to set your own levels.',
-                            style: AppTextStyles.caption,
-                          ),
+                  Text(
+                    'No TP/SL configured by master — trades will open without automatic TP/SL.',
+                    style: AppTextStyles.caption,
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    'Using master\'s TP/SL. Enable "Override master" to set your own levels.',
+                    style: AppTextStyles.caption,
+                  ),
                         ],
-
+                       
                         if (enabled) ...[
-                          Row(
-                            children: [
-                              _ModeChip(
-                                label: 'Pip',
-                                selected: controller.slTpMode.value == 'pip',
-                                onTap:
-                                    enabled
-                                        ? () {
-                                          controller.slTpMode.value = 'pip';
-                                          final tp = num.tryParse(
-                                            tpCtrl.text.trim(),
-                                          );
-                                          final sl = num.tryParse(
-                                            slCtrl.text.trim(),
-                                          );
-                                          if (tp != null)
-                                            controller.takeProfitPips.value =
-                                                tp.toDouble();
-                                          if (sl != null)
-                                            controller.stopLossPips.value =
-                                                sl.toDouble();
-                                        }
-                                        : null,
-                              ),
-                              SizedBox(width: 8.w),
-                              _ModeChip(
-                                label: r'$ Dollar',
-                                selected: controller.slTpMode.value == 'dollar',
-                                onTap:
-                                    enabled
-                                        ? () {
-                                          controller.slTpMode.value = 'dollar';
-                                          final tp = num.tryParse(
-                                            tpCtrl.text.trim(),
-                                          );
-                                          final sl = num.tryParse(
-                                            slCtrl.text.trim(),
-                                          );
-                                          if (tp != null)
-                                            controller.takeProfitDollar.value =
-                                                tp.toDouble();
-                                          if (sl != null)
-                                            controller.stopLossDollar.value =
-                                                sl.toDouble();
-                                        }
-                                        : null,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 12.h),
+                           Row(
+                          children: [
+                            _ModeChip(
+                              label: 'Pip',
+                              selected: controller.slTpMode.value == 'pip',
+                              onTap: enabled
+                                  ? () {
+                                      controller.slTpMode.value = 'pip';
+                                      final tp = num.tryParse(tpCtrl.text.trim());
+                                      final sl = num.tryParse(slCtrl.text.trim());
+                                      if (tp != null) controller.takeProfitPips.value = tp.toDouble();
+                                      if (sl != null) controller.stopLossPips.value = sl.toDouble();
+                                    }
+                                  : null,
+                            ),
+                            SizedBox(width: 8.w),
+                            _ModeChip(
+                              label: r'$ Dollar',
+                              selected: controller.slTpMode.value == 'dollar',
+                              onTap: enabled
+                                  ? () {
+                                      controller.slTpMode.value = 'dollar';
+                                      final tp = num.tryParse(tpCtrl.text.trim());
+                                      final sl = num.tryParse(slCtrl.text.trim());
+                                      if (tp != null) controller.takeProfitDollar.value = tp.toDouble();
+                                      if (sl != null) controller.stopLossDollar.value = sl.toDouble();
+                                    }
+                                  : null,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
 
                           Row(
                             children: [
@@ -1445,33 +1234,15 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                 child: Wrap(
                                   spacing: 6.w,
                                   runSpacing: 6.h,
-                                  children:
-                                      (controller.slTpMode.value == 'pip'
-                                              ? const [5, 10, 15]
-                                              : const [5, 10, 20])
-                                          .map(
-                                            (v) => _MiniPresetChip(
-                                              selected:
-                                                  controller.slTpMode.value ==
-                                                          'pip'
-                                                      ? v ==
-                                                          controller
-                                                              .takeProfitPips
-                                                              .value
-                                                      : v ==
-                                                          controller
-                                                              .takeProfitDollar
-                                                              .value,
-                                              label:
-                                                  controller.slTpMode.value ==
-                                                          'pip'
-                                                      ? '$v'
-                                                      : r'$'
-                                                          '$v',
-                                              onTap: () => onTpPreset(v),
-                                            ),
-                                          )
-                                          .toList(),
+                                  children: (controller.slTpMode.value == 'pip'
+                                          ? const [5, 10, 15]
+                                          : const [5, 10, 20])
+                                      .map((v) => _MiniPresetChip(
+                                            selected: controller.slTpMode.value == 'pip' ? v == controller.takeProfitPips.value : v == controller.takeProfitDollar.value,
+                                            label: controller.slTpMode.value == 'pip' ? '$v' : r'$' '$v',
+                                            onTap: () => onTpPreset(v),
+                                          ))
+                                      .toList(),
                                 ),
                               ),
                               SizedBox(width: 10.w),
@@ -1479,159 +1250,99 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                 child: Wrap(
                                   spacing: 6.w,
                                   runSpacing: 6.h,
-                                  children:
-                                      (controller.slTpMode.value == 'pip'
-                                              ? const [5, 10, 15]
-                                              : const [5, 10, 20])
-                                          .map(
-                                            (v) => _MiniPresetChip(
-                                              label:
-                                                  controller.slTpMode.value ==
-                                                          'pip'
-                                                      ? '$v'
-                                                      : r'$'
-                                                          '$v',
-                                              onTap: () => onSlPreset(v),
-                                              selected:
-                                                  controller.slTpMode.value ==
-                                                          'pip'
-                                                      ? v ==
-                                                          controller
-                                                              .stopLossPips
-                                                              .value
-                                                      : v ==
-                                                          controller
-                                                              .stopLossDollar
-                                                              .value,
-                                            ),
-                                          )
-                                          .toList(),
+                                  children: (controller.slTpMode.value == 'pip'
+                                          ? const [5, 10, 15]
+                                          : const [5, 10, 20])
+                                      .map((v) => _MiniPresetChip(
+                                            label: controller.slTpMode.value == 'pip' ? '$v' : r'$' '$v',
+                                            onTap: () => onSlPreset(v),
+                                            selected: controller.slTpMode.value == 'pip' ? v == controller.stopLossPips.value : v == controller.stopLossDollar.value,
+                                          ))
+                                      .toList(),
                                 ),
                               ),
                             ],
                           ),
                           SizedBox(height: 10.h),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      controller.slTpMode.value == 'pip'
-                                          ? 'Take Profit (pips)'
-                                          : 'Take Profit (\$)',
-                                      style: AppTextStyles.caption,
-                                    ),
-                                    SizedBox(height: 6.h),
-                                    LabeledAppTextField(
-                                      label: '',
-                                      controller: tpCtrl,
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                            decimal: true,
-                                          ),
-                                      hintText:
-                                          enabled
-                                              ? (controller.slTpMode.value ==
-                                                      'pip'
-                                                  ? 'e.g. 15.50'
-                                                  : 'e.g. 25.00')
-                                              : 'Disabled',
-                                      onChanged:
-                                          enabled
-                                              ? (s) {
-                                                final n = num.tryParse(
-                                                  s.trim(),
-                                                );
-                                                if (n == null) return;
-                                                if (controller.slTpMode.value ==
-                                                    'pip') {
-                                                  controller
-                                                      .takeProfitPips
-                                                      .value = n.toDouble();
-                                                } else {
-                                                  controller
-                                                      .takeProfitDollar
-                                                      .value = n.toDouble();
-                                                }
-                                              }
-                                              : null,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                          RegExp(r'[0-9.]'),
-                                        ),
-                                        // SingleDecimalTextFormatter(),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                           Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    controller.slTpMode.value == 'pip' ? 'Take Profit (pips)' : 'Take Profit (\$)',
+                                    style: AppTextStyles.caption,
+                                  ),
+                                  SizedBox(height: 6.h),
+                                  LabeledAppTextField(
+                                    label: '',
+                                    controller: tpCtrl,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    hintText: enabled ? (controller.slTpMode.value == 'pip' ? 'e.g. 15.50' : 'e.g. 25.00') : 'Disabled',
+                                    onChanged: enabled
+                                        ? (s) {
+                                            final n = num.tryParse(s.trim());
+                                            if (n == null) return;
+                                            if (controller.slTpMode.value == 'pip') {
+                                              controller.takeProfitPips.value = n.toDouble();
+                                            } else {
+                                              controller.takeProfitDollar.value = n.toDouble();
+                                            }
+                                          }
+                                        : null,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                                      // const SingleDecimalTextFormatter(),
+                                    ],
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 10.w),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      controller.slTpMode.value == 'pip'
-                                          ? 'Stop Loss (pips)'
-                                          : 'Stop Loss (\$)',
-                                      style: AppTextStyles.caption,
-                                    ),
-                                    SizedBox(height: 6.h),
-                                    LabeledAppTextField(
-                                      label: '',
-                                      controller: slCtrl,
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                            decimal: true,
-                                          ),
-                                      hintText:
-                                          enabled
-                                              ? (controller.slTpMode.value ==
-                                                      'pip'
-                                                  ? 'e.g. 5.50'
-                                                  : 'e.g. 20.00')
-                                              : 'Disabled',
-                                      onChanged:
-                                          enabled
-                                              ? (s) {
-                                                final n = num.tryParse(
-                                                  s.trim(),
-                                                );
-                                                if (n == null) return;
-                                                if (controller.slTpMode.value ==
-                                                    'pip') {
-                                                  controller
-                                                      .stopLossPips
-                                                      .value = n.toDouble();
-                                                } else {
-                                                  controller
-                                                      .stopLossDollar
-                                                      .value = n.toDouble();
-                                                }
-                                              }
-                                              : null,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                          RegExp(r'[0-9.]'),
-                                        ),
-                                        SingleDecimalTextFormatter(),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                            ),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    controller.slTpMode.value == 'pip' ? 'Stop Loss (pips)' : 'Stop Loss (\$)',
+                                    style: AppTextStyles.caption,
+                                  ),
+                                  SizedBox(height: 6.h),
+                                  LabeledAppTextField(
+                                    label: '',
+                                    controller: slCtrl,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    hintText: enabled ? (controller.slTpMode.value == 'pip' ? 'e.g. 5.50' : 'e.g. 20.00') : 'Disabled',
+                                    onChanged: enabled
+                                        ? (s) {
+                                            final n = num.tryParse(s.trim());
+                                            if (n == null) return;
+                                            if (controller.slTpMode.value == 'pip') {
+                                              controller.stopLossPips.value = n.toDouble();
+                                            } else {
+                                              controller.stopLossDollar.value = n.toDouble();
+                                            }
+                                          }
+                                        : null,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                                      const SingleDecimalTextFormatter(),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-
-                          SizedBox(height: 10.h),
-                          Text(
-                            'Your own TP/SL will be used instead of master\'s. Master\'s SL/TP changes will not affect your trades.',
-                            style: AppTextStyles.caption,
-                          ),
-                        ],
-                      ],
+                            ),
+                          ],
+                        ),
+                      
+                        SizedBox(height: 10.h),
+                  Text(
+                    'Your own TP/SL will be used instead of master\'s. Master\'s SL/TP changes will not affect your trades.',
+                    style: AppTextStyles.caption,
+                  ),
+                  ],
+                       ],
                     );
                   }),
                 ],
@@ -1648,11 +1359,7 @@ class _SmallChoiceChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _SmallChoiceChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+  const _SmallChoiceChip({required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1664,12 +1371,7 @@ class _SmallChoiceChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.whiteColor,
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(
-            color:
-                selected
-                    ? AppColors.primary
-                    : AppColors.border.withValues(alpha: 0.18),
-          ),
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border.withValues(alpha: 0.18)),
         ),
         child: Text(
           label,
@@ -1688,11 +1390,7 @@ class _MiniPresetChip extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool selected;
-  const _MiniPresetChip({
-    required this.label,
-    required this.onTap,
-    required this.selected,
-  });
+  const _MiniPresetChip({required this.label, required this.onTap, required this.selected});
 
   @override
   Widget build(BuildContext context) {
@@ -1704,12 +1402,7 @@ class _MiniPresetChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.chipSurface,
           borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(
-            color:
-                selected
-                    ? AppColors.primary
-                    : AppColors.border.withValues(alpha: 0.18),
-          ),
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border.withValues(alpha: 0.18)),
         ),
         child: Text(
           label,
@@ -1728,11 +1421,7 @@ class _ModeChip extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback? onTap;
-  const _ModeChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+  const _ModeChip({required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1744,12 +1433,7 @@ class _ModeChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.chipSurface,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color:
-                selected
-                    ? AppColors.primary
-                    : AppColors.border.withValues(alpha: 0.18),
-          ),
+          border: Border.all(color: selected ? AppColors.primary : AppColors.border.withValues(alpha: 0.18)),
         ),
         child: Text(
           label,
@@ -1774,11 +1458,7 @@ class _SelectTile extends StatelessWidget {
   final String value;
   final List<_SelectItem> items;
   final ValueChanged<String> onChanged;
-  const _SelectTile({
-    required this.value,
-    required this.items,
-    required this.onChanged,
-  });
+  const _SelectTile({required this.value, required this.items, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -1793,22 +1473,17 @@ class _SelectTile extends StatelessWidget {
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          items:
-              items
-                  .map(
-                    (e) => DropdownMenuItem<String>(
-                      value: e.value,
-                      child: Text(
-                        e.label,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
+          items: items
+              .map(
+                (e) => DropdownMenuItem<String>(
+                  value: e.value,
+                  child: Text(
+                    e.label,
+                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  ),
+                ),
+              )
+              .toList(),
           onChanged: (v) {
             if (v != null) onChanged(v);
           },
@@ -1817,16 +1492,11 @@ class _SelectTile extends StatelessWidget {
     );
   }
 }
-
 class _InvestmentCard extends StatelessWidget {
   final TextEditingController investmentCtrl;
   final num minCapital;
   final ValueChanged<String> onQuickFill;
-  const _InvestmentCard({
-    required this.investmentCtrl,
-    required this.minCapital,
-    required this.onQuickFill,
-  });
+  const _InvestmentCard({required this.investmentCtrl, required this.minCapital, required this.onQuickFill});
 
   @override
   Widget build(BuildContext context) {
@@ -1838,13 +1508,10 @@ class _InvestmentCard extends StatelessWidget {
             label: 'Investment Amount (USD) *',
             controller: investmentCtrl,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            hintText:
-                minCapital > 0
-                    ? 'e.g. 100.05 (Min $minCapital)'
-                    : 'e.g. 100.05',
+            hintText: minCapital > 0 ? 'e.g. 100.05 (Min $minCapital)' : 'e.g. 100.05',
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-              SingleDecimalTextFormatter(),
+              const SingleDecimalTextFormatter(),
             ],
             prefixIcon: Padding(
               padding: EdgeInsets.all(0.w),
@@ -1852,11 +1519,7 @@ class _InvestmentCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 6.h),
-          if (minCapital > 0)
-            Text(
-              'Minimum investment: \$$minCapital',
-              style: AppTextStyles.caption,
-            ),
+          if (minCapital > 0) Text('Minimum investment: \$$minCapital', style: AppTextStyles.caption), 
         ],
       ),
     );
@@ -1880,7 +1543,7 @@ class _Card extends StatelessWidget {
           BoxShadow(
             color: AppColors.textPrimary.withValues(alpha: clamped),
             blurRadius: 16,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -1904,23 +1567,14 @@ class _ErrorState extends StatelessWidget {
           children: [
             Icon(Icons.error_outline, size: 40.r, color: AppColors.error),
             SizedBox(height: 10.h),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textGrey),
-            ),
+            Text(message, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textGrey)),
             SizedBox(height: 12.h),
             ElevatedButton(
               onPressed: onRetry,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: EdgeInsets.zero,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, padding: EdgeInsets.zero),
               child: SizedBox(
                 height: 44.h,
-                child: Center(
-                  child: Text('Retry', style: AppTextStyles.button),
-                ),
+                child: Center(child: Text('Retry', style: AppTextStyles.button)),
               ),
             ),
           ],
@@ -1948,47 +1602,24 @@ class _PlanInfoCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  plan.planName,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.cardTitle.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              Text(plan.planName, style: AppTextStyles.cardTitle.copyWith(fontWeight: FontWeight.w600)),
+              const Spacer(),
+              if (plan.commissionType.isNotEmpty)
+                _Pill(
+                  text: plan.commissionType.toUpperCase(),
+                  tone: _PillTone.primary,
                 ),
-              ),
-              if (plan.commissionType.isNotEmpty) ...[
-                SizedBox(width: 8.w),
-                Flexible(
-                  flex: 0,
-                  child: _Pill(
-                    text: plan.commissionType.toUpperCase(),
-                    tone: _PillTone.primary,
-                  ),
-                ),
-              ],
             ],
           ),
           SizedBox(height: 8.h),
-          Wrap(
-            spacing: 12.w,
-            runSpacing: 6.h,
+          Row(
             children: [
-              Text(
-                'Min: \$${plan.minimumCapital}',
-                style: AppTextStyles.caption,
-              ),
-              Text(
-                'Fee: ${plan.commissionLabel.isNotEmpty ? plan.commissionLabel : plan.commissionType}',
-                style: AppTextStyles.caption,
-              ),
-              Text(
-                '${plan.subscriptionFee > 0 ? '\$${plan.subscriptionFee}' : '\$0'} / ${plan.subscriptionPeriodDays} days',
-                style: AppTextStyles.caption,
-              ),
+              Text('Min: \$${plan.minimumCapital}', style: AppTextStyles.caption),
+              SizedBox(width: 12.w),
+              Text('Fee: ${plan.commissionLabel.isNotEmpty ? plan.commissionLabel : plan.commissionType}', style: AppTextStyles.caption),
+              SizedBox(width: 12.w),
+              Text('${plan.subscriptionFee > 0 ? '\$${plan.subscriptionFee}' : '\$0'} / ${plan.subscriptionPeriodDays} days', style: AppTextStyles.caption),
             ],
           ),
           SizedBox(height: 6.h),
@@ -2003,11 +1634,7 @@ class _PlanDropdown extends StatelessWidget {
   final List<CopyTradingPlan> plans;
   final CopyTradingPlan? selected;
   final ValueChanged<CopyTradingPlan> onChanged;
-  const _PlanDropdown({
-    required this.plans,
-    required this.selected,
-    required this.onChanged,
-  });
+  const _PlanDropdown({required this.plans, required this.selected, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -2022,20 +1649,17 @@ class _PlanDropdown extends StatelessWidget {
         child: DropdownButton<int?>(
           value: selected?.planId,
           isExpanded: true,
-          items:
-              plans
-                  .map(
-                    (p) => DropdownMenuItem<int>(
-                      value: p.planId,
-                      child: Text(
-                        '${p.planName.isNotEmpty ? p.planName : 'Plan ${p.planId}'} — Fee ${p.subscriptionFee > 0 ? '\$${p.subscriptionFee}' : p.commissionLabel} / ${p.subscriptionPeriodDays} days',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.black14500,
-                      ),
+          items: plans
+              .map((p) => DropdownMenuItem<int>(
+                    value: p.planId,
+                    child: Text(
+                      '${p.planName.isNotEmpty ? p.planName : 'Plan ${p.planId}'} — Fee ${p.subscriptionFee > 0 ? '\$${p.subscriptionFee}' : p.commissionLabel} / ${p.subscriptionPeriodDays} days',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.black14500,
                     ),
-                  )
-                  .toList(),
+                  ))
+              .toList(),
           onChanged: (v) {
             if (v == null) return;
             for (final p in plans) {
@@ -2063,8 +1687,7 @@ class _AccountListPicker extends StatelessWidget {
     required this.onChanged,
   });
 
-  bool _isBelowMin(EligibleCopyAccount a) =>
-      minCapital > 0 && a.equity < minCapital;
+  bool _isBelowMin(EligibleCopyAccount a) => minCapital > 0 && a.equity < minCapital;
 
   @override
   Widget build(BuildContext context) {
@@ -2082,14 +1705,10 @@ class _AccountListPicker extends StatelessWidget {
           ),
           child: ListView.separated(
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
             itemCount: accounts.length,
-            separatorBuilder:
-                (_, __) => Divider(
-                  height: 1,
-                  color: AppColors.border.withValues(alpha: 0.12),
-                ),
+            separatorBuilder: (_, __) => Divider(height: 1, color: AppColors.border.withValues(alpha: 0.12)),
             itemBuilder: (context, index) {
               final a = accounts[index];
               final belowMin = _isBelowMin(a);
@@ -2101,19 +1720,12 @@ class _AccountListPicker extends StatelessWidget {
                 child: Container(
                   padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 12.h),
                   decoration: BoxDecoration(
-                    color:
-                        isSelected
-                            ? AppColors.primary.withOpacity(0.06)
-                            : Colors.transparent,
+                    color: isSelected ? AppColors.primary.withOpacity(0.06) : Colors.transparent,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(index == 0 ? 12.r : 0),
                       topRight: Radius.circular(index == 0 ? 12.r : 0),
-                      bottomLeft: Radius.circular(
-                        index == accounts.length - 1 ? 12.r : 0,
-                      ),
-                      bottomRight: Radius.circular(
-                        index == accounts.length - 1 ? 12.r : 0,
-                      ),
+                      bottomLeft: Radius.circular(index == accounts.length - 1 ? 12.r : 0),
+                      bottomRight: Radius.circular(index == accounts.length - 1 ? 12.r : 0),
                     ),
                   ),
                   child: Row(
@@ -2127,10 +1739,7 @@ class _AccountListPicker extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyles.black14600.copyWith(
-                                color:
-                                    belowMin
-                                        ? AppColors.textGrey
-                                        : AppColors.textPrimary,
+                                color: belowMin ? AppColors.textGrey : AppColors.textPrimary,
                               ),
                             ),
                             SizedBox(height: 3.h),
@@ -2139,10 +1748,7 @@ class _AccountListPicker extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyles.caption.copyWith(
-                                color:
-                                    belowMin
-                                        ? AppColors.textGrey
-                                        : AppTextStyles.caption.color,
+                                color: belowMin ? AppColors.textGrey : AppTextStyles.caption.color,
                               ),
                             ),
                           ],
@@ -2152,17 +1758,9 @@ class _AccountListPicker extends StatelessWidget {
                       if (belowMin)
                         _Pill(text: 'Below min', tone: _PillTone.warning)
                       else if (alreadyCopying)
-                        _Pill(
-                          text: 'Already copying',
-                          tone: _PillTone.success,
-                          icon: Icons.check_circle,
-                        )
+                        _Pill(text: 'Already copying', tone: _PillTone.success, icon: Icons.check_circle)
                       else if (isSelected)
-                        _Pill(
-                          text: 'Selected',
-                          tone: _PillTone.primary,
-                          icon: Icons.check,
-                        ),
+                        _Pill(text: 'Selected', tone: _PillTone.primary, icon: Icons.check),
                     ],
                   ),
                 ),
@@ -2173,10 +1771,7 @@ class _AccountListPicker extends StatelessWidget {
         if (accounts.isNotEmpty && eligibleCount == 0)
           Padding(
             padding: EdgeInsets.only(top: 8.h),
-            child: Text(
-              'No Eligible Accounts Found.',
-              style: AppTextStyles.cardSubtitle,
-            ),
+            child: Text('No Eligible Accounts Found.', style: AppTextStyles.cardSubtitle),
           ),
       ],
     );
@@ -2203,9 +1798,7 @@ class _BottomBar extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
       decoration: BoxDecoration(
         color: AppColors.tradeBackgroundCenterColor,
-        border: Border(
-          top: BorderSide(color: AppColors.border.withValues(alpha: 0.15)),
-        ),
+        border: Border(top: BorderSide(color: AppColors.border.withValues(alpha: 0.15))),
       ),
       child: Obx(() {
         final s = step.value;
@@ -2217,28 +1810,23 @@ class _BottomBar extends StatelessWidget {
                 child: SizedBox(
                   height: 44.h,
                   child: OutlinedButton(
-                    onPressed:
-                        loading
-                            ? null
-                            : () {
-                              if (isEditMode) {
-                                Get.back();
-                                return;
-                              }
-                              if (s == 0) {
-                                Get.back();
-                              } else {
-                                step.value = 0;
-                              }
-                            },
+                    onPressed: loading
+                        ? null
+                        : () {
+                            if (isEditMode) {
+                              Get.back();
+                              return;
+                            }
+                            if (s == 0) {
+                              Get.back();
+                            } else {
+                              step.value = 0;
+                            }
+                          },
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.zero,
-                      side: BorderSide(
-                        color: AppColors.primary.withOpacity(0.55),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
+                      side: BorderSide(color: AppColors.primary.withOpacity(0.55)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                     ),
                     child: Text('Back', style: AppTextStyles.outlinedButton),
                   ),
@@ -2249,39 +1837,26 @@ class _BottomBar extends StatelessWidget {
                 child: SizedBox(
                   height: 44.h,
                   child: ElevatedButton(
-                    onPressed:
-                        loading
-                            ? null
-                            : () async {
-                              if (s == 0) {
-                                onNext();
-                              } else {
-                                await onSubscribe();
-                              }
-                            },
+                    onPressed: loading
+                        ? null
+                        : () async {
+                            if (s == 0) {
+                              onNext();
+                            } else {
+                              await onSubscribe();
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
                     ),
-                    child:
-                        loading
-                            ? SizedBox(
-                              width: 18.r,
-                              height: 18.r,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.onColoredBackground,
-                              ),
-                            )
-                            : Text(
-                              isEditMode
-                                  ? 'Save'
-                                  : (s == 0 ? 'Next' : 'Subscribe'),
-                              style: AppTextStyles.button,
-                            ),
+                    child: loading
+                        ? SizedBox(width: 18.r, height: 18.r, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onColoredBackground))
+                        : Text(
+                            isEditMode ? 'Save' : (s == 0 ? 'Next' : 'Subscribe'),
+                            style: AppTextStyles.button,
+                          ),
                   ),
                 ),
               ),
@@ -2321,11 +1896,7 @@ class _Pill extends StatelessWidget {
     }
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: border),
-      ),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999), border: Border.all(color: border)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -2333,14 +1904,7 @@ class _Pill extends StatelessWidget {
             Icon(icon, size: 14.r, color: fg),
             SizedBox(width: 5.w),
           ],
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w600,
-              color: fg,
-            ),
-          ),
+          Text(text, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: fg)),
         ],
       ),
     );
@@ -2366,20 +1930,12 @@ class _InlineError extends StatelessWidget {
         children: [
           Icon(Icons.error_outline, size: 18.r, color: AppColors.error),
           SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTextStyles.caption.copyWith(color: AppColors.error),
-            ),
-          ),
+          Expanded(child: Text(message, style: AppTextStyles.caption.copyWith(color: AppColors.error))),
           SizedBox(width: 8.w),
-          TextButton(
-            onPressed: onRetry,
-            style: TextButton.styleFrom(padding: EdgeInsets.zero),
-            child: Text('Retry', style: AppTextStyles.textButton),
-          ),
+          TextButton(onPressed: onRetry, style: TextButton.styleFrom(padding: EdgeInsets.zero), child: Text('Retry', style: AppTextStyles.textButton)),
         ],
       ),
     );
   }
 }
+

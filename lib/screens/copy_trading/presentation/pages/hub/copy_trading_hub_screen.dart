@@ -1,6 +1,6 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_hub_controller.dart';
@@ -35,16 +35,16 @@ class CopyTradingHubScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading: AppBackButton(
-          onPressed: () => AppBackButton.popRoute(context),
-          
-          
+        leading: AppSvgBackButton(
+          onPressed: () => AppSvgBackButton.popRoute(context),
+          iconWidth: 30.w,
+          iconHeight: 30.h,
         ),
       ),
       body: RefreshIndicator(
         onRefresh: () => controller.refreshAll(showLoading: false),
         child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
           child: Obx(() {
             final status = controller.masterStatus.value;
@@ -71,18 +71,18 @@ class CopyTradingHubScreen extends StatelessWidget {
                   label: 'Become a Master',
                   subtitle: 'Application rejected — apply again',
                   trailing: _StatusPill(text: 'Rejected', color: AppColors.error),
-                  onTap: () => Get.to(() => _BecomeMasterScreen()),
+                  onTap: () => Get.to(() => const _BecomeMasterScreen()),
                 ),
               CopyTradingMasterApplicationStatus.unknown => _HubMenuItem(
                   icon: Icons.help_outline,
                   label: 'Become a Master',
                   subtitle: 'Status unknown — try refresh',
-                  onTap: () => Get.to(() => _BecomeMasterScreen()),
+                  onTap: () => Get.to(() => const _BecomeMasterScreen()),
                 ),
               _ => _HubMenuItem(
                   icon: Icons.tune,
                   label: 'Become a Master',
-                  onTap: () => Get.to(() => _BecomeMasterScreen()),
+                  onTap: () => Get.to(() => const _BecomeMasterScreen()),
                 ),
             };
 
@@ -109,7 +109,7 @@ class CopyTradingHubScreen extends StatelessWidget {
                     _HubMenuItem(
                       icon: Icons.explore_outlined,
                       label: 'Explore Masters',
-                      onTap: () => Get.to(() => ExploreMastersScreen()),
+                      onTap: () => Get.to(() => const ExploreMastersScreen()),
                     ),
                     _divider(),
                     _HubMenuItem(
@@ -121,9 +121,9 @@ class CopyTradingHubScreen extends StatelessWidget {
                               : _StatusPill(text: 'None', color: AppColors.textGrey),
                       onTap: () {
                         if (status == CopyTradingMasterApplicationStatus.approved) {
-                          Get.to(() => MyCopiesScreen());
+                          Get.to(() => const MyCopiesScreen());
                         } else {
-                          Get.to(() => MyInvestmentsScreen());
+                          Get.to(() => const MyInvestmentsScreen());
                         }
                       },
                     ),
@@ -173,7 +173,7 @@ class _SectionCard extends StatelessWidget {
           BoxShadow(
             color: AppColors.border.withValues(alpha: 0.03),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -282,7 +282,7 @@ class _PendingReviewScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        title: Text('Pending Review'),
+        title: const Text('Pending Review'),
       ),
       body: Center(
         child: Container(
@@ -317,7 +317,7 @@ class _PendingReviewScreen extends StatelessWidget {
                           ? AppColors.textPrimaryLight
                           : AppColors.onColoredBackground,
                 ),
-                child: Text('OK'),
+                child: const Text('OK'),
               ),
             ],
           ),
@@ -328,7 +328,7 @@ class _PendingReviewScreen extends StatelessWidget {
 }
 
 class _BecomeMasterScreen extends StatefulWidget {
-  _BecomeMasterScreen();
+  const _BecomeMasterScreen();
 
   @override
   State<_BecomeMasterScreen> createState() => _BecomeMasterScreenState();
@@ -366,8 +366,8 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-         leading: AppBackButton(
-          onPressed: () => AppBackButton.popRoute(context),
+         leading: AppSvgBackButton(
+          onPressed: () => AppSvgBackButton.popRoute(context),
         ),
         title: Text('Become a Master', style: AppTextStyles.screenTitle),
       ),
@@ -478,13 +478,13 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
                               CustomToastService.showSuccess(
                                 title: 'Submitted',
                                 message: res.message ?? 'Application submitted',
-                                duration: Duration(milliseconds: 2500),
+                                duration: const Duration(milliseconds: 2500),
                               );
                             } else {
                               CustomToastService.showError(
                                 title: 'Failed',
                                 message: res.message ?? hub.errorMessage.value,
-                                duration: Duration(milliseconds: 2500),
+                                duration: const Duration(milliseconds: 2500),
                               );
                             }
                           }

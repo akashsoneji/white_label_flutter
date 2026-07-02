@@ -51,9 +51,9 @@ brands:
  splashColor: "#01061A"
  launcherBackground: "#01061A"
  urls:
- api: "https://member.gtxprime.com/api/"
- websocket: "wss://member.gtxprime.com/trade-engine"
- chart: "https://member.gtxprime.com"
+ api: "https://app.tenaxcode.com/api/"
+ websocket: "wss://app.tenaxcode.com/trade-engine"
+ chart: "https://app.tenaxcode.com"
  assets:
  appIcon: "assets/brands/gtxprime/icon.png"
  logo: "assets/brands/gtxprime/logo.png"

@@ -1,13 +1,13 @@
 {
-  "default": "pipze",
+  "default": "gtxprime",
   "brands": [
-    "pipze"
+    "gtxprime"
   ],
   "brandDetails": [
     {
-      "name": "pipze",
+      "name": "gtxprime",
       "type": "parent",
-      "label": "Pipze",
+      "label": "GTX Prime",
       "themeMode": "both"
     }
   ]

@@ -22,6 +22,9 @@ class MT5Account {
   final String? tradingPlatform;
   final double minimumTradeSize;
   final double maxLotSize;
+  final bool leverageChangeAllowed;
+  final int leverageMin;
+  final int leverageMax;
   final List<int> leverageOptions;
 
   MT5Account({
@@ -48,6 +51,9 @@ class MT5Account {
     this.tradingPlatform,
     this.minimumTradeSize = 0.01,
     this.maxLotSize = 100.0,
+    this.leverageChangeAllowed = false,
+    this.leverageMin = 100,
+    this.leverageMax = 500,
     this.leverageOptions = const [],
   });
 
@@ -76,6 +82,9 @@ class MT5Account {
       tradingPlatform: json['trading_platform']?.toString(),
       minimumTradeSize: _parseDouble(json['minimum_trade_size']) ?? 0.01,
       maxLotSize: _parseDouble(json['max_lot_size']) ?? 100.0,
+      leverageChangeAllowed: json['leverage_change_allowed'] ?? false,
+      leverageMin: _parseInt(json['leverage_min']) ?? 100,
+      leverageMax: _parseInt(json['leverage_max']) ?? 500,
       leverageOptions: (json['leverage_options'] as List?)
               ?.map((e) => _parseInt(e))
               .whereType<int>()
@@ -129,6 +138,9 @@ class MT5Account {
       'trading_platform': tradingPlatform,
       'minimum_trade_size': minimumTradeSize,
       'max_lot_size': maxLotSize,
+      'leverage_change_allowed': leverageChangeAllowed,
+      'leverage_min': leverageMin,
+      'leverage_max': leverageMax,
       'leverage_options': leverageOptions,
     };
   }
@@ -141,4 +153,7 @@ class MT5Account {
 
   // Helper method to check if this is the primary account
   bool get isPrimaryAccount => primaryAccount == 1;
+
+  // Helper method to check if this is a scratchcard account
+  bool get isScratchCardAccount => masterGroupId.toLowerCase() == 'scratchcard';
 }

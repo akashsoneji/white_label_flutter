@@ -84,15 +84,16 @@ class AccountController extends GetxController with WidgetsBindingObserver {
     ever(Get.find<AppLockService>().isLocked, (bool locked) {
       if (locked) {
         print('=== WS CENTRAL: App locked, disconnecting all sockets ===');
-        _disconnectAllSocketsCentral();
+        _disconnectAllSocketsCentral(clearVisibleData: true);
       } else {
-        // Reconnect only if app is currently resumed
+        // Reconnect only if app is currently resumed.
+        // IMPORTANT: This is a resume-only path, not an account switch.
+        // Do not clear lists or refresh full account data here; only restore sockets/prices.
         if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
-          print('=== WS CENTRAL: App unlocked while resumed, silently reconnecting sockets (preserving UI state) ===');
+          print('=== WS CENTRAL: App unlocked while resumed, restoring sockets only ===');
+          _markDashboardPriceOnlyResume();
           final active = _activeMT5Account.value;
           if (active != null) {
-            // ✅ FIX: Same as app resume — do NOT wipe trading/instrument data,
-            // just reopen the socket connections behind the scenes.
             silentlyReconnectAllSockets(active.metaAccountNumber);
           }
         }
@@ -109,20 +110,19 @@ class AccountController extends GetxController with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      print('=== WS CENTRAL: App minimized ($state), disconnecting all sockets ===');
-      _disconnectAllSocketsCentral();
+      print('=== WS CENTRAL: App minimized ($state), disconnecting sockets without clearing data ===');
+      _disconnectAllSocketsCentral(clearVisibleData: false);
     } else if (state == AppLifecycleState.resumed) {
-      // ✅ Delay check slightly to let AppLockLifecycle evaluate lock status first
+      // ✅ Delay check slightly to let AppLockLifecycle evaluate lock status first.
+      // Normal foreground return should restore socket subscriptions only. A full
+      // account refresh/reconnect clears screen data and causes visible reloads.
       Future.delayed(const Duration(milliseconds: 100), () {
         final isLocked = Get.find<AppLockService>().isLocked.value;
         if (!isLocked) {
-          print('=== WS CENTRAL: App resumed and not locked, silently reconnecting sockets (preserving UI state) ===');
+          print('=== WS CENTRAL: App resumed and not locked, restoring sockets only ===');
+          _markDashboardPriceOnlyResume();
           final active = _activeMT5Account.value;
           if (active != null) {
-            // ✅ FIX: On resume, only reconnect sockets WITHOUT clearing trading data,
-            // instruments data, or triggering a full account refresh. The previous
-            // logic re-used the account-switch path which wiped the UI and caused a
-            // visible "refresh" flash every time the user came back to the app.
             silentlyReconnectAllSockets(active.metaAccountNumber);
           }
         } else {
@@ -132,12 +132,28 @@ class AccountController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  void _disconnectAllSocketsCentral() {
-    print('=== WS CENTRAL: Disconnecting all sockets centrally ===');
+  /// Mirrors crmapp's `resumeSocketsForCurrentAccount` intent: signal the
+  /// dashboard controller to skip a full account-list refresh on the next
+  /// appear (the price-only resume marker for 3 seconds).
+  void _markDashboardPriceOnlyResume() {
+    try {
+      if (Get.isRegistered<DashboardController>()) {
+        Get.find<DashboardController>().markLifecycleResumePriceOnly();
+      }
+    } catch (_) {}
+  }
+
+  void _disconnectAllSocketsCentral({bool clearVisibleData = false}) {
+    print('=== WS CENTRAL: Disconnecting all sockets centrally (clearVisibleData=$clearVisibleData) ===');
     // Instruments
     try {
       if (Get.isRegistered<InstrumentsController>()) {
-        Get.find<InstrumentsController>().disconnectWebSocket();
+        final instruments = Get.find<InstrumentsController>();
+        if (clearVisibleData) {
+          instruments.stopWebSocket();
+        } else {
+          instruments.disconnectWebSocket();
+        }
       }
     } catch (e) {
       print('Error disconnecting Instruments WS: $e');

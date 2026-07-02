@@ -3,10 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
-import 'clients/pipze/config.dart';
+import 'clients/gtxprime/config.dart';
 
 enum Flavor {
-  pipze,
+  gtxprime,
 }
 
 class FlavorConfig {
@@ -91,7 +91,7 @@ class FlavorConfig {
  this.useNewChart = false,
  }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.pipze);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.gtxprime);
 
   static void reset() {
     _instance = null;
@@ -107,27 +107,27 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.pipze,
+      orElse: () => Flavor.gtxprime,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
-      case Flavor.pipze:
-        const config = PipzeConfig();
-        return config.toFlavorConfig(Flavor.pipze, 'pipze');
+      case Flavor.gtxprime:
+        const config = GtxprimeConfig();
+        return config.toFlavorConfig(Flavor.gtxprime, 'gtxprime');
     }
   }
 
-  static bool isPipze() => _instance?.flavor == Flavor.pipze;
-  static FlavorConfig get pipze => activate(Flavor.pipze);
+  static bool isGtxprime() => _instance?.flavor == Flavor.gtxprime;
+  static FlavorConfig get gtxprime => activate(Flavor.gtxprime);
 
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.pipze.name).toLowerCase();
-    return const <String>{'pipze'}.contains(name);
+    final name = (_instance?.flavor.name ?? Flavor.gtxprime.name).toLowerCase();
+    return const <String>{'gtxprime'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;

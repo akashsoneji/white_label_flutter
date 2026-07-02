@@ -44,6 +44,8 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
 
   late final CopyTradingCopierSubscriptionsController _subscriptionsCtrl;
   Map<String, dynamic>? _detailData;
+  bool _isLoadingDetail = false;
+  String _detailError = '';
 
   List<TradeItem> _trades = [];
   bool _isLoadingTrades = false;
@@ -71,6 +73,10 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
 
   Future<void> _fetchDetail() async {
     if (!mounted) return;
+    setState(() {
+      _isLoadingDetail = true;
+      _detailError = '';
+    });
     try {
       final response = await ApiService.get(
         endpoint: ApiConstants.copyTradingCopierSubscriptionDetail(
@@ -82,8 +88,23 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
         setState(() {
           _detailData = response.data;
         });
+      } else {
+        setState(() {
+          _detailError = response.message ?? 'Failed to load details';
+        });
       }
-    } catch (_) {}
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _detailError = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingDetail = false;
+        });
+      }
+    }
   }
 
   Future<void> _fetchTrades() async {
@@ -169,19 +190,19 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Stop investment?'),
-            content: Text(
+            title: const Text('Stop investment?'),
+            content: const Text(
               'This is permanent. You\'ll need to re-subscribe.',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
                 style: TextButton.styleFrom(foregroundColor: AppColors.error),
-                child: Text('Stop'),
+                child: const Text('Stop'),
               ),
             ],
           ),
@@ -208,18 +229,18 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Add capital'),
+            title: const Text('Add capital'),
             content: TextField(
               controller: amountCtrl,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: InputDecoration(hintText: 'Amount (USD)'),
+              decoration: const InputDecoration(hintText: 'Amount (USD)'),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(null),
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () {
@@ -227,7 +248,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                   if (v == null || v <= 0) return;
                   Navigator.of(ctx).pop(v);
                 },
-                child: Text('Add'),
+                child: const Text('Add'),
               ),
             ],
           ),
@@ -349,7 +370,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                   ),
                 ],
               ),
-              Spacer(),
+              const Spacer(),
               Text(
                 displayEquity,
                 style: TextStyle(
@@ -412,7 +433,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
       case 2:
         return _buildOptionsTab();
       default:
-        return SizedBox();
+        return const SizedBox();
     }
   }
 
@@ -644,8 +665,8 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _onPauseTap,
-                      icon: Icon(Icons.pause, color: Colors.white),
-                      label: Text('Pause'),
+                      icon: const Icon(Icons.pause, color: Colors.white),
+                      label: const Text('Pause'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.warning,
                         foregroundColor: Colors.white,
@@ -660,8 +681,8 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _onResumeTap,
-                      icon: Icon(Icons.play_arrow, color: Colors.white),
-                      label: Text('Resume'),
+                      icon: const Icon(Icons.play_arrow, color: Colors.white),
+                      label: const Text('Resume'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.green,
                         foregroundColor: Colors.white,
@@ -677,8 +698,8 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _onStopTap,
-                      icon: Icon(Icons.stop, color: Colors.white),
-                      label: Text('Stop'),
+                      icon: const Icon(Icons.stop, color: Colors.white),
+                      label: const Text('Stop'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error,
                         foregroundColor: Colors.white,
@@ -793,7 +814,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
   // ─────────────────────────────────────────────────────────────────
   Widget _buildTradesTab() {
     if (_isLoadingTrades && _trades.isEmpty) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     if (_tradesError.isNotEmpty && _trades.isEmpty) {
       return Center(
@@ -889,7 +910,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
               label: "View Master's Performance",
               onTap:
                   () => Get.offAll(
-                    () => CopyTradingMainScreen(initialIndex: 1),
+                    () => const CopyTradingMainScreen(initialIndex: 1),
                   ),
             ),
             _divider(),
@@ -1082,7 +1103,7 @@ class _TabButton extends StatelessWidget {
       child: GestureDetector(
         onTap: () => onTap(index),
         child: AnimatedContainer(
-          duration: Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 200),
           padding: EdgeInsets.symmetric(vertical: 10.h),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.primary : AppColors.backgroundLight,
@@ -1168,7 +1189,7 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Text(
                                 t.copierVolume.toStringAsFixed(2),
                                 style: TextStyle(
@@ -1179,17 +1200,17 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
                             t.symbol,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1198,7 +1219,7 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                               SvgPicture.asset(
                                 'assets/svg/copy_trading/calendar.svg',
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               Text(
                                 t.status,
                                 style: TextStyle(
@@ -1208,7 +1229,7 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
                             '\$${t.copierProfit.toStringAsFixed(2)}',
                             style: TextStyle(
@@ -1222,7 +1243,7 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                           ),
                         ],
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Icon(
                         _expanded
                             ? Icons.keyboard_arrow_up
@@ -1241,13 +1262,13 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
 
           // ── Expanded details ──
           AnimatedCrossFade(
-            firstChild: SizedBox(width: double.infinity),
+            firstChild: const SizedBox(width: double.infinity),
             secondChild: _buildDetails(t),
             crossFadeState:
                 _expanded
                     ? CrossFadeState.showSecond
                     : CrossFadeState.showFirst,
-            duration: Duration(milliseconds: 220),
+            duration: const Duration(milliseconds: 220),
           ),
         ],
       ),
@@ -1376,7 +1397,7 @@ class _SummaryCard extends StatelessWidget {
           BoxShadow(
             color: AppColors.border.withValues(alpha: 0.04),
             blurRadius: 6,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),

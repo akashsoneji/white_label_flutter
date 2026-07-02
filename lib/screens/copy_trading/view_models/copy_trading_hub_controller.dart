@@ -168,4 +168,3 @@ class CopyTradingHubController extends GetxController {
     }
   }
 }
-

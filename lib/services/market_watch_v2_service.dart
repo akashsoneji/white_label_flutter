@@ -207,6 +207,22 @@ class MarketWatchV2Service extends GetxService {
     await _ensureSocketForCurrentAccount();
   }
 
+  /// Opens/restores the socket and subscribes symbols without forcing a
+  /// disconnect when the same account socket is still reusable. Used on app
+  /// resume to avoid a full UI/list refresh.
+  Future<void> resumeSubscribeSymbols(List<String> symbols) async {
+    final clean =
+        symbols.map(normalizeSymbol).where((s) => s.isNotEmpty).toList();
+
+    await _ensureSocketForCurrentAccount();
+    if (_channel == null) return;
+    if (clean.isEmpty) return;
+
+    final payload = <String, dynamic>{'action': 'subscribe', 'symbols': clean};
+    _logRequest('resume subscribe', payload);
+    _channel!.sink.add(jsonEncode(payload));
+  }
+
   Future<void> subscribeSymbols(List<String> symbols) async {
     final clean =
         symbols.map(normalizeSymbol).where((s) => s.isNotEmpty).toList();

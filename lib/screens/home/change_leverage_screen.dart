@@ -35,7 +35,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
     // Initialize leverage values dynamically from widget.leverageOptions, fallback to defaults
     _leverageValues = (widget.leverageOptions != null && widget.leverageOptions!.isNotEmpty)
         ? widget.leverageOptions!
-        : const [30, 50, 100, 300, 400, 500];
+        : const [100, 150, 200, 300, 400, 500];
 
     // Set to current leverage if provided and valid, otherwise default to first value
     if (widget.currentLeverage != null &&
