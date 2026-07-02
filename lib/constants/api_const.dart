@@ -51,6 +51,10 @@ class ApiConstants {
   static const String realPlanDetails = '${ajax}mt5accounts/plandetails';
   static const String getTransactions = '${ajax}transactions';
   static const String depositProofProxy = '${ajax}deposit-proof-proxy/';
+  // Bonus APIs
+  static const String bonusList = '${ajax}bonus';
+  static const String bonusClaimList = '${ajax}bonus/bonusClaimList';
+  static const String bonusClaim = '${ajax}bonus/bonusClaim';
   static const String changePrimaryAccount =
       '${ajax}mt5accounts/changePrimaryAccount';
   static String getInstrumentsByAccount(String accountNumber) =>

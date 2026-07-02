@@ -283,7 +283,10 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                                 value: acc,
                                 child: Text(
                                   '$accNo — Balance: \$${bal.toStringAsFixed(2)} (Available: \$${availBal.toStringAsFixed(2)})',
-                                  style: TextStyle(fontSize: 13.sp),
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    color: AppColors.textPrimary,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
                                 ),

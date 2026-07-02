@@ -640,7 +640,7 @@ class _SubscriptionsTab extends StatelessWidget {
       return _EmptyInvestmentsState();
     }
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 24.h),
+      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 90.h),
       itemCount: items.length,
       itemBuilder: (context, i) {
         final item = items[i];
@@ -1137,7 +1137,7 @@ class _TradeHistoryTab extends StatelessWidget {
           return false;
         },
         child: ListView.builder(
-          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
+          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 90.h),
           itemCount:
               trades.length + (controller.isLoadingMoreTrades.value ? 1 : 0),
           itemBuilder: (context, i) {

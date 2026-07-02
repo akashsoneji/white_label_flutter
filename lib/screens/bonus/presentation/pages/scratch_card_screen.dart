@@ -599,11 +599,27 @@ class ScratchCardController extends GetxController {
         if (errData is Map<String, dynamic> &&
             errData['code'] == 'SCRATCH_ACCOUNT_REQUIRED') {
           _pendingRevealCardId = cardId;
-          _pendingScratchGroupId =
-              (errData['scratch_group_id'] as num?)?.toInt();
+          
+          final rawGroupId = errData['scratch_group_id'];
+          if (rawGroupId is num) {
+            _pendingScratchGroupId = rawGroupId.toInt();
+          } else if (rawGroupId is String && rawGroupId.isNotEmpty) {
+            _pendingScratchGroupId = int.tryParse(rawGroupId);
+          } else {
+            _pendingScratchGroupId = null;
+          }
+
           // Spec: no password popup.
           // Auto-generate passwords, create account, then retry reveal.
-          if (_pendingScratchGroupId == null) return null;
+          if (_pendingScratchGroupId == null) {
+            CustomToastService.showError(
+              title: 'Error',
+              message: (response.message?.isNotEmpty == true)
+                  ? response.message!
+                  : 'Scratch group is not configured.',
+            );
+            return null;
+          }
 
           Get.dialog(
             const Dialog(
@@ -640,10 +656,12 @@ class ScratchCardController extends GetxController {
           );
         }
       }
-    } catch (e) {
+    } catch (e, t) {
+      debugPrint('ScratchCardScreen revealCard exception: $e');
+      debugPrint('Stacktrace: $t');
       CustomToastService.showError(
         title: 'Error',
-        message: 'Network error. Please check your connection.',
+        message: 'Error: $e',
       );
     } finally {
       isRevealing.value = false;
@@ -707,10 +725,12 @@ class ScratchCardController extends GetxController {
                   : 'Failed to create scratch account',
         );
       }
-    } catch (e) {
+    } catch (e, t) {
+      debugPrint('ScratchCardScreen createScratchAccount exception: $e');
+      debugPrint('Stacktrace: $t');
       CustomToastService.showError(
         title: 'Error',
-        message: 'Network error. Please check your connection.',
+        message: 'Error: $e',
       );
     } finally {
       isCreatingAccount.value = false;

@@ -28,3 +28,6 @@ assets:
   appIcon: icon.png
   logo: icon.png
   splashLogo: icon.png
+
+features:
+ useNewChart: false

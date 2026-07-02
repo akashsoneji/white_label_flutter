@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,10 @@ import 'package:crm_app/services/dropdown_service.dart';
 import 'package:crm_app/models/dropdown_models.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/utils/app_picker_theme.dart';
+import 'package:country_picker/country_picker.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
+import 'package:phone_numbers_parser/metadata.dart';
 
 import '../../../constants/text_styles.dart';
 import '../../../widgets/common_loading_widget.dart';
@@ -36,6 +41,11 @@ class _EditProfileState extends State<EditProfile> {
   late DropdownService dropdownService;
   late bool isProfileVerified;
 
+  String _selectedCountryCode = '';
+  String _selectedCountryFlag = '';
+  IsoCode? _selectedIsoCode;
+  int _maxPhoneDigits = 15;
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +53,23 @@ class _EditProfileState extends State<EditProfile> {
     dropdownService = Get.find<DropdownService>();
     _addListeners();
     _bindControllerData();
+    ever(dropdownService.selectedCountry, (country) {
+      if (country != null && _selectedCountryCode.isEmpty) {
+        final countries = CountryService().getAll();
+        final matchedCountry = countries.firstWhereOrNull(
+          (c) =>
+              c.name.toLowerCase() == country.name?.toLowerCase() ||
+              c.countryCode.toLowerCase() == country.iso2?.toLowerCase(),
+        );
+        if (matchedCountry != null) {
+          _applyCountry(
+            phoneCode: matchedCountry.phoneCode,
+            flagEmoji: matchedCountry.flagEmoji,
+            countryIso2: matchedCountry.countryCode,
+          );
+        }
+      }
+    });
   }
 
   void _addListeners() {
@@ -56,7 +83,11 @@ class _EditProfileState extends State<EditProfile> {
       controller.updateEmail(_emailController.text);
     });
     _phoneController.addListener(() {
-      controller.updatePhone(_phoneController.text);
+      final digits = _phoneDigits;
+      final combined = '$_selectedCountryCode$digits';
+      if (controller.phone.value != combined) {
+        controller.updatePhone(combined);
+      }
     });
     _addressController.addListener(() {
       controller.updateAddress(_addressController.text);
@@ -71,40 +102,34 @@ class _EditProfileState extends State<EditProfile> {
 
   void _bindControllerData() {
     // Listen to controller data changes and update text controllers
+    void _syncController(TextEditingController target, String value) {
+      if (target.text == value) return;
+      target.value = TextEditingValue(
+        text: value,
+        selection: TextSelection.collapsed(offset: value.length),
+      );
+    }
+
     ever(controller.firstName, (value) {
-      if (_firstNameController.text != value) {
-        _firstNameController.text = value;
-      }
+      _syncController(_firstNameController, value);
     });
     ever(controller.lastName, (value) {
-      if (_lastNameController.text != value) {
-        _lastNameController.text = value;
-      }
+      _syncController(_lastNameController, value);
     });
     ever(controller.email, (value) {
-      if (_emailController.text != value) {
-        _emailController.text = value;
-      }
+      _syncController(_emailController, value);
     });
     ever(controller.phone, (value) {
-      if (_phoneController.text != value) {
-        _phoneController.text = value;
-      }
+      _parseAndSetPhoneNumber(value);
     });
     ever(controller.address, (value) {
-      if (_addressController.text != value) {
-        _addressController.text = value;
-      }
+      _syncController(_addressController, value);
     });
     ever(controller.postcode, (value) {
-      if (_postcodeController.text != value) {
-        _postcodeController.text = value;
-      }
+      _syncController(_postcodeController, value);
     });
     ever(controller.title, (value) {
-      if (_titleController.text != value) {
-        _titleController.text = value;
-      }
+      _syncController(_titleController, value);
     });
   }
 
@@ -120,9 +145,205 @@ class _EditProfileState extends State<EditProfile> {
     super.dispose();
   }
 
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
+  IsoCode? _isoFromCountryCode(String? countryCode) {
+    if (countryCode == null || countryCode.isEmpty) return null;
+    final upper = countryCode.toUpperCase();
+    for (final iso in IsoCode.values) {
+      if (iso.name == upper) return iso;
+    }
+    return null;
+  }
+
+  int _maxDigitsForIso(IsoCode? iso) {
+    if (iso == null) return 15;
+    final lengths = metadataLenghtsByIsoCode[iso];
+    if (lengths == null) return 15;
+    final all = <int>[
+      ...lengths.general,
+      ...lengths.mobile,
+      ...lengths.fixedLine,
+    ];
+    if (all.isEmpty) return 15;
+    return all.reduce((a, b) => a > b ? a : b);
+  }
+
+  String get _phoneDigits =>
+      _phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+  // ignore: unused_element
+  bool _isPhoneValid() {
+    final digits = _phoneDigits;
+    if (digits.isEmpty) return false;
+    final iso = _selectedIsoCode;
+    if (iso == null) return digits.length >= 6;
+    try {
+      final number = PhoneNumber.parse(digits, destinationCountry: iso);
+      return number.isValid(type: PhoneNumberType.mobile) || number.isValid();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void _formatPhoneInput() {
+    final iso = _selectedIsoCode;
+    final digits = _phoneDigits;
+    if (iso == null || digits.isEmpty) return;
+    try {
+      final formatted =
+          PhoneNumber.parse(digits, destinationCountry: iso).formatNsn();
+      if (formatted.isNotEmpty && formatted != _phoneController.text) {
+        _phoneController.value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
+      }
+    } catch (_) {}
+  }
+
+  void _applyCountry({
+    required String phoneCode,
+    required String flagEmoji,
+    required String countryIso2,
+  }) {
+    final iso = _isoFromCountryCode(countryIso2);
+    setState(() {
+      _selectedCountryCode = "+$phoneCode";
+      _selectedCountryFlag = "$flagEmoji +$phoneCode";
+      _selectedIsoCode = iso;
+      _maxPhoneDigits = _maxDigitsForIso(iso);
+    });
+    final digits = _phoneDigits;
+    if (digits.length > _maxPhoneDigits) {
+      _phoneController.text = digits.substring(0, _maxPhoneDigits);
+    }
+    _formatPhoneInput();
+
+    final combined = '$_selectedCountryCode$digits';
+    if (controller.phone.value != combined) {
+      controller.updatePhone(combined);
+    }
+  }
+
+  // ignore: unused_element
+  void _showCountryPicker() {
+    showCountryPicker(
       context: context,
+      showPhoneCode: true,
+      countryListTheme: CountryListThemeData(
+        flagSize: 25,
+        backgroundColor: AppColors.whiteColor,
+        textStyle: TextStyle(fontSize: 16, color: AppColors.textPrimary),
+        bottomSheetHeight: 500,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20.0),
+          topRight: Radius.circular(20.0),
+        ),
+        inputDecoration: InputDecoration(
+          labelText: 'Search',
+          hintText: 'Start typing to search',
+          prefixIcon: Icon(Icons.search, color: AppColors.textPrimary),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: AppColors.placeholderSoft),
+          ),
+        ),
+      ),
+      onSelect: (Country country) {
+        _applyCountry(
+          phoneCode: country.phoneCode,
+          flagEmoji: country.flagEmoji,
+          countryIso2: country.countryCode,
+        );
+      },
+    );
+  }
+
+  void _parseAndSetPhoneNumber(String fullNumber) {
+    if (fullNumber.isEmpty) {
+      if (_phoneController.text.isNotEmpty) {
+        _phoneController.text = '';
+      }
+      return;
+    }
+
+    String nationalNumber = fullNumber;
+    String phoneCode = '';
+    String countryIso = '';
+
+    if (fullNumber.startsWith('+')) {
+      try {
+        final parsed = PhoneNumber.parse(fullNumber);
+        phoneCode = parsed.countryCode;
+        nationalNumber = parsed.nsn;
+        countryIso = parsed.isoCode.name;
+      } catch (e) {
+        final countries = CountryService().getAll();
+        for (final country in countries) {
+          final prefix = '+${country.phoneCode}';
+          if (fullNumber.startsWith(prefix)) {
+            phoneCode = country.phoneCode;
+            nationalNumber = fullNumber.substring(prefix.length);
+            countryIso = country.countryCode;
+            break;
+          }
+        }
+      }
+    }
+
+    if (phoneCode.isNotEmpty) {
+      final countries = CountryService().getAll();
+      final country = countries.firstWhereOrNull(
+        (c) =>
+            c.phoneCode == phoneCode &&
+            (countryIso.isEmpty ||
+                c.countryCode.toUpperCase() == countryIso.toUpperCase()),
+      );
+      if (country != null) {
+        final iso = _isoFromCountryCode(country.countryCode);
+        setState(() {
+          _selectedCountryCode = "+${country.phoneCode}";
+          _selectedCountryFlag = "${country.flagEmoji} +${country.phoneCode}";
+          _selectedIsoCode = iso;
+          _maxPhoneDigits = _maxDigitsForIso(iso);
+        });
+      }
+    } else {
+      final selectedCountry = dropdownService.selectedCountry.value;
+      if (selectedCountry != null) {
+        final countries = CountryService().getAll();
+        final country = countries.firstWhereOrNull(
+          (c) =>
+              c.name.toLowerCase() == selectedCountry.name?.toLowerCase() ||
+              c.countryCode.toLowerCase() ==
+                  selectedCountry.iso2?.toLowerCase(),
+        );
+        if (country != null) {
+          final iso = _isoFromCountryCode(country.countryCode);
+          setState(() {
+            _selectedCountryCode = "+${country.phoneCode}";
+            _selectedCountryFlag = "${country.flagEmoji} +${country.phoneCode}";
+            _selectedIsoCode = iso;
+            _maxPhoneDigits = _maxDigitsForIso(iso);
+          });
+        }
+      }
+    }
+
+    final currentDigits = _phoneController.text.replaceAll(
+      RegExp(r'[^0-9]'),
+      '',
+    );
+    final newDigits = nationalNumber.replaceAll(RegExp(r'[^0-9]'), '');
+    if (currentDigits != newDigits) {
+      _phoneController.value = TextEditingValue(
+        text: nationalNumber,
+        selection: TextSelection.collapsed(offset: nationalNumber.length),
+      );
+    }
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await AppPickerTheme.showAppDatePicker(
+      context,
       initialDate: DateTime.now().subtract(
         const Duration(days: 6570),
       ), // 18 years ago
@@ -132,14 +353,6 @@ class _EditProfileState extends State<EditProfile> {
       lastDate: DateTime.now().subtract(
         const Duration(days: 6570),
       ), // 18 years ago
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(primary: AppColors.primary),
-          ),
-          child: child!,
-        );
-      },
     );
     if (picked != null && picked != _selectedDate) {
       _selectedDate = picked;
@@ -193,9 +406,11 @@ class _EditProfileState extends State<EditProfile> {
                     controller: searchController,
                     textCapitalization: TextCapitalization.none,
                     autocorrect: false,
+                    style: TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'Search countries...',
-                      prefixIcon: Icon(Icons.search),
+                      hintStyle: TextStyle(color: AppColors.textGrey),
+                      prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -223,7 +438,10 @@ class _EditProfileState extends State<EditProfile> {
                               country.emoji ?? '',
                               style: TextStyle(fontSize: 24),
                             ),
-                            title: Text(country.name ?? ''),
+                            title: Text(
+                              country.name ?? '',
+                              style: TextStyle(color: AppColors.textPrimary),
+                            ),
                             onTap: () {
                               dropdownService.selectCountry(country);
                               Navigator.pop(context);
@@ -286,9 +504,11 @@ class _EditProfileState extends State<EditProfile> {
                     controller: searchController,
                     textCapitalization: TextCapitalization.none,
                     autocorrect: false,
+                    style: TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'Search states...',
-                      prefixIcon: Icon(Icons.search),
+                      hintStyle: TextStyle(color: AppColors.textGrey),
+                      prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -312,7 +532,10 @@ class _EditProfileState extends State<EditProfile> {
                         itemBuilder: (context, index) {
                           final state = filteredStates[index];
                           return ListTile(
-                            title: Text(state.name),
+                            title: Text(
+                              state.name,
+                              style: TextStyle(color: AppColors.textPrimary),
+                            ),
                             onTap: () {
                               dropdownService.selectState(state);
                               Navigator.pop(context);
@@ -375,9 +598,11 @@ class _EditProfileState extends State<EditProfile> {
                     controller: searchController,
                     textCapitalization: TextCapitalization.none,
                     autocorrect: false,
+                    style: TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'Search cities...',
-                      prefixIcon: Icon(Icons.search),
+                      hintStyle: TextStyle(color: AppColors.textGrey),
+                      prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -401,7 +626,10 @@ class _EditProfileState extends State<EditProfile> {
                         itemBuilder: (context, index) {
                           final city = filteredCities[index];
                           return ListTile(
-                            title: Text(city.name),
+                            title: Text(
+                              city.name,
+                              style: TextStyle(color: AppColors.textPrimary),
+                            ),
                             onTap: () {
                               dropdownService.selectCity(city);
                               Navigator.pop(context);
@@ -448,9 +676,10 @@ class _EditProfileState extends State<EditProfile> {
                 padding: const EdgeInsets.all(16),
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -460,7 +689,10 @@ class _EditProfileState extends State<EditProfile> {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      title: Text(items[index]),
+                      title: Text(
+                        items[index],
+                        style: TextStyle(color: AppColors.textPrimary),
+                      ),
                       onTap: () {
                         Navigator.pop(context);
                         onItemSelected(items[index]);
@@ -682,39 +914,108 @@ class _EditProfileState extends State<EditProfile> {
                         },
                       ),
                       SizedBox(height: 16.h),
-                      RTLHelper.rtlTextField(
-                        controller: _phoneController,
-                        readOnly: isProfileVerified,
-                        labelText: languageService.tr(
-                          'edit_profile_mobile_number',
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 16.h),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            InkWell(
+                              onTap: null,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 16.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: AppColors.border),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  _selectedCountryFlag.isNotEmpty
+                                      ? _selectedCountryFlag
+                                      : "🌐 +--",
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _phoneController,
+                                readOnly: true,
+                                keyboardType: TextInputType.phone,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'[0-9\s\-()]'),
+                                  ),
+                                  _PhoneDigitsLimitFormatter(
+                                    () => _maxPhoneDigits,
+                                  ),
+                                ],
+                                onChanged: (_) => _formatPhoneInput(),
+                                style: TextStyle(color: AppColors.textPrimary),
+                                decoration: InputDecoration(
+                                  labelText: languageService.tr(
+                                    'edit_profile_mobile_number',
+                                  ),
+                                  labelStyle: TextStyle(
+                                    color: AppColors.textGrey,
+                                  ),
+                                  floatingLabelStyle: TextStyle(
+                                    color: AppColors.primary,
+                                  ),
+                                  counterText: '',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: AppColors.border,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: AppColors.border,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: AppColors.primary,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  errorBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: AppColors.error,
+                                    ),
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16.w,
+                                    vertical: 16.h,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  final digits = (value ?? '').replaceAll(
+                                    RegExp(r'[^0-9]'),
+                                    '',
+                                  );
+                                  if (digits.isEmpty) {
+                                    return languageService.tr(
+                                      'edit_profile_please_enter_mobile_number',
+                                    );
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                        hintText: languageService.tr(
-                          'edit_profile_please_enter_mobile_number',
-                        ),
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
-                          labelText: languageService.tr(
-                            'edit_profile_mobile_number',
-                          ),
-                          labelStyle: TextStyle(color: AppColors.textGrey),
-                          floatingLabelStyle: TextStyle(
-                            color: AppColors.primary,
-                          ),
-                          hintText: languageService.tr(
-                            'edit_profile_please_enter_mobile_number',
-                          ),
-                          hintStyle: TextStyle(color: AppColors.textGrey),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return languageService.tr(
-                              'edit_profile_please_enter_mobile_number',
-                            );
-                          }
-                          return null;
-                        },
                       ),
-                      SizedBox(height: 16.h),
+                      // SizedBox(height: 16.h),
                       Obx(
                         () => RTLHelper.rtlTextField(
                           controller: TextEditingController(
@@ -1084,5 +1385,23 @@ class _EditProfileState extends State<EditProfile> {
         ),
       ),
     );
+  }
+}
+
+class _PhoneDigitsLimitFormatter extends TextInputFormatter {
+  _PhoneDigitsLimitFormatter(this.maxDigits);
+
+  final int Function() maxDigits;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length <= maxDigits()) {
+      return newValue;
+    }
+    return oldValue;
   }
 }

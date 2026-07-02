@@ -40,19 +40,6 @@ class PromotionalScreen extends StatelessWidget {
             final showScratch = modules?.scratchcard ?? false;
             final showTradeWin = modules?.tradewin ?? false;
 
-            if (!showScratch && !showTradeWin) {
-              return Padding(
-                padding: EdgeInsets.symmetric(vertical: 32.h),
-                child: Center(
-                  child: Text(
-                    languageService.tr('tw_no_promotions'),
-                    style: AppTextStyles.subheading,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              );
-            }
-
             final tiles = <Widget>[];
             if (showScratch) {
               tiles.add(
@@ -81,6 +68,16 @@ class PromotionalScreen extends StatelessWidget {
                 ),
               );
             }
+
+            // Always show Bonus section
+            tiles.add(
+              MoreMenuTile(
+                iconName: 'bonus',
+                label: languageService.tr('more_bonus'),
+                onTap: () => Get.toNamed(AppPages.BONUS),
+                textColor: AppColors.textPrimary,
+              ),
+            );
 
             return MoreMenuCardGroup(children: tiles);
           }),

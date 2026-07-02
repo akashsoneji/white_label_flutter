@@ -72,6 +72,18 @@ int _parseIntFlexible(dynamic value) {
   return 0;
 }
 
+double _parseDoubleFlexible(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) {
+    final t = value.trim();
+    if (t.isEmpty) return 0.0;
+    return double.tryParse(t) ?? 0.0;
+  }
+  return 0.0;
+}
+
 class SearchSymbol {
   final int symbolId;
   final String displaySymbol;
@@ -111,7 +123,7 @@ class SearchSymbol {
       categoryId: json['category_id'] ?? 0,
       categoryName: json['category_name'] ?? '',
       digits: json['digits'] ?? 0,
-      contractSize: (json['contract_size'] ?? 0.0).toDouble(),
+      contractSize: _parseDoubleFlexible(json['contract_size']),
       isActive: json['is_active'] ?? false,
       isSynced: json['is_synced'] ?? false,
       lpProviderId: _parseIntFlexible(json['lp_provider_id']),
@@ -137,9 +149,9 @@ class SpreadConfig {
 
   factory SpreadConfig.fromJson(Map<String, dynamic> json) {
     return SpreadConfig(
-      spreadDiff: (json['spread_diff'] ?? 0.0).toDouble(),
-      bidAdjustment: (json['bid_adjustment'] ?? 0.0).toDouble(),
-      askAdjustment: (json['ask_adjustment'] ?? 0.0).toDouble(),
+      spreadDiff: _parseDoubleFlexible(json['spread_diff']),
+      bidAdjustment: _parseDoubleFlexible(json['bid_adjustment']),
+      askAdjustment: _parseDoubleFlexible(json['ask_adjustment']),
       source: json['source'] ?? 'none',
     );
   }

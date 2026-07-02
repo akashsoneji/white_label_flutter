@@ -288,7 +288,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         onTap: onTap,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
-          child: Icon(suffixIcon, color: Colors.grey[600], size: 18),
+          child: Icon(suffixIcon, color: AppColors.textSecondary, size: 18),
         ),
       ),
       decoration: InputDecoration(
@@ -317,7 +317,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   Widget _buildTimePeriodFilter() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.isDarkMode ? Colors.grey[900] : Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.primary, width: 1.5),
       ),
@@ -385,7 +385,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   Widget _buildCustomDateRange() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.isDarkMode ? Colors.grey[900] : Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.primary, width: 1.5),
       ),
@@ -421,7 +421,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                           : 'Select start date',
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: AppColors.whiteColor,
+                        color: AppColors.pureWhite,
                       ),
                     ),
                   ),
@@ -465,7 +465,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                           : 'Select end date',
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: AppColors.whiteColor,
+                        color: AppColors.pureWhite,
                       ),
                     ),
                   ),

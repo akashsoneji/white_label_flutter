@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Chart</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #tv_chart_container {
+        width: 100vw;
+        height: 100vh;
+      }
+      #fallback {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      #fallback.show {
+        display: flex;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tv_chart_container"></div>
+    <div id="fallback">
+      <div>
+        <div style="font-size: 15px; color: #374151; margin-bottom: 6px;">
+          Chart could not load
+        </div>
+        <div>Check internet connection and try again.</div>
+      </div>
+    </div>
+
+    <script>
+      // ─────────────────────────────────────────────────────────────────────
+      // Bootstrap values passed from Flutter via UserScript@AT_DOCUMENT_START.
+      // ─────────────────────────────────────────────────────────────────────
+      var INITIAL_SYMBOL = window.__initSymbol || "EURUSD";
+      var INITIAL_THEME = window.__initTheme || "light";
+
+      var tvWidget = null;
+      var currentSymbol = INITIAL_SYMBOL;
+
+      // Heuristic: map raw symbol like "EURUSD" / "XAUUSD" / "BTCUSD" /
+      // "AAPL" to a TradingView exchange-qualified symbol. The free widget
+      // expects "EXCHANGE:SYMBOL". We try a sensible exchange per asset
+      // class; users can always change it from the chart UI search.
+      function toTvSymbol(raw) {
+        if (!raw) return "FX:EURUSD";
+        var s = String(raw).toUpperCase().trim();
+        // Strip any account-suffix like "EURUSD.r" / "EURUSD.m".
+        if (s.indexOf(".") !== -1) s = s.split(".")[0];
+        // Already exchange-qualified? Pass through.
+        if (s.indexOf(":") !== -1) return s;
+
+        // Indices.
+        var indices = {
+          US30: "OANDA:US30USD",
+          US500: "OANDA:SPX500USD",
+          NAS100: "OANDA:NAS100USD",
+          UK100: "OANDA:UK100GBP",
+          GER40: "OANDA:DE30EUR",
+          DE40: "OANDA:DE30EUR",
+          JP225: "OANDA:JP225USD",
+          AU200: "OANDA:AU200AUD",
+          HK50: "OANDA:HK33HKD",
+          EU50: "OANDA:EU50EUR",
+        };
+        if (indices[s]) return indices[s];
+
+        // Commodities / metals.
+        if (s === "XAUUSD") return "OANDA:XAUUSD";
+        if (s === "XAGUSD") return "OANDA:XAGUSD";
+        if (s === "USOIL" || s === "WTI") return "TVC:USOIL";
+        if (s === "UKOIL" || s === "BRENT") return "TVC:UKOIL";
+        if (s === "NGAS") return "TVC:NATGASUSD";
+
+        // Crypto (ends in USD/USDT and starts with known crypto prefix).
+        var crypto = /^(BTC|ETH|XRP|LTC|DOGE|ADA|SOL|DOT|BCH|LNK|XLM|EOS)/;
+        if (crypto.test(s) && /USD(T)?$/.test(s)) {
+          return "BINANCE:" + s.replace(/USD$/, "USDT");
+        }
+
+        // FX (6 letters and only A-Z).
+        if (/^[A-Z]{6}$/.test(s)) return "FX:" + s;
+
+        // Default fallback — treat as US stock.
+        return "NASDAQ:" + s;
+      }
+
+      // ─────────────────────────────────────────────────────────────────────
+      // Build the TradingView widget.
+      // ─────────────────────────────────────────────────────────────────────
+      function createWidget() {
+        if (typeof TradingView === "undefined" || !TradingView.widget) {
+          document.getElementById("fallback").classList.add("show");
+          return;
+        }
+        try {
+          tvWidget = new TradingView.widget({
+            autosize: true,
+            symbol: toTvSymbol(INITIAL_SYMBOL),
+            interval: "5",
+            timezone: "Etc/UTC",
+            theme: INITIAL_THEME === "dark" ? "dark" : "light",
+            style: "1", // candles
+            locale: "en",
+            toolbar_bg: "#f1f3f6",
+            enable_publishing: false,
+            allow_symbol_change: true,
+            container_id: "tv_chart_container",
+            hide_side_toolbar: false,
+            hide_top_toolbar: false,
+            withdateranges: true,
+            studies: [],
+          });
+          window.__tvWidget = tvWidget;
+        } catch (e) {
+          console.warn("[Chart] widget init failed", e);
+          document.getElementById("fallback").classList.add("show");
+        }
+      }
+
+      // ─────────────────────────────────────────────────────────────────────
+      // Public API used by AdvancedChartInAppWebView (Dart side).
+      // ─────────────────────────────────────────────────────────────────────
+
+      // Switch the symbol shown on the chart.
+      window.__setSymbol = function (rawSymbol) {
+        currentSymbol = rawSymbol;
+        if (!tvWidget) return false;
+        try {
+          // The public tv.js widget reloads via `setSymbol` on its iframe API.
+          if (typeof tvWidget.setSymbol === "function") {
+            tvWidget.setSymbol(toTvSymbol(rawSymbol), "5", function () {});
+            return true;
+          }
+          // Fallback: full rebuild.
+          INITIAL_SYMBOL = rawSymbol;
+          var c = document.getElementById("tv_chart_container");
+          if (c) c.innerHTML = "";
+          createWidget();
+          return true;
+        } catch (e) {
+          console.warn("[Chart] __setSymbol error", e);
+          return false;
+        }
+      };
+
+      // Switch theme (light / dark). Public widget requires re-instantiation
+      // so we tear down + rebuild with the new theme.
+      window.__setTheme = function (newTheme) {
+        INITIAL_THEME = newTheme === "dark" ? "dark" : "light";
+        try {
+          var c = document.getElementById("tv_chart_container");
+          if (c) c.innerHTML = "";
+          createWidget();
+        } catch (e) {
+          console.warn("[Chart] __setTheme error", e);
+        }
+      };
+
+      // No-op stub kept for parity with the legacy ChartInAppWebView API —
+      // native trade overlays are not supported by the free widget.
+      window.__renderNativeTrades = function () {};
+
+      // ─────────────────────────────────────────────────────────────────────
+      // Load tv.js (public TradingView widget — no license required).
+      // ─────────────────────────────────────────────────────────────────────
+      (function loadTv() {
+        var s = document.createElement("script");
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://s3.tradingview.com/tv.js";
+        s.onload = function () {
+          createWidget();
+        };
+        s.onerror = function () {
+          document.getElementById("fallback").classList.add("show");
+        };
+        document.head.appendChild(s);
+      })();
+    </script>
+  </body>
+</html>

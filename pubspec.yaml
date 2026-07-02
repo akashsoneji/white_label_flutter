@@ -67,6 +67,9 @@ dependencies:
   # Country Picker
   country_picker: ^2.0.25
 
+  # Country-aware phone parsing/validation/formatting (pure Dart, libphonenumber metadata)
+  phone_numbers_parser: ^9.0.23
+
   # Socket
   web_socket_channel: ^3.0.3
 
@@ -159,8 +162,6 @@ flutter:
     - assets/config/brands/brands.json
     # END GENERATED ACTIVE CLIENT ASSETS
 
-    
-
     - assets/translations/
 
     - assets/image/
@@ -181,8 +182,8 @@ flutter:
     - assets/animation/
     - assets/svg/partnership_program/
     - assets/svg/ib_dashboard/
-
     - assets/chart/index.html
+    - assets/chart/advanced/
     - assets/svg/flags/
     - assets/mock/
     - assets/svg/copy_trading/

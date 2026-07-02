@@ -511,6 +511,7 @@ class _EnhancedPendingOrderContentState
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 16.h),
@@ -518,7 +519,10 @@ class _EnhancedPendingOrderContentState
                   (orderType) => ListTile(
                     title: Text(
                       orderType.displayName,
-                      style: TextStyle(fontSize: 16.sp),
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     onTap: () {
                       tradingController.setOrderType(orderType);

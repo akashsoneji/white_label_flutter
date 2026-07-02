@@ -18,8 +18,9 @@ class SkyrissConfig extends BaseClientConfig {
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',
-          apiBaseUrl: 'https://login.skyriss.com/api/',
-          websocketUrl: 'wss://login.skyriss.com/trade-engine',
-          chartBaseUrl: 'https://login.skyriss.com',
-        );
+ apiBaseUrl: 'https://login.skyriss.com/api/',
+ websocketUrl: 'wss://login.skyriss.com/trade-engine',
+ chartBaseUrl: 'https://login.skyriss.com',
+ useNewChart: false,
+ );
 }

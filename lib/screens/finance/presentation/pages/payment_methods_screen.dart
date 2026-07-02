@@ -142,6 +142,8 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                     final navigationArguments = {
                       'accountNumber': accountNumberToPass,
                       'paymentMethod': paymentMethod,
+                      if (Get.arguments != null && Get.arguments is Map && Get.arguments['from'] == 'bonus')
+                        'from': 'bonus',
                     };
                     print(
                       'PaymentMethodsScreen: Setting arguments: $navigationArguments',

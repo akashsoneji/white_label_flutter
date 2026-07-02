@@ -346,11 +346,11 @@ class _TradeScreenState extends State<TradeScreen> {
             child: Column(
               children: [
                 _buildHeader(context, accountController, tradingController),
-                DashedUnderline(
-                  dashWidth: 10,
-                  dashSpace: 0,
-                  color: AppColors.grey,
-                ),
+                // DashedUnderline(
+                //   dashWidth: 10,
+                //   dashSpace: 0,
+                //   color: AppColors.isDarkMode ? Colors.transparent : AppColors.grey,
+                // ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 0.0),
                   child: _buildTabs(tradingController),
@@ -374,7 +374,9 @@ class _TradeScreenState extends State<TradeScreen> {
                         ),
                       );
 
-                      final floatingSummary = _buildFloatingSummary(tradingController);
+                      final floatingSummary = _buildFloatingSummary(
+                        tradingController,
+                      );
 
                       return RefreshIndicator(
                         onRefresh: () async {
@@ -382,245 +384,105 @@ class _TradeScreenState extends State<TradeScreen> {
                             await controller.refreshTradeHistory();
                           }
                         },
-                        child: controller.selectedTab == 2
-                            // History tab: keep the summary cards fixed, only list scrolls below.
-                            ? Column(
-                                children: [
-                                  summaryCard,
-                                  floatingSummary,
-                                  SizedBox(height: 8.h),
-                                  Expanded(
-                                    child: NotificationListener<ScrollNotification>(
-                                      onNotification: (n) {
-                                        controller.notifyUserScrollActivity();
-                                        return false;
-                                      },
-                                      child: CustomScrollView(
-                                        controller: _scrollController,
-                                        slivers: [
-                                          if (positions.isEmpty && !isLoadingHistory)
-                                            SliverFillRemaining(
-                                              hasScrollBody: false,
-                                              child: Center(
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    // FutureBuilder<Widget>(
-                                                    //   future: _emptyStateSvgFuture,
-                                                    //   builder:
-                                                    //       (context, snapshot) {
-                                                    //     if (snapshot.hasData) {
-                                                    //       return snapshot.data!;
-                                                    //     }
-                                                    //     return SizedBox(
-                                                    //       height: 100.h,
-                                                    //       width: 100.w,
-                                                    //     );
-                                                    //   },
-                                                    // ),
-                                                    SizedBox(height: 16.h),
-                                                    SizedBox(height: 8.h),
-                                                    Text(
-                                                      _getEmptyStateMessage(
-                                                        controller.selectedTab,
-                                                      ),
-                                                      style: AppTextStyles
-                                                          .subheading
-                                                          .copyWith(
-                                                        color: AppColors.textGrey,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (n) {
+                            controller.notifyUserScrollActivity();
+                            return false;
+                          },
+                          child: CustomScrollView(
+                            controller: _scrollController,
+                            slivers: [
+                              SliverToBoxAdapter(child: summaryCard),
+                              SliverToBoxAdapter(child: floatingSummary),
+                              SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+                              if (positions.isEmpty && !isLoadingHistory)
+                                SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SizedBox(height: 8.h),
+                                        Text(
+                                          _getEmptyStateMessage(
+                                            controller.selectedTab,
+                                          ),
+                                          style: AppTextStyles.subheading
+                                              .copyWith(
+                                                color: AppColors.textGrey,
                                               ),
-                                            )
-                                          else
-                                            SliverPadding(
-                                              padding: EdgeInsets.only(
-                                                left: 16.w,
-                                                right: 16.w,
-                                                bottom: 77.h +
-                                                    MediaQuery.of(context)
-                                                        .padding
-                                                        .bottom,
-                                              ),
-                                              sliver: SliverList(
-                                                delegate:
-                                                    SliverChildBuilderDelegate(
-                                                  (context, index) {
-                                                    final position =
-                                                        positions[index];
-                                                    return RepaintBoundary(
-                                                      child: GetBuilder<
-                                                          TradingController>(
-                                                        id: 'position_${position.orderId}',
-                                                        builder:
-                                                            (innerController) {
-                                                          final TradePosition?
-                                                              fresh =
-                                                              innerController
-                                                                          .selectedTab ==
-                                                                      0
-                                                                  ? innerController
-                                                                      .getMarketPositionById(
-                                                                        position
-                                                                            .orderId,
-                                                                      )
-                                                                  : (innerController
-                                                                              .selectedTab ==
-                                                                          1
-                                                                      ? innerController
-                                                                          .getPendingPositionById(
-                                                                            position.orderId,
-                                                                          )
-                                                                      : innerController
-                                                                          .getClosedPositionById(
-                                                                            position.orderId,
-                                                                          ));
-
-                                                          return _buildPositionCard(
-                                                            innerController,
-                                                            fresh ?? position,
-                                                          );
-                                                        },
-                                                      ),
-                                                    );
-                                                  },
-                                                  childCount: positions.length,
-                                                ),
-                                              ),
-                                            ),
-                                          if (hasMorePages)
-                                            SliverToBoxAdapter(
-                                              child: Builder(
-                                                builder: (context) {
-                                                  WidgetsBinding.instance
-                                                      .addPostFrameCallback(
-                                                    (_) {
-                                                      if (mounted &&
-                                                          !_isLoadingMore &&
-                                                          !controller
-                                                              .isLoadingHistory) {
-                                                        _loadMoreIfNeeded();
-                                                      }
-                                                    },
-                                                  );
-                                                  return _buildPaginationLoader(
-                                                    controller,
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              )
-                            // Market/Pending: current behavior (summary scrolls with list)
-                            : NotificationListener<ScrollNotification>(
-                                onNotification: (n) {
-                                  controller.notifyUserScrollActivity();
-                                  return false;
-                                },
-                                child: CustomScrollView(
-                                  controller: _scrollController,
-                                  slivers: [
-                                    SliverToBoxAdapter(child: summaryCard),
-                                    SliverToBoxAdapter(child: floatingSummary),
-                                    SliverToBoxAdapter(
-                                      child: SizedBox(height: 8.h),
-                                    ),
-                                    if (positions.isEmpty && !isLoadingHistory)
-                                      SliverFillRemaining(
-                                        hasScrollBody: false,
-                                        child: Center(
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              // FutureBuilder<Widget>(
-                                              //   future: _emptyStateSvgFuture,
-                                              //   builder: (context, snapshot) {
-                                              //     if (snapshot.hasData) {
-                                              //       return snapshot.data!;
-                                              //     }
-                                              //     return SizedBox(
-                                              //       height: 100.h,
-                                              //       width: 100.w,
-                                              //     );
-                                              //   },
-                                              // ),
-                                              // SizedBox(height: 16.h),
-                                              SizedBox(height: 8.h),
-                                              Text(
-                                                _getEmptyStateMessage(
-                                                  controller.selectedTab,
-                                                ),
-                                                style: AppTextStyles.subheading
-                                                    .copyWith(
-                                                  color: AppColors.textGrey,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                    else
-                                      SliverPadding(
-                                        padding: EdgeInsets.only(
-                                          left: 16.w,
-                                          right: 16.w,
-                                          bottom: 77.h +
-                                              MediaQuery.of(context)
-                                                  .padding
-                                                  .bottom,
-                                        ),
-                                        sliver: SliverList(
-                                          delegate:
-                                              SliverChildBuilderDelegate(
-                                            (context, index) {
-                                              final position = positions[index];
-                                              return RepaintBoundary(
-                                                child:
-                                                    GetBuilder<TradingController>(
-                                                  id: 'position_${position.orderId}',
-                                                  builder: (innerController) {
-                                                    final TradePosition? fresh =
-                                                        innerController.selectedTab ==
-                                                                0
-                                                            ? innerController
-                                                                .getMarketPositionById(
-                                                                  position.orderId,
-                                                                )
-                                                            : (innerController
-                                                                        .selectedTab ==
-                                                                    1
-                                                                ? innerController
-                                                                    .getPendingPositionById(
-                                                                      position.orderId,
-                                                                    )
-                                                                : innerController
-                                                                    .getClosedPositionById(
-                                                                      position.orderId,
-                                                                    ));
+                                )
+                              else
+                                SliverPadding(
+                                  padding: EdgeInsets.only(
+                                    left: 16.w,
+                                    right: 16.w,
+                                    bottom:
+                                        77.h +
+                                        MediaQuery.of(context).padding.bottom,
+                                  ),
+                                  sliver: SliverList(
+                                    delegate: SliverChildBuilderDelegate((
+                                      context,
+                                      index,
+                                    ) {
+                                      final position = positions[index];
+                                      return RepaintBoundary(
+                                        child: GetBuilder<TradingController>(
+                                          id: 'position_${position.orderId}',
+                                          builder: (innerController) {
+                                            final TradePosition? fresh =
+                                                innerController.selectedTab == 0
+                                                    ? innerController
+                                                        .getMarketPositionById(
+                                                          position.orderId,
+                                                        )
+                                                    : (innerController
+                                                                .selectedTab ==
+                                                            1
+                                                        ? innerController
+                                                            .getPendingPositionById(
+                                                              position.orderId,
+                                                            )
+                                                        : innerController
+                                                            .getClosedPositionById(
+                                                              position.orderId,
+                                                            ));
 
-                                                    return _buildPositionCard(
-                                                      innerController,
-                                                      fresh ?? position,
-                                                    );
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                            childCount: positions.length,
-                                          ),
+                                            return _buildPositionCard(
+                                              innerController,
+                                              fresh ?? position,
+                                            );
+                                          },
                                         ),
-                                      ),
-                                  ],
+                                      );
+                                    }, childCount: positions.length),
+                                  ),
                                 ),
-                              ),
+                              if (hasMorePages && controller.selectedTab == 2)
+                                SliverToBoxAdapter(
+                                  child: Builder(
+                                    builder: (context) {
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                            if (mounted &&
+                                                !_isLoadingMore &&
+                                                !controller.isLoadingHistory) {
+                                              _loadMoreIfNeeded();
+                                            }
+                                          });
+                                      return _buildPaginationLoader(controller);
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -662,50 +524,50 @@ class _TradeScreenState extends State<TradeScreen> {
       return (positions.isNotEmpty)
           ? (tradingController.selectedTab == 0)
               ? Container(
-                  decoration: FlavorConfig.isVantage()
-                      ? BoxDecoration(
-                        color: AppColors.whiteColor,
-                        borderRadius: BorderRadius.circular(12.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.10),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      )
-                      : null,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          FlavorConfig.isVantage() ? 12.r : 10.r,
-                        ),
+                decoration:
+                    FlavorConfig.isVantage()
+                        ? BoxDecoration(
+                          color: AppColors.whiteColor,
+                          borderRadius: BorderRadius.circular(12.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.10),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        )
+                        : null,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        FlavorConfig.isVantage() ? 12.r : 10.r,
                       ),
-                      backgroundColor:
-                          FlavorConfig.isVantage()
-                              ? Colors.transparent
-                              : AppColors.cardBackGround,
-                      padding: EdgeInsets.symmetric(horizontal: 8.w),
                     ),
-                    onPressed: () {
-                      print('🔘 Close All button clicked!');
-                      _showClosePositionsBottomSheet(tradingController);
-                    },
-                    child: Text(
-                      languageService.tr('trade_close_all'),
-                      style: AppTextStyles.label.copyWith(
-                        fontSize: 14.sp,
-                        fontWeight:
-                            FlavorConfig.isVantage()
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                        color: AppColors.primary,
-                      ),
+                    backgroundColor:
+                        FlavorConfig.isVantage()
+                            ? Colors.transparent
+                            : AppColors.cardBackGround,
+                    padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  ),
+                  onPressed: () {
+                    print('🔘 Close All button clicked!');
+                    _showClosePositionsBottomSheet(tradingController);
+                  },
+                  child: Text(
+                    languageService.tr('trade_close_all'),
+                    style: AppTextStyles.label.copyWith(
+                      fontSize: 14.sp,
+                      fontWeight:
+                          FlavorConfig.isVantage()
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                      color: AppColors.primary,
                     ),
                   ),
-                )
-
+                ),
+              )
               : SizedBox.shrink()
           : const SizedBox.shrink();
     });
@@ -726,14 +588,16 @@ class _TradeScreenState extends State<TradeScreen> {
                 : null;
 
         final isVantage = FlavorConfig.isVantage();
-        
+
         return AccountHeaderWidget(
-          layoutStyle: isVantage 
-              ? AccountHeaderLayoutStyle.vantageInstruments 
-              : AccountHeaderLayoutStyle.defaultLayout,
-          padding: isVantage 
-              ? EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h) 
-              : null,
+          layoutStyle:
+              isVantage
+                  ? AccountHeaderLayoutStyle.vantageInstruments
+                  : AccountHeaderLayoutStyle.defaultLayout,
+          padding:
+              isVantage
+                  ? EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h)
+                  : null,
           showSearchIcon: false,
           rightWidget: closeAllButton,
           floatingProfit: floatingProfit,
@@ -782,23 +646,22 @@ class _TradeScreenState extends State<TradeScreen> {
             AnimatedAlign(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
-              alignment: Alignment(
-                -1.0 + (selectedIndex * 1.0),
-                0,
-              ),
+              alignment: Alignment(-1.0 + (selectedIndex * 1.0), 0),
               child: FractionallySizedBox(
                 widthFactor: 1 / 3,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.isDarkMode
-                        ? Colors.white.withOpacity(0.2)
-                        : AppColors.primary,
+                    color:
+                        AppColors.isDarkMode
+                            ? Colors.white.withOpacity(0.2)
+                            : AppColors.primary,
                     borderRadius: BorderRadius.circular(17.r),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.isDarkMode
-                            ? Colors.black.withOpacity(0.1)
-                            : AppColors.primary.withOpacity(0.2),
+                        color:
+                            AppColors.isDarkMode
+                                ? Colors.black.withOpacity(0.1)
+                                : AppColors.primary.withOpacity(0.2),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -878,7 +741,8 @@ class _TradeScreenState extends State<TradeScreen> {
                     style: AppTextStyles.label.copyWith(
                       fontSize: 14.sp,
                       height: 1.57,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
                       color:
                           isSelected
                               ? AppColors.textPrimary
@@ -932,11 +796,12 @@ class _TradeScreenState extends State<TradeScreen> {
                       vertical: 1.5.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.isDarkMode
-                          ? AppColors.primary.withOpacity(0.15)
-                          : (isSelected
-                              ? Colors.white
-                              : AppColors.primary.withOpacity(0.15)),
+                      color:
+                          AppColors.isDarkMode
+                              ? AppColors.primary.withOpacity(0.15)
+                              : (isSelected
+                                  ? Colors.white
+                                  : AppColors.primary.withOpacity(0.15)),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
@@ -977,10 +842,7 @@ class _TradeScreenState extends State<TradeScreen> {
                   ),
                 ),
                 if (count > 0 && index != 2)
-                  Padding(
-                    padding: EdgeInsets.only(left: 4.w),
-                    child: badge,
-                  ),
+                  Padding(padding: EdgeInsets.only(left: 4.w), child: badge),
               ],
             ),
           );
@@ -1019,8 +881,8 @@ class _TradeScreenState extends State<TradeScreen> {
       final isPositive = totalProfitLoss >= 0;
 
       return Container(
-        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: AppColors.cardBackGround,
           borderRadius: BorderRadius.circular(12.r),
@@ -1584,33 +1446,35 @@ class _TradeScreenState extends State<TradeScreen> {
 
     // For huge lists (450+), Dismissible on every row causes jank due to gesture + layout overhead.
     // We keep the same close flow via tap → bottom sheet; swipe-to-close stays enabled for smaller lists.
-    final bool enableSwipeClose = tradingController.marketPositions.length < 350 &&
+    final bool enableSwipeClose =
+        tradingController.marketPositions.length < 350 &&
         tradingController.pendingPositions.length < 350;
 
     final cardChild = GestureDetector(
       onTap: () => _showPositionDetailsBottomSheet(tradingController, position),
       child: Container(
         margin: EdgeInsets.only(bottom: 6.h),
-        decoration: FlavorConfig.isVantage()
-            ? BoxDecoration(
-                color: AppColors.whiteColor,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: AppColors.border.withOpacity(0.08),
-                  width: 1,
-                ),
-              )
-            : BoxDecoration(
-                color: AppColors.whiteColor,
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+        decoration:
+            FlavorConfig.isVantage()
+                ? BoxDecoration(
+                  color: AppColors.whiteColor,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: AppColors.border.withOpacity(0.08),
+                    width: 1,
                   ),
-                ],
-              ),
+                )
+                : BoxDecoration(
+                  color: AppColors.whiteColor,
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: _buildCardContent(tradingController, position, isPositive),
@@ -1629,7 +1493,10 @@ class _TradeScreenState extends State<TradeScreen> {
         direction: DismissDirection.endToStart,
         dismissThresholds: const {DismissDirection.endToStart: 0.4},
         confirmDismiss: (direction) async {
-          return await _showClosePositionConfirmation(tradingController, position);
+          return await _showClosePositionConfirmation(
+            tradingController,
+            position,
+          );
         },
         onDismissed: (direction) async {
           setState(() {
@@ -1646,7 +1513,11 @@ class _TradeScreenState extends State<TradeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Icon(Icons.close_rounded, color: AppColors.whiteColor, size: 24.h),
+              Icon(
+                Icons.close_rounded,
+                color: AppColors.whiteColor,
+                size: 24.h,
+              ),
               SizedBox(width: 8.w),
               Text(
                 'Close',
@@ -1678,7 +1549,7 @@ class _TradeScreenState extends State<TradeScreen> {
     );
   }
 
-    Widget _buildCardContent(
+  Widget _buildCardContent(
     TradingController tradingController,
     TradePosition position,
     bool isPositive,
@@ -1692,22 +1563,22 @@ class _TradeScreenState extends State<TradeScreen> {
     final rightSideContent =
         isPendingTab
             ? Text(
-                'placed',
-                style: AppTextStyles.heading.copyWith(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textGrey,
-                ),
-              )
+              'placed',
+              style: AppTextStyles.heading.copyWith(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textGrey,
+              ),
+            )
             : Text(
-                '${PrecisionHelper.formatPnL(position.profitLoss)}',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.heading.copyWith(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800,
-                  color: isPositive ? AppColors.green : AppColors.red,
-                ),
-              );
+              '${PrecisionHelper.formatPnL(position.profitLoss)}',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.heading.copyWith(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w800,
+                color: isPositive ? AppColors.green : AppColors.red,
+              ),
+            );
 
     if (FlavorConfig.isVantage()) {
       return Container(
@@ -1724,7 +1595,8 @@ class _TradeScreenState extends State<TradeScreen> {
                   Container(
                     padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
-                      color: (isBuy ? AppColors.green : AppColors.red).withOpacity(0.1),
+                      color: (isBuy ? AppColors.green : AppColors.red)
+                          .withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -1861,7 +1733,7 @@ class _TradeScreenState extends State<TradeScreen> {
         builder: (context, setState) {
           return Container(
             height: 350.h,
-            decoration:   BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.whiteColor,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(20),
@@ -1962,7 +1834,18 @@ class _TradeScreenState extends State<TradeScreen> {
                                           }
                                         }
                                       },
-                                      activeColor: AppColors.primary,
+                                      activeColor: AppColors.isDarkMode
+                                          ? Colors.white
+                                          : AppColors.primary,
+                                      checkColor: AppColors.isDarkMode
+                                          ? Colors.black
+                                          : Colors.white,
+                                      side: BorderSide(
+                                        color: AppColors.isDarkMode
+                                            ? Colors.white
+                                            : AppColors.primary,
+                                        width: 1.5,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(
                                           4.r,
@@ -2056,7 +1939,7 @@ class _TradeScreenState extends State<TradeScreen> {
             bottom: MediaQuery.of(Get.context!).viewInsets.bottom,
           ),
           child: Container(
-            decoration:   BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.whiteColor,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(20),
@@ -2135,12 +2018,16 @@ class _TradeScreenState extends State<TradeScreen> {
                                 }
                               },
                               activeColor: AppColors.primary,
-                              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return AppColors.primary;
-                                }
-                                return AppColors.isDarkMode ? Colors.white : Colors.grey;
-                              }),
+                              fillColor: WidgetStateProperty.resolveWith<Color>(
+                                (states) {
+                                  if (states.contains(WidgetState.selected)) {
+                                    return AppColors.primary;
+                                  }
+                                  return AppColors.isDarkMode
+                                      ? Colors.white
+                                      : Colors.grey;
+                                },
+                              ),
                             ),
                           ),
                           onTap: () {
@@ -2746,7 +2633,7 @@ class _TradeScreenState extends State<TradeScreen> {
     bool isPositive,
   ) {
     return Container(
-      decoration:   BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -3166,203 +3053,195 @@ class _TradeScreenState extends State<TradeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                    Padding(
-                      padding: EdgeInsets.all(16.w),
-                      child: Text(
-                        'Which positions would you like to close at market prices?',
-                        style: AppTextStyles.heading.copyWith(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                        textAlign: TextAlign.center,
+                  Padding(
+                    padding: EdgeInsets.all(16.w),
+                    child: Text(
+                      'Which positions would you like to close at market prices?',
+                      style: AppTextStyles.heading.copyWith(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 8.h),
-                    Flexible(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              _buildCloseOption(
-                                tradingController,
-                                'all_currently_open',
-                                'All currently open',
-                                () => tradingController.getTotalProfitLoss(),
-                                selectedOption == 'all_currently_open',
-                                (value) =>
-                                    setState(() => selectedOption = value),
-                              ),
-                              _buildCloseOption(
-                                tradingController,
-                                'all_profitable',
-                                'All profitable',
-                                () =>
-                                    tradingController
-                                        .getTotalProfitableProfitLoss(),
-                                selectedOption == 'all_profitable',
-                                (value) =>
-                                    setState(() => selectedOption = value),
-                              ),
-                              _buildCloseOption(
-                                tradingController,
-                                'all_losing',
-                                'All losing',
-                                () =>
-                                    tradingController
-                                        .getTotalLosingProfitLoss(),
-                                selectedOption == 'all_losing',
-                                (value) =>
-                                    setState(() => selectedOption = value),
-                              ),
-                              _buildCloseOption(
-                                tradingController,
-                                'all_long',
-                                'All Long',
-                                () =>
-                                    tradingController.getTotalLongProfitLoss(),
-                                selectedOption == 'all_long',
-                                (value) =>
-                                    setState(() => selectedOption = value),
-                              ),
-                              _buildCloseOption(
-                                tradingController,
-                                'all_short',
-                                'All Short',
-                                () =>
-                                    tradingController.getTotalShortProfitLoss(),
-                                selectedOption == 'all_short',
-                                (value) =>
-                                    setState(() => selectedOption = value),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // SizedBox(height: 16.h),
-                    SafeArea(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          left: 16.w,
-                          right: 16.w,
-                          // bottom: 16.h,
-                        ),
-                        child: Row(
+                  ),
+                  SizedBox(height: 8.h),
+                  Flexible(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: SingleChildScrollView(
+                        child: Column(
                           children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: AppColors.primary),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                  ),
-                                  minimumSize: Size(double.infinity, 40.h),
-                                  // Removed maximumSize to avoid constraint conflicts
-                                ),
-                                child: Text(
-                                  'Cancel',
-                                  style: AppTextStyles.label.copyWith(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ),
+                            _buildCloseOption(
+                              tradingController,
+                              'all_currently_open',
+                              'All currently open',
+                              () => tradingController.getTotalProfitLoss(),
+                              selectedOption == 'all_currently_open',
+                              (value) => setState(() => selectedOption = value),
                             ),
-                            SizedBox(width: 16.w),
-                            // ✅ ENHANCED: Show P&L in button text, keep original style
-                            Expanded(
-                              child: Obx(() {
-                                // Calculate P&L based on selected option
-                                final pnl = _getPnLForOption(
-                                  selectedOption,
-                                  tradingController,
-                                );
-                                final isPositive = pnl >= 0;
-                                final isPendingTab =
-                                    tradingController.selectedTab == 1;
-
-                                // Button text with P&L
-                                String buttonText;
-                                if (isPendingTab) {
-                                  final count =
-                                      tradingController.pendingPositions.length;
-                                  buttonText =
-                                      'Confirm ($count order${count != 1 ? 's' : ''})';
-                                } else {
-                                  buttonText =
-                                      isPositive
-                                          ? 'Confirm (+\$${PrecisionHelper.formatPnL(pnl)})'
-                                          : 'Confirm (\$${PrecisionHelper.formatPnL(pnl)})';
-                                }
-
-                                return ElevatedButton(
-                                  onPressed:
-                                      tradingController.isLoading
-                                          ? null
-                                          : () async {
-                                            print(
-                                              '🔘 Bottom sheet confirm button clicked!',
-                                            );
-                                            print(
-                                              '📊 Selected option: $selectedOption',
-                                            );
-
-                                            // Close bottom sheet immediately using Navigator
-
-                                            // ✅ Execute directly without second confirmation
-                                            await _executeClosePositionsDirectly(
-                                              tradingController,
-                                              selectedOption,
-                                            );
-                                            Navigator.of(context).pop();
-                                          },
-                                  style: ElevatedButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    backgroundColor:
-                                        isPendingTab
-                                            ? AppColors.primary
-                                            : (isPositive
-                                                ? AppColors.success
-                                                : AppColors.error),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8.r),
-                                    ),
-                                    minimumSize: Size(double.infinity, 40.h),
-                                  ),
-                                  child:
-                                      tradingController.isLoading
-                                          ? ButtonLoadingWidget(
-                                            size: 16.0,
-                                            color: AppColors.whiteColor,
-                                          )
-                                          : Text(
-                                            buttonText,
-                                            textAlign: TextAlign.center,
-                                            style: AppTextStyles.label.copyWith(
-                                              fontSize: 16.sp,
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.whiteColor,
-                                            ),
-                                          ),
-                                );
-                              }),
+                            _buildCloseOption(
+                              tradingController,
+                              'all_profitable',
+                              'All profitable',
+                              () =>
+                                  tradingController
+                                      .getTotalProfitableProfitLoss(),
+                              selectedOption == 'all_profitable',
+                              (value) => setState(() => selectedOption = value),
+                            ),
+                            _buildCloseOption(
+                              tradingController,
+                              'all_losing',
+                              'All losing',
+                              () =>
+                                  tradingController.getTotalLosingProfitLoss(),
+                              selectedOption == 'all_losing',
+                              (value) => setState(() => selectedOption = value),
+                            ),
+                            _buildCloseOption(
+                              tradingController,
+                              'all_long',
+                              'All Long',
+                              () => tradingController.getTotalLongProfitLoss(),
+                              selectedOption == 'all_long',
+                              (value) => setState(() => selectedOption = value),
+                            ),
+                            _buildCloseOption(
+                              tradingController,
+                              'all_short',
+                              'All Short',
+                              () => tradingController.getTotalShortProfitLoss(),
+                              selectedOption == 'all_short',
+                              (value) => setState(() => selectedOption = value),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  // SizedBox(height: 16.h),
+                  SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: 16.w,
+                        right: 16.w,
+                        // bottom: 16.h,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: AppColors.primary),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                minimumSize: Size(double.infinity, 40.h),
+                                // Removed maximumSize to avoid constraint conflicts
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: AppTextStyles.label.copyWith(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 16.w),
+                          // ✅ ENHANCED: Show P&L in button text, keep original style
+                          Expanded(
+                            child: Obx(() {
+                              // Calculate P&L based on selected option
+                              final pnl = _getPnLForOption(
+                                selectedOption,
+                                tradingController,
+                              );
+                              final isPositive = pnl >= 0;
+                              final isPendingTab =
+                                  tradingController.selectedTab == 1;
+
+                              // Button text with P&L
+                              String buttonText;
+                              if (isPendingTab) {
+                                final count =
+                                    tradingController.pendingPositions.length;
+                                buttonText =
+                                    'Confirm ($count order${count != 1 ? 's' : ''})';
+                              } else {
+                                buttonText =
+                                    isPositive
+                                        ? 'Confirm (+\$${PrecisionHelper.formatPnL(pnl)})'
+                                        : 'Confirm (\$${PrecisionHelper.formatPnL(pnl)})';
+                              }
+
+                              return ElevatedButton(
+                                onPressed:
+                                    tradingController.isLoading
+                                        ? null
+                                        : () async {
+                                          print(
+                                            '🔘 Bottom sheet confirm button clicked!',
+                                          );
+                                          print(
+                                            '📊 Selected option: $selectedOption',
+                                          );
+
+                                          // Close bottom sheet immediately using Navigator
+
+                                          // ✅ Execute directly without second confirmation
+                                          await _executeClosePositionsDirectly(
+                                            tradingController,
+                                            selectedOption,
+                                          );
+                                          Navigator.of(context).pop();
+                                        },
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  backgroundColor:
+                                      isPendingTab
+                                          ? AppColors.primary
+                                          : (isPositive
+                                              ? AppColors.success
+                                              : AppColors.error),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.r),
+                                  ),
+                                  minimumSize: Size(double.infinity, 40.h),
+                                ),
+                                child:
+                                    tradingController.isLoading
+                                        ? ButtonLoadingWidget(
+                                          size: 16.0,
+                                          color: AppColors.whiteColor,
+                                        )
+                                        : Text(
+                                          buttonText,
+                                          textAlign: TextAlign.center,
+                                          style: AppTextStyles.label.copyWith(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.whiteColor,
+                                          ),
+                                        ),
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
+      ),
       isScrollControlled: true,
       isDismissible: true,
       enableDrag: true,
@@ -3908,10 +3787,11 @@ class _TradeScreenState extends State<TradeScreen> {
       accountInfo = tradingController.accountInfo;
     }
 
-    final metricKeys = config.metricKeys.where((key) {
-      if (key == 'trade_metric_credit' && currentTab == 2) return false;
-      return true;
-    }).toList();
+    final metricKeys =
+        config.metricKeys.where((key) {
+          if (key == 'trade_metric_credit' && currentTab == 2) return false;
+          return true;
+        }).toList();
 
     // INNOVATIVE DESIGN: Grid view with icons for Vantage flavor
     if (FlavorConfig.isVantage()) {
@@ -3923,9 +3803,9 @@ class _TradeScreenState extends State<TradeScreen> {
         padding: EdgeInsets.symmetric(vertical: 2.h),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          childAspectRatio: isCompactScreen ? 1.38 : 1.55,
-          crossAxisSpacing: 6.w,
-          mainAxisSpacing: 6.h,
+          childAspectRatio: isCompactScreen ? 1.75 : 1.95,
+          crossAxisSpacing: 4.w,
+          mainAxisSpacing: 4.h,
         ),
         itemCount: metricKeys.length,
         itemBuilder: (context, index) {
@@ -3957,27 +3837,28 @@ class _TradeScreenState extends State<TradeScreen> {
 
     // ORIGINAL DESIGN: Simple list for other flavors
     return Column(
-      children: metricKeys.map((key) {
-        String value;
-        Color? valueColor;
+      children:
+          metricKeys.map((key) {
+            String value;
+            Color? valueColor;
 
-        if (currentTab == 2 && totals != null) {
-          value = _getMetricValue(key, null, totals);
-          valueColor = _getMetricColor(key, null, totals);
-        } else if (currentTab != 2 && accountInfo != null) {
-          value = _getMetricValue(key, accountInfo, null);
-          valueColor = _getMetricColor(key, accountInfo, null);
-        } else {
-          value = '0.00';
-          valueColor = AppColors.textGrey;
-        }
+            if (currentTab == 2 && totals != null) {
+              value = _getMetricValue(key, null, totals);
+              valueColor = _getMetricColor(key, null, totals);
+            } else if (currentTab != 2 && accountInfo != null) {
+              value = _getMetricValue(key, accountInfo, null);
+              valueColor = _getMetricColor(key, accountInfo, null);
+            } else {
+              value = '0.00';
+              valueColor = AppColors.textGrey;
+            }
 
-        return _buildMetricRow(
-          languageService.tr(key),
-          value,
-          valueColor: valueColor,
-        );
-      }).toList(),
+            return _buildMetricRow(
+              languageService.tr(key),
+              value,
+              valueColor: valueColor,
+            );
+          }).toList(),
     );
   }
 
@@ -4198,12 +4079,13 @@ class _TradeScreenState extends State<TradeScreen> {
 
     // Format value: strip % suffix from display, add % after negative values
     final displayValue = value.replaceAll('%', '').trim();
-    final showPercent = valueColor != null &&
+    final showPercent =
+        valueColor != null &&
         valueColor == AppColors.red &&
         key == 'trade_metric_margin_level';
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 5.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(10.r),

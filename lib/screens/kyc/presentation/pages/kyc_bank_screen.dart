@@ -16,6 +16,7 @@ import 'package:crm_app/utils/file_compression_helper.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 
 import 'package:crm_app/widgets/kyc_scaffold.dart';
+import 'package:crm_app/models/bank_withdralList_model.dart';
 
 class KycBankScreen extends StatefulWidget {
   const KycBankScreen({Key? key}) : super(key: key);
@@ -481,6 +482,78 @@ class _KycBankScreenState extends State<KycBankScreen> {
     }
   }
 
+  // Crypto Network field
+  Widget _buildCryptoNetworkField() {
+    try {
+      return Obx(() {
+        // Find selected network label
+        final selectedNetwork = controller.allowedCryptoNetworks.firstWhere(
+          (n) => n.slug == controller.selectedCryptoNetwork.value,
+          orElse: () => AllowedCryptoNetwork(slug: '', label: ''),
+        );
+        final displayName = selectedNetwork.label ?? '';
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: 16.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RTLHelper.rtlTextField(
+                readOnly: true,
+                onTap: _showCryptoNetworkBottomSheet,
+                controller: TextEditingController(
+                  text: displayName,
+                ),
+                labelText: languageService.tr('kyc_crypto_network'),
+                suffixIcon: InkWell(
+                  onTap: _showCryptoNetworkBottomSheet,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: RTLHelper.rtlIcon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.icongrey,
+                    ),
+                  ),
+                ),
+                decoration: InputDecoration(
+                  labelText: languageService.tr('kyc_crypto_network'),
+                  hintText: languageService.tr('kyc_crypto_network_hint'),
+                  labelStyle: TextStyle(color: AppColors.textGrey),
+                  floatingLabelStyle: TextStyle(color: AppColors.primary),
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                languageService.tr('kyc_crypto_network_help'),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.textGrey,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        );
+      });
+    } catch (e) {
+      print('Error in _buildCryptoNetworkField: $e');
+      return Container(
+        height: 50.h,
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(
+            'Error loading network field',
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+    }
+  }
+
   // Dynamic fields based on account type
   List<Widget> _buildDynamicFields() {
     try {
@@ -579,6 +652,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
     return [
       // Crypto section header
       // _buildSectionHeader("Crypto Details", Icons.currency_bitcoin),
+      _buildCryptoNetworkField(),
       _buildFormField(
         languageService.tr('kyc_crypto_address'),
         _cryptoAddressController,
@@ -1054,7 +1128,10 @@ class _KycBankScreenState extends State<KycBankScreen> {
               ),
               ...controller.accountTypes.map((type) {
                 return ListTile(
-                  title: Text(type),
+                  title: Text(
+                    type,
+                    style: TextStyle(color: AppColors.textPrimary),
+                  ),
                   trailing:
                       controller.selectedAccountType.value == type
                           ? Icon(Icons.check, color: AppColors.primary)
@@ -1144,7 +1221,10 @@ class _KycBankScreenState extends State<KycBankScreen> {
               ),
               ...controller.relationShips.map((type) {
                 return ListTile(
-                  title: Text(type),
+                  title: Text(
+                    type,
+                    style: TextStyle(color: AppColors.textPrimary),
+                  ),
                   trailing:
                       controller.selectedRelationship.value == type
                           ? Icon(Icons.check, color: AppColors.primary)
@@ -1173,6 +1253,67 @@ class _KycBankScreenState extends State<KycBankScreen> {
       builder: (context) {
         return SafeArea(
           child: _CurrencySelectionBottomSheet(controller: controller),
+        );
+      },
+    );
+  }
+
+  // Helper for Crypto Network bottom sheet
+  void _showCryptoNetworkBottomSheet() {
+    showModalBottomSheet(
+      backgroundColor: AppColors.whiteColor,
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(16.w),
+                child: Text(
+                  languageService.tr('kyc_crypto_network_hint'),
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Obx(() => Column(
+                mainAxisSize: MainAxisSize.min,
+                children: controller.allowedCryptoNetworks.isEmpty
+                    ? [
+                        Padding(
+                          padding: EdgeInsets.all(24.w),
+                          child: Text(
+                            'No networks available',
+                            style: TextStyle(color: AppColors.textSecondary),
+                          ),
+                        )
+                      ]
+                    : controller.allowedCryptoNetworks.map((network) {
+                        return ListTile(
+                          title: Text(
+                            network.label ?? '',
+                            style: TextStyle(color: AppColors.textPrimary),
+                          ),
+                          trailing:
+                              controller.selectedCryptoNetwork.value == network.slug
+                                  ? Icon(Icons.check, color: AppColors.primary)
+                                  : null,
+                          onTap: () {
+                            controller.selectedCryptoNetwork.value = network.slug ?? '';
+                            Navigator.pop(context);
+                          },
+                        );
+                      }).toList(),
+              )),
+              SizedBox(height: 16.h),
+            ],
+          ),
         );
       },
     );
@@ -1651,7 +1792,10 @@ class _CurrencySelectionBottomSheetState
                       itemBuilder: (context, index) {
                         final currency = filteredCurrencies[index];
                         return ListTile(
-                          title: Text(currency),
+                          title: Text(
+                            currency,
+                            style: TextStyle(color: AppColors.textPrimary),
+                          ),
                           trailing:
                               widget.controller.selectedCurrency.value ==
                                       currency

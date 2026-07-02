@@ -4,6 +4,8 @@ import 'package:country_picker/country_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
+import 'package:phone_numbers_parser/metadata.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -42,6 +44,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   String _selectedCountryCode = '';
   String _selectedCountryFlag = '';
+  IsoCode? _selectedIsoCode;
+  // Max number of national digits allowed for the selected country.
+  int _maxPhoneDigits = 15;
   bool _isFormValid = false;
   final ValueNotifier<bool> _passwordVisible = ValueNotifier<bool>(false);
 
@@ -83,11 +88,101 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       _isFormValid =
           _firstNameController.text.isNotEmpty &&
           _lastNameController.text.isNotEmpty &&
-          _phoneController.text.isNotEmpty &&
-          _emailController.text.isNotEmpty &&
+          _isPhoneValid() &&
+          _isValidEmail(_emailController.text.trim()) &&
           _passwordController.text.isNotEmpty;
     });
   }
+
+  // ---- Country-aware phone helpers --------------------------------------
+
+  /// Maps a 2-letter ISO country code (from country_picker) to an [IsoCode].
+  IsoCode? _isoFromCountryCode(String? countryCode) {
+    if (countryCode == null || countryCode.isEmpty) return null;
+    final upper = countryCode.toUpperCase();
+    for (final iso in IsoCode.values) {
+      if (iso.name == upper) return iso;
+    }
+    return null;
+  }
+
+  /// Computes the max number of national digits for the given country so the
+  /// input can be capped per-country (e.g. 10 for IN, 9 for many others).
+  int _maxDigitsForIso(IsoCode? iso) {
+    if (iso == null) return 15;
+    final lengths = metadataLenghtsByIsoCode[iso];
+    if (lengths == null) return 15;
+    final all = <int>[
+      ...lengths.general,
+      ...lengths.mobile,
+      ...lengths.fixedLine,
+    ];
+    if (all.isEmpty) return 15;
+    return all.reduce((a, b) => a > b ? a : b);
+  }
+
+  /// Returns only the digits currently entered in the phone field.
+  String get _phoneDigits =>
+      _phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+  /// Country-aware validity of the entered phone number.
+  bool _isPhoneValid() {
+    final digits = _phoneDigits;
+    if (digits.isEmpty) return false;
+    final iso = _selectedIsoCode;
+    if (iso == null) return digits.length >= 6 && digits.length <= 15;
+    try {
+      final number = PhoneNumber.parse(digits, destinationCountry: iso);
+      if (number.isValid(type: PhoneNumberType.mobile) || number.isValid()) {
+        return true;
+      }
+    } catch (_) {}
+    // Fallback: If library parsing fails or says it is invalid (e.g. mock/test numbers or unassigned area codes),
+    // we accept it if the length of the digits is reasonable (e.g., between 7 and 15 digits).
+    return digits.length >= 7 && digits.length <= 15;
+  }
+
+  /// Formats the entered national number for display (country specific).
+  void _formatPhoneInput() {
+    final iso = _selectedIsoCode;
+    final digits = _phoneDigits;
+    if (iso == null || digits.isEmpty) return;
+    try {
+      final formatted =
+          PhoneNumber.parse(digits, destinationCountry: iso).formatNsn();
+      if (formatted.isNotEmpty && formatted != _phoneController.text) {
+        _phoneController.value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
+      }
+    } catch (_) {
+      // Keep raw input if it cannot be formatted yet.
+    }
+  }
+
+  void _applyCountry({
+    required String phoneCode,
+    required String flagEmoji,
+    required String countryIso2,
+  }) {
+    final iso = _isoFromCountryCode(countryIso2);
+    setState(() {
+      _selectedCountryCode = "+$phoneCode";
+      _selectedCountryFlag = "$flagEmoji +$phoneCode";
+      _selectedIsoCode = iso;
+      _maxPhoneDigits = _maxDigitsForIso(iso);
+    });
+    // Re-trim/format any existing input to the newly selected country.
+    final digits = _phoneDigits;
+    if (digits.length > _maxPhoneDigits) {
+      _phoneController.text = digits.substring(0, _maxPhoneDigits);
+    }
+    _formatPhoneInput();
+    _validateForm();
+  }
+
+  // -----------------------------------------------------------------------
 
   Future<void> _sendOTPForVerification() async {
     try {
@@ -128,7 +223,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         "last_name": _lastNameController.text.trim(),
         "email": _emailController.text.trim(),
         "password": _passwordController.text.trim(),
-        "mobile": _phoneController.text.trim(),
+        "mobile": _phoneDigits,
         "otp_verification_type": "email",
         "register_event_type": "verifyOtp",
         "accept_terms": true,
@@ -203,7 +298,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       "last_name": _lastNameController.text.trim(),
       "email": email,
       "password": _passwordController.text.trim(),
-      "mobile": _phoneController.text.trim(),
+      "mobile": _phoneDigits,
       "otp_verification_type": "email",
       "register_event_type": "register",
       "accept_terms": true,
@@ -250,8 +345,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         ),
         inputDecoration: InputDecoration(
           labelText: 'Search',
-          hintText: 'Start typing to search',
-          prefixIcon: const Icon(Icons.search),
+          hintText: 'Start typing to search',          
+          prefixIcon: Icon(Icons.search, color: AppColors.textPrimary),
           border: OutlineInputBorder(
             borderSide: BorderSide(
               color: AppColors.placeholderSoft,
@@ -260,11 +355,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         ),
       ),
       onSelect: (Country country) {
-        setState(() {
-          _selectedCountryCode = "+${country.phoneCode}";
-          _selectedCountryFlag = "${country.flagEmoji} +${country.phoneCode}";
-          _validateForm();
-        });
+        _applyCountry(
+          phoneCode: country.phoneCode,
+          flagEmoji: country.flagEmoji,
+          countryIso2: country.countryCode,
+        );
       },
     );
   }
@@ -277,15 +372,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       if (countryCode != null && countryCode.isNotEmpty) {
         final countries = CountryService().getAll();
         final deviceCountry = countries.firstWhere(
-          (country) => country.countryCode == countryCode,
+          (country) =>
+              country.countryCode.toUpperCase() == countryCode.toUpperCase(),
           orElse: () => countries.first,
         );
 
-        setState(() {
-          _selectedCountryCode = "+${deviceCountry.phoneCode}";
-          _selectedCountryFlag = deviceCountry.flagEmoji;
-          _validateForm();
-        });
+        _applyCountry(
+          phoneCode: deviceCountry.phoneCode,
+          flagEmoji: deviceCountry.flagEmoji,
+          countryIso2: deviceCountry.countryCode,
+        );
       }
     } catch (e) {
       print("Error detecting device country: $e");
@@ -363,12 +459,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           validator: (value) => _validateEmail(value),
         ),
         _buildPasswordField(),
-        _buildTextField(
-          controller: _referrerController,
-          label: 'Referrer Code',
-          keyboardType: TextInputType.text,
-          maxLength: 30,
-        ),
+        // _buildTextField(
+        //   controller: _referrerController,
+        //   label: 'Referrer Code',
+        //   keyboardType: TextInputType.text,
+        //   maxLength: 30,
+        // ),
         Row(
           children: [
             Checkbox(
@@ -392,6 +488,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 setState(() => _enableBiometricAfterRegister = true);
               },
               activeColor: AppColors.primary,
+              checkColor: AppColors.pureWhite,
+              side: BorderSide(color: AppColors.border),
             ),
             Expanded(
               child: Text(
@@ -447,6 +545,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             onPressed: () => _passwordVisible.value = !isVisible,
             icon: SvgPicture.asset(
               isVisible ? "assets/svg/eye_icon.svg" : "assets/svg/eye-slash.svg",
+              color: AppColors.primary,
             ),
           ),
           validator: (value) => _validatePassword(value),
@@ -479,13 +578,23 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             child: TextFormField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9\s\-()]')),
+                _PhoneDigitsLimitFormatter(() => _maxPhoneDigits),
+              ],
+              onChanged: (_) => _formatPhoneInput(),
               decoration: InputDecoration(
                 labelText: _languageService.tr("register_phone"),
+                counterText: '',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
+                final digits = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+                if (digits.isEmpty) {
                   return _languageService.tr('validation_required');
+                }
+                if (!_isPhoneValid()) {
+                  return _languageService.tr('create_account_validation_phone');
                 }
                 return null;
               },
@@ -607,3 +716,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   }
 }
 
+/// Limits the phone field to a country-specific number of DIGITS while still
+/// allowing separator characters (space, dash, parentheses) added by formatting.
+class _PhoneDigitsLimitFormatter extends TextInputFormatter {
+  _PhoneDigitsLimitFormatter(this.maxDigits);
+
+  final int Function() maxDigits;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length <= maxDigits()) {
+      return newValue;
+    }
+    return oldValue;
+  }
+}

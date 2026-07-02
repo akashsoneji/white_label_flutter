@@ -113,10 +113,6 @@ class _CopyTradingMainScreenState extends State<CopyTradingMainScreen> {
       return Scaffold(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(
-              bottom: kBottomNavigationBarHeight,
-            ),
             child: PageView(
               controller: _pageController,
               onPageChanged: (idx) {
@@ -125,7 +121,6 @@ class _CopyTradingMainScreenState extends State<CopyTradingMainScreen> {
               physics: const NeverScrollableScrollPhysics(),
               children: tabs,
             ),
-          ),
         ),
 
         // Floating pill navigation — same pattern as TradingMainScreen

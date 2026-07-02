@@ -41,7 +41,7 @@ class VantageChartLayout extends StatelessWidget {
         );
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: backgroundColor,
       appBar: VantageAppBar(
         title: appBarTitle,

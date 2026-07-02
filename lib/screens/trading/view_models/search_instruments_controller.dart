@@ -15,7 +15,7 @@ class SearchInstrumentsController extends GetxController {
   var searchQuery = ''.obs;
   /// Chips order: All, Currency, Metals, Crypto, Indices, Energy, Commodities.
   /// Default tab is Currency (Forex/Currency API names via aliases).
-  var currentCategory = 'Currency'.obs;
+  var currentCategory = 'All'.obs;
 
   // Preferred display order — API categories that don't appear here are
   // appended alphabetically at the end.
@@ -56,7 +56,7 @@ class SearchInstrumentsController extends GetxController {
           _updateAvailableCategories();
 
           if (!availableCategories.contains(currentCategory.value)) {
-            currentCategory.value = 'Currency';
+            currentCategory.value = 'All';
           }
 
           _applyFilter();

@@ -1,0 +1,34 @@
+name: gtxprime
+type: child
+inheritsFrom: vantage
+label: GTX Prime
+themeMode: both
+
+android:
+  applicationId: com.gtxprime.app
+  appName: GTX Prime
+
+ios:
+  bundleId: com.gtxprime.app
+  appName: GTX Prime
+
+colors:
+  primary: "#01061A"
+  darkPrimary: "#F8F3FF"
+  secondary: "#011947"
+  accent: "#011947"
+  splashColor: "#01061A"
+  launcherBackground: "#01061A"
+
+urls:
+  api: https://member.gtxprime.com/api/
+  websocket: wss://member.gtxprime.com/trade-engine
+  chart: https://member.gtxprime.com
+
+assets:
+  appIcon: icon.png
+  logo: logo.png
+  splashLogo: splash_logo.png
+
+features:
+  useNewChart: false

@@ -64,7 +64,7 @@ class MasterDashboardScreen extends StatelessWidget {
           onRefresh: () => controller.refreshAll(showLoading: false),
           child: ListView(
             physics: AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 16.h),
+            padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 90.h),
             children: [
               Text(
                 'Dashboard overview',

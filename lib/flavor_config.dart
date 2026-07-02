@@ -20,72 +20,76 @@ class FlavorConfig {
   final String apiBaseUrl;
   final String chartBaseUrl;
   final String websocketUrl;
-  final String appIconPath;
-  final String svgLogoPath;
-  final String splashLogoPath;
-  final String? remoteLogoUrl;
-  final Map<String, dynamic>? selectedBrokerData;
+ final String appIconPath;
+ final String svgLogoPath;
+ final String splashLogoPath;
+ final String? remoteLogoUrl;
+ final Map<String, dynamic>? selectedBrokerData;
+ final bool useNewChart;
 
-  static FlavorConfig? _instance;
-  static Flavor? _selectedFlavor;
+ static FlavorConfig? _instance;
+ static Flavor? _selectedFlavor;
 
-  factory FlavorConfig({
-    required Flavor flavor,
-    required String appName,
-    required String appTitle,
-    required Color primaryColor,
-    required Color darkPrimaryColor,
-    required Color secondaryColor,
-    required Color accentColor,
-    required String apiBaseUrl,
-    required String websocketUrl,
-    required String chartBaseUrl,
-    required String appIconPath,
-    required String svgLogoPath,
-    required String splashLogoPath,
-    String? remoteLogoUrl,
-    Map<String, dynamic>? selectedBrokerData,
-  }) {
-    if (_selectedFlavor == null || _selectedFlavor == flavor) {
-      _instance = FlavorConfig._internal(
-        flavor: flavor,
-        appName: appName,
-        title: appTitle,
-        primaryColor: primaryColor,
-        darkPrimaryColor: darkPrimaryColor,
-        secondaryColor: secondaryColor,
-        accentColor: accentColor,
-        apiBaseUrl: apiBaseUrl,
-        websocketUrl: websocketUrl,
-        chartBaseUrl: chartBaseUrl,
-        appIconPath: appIconPath,
-        svgLogoPath: svgLogoPath,
-        splashLogoPath: splashLogoPath,
-        remoteLogoUrl: remoteLogoUrl,
-        selectedBrokerData: selectedBrokerData,
-      );
-      _selectedFlavor = flavor;
-    }
-    return _instance!;
-  }
+ factory FlavorConfig({
+ required Flavor flavor,
+ required String appName,
+ required String appTitle,
+ required Color primaryColor,
+ required Color darkPrimaryColor,
+ required Color secondaryColor,
+ required Color accentColor,
+ required String apiBaseUrl,
+ required String websocketUrl,
+ required String chartBaseUrl,
+ required String appIconPath,
+ required String svgLogoPath,
+ required String splashLogoPath,
+ String? remoteLogoUrl,
+ Map<String, dynamic>? selectedBrokerData,
+ bool useNewChart = false,
+ }) {
+ if (_selectedFlavor == null || _selectedFlavor == flavor) {
+ _instance = FlavorConfig._internal(
+ flavor: flavor,
+ appName: appName,
+ title: appTitle,
+ primaryColor: primaryColor,
+ darkPrimaryColor: darkPrimaryColor,
+ secondaryColor: secondaryColor,
+ accentColor: accentColor,
+ apiBaseUrl: apiBaseUrl,
+ websocketUrl: websocketUrl,
+ chartBaseUrl: chartBaseUrl,
+ appIconPath: appIconPath,
+ svgLogoPath: svgLogoPath,
+ splashLogoPath: splashLogoPath,
+ remoteLogoUrl: remoteLogoUrl,
+ selectedBrokerData: selectedBrokerData,
+ useNewChart: useNewChart,
+ );
+ _selectedFlavor = flavor;
+ }
+ return _instance!;
+ }
 
-  FlavorConfig._internal({
-    required this.flavor,
-    required String title,
-    required this.appName,
-    required this.primaryColor,
-    required this.darkPrimaryColor,
-    required this.secondaryColor,
-    required this.accentColor,
-    required this.apiBaseUrl,
-    required this.websocketUrl,
-    required this.chartBaseUrl,
-    required this.appIconPath,
-    required this.svgLogoPath,
-    required this.splashLogoPath,
-    required this.remoteLogoUrl,
-    required this.selectedBrokerData,
-  }) : appTitle = title;
+ FlavorConfig._internal({
+ required this.flavor,
+ required String title,
+ required this.appName,
+ required this.primaryColor,
+ required this.darkPrimaryColor,
+ required this.secondaryColor,
+ required this.accentColor,
+ required this.apiBaseUrl,
+ required this.websocketUrl,
+ required this.chartBaseUrl,
+ required this.appIconPath,
+ required this.svgLogoPath,
+ required this.splashLogoPath,
+ required this.remoteLogoUrl,
+ required this.selectedBrokerData,
+ this.useNewChart = false,
+ }) : appTitle = title;
 
   static FlavorConfig get instance => _instance ?? activate(Flavor.celestial);
 
@@ -140,24 +144,27 @@ class FlavorConfig {
     Map<String, dynamic>? brokerData,
   }) {
     final current = instance;
-    _instance = FlavorConfig._internal(
-      flavor: current.flavor,
-      title: config['appTitle']?.toString() ?? current.appTitle,
-      appName: brokerName ?? config['appName']?.toString() ?? current.appName,
-      primaryColor: _parseColor(config['primaryColor']) ?? current.primaryColor,
-      darkPrimaryColor: _parseColor(config['darkPrimaryColor']) ?? current.darkPrimaryColor,
-      secondaryColor: _parseColor(config['secondaryColor']) ?? current.secondaryColor,
-      accentColor: _parseColor(config['accentColor']) ?? current.accentColor,
-      apiBaseUrl: config['apiBaseUrl']?.toString() ?? current.apiBaseUrl,
-      websocketUrl: config['websocketUrl']?.toString() ?? current.websocketUrl,
-      chartBaseUrl: config['chartBaseUrl']?.toString() ?? current.chartBaseUrl,
-      appIconPath: config['appIconPath']?.toString() ?? current.appIconPath,
-      svgLogoPath: brokerLogoUrl ?? config['logoSvgPath']?.toString() ?? current.svgLogoPath,
-      splashLogoPath: config['splashLogoPath']?.toString() ?? current.splashLogoPath,
-      remoteLogoUrl: config['remoteLogoUrl']?.toString() ?? current.remoteLogoUrl,
-      selectedBrokerData: brokerData ?? (config['selectedBrokerData'] as Map<String, dynamic>?) ?? current.selectedBrokerData,
-    );
-  }
+ _instance = FlavorConfig._internal(
+ flavor: current.flavor,
+ title: config['appTitle']?.toString() ?? current.appTitle,
+ appName: brokerName ?? config['appName']?.toString() ?? current.appName,
+ primaryColor: _parseColor(config['primaryColor']) ?? current.primaryColor,
+ darkPrimaryColor: _parseColor(config['darkPrimaryColor']) ?? current.darkPrimaryColor,
+ secondaryColor: _parseColor(config['secondaryColor']) ?? current.secondaryColor,
+ accentColor: _parseColor(config['accentColor']) ?? current.accentColor,
+ apiBaseUrl: config['apiBaseUrl']?.toString() ?? current.apiBaseUrl,
+ websocketUrl: config['websocketUrl']?.toString() ?? current.websocketUrl,
+ chartBaseUrl: config['chartBaseUrl']?.toString() ?? current.chartBaseUrl,
+ appIconPath: config['appIconPath']?.toString() ?? current.appIconPath,
+ svgLogoPath: brokerLogoUrl ?? config['logoSvgPath']?.toString() ?? current.svgLogoPath,
+ splashLogoPath: config['splashLogoPath']?.toString() ?? current.splashLogoPath,
+ remoteLogoUrl: config['remoteLogoUrl']?.toString() ?? current.remoteLogoUrl,
+ selectedBrokerData: brokerData ?? (config['selectedBrokerData'] as Map<String, dynamic>?) ?? current.selectedBrokerData,
+ useNewChart: config['useNewChart'] is bool
+ ? config['useNewChart'] as bool
+ : current.useNewChart,
+ );
+ }
 
   static Color? _parseColor(dynamic value) {
     if (value == null) return null;
@@ -173,24 +180,25 @@ class FlavorConfig {
   }
 }
 
-extension _BaseClientConfigFlavorConfigX on BaseClientConfig {
-  FlavorConfig toFlavorConfig(Flavor flavor, String clientName) {
-    return FlavorConfig(
-      flavor: flavor,
-      appName: brandName,
-      appTitle: appTitle,
-      primaryColor: primaryColor,
-      darkPrimaryColor: darkPrimaryColor,
-      secondaryColor: secondaryColor,
-      accentColor: accentColor,
-      websocketUrl: websocketUrl,
-      chartBaseUrl: chartBaseUrl,
-      apiBaseUrl: apiBaseUrl,
-      appIconPath: getAssetPath(clientName, appIconPath),
-      svgLogoPath: getAssetPath(clientName, logoSvgPath),
-      splashLogoPath: getAssetPath(clientName, splashLogoPath),
-      remoteLogoUrl: null,
-      selectedBrokerData: null,
-    );
-  }
-}
+ extension _BaseClientConfigFlavorConfigX on BaseClientConfig {
+ FlavorConfig toFlavorConfig(Flavor flavor, String clientName) {
+ return FlavorConfig(
+ flavor: flavor,
+ appName: brandName,
+ appTitle: appTitle,
+ primaryColor: primaryColor,
+ darkPrimaryColor: darkPrimaryColor,
+ secondaryColor: secondaryColor,
+ accentColor: accentColor,
+ websocketUrl: websocketUrl,
+ chartBaseUrl: chartBaseUrl,
+ apiBaseUrl: apiBaseUrl,
+ appIconPath: getAssetPath(clientName, appIconPath),
+ svgLogoPath: getAssetPath(clientName, logoSvgPath),
+ splashLogoPath: getAssetPath(clientName, splashLogoPath),
+ remoteLogoUrl: null,
+ selectedBrokerData: null,
+ useNewChart: useNewChart,
+ );
+ }
+ }
