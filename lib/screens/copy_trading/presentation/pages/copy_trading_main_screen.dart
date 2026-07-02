@@ -23,29 +23,61 @@ class CopyTradingMainScreen extends StatefulWidget {
 class _CopyTradingMainScreenState extends State<CopyTradingMainScreen> {
   late final CopyTradingHubController _hubController;
   late final PageController _pageController;
-  late final Worker _worker;
+  late final Worker _tabWorker;
+  late final Worker _statusWorker;
+
+  int get _maxIndexForCurrentRole {
+    final isMaster =
+        _hubController.masterStatus.value ==
+        CopyTradingMasterApplicationStatus.approved;
+    return isMaster ? 4 : 2;
+  }
 
   @override
   void initState() {
     super.initState();
     _hubController = Get.put(CopyTradingHubController());
-    final isMaster =
-        _hubController.masterStatus.value ==
-        CopyTradingMasterApplicationStatus.approved;
-    final initialIndex = widget.initialIndex ?? (isMaster ? 0 : 1);
-    _hubController.currentTabIndex.value = initialIndex;
-    _pageController = PageController(initialPage: initialIndex);
-    
-    _worker = ever(_hubController.currentTabIndex, (int index) {
-      if (_pageController.hasClients && _pageController.page?.round() != index) {
-        _pageController.jumpToPage(index.clamp(0, isMaster ? 4 : 2));
+    _pageController = PageController(
+      initialPage: widget.initialIndex ?? 0,
+    );
+
+    // Tap on the bottom nav → controller updates → worker scrolls PageView.
+    // The clamp upper bound is read LIVE on every event so the navigation
+    // works correctly even when master-status is still resolving at
+    // initState time (it used to be captured as a stale `false` here).
+    _tabWorker = ever(_hubController.currentTabIndex, (int index) {
+      if (!_pageController.hasClients) return;
+      final maxIndex = _maxIndexForCurrentRole;
+      final clamped = index.clamp(0, maxIndex);
+      if (clamped != _hubController.currentTabIndex.value) {
+        _hubController.currentTabIndex.value = clamped;
+        return;
+      }
+      if (_pageController.page?.round() != clamped) {
+        _pageController.jumpToPage(clamped);
       }
     });
+
+    // When the user's role flips from copier → master (or vice-versa) the
+    // tab count changes. If the current index is now out-of-range, snap it
+    // back so we never show an empty page.
+    _statusWorker = ever(
+      _hubController.masterStatus,
+      (_) {
+        final maxIndex = _maxIndexForCurrentRole;
+        final clamped =
+            _hubController.currentTabIndex.value.clamp(0, maxIndex);
+        if (clamped != _hubController.currentTabIndex.value) {
+          _hubController.currentTabIndex.value = clamped;
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
-    _worker.dispose();
+    _tabWorker.dispose();
+    _statusWorker.dispose();
     _pageController.dispose();
     super.dispose();
   }

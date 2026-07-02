@@ -9,6 +9,8 @@ class PmamManager {
   final int totalInvestors;
   final double avgCommission;
   final double profitPercentage;
+  final double maxDrawdown;
+  final bool isEnrolled;
   final List<PmamPlan> plans;
 
   PmamManager({
@@ -22,6 +24,8 @@ class PmamManager {
     this.totalInvestors = 0,
     this.avgCommission = 0,
     this.profitPercentage = 0,
+    this.maxDrawdown = 0,
+    this.isEnrolled = false,
     this.plans = const [],
   });
 
@@ -38,6 +42,8 @@ class PmamManager {
       totalInvestors: int.tryParse(json['total_investors']?.toString() ?? '0') ?? 0,
       avgCommission: double.tryParse(json['avg_commission']?.toString() ?? '0') ?? 0,
       profitPercentage: double.tryParse(json['profit_percentage']?.toString() ?? '0') ?? 0,
+      maxDrawdown: double.tryParse(json['max_drawdown']?.toString() ?? '0') ?? 0,
+      isEnrolled: json['is_enrolled'] == true || json['is_enrolled'] == 1,
       plans: plansList != null 
           ? plansList.map((i) => PmamPlan.fromJson(i)).toList() 
           : [],

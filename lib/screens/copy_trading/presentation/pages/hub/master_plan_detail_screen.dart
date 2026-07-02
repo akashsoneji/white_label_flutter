@@ -1,10 +1,11 @@
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_plan_detail_controller.dart';
+import 'package:crm_app/services/theme_service.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
 class MasterPlanDetailScreen extends StatelessWidget {
@@ -15,1106 +16,1925 @@ class MasterPlanDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(
       CopyTradingMasterPlanDetailController(planId: planId),
-      tag: 'planDetail:$planId',
+      permanent: false,
     );
 
-    return Scaffold(
-      backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: AppColors.tradeBackgroundCenterColor,
-        elevation: 0,
-        centerTitle: true,
-        title: Text('Plan Details', style: AppTextStyles.heading),
-        leading: AppBackButton(
-          onPressed: () => AppBackButton.popRoute(context),
-          
-          
-        ),
-      ),
-      body: GetBuilder<CopyTradingMasterPlanDetailController>(
-        tag: 'planDetail:$planId',
-        builder: (_) {
-          final c = controller;
-          if (c.isLoading.value && c.detail.value == null) {
-            return Center(child: CircularProgressIndicator());
-          }
+    // Re-build the screen when the theme flips, so hard-coded tints
+    // controlled via [PlanTokens] pick up dark-mode values.
+    return Obx(() {
+      final theme = Get.find<ThemeService>();
+      final isDark = theme.isDarkModeObs.value;
+      final t = PlanTokens(isDark: isDark);
 
-          if (c.errorMessage.value.isNotEmpty && c.detail.value == null) {
+      return Scaffold(
+        backgroundColor: t.background,
+        appBar: AppBar(
+          backgroundColor: t.appBar,
+          elevation: 0,
+          scrolledUnderElevation: 0.5,
+          surfaceTintColor: t.appBar,
+          leading: AppSvgBackButton(onPressed: () => Get.back()),
+          title: Text(
+            'Plan Details',
+            style: AppTextStyles.heading.copyWith(color: t.textPrimary),
+          ),
+        ),
+        body: Obx(() {
+          if (controller.isLoading.value &&
+              controller.detail.value == null) {
             return Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.r),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 40.r,
-                      color: AppColors.error,
-                    ),
-                    SizedBox(height: 10.h),
-                    Text(
-                      c.errorMessage.value,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.error,
-                    ),
-                    SizedBox(height: 12.h),
-                    ElevatedButton(
-                      onPressed: () => c.loadPlanDetail(showLoading: true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                      ),
-                      child: Text('Retry', style: AppTextStyles.button),
-                    ),
-                  ],
-                ),
-              ),
+              child: CircularProgressIndicator(color: t.brandBlue),
             );
           }
 
-          final d = c.detail.value;
-          if (d == null) {
-            return Center(
-              child: Text('No detail found', style: AppTextStyles.caption),
+          final plan = controller.detail.value;
+          if (plan == null) {
+            return _EmptyState(
+              onRetry: controller.loadPlanDetail,
+              tokens: t,
             );
           }
 
-          final status = d.status.toLowerCase();
-          final statusColor =
-              (status == 'approved' || status == 'active')
-                  ? AppColors.green
-                  : status.contains('inactive')
-                  ? AppColors.textGrey
-                  : status.contains('pending')
-                  ? AppColors.warning
-                  : AppColors.error;
-
-          return NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                d.planName.isNotEmpty
-                                    ? d.planName
-                                    : 'Plan ${d.id}',
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 10.w,
-                                vertical: 4.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(10.r),
-                              ),
-                              child: Text(
-                                d.status.toLowerCase() == 'pending_admin'
-                                    ? 'Pending Review'
-                                    : d.status,
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: statusColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 14.h),
-
-                        // Top metrics grid
-                        _buildTopMetricsGrid(d),
-                        SizedBox(height: 14.h),
-
-                        // Commission & fees card
-                        _DetailSectionCard(
-                          title: 'Commission & fees',
-                          children: [
-                            _DetailRowWithDesc(
-                              label: 'Commission',
-                              value:
-                                  d.commissionLabel.isNotEmpty
-                                      ? d.commissionLabel
-                                      : (d.commissionPercentage > 0
-                                          ? '${d.commissionPercentage}% commission on profit'
-                                          : 'No fee'),
-                              desc: 'What copiers pay according to this plan.',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Commission type',
-                              value:
-                                  d.commissionType == 'per_trade'
-                                      ? 'Per trade'
-                                      : d.commissionType.capitalizeFirst ??
-                                          d.commissionType,
-                              desc: 'Per profitable trade vs subscription.',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Grace period (no fee)',
-                              value: '${d.noFeeDays} days',
-                              desc:
-                                  'Days after join with no commission on trades.',
-                            ),
-                          ],
-                        ),
-
-                        // Copier rules card
-                        _DetailSectionCard(
-                          title: 'Copier rules',
-                          children: [
-                            _DetailRowWithDesc(
-                              label: 'Min. capital',
-                              value: '\$${d.minimumCapital.toStringAsFixed(2)}',
-                              desc: 'Minimum balance to subscribe.',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Copy ratio',
-                              value: d.copyRatio.toString(),
-                              desc: 'Volume scaling for copiers.',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Max copiers',
-                              value:
-                                  d.maxCopiers > 0
-                                      ? d.maxCopiers.toString()
-                                      : 'Unlimited',
-                              desc:
-                                  'Cap on concurrent copiers (empty = unlimited).',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Active / cap',
-                              value:
-                                  '${d.activeCopiers} / ${d.maxCopiers > 0 ? d.maxCopiers.toString() : ''}',
-                              desc: 'Current copiers vs limit.',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Plan full',
-                              value: d.isFull ? 'Yes' : 'No',
-                              desc: 'No new copiers until someone leaves.',
-                            ),
-                          ],
-                        ),
-
-                        // Strategy & risk disclosure card
-                        _DetailSectionCard(
-                          title: 'Strategy & risk disclosure',
-                          children: [
-                            _DisclosureRow(
-                              title: 'Strategy description',
-                              content:
-                                  d.strategyDescription.trim().isNotEmpty
-                                      ? d.strategyDescription
-                                      : '— Not provided. Edit the plan to add a public description for copiers.',
-                            ),
-                            _DisclosureRow(
-                              title: 'Risk information',
-                              content:
-                                  d.riskInformation.trim().isNotEmpty
-                                      ? d.riskInformation
-                                      : '— Not provided. Edit the plan to disclose drawdown and risk.',
-                            ),
-                          ],
-                        ),
-
-                        // Account & system card
-                        _DetailSectionCard(
-                          title: 'Account & system',
-                          children: [
-                            _DetailRowWithDesc(
-                              label: 'Status',
-                              value:
-                                  d.status.toLowerCase() == 'pending_admin'
-                                      ? 'Pending Review'
-                                      : d.status,
-                              desc: 'Broker / admin approval state.',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Server / LP',
-                              value:
-                                  d.lpProviderName.isNotEmpty
-                                      ? d.lpProviderName
-                                      : d.tradingServer,
-                              desc: 'Execution routing label.',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Trading account',
-                              value: d.tradingAccountNumber,
-                              desc: 'Account number used for this plan.',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Initial equity snapshot',
-                              value:
-                                  '\$${d.initialEquitySnapshot.isNotEmpty ? double.tryParse(d.initialEquitySnapshot)?.toStringAsFixed(2) ?? d.initialEquitySnapshot : '0.00'}',
-                              desc:
-                                  'Captured when the plan was approved (if recorded).',
-                            ),
-                            _DetailRowWithDesc(
-                              label: 'Created',
-                              value: _formatDate(d.createdAt),
-                              desc: 'Plan creation timestamp.',
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 10.h),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.filter_list,
-                          size: 18.r,
-                          color: AppColors.textGrey,
-                        ),
-                        SizedBox(width: 6.w),
-                        Expanded(
-                          child: Text(
-                            'Trade History',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ];
-            },
-            body: Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 24.h),
-              child: _TradesTab(trades: d.tradeHistory),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _EmptyCard extends StatelessWidget {
-  final String message;
-  const _EmptyCard({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(14.r),
-      decoration: BoxDecoration(
-        color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
-      ),
-      child: Text(message, style: AppTextStyles.caption),
-    );
-  }
-}
-
-class _TradesTab extends StatefulWidget {
-  final List<CopyTradingMasterTradeHistoryItem> trades;
-  const _TradesTab({required this.trades});
-
-  @override
-  State<_TradesTab> createState() => _TradesTabState();
-}
-
-class _TradesTabState extends State<_TradesTab> {
-  String? _symbol;
-  String? _direction; // buy/sell
-  String? _copierKey; // "account|name"
-  final TextEditingController _searchCtrl = TextEditingController();
-  String _sort = 'newest'; // newest | oldest | profit_desc | profit_asc | volume_desc
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final symbols = _uniqueSorted(
-      widget.trades.map((e) => e.symbol).where((s) => s.trim().isNotEmpty),
-    );
-    final copiers = _uniqueSorted(
-      widget.trades
-          .map((e) => '${e.copierAccount}|${e.copierName}')
-          .where((s) => s.trim().isNotEmpty),
-    );
-
-    final query = _searchCtrl.text.trim().toLowerCase();
-    final filtered =
-        widget.trades.where((t) {
-          if (_symbol != null && t.symbol != _symbol) return false;
-          if (_direction != null && t.direction.toLowerCase() != _direction)
-            return false;
-          if (_copierKey != null &&
-              '${t.copierAccount}|${t.copierName}' != _copierKey)
-            return false;
-          if (query.isNotEmpty) {
-            final hay = '${t.symbol} ${t.direction} ${t.copierAccount} ${t.copierName} ${t.status}'.toLowerCase();
-            if (!hay.contains(query)) return false;
-          }
-          return true;
-        }).toList();
-
-    int cmpByTime(CopyTradingMasterTradeHistoryItem a, CopyTradingMasterTradeHistoryItem b) {
-      return a.openTime.compareTo(b.openTime);
-    }
-    switch (_sort) {
-      case 'oldest':
-        filtered.sort((a, b) => cmpByTime(a, b));
-        break;
-      case 'profit_desc':
-        filtered.sort((a, b) => b.masterProfit.toDouble().compareTo(a.masterProfit.toDouble()));
-        break;
-      case 'profit_asc':
-        filtered.sort((a, b) => a.masterProfit.toDouble().compareTo(b.masterProfit.toDouble()));
-        break;
-      case 'volume_desc':
-        filtered.sort((a, b) => b.masterVolume.toDouble().compareTo(a.masterVolume.toDouble()));
-        break;
-      case 'newest':
-      default:
-        filtered.sort((a, b) => cmpByTime(b, a));
-        break;
-    }
-
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        // Search bar
-        Container(
-          height: 42.h,
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          decoration: BoxDecoration(
-            color: AppColors.whiteColor,
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search, size: 18.r, color: AppColors.textGrey),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: TextField(
-                  controller: _searchCtrl,
-                  onChanged: (_) => setState(() {}),
-                  textInputAction: TextInputAction.search,
-                  style: TextStyle(fontSize: 13.sp, color: AppColors.textPrimary),
-                  decoration: InputDecoration(
-                    isCollapsed: true,
-                    border: InputBorder.none,
-                    hintText: 'Search symbol, copier, status…',
-                    hintStyle: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
-                  ),
-                ),
+          return RefreshIndicator(
+            onRefresh: controller.loadPlanDetail,
+            color: AppColors.primary,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-              if (_searchCtrl.text.isNotEmpty)
-                GestureDetector(
-                  onTap: () {
-                    _searchCtrl.clear();
-                    setState(() {});
-                  },
-                  child: Icon(Icons.close, size: 16.r, color: AppColors.textGrey),
-                ),
-            ],
-          ),
-        ),
-        SizedBox(height: 10.h),
-
-        // Sort row
-        Row(
-          children: [
-            Icon(Icons.swap_vert, size: 16.r, color: AppColors.textGrey),
-            SizedBox(width: 6.w),
-            Text(
-              'Sort:',
-              style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _sortChip('newest', 'Newest'),
-                    _sortChip('oldest', 'Oldest'),
-                    _sortChip('profit_desc', 'Profit ↓'),
-                    _sortChip('profit_asc', 'Profit ↑'),
-                    _sortChip('volume_desc', 'Volume ↓'),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 10.h),
-
-        _FilterRow(
-          symbolValue: _symbol,
-          directionValue: _direction,
-          copierValue: _copierKey,
-          symbols: symbols,
-          directions: const ['buy', 'sell'],
-          copiers: copiers,
-          copierLabelBuilder: (key) {
-            final parts = key.split('|');
-            final acc = (parts.isNotEmpty ? parts[0] : '').trim();
-            final name = (parts.length > 1 ? parts[1] : '').trim();
-            if (name.isEmpty) return acc.isNotEmpty ? acc : 'Copier';
-            return acc.isNotEmpty ? '$acc ($name)' : name;
-          },
-          onChanged:
-              (s, d, c) => setState(() {
-                _symbol = s;
-                _direction = d;
-                _copierKey = c;
-              }),
-        ),
-        SizedBox(height: 10.h),
-        if (filtered.isEmpty)
-          _EmptyCard(message: 'No trades found')
-        else
-          ...filtered.map((t) => _TradeHistoryCard(item: t)),
-      ],
-    );
-  }
-
-  Widget _sortChip(String value, String label) {
-    final selected = _sort == value;
-    return Padding(
-      padding: EdgeInsets.only(right: 6.w),
-      child: GestureDetector(
-        onTap: () => setState(() => _sort = value),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.primary.withValues(alpha: 0.12) : AppColors.whiteColor,
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(
-              color: selected ? AppColors.primary.withValues(alpha: 0.4) : AppColors.border.withValues(alpha: 0.15),
-            ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w700,
-              color: selected ? AppColors.primary : AppColors.textGrey,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterRow extends StatelessWidget {
-  final String? symbolValue;
-  final String? directionValue;
-  final String? copierValue;
-  final List<String> symbols;
-  final List<String> directions;
-  final List<String> copiers;
-  final String Function(String key) copierLabelBuilder;
-  final void Function(String? symbol, String? direction, String? copier)
-  onChanged;
-
-  const _FilterRow({
-    required this.symbolValue,
-    required this.directionValue,
-    required this.copierValue,
-    required this.symbols,
-    required this.directions,
-    required this.copiers,
-    required this.copierLabelBuilder,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _DropdownFilter(
-            title: 'All Symbols',
-            value: symbolValue,
-            items: symbols,
-            itemLabelBuilder: (s) => s,
-            onChanged: (v) => onChanged(v, directionValue, copierValue),
-          ),
-        ),
-        SizedBox(width: 10.w),
-        Expanded(
-          child:
-              directions.isEmpty
-                  ? _DropdownFilter(
-                    title: 'All Directions',
-                    value: null,
-                    items: const [],
-                    itemLabelBuilder: (s) => s,
-                    enabled: false,
-                    onChanged: (_) {},
-                  )
-                  : _DropdownFilter(
-                    title: 'All Directions',
-                    value: directionValue,
-                    items: directions,
-                    itemLabelBuilder: (s) => s.toUpperCase(),
-                    onChanged: (v) => onChanged(symbolValue, v, copierValue),
-                  ),
-        ),
-        SizedBox(width: 10.w),
-        Expanded(
-          child: _DropdownFilter(
-            title: 'All Copiers',
-            value: copierValue,
-            items: copiers,
-            itemLabelBuilder: copierLabelBuilder,
-            onChanged: (v) => onChanged(symbolValue, directionValue, v),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DropdownFilter extends StatelessWidget {
-  final String title;
-  final String? value;
-  final List<String> items;
-  final String Function(String v) itemLabelBuilder;
-  final ValueChanged<String?> onChanged;
-  final bool enabled;
-
-  const _DropdownFilter({
-    required this.title,
-    required this.value,
-    required this.items,
-    required this.itemLabelBuilder,
-    required this.onChanged,
-    this.enabled = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final display = value == null ? title : itemLabelBuilder(value!);
-    return PopupMenuButton<String?>(
-      enabled: enabled,
-      tooltip: title,
-      onSelected: onChanged,
-      itemBuilder: (context) {
-        final list = <PopupMenuEntry<String?>>[
-          PopupMenuItem<String?>(
-            value: null,
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-        ];
-        for (final it in items) {
-          list.add(
-            PopupMenuItem<String?>(
-              value: it,
-              child: Text(
-                itemLabelBuilder(it),
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          );
-        }
-        return list;
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color:
-              enabled
-                  ? AppColors.whiteColor
-                  : AppColors.whiteColor.withOpacity(0.65),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: AppColors.border.withValues(alpha: 0.18)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                display,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: enabled ? AppColors.textPrimary : AppColors.textGrey,
-                ),
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Icon(
-              Icons.keyboard_arrow_down,
-              size: 18.r,
-              color:
-                  enabled
-                      ? AppColors.textGrey
-                      : AppColors.textGrey.withOpacity(0.7),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-List<String> _uniqueSorted(Iterable<String> values) {
-  final set = <String>{};
-  for (final v in values) {
-    final s = v.trim();
-    if (s.isNotEmpty) set.add(s);
-  }
-  final list =
-      set.toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-  return list;
-}
-
-class _TradeHistoryCard extends StatefulWidget {
-  final CopyTradingMasterTradeHistoryItem item;
-  const _TradeHistoryCard({required this.item});
-
-  @override
-  State<_TradeHistoryCard> createState() => _TradeHistoryCardState();
-}
-
-class _TradeHistoryCardState extends State<_TradeHistoryCard> {
-  bool _expanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = widget.item;
-    final dir = t.direction.toLowerCase();
-    final isBuy = dir == 'buy';
-    final profit = t.masterProfit.toDouble();
-    final profitColor = profit >= 0 ? AppColors.green : AppColors.error;
-    final status = t.status.isNotEmpty ? t.status : '—';
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() => _expanded = !_expanded),
-      child: Container(
-        margin: EdgeInsets.only(bottom: 10.h),
-        padding: EdgeInsets.all(14.r),
-        decoration: BoxDecoration(
-          color: AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.border.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 24),
               children: [
-                // Container(
-                //   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                //   decoration: BoxDecoration(
-                //     color: (isBuy ? AppColors.green : AppColors.error).withOpacity(0.12),
-                //     borderRadius: BorderRadius.circular(10.r),
-                //   ),
-                //   child: Text(
-                //     isBuy ? 'BUY' : 'SELL',
-                //     style: TextStyle(
-                //       fontSize: 11.sp,
-                //       fontWeight: FontWeight.w800,
-                //       color: isBuy ? AppColors.green : AppColors.error,
-                //       letterSpacing: 0.2,
-                //     ),
-                //   ),
-                // ),
-                // SizedBox(width: 10.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            t.symbol,
-                            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                          ),
-                          SizedBox(width: 10.w),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                            decoration: BoxDecoration(
-                              color: (isBuy ? AppColors.green : AppColors.error).withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                            child: Text(
-                              isBuy ? 'BUY' : 'SELL',
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.w800,
-                                color: isBuy ? AppColors.green : AppColors.error,
-                                letterSpacing: 0.2,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 6.h),
-                      Text(
-                        '${t.copierName.isNotEmpty ? t.copierName : 'Copier'}  •  ${t.copierAccount.isNotEmpty ? t.copierAccount : '—'}',
-                        style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                // Header card
+                _PlanHeaderCard(plan: plan, controller: controller, tokens: t),
+                const SizedBox(height: 12),
+
+                // KPI cards (2 hero + 4 pill strip)
+                _KpiGrid(plan: plan, tokens: t),
+                const SizedBox(height: 12),
+
+                // Performance row (4-column compact grid)
+                _SectionCard(
+                  title: 'Performance',
+                  tokens: t,
+                  accentColor: t.success,
+                  child: _PerformanceRow(perf: plan.performance, tokens: t),
+                ),
+                const SizedBox(height: 12),
+
+                // Equity curve
+                _SectionCard(
+                  title: 'Equity curve (last 90 days)',
+                  tokens: t,
+                  accentColor: t.success,
+                  child: _EquityCurve(equity: plan.equityCurve, tokens: t),
+                ),
+                const SizedBox(height: 12),
+
+                // Commission summary
+                _SectionCard(
+                  title: 'Commission summary',
+                  tokens: t,
+                  accentColor: t.warning,
+                  child: _CommissionSummary(
+                    comm: plan.commissionSummary,
+                    tokens: t,
                   ),
                 ),
-                SizedBox(width: 10.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      status.toUpperCase(),
-                      style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey, fontWeight: FontWeight.w700),
-                    ),
-                    SizedBox(height: 6.h),
-                    Text(
-                      '\$${profit.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: profitColor),
-                    ),
-                  ],
+                const SizedBox(height: 12),
+
+                // Settlement cycle
+                _SectionCard(
+                  title: 'Settlement cycle',
+                  tokens: t,
+                  accentColor: t.warning,
+                  child: _SettlementCycle(settle: plan.settlement, tokens: t),
                 ),
-                SizedBox(width: 6.w),
-                Icon(
-                  _expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                  size: 20.r,
-                  color: AppColors.textPrimary,
+                const SizedBox(height: 12),
+
+                // Commission & fees
+                _SectionCard(
+                  title: 'Commission & fees',
+                  tokens: t,
+                  accentColor: t.warning,
+                  child: _CommissionFees(plan: plan, tokens: t),
+                ),
+                const SizedBox(height: 12),
+
+                // Copier rules
+                _SectionCard(
+                  title: 'Copier rules',
+                  tokens: t,
+                  child: _CopierRules(plan: plan, tokens: t),
+                ),
+                const SizedBox(height: 12),
+
+                // Strategy & risk disclosure
+                _SectionCard(
+                  title: 'Strategy & risk disclosure',
+                  tokens: t,
+                  child: _StrategyDisclosure(plan: plan, tokens: t),
+                ),
+                const SizedBox(height: 12),
+
+                // Account & system
+                _SectionCard(
+                  title: 'Account & system',
+                  tokens: t,
+                  child: _AccountSystem(plan: plan, tokens: t),
+                ),
+                const SizedBox(height: 12),
+
+                // Plan timeline
+                _SectionCard(
+                  title: 'Plan timeline',
+                  tokens: t,
+                  accentColor: t.brandBlue,
+                  child: _PlanTimeline(plan: plan, tokens: t),
                 ),
               ],
             ),
-            if (_expanded) ...[
-              SizedBox(height: 12.h),
-              Divider(color: AppColors.border.withValues(alpha: 0.12), height: 1),
-              SizedBox(height: 12.h),
-              _KVRow(label: 'Trade ID', value: '#${t.id}'),
-              _KVRow(label: 'Open time', value: _formatTime(t.openTime)),
-              if (t.closeTime.trim().isNotEmpty) _KVRow(label: 'Close time', value: _formatTime(t.closeTime)),
-              _KVRow(label: 'Open price', value: t.openPrice.toString()),
-              if (t.closePrice != 0) _KVRow(label: 'Close price', value: t.closePrice.toString()),
-              _KVRow(label: 'Master vol', value: t.masterVolume.toString()),
-              _KVRow(label: 'Copier vol', value: t.copierVolume.toString()),
-              _KVRow(label: 'Copier P&L', value: '\$${t.copierProfit.toDouble().toStringAsFixed(2)}'),
+          );
+        }),
+      );
+    });
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Theme tokens
+// ─────────────────────────────────────────────────────────────────────────────
+
+class PlanTokens {
+  final bool isDark;
+  PlanTokens({required this.isDark});
+
+  // Brand accents stay the same across themes (matches web).
+  static const Color _brandBlue = Color(0xFF2C5FFB);
+  static const Color _success = Color(0xFF12B76A);
+  static const Color _successText = Color(0xFF027A48);
+  static const Color _danger = Color(0xFFEF4444);
+  static const Color _dangerText = Color(0xFFB42318);
+  static const Color _warning = Color(0xFFF79009);
+  static const Color _warningSoft = Color(0xFFFFFAEB);
+  static const Color _warningText = Color(0xFFB54708);
+
+  // Neutrals - light
+  static const Color _bgLight = Color(0xFFF7F8FA);
+  static const Color _cardLight = Colors.white;
+  static const Color _borderLight = Color(0xFFE4E7EC);
+  static const Color _dividerLineLight = Color(0xFFEAECF0);
+  static const Color _dividerLight = Color(0xFFF2F4F7);
+  static const Color _mutedLight = Color(0xFFF2F4F7);
+  static const Color _mutedTextLight = Color(0xFF98A2B3);
+  static const Color _subTextLight = Color(0xFF667085);
+  static const Color _subTextAltLight = Color(0xFF6B7280);
+  static const Color _descTextLight = Color(0xFF475467);
+  static const Color _bodyTextLight = Color(0xFF344054);
+  static const Color _headingTextLight = Color(0xFF101828);
+
+  // Neutrals - dark
+  static const Color _bgDark = Color(0xFF0E1217);
+  static const Color _cardDark = Color(0xFF161B22);
+  static const Color _borderDark = Color(0xFF2A3038);
+  static const Color _dividerDark = Color(0xFF1F242C);
+  static const Color _mutedDark = Color(0xFF1F242C);
+  static const Color _mutedTextDark = Color(0xFF6B7280);
+  static const Color _subTextDark = Color(0xFF8B95A4);
+  static const Color _descTextDark = Color(0xFFB6BFCD);
+  static const Color _bodyTextDark = Color(0xFFD4DAE4);
+  static const Color _headingTextDark = Color(0xFFF5F7FA);
+
+  Color get background => isDark ? _bgDark : _bgLight;
+  Color get appBar => isDark ? _cardDark : _cardLight;
+  Color get card => isDark ? _cardDark : _cardLight;
+  Color get border => isDark ? _borderDark : _borderLight;
+  Color get divider => isDark ? _dividerDark : _dividerLight;
+  Color get dividerLine => isDark ? _dividerDark : _dividerLineLight;
+  Color get muted => isDark ? _mutedDark : _mutedLight;
+  Color get mutedText => isDark ? _mutedTextDark : _mutedTextLight;
+  Color get subText => isDark ? _subTextDark : _subTextLight;
+  Color get subTextAlt => isDark ? _subTextDark : _subTextAltLight;
+  Color get descText => isDark ? _descTextDark : _descTextLight;
+  Color get bodyText => isDark ? _bodyTextDark : _bodyTextLight;
+  Color get textPrimary => isDark ? _headingTextDark : _headingTextLight;
+  Color get textSecondary => isDark ? _bodyTextDark : _bodyTextLight;
+
+  // Brand
+  Color get brandBlue => _brandBlue;
+  Color get success => _success;
+  Color get successText => _successText;
+  Color get danger => _danger;
+  Color get dangerText => _dangerText;
+  Color get warning => _warning;
+  Color get warningSoft => _warningSoft;
+  Color get warningText => _warningText;
+
+  BoxDecoration get cardDecoration => BoxDecoration(
+        color: card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: border),
+      );
+
+  BoxDecoration get chipDecoration => BoxDecoration(
+        color: muted,
+        borderRadius: BorderRadius.circular(10),
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Empty / loading state
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _EmptyState extends StatelessWidget {
+  final Future<void> Function() onRetry;
+  final PlanTokens tokens;
+  const _EmptyState({required this.onRetry, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error_outline, size: 56, color: tokens.mutedText),
+          const SizedBox(height: 12),
+          Text(
+            'Plan not found',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: tokens.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: () => onRetry(),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Plan header
+
+
+class _PlanHeaderCard extends StatelessWidget {
+  final CopyTradingMasterPlanDetail plan;
+  final CopyTradingMasterPlanDetailController controller;
+  final PlanTokens tokens;
+
+  const _PlanHeaderCard({
+    required this.plan,
+    required this.controller,
+    required this.tokens,
+  });
+
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty || parts.first.isEmpty) return 'P';
+    if (parts.length == 1) return parts.first.characters.first.toUpperCase();
+    return (parts.first.characters.first + parts[1].characters.first)
+        .toUpperCase();
+  }
+
+  Color _statusColor() {
+    switch (plan.status.toLowerCase()) {
+      case 'approved':
+      case 'active':
+        return tokens.success;
+      case 'paused':
+        return tokens.warning;
+      case 'inactive':
+      case 'inactivated':
+        return tokens.mutedText;
+      default:
+        return tokens.brandBlue;
+    }
+  }
+
+  String _statusLabel() {
+    if (plan.status.isEmpty) return 'Unknown';
+    return plan.status[0].toUpperCase() + plan.status.substring(1);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPaused = plan.status.toLowerCase() == 'paused';
+    final isInactive = plan.status.toLowerCase() == 'inactive' ||
+        plan.status.toLowerCase() == 'inactivated';
+    final isCopyingOn = !plan.copyingPaused;
+
+    return Container(
+      decoration: tokens.cardDecoration,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: tokens.brandBlue,
+                child: Text(
+                  _initials(plan.planName),
+                  style: TextStyle(
+                    color: tokens.card,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      plan.planName,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: tokens.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        _StatusPill(
+                          label: _statusLabel(),
+                          color: _statusColor(),
+                          tokens: tokens,
+                        ),
+                        _GrayPill(
+                          label: plan.commissionLabel.isNotEmpty
+                              ? plan.commissionLabel
+                              : 'Commission',
+                          tokens: tokens,
+                        ),
+                        // Compact "copying" indicator merged with a tiny dot
+                        _CopyingDotPill(
+                          on: isCopyingOn,
+                          tokens: tokens,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _HeaderAction(
+                  icon: Icons.edit_outlined,
+                  label: 'Edit',
+                  onTap: () {},
+                  color: tokens.bodyText,
+                  tokens: tokens,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _HeaderAction(
+                  icon: isPaused
+                      ? Icons.play_arrow_rounded
+                      : Icons.pause_rounded,
+                  label: isPaused ? 'Resume' : 'Pause',
+                  onTap: isPaused
+                      ? controller.resumePlan
+                      : controller.pausePlan,
+                  color: tokens.warning,
+                  tokens: tokens,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _HeaderAction(
+                  icon: Icons.block,
+                  label: 'Inactivate',
+                  onTap: controller.inactivatePlan,
+                  color: tokens.dangerText,
+                  borderColor: tokens.danger.withValues(alpha: 0.4),
+                  disabled: isInactive,
+                  tokens: tokens,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final String label;
+  final Color color;
+  final PlanTokens tokens;
+  const _StatusPill({
+    required this.label,
+    required this.color,
+    required this.tokens,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+class _GrayPill extends StatelessWidget {
+  final String label;
+  final PlanTokens tokens;
+  const _GrayPill({required this.label, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: tokens.chipDecoration,
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          color: tokens.bodyText,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+/// Tiny pill that shows a colored dot + "Copying on/off" text in one compact chip
+class _CopyingDotPill extends StatelessWidget {
+  final bool on;
+  final PlanTokens tokens;
+  const _CopyingDotPill({required this.on, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = on ? tokens.success : tokens.mutedText;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            on ? 'Copying on' : 'Copying off',
+            style: TextStyle(
+              fontSize: 10.5,
+              color: color,
+              fontWeight: FontWeight.w600,
+              height: 1.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+  final Color? borderColor;
+  final bool disabled;
+  final PlanTokens tokens;
+
+  const _HeaderAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.tokens,
+    this.color,
+    this.borderColor,
+    this.disabled = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? tokens.bodyText;
+    final b = borderColor ?? tokens.border;
+    return InkWell(
+      onTap: disabled ? null : onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        height: 36,
+        decoration: BoxDecoration(
+          color: tokens.card,
+          border: Border.all(color: b),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon,
+                size: 14, color: disabled ? tokens.mutedText : c),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: disabled ? tokens.mutedText : c,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
-
-  String _formatTime(String iso) {
-    final dt = DateTime.tryParse(iso);
-    if (dt == null) return iso;
-    final local = dt.toLocal();
-    final two = (int n) => n.toString().padLeft(2, '0');
-    return '${local.year}-${two(local.month)}-${two(local.day)} ${two(local.hour)}:${two(local.minute)}';
-  }
 }
 
-class _KVRow extends StatelessWidget {
-  final String label;
-  final String value;
-  const _KVRow({required this.label, required this.value});
+// ─────────────────────────────────────────────────────────────────────────────
+// KPI block (redesigned): 2 hero cards + horizontal scrolling pill row
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _KpiGrid extends StatelessWidget {
+  final CopyTradingMasterPlanDetail plan;
+  final PlanTokens tokens;
+  const _KpiGrid({required this.plan, required this.tokens});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 110.w,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: AppColors.textGrey,
-                fontWeight: FontWeight.w600,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Hero band: 2 standout numbers (AUM + Net P&L)
+        Row(
+          children: [
+            Expanded(
+              child: _KpiHeroCard(
+                icon: Icons.account_balance_wallet_outlined,
+                label: 'Plan AUM',
+                value: '\$${plan.totalCapital.toStringAsFixed(2)}',
+                accent: tokens.brandBlue,
+                tokens: tokens,
               ),
             ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
+            const SizedBox(width: 10),
+            Expanded(
+              child: _KpiHeroCard(
+                icon: Icons.trending_up_rounded,
+                label: 'Net P&L',
+                value: '\$${plan.performance.netPnl.toStringAsFixed(2)}',
+                accent: plan.performance.netPnl >= 0
+                    ? tokens.success
+                    : tokens.danger,
+                tokens: tokens,
+                trailing: Text(
+                  'After fees',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: tokens.mutedText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        // ── Compact pill strip: 4 secondary metrics, horizontal scroll
+        SizedBox(
+          height: 64,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            children: [
+              _KpiPill(
+                icon: Icons.people_alt_rounded,
+                label: 'Active Copiers',
+                value: '${plan.activeCopiers}',
+                accent: tokens.brandBlue,
+                tokens: tokens,
+              ),
+              const SizedBox(width: 8),
+              _KpiPill(
+                icon: Icons.grid_view_rounded,
+                label: 'Open Positions',
+                value: '${plan.openPositions}',
+                accent: tokens.brandBlue,
+                tokens: tokens,
+              ),
+              const SizedBox(width: 8),
+              _KpiPill(
+                icon: Icons.percent_rounded,
+                label: 'Floating Comm.',
+                value:
+                    '\$${plan.commissionSummary.pending.toStringAsFixed(2)}',
+                accent: tokens.warning,
+                tokens: tokens,
+              ),
+              const SizedBox(width: 8),
+              _KpiPill(
+                icon: Icons.payments_outlined,
+                label: 'Earned',
+                value:
+                    '\$${plan.totalCommissionEarned.toStringAsFixed(2)}',
+                accent: tokens.success,
+                tokens: tokens,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _DetailSectionCard extends StatelessWidget {
-  final String title;
-  final List<Widget> children;
-
-  const _DetailSectionCard({required this.title, required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(14.r),
-      decoration: BoxDecoration(
-        color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 10.h),
-          ...children,
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRowWithDesc extends StatelessWidget {
+/// Compact metric pill: icon + value + label, single dense row
+class _KpiPill extends StatelessWidget {
+  final IconData icon;
   final String label;
   final String value;
-  final String? desc;
+  final Color accent;
+  final PlanTokens tokens;
 
-  const _DetailRowWithDesc({
+  const _KpiPill({
+    required this.icon,
     required this.label,
     required this.value,
-    this.desc,
+    required this.accent,
+    required this.tokens,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
+    return Container(
+      width: 122,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: tokens.card,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: tokens.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: accent, size: 16),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: tokens.textPrimary,
+                    height: 1.0,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w500,
+                    color: tokens.mutedText,
+                    height: 1.0,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Standout "hero" metric card (used only for the 2 most important numbers)
+class _KpiHeroCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color accent;
+  final PlanTokens tokens;
+  final Widget? trailing;
+
+  const _KpiHeroCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.accent,
+    required this.tokens,
+    this.trailing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accent.withValues(alpha: tokens.isDark ? 0.18 : 0.10),
+            accent.withValues(alpha: tokens.isDark ? 0.08 : 0.04),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: accent.withValues(alpha: tokens.isDark ? 0.35 : 0.25),
+        ),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(7),
                 ),
+                child: Icon(icon, color: Colors.white, size: 15),
               ),
-              Flexible(
+              const SizedBox(width: 8),
+              Expanded(
                 child: Text(
-                  value,
-                  textAlign: TextAlign.right,
+                  label,
                   style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: tokens.descText,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          if (desc != null && desc!.isNotEmpty) ...[
-            SizedBox(height: 2.h),
-            Text(
-              desc!,
-              style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+          const SizedBox(height: 6),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: tokens.textPrimary,
+                height: 1.05,
+                letterSpacing: -0.3,
+              ),
+              maxLines: 1,
             ),
+          ),
+          if (trailing != null) ...[
+            const SizedBox(height: 4),
+            trailing!,
           ],
-          SizedBox(height: 4.h),
-          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.08)),
         ],
       ),
     );
   }
 }
 
-class _DisclosureRow extends StatelessWidget {
-  final String title;
-  final String content;
+// ─────────────────────────────────────────────────────────────────────────────
+// Section card wrapper
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const _DisclosureRow({required this.title, required this.content});
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final Widget child;
+  final PlanTokens tokens;
+  final Color? accentColor;
+
+  const _SectionCard({
+    required this.title,
+    required this.child,
+    required this.tokens,
+    this.accentColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 12.h),
+    final accent = accentColor ?? tokens.brandBlue;
+    return Container(
+      width: double.infinity,
+      decoration: tokens.cardDecoration,
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textGrey,
-              letterSpacing: 0.3,
-            ),
+          // Title row with thin colored accent stripe on the left
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 3,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: tokens.textPrimary,
+                  letterSpacing: 0.1,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 4.h),
-          Text(
-            content,
-            style: TextStyle(
-              fontSize: 12.sp,
-              color:
-                  content.startsWith('—')
-                      ? AppColors.textGrey
-                      : AppColors.textPrimary,
-              height: 1.3,
-            ),
-          ),
-          SizedBox(height: 6.h),
-          Divider(height: 1, color: AppColors.border.withValues(alpha: 0.08)),
+          const SizedBox(height: 12),
+          child,
         ],
       ),
     );
   }
 }
 
-Widget _buildTopMetricsGrid(dynamic d) {
-  return Column(
-    children: [
-      Row(
-        children: [
-          Expanded(
-            child: _buildMetricCard(
-              'ACTIVE COPIERS',
-              d.activeCopiers.toString(),
+// ─────────────────────────────────────────────────────────────────────────────
+// Performance row (8 mini-stats)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PerformanceRow extends StatelessWidget {
+  final CopyTradingPlanPerformance perf;
+  final PlanTokens tokens;
+  const _PerformanceRow({required this.perf, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    // 4 columns × 2 rows — fits on a single screen, no horizontal scroll.
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _PerfCell(
+                label: 'Closed',
+                value: '${perf.closedTrades}',
+                tokens: tokens,
+              ),
             ),
-          ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: _buildMetricCard(
-              'PLAN EQUITY (AUM)',
-              '\$${d.totalCapital.toStringAsFixed(2)}',
+            const SizedBox(width: 8),
+            Expanded(
+              child: _PerfCell(
+                label: 'Win rate',
+                value: '${perf.winRate.toStringAsFixed(2)}%',
+                tokens: tokens,
+              ),
             ),
-          ),
-        ],
-      ),
-      SizedBox(height: 10.h),
-      Row(
-        children: [
-          Expanded(
-            child: _buildMetricCard(
-              'COMMISSION EARNED',
-              '\$${d.totalCommissionEarned.toStringAsFixed(2)}',
-              valueColor: AppColors.green,
+            const SizedBox(width: 8),
+            Expanded(
+              child: _PerfCell(
+                label: 'Profit factor',
+                value: perf.profitFactor.toStringAsFixed(2),
+                tokens: tokens,
+              ),
             ),
-          ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: _buildMetricCard(
-              'OPEN POSITIONS',
-              d.openPositions.toString(),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _PerfCell(
+                label: 'Expectancy',
+                value: '\$${perf.expectancy.toStringAsFixed(2)}',
+                valueColor: tokens.success,
+                tokens: tokens,
+              ),
             ),
-          ),
-        ],
-      ),
-    ],
-  );
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _PerfCell(
+                label: 'Avg win',
+                value: '\$${perf.avgWin.toStringAsFixed(2)}',
+                valueColor: tokens.success,
+                tokens: tokens,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _PerfCell(
+                label: 'Avg loss',
+                value: '\$${perf.avgLoss.toStringAsFixed(2)}',
+                valueColor: tokens.danger,
+                tokens: tokens,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _PerfCell(
+                label: 'Max DD',
+                value: '\$${perf.maxDrawdown.toStringAsFixed(2)}',
+                valueColor: tokens.danger,
+                tokens: tokens,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _PerfCell(
+                label: 'Net P&L',
+                value: '\$${perf.netPnl.toStringAsFixed(2)}',
+                valueColor:
+                    perf.netPnl >= 0 ? tokens.success : tokens.danger,
+                tokens: tokens,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }
 
-Widget _buildMetricCard(String label, String value, {Color? valueColor}) {
-  return Container(
-    padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 10.w),
-    decoration: BoxDecoration(
-      color: AppColors.whiteColor,
-      borderRadius: BorderRadius.circular(10.r),
-      border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
-    ),
-    child: Column(
+/// Compact performance cell — small label + bold value, no scroll needed
+class _PerfCell extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final PlanTokens tokens;
+
+  const _PerfCell({
+    required this.label,
+    required this.value,
+    required this.tokens,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: tokens.muted,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: tokens.mutedText,
+              height: 1.0,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: valueColor ?? tokens.textPrimary,
+                height: 1.0,
+              ),
+              maxLines: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Equity curve
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _EquityCurve extends StatelessWidget {
+  final List<CopyTradingPlanEquityCurvePoint> equity;
+  final PlanTokens tokens;
+  const _EquityCurve({required this.equity, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    if (equity.isEmpty) {
+      return SizedBox(
+        height: 220,
+        child: Center(
+          child: Text(
+            'No equity data yet',
+            style: TextStyle(
+              color: tokens.mutedText,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Build list of parsed (DateTime, double) pairs, ignore unparseable rows.
+    final pts = <_EquityPt>[];
+    for (final p in equity) {
+      if (p.date.isEmpty) continue;
+      try {
+        final d = DateTime.parse(p.date);
+        pts.add(_EquityPt(d, p.equity.toDouble()));
+      } catch (_) {
+        // ignore
+      }
+    }
+
+    if (pts.length < 2) {
+      return SizedBox(
+        height: 220,
+        child: Center(
+          child: Text(
+            'No equity data yet',
+            style: TextStyle(
+              color: tokens.mutedText,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final spots = <FlSpot>[
+      for (int i = 0; i < pts.length; i++) FlSpot(i.toDouble(), pts[i].value),
+    ];
+
+    final minY =
+        pts.map((e) => e.value).reduce((a, b) => a < b ? a : b);
+    final maxY =
+        pts.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+    final range = (maxY - minY).abs();
+    final padY = range * 0.15 + 1;
+    final chartMin = minY - padY;
+    final chartMax = maxY + padY;
+    final yInterval = ((chartMax - chartMin) / 5).abs();
+    final xInterval = (pts.length / 6).clamp(1, pts.length).toDouble();
+
+    return SizedBox(
+      height: 220,
+      child: LineChart(
+        LineChartData(
+          minY: chartMin,
+          maxY: chartMax,
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: yInterval,
+            getDrawingHorizontalLine: (_) => FlLine(
+              color: tokens.dividerLine,
+              strokeWidth: 1,
+            ),
+          ),
+          titlesData: FlTitlesData(
+            topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false)),
+            rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 28,
+                interval: xInterval,
+                getTitlesWidget: (value, meta) {
+                  final idx = value.toInt();
+                  if (idx < 0 || idx >= pts.length) {
+                    return const SizedBox.shrink();
+                  }
+                  final d = pts[idx].date;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      DateFormat('yyyy-MM-dd').format(d),
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: tokens.mutedText,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 44,
+                interval: yInterval,
+                getTitlesWidget: (value, meta) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Text(
+                      NumberFormat.compactCurrency(symbol: '\$')
+                          .format(value),
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: tokens.mutedText,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          lineTouchData: const LineTouchData(enabled: true),
+          lineBarsData: [
+            LineChartBarData(
+              spots: spots,
+              isCurved: false,
+              color: tokens.success,
+              barWidth: 2,
+              dotData: const FlDotData(show: false),
+              belowBarData: BarAreaData(
+                show: true,
+                color: tokens.success.withValues(alpha: 0.08),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EquityPt {
+  final DateTime date;
+  final double value;
+  _EquityPt(this.date, this.value);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Commission summary
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CommissionSummary extends StatelessWidget {
+  final CopyTradingPlanCommissionSummary comm;
+  final PlanTokens tokens;
+  const _CommissionSummary({required this.comm, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    // Single dense row: 4 metrics side-by-side with a thin divider
+    // between them. Fits in one screen-height — no nested grid.
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _SummaryCell(
+            label: 'Lifetime',
+            value: '\$${comm.lifetime.toStringAsFixed(2)}',
+            tokens: tokens,
+          ),
+        ),
+        _SummaryVSep(tokens: tokens),
+        Expanded(
+          child: _SummaryCell(
+            label: 'This month',
+            value: '\$${comm.thisMonth.toStringAsFixed(2)}',
+            tokens: tokens,
+          ),
+        ),
+        _SummaryVSep(tokens: tokens),
+        Expanded(
+          child: _SummaryCell(
+            label: 'Pending',
+            value: '\$${comm.pending.toStringAsFixed(2)}',
+            valueColor: tokens.warning,
+            tokens: tokens,
+          ),
+        ),
+        _SummaryVSep(tokens: tokens),
+        Expanded(
+          child: _SummaryCell(
+            label: 'Settled',
+            value: '\$${comm.settled.toStringAsFixed(2)}',
+            tokens: tokens,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Compact inline metric cell — small label above bold value
+class _SummaryCell extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final PlanTokens tokens;
+
+  const _SummaryCell({
+    required this.label,
+    required this.value,
+    required this.tokens,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
-          textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 9.sp,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textGrey,
-            letterSpacing: 0.3,
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: tokens.mutedText,
+            height: 1.0,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        SizedBox(height: 6.h),
-        Text(
-          value,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 15.sp,
-            fontWeight: FontWeight.bold,
-            color: valueColor ?? AppColors.textPrimary,
+        const SizedBox(height: 6),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: valueColor ?? tokens.textPrimary,
+              height: 1.0,
+            ),
+            maxLines: 1,
           ),
         ),
       ],
-    ),
-  );
+    );
+  }
 }
 
-String _formatDate(String isoString) {
-  try {
-    final dt = DateTime.parse(isoString);
-    return DateFormat('d MMM yyyy').format(dt);
-  } catch (_) {
-    return isoString;
+/// Thin vertical separator between summary cells
+class _SummaryVSep extends StatelessWidget {
+  final PlanTokens tokens;
+  const _SummaryVSep({required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 28,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      color: tokens.divider,
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Settlement cycle
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _SettlementCycle extends StatelessWidget {
+  final CopyTradingPlanSettlement settle;
+  final PlanTokens tokens;
+  const _SettlementCycle({required this.settle, required this.tokens});
+
+  String _fmtDate(String iso) {
+    if (iso.isEmpty) return '—';
+    try {
+      final d = DateTime.parse(iso);
+      return DateFormat('d MMM yyyy, HH:mm').format(d);
+    } catch (_) {
+      return iso;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _KeyValueRow(
+          label: 'Cycle',
+          description: 'How often pending commissions are flushed to your wallet.',
+          value: _capitalize(settle.cycle),
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Last settled',
+          description: 'When the previous cycle ran.',
+          value: settle.lastSettledAt.isEmpty ? '—' : _fmtDate(settle.lastSettledAt),
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Next payout',
+          description: 'Projected date of the next cycle flush.',
+          value: settle.nextPayoutAt.isEmpty ? '—' : _fmtDate(settle.nextPayoutAt),
+          trailingWidget: settle.isDue ? _DueBadge(tokens: tokens) : null,
+          tokens: tokens,
+        ),
+      ],
+    );
+  }
+}
+
+String _capitalize(String s) {
+  if (s.isEmpty) return '—';
+  return s[0].toUpperCase() + s.substring(1);
+}
+
+class _DueBadge extends StatelessWidget {
+  final PlanTokens tokens;
+  const _DueBadge({required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: tokens.warningSoft,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        'Due now',
+        style: TextStyle(
+          fontSize: 10,
+          color: tokens.warningText,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Commission & fees
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CommissionFees extends StatelessWidget {
+  final CopyTradingMasterPlanDetail plan;
+  final PlanTokens tokens;
+  const _CommissionFees({required this.plan, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _KeyValueRow(
+          label: 'Commission',
+          description: 'What copiers pay according to this plan.',
+          value: plan.commissionLabel.isNotEmpty
+              ? plan.commissionLabel
+              : '${plan.commissionPercentage}%',
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Commission type',
+          description: 'Per profitable trade vs subscription.',
+          value: _capitalize(plan.commissionType.isEmpty
+              ? 'per_trade'
+              : plan.commissionType),
+          tokens: tokens,
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Copier rules
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CopierRules extends StatelessWidget {
+  final CopyTradingMasterPlanDetail plan;
+  final PlanTokens tokens;
+  const _CopierRules({required this.plan, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    final cap = plan.maxCopiers == 0
+        ? '∞'
+        : '${plan.activeCopiers} / ${plan.maxCopiers}';
+    return Column(
+      children: [
+        _KeyValueRow(
+          label: 'Minimum capital',
+          description: 'Smallest account a copier can join with.',
+          value: '\$${plan.minimumCapital.toStringAsFixed(2)}',
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Active / cap',
+          description: 'Current copiers vs limit.',
+          value: cap,
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Plan full',
+          description: 'No new copiers until someone leaves.',
+          value: plan.isFull ? 'Yes' : 'No',
+          valueColor:
+              plan.isFull ? tokens.danger : tokens.textPrimary,
+          tokens: tokens,
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Strategy & risk disclosure
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _StrategyDisclosure extends StatelessWidget {
+  final CopyTradingMasterPlanDetail plan;
+  final PlanTokens tokens;
+  const _StrategyDisclosure({required this.plan, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'STRATEGY DESCRIPTION',
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: tokens.subText,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          plan.strategyDescription.isNotEmpty
+              ? plan.strategyDescription
+              : '— Not provided. Edit the plan to add a public description for copiers.',
+          style: TextStyle(
+            fontSize: 13,
+            color: tokens.bodyText,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'RISK INFORMATION',
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: tokens.subText,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          plan.riskInformation.isNotEmpty
+              ? plan.riskInformation
+              : '— Not provided. Edit the plan to disclose drawdown and risk.',
+          style: TextStyle(
+            fontSize: 13,
+            color: tokens.bodyText,
+            height: 1.4,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Account & system
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AccountSystem extends StatelessWidget {
+  final CopyTradingMasterPlanDetail plan;
+  final PlanTokens tokens;
+  const _AccountSystem({required this.plan, required this.tokens});
+
+  String _statusLabel() {
+    if (plan.status.isEmpty) return '—';
+    return _capitalize(plan.status);
+  }
+
+  String _copyingLabel() {
+    if (plan.copyingPaused) return 'Paused';
+    return 'Active';
+  }
+
+  String _serverLabel() {
+    if (plan.tradingServer.isNotEmpty) return plan.tradingServer;
+    if (plan.lpProviderName.isNotEmpty) return plan.lpProviderName;
+    return '—';
+  }
+
+  String _createdAtLabel() {
+    if (plan.createdAt.isEmpty) return '—';
+    try {
+      return DateFormat('d MMM yyyy').format(DateTime.parse(plan.createdAt));
+    } catch (_) {
+      return plan.createdAt;
+    }
+  }
+
+  String? _initialEquity() {
+    if (plan.initialEquitySnapshot.isEmpty) return null;
+    final n = num.tryParse(plan.initialEquitySnapshot);
+    if (n == null) return plan.initialEquitySnapshot;
+    return n.toStringAsFixed(2);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _KeyValueRow(
+          label: 'Status',
+          description: 'Broker / admin approval state.',
+          value: _statusLabel(),
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Copying',
+          description: 'Whether new master trades are replicated to copiers.',
+          value: _copyingLabel(),
+          valueColor: plan.copyingPaused
+              ? tokens.warning
+              : tokens.success,
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Server',
+          description: 'Execution routing label.',
+          value: _serverLabel(),
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Trading account',
+          description: 'Account number used for this plan.',
+          value: plan.tradingAccountNumber.isEmpty
+              ? '—'
+              : plan.tradingAccountNumber,
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Initial equity snapshot',
+          description: 'Captured when the plan was approved (if recorded).',
+          value: _initialEquity() == null
+              ? '—'
+              : '\$${_initialEquity()}',
+          tokens: tokens,
+        ),
+        _Divider(tokens: tokens),
+        _KeyValueRow(
+          label: 'Created',
+          description: 'Plan creation timestamp.',
+          value: _createdAtLabel(),
+          tokens: tokens,
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Plan timeline
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PlanTimeline extends StatelessWidget {
+  final CopyTradingMasterPlanDetail plan;
+  final PlanTokens tokens;
+  const _PlanTimeline({required this.plan, required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    final events = <_TimelineRowVM>[];
+
+    if (plan.createdAt.isNotEmpty) {
+      events.add(_TimelineRowVM(
+        title: 'Plan created',
+        description: 'Submitted for review.',
+        date: plan.createdAt,
+        kind: 'created',
+        tokens: tokens,
+      ));
+    }
+    if (plan.approvedAt.isNotEmpty) {
+      events.add(_TimelineRowVM(
+        title: 'Plan approved',
+        description: 'Live for copiers to subscribe.',
+        date: plan.approvedAt,
+        kind: 'approved',
+        tokens: tokens,
+      ));
+    }
+    if (plan.copyingPaused && plan.copyingPausedAt.isNotEmpty) {
+      events.add(_TimelineRowVM(
+        title: 'Copying paused',
+        description: 'No new master trades replicated.',
+        date: plan.copyingPausedAt,
+        kind: 'paused',
+        tokens: tokens,
+      ));
+    }
+    if (plan.status.toLowerCase() == 'inactive' ||
+        plan.status.toLowerCase() == 'inactivated') {
+      events.add(_TimelineRowVM(
+        title: 'Plan inactivated',
+        description: 'No longer accepting copiers.',
+        date: plan.updatedAt,
+        kind: 'inactive',
+        tokens: tokens,
+      ));
+    }
+
+    if (events.isEmpty) {
+      return Text(
+        'No timeline events',
+        style: TextStyle(color: tokens.mutedText, fontSize: 13),
+      );
+    }
+
+    return Column(
+      children: [
+        for (int i = 0; i < events.length; i++) ...[
+          _TimelineRowWidget(
+            event: events[i],
+            isLast: i == events.length - 1,
+            tokens: tokens,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _TimelineRowVM {
+  final String title;
+  final String description;
+  final String date;
+  final String kind;
+  final PlanTokens tokens;
+  _TimelineRowVM({
+    required this.title,
+    required this.description,
+    required this.date,
+    required this.kind,
+    required this.tokens,
+  });
+}
+
+class _TimelineRowWidget extends StatelessWidget {
+  final _TimelineRowVM event;
+  final bool isLast;
+  final PlanTokens tokens;
+  const _TimelineRowWidget({
+    required this.event,
+    required this.isLast,
+    required this.tokens,
+  });
+
+  Color _dotColor() {
+    switch (event.kind.toLowerCase()) {
+      case 'approved':
+        return tokens.success;
+      case 'created':
+        return tokens.brandBlue;
+      case 'paused':
+        return tokens.warning;
+      case 'inactive':
+      case 'inactivated':
+        return tokens.mutedText;
+      default:
+        return tokens.subText;
+    }
+  }
+
+  String _fmt(String iso) {
+    try {
+      return DateFormat('d MMM yyyy, HH:mm').format(DateTime.parse(iso));
+    } catch (_) {
+      return iso;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                margin: const EdgeInsets.only(top: 4),
+                decoration: BoxDecoration(
+                  color: _dotColor(),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    color: tokens.border,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          event.title,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: tokens.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        _fmt(event.date),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: tokens.mutedText,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    event.description,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: tokens.subText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared bits
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _KeyValueRow extends StatelessWidget {
+  final String label;
+  final String description;
+  final String value;
+  final Color? valueColor;
+  final Widget? trailingWidget;
+  final PlanTokens tokens;
+
+  const _KeyValueRow({
+    required this.label,
+    required this.description,
+    required this.value,
+    required this.tokens,
+    this.valueColor,
+    this.trailingWidget,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: tokens.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: tokens.mutedText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: valueColor ?? tokens.textPrimary,
+                ),
+              ),
+              if (trailingWidget != null) ...[
+                const SizedBox(height: 4),
+                trailingWidget!,
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  final PlanTokens tokens;
+  const _Divider({required this.tokens});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(height: 1, color: tokens.divider);
   }
 }

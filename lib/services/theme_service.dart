@@ -16,6 +16,16 @@ class ThemeService extends GetxService with WidgetsBindingObserver {
   /// Persisted user preference (System/Light/Dark).
   final Rx<ThemeMode> themeModeRx = defaultThemeMode.obs;
 
+  /// Observable mirror of [isDarkResolved] — used by widgets inside Obx to
+  /// rebuild when the theme flips (the underlying [themeModeRx] is Rx, but
+  /// `platformBrightness` changes are not observable through GetX directly,
+  /// so we recompute and update this whenever either source changes).
+  final RxBool isDarkModeObs = false.obs;
+
+  void _refreshDarkMode() {
+    isDarkModeObs.value = isDarkResolved;
+  }
+
   /// Effective theme mode based on:
   ///   1. Brand lock (dark-only / light-only)
   ///   2. Global flag (enableDarkModeGlobal)
@@ -42,6 +52,8 @@ class ThemeService extends GetxService with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+    ever(themeModeRx, (_) => _refreshDarkMode());
+    _refreshDarkMode();
     _initialization = _initialize();
   }
 
@@ -54,6 +66,7 @@ class ThemeService extends GetxService with WidgetsBindingObserver {
   @override
   void didChangePlatformBrightness() {
     super.didChangePlatformBrightness();
+    _refreshDarkMode();
 
     // When the selected mode is System, Flutter switches Material themes by
     // itself, but our app-wide AppColors are getter-based and many widgets use

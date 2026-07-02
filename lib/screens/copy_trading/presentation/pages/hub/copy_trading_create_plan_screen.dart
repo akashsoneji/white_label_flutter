@@ -2,9 +2,8 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_dashboard_controller.dart';
 import 'package:crm_app/utils/app_logger.dart';
-import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/app_select_field.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -72,10 +71,10 @@ class _CopyTradingCreatePlanScreenState
         elevation: 0,
         centerTitle: true,
         title: Text('Create New Plan', style: AppTextStyles.heading),
-        leading: AppBackButton(
+        leading: AppSvgBackButton(
           onPressed: () => Get.back(closeOverlays: true),
-          
-          
+          iconWidth: 30.w,
+          iconHeight: 30.h,
         ),
       ),
       body: SingleChildScrollView(
@@ -108,7 +107,7 @@ class _CopyTradingCreatePlanScreenState
                       SizedBox(height: 6.h),
                       Obx(() {
                         if (_controller.eligibleAccountsLoading.value) {
-                          return LinearProgressIndicator(minHeight: 2);
+                          return const LinearProgressIndicator(minHeight: 2);
                         }
                         final err = _controller.eligibleAccountsError.value;
                         if (err.isNotEmpty) {
@@ -378,7 +377,7 @@ class _CopyTradingCreatePlanScreenState
             TextFormField(
               controller: _noFeeDaysCtrl,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(),
+              decoration: const InputDecoration(),
             ),
             SizedBox(height: 4.h),
             Text(
@@ -455,7 +454,7 @@ class _CopyTradingCreatePlanScreenState
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: '1',
               ),
             ),
@@ -576,9 +575,10 @@ class _CopyTradingCreatePlanScreenState
 
   Future<void> _submit() async {
     if (_selectedEligibleAccountIndex == null) {
-      CustomToastService.showError(
-        title: 'Required',
-        message: 'Select trading account',
+      Get.snackbar(
+        'Required',
+        'Select trading account',
+        snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
@@ -587,9 +587,10 @@ class _CopyTradingCreatePlanScreenState
 
     final idx = _selectedEligibleAccountIndex!;
     if (idx < 0 || idx >= _controller.eligibleAccounts.length) {
-      CustomToastService.showError(
-        title: 'Invalid',
-        message: 'Select a valid trading account',
+      Get.snackbar(
+        'Invalid',
+        'Select a valid trading account',
+        snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
@@ -597,9 +598,10 @@ class _CopyTradingCreatePlanScreenState
     final commissionValue = num.tryParse(_commissionCtrl.text.trim());
     final minCap = num.tryParse(_minCapitalCtrl.text.trim());
     if (commissionValue == null || minCap == null) {
-      CustomToastService.showError(
-        title: 'Invalid',
-        message: 'Enter valid numeric values',
+      Get.snackbar(
+        'Invalid',
+        'Enter valid numeric values',
+        snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
@@ -630,14 +632,16 @@ class _CopyTradingCreatePlanScreenState
     final res = await _controller.createPlan(body);
     if (res.success) {
       Get.back();
-      CustomToastService.showSuccess(
-        title: 'Created',
-        message: res.message ?? 'Plan created',
+      Get.snackbar(
+        'Created',
+        res.message ?? 'Plan created',
+        snackPosition: SnackPosition.BOTTOM,
       );
     } else {
-      CustomToastService.showError(
-        title: 'Failed',
-        message: res.message ?? _controller.errorMessage.value,
+      Get.snackbar(
+        'Failed',
+        res.message ?? _controller.errorMessage.value,
+        snackPosition: SnackPosition.BOTTOM,
       );
     }
   }

@@ -1,7 +1,10 @@
-import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'dart:convert';
+import 'dart:developer' as developer;
+
 import 'package:get/get.dart';
 import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/models/search_instruments_model.dart';
 import 'package:crm_app/models/socket_response.dart';
 
@@ -30,7 +33,7 @@ class SearchInstrumentsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    availableCategories.assignAll(_categoryChipOrder);
+    // Categories are populated dynamically after API response via _updateAvailableCategories().
     fetchInstruments();
   }
 
@@ -40,27 +43,77 @@ class SearchInstrumentsController extends GetxController {
     final tradingAccount =
         (rawNumber != null && rawNumber.trim().isNotEmpty) ? rawNumber : '0';
 
+    final endpoint = ApiConstants.getInstrumentsByAccount(tradingAccount);
+
+    // ---- DEBUG: REQUEST ----
+    developer.log(
+      '🔎 [SearchInstruments] REQUEST → endpoint: $endpoint | '
+      'baseUrl: ${ApiConstants.baseUrl} | '
+      'tradingAccount: $tradingAccount | '
+      'activeMT5: ${activeAccount?.metaAccountNumber}',
+      name: 'SearchInstrumentsController',
+    );
+    print('🔎 [SearchInstruments] REQUEST URL: ${ApiConstants.baseUrl}$endpoint');
+
     try {
       isLoading.value = true;
-      final response = await ApiService.get(
-        endpoint: ApiConstants.getInstrumentsByAccount(tradingAccount),
-      );
+      final response = await ApiService.get(endpoint: endpoint);
+
+      // ---- DEBUG: RAW RESPONSE ----
+      print('🔎 [SearchInstruments] success: ${response.success}');
+      print('🔎 [SearchInstruments] message: ${response.message}');
+      try {
+        final encoded = jsonEncode(response.data);
+        final preview = encoded.length > 4000
+            ? '${encoded.substring(0, 4000)}...(truncated ${encoded.length - 4000} chars)'
+            : encoded;
+        print('🔎 [SearchInstruments] RAW DATA: $preview');
+      } catch (_) {
+        print('🔎 [SearchInstruments] RAW DATA (non-json): ${response.data}');
+      }
 
       if (response.success && response.data != null) {
-        final searchResponse = SearchInstrumentsResponse.fromJson(response.data);
+        final searchResponse =
+            SearchInstrumentsResponse.fromJson(response.data);
+
+        print(
+          '🔎 [SearchInstruments] PARSED → status: ${searchResponse.status} | '
+          'data != null: ${searchResponse.data != null} | '
+          'symbols count: ${searchResponse.data?.symbols.length ?? 0}',
+        );
+
         if (searchResponse.data != null) {
           allSymbols.assignAll(searchResponse.data!.symbols);
           _updateAvailableCategories();
 
-          if (!availableCategories.contains(currentCategory.value)) {
-            currentCategory.value = 'All';
-          }
+          currentCategory.value = 'All';
 
           _applyFilter();
+
+          print(
+            '🔎 [SearchInstruments] AFTER FILTER → allSymbols: ${allSymbols.length} | '
+            'filteredSymbols: ${filteredSymbols.length} | '
+            'availableCategories: $availableCategories',
+          );
+          if (allSymbols.isNotEmpty) {
+            final first = allSymbols.first;
+            print(
+              '🔎 [SearchInstruments] FIRST SYMBOL → display: ${first.displaySymbol} | '
+              'category: ${first.categoryName} | digits: ${first.digits}',
+            );
+          }
+        } else {
+          print('⚠️ [SearchInstruments] searchResponse.data is NULL');
         }
+      } else {
+        print(
+          '⚠️ [SearchInstruments] Bad response → success=${response.success}, '
+          'data=${response.data}',
+        );
       }
-    } catch (e) {
-      print('Error fetching search instruments: $e');
+    } catch (e, st) {
+      print('❌ [SearchInstruments] Error fetching search instruments: $e');
+      print('❌ [SearchInstruments] StackTrace: $st');
     } finally {
       isLoading.value = false;
     }
@@ -77,8 +130,25 @@ class SearchInstrumentsController extends GetxController {
   }
 
   void _updateAvailableCategories() {
-    // Fixed chip order (not driven by API category list order).
-    availableCategories.assignAll(_categoryChipOrder);
+    // Only show categories that have at least one symbol in the API response.
+    // 'All' is always shown first (if there are any symbols at all).
+    final presentChips = <String>[];
+
+    if (allSymbols.isNotEmpty) {
+      presentChips.add('All');
+    }
+
+    for (final chip in _categoryChipOrder) {
+      if (chip == 'All') continue; // already handled above
+      final hasMatch = allSymbols.any(
+        (s) => symbolMatchesCategoryChip(s.categoryName, chip),
+      );
+      if (hasMatch) {
+        presentChips.add(chip);
+      }
+    }
+
+    availableCategories.assignAll(presentChips);
   }
 
   /// Maps a symbol's API [categoryName] to the chip bucket [selectedChip], or false if no match.

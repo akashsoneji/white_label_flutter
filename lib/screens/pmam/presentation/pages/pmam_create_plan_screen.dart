@@ -1,3 +1,4 @@
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -6,8 +7,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
-import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/app_select_field.dart';
 
 class PmamCreatePlanScreen extends StatefulWidget {
   const PmamCreatePlanScreen({super.key});
@@ -60,9 +60,12 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedAccount == null) {
-      CustomToastService.showError(
-        title: 'Required',
-        message: 'Please select a trading account',
+      Get.snackbar(
+        'Required',
+        'Please select a trading account',
+        backgroundColor: AppColors.error,
+        colorText: AppColors.whiteColor,
+        snackPosition: SnackPosition.TOP,
       );
       return;
     }
@@ -89,7 +92,11 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: const AppBackButton(),
+        leading: AppSvgBackButton(
+          onPressed: () => Get.back(closeOverlays: true),
+          iconWidth: 30.w,
+          iconHeight: 30.h,
+        ),
 
         // leading: GestureDetector(
         //   onTap: () => Get.back(),
@@ -126,7 +133,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                   borderRadius: BorderRadius.circular(14.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: AppColors.border.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -172,7 +179,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                             vertical: 4.h,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.green.withOpacity(0.15),
+                            color: AppColors.green.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
@@ -199,7 +206,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                   borderRadius: BorderRadius.circular(14.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: AppColors.border.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -222,7 +229,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                         return Container(
                           padding: EdgeInsets.all(12.w),
                           decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.dividerMedium),
+                            border: Border.all(color: AppColors.border),
                             borderRadius: BorderRadius.circular(10.r),
                           ),
                           child: Text(
@@ -234,41 +241,15 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                           ),
                         );
                       }
-                      return DropdownButtonFormField<Map<String, dynamic>>(
-                        isExpanded: true,
+                      return AppSelectField<Map<String, dynamic>>(
                         value: _selectedAccount,
-                        hint: Text(
-                          'Select a trading account',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
-                            vertical: 6.h,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.r),
-                            borderSide: const BorderSide(
-                              color: AppColors.dividerMedium,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.r),
-                            borderSide: const BorderSide(
-                              color: AppColors.dividerMedium,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.r),
-                            borderSide: BorderSide(color: AppColors.primary),
-                          ),
-                        ),
-                        items:
+                        hint: 'Select a trading account',
+                        sheetTitle: 'Select Trading Account',
+                        valueEquals: (a, b) => a['id'] == b['id'],
+                        options:
                             accounts.map((acc) {
-                              final accNo = acc['meta_account_number'] ?? '-';
+                              final accNo =
+                                  acc['meta_account_number']?.toString() ?? '-';
                               final bal =
                                   double.tryParse(
                                     acc['balance']?.toString() ?? '0',
@@ -276,23 +257,20 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                                   0;
                               final availBal =
                                   double.tryParse(
-                                    acc['available_balance']?.toString() ?? '0',
+                                    acc['available_balance']?.toString() ??
+                                        '0',
                                   ) ??
                                   0;
-                              return DropdownMenuItem<Map<String, dynamic>>(
+                              return AppSelectOption<Map<String, dynamic>>(
                                 value: acc,
-                                child: Text(
-                                  '$accNo — Balance: \$${bal.toStringAsFixed(2)} (Available: \$${availBal.toStringAsFixed(2)})',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
+                                title:
+                                    '$accNo — Balance: \$${bal.toStringAsFixed(2)}',
+                                subtitle:
+                                    'Available: \$${availBal.toStringAsFixed(2)}',
                               );
                             }).toList(),
-                        onChanged: (v) => setState(() => _selectedAccount = v),
+                        onChanged:
+                            (v) => setState(() => _selectedAccount = v),
                       );
                     }),
                     SizedBox(height: 4.h),
@@ -433,7 +411,7 @@ class _FormLabel extends StatelessWidget {
                 ),
               ),
             if (required)
-              TextSpan(text: ' *', style: TextStyle(color: AppColors.red)),
+              TextSpan(text: ' *', style: TextStyle(color: AppColors.error)),
           ],
         ),
       ),
@@ -469,11 +447,11 @@ class _StyledTextField extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: AppColors.dividerMedium),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: const BorderSide(color: AppColors.dividerMedium),
+          borderSide: BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
@@ -481,7 +459,7 @@ class _StyledTextField extends StatelessWidget {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: BorderSide(color: AppColors.red),
+          borderSide: BorderSide(color: AppColors.error),
         ),
       ),
     );

@@ -295,6 +295,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
+              backgroundColor: AppColors.background,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
@@ -302,7 +303,8 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12.r),
-                  color: AppColors.whiteColor,
+                  color: AppColors.card,
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -339,6 +341,10 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                                   'assets/svg/partnership_program/cancel.svg',
                                   width: 30.55.w,
                                   height: 30.55.w,
+                                  colorFilter: ColorFilter.mode(
+                                    AppColors.textPrimary,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
                             ),
@@ -355,7 +361,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.icongrey,
+                        color: AppColors.textSecondary,
                         height: 1.33,
                       ),
                     ),
@@ -373,17 +379,21 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(4.r),
                             ),
-                            side: BorderSide(color: AppColors.icongrey),
-                            overlayColor: WidgetStateProperty.all(
-                              AppColors.icongrey,
-                            ),
+                            activeColor: AppColors.primary,
+                            checkColor: AppColors.whiteColor,
+                            side: BorderSide(color: AppColors.textGrey, width: 1.5),
+                            fillColor: WidgetStateProperty.resolveWith((states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return AppColors.primary;
+                              }
+                              return AppColors.card;
+                            }),
                             value: isAgreed,
                             onChanged: (value) {
                               setDialogState(() {
                                 isAgreed = value ?? false;
                               });
                             },
-                            activeColor: AppColors.primary,
                           ),
                         ),
                         SizedBox(width: 8.w),
@@ -394,7 +404,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w400,
                               height: 1.58,
-                              color: AppColors.icongrey,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         ),
@@ -418,6 +428,8 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.whiteColor,
+                          disabledBackgroundColor: AppColors.neutralTrack,
+                          disabledForegroundColor: AppColors.textSecondary,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.r),
@@ -429,6 +441,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
+                            color: AppColors.whiteColor,
                           ),
                         ),
                       ),

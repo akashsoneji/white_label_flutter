@@ -1,3 +1,4 @@
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -6,11 +7,20 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import '../widgets/edit_plan_bottom_sheet.dart';
 import 'package:crm_app/screens/pmam/presentation/pages/pmam_manager_investor_detail_screen.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 
 class PmamManagerPortalScreen extends StatefulWidget {
-  const PmamManagerPortalScreen({super.key});
+  const PmamManagerPortalScreen({
+    super.key,
+    this.initialTab = 0,
+    this.embedded = false,
+  });
+
+  /// 0 = Investors, 1 = Plans.
+  final int initialTab;
+  /// When true, hides the app bar (caller provides its own).
+  final bool embedded;
 
   @override
   State<PmamManagerPortalScreen> createState() =>
@@ -28,7 +38,11 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 2, vsync: this);
+    _tabCtrl = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTab.clamp(0, 1),
+    );
     if (Get.isRegistered<PmamController>()) {
       _ctrl = Get.find<PmamController>();
     } else {
@@ -55,9 +69,9 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
       case 'active':
         return AppColors.green;
       case 'rejected':
-        return AppColors.red;
+        return AppColors.error;
       case 'pending':
-        return AppColors.statusYellow;
+        return AppColors.warningText;
       default:
         return AppColors.textGrey;
     }
@@ -67,11 +81,15 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: AppBar(
+      appBar: widget.embedded
+          ? null
+          : AppBar(
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: const AppBackButton(),
+        leading: AppBackButton(
+          onPressed: () => Get.back(closeOverlays: true),
+        ),
         title: Text('Manager Portal', style: AppTextStyles.heading),
         centerTitle: true,
         actions: [
@@ -162,7 +180,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
               borderRadius: BorderRadius.circular(12.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: AppColors.border.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -192,7 +210,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                 _StatPill(
                   label: 'Rejected',
                   value: '${counts['rejected']}',
-                  color: AppColors.red,
+                  color: AppColors.error,
                 ),
               ],
             ),
@@ -322,7 +340,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                               borderRadius: BorderRadius.circular(12.r),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.04),
+                                  color: AppColors.border.withValues(alpha: 0.04),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -427,7 +445,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                           valueColor:
                                               pnlIsPos
                                                   ? AppColors.green
-                                                  : AppColors.red,
+                                                  : AppColors.error,
                                         ),
                                       ),
                                     ],
@@ -477,7 +495,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                                     }
                                                   },
                                           style: OutlinedButton.styleFrom(
-                                            side: BorderSide(color: AppColors.red),
+                                            side: BorderSide(color: AppColors.error),
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(
                                                 10.r,
@@ -494,13 +512,13 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                                 width: 16.h,
                                                 child: CircularProgressIndicator(
                                                   strokeWidth: 2,
-                                                  color: AppColors.red,
+                                                  color: AppColors.error,
                                                 ),
                                               )
                                               : Text(
                                                 'Reject',
                                                 style: TextStyle(
-                                                  color: AppColors.red,
+                                                  color: AppColors.error,
                                                   fontSize: 13.sp,
                                                   fontWeight: FontWeight.w700,
                                                 ),
@@ -646,11 +664,17 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                 statusColor = AppColors.green;
                 break;
               case 'pending_admin':
-                statusColor = AppColors.statusYellow;
+                statusColor = AppColors.warningText;
+                break;
+              case 'paused':
+                statusColor = AppColors.warningText;
                 break;
               default:
                 statusColor = AppColors.textGrey;
             }
+            final isPaused = status == 'paused' ||
+                (p['is_paused'] == 1 || p['is_paused'] == true);
+            final canPauseResume = status == 'approved' || isPaused;
             return Container(
               padding: EdgeInsets.all(14.w),
               decoration: BoxDecoration(
@@ -658,7 +682,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                 borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: AppColors.border.withValues(alpha: 0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -728,7 +752,8 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
+                        child: OutlinedButton.icon(
+                          icon: Icon(Icons.visibility),
                           onPressed:
                               () => Get.toNamed(
                                 AppPages.PMAM_MANAGER_PLAN_DETAIL,
@@ -741,8 +766,8 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                             ),
                             padding: EdgeInsets.symmetric(vertical: 8.h),
                           ),
-                          child: Text(
-                            'View Details',
+                           label:  Text(
+                            'View',
                             style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 13.sp,
@@ -751,13 +776,85 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                           ),
                         ),
                       ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _openEditPlan(p),
+                          icon: Icon(
+                            Icons.edit_outlined,
+                            size: 16.sp,
+                            color: AppColors.primary,
+                          ),
+                          label: Text(
+                            'Edit',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                AppColors.primary.withValues(alpha: 0.1),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                          ),
+                        ),
+                      ),
+                      if (canPauseResume) ...[
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _confirmPauseResume(
+                              planId: (p['id'] is int)
+                                  ? p['id'] as int
+                                  : int.tryParse('${p['id']}') ?? 0,
+                              planName: (p['plan_name'] ?? 'Plan').toString(),
+                              isPaused: isPaused,
+                            ),
+                            icon: Icon(
+                              isPaused
+                                  ? Icons.play_arrow_rounded
+                                  : Icons.pause_rounded,
+                              size: 16.sp,
+                              color: isPaused
+                                  ? AppColors.green
+                                  : AppColors.warningText,
+                            ),
+                            label: Text(
+                              isPaused ? 'Resume' : 'Pause',
+                              style: TextStyle(
+                                color: isPaused
+                                    ? AppColors.green
+                                    : AppColors.warningText,
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: (isPaused
+                                      ? AppColors.green
+                                      : AppColors.warningText)
+                                  .withValues(alpha: 0.1),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              padding: EdgeInsets.symmetric(vertical: 8.h),
+                            ),
+                          ),
+                        ),
+                      ],
                       if (status == 'approved') ...[
                         SizedBox(width: 8.w),
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () => _ctrl.inactivatePlan(p['id'] ?? 0),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.red.withOpacity(0.1),
+                              backgroundColor: AppColors.error.withValues(alpha: 0.1),
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.r),
@@ -767,7 +864,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                             child: Text(
                               'Inactivate',
                               style: TextStyle(
-                                color: AppColors.red,
+                                color: AppColors.error,
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -784,6 +881,97 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
         ),
       );
     });
+  }
+
+  /// Opens the bottom-sheet edit modal (mirrors the web "Edit plan" dialog).
+  Future<void> _openEditPlan(Map<String, dynamic> plan) async {
+    await EditPlanBottomSheet.show(context, plan);
+  }
+
+  /// Shows the confirm dialog (matching the web wording) and calls the
+  /// controller to pause / resume the plan, then shows a snackbar.
+  Future<void> _confirmPauseResume({
+    required int planId,
+    required String planName,
+    required bool isPaused,
+  }) async {
+    if (planId <= 0) return;
+    final title = isPaused
+        ? 'Resume plan "$planName"?'
+        : 'Pause plan "$planName"?';
+    final body = isPaused
+        ? 'New investor joins and trade allocations will restart. '
+            'MT5 trading rights on the pool account will be re-enabled.'
+        : 'New investor joins and new trade allocations will stop.\n\n'
+            'Existing investor positions stay open. While paused, you also '
+            'cannot CLOSE positions on the pool MT5 account — resume the '
+            'plan first to manage open trades.';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: Text(
+          body,
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: AppColors.textGrey,
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textGrey),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  isPaused ? AppColors.green : AppColors.warningText,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(isPaused ? 'Resume' : 'Pause'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final result = isPaused
+        ? await _ctrl.resumeManagerPlan(planId)
+        : await _ctrl.pauseManagerPlan(planId);
+
+    if (!mounted) return;
+    Get.snackbar(
+      result.ok ? 'Success' : 'Error',
+      result.message,
+      backgroundColor: result.ok
+          ? AppColors.green.withValues(alpha: 0.95)
+          : AppColors.error.withValues(alpha: 0.95),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: EdgeInsets.all(12.w),
+      borderRadius: 10,
+      duration: const Duration(seconds: 3),
+    );
   }
 }
 
@@ -826,7 +1014,7 @@ class _StatPill extends StatelessWidget {
 class _VertDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(height: 28.h, width: 1, color: AppColors.dividerDark);
+    return Container(height: 28.h, width: 1, color: AppColors.border);
   }
 }
 
@@ -853,7 +1041,7 @@ class _PortalFilterChip extends StatelessWidget {
           color: selected ? AppColors.primary : AppColors.whiteColor,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.dividerMedium,
+            color: selected ? AppColors.primary : AppColors.border,
           ),
           boxShadow:
               selected

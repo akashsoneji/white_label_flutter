@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_copiers_controller.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/copy_trading/presentation/pages/hub/subscribe_to_plan_screen.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_details_controller.dart';
@@ -74,7 +75,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
               BlendMode.srcIn,
             ),
           ),
-          onPressed: () => Get.offAll(() => TradingMainScreen()),
+          onPressed: () => Get.offAll(() => const TradingMainScreen()),
         ),
         actions: [
           IconButton(
@@ -213,13 +214,13 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                 final allCopiers = controller.copiers;
 
                 if (loading && allCopiers.isEmpty) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 Widget listChild;
                 if (err.isNotEmpty && allCopiers.isEmpty) {
                   listChild = ListView(
-                    physics: AlwaysScrollableScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     children: [
                       Padding(
                         padding: EdgeInsets.symmetric(
@@ -262,7 +263,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                   );
                 } else if (allCopiers.isEmpty) {
                   listChild = ListView(
-                    physics: AlwaysScrollableScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     children: [
                       Container(
                         padding: EdgeInsets.symmetric(vertical: 100.h),
@@ -280,7 +281,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                 } else {
                   listChild = ListView.separated(
                     controller: _scrollController,
-                    physics: AlwaysScrollableScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 80.h),
                     itemCount:
                         allCopiers.length +
@@ -381,7 +382,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
           BoxShadow(
             color: AppColors.border.withValues(alpha: 0.02),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -590,7 +591,7 @@ class _CopierCardItem extends StatelessWidget {
           BoxShadow(
             color: AppColors.border.withValues(alpha: 0.03),
             blurRadius: 8,
-            offset: Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -857,7 +858,7 @@ class _CopierCardItem extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () async {
@@ -900,14 +901,14 @@ class _CopierCardItem extends StatelessWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Stop Copy'),
-            content: Text(
+            title: const Text('Stop Copy'),
+            content: const Text(
               'Are you sure you want to permanently stop copying for this investor? This action cannot be undone.',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () async {

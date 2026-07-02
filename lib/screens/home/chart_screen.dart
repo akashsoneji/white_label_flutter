@@ -1,4 +1,3 @@
-import 'package:crm_app/widgets/app_svg_icon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
@@ -7,10 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/screens/trading/view_models/chart_controller.dart';
+import 'package:crm_app/models/instrument.dart';
 import 'package:crm_app/models/socket_response.dart';
+import 'package:crm_app/widgets/app_switch_tile.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
-import 'package:crm_app/widgets/advanced_chart_inapp_webview.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'dart:convert';
@@ -20,8 +19,6 @@ import '../../constants/color.dart';
 import '../../constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
-import 'package:crm_app/screens/home/brands/vantage/vantage_chart_layout.dart';
-import 'package:crm_app/widgets/vantage/vantage_symbol_dropdown.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
@@ -35,18 +32,17 @@ import '../../utils/precision_helper.dart';
 import '../../models/order_types.dart';
 import '../../utils/app_logger.dart';
 import '../../widgets/custom_toast.dart';
-import '../../widgets/app_switch_tile.dart';
+import '../../widgets/stepper_adjust_icon.dart';
 import '../../routes/app_pages.dart';
 import 'dashboard_screen.dart';
 import 'pending_order_content.dart';
 import 'pending_order_screen.dart';
+import 'search_instruments_screen.dart';
 import '../../services/one_click_trading_service.dart';
 import '../../services/one_click_trading_queue_service.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import '../../services/symbol_selection_service.dart';
-import 'search_instruments_screen.dart';
 import '../../services/symbol_details_cache_service.dart';
-import '../../services/theme_service.dart';
 
 class ChartScreen extends StatefulWidget {
   final Function(int?)?
@@ -92,7 +88,6 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
   String _datafeedSymbolForSelected = '';
   String _lastSymbolForDatafeedLookup = '';
   bool _isFetchingDatafeedSymbol = false;
-  String _lastDebugPrintedChartUrl = '';
 
   bool useTradingView = true;
   final ValueNotifier<String> selectedPriceType = ValueNotifier('Asset Price');
@@ -101,6 +96,7 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
   late TextEditingController _takeProfitController;
   late TextEditingController _stopLossController;
   late TextEditingController _limitPriceController;
+  late TextEditingController _openPriceController;
   late TextEditingController distanceController;
   VoidCallback? _distanceListener;
 
@@ -113,6 +109,8 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
   late AppNotificationController notificationController;
   late SymbolSelectionService symbolSelectionService;
 
+  // Mock chart data for now
+  List<Map<String, dynamic>> _chartData = [];
   Map<String, dynamic>? realTimePrice;
   bool isLoading = true;
   bool _isPlacingOrder = false; // Prevent multiple order executions
@@ -167,35 +165,9 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
   // GetX reactive listener worker to be disposed
   Worker? _instrumentsWorker;
 
- // GlobalKeys to access WebView state for explicit symbol updates.
- // Two keys: one for the legacy chart (ChartInAppWebView) and one for the
- // new advanced chart (AdvancedChartInAppWebView). The active flavor's
- // `useNewChart` flag decides which one `chart_screen` actually mounts in
- // `_buildChartArea()`. Both widgets expose the same public API
- // (`updateSymbol`, `updateNativeTrades`) so the helper methods below
- // route calls transparently.
- final GlobalKey<ChartInAppWebViewState> _legacyChartKey =
- GlobalKey<ChartInAppWebViewState>();
- final GlobalKey<AdvancedChartInAppWebViewState> _advancedChartKey =
- GlobalKey<AdvancedChartInAppWebViewState>();
-
- /// Route symbol-update calls to whichever chart is currently mounted.
- void _wvUpdateSymbol(String chartSymbol) {
- if (FlavorConfig.instance.useNewChart) {
- _advancedChartKey.currentState?.updateSymbol(chartSymbol);
- } else {
- _legacyChartKey.currentState?.updateSymbol(chartSymbol);
- }
- }
-
- /// Route trade-overlay calls to whichever chart is currently mounted.
- void _wvUpdateNativeTrades(String jsonString) {
- if (FlavorConfig.instance.useNewChart) {
- _advancedChartKey.currentState?.updateNativeTrades(jsonString);
- } else {
- _legacyChartKey.currentState?.updateNativeTrades(jsonString);
- }
- }
+  // GlobalKey to access WebView state for explicit symbol updates
+  final GlobalKey<ChartInAppWebViewState> _webViewKey =
+      GlobalKey<ChartInAppWebViewState>();
 
   // Helper method to remove symbol suffixes (.c, .r, etc.)
   // IMPORTANT: Use this ONLY for display and chart iframe
@@ -242,7 +214,7 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
     }
 
     // Decide color (example rule)
-    // Color color = price % 2 == 0 ? Colors.green : Colors.red;
+    // Color color = price % 2 == 0 ? AppColors.green : AppColors.error;
 
     return [
       TextSpan(
@@ -418,6 +390,12 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
           decimals: _getCurrentDigits(),
         ),
       );
+      _openPriceController = TextEditingController(
+        text: PrecisionHelper.formatPrice(
+          _openPrice.value,
+          decimals: _getCurrentDigits(),
+        ),
+      );
       distanceController = TextEditingController(
         text: PrecisionHelper.formatPrice(_distance.value),
       );
@@ -462,6 +440,7 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       _takeProfitController = TextEditingController(text: '0.00');
       _stopLossController = TextEditingController(text: '0.00');
       _limitPriceController = TextEditingController(text: '0.00000');
+      _openPriceController = TextEditingController(text: '0.00000');
       distanceController = TextEditingController(text: '0.00');
 
       // Don't set hardcoded symbol - let it be dynamic from instruments
@@ -469,19 +448,19 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
     }
   }
 
- /// Inject open trades into the WebView Chart
- void _updateTradesOnChart() {
- if (!mounted) return;
+  /// Inject open trades into the WebView Chart
+  void _updateTradesOnChart() {
+    if (!mounted || _webViewKey.currentState == null) return;
 
- try {
- final tradingController = Get.find<TradingController>();
- final positions = tradingController.marketPositions;
+    try {
+      final tradingController = Get.find<TradingController>();
+      final positions = tradingController.marketPositions;
 
- // Debounce frequent socket updates (especially when 100-200+ positions update in batches)
- // to avoid UI jank and "stuck" transitions between tabs.
- _tradesInjectDebounce?.cancel();
- _tradesInjectDebounce = Timer(const Duration(milliseconds: 250), () {
- if (!mounted) return;
+      // Debounce frequent socket updates (especially when 100-200+ positions update in batches)
+      // to avoid UI jank and "stuck" transitions between tabs.
+      _tradesInjectDebounce?.cancel();
+      _tradesInjectDebounce = Timer(const Duration(milliseconds: 250), () {
+        if (!mounted || _webViewKey.currentState == null) return;
 
         // Build a lightweight signature first; skip inject if nothing meaningful changed.
         // (orderId + PnL + entry/current prices are enough for chart markers)
@@ -519,8 +498,8 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
                 )
                 .toList();
 
- final jsonString = jsonEncode(tradesList);
- _wvUpdateNativeTrades(jsonString);
+        final jsonString = jsonEncode(tradesList);
+        _webViewKey.currentState?.updateNativeTrades(jsonString);
       });
     } catch (e) {
       print('❌ Error injecting trades to chart: $e');
@@ -697,21 +676,44 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
         selectedSymbol,
       ); // Original symbol with suffix
 
-      // Determine order type based on current selection
+      // Determine order type based on current selection from the dropdown/selector
       OrderType orderType;
-      if (_whenPriceIsEnabled.value) {
-        // Conditional orders (Buy Limit/Sell Limit)
-        if (_selectedPendingOrderType.value == 0) {
-          orderType = OrderType.sellLimit; // Sell Limit
-        } else {
-          orderType = OrderType.buyLimit; // Buy Limit
-        }
-      } else {
+      final orderTypeName = _selectedOrderType.value;
+
+      if (!_whenPriceIsEnabled.value) {
         // Market orders
         if (_selectedPendingOrderType.value == 0) {
-          orderType = OrderType.sellMarket; // Sell Market
+          orderType = OrderType.sellMarket;
         } else {
-          orderType = OrderType.buyMarket; // Buy Market
+          orderType = OrderType.buyMarket;
+        }
+      } else {
+        // Pending orders
+        switch (orderTypeName) {
+          case 'Buy Limit':
+            orderType = OrderType.buyLimit;
+            break;
+          case 'Sell Limit':
+            orderType = OrderType.sellLimit;
+            break;
+          case 'Buy Stop':
+            orderType = OrderType.buyStop;
+            break;
+          case 'Sell Stop':
+            orderType = OrderType.sellStop;
+            break;
+          case 'Buy Stop Limit':
+            orderType = OrderType.buyStopLimit;
+            break;
+          case 'Sell Stop Limit':
+            orderType = OrderType.sellStopLimit;
+            break;
+          default:
+            // Fallback based on simple toggle
+            orderType =
+                _selectedPendingOrderType.value == 0
+                    ? OrderType.sellLimit
+                    : OrderType.buyLimit;
         }
       }
 
@@ -725,35 +727,38 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
               ? (int.tryParse(priceData['digits'].toString()) ?? 5)
               : 5;
 
-      // Format values properly to avoid floating point errors like 1.1367749999999999
-      // Read from controller first (user's entered value), fallback to ValueNotifier
-      final limitPriceControllerValue = _limitPriceController.text.trim();
-      final limitPriceFromController =
-          limitPriceControllerValue.isNotEmpty
-              ? double.tryParse(limitPriceControllerValue)
-              : null;
+      // Price logic for different order types:
+      // For Stop Limit orders: price is the Trigger Price, stopLimitPrice is the Limit Price.
+      // For other pending orders: price is the entry price.
+      String? price;
+      String? stopLimitPrice;
 
-      final price =
-          _whenPriceIsEnabled.value
-              ? PrecisionHelper.formatPrice(
-                PrecisionHelper.parseDouble(
-                  (limitPriceFromController != null &&
-                          limitPriceFromController > 0)
-                      ? limitPriceControllerValue
-                      : _limitPrice.value.toString(),
-                  decimals: decimals,
-                ),
-                decimals: decimals,
-              )
-              : null;
+      if (_whenPriceIsEnabled.value) {
+        if (orderType == OrderType.buyStopLimit ||
+            orderType == OrderType.sellStopLimit) {
+          // Trigger Price comes from openPrice notifier
+          price = PrecisionHelper.formatPrice(
+            _openPrice.value,
+            decimals: decimals,
+          );
+          // Limit Price comes from limitPrice notifier
+          stopLimitPrice = PrecisionHelper.formatPrice(
+            _limitPrice.value,
+            decimals: decimals,
+          );
+        } else {
+          // For all other pending orders, use the limitPrice notifier
+          price = PrecisionHelper.formatPrice(
+            _limitPrice.value,
+            decimals: decimals,
+          );
+        }
+      }
 
       final takeProfit =
           _takeProfitEnabled.value
               ? PrecisionHelper.formatPrice(
-                PrecisionHelper.parseDouble(
-                  _takeProfitPrice.value.toString(),
-                  decimals: decimals,
-                ),
+                _takeProfitPrice.value,
                 decimals: decimals,
               )
               : null;
@@ -761,10 +766,7 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       final stopLoss =
           _stopLossEnabled.value
               ? PrecisionHelper.formatPrice(
-                PrecisionHelper.parseDouble(
-                  _stopLossPrice.value.toString(),
-                  decimals: decimals,
-                ),
+                _stopLossPrice.value,
                 decimals: decimals,
               )
               : null;
@@ -776,19 +778,19 @@ Placing Order:
 - Type: ${orderType.value}
 - Volume: $volumeStr
 - Price: ${price ?? 'Market'}
+- Stop Limit Price: ${stopLimitPrice ?? 'None'}
 - Take Profit: ${takeProfit ?? 'None'}
 - Stop Loss: ${stopLoss ?? 'None'}
 - MT5 Account: ${activeAccount.metaAccountNumber}
       ''');
 
       // Place the order using TradingController
-      // IMPORTANT: Use original symbol WITH suffix for order placement
       final success = await tradingController.placeTradeOrder(
-        symbol:
-            selectedSymbol, // Original symbol with suffix (e.g., "EURUSD.c")
+        symbol: selectedSymbol,
         volume: volumeStr,
         orderType: orderType,
         price: price,
+        stopLimitPrice: stopLimitPrice,
         takeProfit: takeProfit,
         stopLoss: stopLoss,
         mt5Account: activeAccount.metaAccountNumber,
@@ -850,6 +852,19 @@ Placing Order:
     }
   }
 
+  bool _isPendingOrderValid() {
+    _validateLimitPrice();
+    _validateStopLoss();
+    _validateTakeProfit();
+
+    if (_limitPriceError.value != null) return false;
+    if (_stopLossEnabled.value && _stopLossError.value != null) return false;
+    if (_takeProfitEnabled.value && _takeProfitError.value != null)
+      return false;
+
+    return true;
+  }
+
   void _onSymbolChangedFromInstruments() {
     final newSymbol = ChartScreen._selectedSymbolNotifier.value;
     print('🔄 ChartScreen: Symbol changed from $selectedSymbol to $newSymbol');
@@ -876,8 +891,17 @@ Placing Order:
     print('📡 Current Symbol: $selectedSymbol');
     print('🔌 Socket Connected: ${chartSocketController.isConnected.value}');
 
+    // ✅ FIX: Reset datafeed symbol cache so that _buildChartArea() passes the new
+    // displaySymbol as ChartInAppWebView.symbol prop. Without this reset,
+    // _datafeedSymbolForSelected holds the old symbol's value and the prop
+    // doesn't change → didUpdateWidget never fires → JS updateSymbol not called.
+    // This ensures the prop changes immediately on rebuild, triggering didUpdateWidget
+    // even when _webViewKey.currentState is null (chart tab not yet rendered in PageView).
     setState(() {
       selectedSymbol = newSymbol;
+      _datafeedSymbolForSelected = ''; // force prop change in ChartInAppWebView
+      _lastSymbolForDatafeedLookup = ''; // allow fresh datafeed lookup for new symbol
+      _isFetchingDatafeedSymbol = false;
     });
     symbolSelectionService.setSymbol(newSymbol);
     if (ChartScreen._selectedSymbolNotifier.value != newSymbol) {
@@ -887,22 +911,34 @@ Placing Order:
     // Change symbol in socket controller (this will handle disconnect/reconnect)
     _changeChartSymbol(newSymbol);
 
- // Explicitly trigger WebView update after setState completes
- // Use post-frame callback to ensure widget tree has updated
- WidgetsBinding.instance.addPostFrameCallback((_) {
- if (!mounted) return;
- print('📊 Explicitly updating WebView with symbol: $selectedSymbol');
- // Remove suffix for chart display
- String chartSymbol = selectedSymbol;
- if (chartSymbol.contains('.')) {
- chartSymbol = chartSymbol.substring(0, chartSymbol.lastIndexOf('.'));
- }
- _wvUpdateSymbol(chartSymbol);
- // If the chart wasn't ready at the moment of setState, the widget
- // itself will be re-built with the new symbol URL and will fire
- // `didUpdateWidget` -> `updateSymbol` once it's mounted, so we don't
- // need a manual retry here.
- });
+    // Explicitly trigger WebView update after setState completes
+    // Use post-frame callback to ensure widget tree has updated
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _webViewKey.currentState != null) {
+        print('📊 Explicitly updating WebView with symbol: $selectedSymbol');
+        // Remove suffix for chart display
+        String chartSymbol = selectedSymbol;
+        if (chartSymbol.contains('.')) {
+          chartSymbol = chartSymbol.substring(0, chartSymbol.lastIndexOf('.'));
+        }
+        _webViewKey.currentState?.updateSymbol(chartSymbol);
+      } else {
+        print('⚠️ WebView not ready yet, will update via didUpdateWidget');
+        // If WebView isn't ready, schedule another attempt
+        Future.delayed(Duration(milliseconds: 500), () {
+          if (mounted && _webViewKey.currentState != null) {
+            String chartSymbol = selectedSymbol;
+            if (chartSymbol.contains('.')) {
+              chartSymbol = chartSymbol.substring(
+                0,
+                chartSymbol.lastIndexOf('.'),
+              );
+            }
+            _webViewKey.currentState?.updateSymbol(chartSymbol);
+          }
+        });
+      }
+    });
 
     print('✅ ChartScreen: Updated selectedSymbol to $selectedSymbol');
   }
@@ -965,6 +1001,26 @@ Placing Order:
   }
 
   void _loadMockData() {
+    // Generate mock chart data
+    _chartData = List.generate(50, (index) {
+      final date = DateTime.now().subtract(Duration(days: 50 - index));
+      final basePrice = 1.1550;
+      final randomChange = (index % 10 - 5) * 0.001;
+      final open = basePrice + randomChange;
+      final close = open + (index % 3 - 1) * 0.0005;
+      final high = open > close ? open + 0.002 : close + 0.002;
+      final low = open > close ? close - 0.001 : open - 0.001;
+
+      return {
+        'date': date,
+        'open': open,
+        'high': high,
+        'low': low,
+        'close': close,
+        'volume': 1000 + (index * 100),
+      };
+    });
+
     setState(() {
       isLoading = false;
     });
@@ -1001,6 +1057,247 @@ Placing Order:
             digits: digits, // Pass digits from socket
           ),
     );
+  }
+
+  void _showPriceDebugInfo() {
+    try {
+      final bidPrice = chartSocketController.getBidPrice() ?? 0.0;
+      final askPrice = chartSocketController.getAskPrice() ?? 0.0;
+      final marketPrice = chartSocketController.getMarketPrice() ?? 0.0;
+      final monitorService = Get.find<PriceAlertMonitorService>();
+      final status = monitorService.getMonitoringStatus();
+
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text('Price Debug Info'),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Symbol: $selectedSymbol',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Bid Price (SELL): ${PrecisionHelper.formatPrice(bidPrice, decimals: _getCurrentDigits())}',
+                    ),
+                    Text(
+                      'Ask Price (BUY): ${PrecisionHelper.formatPrice(askPrice, decimals: _getCurrentDigits())}',
+                    ),
+                    Text(
+                      'Market Price (Alert): ${PrecisionHelper.formatPrice(marketPrice, decimals: _getCurrentDigits())}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.blue,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Monitoring Status:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text('Active: ${status['isMonitoring']}'),
+                    Text('Active Alerts: ${status['activeAlertsCount']}'),
+                    SizedBox(height: 16),
+                    if (status['alerts'] != null &&
+                        (status['alerts'] as List).isNotEmpty) ...[
+                      Text(
+                        'Active Alerts:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      ...(status['alerts'] as List).map(
+                        (alert) => Padding(
+                          padding: EdgeInsets.only(left: 8, top: 4),
+                          child: Text(
+                            '${alert['symbol']} ${alert['condition']} ${PrecisionHelper.formatPrice(alert['targetPrice'] ?? 0.0, decimals: _getCurrentDigits())}',
+                          ),
+                        ),
+                      ),
+                    ] else
+                      Text(
+                        'No active alerts',
+                        style: TextStyle(color: AppColors.textGrey),
+                      ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Test Actions:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              final monitorService =
+                                  Get.find<PriceAlertMonitorService>();
+                              await monitorService.addTestAlert(
+                                selectedSymbol,
+                                1.80950,
+                                'above',
+                              );
+                              if (Get.isRegistered<
+                                AppNotificationController
+                              >()) {
+                                Get.find<AppNotificationController>().showInfo(
+                                  message:
+                                      'Test alert added: $selectedSymbol above 1.80950',
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.blue,
+                            ),
+                            child: Text(
+                              'Add Test Alert\n(1.80950 above)',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: AppColors.whiteColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 4),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              final monitorService =
+                                  Get.find<PriceAlertMonitorService>();
+                              await monitorService.testTriggerAlert(
+                                selectedSymbol,
+                                marketPrice,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.warning,
+                            ),
+                            child: Text(
+                              'Test Trigger\nNow',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: AppColors.whiteColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 4),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              final monitorService =
+                                  Get.find<PriceAlertMonitorService>();
+                              await monitorService.testNotificationSystem();
+                              if (Get.isRegistered<
+                                AppNotificationController
+                              >()) {
+                                Get.find<AppNotificationController>()
+                                    .showSuccess(
+                                      message: 'Test notification sent!',
+                                    );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.green,
+                            ),
+                            child: Text(
+                              'Test Notification\nSystem',
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: AppColors.whiteColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              final monitorService =
+                                  Get.find<PriceAlertMonitorService>();
+                              await monitorService.ensureChartSocketConnected(
+                                selectedSymbol,
+                              );
+                              if (Get.isRegistered<
+                                AppNotificationController
+                              >()) {
+                                Get.find<AppNotificationController>().showInfo(
+                                  message: 'ChartSocket connection checked!',
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.quickActionPurple,
+                            ),
+                            child: Text(
+                              'Fix WebSocket\nConnection',
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: AppColors.whiteColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Close'),
+                ),
+              ],
+            ),
+      );
+    } catch (e) {
+      if (Get.isRegistered<AppNotificationController>()) {
+        Get.find<AppNotificationController>().showError(
+          message: 'Debug info error: $e',
+        );
+      }
+    }
+  }
+
+  void _testPriceAlert() async {
+    try {
+      final currentPrice = chartSocketController.getMarketPrice() ?? 1.14252;
+      final monitorService = Get.find<PriceAlertMonitorService>();
+
+      // Show current status
+      final status = monitorService.getMonitoringStatus();
+      print('📊 Current Status: $status');
+
+      // Test trigger alert
+      await monitorService.testTriggerAlert(selectedSymbol, currentPrice);
+
+      // Show success message
+      if (Get.isRegistered<AppNotificationController>()) {
+        Get.find<AppNotificationController>().showSuccess(
+          message:
+              'Test alert triggered! Check notifications. Current: $selectedSymbol at \$${PrecisionHelper.formatPrice(currentPrice, decimals: _getCurrentDigits())}',
+        );
+      }
+    } catch (e) {
+      print('Error testing price alert: $e');
+      if (Get.isRegistered<AppNotificationController>()) {
+        Get.find<AppNotificationController>().showError(
+          message: 'Test failed: $e',
+        );
+      }
+    }
   }
 
   void _onSymbolChanged(String newSymbol) {
@@ -1090,7 +1387,7 @@ Placing Order:
                 width: 32.w,
                 height: 32.h,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Image.asset(
@@ -1270,19 +1567,8 @@ Placing Order:
 
   @override
   Widget build(BuildContext context) {
-    // ✅ FIX: Ensure DashboardController WebSocket is initialized in background
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      try {
-        if (Get.isRegistered<DashboardController>()) {
-          final dashboardController = Get.find<DashboardController>();
-          dashboardController.ensureWebSocketInitialized();
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Chart Screen: Error ensuring WebSocket initialization: $e');
-        }
-      }
-    });
+    // NOTE: WebSocket initialization is handled centrally by AccountController
+    // DO NOT call ensureWebSocketInitialized() here - it causes redundant refreshes
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
@@ -1295,65 +1581,20 @@ Placing Order:
         8.h + // Outer bottom padding
         MediaQuery.of(context).padding.bottom; // Safe area
 
-    if (FlavorConfig.isVantage()) {
-      final primary = FlavorConfig.instance.primaryColor;
-      final baseBg = AppColors.background;
-      final chartFlex = isSmallScreen ? 16 : (isLargeScreen ? 20 : 18);
-
-      return VantageChartLayout(
-        titleWidget: Obx(
-          () => VantageSymbolDropdown(
-            selectedSymbol: selectedSymbol,
-            favorites: instrumentsController.favoriteInstruments.toList(),
-            formatLabel: _removeSymbolSuffix,
-            onSymbolSelected: _onSymbolChanged,
-            onEmptyTap:
-                () => _openSearchInstrumentsSheet(
-                  onSymbolPicked: _onSymbolChanged,
-                ),
-          ),
-        ),
-        actions: [_buildTradeHistoryButton(compact: true)],
-        backgroundColor: baseBg,
-        primaryColor: primary,
-        chartFlex: chartFlex,
-        chart: _buildChartArea(),
-        controlDock: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildVantageQuantityAndActionsRow(),
-            SizedBox(height: 8.h),
-            _buildVantageBuySellRow(),
-          ],
-        ),
-        overlay: _buildNotificationStack(),
-      );
-    }
-
-    return _buildDefaultScaffold(
-      context: context,
-      navBarHeight: navBarHeight,
-      isSmallScreen: isSmallScreen,
-      isLargeScreen: isLargeScreen,
-    );
-  }
-
-  Widget _buildDefaultScaffold({
-    required BuildContext context,
-    required double navBarHeight,
-    required bool isSmallScreen,
-    required bool isLargeScreen,
-  }) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      // Resize so the on-screen keyboard (e.g. TradingView text/annotation
+      // input inside the WebView) does not cover the chart on iOS.
+      resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.tradeBackgroundCenterColor,
       body: SafeArea(
         child: Stack(
           children: [
             Column(
               children: [
+                // Header - Fixed height
                 _buildHeader(context),
+
+                // Chart Area - Responsive height
                 Expanded(
                   flex:
                       isSmallScreen
@@ -1363,12 +1604,19 @@ Placing Order:
                           : 3,
                   child: _buildChartArea(),
                 ),
+
+                // Interactive Icons - Fixed height
                 _buildVolumeInputScreen(context, true),
+
+                // Trading Controls - Fixed height
                 _buildTradingControls(),
                 _buildInteractiveIcons(),
+
+                // Bottom padding for navigation bar
                 SizedBox(height: navBarHeight + 8.h),
               ],
             ),
+            // Notification stack overlay (only when one-click trading is enabled)
             _buildNotificationStack(),
           ],
         ),
@@ -1380,6 +1628,7 @@ Placing Order:
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
 
+    // Create the symbol selector widget with connection status
     final symbolSelector = GestureDetector(
       onTap: () => _showSymbolSelector(),
       child: Container(
@@ -1428,7 +1677,7 @@ Placing Order:
             //         width: 8.w,
             //         height: 8.h,
             //         decoration: BoxDecoration(
-            //           color: AppColors.red,
+            //           color: AppColors.error,
             //           shape: BoxShape.circle,
             //         ),
             //       ),
@@ -1450,102 +1699,92 @@ Placing Order:
     final tradingController = Get.find<TradingController>();
 
     return Obx(() {
-      final double? floatingProfit =
-          tradingController.accountInfoRx.value?.profit;
-
-      if (FlavorConfig.isVantage()) {
-        return SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-            child: Row(
-              children: [
-                AppBackButton(
-                  onPressed: () {
-                    final nav = Navigator.of(context);
-                    if (nav.canPop()) {
-                      nav.pop();
-                    } else {
-                      Get.back();
-                    }
-                  },
-                ),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Obx(
-                      () => VantageSymbolDropdown(
-                        selectedSymbol: selectedSymbol,
-                        favorites:
-                            instrumentsController.favoriteInstruments.toList(),
-                        formatLabel: _removeSymbolSuffix,
-                        onSymbolSelected: _onSymbolChanged,
-                        onEmptyTap:
-                            () => _openSearchInstrumentsSheet(
-                              onSymbolPicked: _onSymbolChanged,
-                            ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
+      final double? floatingProfit = tradingController.accountInfo?.profit;
 
       return AccountHeaderWidget(
         showSearchIcon: false,
-        rightWidget: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildTradeHistoryButton(),
-            SizedBox(width: 8.w),
-            symbolSelector,
-          ],
-        ),
+        rightWidget: symbolSelector,
         floatingProfit: floatingProfit, // ✅ ADD: Show floating P&L
       );
     });
   }
 
-  void _navigateToTradeHistory() {
-    if (widget.onNavigateToTrade != null) {
-      widget.onNavigateToTrade!(0);
-    }
-  }
-
-  Widget _buildTradeHistoryButton({bool compact = false}) {
-    final size = compact ? 28.0 : 22.0;
-    final borderRadius = compact ? 14.0 : 8.0;
-
-    return Padding(
-      padding: EdgeInsets.only(right: compact ? 8.w : 0),
-      child: Tooltip(
-        message: languageService.tr('trade_history'),
-        child: InkWell(
-          onTap: _navigateToTradeHistory,
-          borderRadius: BorderRadius.circular(borderRadius.r),
-          child: SizedBox(
-            height: size.h,
-            width: size.w,
-            child:AppSvgIcon(assetPath: "assets/svg/bottom_navigation/candle_bold.svg",height: 22.h,width: 24.w,color: AppColors.primary,)
-          ),
+  Widget _buildAssetDetails() {
+    if (_chartData.isEmpty) {
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        child: Row(
+          children: [
+            Text(
+              'Loading...',
+              style: AppTextStyles.label.copyWith(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textGrey,
+              ),
+            ),
+          ],
         ),
+      );
+    }
+
+    final latestCandle = _chartData.last;
+    final firstCandle = _chartData.first;
+    final change = latestCandle['close'] - firstCandle['open'];
+    final changePercent = (change / firstCandle['open']) * 100;
+    final isPositive = change >= 0;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      child: Row(
+        children: [
+          Text(
+            'Change: ${isPositive ? '+' : ''}${changePercent.toStringAsFixed(2)}%',
+            style: AppTextStyles.label.copyWith(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: isPositive ? AppColors.success : AppColors.error,
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Text(
+            'Low: ${firstCandle['low'] != null ? PrecisionHelper.formatPrice(firstCandle['low'], decimals: _getCurrentDigits()) : PrecisionHelper.formatPrice(0.0, decimals: _getCurrentDigits())}',
+            style: AppTextStyles.label.copyWith(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textGrey,
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Text(
+            'High: ${firstCandle['high'] != null ? PrecisionHelper.formatPrice(firstCandle['high'], decimals: _getCurrentDigits()) : PrecisionHelper.formatPrice(0.0, decimals: _getCurrentDigits())}',
+            style: AppTextStyles.label.copyWith(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textGrey,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            width: 20.w,
+            height: 20.h,
+            decoration: BoxDecoration(
+              color: AppColors.textGrey.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.info_outline,
+              size: 14.h,
+              color: AppColors.textGrey,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildChartArea() {
     final displaySymbol = _removeSymbolSuffix(selectedSymbol);
-    final ThemeService? themeService =
-        Get.isRegistered<ThemeService>() ? Get.find<ThemeService>() : null;
-
-    // Always pass only light/dark to the chart URL.
-    // If user selected System in MoreScreen, resolve it to current platform brightness.
-    final String themeParam = themeService != null
-        ? (themeService.isDarkResolved ? 'dark' : 'light')
-        : (AppColors.isDarkMode ? 'dark' : 'light');
 
     // Dynamic lookup: if symbol changed, try to fetch cached `datafeed_symbol`
     // for the active account. Must be non-blocking (no await in build).
@@ -1554,7 +1793,9 @@ Placing Order:
         !_isFetchingDatafeedSymbol) {
       final symbolToLookup = selectedSymbol;
       _lastSymbolForDatafeedLookup = selectedSymbol;
-      _datafeedSymbolForSelected = '';
+      // ✅ FIX: Do NOT reset _datafeedSymbolForSelected to '' here.
+      // Keeping old value prevents the first spurious URL change that causes blink #1.
+      // The URL will update exactly ONCE when the lookup resolves.
       _isFetchingDatafeedSymbol = true;
 
       Future(() async {
@@ -1563,7 +1804,6 @@ Placing Order:
         if (accountNumber == null) {
           if (!mounted) return;
           setState(() {
-            _datafeedSymbolForSelected = '';
             _isFetchingDatafeedSymbol = false;
           });
           return;
@@ -1577,7 +1817,8 @@ Placing Order:
 
         if (!ok) {
           setState(() {
-            _datafeedSymbolForSelected = '';
+            // Fallback: use display symbol so chart loads something
+            _datafeedSymbolForSelected = displaySymbol;
             _isFetchingDatafeedSymbol = false;
           });
           return;
@@ -1598,46 +1839,38 @@ Placing Order:
         setState(() {
           // If API value isn't available, fallback to display symbol.
           _datafeedSymbolForSelected =
-              resolvedDatafeedSymbol.isNotEmpty ? resolvedDatafeedSymbol : '';
+              resolvedDatafeedSymbol.isNotEmpty ? resolvedDatafeedSymbol : displaySymbol;
           _isFetchingDatafeedSymbol = false;
         });
       });
     }
 
+    // Use resolved datafeed symbol if available, else displaySymbol.
     final effectiveDatafeedSymbol =
         _datafeedSymbolForSelected.isNotEmpty
             ? _datafeedSymbolForSelected
             : displaySymbol;
 
+    // Include symbol in URL so the server loads the correct chart immediately.
+    // Symbol is also passed as a prop so JS updateSymbol() can handle fast
+    // in-session symbol switches without a full reload (via didUpdateWidget).
     final chartUrl =
-        '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$effectiveDatafeedSymbol&theme=$themeParam';
+        '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$effectiveDatafeedSymbol&theme=${AppColors.chartTheme}';
 
-    if (kDebugMode && chartUrl != _lastDebugPrintedChartUrl) {
-      _lastDebugPrintedChartUrl = chartUrl;
-      debugPrint('📈 Chart URL: $chartUrl');
-    }
- return Container(
- width: double.infinity,
- height: MediaQuery.of(context).size.height * 0.4, // Responsive height
- padding: EdgeInsets.zero,
- margin: EdgeInsets.zero,
-
- // margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
- child: FlavorConfig.instance.useNewChart
- ? AdvancedChartInAppWebView(
- key: _advancedChartKey,
- symbol: selectedSymbol,
- theme: themeParam,
- )
- : ChartInAppWebView(
- key: _legacyChartKey,
- symbol: selectedSymbol,
- // Removed ValueKey to allow didUpdateWidget to handle symbol changes
- // This enables JavaScript-based updates instead of full widget recreation
- url: chartUrl,
- ),
- );
+    return Container(
+      width: double.infinity,
+      height: MediaQuery.of(context).size.height * 0.4,
+      padding: EdgeInsets.zero,
+      margin: EdgeInsets.zero,
+      child: ChartInAppWebView(
+        key: _webViewKey,
+        symbol: effectiveDatafeedSymbol, // JS-updated for fast in-session switches
+        url: chartUrl,                   // includes symbol for correct initial server load
+      ),
+    );
   }
+
+
 
   /// Build notification stack overlay (only shown when one-click trading is enabled)
   /// NOTE: Notifications are now handled globally via AppNotificationStack in main.dart
@@ -1771,6 +2004,44 @@ Placing Order:
     }
   }
 
+  // Helper function to convert ListElement to Instrument format
+  List<Instrument> _convertListElementsToInstruments(
+    List<ListElement> listElements,
+  ) {
+    return listElements.map((element) {
+      //dev.log(
+      // '🔍 Converting ListElement to Instrument element: ${element.ask}',
+      // );
+      // Get group name for category
+      final instrumentsController = Get.find<InstrumentsController>();
+      final groupName = instrumentsController.getGroupNameForSymbol(
+        element.symbol,
+      );
+
+      // Generate flag based on symbol
+      // String flag = _getFlagForSymbol(element.symbol);
+
+      // Generate status based on spreadDiff
+      String status = element.spreadDiff > 0 ? 'Active' : 'Market closed';
+
+      return Instrument(
+        name: element.symbol,
+        flag: element.logo,
+        status: status,
+        bidPrice: element.bid.toStringAsFixed(element.digits),
+        askPrice: element.ask.toStringAsFixed(element.digits),
+        lowPrice: (element.bid - element.spreadDiff).toStringAsFixed(
+          element.digits,
+        ),
+        highPrice: (element.ask + element.spreadDiff).toStringAsFixed(
+          element.digits,
+        ),
+        category: groupName,
+        isFavorite: false,
+      );
+    }).toList();
+  }
+
   // Helper function to get flag emoji for symbol
   // String _getFlagForSymbol(String symbol) {
   //   // Currency pairs
@@ -1803,7 +2074,7 @@ Placing Order:
   //   return '📈';
   // }
 
-  void _openSearchInstrumentsSheet({void Function(String)? onSymbolPicked}) {
+  void _showSymbolSelector() {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -1818,13 +2089,9 @@ Placing Order:
           child: ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
             child: SearchInstrumentsScreen(
+              favoritesOnly: true, // Only show favourites, hide segments & add button
               onNavigateToChart: (symbol) {
-                Navigator.of(sheetContext).pop();
-                if (onSymbolPicked != null) {
-                  onSymbolPicked(symbol);
-                } else {
-                  _onSymbolChanged(symbol);
-                }
+                _onSymbolChanged(symbol);
               },
             ),
           ),
@@ -1833,175 +2100,54 @@ Placing Order:
     );
   }
 
-  void _showSymbolSelector() {
-    if (!FlavorConfig.isVantage()) {
-      _openSearchInstrumentsSheet();
-      return;
-    }
-
-    final favorites = instrumentsController.favoriteInstruments.toList();
-    if (favorites.isEmpty) {
-      _openSearchInstrumentsSheet(onSymbolPicked: _onSymbolChanged);
-      return;
-    }
-
-  }
 
   Widget _buildInteractiveIcons() {
-    final isVantage = FlavorConfig.isVantage();
-
-    // Tenax/default: keep the old (original) look.
-    if (!isVantage) {
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-        child: Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  Get.to(
-                    () => PendingOrderScreen(
-                      symbol: selectedSymbol,
-                      onNavigateToTrade: widget.onNavigateToTrade,
-                    ),
-                  );
-                },
-                child: SizedBox(
-                  height: 52.h,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(7.r),
-                      color: AppColors.primary,
-                    ),
-                    child: Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 14.w),
-                        child: Text(
-                          languageService.tr('chart_pending_order_header'),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.labelOnTradeButton,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 10.w),
-            GestureDetector(
-              onTap: () {
-                _showPriceAlertDialog();
-              },
-              child: Container(
-                height: 52.h,
-                width: 45.w,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(7.r),
-                  color: AppColors.cardBackGround,
-                ),
-                child: Icon(Icons.notifications, color: AppColors.primary),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       child: Row(
         children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                Get.to(
-                  () => PendingOrderScreen(
-                    symbol: selectedSymbol,
-                    onNavigateToTrade: widget.onNavigateToTrade,
-                  ),
-                );
-              },
-              child: SizedBox(
-                height: 40.h,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14.r),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.primary,
-                        Color.alphaBlend(
-                          AppColors.accent.withOpacity(0.35),
-                          AppColors.primary,
-                        ),
-                      ],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.22),
-                        blurRadius: 18,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.pending_actions_rounded,
-                          size: 18.sp,
-                          color: AppColors.whiteColor,
-                        ),
-                        SizedBox(width: 8.w),
-                        Flexible(
-                          child: Text(
-                            languageService.tr('chart_pending_order_header'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.labelOnTradeButton,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+          GestureDetector(
+            onTap: () {
+              // Navigate to fullscreen pending order screen
+              Get.to(
+                () => PendingOrderScreen(
+                  symbol: selectedSymbol,
+                  onNavigateToTrade: widget.onNavigateToTrade,
                 ),
+              );
+            },
+            child: Container(
+              height: 45.h,
+              width: Get.width / 1.25,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(7.r),
+                color:
+                    AppColors.isDarkMode
+                        ? AppColors.primary.withOpacity(0.1)
+                        : AppColors.primary,
+              ),
+              child: Text(
+                languageService.tr('chart_pending_order_header'),
+                style: AppTextStyles.labelOnTradeButton,
               ),
             ),
           ),
-          SizedBox(width: 8.w),
+          Spacer(),
 
           GestureDetector(
             onTap: () {
               _showPriceAlertDialog();
             },
             child: Container(
-              height: 40.h,
-              width: 40.w,
+              height: 45.h,
+              width: 45.w,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14.r),
-                color: AppColors.whiteColor,
-                border: Border.all(
-                  color: AppColors.primary.withOpacity(0.14),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 14,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(7.r),
+                color: AppColors.cardBackGround,
               ),
-              child: Icon(
-                Icons.notifications_active_rounded,
-                color: AppColors.primary,
-                size: 19.sp,
-              ),
+              child: Icon(Icons.notifications, color: AppColors.primary),
               // child: SvgPicture.asset(
               //   "assets/svg/chart_screen_icon/bell_icon.svg",
               //   color: AppColors.primary,
@@ -2021,7 +2167,7 @@ Placing Order:
           //     alignment: Alignment.center,
           //     decoration: BoxDecoration(
           //       borderRadius: BorderRadius.circular(7.r),
-          //       color: Colors.blue,
+          //       color: AppColors.blue,
           //     ),
           //     child: Icon(Icons.info, color: AppColors.whiteColor, size: 20.sp),
           //   ),
@@ -2038,7 +2184,7 @@ Placing Order:
           //     alignment: Alignment.center,
           //     decoration: BoxDecoration(
           //       borderRadius: BorderRadius.circular(7.r),
-          //       color: Colors.orange,
+          //       color: AppColors.warning,
           //     ),
           //     child: Icon(Icons.bug_report, color: AppColors.whiteColor, size: 20.sp),
           //   ),
@@ -2048,594 +2194,9 @@ Placing Order:
     );
   }
 
-  Widget _buildVantageQuantityAndActionsRow() {
-    final primary = AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
-    final baseBg = AppColors.background;
-
-    Widget iconChip({
-      required IconData icon,
-      required VoidCallback onTap,
-      String? tooltip,
-    }) {
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12.r),
-        child: SizedBox(
-          height: 40.h,
-          width: 40.w,
-          child: Center(
-            child: Icon(icon, size: 20.sp, color: primary),
-          ),
-        ),
-      );
-    }
-
-    final qtyPill = Container(
-      height: 40.h,
-      padding: EdgeInsets.symmetric(horizontal: 8.w),
-      decoration: BoxDecoration(
-        color: baseBg,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: primary.withOpacity(0.14)),
-      ),
-      child: Row(
-        children: [
-          _buildVantageQtyButton(
-            icon: Icons.remove,
-            onTap: () {
-              setState(() {
-                final next = double.parse((volume - 0.01).toStringAsFixed(2));
-                volume = next < _minLot ? _minLot : next;
-                _volumeController.text = volume.toStringAsFixed(2);
-              });
-            },
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: TextField(
-              controller: _volumeController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                TextInputFormatter.withFunction((oldValue, newValue) {
-                  final text = newValue.text;
-                  if (text.isEmpty) return newValue;
-                  if (text.length > 1 &&
-                      text.startsWith('0') &&
-                      !text.startsWith('0.')) {
-                    return oldValue;
-                  }
-                  final newDouble = double.tryParse(text);
-                  if (newDouble == null) return oldValue;
-                  if (newDouble > _maxLot) return oldValue;
-                  return newValue;
-                }),
-              ],
-              textAlign: TextAlign.center,
-              style: AppTextStyles.labelOnTradeQuantityDigit.copyWith(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-              decoration: InputDecoration(
-                filled: false,
-                fillColor: Colors.transparent,
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                isDense: true,
-                hintText: '0.01',
-                hintStyle: AppTextStyles.labelOnTradeQuantityDigit.copyWith(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textGrey,
-                ),
-              ),
-              onChanged: (value) {
-                final newVolume = double.tryParse(value);
-                if (newVolume != null && newVolume > 0) {
-                  setState(() => volume = newVolume);
-                }
-              },
-              onEditingComplete: () {
-                FocusScope.of(context).unfocus();
-                final parsed = double.tryParse(_volumeController.text);
-                final clamped =
-                    (parsed == null || parsed <= 0)
-                        ? _minLot
-                        : parsed.clamp(_minLot, _maxLot);
-                setState(() {
-                  volume = double.parse(clamped.toStringAsFixed(2));
-                });
-                _volumeController.text = volume.toStringAsFixed(2);
-              },
-            ),
-          ),
-          SizedBox(width: 8.w),
-          _buildVantageQtyButton(
-            icon: Icons.add,
-            onTap: () {
-              setState(() {
-                final next = double.parse((volume + 0.01).toStringAsFixed(2));
-                volume = next > _maxLot ? _maxLot : next;
-                _volumeController.text = volume.toStringAsFixed(2);
-              });
-            },
-          ),
-        ],
-      ),
-    );
-
-    final actionsPill = Container(
-      height: 40.h,
-      decoration: BoxDecoration(
-        color: baseBg,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: primary.withOpacity(0.14)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          iconChip(
-            icon: Icons.pending_actions_rounded,
-            onTap: () {
-              Get.to(
-                () => PendingOrderScreen(
-                  symbol: selectedSymbol,
-                  onNavigateToTrade: widget.onNavigateToTrade,
-                ),
-              );
-            },
-          ),
-          Container(
-            width: 1,
-            height: 20.h,
-            color: primary.withOpacity(0.10),
-          ),
-          iconChip(
-            icon: Icons.notifications_active_rounded,
-            onTap: _showPriceAlertDialog,
-          ),
-        ],
-      ),
-    );
-
-    return Row(
-      children: [
-        Expanded(child: qtyPill),
-        SizedBox(width: 10.w),
-        actionsPill,
-      ],
-    );
-  }
-
-  Widget _buildVantageQtyButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    final primary = AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10.r),
-      child: Container(
-        height: 28.h,
-        width: 28.w,
-        decoration: BoxDecoration(
-          color: primary.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(color: primary.withOpacity(0.16)),
-        ),
-        child: Center(
-          child: Icon(icon, size: 18.sp, color: primary),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVantageBuySellRow() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 400;
-    final primary = AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
-
-    // Prices from chart socket controller
-    final bidPrice = chartSocketController.getBidPrice()?.toString() ?? '0';
-    final askPrice = chartSocketController.getAskPrice()?.toString() ?? '0';
-    final difference = chartSocketController.getDifference()?.toString() ?? '0';
-
-    Widget sideButton({
-      required String label,
-      required String price,
-      required List<Color> colors,
-      required VoidCallback onTap,
-    }) {
-      final isBuy = label == 'BUY';
-      final textColor = (isBuy && AppColors.isDarkMode) ? const Color(0xFF1E1E1E) : Colors.white;
-      final subTextColor = (isBuy && AppColors.isDarkMode)
-          ? const Color(0xFF1E1E1E).withOpacity(0.8)
-          : Colors.white.withOpacity(0.92);
-
-      return InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
-        child: Container(
-          height: 44.h,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: colors,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: colors.first.withOpacity(0.18),
-                blurRadius: 14,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyles.button.copyWith(
-                    fontSize: isSmallScreen ? 12.sp : 15.sp,
-                    fontWeight: FontWeight.w800,
-                    color: textColor,
-                    height: 1.05,
-                  ),
-                ),
-                Text(
-                  price,
-                  style: AppTextStyles.button.copyWith(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w600,
-                    color: subTextColor,
-                    height: 1.05,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    final spreadChip = SizedBox(
-      width: 50.w,
-      height: 44.h,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: primary.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: primary.withOpacity(0.16)),
-        ),
-        child: Center(
-          child: Text(
-            difference,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.labelOnTradeDifference.copyWith(
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-              fontSize: 12.sp,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    return Row(
-      children: [
-        Expanded(
-          child: sideButton(
-            label: 'SELL',
-            price: bidPrice,
-            colors: const [
-              AppColors.chartRed1,
-              AppColors.chartRed2,
-            ],
-            onTap: () async {
-              // Preserve original behavior by delegating to the existing control.
-              // Trigger the same sell flow by calling the existing widget handler.
-              // (We reuse the same onTap logic by using the existing method.)
-              // ignore: unnecessary_statements
-              await Future.microtask(() {});
-              // Call the original SELL flow by reusing the existing method widget.
-              // This keeps logic unchanged and only swaps UI.
-              await _onTapSell();
-            },
-          ),
-        ),
-        SizedBox(width: 10.w),
-        spreadChip,
-        SizedBox(width: 10.w),
-        Expanded(
-          child: sideButton(
-            label: 'BUY',
-            price: askPrice,
-            colors: [
-              primary,
-              Color.alphaBlend(Colors.black.withOpacity(0.10), primary),
-            ],
-            onTap: () async {
-              await _onTapBuy();
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _onTapSell() async {
-    // Reuse the existing SELL flow by calling the same code path.
-    // This method contains only the previously-inline logic (moved unchanged).
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 400;
-    // NOTE: `isSmallScreen` kept to avoid accidental behavior changes (used in UI only before).
-    // ignore: unused_local_variable
-    final _ = isSmallScreen;
-    // --- BEGIN: extracted from existing SELL onTap (unchanged) ---
-    if (accountController.mt5Accounts.isEmpty ||
-        accountController.activeMT5Account == null) {
-      if (widget.onNavigateToTab != null) {
-        widget.onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 3);
-      } else {
-        Get.to(() => DashboardScreen());
-      }
-      return;
-    }
-    setState(() {
-      volume = volume.clamp(_minLot, _maxLot);
-      _volumeController.text = volume.toStringAsFixed(2);
-    });
-    final oneClickService = OneClickTradingService.instance;
-    final isOneClickEnabled = await oneClickService.isOneClickTradingEnabled();
-
-    if (isOneClickEnabled) {
-      final notificationId = notificationController.addTradingNotification(
-        symbol: selectedSymbol,
-        type: "1",
-        volume: volume,
-      );
-      OneClickTradingQueueService.instance.enqueueTrade(
-        type: "1",
-        symbol: selectedSymbol,
-        volume: volume,
-        notificationId: notificationId,
-        onTradeComplete: (
-          id,
-          symbol,
-          type,
-          volume,
-          isSuccess,
-          errorMessage,
-        ) {
-          notificationController.updateTradingNotificationStatus(
-            id: id,
-            isSuccess: isSuccess,
-            errorMessage: errorMessage,
-          );
-        },
-      );
-      return;
-    }
-
-    if (_isPlacingOrder) return;
-    if (_isPlacingOrder) return;
-
-    setState(() {
-      _isPlacingOrder = true;
-    });
-
-    try {
-      final result = await chartController.placeTradeOrder(
-        mt5Account: "${accountController.activeMT5Account?.metaAccountNumber}",
-        symbol: "$selectedSymbol",
-        volume: volume,
-        type: "1",
-        priceSl: "",
-        priceTp: "",
-        price: "",
-      );
-
-      if (result['success'] == true) {
-        final orderData = result['orderData'] as Map<String, dynamic>?;
-        final responseData = orderData?['data'] as Map<String, dynamic>?;
-        final deal = responseData?['deal'] as Map<String, dynamic>?;
-
-        final positionIdValue =
-            responseData?['position_id'] ?? deal?['PositionID'];
-        final positionId =
-            positionIdValue != null ? positionIdValue.toString() : 'N/A';
-
-        final orderIdValue = responseData?['order_id'] ?? deal?['Deal'];
-        final orderId = orderIdValue != null ? orderIdValue.toString() : 'N/A';
-
-        final priceValue = deal?['Price'] ?? responseData?['price'];
-        final executionPrice =
-            priceValue != null ? priceValue.toString() : null;
-
-        final symbolFromResponse = deal?['Symbol']?.toString() ?? selectedSymbol;
-
-        final executionPriceDouble =
-            executionPrice != null ? double.tryParse(executionPrice) : null;
-
-        Get.toNamed(
-          Routes.ORDER_CONFIRMATION,
-          arguments: {
-            'orderData': orderData ?? {},
-            'symbol': symbolFromResponse,
-            'orderType': '1',
-            'volume': volume,
-            'price': executionPriceDouble,
-            'executionPrice': executionPrice,
-            'positionId': positionId,
-            'orderId': orderId,
-            'tabIndex': 0,
-            'onNavigateToTrade': widget.onNavigateToTrade,
-            'isPlacing': false,
-          },
-        );
-
-        await Future.delayed(const Duration(milliseconds: 30));
-        if (widget.onNavigateToTrade != null) {
-          widget.onNavigateToTrade!(0);
-        }
-      } else {
-        CustomToastService.showError(
-          title: 'Error',
-          message: result['error'] ?? 'Failed to place order',
-        );
-      }
-    } catch (error) {
-      CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to place order: $error',
-      );
-    } finally {
-      setState(() {
-        _isPlacingOrder = false;
-      });
-    }
-    // --- END: extracted ---
-  }
-
-  Future<void> _onTapBuy() async {
-    // Extracted from existing BUY onTap (kept unchanged).
-    if (accountController.mt5Accounts.isEmpty ||
-        accountController.activeMT5Account == null) {
-      if (widget.onNavigateToTab != null) {
-        widget.onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 3);
-      } else {
-        Get.to(() => DashboardScreen());
-      }
-      return;
-    }
-    setState(() {
-      volume = volume.clamp(_minLot, _maxLot);
-      _volumeController.text = volume.toStringAsFixed(2);
-    });
-    final oneClickService = OneClickTradingService.instance;
-    final isOneClickEnabled = await oneClickService.isOneClickTradingEnabled();
-
-    if (isOneClickEnabled) {
-      final notificationId = notificationController.addTradingNotification(
-        symbol: selectedSymbol,
-        type: "buy",
-        volume: volume,
-      );
-      OneClickTradingQueueService.instance.enqueueTrade(
-        type: "buy",
-        symbol: selectedSymbol,
-        volume: volume,
-        notificationId: notificationId,
-        onTradeComplete: (
-          id,
-          symbol,
-          type,
-          volume,
-          isSuccess,
-          errorMessage,
-        ) {
-          notificationController.updateTradingNotificationStatus(
-            id: id,
-            isSuccess: isSuccess,
-            errorMessage: errorMessage,
-          );
-        },
-      );
-      return;
-    }
-
-    if (_isPlacingOrder) return;
-    if (_isPlacingOrder) return;
-
-    setState(() {
-      _isPlacingOrder = true;
-    });
-
-    try {
-      final result = await chartController.placeTradeOrder(
-        mt5Account: "${accountController.activeMT5Account?.metaAccountNumber}",
-        symbol: "$selectedSymbol",
-        volume: volume,
-        type: "buy",
-        priceSl: "",
-        priceTp: "",
-        price: "",
-      );
-
-      if (result['success'] == true) {
-        final orderData = result['orderData'] as Map<String, dynamic>?;
-        final responseData = orderData?['data'] as Map<String, dynamic>?;
-        final deal = responseData?['deal'] as Map<String, dynamic>?;
-
-        final positionIdValue =
-            responseData?['position_id'] ?? deal?['PositionID'];
-        final positionId =
-            positionIdValue != null ? positionIdValue.toString() : 'N/A';
-
-        final orderIdValue = responseData?['order_id'] ?? deal?['Deal'];
-        final orderId = orderIdValue != null ? orderIdValue.toString() : 'N/A';
-
-        final priceValue = deal?['Price'] ?? responseData?['price'];
-        final executionPrice =
-            priceValue != null ? priceValue.toString() : null;
-
-        final symbolFromResponse = deal?['Symbol']?.toString() ?? selectedSymbol;
-
-        final executionPriceDouble =
-            executionPrice != null ? double.tryParse(executionPrice) : null;
-
-        Get.toNamed(
-          Routes.ORDER_CONFIRMATION,
-          arguments: {
-            'orderData': orderData ?? {},
-            'symbol': symbolFromResponse,
-            'orderType': 'buy',
-            'volume': volume,
-            'price': executionPriceDouble,
-            'executionPrice': executionPrice,
-            'positionId': positionId,
-            'orderId': orderId,
-            'tabIndex': 0,
-            'onNavigateToTrade': widget.onNavigateToTrade,
-            'isPlacing': false,
-          },
-        );
-
-        await Future.delayed(const Duration(milliseconds: 30));
-        if (widget.onNavigateToTrade != null) {
-          widget.onNavigateToTrade!(0);
-        }
-      } else {
-        CustomToastService.showError(
-          title: 'Error',
-          message: result['error'] ?? 'Failed to place order',
-        );
-      }
-    } catch (error) {
-      CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to place order: $error',
-      );
-    } finally {
-      setState(() {
-        _isPlacingOrder = false;
-      });
-    }
-  }
-
   Widget _buildTradingControls() {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
-    final isVantage = FlavorConfig.isVantage();
-    final primary = AppColors.isDarkMode ? Colors.white : FlavorConfig.instance.primaryColor;
 
     // Get real-time prices from chart socket controller
     final bidPrice = chartSocketController.getBidPrice()?.toString() ?? '0';
@@ -2664,606 +2225,505 @@ Placing Order:
     //   print('❌ No model data available');
     // }
 
-    final sideFlex = isVantage ? 1 : 3;
-    final midFlex = 1;
-
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w),
-      child: Row(
-        children: [
-          // SELL
-          Expanded(
-            flex: sideFlex,
-            child: GestureDetector(
-              onTap: () async {
-                    // If no active trading account exists, redirect user to Dashboard to open/select one.
-                    if (accountController.mt5Accounts.isEmpty ||
-                        accountController.activeMT5Account == null) {
-                      if (widget.onNavigateToTab != null) {
-                        widget.onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 3);
-                      } else {
-                        Get.to(() => DashboardScreen());
-                      }
-                      return;
-                    }
-                    // Silently clamp volume before placing order.
-                    setState(() {
-                      volume = volume.clamp(_minLot, _maxLot);
-                      _volumeController.text = volume.toStringAsFixed(2);
-                    });
-                    // Check if One Click Trading is enabled
-                    final oneClickService = OneClickTradingService.instance;
-                    final isOneClickEnabled =
-                        await oneClickService.isOneClickTradingEnabled();
-
-                    if (isOneClickEnabled) {
-                      // Add notification immediately with loading status
-                      final notificationId = notificationController
-                          .addTradingNotification(
-                            symbol: selectedSymbol,
-                            type: "1",
-                            volume: volume,
-                          );
-
-                      // Use queue service for background processing
-                      // This allows multiple rapid taps without blocking
-                      // Pass the notification ID so callback uses the same ID
-                      OneClickTradingQueueService.instance.enqueueTrade(
-                        type: "1",
-                        symbol: selectedSymbol,
-                        volume: volume,
-                        notificationId: notificationId,
-                        onTradeComplete: (
-                          id,
-                          symbol,
-                          type,
-                          volume,
-                          isSuccess,
-                          errorMessage,
-                        ) {
-                          // Update notification status when trade completes
-                          notificationController
-                              .updateTradingNotificationStatus(
-                                id: id,
-                                isSuccess: isSuccess,
-                                errorMessage: errorMessage,
-                              );
-                        },
-                      );
-                      return; // Exit immediately, trade will process in background
-                    }
-
-                    // Original flow - show confirmation screen
-                    // Prevent multiple taps only when one-click is disabled
-                    if (_isPlacingOrder) return;
-
-                    // Original flow - show confirmation screen
-                    // Prevent multiple taps
-                    if (_isPlacingOrder) return;
-
-                    // Update UI to show button is pressed (instant feedback)
-                    setState(() {
-                      _isPlacingOrder = true;
-                    });
-
-                    try {
-                      // Call API first - no confirmation screen until success
-                      final result = await chartController.placeTradeOrder(
-                        mt5Account:
-                            "${accountController.activeMT5Account?.metaAccountNumber}",
-                        symbol: "${selectedSymbol}",
-                        volume: volume,
-                        type: "1",
-                        priceSl: "",
-                        priceTp: "",
-                        price: "",
-                      );
-
-                      if (result['success'] == true) {
-                        // Order successful - extract data from API response
-                        // API response structure:
-                        // {
-                        //   "status": true,
-                        //   "success": true,
-                        //   "message": "Order placed successfully",
-                        //   "data": {
-                        //     "order_id": 653491,
-                        //     "position_id": 674696,
-                        //     "deal": {
-                        //       "Price": 4194.33,
-                        //       "Symbol": "XAUUSD",
-                        //       "Volume": 100,
-                        //       ...
-                        //     }
-                        //   }
-                        // }
-                        final orderData =
-                            result['orderData'] as Map<String, dynamic>?;
-                        final responseData =
-                            orderData?['data'] as Map<String, dynamic>?;
-                        final deal =
-                            responseData?['deal'] as Map<String, dynamic>?;
-
-                        // Extract position_id from data.position_id
-                        final positionIdValue =
-                            responseData?['position_id'] ?? deal?['PositionID'];
-                        final positionId =
-                            positionIdValue != null
-                                ? positionIdValue.toString()
-                                : 'N/A';
-
-                        // Extract order_id from data.order_id
-                        final orderIdValue =
-                            responseData?['order_id'] ?? deal?['Deal'];
-                        final orderId =
-                            orderIdValue != null
-                                ? orderIdValue.toString()
-                                : 'N/A';
-
-                        // Extract execution price from deal.Price (ONLY from API response)
-                        final priceValue =
-                            deal?['Price'] ?? responseData?['price'];
-                        final executionPrice =
-                            priceValue != null ? priceValue.toString() : null;
-
-                        // Extract symbol from deal.Symbol or use selectedSymbol
-                        final symbolFromResponse =
-                            deal?['Symbol']?.toString() ?? selectedSymbol;
-
-                        // Convert execution price to double (ONLY from API, no fallback to old prices)
-                        final executionPriceDouble =
-                            executionPrice != null
-                                ? double.tryParse(executionPrice)
-                                : null;
-
-                        // If price is missing from API, log error but don't use old cached price
-                        if (executionPriceDouble == null &&
-                            executionPrice != null) {
-                          print(
-                            '⚠️ Warning: Could not parse execution price: $executionPrice',
-                          );
+      child: Container(
+        child: Stack(
+          children: [
+            Row(
+              children: [
+                // SELL Button - now wrapped in GestureDetector
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      // If no active trading account exists, redirect user to Dashboard to open/select one.
+                      if (accountController.mt5Accounts.isEmpty ||
+                          accountController.activeMT5Account == null) {
+                        if (widget.onNavigateToTab != null) {
+                          widget.onNavigateToTab!(3);
+                        } else {
+                          Get.to(() => DashboardScreen());
                         }
+                        return;
+                      }
+                      // Silently clamp volume before placing order.
+                      setState(() {
+                        volume = volume.clamp(_minLot, _maxLot);
+                        _volumeController.text = volume.toStringAsFixed(2);
+                      });
+                      // Check if One Click Trading is enabled
+                      final oneClickService = OneClickTradingService.instance;
+                      final isOneClickEnabled =
+                          await oneClickService.isOneClickTradingEnabled();
 
-                        // Show confirmation screen with actual data from API response
-                        Get.toNamed(
-                          Routes.ORDER_CONFIRMATION,
-                          arguments: {
-                            'orderData': orderData ?? {},
-                            'symbol': symbolFromResponse,
-                            'orderType': '1', // Sell order
-                            'volume': volume, // Use the volume that was placed
-                            'price': executionPriceDouble,
-                            'executionPrice': executionPrice,
-                            'positionId': positionId,
-                            'orderId': orderId,
-                            'tabIndex': 0, // Market tab
-                            'onNavigateToTrade': widget.onNavigateToTrade,
-                            'isPlacing': false,
+                      if (isOneClickEnabled) {
+                        // Add notification immediately with loading status
+                        final notificationId = notificationController
+                            .addTradingNotification(
+                              symbol: selectedSymbol,
+                              type: "1",
+                              volume: volume,
+                            );
+
+                        // Use queue service for background processing
+                        // This allows multiple rapid taps without blocking
+                        // Pass the notification ID so callback uses the same ID
+                        OneClickTradingQueueService.instance.enqueueTrade(
+                          type: "1",
+                          symbol: selectedSymbol,
+                          volume: volume,
+                          notificationId: notificationId,
+                          onTradeComplete: (
+                            id,
+                            symbol,
+                            type,
+                            volume,
+                            isSuccess,
+                            errorMessage,
+                          ) {
+                            // Update notification status when trade completes
+                            notificationController
+                                .updateTradingNotificationStatus(
+                                  id: id,
+                                  isSuccess: isSuccess,
+                                  errorMessage: errorMessage,
+                                );
                           },
                         );
+                        return; // Exit immediately, trade will process in background
+                      }
 
-                        // After 30ms, navigate to trade screen
-                        await Future.delayed(Duration(milliseconds: 30));
+                      // Original flow - show confirmation screen
+                      // Prevent multiple taps only when one-click is disabled
+                      if (_isPlacingOrder) return;
 
-                        if (widget.onNavigateToTrade != null) {
-                          widget.onNavigateToTrade!(0); // Market tab
+                      // Original flow - show confirmation screen
+                      // Prevent multiple taps
+                      if (_isPlacingOrder) return;
+
+                      // Update UI to show button is pressed (instant feedback)
+                      setState(() {
+                        _isPlacingOrder = true;
+                      });
+
+                      try {
+                        // Call API first - no confirmation screen until success
+                        final result = await chartController.placeTradeOrder(
+                          mt5Account:
+                              "${accountController.activeMT5Account?.metaAccountNumber}",
+                          symbol: "${selectedSymbol}",
+                          volume: volume,
+                          type: "1",
+                          priceSl: "",
+                          priceTp: "",
+                          price: "",
+                        );
+
+                        if (result['success'] == true) {
+                          // Order successful - extract data from API response
+                          // API response structure:
+                          // {
+                          //   "status": true,
+                          //   "success": true,
+                          //   "message": "Order placed successfully",
+                          //   "data": {
+                          //     "order_id": 653491,
+                          //     "position_id": 674696,
+                          //     "deal": {
+                          //       "Price": 4194.33,
+                          //       "Symbol": "XAUUSD",
+                          //       "Volume": 100,
+                          //       ...
+                          //     }
+                          //   }
+                          // }
+                          final orderData =
+                              result['orderData'] as Map<String, dynamic>?;
+                          final responseData =
+                              orderData?['data'] as Map<String, dynamic>?;
+                          final deal =
+                              responseData?['deal'] as Map<String, dynamic>?;
+
+                          // Extract position_id from data.position_id
+                          final positionIdValue =
+                              responseData?['position_id'] ??
+                              deal?['PositionID'];
+                          final positionId =
+                              positionIdValue != null
+                                  ? positionIdValue.toString()
+                                  : 'N/A';
+
+                          // Extract order_id from data.order_id
+                          final orderIdValue =
+                              responseData?['order_id'] ?? deal?['Deal'];
+                          final orderId =
+                              orderIdValue != null
+                                  ? orderIdValue.toString()
+                                  : 'N/A';
+
+                          // Extract execution price from deal.Price (ONLY from API response)
+                          final priceValue =
+                              deal?['Price'] ?? responseData?['price'];
+                          final executionPrice =
+                              priceValue != null ? priceValue.toString() : null;
+
+                          // Extract symbol from deal.Symbol or use selectedSymbol
+                          final symbolFromResponse =
+                              deal?['Symbol']?.toString() ?? selectedSymbol;
+
+                          // Convert execution price to double (ONLY from API, no fallback to old prices)
+                          final executionPriceDouble =
+                              executionPrice != null
+                                  ? double.tryParse(executionPrice)
+                                  : null;
+
+                          // If price is missing from API, log error but don't use old cached price
+                          if (executionPriceDouble == null &&
+                              executionPrice != null) {
+                            print(
+                              '⚠️ Warning: Could not parse execution price: $executionPrice',
+                            );
+                          }
+
+                          // Show confirmation screen with actual data from API response
+                          Get.toNamed(
+                            Routes.ORDER_CONFIRMATION,
+                            arguments: {
+                              'orderData': orderData ?? {},
+                              'symbol': symbolFromResponse,
+                              'orderType': '1', // Sell order
+                              'volume':
+                                  volume, // Use the volume that was placed
+                              'price': executionPriceDouble,
+                              'executionPrice': executionPrice,
+                              'positionId': positionId,
+                              'orderId': orderId,
+                              'tabIndex': 0, // Market tab
+                              'onNavigateToTrade': widget.onNavigateToTrade,
+                              'isPlacing': false,
+                            },
+                          );
+
+                          // After 30ms, navigate to trade screen
+                          await Future.delayed(Duration(milliseconds: 30));
+
+                          if (widget.onNavigateToTrade != null) {
+                            widget.onNavigateToTrade!(0); // Market tab
+                          }
+                        } else {
+                          // API validation error - show error and stay on chart screen
+                          CustomToastService.showError(
+                            title: 'Error',
+                            message: result['error'] ?? 'Failed to place order',
+                          );
+                          // Stay on chart screen - don't navigate
                         }
-                      } else {
-                        // API validation error - show error and stay on chart screen
+                      } catch (error) {
                         CustomToastService.showError(
                           title: 'Error',
-                          message: result['error'] ?? 'Failed to place order',
+                          message: 'Failed to place order: $error',
                         );
                         // Stay on chart screen - don't navigate
+                      } finally {
+                        setState(() {
+                          _isPlacingOrder = false;
+                        });
                       }
-                    } catch (error) {
-                      CustomToastService.showError(
-                        title: 'Error',
-                        message: 'Failed to place order: $error',
-                      );
-                      // Stay on chart screen - don't navigate
-                    } finally {
-                      setState(() {
-                        _isPlacingOrder = false;
-                      });
-                    }
-                  },
-              child: AnimatedOpacity(
-                duration: Duration(milliseconds: 100),
-                opacity: _isPlacingOrder ? 0.5 : 1.0,
-                child: SizedBox(
-                  height: isVantage ? 42.h : 48.h,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: isVantage ? null : AppColors.error,
-                      borderRadius: BorderRadius.circular(isVantage ? 16.r : 8.r),
-                      gradient:
-                          isVantage
-                              ? LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  AppColors.chartRed1,
-                                  Color.alphaBlend(
-                                    Colors.black.withOpacity(0.10),
-                                    AppColors.chartRed1,
-                                  ),
-                                ],
-                              )
-                              : null,
-                      boxShadow:
-                          isVantage
-                              ? [
-                                BoxShadow(
-                                  color: AppColors.chartRed1.withOpacity(
-                                    0.22,
-                                  ),
-                                  blurRadius: 18,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ]
-                              : null,
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'SELL',
-                            style: AppTextStyles.button.copyWith(
-                              fontSize: isSmallScreen ? 12.sp : 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color:
-                                  isVantage
-                                      ? Colors.white
-                                      : AppTextStyles.button.color,
-                            ),
-                          ),
-                          Text(
-                            bidPrice,
-                            style: AppTextStyles.button.copyWith(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                              color:
-                                  isVantage
-                                      ? Colors.white.withOpacity(0.92)
-                                      : AppTextStyles.button.color,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          SizedBox(width: isSmallScreen ? 8.w : 12.w),
-
-          // SPREAD / DIFFERENCE (center)
-          Expanded(
-            flex: midFlex,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minWidth: 56.w),
-              child: SizedBox(
-                height: isVantage ? 42.h : 48.h,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color:
-                        isVantage
-                            ? AppColors.whiteColor
-                            : AppColors.tradeBackgroundCenterColor,
-                    borderRadius: BorderRadius.circular(isVantage ? 16.r : 8.r),
-                    border:
-                        isVantage
-                            ? Border.all(
-                              color: AppColors.primary.withOpacity(0.12),
-                            )
-                            : null,
-                    boxShadow:
-                        isVantage
-                            ? [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 14,
-                                offset: const Offset(0, 8),
-                              ),
-                            ]
-                            : null,
-                  ),
-                  child: Center(
-                    child: Text(
-                      difference,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style:
-                          isVantage
-                              ? AppTextStyles.labelOnTradeDifference.copyWith(
+                    },
+                    child: AnimatedOpacity(
+                      duration: Duration(milliseconds: 100),
+                      opacity: _isPlacingOrder ? 0.5 : 1.0,
+                      child: Container(
+                        height: 48.h,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'SELL',
+                              style: AppTextStyles.button.copyWith(
+                                fontSize: isSmallScreen ? 12.sp : 16.sp,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                              )
-                              : AppTextStyles.labelOnTradeDifference,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          SizedBox(width: isSmallScreen ? 8.w : 12.w),
-
-          // BUY
-          Expanded(
-            flex: sideFlex,
-            child: GestureDetector(
-              onTap: () async {
-                    // If no active trading account exists, redirect user to Dashboard to open/select one.
-                    if (accountController.mt5Accounts.isEmpty ||
-                        accountController.activeMT5Account == null) {
-                      if (widget.onNavigateToTab != null) {
-                        widget.onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 3);
-                      } else {
-                        Get.to(() => DashboardScreen());
-                      }
-                      return;
-                    }
-                    // Silently clamp volume before placing order.
-                    setState(() {
-                      volume = volume.clamp(_minLot, _maxLot);
-                      _volumeController.text = volume.toStringAsFixed(2);
-                    });
-                    // Check if One Click Trading is enabled
-                    final oneClickService = OneClickTradingService.instance;
-                    final isOneClickEnabled =
-                        await oneClickService.isOneClickTradingEnabled();
-
-                    if (isOneClickEnabled) {
-                      // Add notification immediately with loading status
-                      final notificationId = notificationController
-                          .addTradingNotification(
-                            symbol: selectedSymbol,
-                            type: "buy",
-                            volume: volume,
-                          );
-
-                      // Use queue service for background processing
-                      // This allows multiple rapid taps without blocking
-                      // Pass the notification ID so callback uses the same ID
-                      OneClickTradingQueueService.instance.enqueueTrade(
-                        type: "buy",
-                        symbol: selectedSymbol,
-                        volume: volume,
-                        notificationId: notificationId,
-                        onTradeComplete: (
-                          id,
-                          symbol,
-                          type,
-                          volume,
-                          isSuccess,
-                          errorMessage,
-                        ) {
-                          // Update notification status when trade completes
-                          notificationController
-                              .updateTradingNotificationStatus(
-                                id: id,
-                                isSuccess: isSuccess,
-                                errorMessage: errorMessage,
-                              );
-                        },
-                      );
-                      return; // Exit immediately, trade will process in background
-                    }
-
-                    // Original flow - show confirmation screen
-                    // Prevent multiple taps only when one-click is disabled
-                    if (_isPlacingOrder) return;
-
-                    // Original flow - show confirmation screen
-                    // Prevent multiple taps
-                    if (_isPlacingOrder) return;
-
-                    // Update UI to show button is pressed (instant feedback)
-                    setState(() {
-                      _isPlacingOrder = true;
-                    });
-
-                    try {
-                      // Call API first - no confirmation screen until success
-                      final result = await chartController.placeTradeOrder(
-                        mt5Account:
-                            "${accountController.activeMT5Account?.metaAccountNumber}",
-                        symbol: "${selectedSymbol}",
-                        volume: volume,
-                        type: "buy",
-                        priceSl: "",
-                        priceTp: "",
-                        price: "",
-                      );
-
-                      if (result['success'] == true) {
-                        // Order successful - extract data from API response
-                        // API response structure:
-                        // {
-                        //   "status": true,
-                        //   "success": true,
-                        //   "message": "Order placed successfully",
-                        //   "data": {
-                        //     "order_id": 653491,
-                        //     "position_id": 674696,
-                        //     "deal": {
-                        //       "Price": 4194.33,
-                        //       "Symbol": "XAUUSD",
-                        //       "Volume": 100,
-                        //       ...
-                        //     }
-                        //   }
-                        // }
-                        final orderData =
-                            result['orderData'] as Map<String, dynamic>?;
-                        final responseData =
-                            orderData?['data'] as Map<String, dynamic>?;
-                        final deal =
-                            responseData?['deal'] as Map<String, dynamic>?;
-
-                        // Extract position_id from data.position_id
-                        final positionIdValue =
-                            responseData?['position_id'] ?? deal?['PositionID'];
-                        final positionId =
-                            positionIdValue != null
-                                ? positionIdValue.toString()
-                                : 'N/A';
-
-                        // Extract order_id from data.order_id
-                        final orderIdValue =
-                            responseData?['order_id'] ?? deal?['Deal'];
-                        final orderId =
-                            orderIdValue != null
-                                ? orderIdValue.toString()
-                                : 'N/A';
-
-                        // Extract execution price from deal.Price (ONLY from API response)
-                        final priceValue =
-                            deal?['Price'] ?? responseData?['price'];
-                        final executionPrice =
-                            priceValue != null ? priceValue.toString() : null;
-
-                        // Extract symbol from deal.Symbol or use selectedSymbol
-                        final symbolFromResponse =
-                            deal?['Symbol']?.toString() ?? selectedSymbol;
-
-                        // Convert execution price to double (ONLY from API, no fallback to old prices)
-                        final executionPriceDouble =
-                            executionPrice != null
-                                ? double.tryParse(executionPrice)
-                                : null;
-
-                        // If price is missing from API, log error but don't use old cached price
-                        if (executionPriceDouble == null &&
-                            executionPrice != null) {
-                          print(
-                            '⚠️ Warning: Could not parse execution price: $executionPrice',
-                          );
-                        }
-
-                        // Show confirmation screen with actual data from API response
-                        Get.toNamed(
-                          Routes.ORDER_CONFIRMATION,
-                          arguments: {
-                            'orderData': orderData ?? {},
-                            'symbol': symbolFromResponse,
-                            'orderType': 'buy', // Buy order
-                            'volume': volume, // Use the volume that was placed
-                            'price': executionPriceDouble,
-                            'executionPrice': executionPrice,
-                            'positionId': positionId,
-                            'orderId': orderId,
-                            'tabIndex': 0, // Market tab
-                            'onNavigateToTrade': widget.onNavigateToTrade,
-                            'isPlacing': false,
-                          },
-                        );
-
-                        // After 30ms, navigate to trade screen
-                        await Future.delayed(Duration(milliseconds: 30));
-
-                        if (widget.onNavigateToTrade != null) {
-                          widget.onNavigateToTrade!(0); // Market tab
-                        }
-                      } else {
-                        // API validation error - show error and stay on chart screen
-                        CustomToastService.showError(
-                          title: 'Error',
-                          message: result['error'] ?? 'Failed to place order',
-                        );
-                        // Stay on chart screen - don't navigate
-                      }
-                    } catch (error) {
-                      CustomToastService.showError(
-                        title: 'Error',
-                        message: 'Failed to place order: $error',
-                      );
-                      // Stay on chart screen - don't navigate
-                    } finally {
-                      setState(() {
-                        _isPlacingOrder = false;
-                      });
-                    }
-                  },
-              child: AnimatedOpacity(
-                duration: Duration(milliseconds: 100),
-                opacity: _isPlacingOrder ? 0.5 : 1.0,
-                child: SizedBox(
-                  height: isVantage ? 42.h : 48.h,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: isVantage ? null : AppColors.success,
-                      borderRadius: BorderRadius.circular(isVantage ? 16.r : 8.r),
-                      gradient:
-                          isVantage
-                              ? LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  primary,
-                                  Color.alphaBlend(
-                                    Colors.black.withOpacity(0.10),
-                                    primary,
-                                  ),
-                                ],
-                              )
-                              : null,
-                      boxShadow:
-                          isVantage
-                              ? [
-                                BoxShadow(
-                                  color: primary.withOpacity(
-                                    0.20,
-                                  ),
-                                  blurRadius: 18,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ]
-                              : null,
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'BUY',
-                            style: AppTextStyles.button.copyWith(
-                              fontSize: isSmallScreen ? 12.sp : 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color:
-                                  isVantage
-                                      ? (AppColors.isDarkMode ? const Color(0xFF1E1E1E) : Colors.white)
-                                      : AppTextStyles.button.color,
+                                color: AppColors.onColoredBackground,
+                              ),
                             ),
-                          ),
-                          Text(
-                            askPrice.toString(),
-                            style: AppTextStyles.button.copyWith(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                              color:
-                                  isVantage
-                                      ? (AppColors.isDarkMode
-                                          ? const Color(0xFF1E1E1E).withOpacity(0.8)
-                                          : Colors.white.withOpacity(0.92))
-                                      : AppTextStyles.button.color,
+                            Text(
+                              bidPrice,
+                              style: AppTextStyles.button.copyWith(
+                                fontSize: isSmallScreen ? 12.sp : 12.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.onColoredBackground,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
+                SizedBox(width: isSmallScreen ? 8.w : 16.w),
+                // BUY Button - now wrapped in GestureDetector
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      // If no active trading account exists, redirect user to Dashboard to open/select one.
+                      if (accountController.mt5Accounts.isEmpty ||
+                          accountController.activeMT5Account == null) {
+                        if (widget.onNavigateToTab != null) {
+                          widget.onNavigateToTab!(3);
+                        } else {
+                          Get.to(() => DashboardScreen());
+                        }
+                        return;
+                      }
+                      // Silently clamp volume before placing order.
+                      setState(() {
+                        volume = volume.clamp(_minLot, _maxLot);
+                        _volumeController.text = volume.toStringAsFixed(2);
+                      });
+                      // Check if One Click Trading is enabled
+                      final oneClickService = OneClickTradingService.instance;
+                      final isOneClickEnabled =
+                          await oneClickService.isOneClickTradingEnabled();
+
+                      if (isOneClickEnabled) {
+                        // Add notification immediately with loading status
+                        final notificationId = notificationController
+                            .addTradingNotification(
+                              symbol: selectedSymbol,
+                              type: "buy",
+                              volume: volume,
+                            );
+
+                        // Use queue service for background processing
+                        // This allows multiple rapid taps without blocking
+                        // Pass the notification ID so callback uses the same ID
+                        OneClickTradingQueueService.instance.enqueueTrade(
+                          type: "buy",
+                          symbol: selectedSymbol,
+                          volume: volume,
+                          notificationId: notificationId,
+                          onTradeComplete: (
+                            id,
+                            symbol,
+                            type,
+                            volume,
+                            isSuccess,
+                            errorMessage,
+                          ) {
+                            // Update notification status when trade completes
+                            notificationController
+                                .updateTradingNotificationStatus(
+                                  id: id,
+                                  isSuccess: isSuccess,
+                                  errorMessage: errorMessage,
+                                );
+                          },
+                        );
+                        return; // Exit immediately, trade will process in background
+                      }
+
+                      // Original flow - show confirmation screen
+                      // Prevent multiple taps only when one-click is disabled
+                      if (_isPlacingOrder) return;
+
+                      // Original flow - show confirmation screen
+                      // Prevent multiple taps
+                      if (_isPlacingOrder) return;
+
+                      // Update UI to show button is pressed (instant feedback)
+                      setState(() {
+                        _isPlacingOrder = true;
+                      });
+
+                      try {
+                        // Call API first - no confirmation screen until success
+                        final result = await chartController.placeTradeOrder(
+                          mt5Account:
+                              "${accountController.activeMT5Account?.metaAccountNumber}",
+                          symbol: "${selectedSymbol}",
+                          volume: volume,
+                          type: "buy",
+                          priceSl: "",
+                          priceTp: "",
+                          price: "",
+                        );
+
+                        if (result['success'] == true) {
+                          // Order successful - extract data from API response
+                          // API response structure:
+                          // {
+                          //   "status": true,
+                          //   "success": true,
+                          //   "message": "Order placed successfully",
+                          //   "data": {
+                          //     "order_id": 653491,
+                          //     "position_id": 674696,
+                          //     "deal": {
+                          //       "Price": 4194.33,
+                          //       "Symbol": "XAUUSD",
+                          //       "Volume": 100,
+                          //       ...
+                          //     }
+                          //   }
+                          // }
+                          final orderData =
+                              result['orderData'] as Map<String, dynamic>?;
+                          final responseData =
+                              orderData?['data'] as Map<String, dynamic>?;
+                          final deal =
+                              responseData?['deal'] as Map<String, dynamic>?;
+
+                          // Extract position_id from data.position_id
+                          final positionIdValue =
+                              responseData?['position_id'] ??
+                              deal?['PositionID'];
+                          final positionId =
+                              positionIdValue != null
+                                  ? positionIdValue.toString()
+                                  : 'N/A';
+
+                          // Extract order_id from data.order_id
+                          final orderIdValue =
+                              responseData?['order_id'] ?? deal?['Deal'];
+                          final orderId =
+                              orderIdValue != null
+                                  ? orderIdValue.toString()
+                                  : 'N/A';
+
+                          // Extract execution price from deal.Price (ONLY from API response)
+                          final priceValue =
+                              deal?['Price'] ?? responseData?['price'];
+                          final executionPrice =
+                              priceValue != null ? priceValue.toString() : null;
+
+                          // Extract symbol from deal.Symbol or use selectedSymbol
+                          final symbolFromResponse =
+                              deal?['Symbol']?.toString() ?? selectedSymbol;
+
+                          // Convert execution price to double (ONLY from API, no fallback to old prices)
+                          final executionPriceDouble =
+                              executionPrice != null
+                                  ? double.tryParse(executionPrice)
+                                  : null;
+
+                          // If price is missing from API, log error but don't use old cached price
+                          if (executionPriceDouble == null &&
+                              executionPrice != null) {
+                            print(
+                              '⚠️ Warning: Could not parse execution price: $executionPrice',
+                            );
+                          }
+
+                          // Show confirmation screen with actual data from API response
+                          Get.toNamed(
+                            Routes.ORDER_CONFIRMATION,
+                            arguments: {
+                              'orderData': orderData ?? {},
+                              'symbol': symbolFromResponse,
+                              'orderType': 'buy', // Buy order
+                              'volume':
+                                  volume, // Use the volume that was placed
+                              'price': executionPriceDouble,
+                              'executionPrice': executionPrice,
+                              'positionId': positionId,
+                              'orderId': orderId,
+                              'tabIndex': 0, // Market tab
+                              'onNavigateToTrade': widget.onNavigateToTrade,
+                              'isPlacing': false,
+                            },
+                          );
+
+                          // After 30ms, navigate to trade screen
+                          await Future.delayed(Duration(milliseconds: 30));
+
+                          if (widget.onNavigateToTrade != null) {
+                            widget.onNavigateToTrade!(0); // Market tab
+                          }
+                        } else {
+                          // API validation error - show error and stay on chart screen
+                          CustomToastService.showError(
+                            title: 'Error',
+                            message: result['error'] ?? 'Failed to place order',
+                          );
+                          // Stay on chart screen - don't navigate
+                        }
+                      } catch (error) {
+                        CustomToastService.showError(
+                          title: 'Error',
+                          message: 'Failed to place order: $error',
+                        );
+                        // Stay on chart screen - don't navigate
+                      } finally {
+                        setState(() {
+                          _isPlacingOrder = false;
+                        });
+                      }
+                    },
+                    child: AnimatedOpacity(
+                      duration: Duration(milliseconds: 100),
+                      opacity: _isPlacingOrder ? 0.5 : 1.0,
+                      child: Container(
+                        height: 48.h,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.success,
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'BUY',
+                              style: AppTextStyles.button.copyWith(
+                                fontSize: isSmallScreen ? 12.sp : 16.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.onColoredBackground,
+                              ),
+                            ),
+                            Text(
+                              askPrice.toString(),
+                              style: AppTextStyles.button.copyWith(
+                                fontSize: isSmallScreen ? 12.sp : 12.sp,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.onColoredBackground,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * 0.013,
+                ),
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.tradeBackgroundCenterColor,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  height: 26.h,
+                  width: 52.w,
+                  child: Text(
+                    difference,
+                    style: AppTextStyles.labelOnTradeDifference,
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -3273,15 +2733,14 @@ Placing Order:
   double get _maxLot => accountController.activeMT5Account?.maxLotSize ?? 100.0;
 
   Widget _buildVolumeInputScreen(BuildContext context, bool isborder) {
-    final isVantage = FlavorConfig.isVantage();
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: isborder ? 10.w : 0,
-        vertical: isborder ? (isVantage ? 6.h : 10.h) : 2.h,
+        vertical: isborder ? 10.h : 2.h,
       ),
       child: Container(
-        height: isVantage ? 44.h : 48.h,
-        padding: EdgeInsets.symmetric(horizontal: isVantage ? 10.w : 11.w),
+        height: 48.h,
+        padding: EdgeInsets.symmetric(horizontal: 11.w),
         decoration: BoxDecoration(
           color: AppColors.whiteColor,
           borderRadius: BorderRadius.circular(8.r),
@@ -3295,13 +2754,12 @@ Placing Order:
           children: [
             // Minus button
             Container(
-              height: isVantage ? 22.h : 24.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 // color: AppColors.icongrey,
-                border: Border.all(color: AppColors.icongrey),
+                border: Border.all(color: AppColors.primary, width: 2),
               ),
-              width: isVantage ? 22.w : 24.w,
+              width: 24.w,
               child: IconButton(
                 onPressed: () {
                   setState(() {
@@ -3312,10 +2770,9 @@ Placing Order:
                     _volumeController.text = volume.toStringAsFixed(2);
                   });
                 },
-                icon: Icon(
-                  Icons.remove,
-                  size: isVantage ? 16.h : 18.h,
-                  color: AppColors.icongrey,
+                icon: StepperAdjustIcon(
+                  kind: StepperAdjustKind.decrement,
+                  size: 14,
                 ),
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
@@ -3363,8 +2820,6 @@ Placing Order:
                     textAlign: TextAlign.center,
                     style: AppTextStyles.labelOnTradeQuantityDigit,
                     decoration: InputDecoration(
-                      filled: false,
-                      fillColor: Colors.transparent,
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -3406,8 +2861,8 @@ Placing Order:
                 // color: AppColors.icongrey,
                 border: Border.all(color: AppColors.primary, width: 2),
               ),
-              width: isVantage ? 22.w : 24.w,
-              height: isVantage ? 22.h : 24.h,
+              width: 24.w,
+              height: 24.h,
               child: IconButton(
                 onPressed: () {
                   setState(() {
@@ -3418,10 +2873,9 @@ Placing Order:
                     _volumeController.text = volume.toStringAsFixed(2);
                   });
                 },
-                icon: Icon(
-                  Icons.add,
-                  size: isVantage ? 16.h : 18.h,
-                  color: AppColors.primary,
+                icon: StepperAdjustIcon(
+                  kind: StepperAdjustKind.increment,
+                  size: 14,
                 ),
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
@@ -3433,7 +2887,86 @@ Placing Order:
     );
   }
 
-  // ignore: unused_element
+  void _showTradingOrderBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true, // allow outside tap
+      enableDrag: true, // allow swipe down
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque, // let outside taps pass through
+          onTap: () {
+            Navigator.of(context).pop(); // close on outside tap
+          },
+          child: GestureDetector(
+            // prevent taps inside sheet from closing it
+            onTap: () {},
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.8,
+              minChildSize: 0.3,
+              maxChildSize: 0.95, // Increased to 95% to accommodate keyboard
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.whiteColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20.r),
+                      topRight: Radius.circular(20.r),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(top: 8.h),
+                        child: Container(
+                          width: 30.w,
+                          height: 5.h,
+                          decoration: BoxDecoration(
+                            color: AppColors.textGrey,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 18.h),
+                        child: Text(
+                          languageService.tr('chart_pending_order_label'),
+                          style: AppTextStyles.labelOnTradeBottomTitle,
+                        ),
+                      ),
+                      SizedBox(height: 7.5.h),
+                      Container(
+                        height: 1.h,
+                        width: double.infinity,
+                        color: AppColors.textGrey,
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          controller: scrollController,
+                          padding: EdgeInsets.only(
+                            left: 16.w,
+                            right: 16.w,
+                            top: 16.w,
+                            bottom:
+                                MediaQuery.of(context).viewInsets.bottom +
+                                16.w, // Add keyboard height
+                          ),
+                          child: _buildPendingOrderContent(),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildMarketOrderContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -3475,7 +3008,7 @@ Placing Order:
           width: double.infinity,
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
-            color: AppColors.grey,
+            color: AppColors.textGrey,
             borderRadius: BorderRadius.circular(10.r),
           ),
           child: Row(
@@ -3593,10 +3126,9 @@ Placing Order:
                                     }
                                   });
                                 },
-                                icon: Icon(
-                                  Icons.remove,
-                                  size: 16.h,
-                                  color: AppColors.icongrey,
+                                icon: StepperAdjustIcon(
+                                  kind: StepperAdjustKind.decrement,
+                                  size: 12,
                                 ),
                                 padding: EdgeInsets.zero,
                                 constraints: BoxConstraints(),
@@ -3656,8 +3188,6 @@ Placing Order:
                                           fontWeight: FontWeight.w700,
                                         ),
                                         decoration: InputDecoration(
-                                          filled: false,
-                                          fillColor: Colors.transparent,
                                           border: InputBorder.none,
                                           focusedBorder: InputBorder.none,
                                           enabledBorder: InputBorder.none,
@@ -3733,10 +3263,9 @@ Placing Order:
                                         .toStringAsFixed(2);
                                   });
                                 },
-                                icon: Icon(
-                                  Icons.add,
-                                  size: 16.h,
-                                  color: AppColors.primary,
+                                icon: StepperAdjustIcon(
+                                  kind: StepperAdjustKind.increment,
+                                  size: 12,
                                 ),
                                 padding: EdgeInsets.zero,
                                 constraints: BoxConstraints(),
@@ -3852,10 +3381,9 @@ Placing Order:
                                     }
                                   });
                                 },
-                                icon: Icon(
-                                  Icons.remove,
-                                  size: 16.h,
-                                  color: AppColors.icongrey,
+                                icon: StepperAdjustIcon(
+                                  kind: StepperAdjustKind.decrement,
+                                  size: 12,
                                 ),
                                 padding: EdgeInsets.zero,
                                 constraints: BoxConstraints(),
@@ -3885,8 +3413,6 @@ Placing Order:
                                           fontWeight: FontWeight.w700,
                                         ),
                                         decoration: InputDecoration(
-                                          filled: false,
-                                          fillColor: Colors.transparent,
                                           border: InputBorder.none,
                                           focusedBorder: InputBorder.none,
                                           enabledBorder: InputBorder.none,
@@ -3942,10 +3468,9 @@ Placing Order:
                                         .toStringAsFixed(2);
                                   });
                                 },
-                                icon: Icon(
-                                  Icons.add,
-                                  size: 16.h,
-                                  color: AppColors.primary,
+                                icon: StepperAdjustIcon(
+                                  kind: StepperAdjustKind.increment,
+                                  size: 12,
                                 ),
                                 padding: EdgeInsets.zero,
                                 constraints: BoxConstraints(),
@@ -4052,7 +3577,6 @@ Placing Order:
   }
 
   // Helper method to execute one-click trade
-  // ignore: unused_element
   Future<void> _executeOneClickTrade({
     required String type, // "buy" or "1" (sell)
     required String symbol,
@@ -4116,7 +3640,6 @@ Placing Order:
     }
   }
 
-  // ignore: unused_element
   Widget _buildPendingOrderContent() {
     return PendingOrderContent(
       selectedPendingOrderType: _selectedPendingOrderType,
@@ -4132,6 +3655,7 @@ Placing Order:
       takeProfitController: _takeProfitController,
       stopLossController: _stopLossController,
       limitPriceController: _limitPriceController,
+      openPriceController: _openPriceController,
       onPlaceOrder: _placePendingOrder,
       selectedSymbol: selectedSymbol,
       onVolumeChanged: (newVolume) {
@@ -4176,10 +3700,9 @@ Placing Order:
                         }
                       });
                     },
-                    icon: Icon(
-                      Icons.remove,
-                      size: 16.h,
-                      color: AppColors.icongrey,
+                    icon: StepperAdjustIcon(
+                      kind: StepperAdjustKind.decrement,
+                      size: 12,
                     ),
                     padding: EdgeInsets.zero,
                     constraints: BoxConstraints(),
@@ -4216,8 +3739,6 @@ Placing Order:
                               fontWeight: FontWeight.w700,
                             ),
                             decoration: InputDecoration(
-                              filled: false,
-                              fillColor: Colors.transparent,
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               enabledBorder: InputBorder.none,
@@ -4267,7 +3788,10 @@ Placing Order:
                         _volumeController.text = volume.toStringAsFixed(2);
                       });
                     },
-                    icon: Icon(Icons.add, size: 16.h, color: AppColors.primary),
+                    icon: StepperAdjustIcon(
+                      kind: StepperAdjustKind.increment,
+                      size: 12,
+                    ),
                     padding: EdgeInsets.zero,
                     constraints: BoxConstraints(),
                   ),
@@ -4297,7 +3821,6 @@ Placing Order:
     );
   }
 
-  // ignore: unused_element
   Widget _buildQuentyPendingOrder() {
     return Container(
       height: 117.h,
@@ -4310,7 +3833,11 @@ Placing Order:
       child: Column(
         children: [
           _buildVolumeInputScreen(context, false),
-          Container(width: double.maxFinite, height: 2, color: AppColors.grey),
+          Container(
+            width: double.maxFinite,
+            height: 2,
+            color: AppColors.textGrey,
+          ),
           SizedBox(height: 6.h),
 
           Padding(
@@ -4355,7 +3882,6 @@ Placing Order:
     );
   }
 
-  // ignore: unused_element
   Widget _buildOpenPriceInput() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 0, vertical: 2.h),
@@ -4389,7 +3915,10 @@ Placing Order:
                     }
                   });
                 },
-                icon: Icon(Icons.remove, size: 18.h, color: AppColors.icongrey),
+                icon: StepperAdjustIcon(
+                  kind: StepperAdjustKind.decrement,
+                  size: 14,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
               ),
@@ -4414,8 +3943,6 @@ Placing Order:
                     textAlign: TextAlign.center,
                     style: AppTextStyles.labelOnTradeQuantityDigit,
                     decoration: InputDecoration(
-                      filled: false,
-                      fillColor: Colors.transparent,
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -4454,7 +3981,10 @@ Placing Order:
                     _volumeController.text = volume.toStringAsFixed(2);
                   });
                 },
-                icon: Icon(Icons.add, size: 18.h, color: AppColors.primary),
+                icon: StepperAdjustIcon(
+                  kind: StepperAdjustKind.increment,
+                  size: 14,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
               ),
@@ -4465,7 +3995,6 @@ Placing Order:
     );
   }
 
-  // ignore: unused_element
   Widget _buildPriceInputField(
     String label,
     ValueNotifier<double> priceNotifier,
@@ -4503,7 +4032,10 @@ Placing Order:
                     );
                   }
                 },
-                icon: Icon(Icons.remove, size: 16.h, color: AppColors.icongrey),
+                icon: StepperAdjustIcon(
+                  kind: StepperAdjustKind.decrement,
+                  size: 12,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
               ),
@@ -4531,8 +4063,6 @@ Placing Order:
                           fontWeight: FontWeight.w700,
                         ),
                         decoration: InputDecoration(
-                          filled: false,
-                          fillColor: Colors.transparent,
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           enabledBorder: InputBorder.none,
@@ -4574,7 +4104,10 @@ Placing Order:
                     decimals: _getCurrentDigits(),
                   );
                 },
-                icon: Icon(Icons.add, size: 16.h, color: AppColors.primary),
+                icon: StepperAdjustIcon(
+                  kind: StepperAdjustKind.increment,
+                  size: 12,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
               ),
@@ -4585,15 +4118,14 @@ Placing Order:
     );
   }
 
-  // ignore: unused_element
   Widget _buildPriceInput(String label, ValueNotifier<double> priceNotifier) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: AppColors.border),
       ),
       child: ValueListenableBuilder<double>(
         valueListenable: priceNotifier,
@@ -4605,13 +4137,16 @@ Placing Order:
                 height: 32.h,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[400]!),
+                  border: Border.all(color: AppColors.textGrey),
                 ),
                 child: IconButton(
                   onPressed: () {
                     if (price > 0.01) priceNotifier.value = price - 0.01;
                   },
-                  icon: Icon(Icons.remove, size: 16.h, color: Colors.grey[600]),
+                  icon: StepperAdjustIcon(
+                    kind: StepperAdjustKind.decrement,
+                    size: 12,
+                  ),
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                 ),
@@ -4642,7 +4177,10 @@ Placing Order:
                   onPressed: () {
                     priceNotifier.value = price + 0.01;
                   },
-                  icon: Icon(Icons.add, size: 16.h, color: AppColors.primary),
+                  icon: StepperAdjustIcon(
+                    kind: StepperAdjustKind.increment,
+                    size: 12,
+                  ),
                   padding: EdgeInsets.zero,
                   constraints: BoxConstraints(),
                 ),
@@ -4992,10 +4530,9 @@ Placing Order:
                                     .toStringAsFixed(2);
                               }
                             },
-                            icon: Icon(
-                              Icons.remove,
-                              size: 16.h,
-                              color: AppColors.icongrey,
+                            icon: StepperAdjustIcon(
+                              kind: StepperAdjustKind.decrement,
+                              size: 12,
                             ),
                             padding: EdgeInsets.zero,
                             constraints: BoxConstraints(),
@@ -5025,8 +4562,6 @@ Placing Order:
                                       fontWeight: FontWeight.w700,
                                     ),
                                     decoration: InputDecoration(
-                                      filled: false,
-                                      fillColor: Colors.transparent,
                                       border: InputBorder.none,
                                       focusedBorder: InputBorder.none,
                                       enabledBorder: InputBorder.none,
@@ -5080,10 +4615,9 @@ Placing Order:
                               distanceController.text = _distance.value
                                   .toStringAsFixed(2);
                             },
-                            icon: Icon(
-                              Icons.add,
-                              size: 16.h,
-                              color: AppColors.primary,
+                            icon: StepperAdjustIcon(
+                              kind: StepperAdjustKind.increment,
+                              size: 12,
                             ),
                             padding: EdgeInsets.zero,
                             constraints: BoxConstraints(),
@@ -5103,16 +4637,16 @@ Placing Order:
             //       height: 32.h,
             //       decoration: BoxDecoration(
             //         shape: BoxShape.circle,
-            //         border: Border.all(color: Colors.grey[400]!),
+            //         border: Border.all(color: AppColors.textGrey!),
             //       ),
             //       child: IconButton(
             //         onPressed: () {
             //           if (distance > 10) _distance.value = distance - 10;
             //         },
             //         icon: Icon(
-            //           Icons.remove,
+            //           Icons.remove_circle,
             //           size: 16.h,
-            //           color: Colors.grey[600],
+            //           color: AppColors.textGrey,
             //         ),
             //         padding: EdgeInsets.zero,
             //         constraints: BoxConstraints(),
@@ -5142,7 +4676,7 @@ Placing Order:
             //           _distance.value = distance + 10;
             //         },
             //         icon: Icon(
-            //           Icons.add,
+            //           Icons.add_circle,
             //           size: 16.h,
             //           color: AppColors.primary,
             //         ),
@@ -5198,4 +4732,25 @@ Placing Order:
     );
   }
 
+  // Helper methods from instruments screen
+  String _getMarketStatus(String status) {
+    // Extract time and percentage from status like "01:00:00 H 16.0"
+    if (status.contains('H') || status.contains('S')) {
+      final parts = status.split(' ');
+      if (parts.length >= 3) {
+        final time = parts[0];
+        final type = parts[1];
+        final value = parts[2];
+
+        if (type == 'S') {
+          // Show active status with percentage
+          return '$time +$value% S:${value.split('.')[0]}.${value.split('.')[1]}';
+        } else {
+          // Show market closed
+          return 'Market closed';
+        }
+      }
+    }
+    return 'Market closed';
+  }
 }

@@ -363,4 +363,13 @@ class AppColors {
   static Color get errorText => isDarkMode ? const Color(0xFFEF9999) : const Color(0xFFD32F2F);
   static Color shadowAlpha(double alpha) => textPrimary.withValues(alpha: alpha);
   static Color get switchTrackOff => isDarkMode ? const Color(0xFF505050) : const Color(0xFFDCDCDC);
+
+  // CRM compatibility aliases (for migrated screens)
+  static Color get selectedChipBackground => chipSelected;
+  static Color get selectedChipForeground => onColoredBackground;
+  static String get chartTheme => isDarkMode ? 'dark' : 'light';
+
+  // PMAM compatibility aliases (from crmapp merge)
+  static Color get neutralTrackMuted => isDarkMode ? const Color(0xFF3A3A4A) : const Color(0xFFE0E0E0);
+  static Color get neutralTrackSoft => isDarkMode ? const Color(0xFF4A4A5A) : const Color(0xFFEEEEEE);
 }

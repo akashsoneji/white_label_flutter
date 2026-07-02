@@ -1,13 +1,21 @@
 {
-  "default": "pipze",
+  "default": "baazex",
   "brands": [
-    "pipze"
+    "baazex",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "pipze",
+      "name": "baazex",
+      "type": "child",
+      "inheritsFrom": "vantage",
+      "label": "Baazex",
+      "themeMode": "both"
+    },
+    {
+      "name": "vantage",
       "type": "parent",
-      "label": "Pipze",
+      "label": "Vantage",
       "themeMode": "both"
     }
   ]

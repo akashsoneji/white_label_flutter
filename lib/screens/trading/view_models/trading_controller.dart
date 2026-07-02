@@ -2554,6 +2554,7 @@ class TradingController extends GetxController {
     String? price,
     String? takeProfit,
     String? stopLoss,
+    String? stopLimitPrice,
     String? mt5Account,
   }) async {
     try {
@@ -2626,6 +2627,9 @@ class TradingController extends GetxController {
       }
       if (stopLoss != null && stopLoss.isNotEmpty) {
         payload['stop_loss'] = stopLoss;
+      }
+      if (stopLimitPrice != null && stopLimitPrice.isNotEmpty) {
+        payload['stop_limit_price'] = stopLimitPrice;
       }
 
       // Log the API call details

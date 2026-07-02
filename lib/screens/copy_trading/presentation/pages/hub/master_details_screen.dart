@@ -1,5 +1,5 @@
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_details_controller.dart';
@@ -40,10 +40,10 @@ class MasterDetailsScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading:  AppBackButton(
-          onPressed: () => AppBackButton.popRoute(context),
-          
-          
+        leading:  AppSvgBackButton(
+          onPressed: () => AppSvgBackButton.popRoute(context),
+          iconWidth: 30.w,
+          iconHeight: 30.h,
         ),
         
         actions: [
@@ -55,7 +55,7 @@ class MasterDetailsScreen extends StatelessWidget {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
         if (controller.errorMessage.value.isNotEmpty) {
           return _ErrorState(
@@ -66,7 +66,7 @@ class MasterDetailsScreen extends StatelessWidget {
 
         final profile = controller.profile.value;
         if (profile == null) {
-          return Center(child: Text('No data'));
+          return const Center(child: Text('No data'));
         }
 
         return RefreshIndicator(
@@ -125,7 +125,7 @@ class _MasterHeroCard extends StatelessWidget {
           BoxShadow(
             color: AppColors.border.withValues(alpha: 0.03),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -181,7 +181,7 @@ class _MasterHeroCard extends StatelessWidget {
                         Container(
                           width: 7.r,
                           height: 7.r,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: AppColors.green,
                             shape: BoxShape.circle,
                           ),
@@ -220,12 +220,12 @@ class _MasterHeroCard extends StatelessWidget {
                   value: '\$${profile.masterEquity.toStringAsFixed(2)}',
                 ),
               ),
-              // Expanded(
-              //   child: _HeroStat(
-              //     label: 'Commission',
-              //     value: commission.isNotEmpty ? commission : '-',
-              //   ),
-              // ),
+              Expanded(
+                child: _HeroStat(
+                  label: 'Commission',
+                  value: commission.isNotEmpty ? commission : '-',
+                ),
+              ),
               Expanded(
                 child: _HeroStat(
                   label: 'With Us',
@@ -234,12 +234,6 @@ class _MasterHeroCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
-           _HeroStat(
-                  label: 'Commission',
-                  value: commission.isNotEmpty ? commission : '-',
-                ),
-              
           SizedBox(height: 12.h),
           SizedBox(
             width: double.infinity,
@@ -263,11 +257,7 @@ class _MasterHeroCard extends StatelessWidget {
                       },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                disabledBackgroundColor: AppColors.textGrey.withValues(
-                  alpha: 0.18,
-                ),
                 foregroundColor: AppColors.whiteColor,
-                disabledForegroundColor: AppColors.textGrey,
                 padding: EdgeInsets.zero,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -275,7 +265,7 @@ class _MasterHeroCard extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                primaryPlan == null ? 'Not yet plan' : 'Subscribe',
+                'Subscribe',
                 style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400),
               ),
             ),
@@ -804,7 +794,7 @@ class _PerformanceChart extends StatelessWidget {
                     },
                   ),
                 ),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 bottomTitles: AxisTitles(
                   axisNameWidget: Padding(
                     padding: EdgeInsets.only(top: 4.h),
@@ -1073,7 +1063,7 @@ class _OrderCardState extends State<_OrderCard> {
     return GestureDetector(
       onTap: () => setState(() => _expanded = !_expanded),
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 220),
+        duration: const Duration(milliseconds: 220),
         curve: Curves.easeInOut,
         padding: EdgeInsets.all(12.r),
         decoration: BoxDecoration(
@@ -1157,7 +1147,7 @@ class _OrderCardState extends State<_OrderCard> {
                 ),
                 SizedBox(width: 8.w),
                 AnimatedRotation(
-                  duration: Duration(milliseconds: 220),
+                  duration: const Duration(milliseconds: 220),
                   turns: _expanded ? 0.5 : 0,
                   child: Icon(
                     Icons.keyboard_arrow_down,
@@ -1179,7 +1169,7 @@ class _OrderCardState extends State<_OrderCard> {
                   Expanded(
                     child: _TField(label: 'Order ID', value: '#${item.id}'),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Expanded(
                     flex: 2,
                     child: _TField(
@@ -1201,7 +1191,7 @@ class _OrderCardState extends State<_OrderCard> {
                       ),
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Expanded(
                     flex: 2,
                     child: _TField(
@@ -1233,7 +1223,7 @@ class _OrderCardState extends State<_OrderCard> {
                               : sideColor,
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Expanded(
                     flex: 2,
                     child: _TField(
@@ -1325,10 +1315,85 @@ class _ErrorState extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
               ),
-              child: Text('Retry'),
+              child: const Text('Retry'),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────── Strategy & risk disclosure ───────────────────────────
+
+class _StrategyDisclosureCard extends StatelessWidget {
+  final CopyTradingMasterProfile profile;
+  const _StrategyDisclosureCard({required this.profile});
+
+  @override
+  Widget build(BuildContext context) {
+    final strategy = profile.strategyDescription.trim();
+    final hasStrategy = strategy.isNotEmpty;
+    final risk = profile.riskInformation.trim();
+    final hasRisk = risk.isNotEmpty;
+    return Container(
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 16.h),
+      decoration: BoxDecoration(
+        color: AppColors.whiteColor,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Strategy & risk disclosure',
+            style: AppTextStyles.label.copyWith(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 10.h),
+          Text(
+            'STRATEGY',
+            style: AppTextStyles.caption.copyWith(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textGrey,
+              letterSpacing: 0.5,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            hasStrategy ? strategy : 'No strategy description provided.',
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 12.sp,
+              color:
+                  hasStrategy ? AppColors.textPrimary : AppColors.textGrey,
+            ),
+          ),
+          if (hasRisk) ...[
+            SizedBox(height: 12.h),
+            Text(
+              'RISK',
+              style: AppTextStyles.caption.copyWith(
+                fontSize: 10.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textGrey,
+                letterSpacing: 0.5,
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              risk,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 12.sp,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

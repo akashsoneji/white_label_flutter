@@ -410,7 +410,7 @@ class AccountHeaderWidget extends StatelessWidget {
     if (primaryAccount != null) {
       return primaryAccount.metaAccountNumber;
     }
-    return 'No Account'; // Default account number
+    return ''; // Keep blank while initial account data is loading.
   }
 
   void _showAccountSelectionBottomSheet(

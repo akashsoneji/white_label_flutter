@@ -3,11 +3,24 @@
 
 ext.brandFlavors = [
     [
+        name: "baazex",
+        label: "Baazex",
+        appId: "com.baazex.app",
+        appName: "Baazex",
+        primary: "#BF235C",
+        secondary: "#212121",
+        accent: "#BF235C",
+        splashColor: "#BF235C",
+        launcherBackground: "#BF235C",
+        type: "child",
+        inheritsFrom: "vantage",
+    ],
+    [
         name: "celestial",
         label: "Celestial",
         appId: "com.celestial.app",
         appName: "Celestial",
-        primary: "#24324D",
+        primary: "#324D69",
         secondary: "#22D3EE",
         accent: "#24324D",
         splashColor: "#24324D",

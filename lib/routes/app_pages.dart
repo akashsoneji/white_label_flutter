@@ -53,6 +53,7 @@ import '../screens/pmam/presentation/pages/pmam_create_plan_screen.dart';
 import '../screens/pmam/presentation/pages/pmam_investor_portal_screen.dart';
 import '../screens/pmam/presentation/pages/pmam_manager_detail_screen.dart';
 import '../screens/pmam/presentation/pages/pmam_manager_plan_detail_screen.dart';
+import '../screens/pmam/presentation/pages/pmam_fund_manager_view_screen.dart';
 import '../screens/finance/presentation/pages/cregis_address_screen.dart';
 import '../screens/finance/presentation/pages/cregis_success_screen.dart';
 import '../screens/common/webview_screen.dart';
@@ -153,6 +154,7 @@ class AppPages {
   static const PMAM_INVESTOR_PORTAL = _Paths.PMAM_INVESTOR_PORTAL;
   static const PMAM_MANAGER_DETAIL = _Paths.PMAM_MANAGER_DETAIL;
   static const PMAM_MANAGER_PLAN_DETAIL = _Paths.PMAM_MANAGER_PLAN_DETAIL;
+  static const PMAM_FUND_MANAGER_VIEW = _Paths.PMAM_FUND_MANAGER_VIEW;
   static const CREGIS_ADDRESS = _Paths.CREGIS_ADDRESS;
   static const CREGIS_SUCCESS = _Paths.CREGIS_SUCCESS;
 
@@ -416,6 +418,12 @@ class AppPages {
     GetPage(
       name: _Paths.PMAM_MANAGER_PLAN_DETAIL,
       page: () => const PmamManagerPlanDetailScreen(),
+      binding: PmamBinding(),
+      middlewares: [FeatureFlagMiddleware(FeatureKeys.pmam)],
+    ),
+    GetPage(
+      name: _Paths.PMAM_FUND_MANAGER_VIEW,
+      page: () => const PmamFundManagerViewScreen(),
       binding: PmamBinding(),
       middlewares: [FeatureFlagMiddleware(FeatureKeys.pmam)],
     ),

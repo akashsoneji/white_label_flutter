@@ -189,6 +189,28 @@ class KycBankController extends GetxController {
     // Reset OTP state when changing account type
     isOtpSent.value = false;
     otp.value = '';
+    _applyAccountTypeDefaults();
+  }
+
+  void _applyAccountTypeDefaults() {
+    if (selectedAccountType.value.toLowerCase() == 'crypto') {
+      selectedCurrency.value = 'USDT';
+      _applyDefaultCryptoNetwork();
+    } else if (selectedCurrency.value == 'USDT') {
+      selectedCurrency.value = 'USD';
+    }
+  }
+
+  void _applyDefaultCryptoNetwork() {
+    if (allowedCryptoNetworks.isNotEmpty) {
+      selectedCryptoNetwork.value = allowedCryptoNetworks.first.slug ?? '';
+    } else {
+      selectedCryptoNetwork.value = '';
+    }
+  }
+
+  void setCryptoNetwork(String slug) {
+    selectedCryptoNetwork.value = slug;
   }
 
   void setRelationShip(String relation) {
@@ -449,6 +471,18 @@ class KycBankController extends GetxController {
         }
         return false;
       }
+      if (accountHolderName.value.isNotEmpty &&
+          !_isValidCryptoHolderName(accountHolderName.value)) {
+        errorMessage.value =
+            'Crypto holder name can only contain letters, spaces, hyphens, apostrophes, and periods';
+        if (Get.isRegistered<AppNotificationController>()) {
+          Get.find<AppNotificationController>().showError(
+            message:
+                'Crypto holder name can only contain letters, spaces, hyphens, apostrophes, and periods',
+          );
+        }
+        return false;
+      }
     } else {
       // UPI case
       if (upiAddress.value.isEmpty) {
@@ -474,6 +508,10 @@ class KycBankController extends GetxController {
     }
 
     return true;
+  }
+
+  bool _isValidCryptoHolderName(String value) {
+    return RegExp(r"^[a-zA-Z\s\-'.]+$").hasMatch(value.trim());
   }
 
   // Build OTP request parameters - Dynamic based on account type
