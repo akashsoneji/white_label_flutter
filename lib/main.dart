@@ -66,9 +66,11 @@ import 'services/account_service.dart';
 import 'services/websocket_endpoint_helper.dart';
 import 'routes/app_pages.dart';
 import 'widgets/exit_confirmation_wrapper.dart';
+import 'widgets/keyboard_dismiss_wrapper.dart';
 import 'widgets/app_notification_stack.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'utils/app_logger.dart';
+import 'utils/keyboard_unfocus_navigator_observer.dart';
 // App status check imports are enabled
 import 'services/app_status/app_status_service.dart';
 import 'services/app_status/app_status_controller.dart';
@@ -635,7 +637,7 @@ class MyGetXApp extends StatelessWidget {
                           selectionHandleColor: brandPrimary,
                         ),
                       ),
-                      child: child!,
+                      child: KeyboardDismissWrapper(child: child!),
                     );
                     return Stack(
                       children: [
@@ -664,6 +666,7 @@ class MyGetXApp extends StatelessWidget {
                   themeMode: themeService.themeMode,
                   theme: _buildLightTheme(),
                   darkTheme: _buildDarkTheme(),
+                  navigatorObservers: [KeyboardUnfocusNavigatorObserver()],
                   initialRoute: AppPages.SPLASH,
                   getPages: AppPages.routes,
                 ),

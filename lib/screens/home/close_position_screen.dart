@@ -13,6 +13,7 @@ import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/app_switch_tile.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/utils/precision_helper.dart';
@@ -602,7 +603,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                 width: iconSize,
                 height: iconSize,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Image.asset(
@@ -644,7 +645,11 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
         elevation: 0,
         toolbarHeight: 72.h, // a bit more height so 2 lines fit nicely
         centerTitle: false, // easier for layout; we’ll align manually
-        leading: const AppBackButton(),
+        leading: AppSvgBackButton(
+          onPressed: () => Get.back(closeOverlays: true),
+          iconWidth: 30.w,
+          iconHeight: 30.h,
+        ),
         titleSpacing: 0, // so title starts close to leading
         title: Column(
           mainAxisSize: MainAxisSize.min,
@@ -772,45 +777,24 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
       height: showChart ? MediaQuery.of(context).size.height * 0.4 : 64.h,
       child: Column(
         children: [
-          // Chart Header with Toggle
-          Container(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Chart',
-                  style: AppTextStyles.label.copyWith(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Row(
-                  children: [
-                    // Chart On/Off Toggle
-                    Transform.scale(
-                      scale: 0.9,
-                      child: Switch(
-                        value: showChart,
-                        onChanged: (value) {
-                          setState(() {
-                            showChart = value;
-                          });
-                        },
-                        activeColor: AppColors.primary,
-                        activeTrackColor: AppColors.primary.withOpacity(0.3),
-                        inactiveThumbColor: AppColors.whiteColor,
-                        inactiveTrackColor: AppColors.icongrey.withAlpha(55),
-                        trackOutlineColor: WidgetStateProperty.all(
-                          Colors.transparent,
-                        ),
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: AppColors.whiteColor,
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: AppSwitchTile(
+                title: 'Chart',
+                value: showChart,
+                onChanged: (value) {
+                  setState(() {
+                    showChart = value;
+                  });
+                },
+              ),
             ),
           ),
           // Chart WebView (only when chart is enabled)
@@ -838,8 +822,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
 
   String _buildChartUrl(String symbol) {
     final displaySymbol = _removeSymbolSuffixForDisplay(symbol);
-    final themeParam = AppColors.isDarkMode ? 'dark' : 'light';
-    return '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$displaySymbol&theme=$themeParam';
+    return '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$displaySymbol&theme=${AppColors.chartTheme}';
   }
 
   Widget _buildCurrentPrices() {
@@ -1065,9 +1048,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
-                color: AppColors.whiteColor,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(6.r),
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: AppColors.surface!),
               ),
               child: Column(
                 children: [
@@ -1148,11 +1131,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppColors.isDarkMode
-                                    ? AppColors.border
-                                    : Colors.grey[400]!,
-                              ),
+                              border: Border.all(color: AppColors.primary!),
                             ),
                             child: IconButton(
                               onPressed: () {
@@ -1171,9 +1150,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                               icon: Icon(
                                 Icons.remove,
                                 size: 20.h,
-                                color: AppColors.isDarkMode
-                                    ? Colors.white
-                                    : Colors.grey[600],
+                                color: AppColors.primary,
                               ),
                               padding: EdgeInsets.zero,
                               constraints: BoxConstraints(),
@@ -1193,8 +1170,6 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                                   color: AppColors.textPrimary,
                                 ),
                                 decoration: InputDecoration(
-                                  filled: false,
-                                  fillColor: Colors.transparent,
                                   hintText: 'Enter lots',
                                   hintStyle: AppTextStyles.label.copyWith(
                                     fontSize: 12.sp,
@@ -1775,11 +1750,9 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: AppColors.isDarkMode ? AppColors.textFieldBg : Colors.grey[50],
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(6.r),
-        border: Border.all(
-          color: AppColors.isDarkMode ? AppColors.border : Colors.grey[200]!,
-        ),
+        border: Border.all(color: AppColors.surface!),
       ),
       child: Row(
         children: [
@@ -1788,11 +1761,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
             height: 20.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.isDarkMode
-                    ? AppColors.border
-                    : Colors.grey[400]!,
-              ),
+              border: Border.all(color: AppColors.primary!),
             ),
             child: IconButton(
               onPressed: () {
@@ -1813,11 +1782,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                   _pnlCalculationKey++;
                 });
               },
-              icon: Icon(
-                Icons.remove,
-                size: 10.h,
-                color: AppColors.isDarkMode ? Colors.white : Colors.grey[600],
-              ),
+              icon: Icon(Icons.remove, size: 10.h, color: AppColors.primary),
               padding: EdgeInsets.zero,
               constraints: BoxConstraints(),
             ),
@@ -1834,8 +1799,6 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                   color: AppColors.textPrimary,
                 ),
                 decoration: InputDecoration(
-                  filled: false,
-                  fillColor: Colors.transparent,
                   border: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -2235,7 +2198,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
           ),
           // Value - only this part updates, with fixed width to prevent layout shifts
           SizedBox(
-            width: 100.w, // Fixed width to prevent layout shifts
+            width: 112.w, // Fixed width to prevent layout shifts
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               transitionBuilder: (Widget child, Animation<double> animation) {

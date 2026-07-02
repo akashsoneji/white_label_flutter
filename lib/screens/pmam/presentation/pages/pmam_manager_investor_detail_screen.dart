@@ -432,7 +432,7 @@ class _PmamManagerInvestorDetailScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        
+
                         Text(
                           _error!,
                           style: TextStyle(
@@ -471,7 +471,7 @@ class _PmamManagerInvestorDetailScreenState
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                 
+
                                   Text(
                                     'Investment Summary',
                                     style: TextStyle(
@@ -685,4 +685,3 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
     return oldDelegate.height != height || oldDelegate.child != child;
   }
 }
-

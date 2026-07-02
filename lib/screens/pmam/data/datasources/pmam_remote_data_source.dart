@@ -25,6 +25,34 @@ class PmamRemoteDataSource {
         endpoint: 'user/pmam/manager/plans/$planId/inactivate',
       );
 
+  /// Pause a plan — POST /user/pmam/manager/plans/{id}/pause
+  /// New investor joins + new trade allocations stop; existing positions
+  /// stay open but cannot be closed while paused.
+  Future<ApiResponse> pausePlan(int planId) => _api.post(
+        endpoint: 'user/pmam/manager/plans/$planId/pause',
+      );
+
+  /// Resume a previously paused plan — POST /user/pmam/manager/plans/{id}/resume
+  Future<ApiResponse> resumePlan(int planId) => _api.post(
+        endpoint: 'user/pmam/manager/plans/$planId/resume',
+      );
+
+  /// Edit a plan (PUT) — accepts a partial map of fields; only the fields
+  /// provided are sent so the API can enforce what is editable in the
+  /// current state (e.g. while investors are active only name/strategy/risk).
+  Future<ApiResponse> updatePlan(int planId, Map<String, dynamic> body) =>
+      _api.put(endpoint: 'user/pmam/manager/plans/$planId', data: body);
+
+  /// Rich dashboard payload — hero KPIs, main chart (equity/aum/net_pnl),
+  /// investor health, plans, payouts, recent trades, alerts. [range] is one
+  /// of: today | 7d | 30d | 90d | 1y | all.
+  Future<ApiResponse> getManagerDashboardOverview({String range = '30d'}) {
+    final t = DateTime.now().millisecondsSinceEpoch;
+    return _api.get(
+      endpoint: 'user/pmam/manager/dashboard-overview?range=$range&_t=$t',
+    );
+  }
+
   Future<ApiResponse> getManagerDashboardStats() =>
       _api.get(endpoint: 'user/pmam/manager/dashboard-stats');
 
@@ -154,6 +182,43 @@ class PmamRemoteDataSource {
 
   Future<ApiResponse> getMyOpenAllocations() =>
       _api.get(endpoint: 'user/pmam/investor/my-open-allocations');
+
+  /// Public fund-manager profile (used by Explore → View Manager screen).
+  /// GET /user/pmam/managers/{managerCode}
+  Future<ApiResponse> getManagerProfile(String managerCode) {
+    final t = DateTime.now().millisecondsSinceEpoch;
+    return _api.get(
+      endpoint: 'user/pmam/managers/$managerCode?_t=$t',
+    );
+  }
+
+  /// Public open positions for a given manager + plan.
+  /// GET /user/pmam/managers/{managerCode}/open-positions?plan_id={planId}
+  Future<ApiResponse> getManagerOpenPositions({
+    required String managerCode,
+    required int planId,
+  }) {
+    final t = DateTime.now().millisecondsSinceEpoch;
+    return _api.get(
+      endpoint:
+          'user/pmam/managers/$managerCode/open-positions?plan_id=$planId&_t=$t',
+    );
+  }
+
+  /// Public trade history for a given manager + plan
+  /// (no date filter — used by the View Manager screen).
+  /// GET /user/pmam/managers/{managerCode}/trades?plan_id={planId}&per_page=9999
+  Future<ApiResponse> getManagerTradesPublic({
+    required String managerCode,
+    required int planId,
+    int perPage = 9999,
+  }) {
+    final t = DateTime.now().millisecondsSinceEpoch;
+    return _api.get(
+      endpoint:
+          'user/pmam/managers/$managerCode/trades?plan_id=$planId&per_page=$perPage&_t=$t',
+    );
+  }
 
   Future<ApiResponse> getManagerTrades({
     required String managerCode,

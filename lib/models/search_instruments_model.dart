@@ -67,9 +67,20 @@ int _parseIntFlexible(dynamic value) {
   if (value is String) {
     final t = value.trim();
     if (t.isEmpty) return 0;
-    return int.tryParse(t) ?? 0;
+    return int.tryParse(t) ?? double.tryParse(t)?.toInt() ?? 0;
   }
   return 0;
+}
+
+double _parseDoubleFlexible(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is num) return value.toDouble();
+  if (value is String) {
+    final t = value.trim();
+    if (t.isEmpty) return 0.0;
+    return double.tryParse(t) ?? 0.0;
+  }
+  return 0.0;
 }
 
 class SearchSymbol {
@@ -105,19 +116,23 @@ class SearchSymbol {
 
   factory SearchSymbol.fromJson(Map<String, dynamic> json) {
     return SearchSymbol(
-      symbolId: json['symbol_id'] ?? 0,
-      displaySymbol: json['display_symbol'] ?? '',
-      datafeedSymbol: json['datafeed_symbol'] ?? '',
-      categoryId: json['category_id'] ?? 0,
-      categoryName: json['category_name'] ?? '',
-      digits: json['digits'] ?? 0,
-      contractSize: (json['contract_size'] ?? 0.0).toDouble(),
-      isActive: json['is_active'] ?? false,
-      isSynced: json['is_synced'] ?? false,
+      symbolId: _parseIntFlexible(json['symbol_id']),
+      displaySymbol: json['display_symbol']?.toString() ?? '',
+      datafeedSymbol: json['datafeed_symbol']?.toString() ?? '',
+      categoryId: _parseIntFlexible(json['category_id']),
+      categoryName: json['category_name']?.toString() ?? '',
+      digits: _parseIntFlexible(json['digits']),
+      contractSize: _parseDoubleFlexible(json['contract_size']),
+      isActive: json['is_active'] == true,
+      isSynced: json['is_synced'] == true,
       lpProviderId: _parseIntFlexible(json['lp_provider_id']),
       groupId: _parseIntFlexible(json['group_id']),
-      spreadConfig: SpreadConfig.fromJson(json['spread_config'] ?? {}),
-      stopsLevel: json['stops_level'] ?? 0,
+      spreadConfig: SpreadConfig.fromJson(
+        (json['spread_config'] is Map<String, dynamic>)
+            ? json['spread_config'] as Map<String, dynamic>
+            : <String, dynamic>{},
+      ),
+      stopsLevel: _parseIntFlexible(json['stops_level']),
     );
   }
 }
@@ -137,10 +152,10 @@ class SpreadConfig {
 
   factory SpreadConfig.fromJson(Map<String, dynamic> json) {
     return SpreadConfig(
-      spreadDiff: (json['spread_diff'] ?? 0.0).toDouble(),
-      bidAdjustment: (json['bid_adjustment'] ?? 0.0).toDouble(),
-      askAdjustment: (json['ask_adjustment'] ?? 0.0).toDouble(),
-      source: json['source'] ?? 'none',
+      spreadDiff: _parseDoubleFlexible(json['spread_diff']),
+      bidAdjustment: _parseDoubleFlexible(json['bid_adjustment']),
+      askAdjustment: _parseDoubleFlexible(json['ask_adjustment']),
+      source: json['source']?.toString() ?? 'none',
     );
   }
 }

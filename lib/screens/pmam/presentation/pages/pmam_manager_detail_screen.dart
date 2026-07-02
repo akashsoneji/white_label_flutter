@@ -5,6 +5,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/app_select_field.dart';
 import 'package:crm_app/models/pmam_model.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
@@ -95,7 +96,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                         width: 40.w,
                         height: 4.h,
                         decoration: BoxDecoration(
-                          color: AppColors.dividerMedium,
+                          color: AppColors.border,
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
@@ -122,47 +123,30 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                         ),
                       ),
                       SizedBox(height: 8.h),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.tradeBackgroundCenterColor,
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<PmamPlan>(
-                            isExpanded: true,
-                            value: _selectedPlan,
-                            dropdownColor: AppColors.card,
-                            iconEnabledColor: AppColors.textPrimary,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: AppColors.textPrimary,
-                            ),
-                            items:
-                                _manager.plans.map((p) {
-                                  return DropdownMenuItem(
+                      AppSelectField<PmamPlan>(
+                        value: _selectedPlan,
+                        hint: 'Select a plan',
+                        sheetTitle: 'Select Plan',
+                        valueEquals: (a, b) => a.id == b.id,
+                        options:
+                            _manager.plans
+                                .map(
+                                  (p) => AppSelectOption<PmamPlan>(
                                     value: p,
-                                    child: Text(
-                                      p.planName,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                setSheetState(() {
-                                  _selectedPlan = val;
-                                  _selectedAccount = null;
-                                  _ctrl.loadEligibleAccounts(val.id);
-                                });
-                                setState(() {});
-                              }
-                            },
-                          ),
-                        ),
+                                    title: p.planName,
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setSheetState(() {
+                              _selectedPlan = val;
+                              _selectedAccount = null;
+                              _ctrl.loadEligibleAccounts(val.id);
+                            });
+                            setState(() {});
+                          }
+                        },
                       ),
                       SizedBox(height: 16.h),
                     ],
@@ -188,63 +172,36 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                           ),
                         );
                       }
-                      return Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.tradeBackgroundCenterColor,
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<Map<String, dynamic>>(
-                            isExpanded: true,
-                            value: _selectedAccount,
-                            dropdownColor: AppColors.card,
-                            iconEnabledColor: AppColors.textPrimary,
-                            iconDisabledColor: AppColors.textGrey,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              color: AppColors.textPrimary,
-                            ),
-                            hint: Text(
-                              'Choose an account',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: AppColors.textGrey,
-                              ),
-                            ),
-                            items:
-                                _ctrl.eligibleAccounts.map((acc) {
-                                  final accNo =
-                                      acc['meta_account_number'] ?? '-';
-                                  final bal =
-                                      double.tryParse(
-                                        acc['balance']?.toString() ?? '0',
-                                      ) ??
-                                      0;
-                                  final availBal =
-                                      double.tryParse(
-                                        acc['available_balance']?.toString() ??
-                                            '0',
-                                      ) ??
-                                      0;
-                                  return DropdownMenuItem(
-                                    value: acc,
-                                    child: Text(
-                                      '$accNo — Balance: \$${bal.toStringAsFixed(2)} (Available: \$${availBal.toStringAsFixed(2)})',
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                }).toList(),
-                            onChanged: (val) {
-                              setSheetState(() => _selectedAccount = val);
-                            },
-                          ),
-                        ),
+                      return AppSelectField<Map<String, dynamic>>(
+                        value: _selectedAccount,
+                        hint: 'Choose an account',
+                        sheetTitle: 'Select Trading Account',
+                        valueEquals: (a, b) => a['id'] == b['id'],
+                        options:
+                            _ctrl.eligibleAccounts.map((acc) {
+                              final accNo =
+                                  acc['meta_account_number']?.toString() ?? '-';
+                              final bal =
+                                  double.tryParse(
+                                    acc['balance']?.toString() ?? '0',
+                                  ) ??
+                                  0;
+                              final availBal =
+                                  double.tryParse(
+                                    acc['available_balance']?.toString() ?? '0',
+                                  ) ??
+                                  0;
+                              return AppSelectOption<Map<String, dynamic>>(
+                                value: acc,
+                                title:
+                                    '$accNo — Balance: \$${bal.toStringAsFixed(2)}',
+                                subtitle:
+                                    'Available: \$${availBal.toStringAsFixed(2)}',
+                              );
+                            }).toList(),
+                        onChanged: (val) {
+                          setSheetState(() => _selectedAccount = val);
+                        },
                       );
                     }),
                     SizedBox(height: 20.h),
@@ -301,7 +258,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                                       color:
                                           isBalanceEnough
                                               ? AppColors.green
-                                              : AppColors.red,
+                                              : AppColors.error,
                                     ),
                                   ),
                                 ],
@@ -318,7 +275,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                           'Insufficient balance for this plan.',
                           style: TextStyle(
                             fontSize: 11.sp,
-                            color: AppColors.red,
+                            color: AppColors.error,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -402,7 +359,9 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        leading: const AppBackButton(),
+        leading: AppBackButton(
+          onPressed: () => Get.back(closeOverlays: true),
+        ),
         title: Text('Manager Detail', style: AppTextStyles.heading),
         centerTitle: true,
       ),
@@ -418,7 +377,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: AppColors.border.withValues(alpha: 0.06),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -521,10 +480,10 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                         vertical: 12.h,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.warning.withOpacity(0.10),
+                        color: AppColors.warning.withValues(alpha: 0.10),
                         borderRadius: BorderRadius.circular(12.r),
                         border: Border.all(
-                          color: AppColors.warning.withOpacity(0.35),
+                          color: AppColors.warning.withValues(alpha: 0.35),
                         ),
                       ),
                       child: Row(
@@ -562,39 +521,39 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
 
             // Use the selected plan for displaying detailed stats if needed,
             // but usually aum/investors are manager-level in PMAM context.
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Wrap(
-                children: [
-                  _DetailStatCard(
-                    label: 'GAIN',
-                    value: '${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(2)}%',
-                    icon: Icons.trending_up_rounded,
-                    color: gain >= 0 ? AppColors.green : AppColors.red,
-                  ),
-                  SizedBox(width: 8.w),
-                  _DetailStatCard(
-                    label: 'TOTAL AUM',
-                    value: aum,
-                    icon: Icons.account_balance_wallet_rounded,
-                  ),
-                  SizedBox(width: 8.w),
-                  _DetailStatCard(
-                    label: 'INVESTORS',
-                    value: investors,
-                    icon: Icons.people_rounded,
-                  ),
-                  SizedBox(width: 8.w),
-                  _DetailStatCard(
-                    label: 'COMMISSION',
-                    value: commission,
-                    icon: Icons.percent_rounded,
-                    color: AppColors.primary,
-                  ),
-                ],
-              ),
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 6.h,
+              crossAxisSpacing: 6.w,
+              childAspectRatio: 2.5,
+              children: [
+                _DetailStatCard(
+                  label: 'GAIN',
+                  value: '${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(2)}%',
+                  icon: Icons.trending_up_rounded,
+                  color: gain >= 0 ? AppColors.green : AppColors.error,
+                ),
+                _DetailStatCard(
+                  label: 'TOTAL AUM',
+                  value: aum,
+                  icon: Icons.account_balance_wallet_rounded,
+                ),
+                _DetailStatCard(
+                  label: 'INVESTORS',
+                  value: investors,
+                  icon: Icons.people_rounded,
+                ),
+                _DetailStatCard(
+                  label: 'COMMISSION',
+                  value: commission,
+                  icon: Icons.percent_rounded,
+                  color: AppColors.primary,
+                ),
+              ],
             ),
-            SizedBox(height: 14.h),
+            SizedBox(height: 4.h),
 
             // Plan Details card
             if (_selectedPlan != null)
@@ -606,7 +565,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                   borderRadius: BorderRadius.circular(14.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: AppColors.border.withValues(alpha: 0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -725,7 +684,7 @@ class _DetailStatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.border.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -735,24 +694,35 @@ class _DetailStatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: c, size: 18.sp),
-          SizedBox(height: 6.h),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w700,
-              color: c,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 9.sp,
-              color: AppColors.textGrey,
-              letterSpacing: 0.5,
-            ),
+          Row(
+            children: [
+              Icon(icon, color: c, size: 18.sp),
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                        color: c,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 9.sp,
+                        color: AppColors.textGrey,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

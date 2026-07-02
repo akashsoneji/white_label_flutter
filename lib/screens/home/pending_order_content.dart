@@ -29,6 +29,7 @@ class PendingOrderContent extends StatefulWidget {
   final TextEditingController takeProfitController;
   final TextEditingController stopLossController;
   final TextEditingController limitPriceController;
+  final TextEditingController? openPriceController;
   final VoidCallback onPlaceOrder;
   final String selectedSymbol;
   final bool isLoading;
@@ -49,6 +50,7 @@ class PendingOrderContent extends StatefulWidget {
     required this.takeProfitController,
     required this.stopLossController,
     required this.limitPriceController,
+    this.openPriceController,
     required this.onPlaceOrder,
     required this.selectedSymbol,
     this.isLoading = false,

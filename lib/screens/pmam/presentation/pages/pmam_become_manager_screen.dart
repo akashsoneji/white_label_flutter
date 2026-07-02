@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
-import 'package:crm_app/widgets/custom_toast.dart';
 
 class PmamBecomeManagerScreen extends StatefulWidget {
   const PmamBecomeManagerScreen({super.key});
@@ -64,9 +61,12 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
 
   Future<void> _submit() async {
     if (!_emailVerified || !_mobileVerified || !_personalInfoDone) {
-      CustomToastService.showError(
-        title: 'Incomplete Profile',
-        message: 'Please complete all verification steps before applying.',
+      Get.snackbar(
+        'Incomplete Profile',
+        'Please complete all verification steps before applying.',
+        backgroundColor: AppColors.error,
+        colorText: AppColors.whiteColor,
+        snackPosition: SnackPosition.TOP,
       );
       return;
     }
@@ -78,15 +78,18 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: AppColors.tradeBackgroundCenterColor,
-        elevation: 0,
-        leading: AppBackButton(onPressed: ()=> Navigator.of(context).pop(),
-        ),
-        title: Text('Become a Manager', style: AppTextStyles.heading),
-        centerTitle: true,
-      ),
+      // appBar: AppBar(
+      //   scrolledUnderElevation: 0,
+      //   backgroundColor: AppColors.tradeBackgroundCenterColor,
+      //   elevation: 0,
+      //   leading: AppSvgBackButton(
+      //     onPressed: () => Get.back(closeOverlays: true),
+      //     iconWidth: 30.w,
+      //     iconHeight: 30.h,
+      //   ),
+      //   title: Text('Become a Manager', style: AppTextStyles.heading),
+      //   centerTitle: true,
+      // ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 16.h),
         child: Column(
@@ -109,7 +112,7 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                 ),
                 SizedBox(height: 12.h),
                 Text(
-                  'PMAM Manager Application',
+                  'PAMM Manager Application',
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
@@ -119,7 +122,7 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  'Complete all steps to become a PMAM Manager',
+                  'Complete all steps to become a PAMM Manager',
                   style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
                   textAlign: TextAlign.center,
                 ),
@@ -148,7 +151,7 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                         done: _personalInfoDone,
                       ),
                       _StepCard(
-                        label: 'PMAM Application',
+                        label: 'PAMM Application',
                         done: _pmamApplied,
                         notApplied: !_pmamApplied,
                       ),
@@ -165,6 +168,8 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                       width: 20.w,
                       height: 20.w,
                       child: Checkbox(
+                        checkColor: AppColors.whiteColor,
+                        side: BorderSide(color: AppColors.textGrey, width: 1.5),
                         value: _termsAccepted,
                         onChanged:
                             (v) => setState(() => _termsAccepted = v ?? false),
@@ -185,7 +190,7 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                           children: [
                             const TextSpan(text: 'I accept the '),
                             TextSpan(
-                              text: 'PMAM Manager Terms and Conditions',
+                              text: 'PAMM Manager Terms and Conditions',
                               style: TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
@@ -279,7 +284,7 @@ class _StepCard extends StatelessWidget {
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         border: Border.all(
-          color: done ? AppColors.primary : AppColors.stepperInactive,
+          color: done ? AppColors.primary : AppColors.neutralTrack,
           width: 1.2,
         ),
         borderRadius: BorderRadius.circular(12.r),
@@ -296,7 +301,7 @@ class _StepCard extends StatelessWidget {
                 width: 24.w,
                 height: 24.w,
                 decoration: BoxDecoration(
-                  color: done ? AppColors.primary : AppColors.stepperActive,
+                  color: done ? AppColors.primary : AppColors.neutralTrackMuted,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -322,7 +327,7 @@ class _StepCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: done ? AppColors.primary : AppColors.stepperComplete,
+                  color: done ? AppColors.primary : AppColors.neutralTrackSoft,
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Text(
