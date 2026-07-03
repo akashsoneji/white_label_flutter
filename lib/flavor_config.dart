@@ -4,11 +4,9 @@
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
 import 'clients/baazex/config.dart';
-import 'clients/vantage/config.dart';
 
 enum Flavor {
   baazex,
-  vantage,
 }
 
 class FlavorConfig {
@@ -119,29 +117,17 @@ class FlavorConfig {
       case Flavor.baazex:
         const config = BaazexConfig();
         return config.toFlavorConfig(Flavor.baazex, 'baazex');
-      case Flavor.vantage:
-        const config = VantageConfig();
-        return config.toFlavorConfig(Flavor.vantage, 'vantage');
     }
   }
 
   static bool isBaazex() => _instance?.flavor == Flavor.baazex;
   static FlavorConfig get baazex => activate(Flavor.baazex);
 
-  /// Returns true when the active flavor is Vantage itself.
-  ///
-  /// **Prefer [usesVantageUi]** for branch decisions in widgets — `isVantage`
-  /// only matches the literal Vantage flavor, while the UI tree is shared
-  /// between Vantage and every brand that inherits from it (Baazex, etc.).
   static bool isVantage() => usesVantageUi();
-  static FlavorConfig get vantage => activate(Flavor.vantage);
 
-  /// UI parent lookup: Baazex (and any future Vantage child) inherits from
-  /// Vantage, so the UI tree should use Vantage's screen files regardless
-  /// of which flavor is active.
   static bool usesVantageUi() {
     final name = (_instance?.flavor.name ?? Flavor.baazex.name).toLowerCase();
-    return const <String>{'baazex', 'vantage'}.contains(name);
+    return const <String>{'baazex'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;
