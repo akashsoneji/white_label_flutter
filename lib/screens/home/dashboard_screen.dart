@@ -25,6 +25,7 @@ import 'package:crm_app/screens/finance/presentation/pages/internal_transfer_scr
 import 'package:crm_app/screens/finance/presentation/finance_ui_scope.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_dashboard_layout.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_glass_tokens.dart';
+import 'package:crm_app/brands/celestial/celestial_theme.dart';
 import 'package:crm_app/widgets/app_svg_icon.dart';
 import 'package:crm_app/widgets/vantage/vantage_app_bar.dart';
 import 'package:crm_app/screens/wallet/view_models/wallet_controller.dart';
@@ -64,6 +65,7 @@ class DashboardScreen extends StatelessWidget {
   BoxDecoration _vantageSegmentedBarDecoration() =>
       VantageUiTokens.groupDecoration();
 
+  // ── Default (non-vantage, non-celestial) header wallet pill ────────────────
   Widget _buildWalletHeaderButton() {
     final walletCtrl = Get.isRegistered<WalletController>()
         ? Get.find<WalletController>()
@@ -122,6 +124,104 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // ── Celestial wallet pill (lighter, MT5-inspired) ─────────────────────────
+  Widget _buildCelestialWalletHeaderButton(BuildContext context) {
+    final walletCtrl = Get.isRegistered<WalletController>()
+        ? Get.find<WalletController>()
+        : Get.put(WalletController());
+
+    return Container(
+      height: 36.h,
+      decoration: BoxDecoration(
+        color: CelTheme.buyTint(context),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: CelTheme.divider(context), width: 0.6),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Get.toNamed(AppPages.WALLET),
+          borderRadius: BorderRadius.circular(18.r),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppSvgIcon(
+                  assetPath: 'assets/svg/deshboard/empty-wallet-add.svg',
+                  height: 16.h,
+                  width: 16.w,
+                  color: CelTheme.buyBlue,
+                ),
+                SizedBox(width: 6.w),
+                Obx(() {
+                  final bal = walletCtrl.balance.value;
+                  final displayBal = bal.isEmpty ? '0.00' : bal;
+                  final formattedBal = displayBal.startsWith('\$')
+                      ? displayBal
+                      : '\$$displayBal';
+                  return Text(
+                    formattedBal,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                      color: CelTheme.mainText(context),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCelestialHeaderIconButton(
+    BuildContext context, {
+    required String assetPath,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      height: 36.h,
+      width: 36.w,
+      decoration: BoxDecoration(
+        color: CelTheme.buyBlue,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: IconButton(
+        icon: AppSvgIcon(
+          assetPath: assetPath,
+          height: 18.h,
+          width: 18.w,
+          color: Colors.white,
+        ),
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  Widget _buildCelestialBackButton(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        Icons.arrow_back_ios_new_rounded,
+        color: CelTheme.mainText(context),
+        size: 18.sp,
+      ),
+      onPressed: () {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          Get.back();
+        }
+      },
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(),
+    );
+  }
+
   Widget _buildHeaderIconButton({
     required String assetPath,
     required VoidCallback onPressed,
@@ -156,6 +256,689 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // ════════════════════════════════════════════════════════════════════════
+  // CELESTIAL — REIMAGINED DASHBOARD CONTENT (MT5-inspired)
+  // ════════════════════════════════════════════════════════════════════════
+
+  Widget _buildCelestialDashboardContent(BuildContext context) {
+    return Container(
+      color: CelTheme.bg(context),
+      child: Obx(() {
+        final isEmpty = controller.mt5Accounts.isEmpty;
+        return Stack(
+          children: [
+            AnimatedOpacity(
+              opacity: controller.isBottomSheetOpen.value ? 0.3 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: CustomScrollView(
+                cacheExtent: 500,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  if (isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _buildCelestialEmptyState(context),
+                    )
+                  else
+                    SliverPadding(
+                      padding: EdgeInsets.only(
+                        left: 16.w,
+                        right: 16.w,
+                        top: 8.h,
+                        bottom:
+                            16 +
+                            77.h +
+                            MediaQuery.of(context).padding.bottom,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((
+                          context,
+                          index,
+                        ) {
+                          final account = controller.mt5Accounts[index];
+                          return Container(
+                            margin: EdgeInsets.only(bottom: 14.h),
+                            child: _buildCelestialAccountCard(
+                              context,
+                              account,
+                            ),
+                          );
+                        }, childCount: controller.mt5Accounts.length),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (controller.isLoadingMT5Accounts.value)
+              Center(
+                child: CommonLoadingWidget(
+                  isFullScreen: true,
+                  color: CelTheme.buyBlue,
+                ),
+              ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildCelestialEmptyState(BuildContext context) {
+    final languageService = Get.find<LanguageService>();
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 16.h),
+          decoration: BoxDecoration(
+            color: CelTheme.card(context),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: CelTheme.divider(context), width: 0.6),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Compact icon — small square chip, not a giant circle
+              Container(
+                width: 44.w,
+                height: 44.w,
+                decoration: BoxDecoration(
+                  color: CelTheme.buyTint(context),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  Icons.account_balance_wallet_outlined,
+                  color: CelTheme.buyBlue,
+                  size: 22.sp,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                languageService.tr('dashboard_new_account_title'),
+                style: TextStyle(
+                  color: CelTheme.headerText(context),
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                languageService.tr('dashboard_new_account_description'),
+                style: TextStyle(
+                  color: CelTheme.subText(context),
+                  fontSize: 11.sp,
+                  height: 1.35,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 14.h),
+              // Two CTAs side by side (compact, equal width)
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 38.h,
+                      child: OutlinedButton(
+                        onPressed: controller.openRealAccount,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: CelTheme.buyBlue,
+                            width: 1,
+                          ),
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: Text(
+                          languageService.tr('dashboard_open_real_account'),
+                          style: TextStyle(
+                            color: CelTheme.buyBlue,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: SizedBox(
+                      height: 38.h,
+                      child: ElevatedButton(
+                        onPressed: controller.openDemoAccount,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CelTheme.buyBlue,
+                          elevation: 0,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: Text(
+                          languageService.tr('dashboard_open_demo_account'),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCelestialAccountCard(
+    BuildContext context,
+    MT5Account account,
+  ) {
+    final dashboardController = Get.find<DashboardController>();
+    final languageService = Get.find<LanguageService>();
+
+    return Obx(() {
+      final accountInfo = dashboardController.getAccountInfo(
+        account.metaAccountNumber,
+      );
+
+      final balance = accountInfo != null
+          ? accountInfo.balance
+          : double.tryParse(account.balance.toString()) ?? 0;
+      final equity = accountInfo != null
+          ? accountInfo.equity
+          : double.tryParse(account.equity.toString()) ?? 0;
+      final margin =
+          accountInfo != null
+              ? accountInfo.margin
+              : (double.tryParse(account.margin.toString()) ?? 0);
+      final marginFree =
+          accountInfo != null
+              ? accountInfo.marginFree
+              : (double.tryParse(account.freeMargin.toString()) ?? 0);
+      final pnl = accountInfo?.profit ?? 0;
+
+      final isLive = account.accountType.toLowerCase() == 'live';
+      final accentColor = isLive
+          ? CelTheme.sell(context)
+          : CelTheme.buyBlue;
+      final accentTint = isLive
+          ? CelTheme.pillBg(context)
+          : CelTheme.buyTint(context);
+
+      return Container(
+        decoration: BoxDecoration(
+          color: CelTheme.card(context),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: CelTheme.divider(context),
+            width: 0.6,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Top row: account# + LIVE/DEMO pill + actions (compact) ───────────
+            Padding(
+              padding: EdgeInsets.fromLTRB(12.w, 10.h, 6.w, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            account.metaAccountNumber,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: CelTheme.headerText(context),
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 6.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 6.w,
+                            vertical: 1.5.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: accentTint,
+                            borderRadius: BorderRadius.circular(999.r),
+                          ),
+                          child: Text(
+                            account.accountType.capitalizeFirst ?? '',
+                            style: TextStyle(
+                              color: accentColor,
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                        if (account.masterGroupId.toLowerCase() ==
+                            'scratchcard') ...[
+                          SizedBox(width: 4.w),
+                          BrandLogo(
+                            source: 'assets/svg/more/scratch.svg',
+                            height: 14,
+                            width: 14,
+                            color: accentColor,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => _showAccountInfoBottomSheet(account),
+                    borderRadius: BorderRadius.circular(6.r),
+                    child: Padding(
+                      padding: EdgeInsets.all(6.w),
+                      child: Icon(
+                        Icons.info_outline_rounded,
+                        color: CelTheme.subText(context),
+                        size: 16.sp,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => _showAccountMenuBottomSheet(account),
+                    borderRadius: BorderRadius.circular(6.r),
+                    child: Padding(
+                      padding: EdgeInsets.all(6.w),
+                      child: Icon(
+                        Icons.more_vert_rounded,
+                        color: CelTheme.subText(context),
+                        size: 16.sp,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Compact balance + P/L pill (single row) ───────────────────
+            Padding(
+              padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        languageService.tr('dashboard_balance'),
+                        style: TextStyle(
+                          color: CelTheme.subText(context),
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        '\$${balance.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: CelTheme.mainText(context),
+                          fontSize: 19.sp,
+                          fontWeight: FontWeight.w800,
+                          height: 1.15,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Spacer(),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: pnl >= 0
+                          ? CelTheme.tpGreen.withOpacity(0.10)
+                          : CelTheme.slRed.withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          pnl >= 0
+                              ? Icons.arrow_drop_up_rounded
+                              : Icons.arrow_drop_down_rounded,
+                          color: pnl >= 0 ? CelTheme.tpGreen : CelTheme.slRed,
+                          size: 16.sp,
+                        ),
+                        Text(
+                          '${pnl >= 0 ? '+' : '-'}\$${pnl.abs().toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: pnl >= 0
+                                ? CelTheme.tpGreen
+                                : CelTheme.slRed,
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 3-col compact stat strip
+            Padding(
+              padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 0),
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 8.h,
+                ),
+                decoration: BoxDecoration(
+                  color: CelTheme.buyTint(context).withOpacity(0.45),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _buildCelestialMiniStat(
+                        context,
+                        label: languageService.tr('dashboard_equity'),
+                        value: '\$${equity.toStringAsFixed(2)}',
+                      ),
+                    ),
+                    _buildCelestialVDivider(context),
+                    Expanded(
+                      child: _buildCelestialMiniStat(
+                        context,
+                        label: languageService.tr('trade_metric_margin'),
+                        value: '\$${margin.toStringAsFixed(2)}',
+                      ),
+                    ),
+                    _buildCelestialVDivider(context),
+                    Expanded(
+                      child: _buildCelestialMiniStat(
+                        context,
+                        label: languageService.tr('trade_metric_free_margin'),
+                        value: '\$${marginFree.toStringAsFixed(2)}',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Server meta
+            Padding(
+              padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.dns_outlined,
+                    color: CelTheme.subText(context),
+                    size: 11.sp,
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    '${account.tradingServer.capitalizeFirst} • ${account.masterGroupId}',
+                    style: TextStyle(
+                      color: CelTheme.subText(context),
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 10.h),
+
+            // ── Action row: Trade | Deposit | Withdraw/Settings ──────────
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              child: Row(
+                children: [
+                  // Trade — square icon button
+                  _buildCelestialIconAction(
+                    context,
+                    icon: Icons.candlestick_chart_outlined,
+                    color: CelTheme.buyBlue,
+                    onTap: () async {
+                      final accountController =
+                          Get.find<AccountController>();
+                      await accountController.setActiveMT5Account(
+                        account.metaAccountNumber,
+                      );
+                      if (onNavigateToTab != null) {
+                        onNavigateToTab!(
+                          FlavorConfig.isVantage() ? 1 : 2,
+                        );
+                      }
+                    },
+                  ),
+                  SizedBox(width: 8.w),
+                  // Deposit
+                  Expanded(
+                    child: _buildCelestialFilledAction(
+                      context,
+                      label: languageService.tr('dashboard_deposit'),
+                      color: CelTheme.tpGreen,
+                      onTap: () {
+                        if (account.accountType.toLowerCase() == 'live') {
+                          controller.onDepositRealAccount(
+                            account.metaAccountNumber,
+                          );
+                        } else {
+                          controller.onDeposit(account.metaAccountNumber);
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  // Withdraw / Settings
+                  Expanded(
+                    child: _buildCelestialFilledAction(
+                      context,
+                      label:
+                          account.accountType.toLowerCase() == 'live'
+                          ? languageService.tr('dashboard_withdraw')
+                          : languageService.tr('more_settings'),
+                      color: isLive ? CelTheme.sellRed : CelTheme.buyBlue,
+                      onTap: () {
+                        if (account.accountType.toLowerCase() == 'live') {
+                          controller.onWithdraw(
+                            account.metaAccountNumber,
+                          );
+                        } else {
+                          controller.onSettings(
+                            account.metaAccountNumber,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Switch to Trade (only non-primary) ──────────────────────
+            if (!account.isPrimaryAccount) ...[
+              SizedBox(height: 12.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14.w),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 38.h,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      final accountController =
+                          Get.find<AccountController>();
+                      accountController
+                          .setActiveMT5Account(account.metaAccountNumber)
+                          .catchError((e) {
+                            if (kDebugMode) {
+                              print('Account switch failed: $e');
+                            }
+                          });
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: CelTheme.buyBlue,
+                        width: 1,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.swap_horiz_rounded,
+                          size: 16.sp,
+                          color: CelTheme.buyBlue,
+                        ),
+                        SizedBox(width: 6.w),
+                        Text(
+                          languageService.tr('dashboard_switch_to_trade'),
+                          style: TextStyle(
+                            color: CelTheme.buyBlue,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
+            SizedBox(height: 14.h),
+          ],
+        ),
+      );
+    });
+  }
+
+  // Celestial compact helper: mini stat cell
+  Widget _buildCelestialMiniStat(
+    BuildContext context, {
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          label.toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: CelTheme.subText(context),
+            fontSize: 8.sp,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          ),
+        ),
+        SizedBox(height: 2.h),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: CelTheme.mainText(context),
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Celestial compact helper: thin vertical divider
+  Widget _buildCelestialVDivider(BuildContext context) {
+    return Container(
+      width: 0.6,
+      height: 22.h,
+      margin: EdgeInsets.symmetric(horizontal: 6.w),
+      color: CelTheme.divider(context).withOpacity(0.7),
+    );
+  }
+
+  // ── Celestial helper: square icon action (Trade) ────────────────────────
+  Widget _buildCelestialIconAction(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10.r),
+      child: Container(
+        width: 44.h,
+        height: 44.h,
+        decoration: BoxDecoration(
+          color: CelTheme.buyTint(context),
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(
+            color: CelTheme.divider(context),
+            width: 0.6,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Icon(icon, color: color, size: 20.sp),
+      ),
+    );
+  }
+
+  // ── Celestial helper: solid filled action (Deposit / Withdraw) ───────────
+  Widget _buildCelestialFilledAction(
+    BuildContext context, {
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: color,
+      borderRadius: BorderRadius.circular(10.r),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10.r),
+        child: Container(
+          height: 44.h,
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // DEFAULT (non-Celestial) DASHBOARD CONTENT — unchanged behavior
+  // ════════════════════════════════════════════════════════════════════════
+
   Widget _buildDashboardContent(
     BuildContext context, {
     required bool includeLoadingOverlay,
@@ -176,28 +959,10 @@ class DashboardScreen extends StatelessWidget {
                 cacheExtent: 500,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  if (isVantage)
-                    SliverAppBar(
-                      pinned: true,
-                      floating: false,
-                      backgroundColor: Colors.transparent,
-                      surfaceTintColor: Colors.transparent,
-                      elevation: 0,
-                      scrolledUnderElevation: 0,
-                      automaticallyImplyLeading: false,
-                      title: null,
-                      centerTitle: true,
-                      toolbarHeight: 56.h,
-                      actions: [
-                        _buildWalletHeaderButton(),
-                        SizedBox(width: 8.w),
-                        _buildHeaderIconButton(
-                          assetPath: 'assets/svg/deshboard/add-square.svg',
-                          onPressed: controller.showOpenAccountSheet,
-                          margin: EdgeInsets.only(right: 16.w),
-                        ),
-                      ],
-                    ),
+                  // Vantage renders its AppBar via the parent scaffold
+                  // (VantageDashboardLayout). Celestial renders a single
+                  // AppBar in this build() method (see below), so no inner
+                  // sliver AppBar is needed for either.
 
                   if (isEmpty)
                     SliverFillRemaining(
@@ -212,7 +977,9 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           constraints: const BoxConstraints(maxWidth: 520),
                           decoration:
-                              isVantage ? _vantageGlassCardDecoration() : null,
+                              isVantage
+                              ? _vantageGlassCardDecoration()
+                              : null,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -227,7 +994,9 @@ class DashboardScreen extends StatelessWidget {
                                   width: 96.w,
                                 ),
                                 builder: (context, snapshot) {
-                                  if (snapshot.hasData) return snapshot.data!;
+                                  if (snapshot.hasData) {
+                                    return snapshot.data!;
+                                  }
                                   return SizedBox(height: 96.h, width: 96.w);
                                 },
                               ),
@@ -253,9 +1022,13 @@ class DashboardScreen extends StatelessWidget {
                                 width: 333.w,
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
-                                    side: BorderSide(color: AppColors.primary),
+                                    side: BorderSide(
+                                      color: AppColors.primary,
+                                    ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12.r),
+                                      borderRadius: BorderRadius.circular(
+                                        12.r,
+                                      ),
                                     ),
                                   ),
                                   onPressed: controller.openRealAccount,
@@ -264,7 +1037,9 @@ class DashboardScreen extends StatelessWidget {
                                       'dashboard_open_real_account',
                                     ),
                                     style: AppTextStyles.black14600h1_71
-                                        .copyWith(color: AppColors.primary),
+                                        .copyWith(
+                                          color: AppColors.primary,
+                                        ),
                                   ),
                                 ),
                               ),
@@ -279,7 +1054,9 @@ class DashboardScreen extends StatelessWidget {
                                       color: AppColors.backgroundLight,
                                     ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12.r),
+                                      borderRadius: BorderRadius.circular(
+                                        12.r,
+                                      ),
                                     ),
                                   ),
                                   onPressed: controller.openDemoAccount,
@@ -288,7 +1065,9 @@ class DashboardScreen extends StatelessWidget {
                                       'dashboard_open_demo_account',
                                     ),
                                     style: AppTextStyles.black14600h1_71
-                                        .copyWith(color: AppColors.whiteColor),
+                                        .copyWith(
+                                          color: AppColors.whiteColor,
+                                        ),
                                   ),
                                 ),
                               ),
@@ -309,7 +1088,10 @@ class DashboardScreen extends StatelessWidget {
                             MediaQuery.of(context).padding.bottom,
                       ),
                       sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
+                        delegate: SliverChildBuilderDelegate((
+                          context,
+                          index,
+                        ) {
                           final account = controller.mt5Accounts[index];
                           return Container(
                             margin: EdgeInsets.only(bottom: 16),
@@ -321,7 +1103,8 @@ class DashboardScreen extends StatelessWidget {
                 ],
               ),
             ),
-            if (includeLoadingOverlay && controller.isLoadingMT5Accounts.value)
+            if (includeLoadingOverlay &&
+                controller.isLoadingMT5Accounts.value)
               Center(child: CommonLoadingWidget(isFullScreen: true)),
           ],
         );
@@ -333,6 +1116,7 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final languageService = Get.find<LanguageService>();
     final isVantage = FlavorConfig.isVantage();
+    final isCelestial = FlavorConfig.isCelestial();
     // ✅ FIX: Ensure WebSocket is initialized and always refresh accounts when Dashboard appears
     // This works for Get.back, Get.offAll, and bottom navigation
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -373,6 +1157,40 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ],
             )
+            : isCelestial
+            ? AppBar(
+              scrolledUnderElevation: 0,
+              backgroundColor: CelTheme.bg(context),
+              elevation: 0,
+              surfaceTintColor: Colors.transparent,
+              automaticallyImplyLeading: false,
+              // Custom back + title, matching Celestial chart/history screens
+              titleSpacing: 0,
+              leading: _buildCelestialBackButton(context),
+              leadingWidth: 44.w,
+              centerTitle: false,
+              title: Padding(
+                padding: EdgeInsets.only(left: 4.w),
+                child: Text(
+                  languageService.tr('dashboard_title'),
+                  style: TextStyle(
+                    color: CelTheme.headerText(context),
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              actions: [
+                _buildCelestialWalletHeaderButton(context),
+                SizedBox(width: 8.w),
+                _buildCelestialHeaderIconButton(
+                  context,
+                  assetPath: 'assets/svg/deshboard/add-square.svg',
+                  onPressed: controller.showOpenAccountSheet,
+                ),
+                SizedBox(width: 12.w),
+              ],
+            )
             : AppBar(
               scrolledUnderElevation: 0,
               backgroundColor: AppColors.tradeBackgroundCenterColor,
@@ -394,6 +1212,23 @@ class DashboardScreen extends StatelessWidget {
               ],
             );
 
+    // ── Celestial full-screen scaffold ───────────────────────────────────
+    if (isCelestial) {
+      return Scaffold(
+        backgroundColor: CelTheme.bg(context),
+        appBar: appBar,
+        // No outer Obx here — _buildCelestialDashboardContent owns its own
+        // reactive scope. Wrapping RefreshIndicator in an empty Obx
+        // triggers GetX "improper use" error.
+        body: RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: CelTheme.buyBlue,
+          backgroundColor: CelTheme.card(context),
+          child: _buildCelestialDashboardContent(context),
+        ),
+      );
+    }
+
     // Vantage-only wrapper: keeps entry screen logic, moves layout shell to a brand file.
     if (isVantage) {
       return Obx(
@@ -408,7 +1243,10 @@ class DashboardScreen extends StatelessWidget {
               controller.isLoadingMT5Accounts.value
                   ? Center(child: CommonLoadingWidget(isFullScreen: true))
                   : null,
-          child: _buildDashboardContent(context, includeLoadingOverlay: false),
+          child: _buildDashboardContent(
+            context,
+            includeLoadingOverlay: false,
+          ),
         ),
       );
     }
@@ -420,7 +1258,10 @@ class DashboardScreen extends StatelessWidget {
       body: Obx(
         () => RefreshIndicator(
           onRefresh: _onRefresh,
-          child: _buildDashboardContent(context, includeLoadingOverlay: true),
+          child: _buildDashboardContent(
+            context,
+            includeLoadingOverlay: true,
+          ),
         ),
       ),
     );
@@ -464,18 +1305,18 @@ class DashboardScreen extends StatelessWidget {
       padding: EdgeInsets.all(isVantage ? 14 : 12),
       decoration:
           isVantage
-              ? VantageUiTokens.cardDecoration()
-              : BoxDecoration(
-                color: AppColors.card,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.divider.withOpacity(0.5),
-                    blurRadius: 10,
-                    offset: Offset(0, 2),
-                  ),
-                ],
+          ? VantageUiTokens.cardDecoration()
+          : BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.divider.withOpacity(0.5),
+                blurRadius: 10,
+                offset: Offset(0, 2),
               ),
+            ],
+          ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -502,16 +1343,19 @@ class DashboardScreen extends StatelessWidget {
                     Container(
                       height: 22,
                       width: 42,
-                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
                       alignment: Alignment.center,
                       // padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color:
                             AppColors.isDarkMode
-                                ? Colors.white.withOpacity(0.12)
-                                : (account.accountType == 'live'
-                                    ? AppColors.accent
-                                    : AppColors.blue),
+                            ? Colors.white.withOpacity(0.12)
+                            : (account.accountType == 'live'
+                                ? AppColors.accent
+                                : AppColors.blue),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
@@ -519,10 +1363,9 @@ class DashboardScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color:
-                              AppColors.isDarkMode
-                                  ? Colors.white
-                                  : Colors.white,
+                          color: AppColors.isDarkMode
+                              ? Colors.white
+                              : Colors.white,
                         ),
                       ),
                     ),
@@ -603,10 +1446,12 @@ class DashboardScreen extends StatelessWidget {
                       style: TextStyle(
                         backgroundColor:
                             AppColors.isDarkMode
-                                ? Colors.white.withOpacity(0.12)
-                                : (isVantage
-                                    ? AppColors.primary.withValues(alpha: 0.10)
-                                    : AppColors.accent.withAlpha(50)),
+                            ? Colors.white.withOpacity(0.12)
+                            : (isVantage
+                                ? AppColors.primary.withValues(
+                                    alpha: 0.10,
+                                  )
+                                : AppColors.accent.withAlpha(50)),
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
                         height: 1.4,
@@ -619,8 +1464,9 @@ class DashboardScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
-                        color:
-                            isVantage ? AppColors.textGrey : AppColors.icongrey,
+                        color: isVantage
+                            ? AppColors.textGrey
+                            : AppColors.icongrey,
                         height: 1.4,
                       ),
                     ),
@@ -638,17 +1484,23 @@ class DashboardScreen extends StatelessWidget {
           isVantage
               ? Container(
                 decoration: _vantageSegmentedBarDecoration(),
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 6.h,
+                ),
                 child: Row(
                   children: [
                     InkWell(
                       onTap: () async {
-                        final accountController = Get.find<AccountController>();
+                        final accountController =
+                            Get.find<AccountController>();
                         await accountController.setActiveMT5Account(
                           account.metaAccountNumber,
                         );
                         if (onNavigateToTab != null) {
-                          onNavigateToTab!(FlavorConfig.isVantage() ? 1 : 2);
+                          onNavigateToTab!(
+                            FlavorConfig.isVantage() ? 1 : 2,
+                          );
                         }
                       },
                       borderRadius: BorderRadius.circular(12.r),
@@ -660,8 +1512,8 @@ class DashboardScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color:
                               AppColors.isDarkMode
-                                  ? AppColors.primary.withValues(alpha: 0.12)
-                                  : AppColors.cardBackGround,
+                              ? AppColors.primary.withValues(alpha: 0.12)
+                              : AppColors.cardBackGround,
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(
                             color: AppColors.border.withValues(
@@ -674,10 +1526,9 @@ class DashboardScreen extends StatelessWidget {
                               'assets/svg/bottom_navigation/candle_bold.svg',
                           height: 16.h,
                           width: 16.w,
-                          color:
-                              AppColors.isDarkMode
-                                  ? AppColors.primary
-                                  : AppColors.primary,
+                          color: AppColors.isDarkMode
+                              ? AppColors.primary
+                              : AppColors.primary,
                         ),
                       ),
                     ),
@@ -696,7 +1547,9 @@ class DashboardScreen extends StatelessWidget {
                               account.metaAccountNumber,
                             );
                           } else {
-                            controller.onDeposit(account.metaAccountNumber);
+                            controller.onDeposit(
+                              account.metaAccountNumber,
+                            );
                           }
                         },
                       ),
@@ -705,28 +1558,28 @@ class DashboardScreen extends StatelessWidget {
                     Expanded(
                       child: _buildActionButton(
                         compact: true,
-                        color:
-                            account.accountType.toLowerCase() == 'live'
-                                ? AppColors.red
-                                : AppColors.primary,
+                        color: account.accountType.toLowerCase() == 'live'
+                            ? AppColors.red
+                            : AppColors.primary,
                         isSvg: true,
-                        svg:
-                            account.accountType.toLowerCase() == 'live'
-                                ? "assets/svg/deshboard/money-send.svg"
-                                : 'assets/svg/more/settings.svg',
-                        icon:
-                            account.accountType.toLowerCase() == 'live'
-                                ? Icons.trending_down
-                                : Icons.settings,
-                        label:
-                            account.accountType.toLowerCase() == 'live'
-                                ? languageService.tr('dashboard_withdraw')
-                                : languageService.tr('more_settings'),
+                        svg: account.accountType.toLowerCase() == 'live'
+                            ? "assets/svg/deshboard/money-send.svg"
+                            : 'assets/svg/more/settings.svg',
+                        icon: account.accountType.toLowerCase() == 'live'
+                            ? Icons.trending_down
+                            : Icons.settings,
+                        label: account.accountType.toLowerCase() == 'live'
+                            ? languageService.tr('dashboard_withdraw')
+                            : languageService.tr('more_settings'),
                         onTap: () {
                           if (account.accountType.toLowerCase() == 'live') {
-                            controller.onWithdraw(account.metaAccountNumber);
+                            controller.onWithdraw(
+                              account.metaAccountNumber,
+                            );
                           } else {
-                            controller.onSettings(account.metaAccountNumber);
+                            controller.onSettings(
+                              account.metaAccountNumber,
+                            );
                           }
                         },
                       ),
@@ -766,13 +1619,16 @@ class DashboardScreen extends StatelessWidget {
                   InkWell(
                     onTap: () async {
                       // Call setActiveMT5Account which handles socket reconnection
-                      final accountController = Get.find<AccountController>();
+                      final accountController =
+                          Get.find<AccountController>();
                       await accountController.setActiveMT5Account(
                         account.metaAccountNumber,
                       );
                       // Navigate to Trade screen and update bottom navigation
                       if (onNavigateToTab != null) {
-                        onNavigateToTab!(FlavorConfig.isVantage() ? 1 : 2);
+                        onNavigateToTab!(
+                          FlavorConfig.isVantage() ? 1 : 2,
+                        );
                       }
                     },
                     borderRadius: BorderRadius.circular(5.r),
@@ -812,7 +1668,9 @@ class DashboardScreen extends StatelessWidget {
                             account.metaAccountNumber,
                           );
                         } else {
-                          controller.onDeposit(account.metaAccountNumber);
+                          controller.onDeposit(
+                            account.metaAccountNumber,
+                          );
                         }
                       },
                     ),
@@ -824,28 +1682,28 @@ class DashboardScreen extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: _buildActionButton(
-                      color:
-                          account.accountType.toLowerCase() == 'live'
-                              ? AppColors.red
-                              : AppColors.primary,
+                      color: account.accountType.toLowerCase() == 'live'
+                          ? AppColors.red
+                          : AppColors.primary,
                       isSvg: true,
-                      svg:
-                          account.accountType.toLowerCase() == 'live'
-                              ? "assets/svg/deshboard/money-send.svg"
-                              : 'assets/svg/more/settings.svg',
-                      icon:
-                          account.accountType.toLowerCase() == 'live'
-                              ? Icons.trending_down
-                              : Icons.settings,
-                      label:
-                          account.accountType.toLowerCase() == 'live'
-                              ? languageService.tr('dashboard_withdraw')
-                              : languageService.tr('more_settings'),
+                      svg: account.accountType.toLowerCase() == 'live'
+                          ? "assets/svg/deshboard/money-send.svg"
+                          : 'assets/svg/more/settings.svg',
+                      icon: account.accountType.toLowerCase() == 'live'
+                          ? Icons.trending_down
+                          : Icons.settings,
+                      label: account.accountType.toLowerCase() == 'live'
+                          ? languageService.tr('dashboard_withdraw')
+                          : languageService.tr('more_settings'),
                       onTap: () {
                         if (account.accountType.toLowerCase() == 'live') {
-                          controller.onWithdraw(account.metaAccountNumber);
+                          controller.onWithdraw(
+                            account.metaAccountNumber,
+                          );
                         } else {
-                          controller.onSettings(account.metaAccountNumber);
+                          controller.onSettings(
+                            account.metaAccountNumber,
+                          );
                         }
                       },
                     ),
@@ -902,13 +1760,12 @@ class DashboardScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
                   ),
-                  padding:
-                      isVantage
-                          ? EdgeInsets.symmetric(
-                            vertical: 8.h,
-                            horizontal: 12.w,
-                          )
-                          : null,
+                  padding: isVantage
+                      ? EdgeInsets.symmetric(
+                          vertical: 8.h,
+                          horizontal: 12.w,
+                        )
+                      : null,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -953,19 +1810,17 @@ class DashboardScreen extends StatelessWidget {
         final screenWidth = MediaQuery.of(context).size.width;
         // Calculate responsive font size based on screen width
         // Small devices (< 400px): 11sp, Medium (400-600px): 12sp, Large (> 600px): 13sp
-        final double baseFontSize =
-            screenWidth < 400
-                ? 11.sp
-                : screenWidth < 600
-                ? 12.sp
-                : 13.sp;
+        final double baseFontSize = screenWidth < 400
+            ? 11.sp
+            : screenWidth < 600
+            ? 12.sp
+            : 13.sp;
         final double fontSize =
             compact ? (baseFontSize - 2).clamp(9.5, 11.0) : baseFontSize;
         final double iconSize = compact ? 13.sp : 16.sp;
-        final EdgeInsets padding =
-            compact
-                ? EdgeInsets.symmetric(vertical: 6.h, horizontal: 6.w)
-                : EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w);
+        final EdgeInsets padding = compact
+            ? EdgeInsets.symmetric(vertical: 6.h, horizontal: 6.w)
+            : EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w);
 
         final bool isDarkMode = AppColors.isDarkMode;
         final Color buttonBgColor =
@@ -975,7 +1830,9 @@ class DashboardScreen extends StatelessWidget {
         return GestureDetector(
           onTap: onTap,
           child: Container(
-            constraints: BoxConstraints(minHeight: compact ? 30.h : 40.h),
+            constraints: BoxConstraints(
+              minHeight: compact ? 30.h : 40.h,
+            ),
             padding: padding,
             decoration: BoxDecoration(
               color: buttonBgColor,
@@ -987,11 +1844,11 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 (isSvg == true)
                     ? AppSvgIcon(
-                      assetPath: svg!,
-                      height: compact ? 13.h : 16.h,
-                      width: compact ? 13.w : 16.w,
-                      color: textAndIconColor,
-                    )
+                        assetPath: svg!,
+                        height: compact ? 13.h : 16.h,
+                        width: compact ? 13.w : 16.w,
+                        color: textAndIconColor,
+                      )
                     : Icon(icon, color: textAndIconColor, size: iconSize),
                 SizedBox(width: 4.w),
                 Flexible(
@@ -1014,6 +1871,62 @@ class DashboardScreen extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+// ─── Celestial helper: divider line between detail rows ─────────────────────
+class _CelestialDivider extends StatelessWidget {
+  final BuildContext context;
+  const _CelestialDivider({required this.context});
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(
+      height: 1,
+      thickness: 0.5,
+      color: CelTheme.divider(context).withOpacity(0.6),
+    );
+  }
+}
+
+// ─── Celestial helper: detail row (label : value, MT5-like) ────────────────
+class _CelestialDetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final BuildContext context;
+
+  const _CelestialDetailRow({
+    required this.label,
+    required this.value,
+    required this.context,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext _) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: CelTheme.subText(context),
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: valueColor ?? CelTheme.mainText(context),
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
   }
 }
 
@@ -1088,12 +2001,11 @@ class AccountInfoBottomSheet extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color:
-                                AppColors.isDarkMode
-                                    ? Colors.white.withOpacity(0.12)
-                                    : (account.accountType == 'live'
-                                        ? AppColors.accent
-                                        : AppColors.blue),
+                            color: AppColors.isDarkMode
+                                ? Colors.white.withOpacity(0.12)
+                                : (account.accountType == 'live'
+                                    ? AppColors.accent
+                                    : AppColors.blue),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -1101,10 +2013,9 @@ class AccountInfoBottomSheet extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w600,
-                              color:
-                                  AppColors.isDarkMode
-                                      ? Colors.white
-                                      : Colors.white,
+                              color: AppColors.isDarkMode
+                                  ? Colors.white
+                                  : Colors.white,
                             ),
                           ),
                         ),
@@ -1120,10 +2031,9 @@ class AccountInfoBottomSheet extends StatelessWidget {
                               // width: 29.w,
                               padding: EdgeInsets.only(left: 4.w, right: 4.w),
                               decoration: BoxDecoration(
-                                color:
-                                    AppColors.isDarkMode
-                                        ? AppColors.primary.withOpacity(0.12)
-                                        : AppColors.accent.withAlpha(50),
+                                color: AppColors.isDarkMode
+                                    ? AppColors.primary.withOpacity(0.12)
+                                    : AppColors.accent.withAlpha(50),
                                 borderRadius: BorderRadius.circular(2.r),
                               ),
                               child: Text.rich(
@@ -1271,20 +2181,20 @@ class AccountInfoBottomSheet extends StatelessWidget {
                 SizedBox(width: 12),
                 account.accountType.toLowerCase() == 'live'
                     ? Expanded(
-                      child: _buildActionButton(
-                        isSvg: true,
-                        color: AppColors.red,
-                        svg: 'assets/svg/deshboard/money-send.svg',
-                        icon: Icons.arrow_downward,
-                        label: languageService.tr('dashboard_withdraw'),
-                        onTap: () {
-                          Get.back(closeOverlays: true);
-                          Get.find<DashboardController>().onWithdraw(
-                            account.metaAccountNumber,
-                          );
-                        },
-                      ),
-                    )
+                        child: _buildActionButton(
+                          isSvg: true,
+                          color: AppColors.red,
+                          svg: 'assets/svg/deshboard/money-send.svg',
+                          icon: Icons.arrow_downward,
+                          label: languageService.tr('dashboard_withdraw'),
+                          onTap: () {
+                            Get.back(closeOverlays: true);
+                            Get.find<DashboardController>().onWithdraw(
+                              account.metaAccountNumber,
+                            );
+                          },
+                        ),
+                      )
                     : SizedBox.shrink(),
                 SizedBox(width: 12),
                 Expanded(
@@ -1367,11 +2277,11 @@ class AccountInfoBottomSheet extends StatelessWidget {
           children: [
             (isSvg == true)
                 ? AppSvgIcon(
-                  assetPath: svg!,
-                  height: 18,
-                  width: 18,
-                  color: color,
-                )
+                    assetPath: svg!,
+                    height: 18,
+                    width: 18,
+                    color: color,
+                  )
                 : Icon(icon, size: 18, color: color),
             SizedBox(width: 6),
             Flexible(
@@ -1558,45 +2468,44 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         width: double.infinity,
                         height: 46.h,
                         child: ElevatedButton(
-                          onPressed:
-                              isLoading.value
-                                  ? null
-                                  : () async {
-                                    if (formKey.currentState!.validate()) {
-                                      isLoading.value = true;
-                                      try {
-                                        final response = await authService
-                                            .changePassword(
-                                              mt5Account:
-                                                  account.metaAccountNumber,
-                                              newPassword:
-                                                  passwordController.text
-                                                      .trim(),
-                                            );
+                          onPressed: isLoading.value
+                              ? null
+                              : () async {
+                                  if (formKey.currentState!.validate()) {
+                                    isLoading.value = true;
+                                    try {
+                                      final response = await authService
+                                          .changePassword(
+                                            mt5Account:
+                                                account.metaAccountNumber,
+                                            newPassword: passwordController
+                                                .text
+                                                .trim(),
+                                          );
 
-                                        if (response.success) {
-                                          CustomToastService.showSuccess(
-                                            message:
-                                                response.data?['message'] ??
-                                                'Password changed successfully',
-                                          );
-                                          Get.back(closeOverlays: true);
-                                        } else {
-                                          CustomToastService.showError(
-                                            message:
-                                                response.message ??
-                                                'Failed to change password',
-                                          );
-                                        }
-                                      } catch (e) {
-                                        CustomToastService.showError(
-                                          message: 'Error: $e',
+                                      if (response.success) {
+                                        CustomToastService.showSuccess(
+                                          message:
+                                              response.data?['message'] ??
+                                              'Password changed successfully',
                                         );
-                                      } finally {
-                                        isLoading.value = false;
+                                        Get.back(closeOverlays: true);
+                                      } else {
+                                        CustomToastService.showError(
+                                          message:
+                                              response.message ??
+                                              'Failed to change password',
+                                        );
                                       }
+                                    } catch (e) {
+                                      CustomToastService.showError(
+                                        message: 'Error: $e',
+                                      );
+                                    } finally {
+                                      isLoading.value = false;
                                     }
-                                  },
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             disabledBackgroundColor: AppColors.border,
@@ -1604,26 +2513,25 @@ class AccountMenuBottomSheet extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child:
-                              isLoading.value
-                                  ? SizedBox(
-                                    width: 20.w,
-                                    height: 20.h,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppColors.whiteColor,
-                                      ),
-                                    ),
-                                  )
-                                  : Text(
-                                    'Change Password',
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.whiteColor,
+                          child: isLoading.value
+                              ? SizedBox(
+                                  width: 20.w,
+                                  height: 20.h,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.whiteColor,
                                     ),
                                   ),
+                                )
+                              : Text(
+                                  'Change Password',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.whiteColor,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
