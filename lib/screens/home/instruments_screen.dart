@@ -12,7 +12,6 @@ import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
-import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart'; // ✅ ADD: For account change listener
@@ -82,6 +81,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchTextChanged);
+    _controller.markInitialScreenOpening();
 
     // Ensure the last selected symbol is loaded from secure storage
     Future.microtask(() async {
@@ -99,26 +99,21 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
     });
   }
 
+  /// Opens `ws/marketwatchv2` from this tab.
+  ///
+  /// First tab entry must hydrate the favorite instrument rows before subscribing
+  /// prices. If we only subscribe ticks here, the list stays empty until the first
+  /// tick and the UI can briefly show the empty/no-data container. Hydrating via
+  /// the controller keeps the loader visible and then shows data directly.
   Future<void> _ensureMarketWatchV2ForTab() async {
-    if (!Get.isRegistered<MarketWatchV2Service>()) return;
     final ic = _controller;
     final deadline = DateTime.now().add(const Duration(milliseconds: 400));
     while (ic.isLoadingFavorites.value && DateTime.now().isBefore(deadline)) {
       await Future<void>.delayed(const Duration(milliseconds: 16));
     }
-    final svc = Get.find<MarketWatchV2Service>();
-    final syms =
-        ic.favoriteInstruments
-            .map(MarketWatchV2Service.normalizeSymbol)
-            .where((s) => s.isNotEmpty)
-            .toSet()
-            .toList();
+
     try {
-      if (syms.isNotEmpty) {
-        await svc.subscribeSymbols(syms);
-      } else {
-        await svc.ensureAuthenticatedConnection();
-      }
+      await ic.startMarketWatchV2Only();
     } catch (_) {}
   }
 
@@ -153,9 +148,14 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
             Expanded(
               child: Obx(() {
                 final controller = _controller;
-                // Show loading indicator while WebSocket is connecting and no data yet
-                if (controller.allInstruments.isEmpty &&
-                    !controller.isConnected.value) {
+                final showInitialLoader =
+                    controller.isLoadingFavorites.value ||
+                    controller.isHydratingInstrumentCatalog.value ||
+                    (!controller.hasAttemptedInitialLoad.value &&
+                        controller.allInstruments.isEmpty);
+                // On lifecycle resume/reconnect, keep the existing list visible. Only
+                // show the full loader for first load / genuinely empty state.
+                if (showInitialLoader) {
                   return Center(
                     child: CommonLoadingWidget(
                       message: 'Loading instruments...',

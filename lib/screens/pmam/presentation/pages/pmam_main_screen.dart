@@ -1,15 +1,27 @@
-// import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
-import 'package:crm_app/routes/app_pages.dart';
-import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/screens/home/more/widgets/more_menu_widgets.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 
+import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
+import 'package:crm_app/widgets/pmam_bottom_navigation.dart';
+import 'package:crm_app/widgets/app_back_button.dart';
+import 'pmam_become_manager_screen.dart';
+import 'pmam_explore_managers_screen.dart';
+import 'pmam_investor_portal_screen.dart';
+import 'pmam_manager_dashboard_screen.dart';
+import 'pmam_manager_portal_screen.dart';
+
+/// Single entry-point for the PAMM module.
+///
+/// Hosts a bottom-navigation scaffold whose tab set depends on whether the
+/// signed-in user is an *approved* PAMM manager:
+///
+///   • Approved manager → 5 tabs
+///     Dashboard / My Plans / My Investors / Explore / My Investments
+///
+///   • Everyone else  → 3 tabs
+///     Become a Manager / Explore Fund Managers / My Investments
 class PmamMainScreen extends StatefulWidget {
   const PmamMainScreen({super.key});
 
@@ -18,322 +30,119 @@ class PmamMainScreen extends StatefulWidget {
 }
 
 class _PmamMainScreenState extends State<PmamMainScreen> {
-  late final PmamController _controller;
+  final PmamController _c = Get.put(PmamController(), permanent: true);
+
+  int _idx = 0;
+  PmamNavMode? _lastMode;
 
   @override
   void initState() {
     super.initState();
-    if (Get.isRegistered<PmamController>()) {
-      _controller = Get.find<PmamController>();
-    } else {
-      _controller = Get.put(PmamController());
-    }
-    // Always refresh status when screen opens (handles re-entry after registration)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.loadManagerStatus();
+    // Kick off the lightweight profile check so we know the manager status
+    // before deciding which tab set to show.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await _c.loadManagerStatus();
+      } catch (_) {}
     });
+  }
+
+  PmamNavMode _modeFor(String? status) =>
+      (status?.toLowerCase() == 'approved')
+          ? PmamNavMode.manager
+          : PmamNavMode.investor;
+
+  List<Widget> _pagesFor(PmamNavMode mode) {
+    if (mode == PmamNavMode.manager) {
+      return const [
+        PmamManagerDashboardScreen(),
+        // Plans tab of the manager portal.
+        PmamManagerPortalScreen(initialTab: 1, embedded: true),
+        // Investors tab of the manager portal.
+        PmamManagerPortalScreen(initialTab: 0, embedded: true),
+        PmamExploreManagersScreen(embedded: true),
+        // My Investments tab of the investor portal.
+        PmamInvestorPortalScreen(initialTab: 1, embedded: true),
+      ];
+    }
+    return const [
+      PmamBecomeManagerScreen(),
+      PmamExploreManagersScreen(embedded: true),
+      PmamInvestorPortalScreen(initialTab: 1, embedded: true),
+    ];
+  }
+
+  String _titleFor(PmamNavMode mode, int i) {
+    if (mode == PmamNavMode.manager) {
+      return const [
+        'Manager Dashboard',
+        'My Plans',
+        'My Investors',
+        'Explore Fund Managers',
+        'My Investments',
+      ][i];
+    }
+    return const [
+      'Become a Manager',
+      'Explore Fund Managers',
+      'My Investments',
+    ][i];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: AppColors.tradeBackgroundCenterColor,
-        elevation: 0,
-        leading: const AppBackButton(),
+    return Obx(() {
+      final mode = _modeFor(_c.managerStatus.value);
 
-        // leading: GestureDetector(
-        //   onTap: () => Get.back(),
-        //   child: Container(
-        //     height: 24.h,
-        //     width: 24.w,
-        //     padding: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
-        //     child: SvgPicture.asset(
-        //       'assets/svg/trade/arro_back.svg',
-        //       width: 20.w,
-        //       height: 20.h,
-        //       colorFilter: ColorFilter.mode(
-        //         AppColors.textPrimary,
-        //         BlendMode.srcIn,
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        title: Text('PAMM', style: AppTextStyles.heading),
-        centerTitle: true,
-      ),
-      body: Obx(() {
-        if (_controller.isLoading.value) {
-          return Center(
-            child: CommonLoadingWidget(size: 40, color: AppColors.primary),
-          );
-        }
-        return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 16.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header card
-              // Container(
-              //   width: double.infinity,
-              //   padding: EdgeInsets.all(16.w),
-              //   decoration: BoxDecoration(
-              //     color: AppColors.primary,
-              //     borderRadius: BorderRadius.circular(16.r),
-              //   ),
-              //   child: Row(
-              //     children: [
-              //       Container(
-              //         width: 44.w,
-              //         height: 44.w,
-              //         decoration: BoxDecoration(
-              //           color: AppColors.whiteColor.withOpacity(0.2),
-              //           shape: BoxShape.circle,
-              //         ),
-              //         child: Icon(
-              //           Icons.show_chart_rounded,
-              //           color: AppColors.whiteColor,
-              //           size: 24.sp,
-              //         ),
-              //       ),
-              //       // SizedBox(width: 12.w),
-              //       // Expanded(
-              //       //   child: Column(
-              //       //     crossAxisAlignment: CrossAxisAlignment.start,
-              //       //     children: [
-              //       //       Text(
-              //       //         'PMAM',
-              //       //         style: TextStyle(
-              //       //           color: AppColors.whiteColor,
-              //       //           fontSize: 16.sp,
-              //       //           fontWeight: FontWeight.w600,
-              //       //         ),
-              //       //       ),
-              //       //       Text(
-              //       //         'Percent Allocation Money Management',
-              //       //         style: TextStyle(
-              //       //           color: AppColors.whiteColor.withOpacity(0.85),
-              //       //           fontSize: 12.sp,
-              //       //         ),
-              //       //       ),
-              //       //     ],
-              //       //   ),
-              //       // ),
-              //     ],
-              //   ),
-              // ),
-              // SizedBox(height: 24.h),
+      // Reset the active index whenever the tab set changes so we don't end
+      // up pointing at a missing tab.
+      if (_lastMode != mode) {
+        _lastMode = mode;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() => _idx = 0);
+        });
+      }
 
-              // Manager section
-              // _buildSectionLabel('Manager'),
-              SizedBox(height: 10.h),
-              _buildManagerMenuItems(),
-              // SizedBox(height: 10.h),
+      final pages = _pagesFor(mode);
+      final safeIdx = _idx.clamp(0, pages.length - 1);
 
-              // Investor section
-              // _buildSectionLabel('Investor'),
-              // SizedBox(height: 10.h),
-              SizedBox(height: 8.h),
-              _buildInvestorMenuItems(),
-              SizedBox(height: 10.h),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _buildManagerMenuItems() {
-    final status = _controller.managerStatus.value;
-
-    if (status == 'approved') {
-      return MoreMenuCardGroup(
-        children: [
-          MoreMenuTile(
-            iconName: 'dashboard',
-            label: 'Manager Dashboard',
-            onTap: () => Get.toNamed(AppPages.PMAM_MANAGER_DASHBOARD),
-            textColor: AppColors.textPrimary,
-          ),
-          MoreMenuTile(
-            iconName: 'dashboard',
-            label: 'Manager Portal',
-            onTap: () => Get.toNamed(AppPages.PMAM_MANAGER_PORTAL),
-            textColor: AppColors.textPrimary,
-          ),
-        ],
-      );
-    }
-
-    if (status == 'pending') {
-      return Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: AppColors.warningBgLight,
-          borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: AppColors.warningBorder, width: 1.2),
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: AppColors.card,
+          elevation: 0,
+          centerTitle: false,
+          leading: AppBackButton(
+          onPressed: () => Get.back(closeOverlays: true),
         ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.schedule_rounded,
-              color: AppColors.statusYellow,
-              size: 22.sp,
+          iconTheme: IconThemeData(color: AppColors.textPrimary),
+          title: Text(
+            _titleFor(mode, safeIdx),
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Manager Application Pending',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.warningTextDark,
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    'Your application is under review by admin.',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColors.warningTextMedium,
-                    ),
-                  ),
-                ],
+          ),
+          actions: [
+            if (mode == PmamNavMode.manager)
+              IconButton(
+                tooltip: 'Refresh',
+                icon: Icon(Icons.refresh_rounded, color: AppColors.textPrimary),
+                onPressed: () => _c.loadManagerDashboard(),
               ),
-            ),
           ],
         ),
-      );
-    }
-
-    if (status == 'rejected') {
-      return Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: AppColors.errorBgLight,
-          borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(color: AppColors.red.withOpacity(0.4), width: 1.2),
+        body: IndexedStack(
+          index: safeIdx,
+          children: pages,
         ),
-        child: Row(
-          children: [
-            Icon(Icons.cancel_rounded, color: AppColors.red, size: 22.sp),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Text(
-                'Your manager application was rejected. Contact support for more info.',
-                style: TextStyle(fontSize: 13.sp, color: AppColors.red),
-              ),
-            ),
-          ],
+        bottomNavigationBar: PmamBottomNavigation(
+          currentIndex: safeIdx,
+          mode: mode,
+          onTap: (i) => setState(() => _idx = i),
         ),
       );
-    }
-
-    // Not applied
-    return MoreMenuCardGroup(
-      children: [
-        MoreMenuTile(
-          iconName: 'dashboard',
-          label: 'Become a Manager',
-          onTap: () => Get.toNamed(AppPages.PMAM_BECOME_MANAGER),
-          textColor: AppColors.textPrimary,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInvestorMenuItems() {
-    return MoreMenuCardGroup(
-      children: [
-        MoreMenuTile(
-          iconName: 'dashboard',
-          label: 'Investor Portal',
-          onTap: () => Get.toNamed(AppPages.PMAM_INVESTOR_PORTAL),
-          textColor: AppColors.textPrimary,
-        ),
-      ],
-    );
+    });
   }
 }
-
-// class _PmamMenuItem extends StatelessWidget {
-//   final IconData icon;
-//   final String label;
-//   final String subtitle;
-//   final VoidCallback onTap;
-//   final bool showBorder;
-
-//   const _PmamMenuItem({
-//     required this.icon,
-//     required this.label,
-//     required this.subtitle,
-//     required this.onTap,
-//     this.showBorder = true,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return InkWell(
-//       onTap: onTap,
-//       borderRadius: BorderRadius.circular(14.r),
-//       child: Container(
-//         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-//         decoration:
-//             showBorder
-//                 ? BoxDecoration(
-//                   border: Border(
-//                     bottom: BorderSide(color: const Color(0xFFEEEEEE)),
-//                   ),
-//                 )
-//                 : null,
-//         child: Row(
-//           children: [
-//             Container(
-//               width: 40.w,
-//               height: 40.w,
-//               decoration: BoxDecoration(
-//                 color: AppColors.primary.withOpacity(0.1),
-//                 borderRadius: BorderRadius.circular(10.r),
-//               ),
-//               child: Icon(icon, color: AppColors.primary, size: 20.sp),
-//             ),
-//             SizedBox(width: 14.w),
-//             Expanded(
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Text(
-//                     label,
-//                     style: TextStyle(
-//                       fontSize: 15.sp,
-//                       fontWeight: FontWeight.w600,
-//                       textColor: AppColors.textPrimary,
-//                     ),
-//                   ),
-//                   // SizedBox(height: 2.h),
-//                   // Text(
-//                   //   subtitle,
-//                   //   style: TextStyle(
-//                   //     fontSize: 12.sp,
-//                   //     color: AppColors.textGrey,
-//                   //   ),
-//                   // ),
-//                 ],
-//               ),
-//             ),
-//             Icon(
-//               Icons.chevron_right_rounded,
-//               color: AppColors.textGrey,
-//               size: 22.sp,
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }

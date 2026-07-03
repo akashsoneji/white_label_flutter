@@ -30,6 +30,7 @@ class FinanceUiRegistry implements FinanceUiSlots {
 
  bool get _usesVantageUi =>
  _activeClient.toLowerCase() == 'vantage' ||
+ _activeClient.toLowerCase() == 'baazex' ||
  _activeClient.toLowerCase() == 'celestial' ||
  _activeClient.toLowerCase() == 'pipze' ||
  _activeClient.toLowerCase() == 'skyriss' ||

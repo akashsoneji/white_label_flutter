@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -9,10 +11,19 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/models/pmam_model.dart';
 import 'package:crm_app/screens/pmam/presentation/pages/pmam_trade_history_screen.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/utils/app_picker_theme.dart';
 
 class PmamInvestorPortalScreen extends StatefulWidget {
-  const PmamInvestorPortalScreen({super.key});
+  const PmamInvestorPortalScreen({
+    super.key,
+    this.initialTab = 0,
+    this.embedded = false,
+  });
+
+  /// 0 = Fund Managers, 1 = My Investments.
+  final int initialTab;
+  /// When true, hides the app bar (caller provides its own).
+  final bool embedded;
 
   @override
   State<PmamInvestorPortalScreen> createState() =>
@@ -67,7 +78,11 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
   @override
   void initState() {
     super.initState();
-    _tabCtrl = TabController(length: 2, vsync: this);
+    _tabCtrl = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTab.clamp(0, 1),
+    );
     if (Get.isRegistered<PmamController>()) {
       _ctrl = Get.find<PmamController>();
     } else {
@@ -97,12 +112,16 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: AppBar(
+      backgroundColor: AppColors.background,
+      appBar: widget.embedded
+          ? null
+          : AppBar(
         scrolledUnderElevation: 0,
-        backgroundColor: AppColors.tradeBackgroundCenterColor,
+        backgroundColor: AppColors.background,
         elevation: 0,
-        leading: const AppBackButton(),
+       leading: AppBackButton(
+          onPressed: () => Get.back(closeOverlays: true),
+        ),
 
         title: Text('Investor Portal', style: AppTextStyles.heading),
         centerTitle: true,
@@ -160,7 +179,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: AppColors.border.withValues(alpha: 0.08),
                   blurRadius: 18,
                   offset: const Offset(0, 10),
                 ),
@@ -219,11 +238,11 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                     fillColor: AppColors.tradeBackgroundCenterColor,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: const BorderSide(color: AppColors.dividerLight),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
-                      borderSide: const BorderSide(color: AppColors.dividerLight),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
@@ -242,7 +261,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(ctx).pop(),
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: AppColors.dividerMedium),
+                          side: BorderSide(color: AppColors.border),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.r),
                           ),
@@ -291,9 +310,9 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   ? SizedBox(
                                     width: 18.sp,
                                     height: 18.sp,
-                                    child: const CircularProgressIndicator(
+                                    child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: Colors.white,
+                                      color: AppColors.onColoredBackground,
                                     ),
                                   )
                                   : Text(
@@ -386,8 +405,8 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
             }
 
             Future<void> pickFrom() async {
-              final picked = await showDatePicker(
-                context: ctx,
+              final picked = await AppPickerTheme.showAppDatePicker(
+                ctx,
                 initialDate: from,
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2100),
@@ -398,8 +417,8 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
             }
 
             Future<void> pickTo() async {
-              final picked = await showDatePicker(
-                context: ctx,
+              final picked = await AppPickerTheme.showAppDatePicker(
+                ctx,
                 initialDate: to,
                 firstDate: DateTime(2000),
                 lastDate: DateTime(2100),
@@ -436,7 +455,10 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                           ),
                           IconButton(
                             onPressed: () => Navigator.of(ctx).pop(),
-                            icon: const Icon(Icons.close),
+                            icon: Icon(
+                              Icons.close,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         ],
                       ),
@@ -472,7 +494,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   color: AppColors.whiteColor,
                                   borderRadius: BorderRadius.circular(10.r),
                                   border: Border.all(
-                                    color: AppColors.dividerLight,
+                                    color: AppColors.border,
                                   ),
                                 ),
                                 child: Row(
@@ -520,7 +542,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   color: AppColors.whiteColor,
                                   borderRadius: BorderRadius.circular(10.r),
                                   border: Border.all(
-                                    color: AppColors.dividerLight,
+                                    color: AppColors.border,
                                   ),
                                 ),
                                 child: Row(
@@ -603,7 +625,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   metric(
                                     'Net P&L:',
                                     '${netPos ? '+' : ''}\$${net.abs().toStringAsFixed(2)}',
-                                    netPos ? AppColors.green : AppColors.red,
+                                    netPos ? AppColors.green : AppColors.error,
                                   ),
                                 ],
                               ),
@@ -613,7 +635,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   metric(
                                     'Commission:',
                                     '${commPos ? '+' : ''}\$${comm.abs().toStringAsFixed(2)}',
-                                    commPos ? AppColors.green : AppColors.red,
+                                    commPos ? AppColors.green : AppColors.error,
                                   ),
                                   SizedBox(width: 10.w),
                                   metric(
@@ -621,7 +643,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     '${settledPos ? '+' : ''}\$${settled.abs().toStringAsFixed(2)}',
                                     settledPos
                                         ? AppColors.green
-                                        : AppColors.red,
+                                        : AppColors.error,
                                   ),
                                 ],
                               ),
@@ -640,17 +662,17 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                 width: double.infinity,
                                 padding: EdgeInsets.all(12.w),
                                 decoration: BoxDecoration(
-                                  color: AppColors.red.withOpacity(0.08),
+                                  color: AppColors.error.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(12.r),
                                   border: Border.all(
-                                    color: AppColors.red.withOpacity(0.25),
+                                    color: AppColors.error.withValues(alpha: 0.25),
                                   ),
                                 ),
                                 child: Row(
                                   children: [
                                     Icon(
                                       Icons.info_outline,
-                                      color: AppColors.red,
+                                      color: AppColors.error,
                                       size: 18.sp,
                                     ),
                                     SizedBox(width: 10.w),
@@ -659,7 +681,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                         _ctrl.errorMessage.value,
                                         style: TextStyle(
                                           fontSize: 12.sp,
-                                          color: AppColors.red,
+                                          color: AppColors.error,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -804,7 +826,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                       ),
                                       Container(
                                         height: 1,
-                                        color: AppColors.dividerLight,
+                                        color: AppColors.border,
                                       ),
                                       Expanded(
                                         child: ListView.builder(
@@ -843,16 +865,16 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                             final pnlColor =
                                                 pnlPos
                                                     ? AppColors.green
-                                                    : AppColors.red;
+                                                    : AppColors.error;
 
                                             return Container(
                                               padding: EdgeInsets.symmetric(
                                                 vertical: 10.h,
                                               ),
-                                              decoration: const BoxDecoration(
+                                              decoration: BoxDecoration(
                                                 border: Border(
                                                   bottom: BorderSide(
-                                                    color: AppColors.dividerLightAlt,
+                                                    color: AppColors.border,
                                                   ),
                                                 ),
                                               ),
@@ -896,7 +918,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                             isBuy
                                                                 ? AppColors
                                                                     .green
-                                                                : AppColors.red,
+                                                                : AppColors.error,
                                                         fontWeight:
                                                             FontWeight.w800,
                                                       ),
@@ -956,7 +978,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                             comm >= 0
                                                                 ? AppColors
                                                                     .green
-                                                                : AppColors.red,
+                                                                : AppColors.error,
                                                         fontWeight:
                                                             FontWeight.w700,
                                                       ),
@@ -1014,7 +1036,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
               borderRadius: BorderRadius.circular(12.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: AppColors.border.withValues(alpha: 0.06),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -1122,7 +1144,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                         borderRadius: BorderRadius.circular(12.r),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: AppColors.border.withValues(alpha: 0.04),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -1204,7 +1226,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   color:
                                       profitIsPos
                                           ? AppColors.green
-                                          : AppColors.red,
+                                          : AppColors.error,
                                 ),
                                 SizedBox(width: 8.w),
                                 _PerfChip(label: 'AUM', value: '\$$totalAum'),
@@ -1269,21 +1291,21 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
               width: double.infinity,
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: AppColors.red.withOpacity(0.08),
+                color: AppColors.error.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: AppColors.red.withOpacity(0.25)),
+                border: Border.all(color: AppColors.error.withValues(alpha: 0.25)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline, color: AppColors.red, size: 18.sp),
+                  Icon(Icons.info_outline, color: AppColors.error, size: 18.sp),
                   SizedBox(width: 10.w),
                   Expanded(
                     child: Text(
                       _ctrl.errorMessage.value,
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: AppColors.red,
+                        color: AppColors.error,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -1316,7 +1338,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                       value:
                           '${totalPnl >= 0 ? '+' : ''}\$${totalPnl.toStringAsFixed(2)}',
                       valueColor:
-                          totalPnl >= 0 ? AppColors.green : AppColors.red,
+                          totalPnl >= 0 ? AppColors.green : AppColors.error,
                     ),
                     SizedBox(width: gap),
                     _SummaryChip(
@@ -1395,7 +1417,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                     status == 'active'
                         ? AppColors.green
                         : status == 'pending'
-                        ? AppColors.pendingStatusDark
+                        ? AppColors.warningText
                         : AppColors.textGrey;
                 return Container(
                   padding: EdgeInsets.all(14.w),
@@ -1404,7 +1426,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                     borderRadius: BorderRadius.circular(12.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: AppColors.border.withValues(alpha: 0.04),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -1471,7 +1493,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                       _InvestmentInfoRow(
                         'Total P&L',
                         '${pnl >= 0 ? '+' : ''}\$${pnl.toStringAsFixed(2)}',
-                        valueColor: pnl >= 0 ? AppColors.green : AppColors.red,
+                        valueColor: pnl >= 0 ? AppColors.green : AppColors.error,
                       ),
                       _InvestmentInfoRow(
                         'Current Value',
@@ -1545,7 +1567,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     () => _confirmUnsubscribe(pmamInvestorId),
                                 style: OutlinedButton.styleFrom(
                                   side: BorderSide(
-                                    color: AppColors.red.withOpacity(0.5),
+                                    color: AppColors.error.withValues(alpha: 0.5),
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.r),
@@ -1555,7 +1577,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                 child: Text(
                                   'Withdraw',
                                   style: TextStyle(
-                                    color: AppColors.red,
+                                    color: AppColors.error,
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -1577,15 +1599,15 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
               borderRadius: BorderRadius.circular(12.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: AppColors.border.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: ExpansionTile(
-              collapsedIconColor:AppColors.primary,
               iconColor: AppColors.primary,
+              collapsedIconColor: AppColors.primary,
               shape: const RoundedRectangleBorder(side: BorderSide.none),
               collapsedShape: const RoundedRectangleBorder(
                 side: BorderSide.none,
@@ -1594,10 +1616,23 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                 'Fund Entries',
                 style: TextStyle(
                   fontSize: 13.sp,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
               ),
+              subtitle: fundEntries.isEmpty
+                  ? null
+                  : Padding(
+                      padding: EdgeInsets.only(top: 2.h),
+                      child: Text(
+                        '${fundEntries.length} transaction${fundEntries.length == 1 ? '' : 's'} found',
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: AppColors.textGrey,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
               children: [
                 if (fundEntries.isEmpty)
                   Padding(
@@ -1665,7 +1700,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                           final statusColor = statusLower == 'active'
                               ? AppColors.green
                               : statusLower == 'withdrawn'
-                                  ? AppColors.red
+                                  ? AppColors.error
                                   : AppColors.textGrey;
                           final date =
                               e['entry_time'] ??
@@ -1674,8 +1709,8 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                               e['open_time'];
 
                           final transactionColor =
-                              isDeposit ? AppColors.green : AppColors.red;
-                          
+                              isDeposit ? AppColors.green : AppColors.error;
+                          final prefixSign = isDeposit ? '+' : '-';
 
                           return Container(
                             margin: EdgeInsets.only(
@@ -1686,11 +1721,11 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                               color: AppColors.whiteColor,
                               borderRadius: BorderRadius.circular(14.r),
                               border: Border.all(
-                                color: AppColors.dividerLight,
+                                color: AppColors.border,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.03),
+                                  color: Colors.black.withValues(alpha: 0.03),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -1717,7 +1752,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        '$type',
+                                        '$prefixSign $type',
                                         style: TextStyle(
                                           fontSize: 13.sp,
                                           color: transactionColor,
@@ -1729,7 +1764,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           color: AppColors.textPrimary,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w900,
                                         ),
                                       ),
                                     ],
@@ -1771,7 +1806,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                           vertical: 3.h,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: statusColor.withOpacity(0.12),
+                                          color: statusColor.withValues(alpha: 0.12),
                                           borderRadius: BorderRadius.circular(20.r),
                                         ),
                                         child: Text(
@@ -1791,7 +1826,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   // Divider line
                                   Container(
                                     height: 1,
-                                    color: AppColors.dividerLight.withOpacity(0.5),
+                                    color: AppColors.border.withValues(alpha: 0.5),
                                   ),
                                   SizedBox(height: 8.h),
                                   // Row 3: Date
@@ -1847,7 +1882,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                 borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: AppColors.border.withValues(alpha: 0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -1928,7 +1963,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     decoration: BoxDecoration(
                                       color: (isBuy
                                               ? AppColors.green
-                                              : AppColors.red)
+                                              : AppColors.error)
                                           .withOpacity(0.12),
                                       borderRadius: BorderRadius.circular(20.r),
                                     ),
@@ -1940,7 +1975,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                         color:
                                             isBuy
                                                 ? AppColors.green
-                                                : AppColors.red,
+                                                : AppColors.error,
                                       ),
                                     ),
                                   ),
@@ -2044,7 +2079,7 @@ class _SummaryChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: AppColors.border.withValues(alpha: 0.04),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -2091,7 +2126,7 @@ class _SmallFilterChip extends StatelessWidget {
           color: selected ? AppColors.primary : AppColors.whiteColor,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.dividerMedium,
+            color: selected ? AppColors.primary : AppColors.border,
           ),
         ),
         child: Text(

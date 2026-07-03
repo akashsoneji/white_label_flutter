@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/models/copy_trading_dashboard_overview.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/services/api_service.dart';
 import 'package:flutter/foundation.dart';
@@ -205,11 +206,15 @@ class CopyTradingMasterPlanItem {
   final String commissionLabel;
   final num commissionPercentage;
   final num subscriptionFee;
+  final int subscriptionPeriodDays;
+  final String settlementCycle;
+  final String lastSettledAt;
   final num minimumCapital;
   final num copyRatio;
   final int? maxCopiers;
   final int activeCopiersCount;
   final num totalCapital;
+  final num roiPct;
   final bool isFull;
   final String status;
   final bool copyingPaused;
@@ -230,11 +235,15 @@ class CopyTradingMasterPlanItem {
     required this.commissionLabel,
     required this.commissionPercentage,
     required this.subscriptionFee,
+    required this.subscriptionPeriodDays,
+    required this.settlementCycle,
+    required this.lastSettledAt,
     required this.minimumCapital,
     required this.copyRatio,
     required this.maxCopiers,
     required this.activeCopiersCount,
     required this.totalCapital,
+    required this.roiPct,
     required this.isFull,
     required this.status,
     required this.copyingPaused,
@@ -246,8 +255,10 @@ class CopyTradingMasterPlanItem {
   });
 
   factory CopyTradingMasterPlanItem.fromJson(Map<String, dynamic> json) {
+    num toNum(dynamic v) => v is num ? v : num.tryParse(v?.toString() ?? '') ?? 0;
+    int toInt(dynamic v) => v is num ? v.toInt() : int.tryParse(v?.toString() ?? '') ?? 0;
     return CopyTradingMasterPlanItem(
-      id: (json['id'] ?? 0) is num ? (json['id'] as num).toInt() : 0,
+      id: toInt(json['id']),
       planName: (json['plan_name'] ?? json['name'] ?? '').toString(),
       tradingAccountNumber: (json['trading_account_number'] ?? '').toString(),
       tradingServer: (json['trading_server'] ?? '').toString(),
@@ -255,23 +266,26 @@ class CopyTradingMasterPlanItem {
       serverType: (json['server_type'] ?? '').toString(),
       commissionType: (json['commission_type'] ?? '').toString(),
       commissionLabel: (json['commission_label'] ?? '').toString(),
-      commissionPercentage: (json['commission_percentage'] ?? 0) as num? ?? 0,
-      subscriptionFee: (json['subscription_fee'] ?? 0) as num? ?? 0,
-      minimumCapital: (json['minimum_capital'] ?? 0) as num? ?? 0,
-      copyRatio: (json['copy_ratio'] ?? 1) as num? ?? 1,
-      maxCopiers: (json['max_copiers'] is num) ? (json['max_copiers'] as num).toInt() : int.tryParse((json['max_copiers'] ?? '').toString()),
-      activeCopiersCount:
-          (json['active_copiers_count'] ?? 0) is num ? (json['active_copiers_count'] as num).toInt() : 0,
-      totalCapital: (json['total_capital'] ?? json['total_aum'] ?? 0) as num? ?? 0,
+      commissionPercentage: toNum(json['commission_percentage']),
+      subscriptionFee: toNum(json['subscription_fee']),
+      subscriptionPeriodDays: toInt(json['subscription_period_days']),
+      settlementCycle: (json['settlement_cycle'] ?? '').toString(),
+      lastSettledAt: (json['last_settled_at'] ?? '').toString(),
+      minimumCapital: toNum(json['minimum_capital']),
+      copyRatio: toNum(json['copy_ratio'] ?? 1),
+      maxCopiers: json['max_copiers'] is num
+          ? (json['max_copiers'] as num).toInt()
+          : int.tryParse((json['max_copiers'] ?? '').toString()),
+      activeCopiersCount: toInt(json['active_copiers_count']),
+      totalCapital: toNum(json['total_capital'] ?? json['total_aum']),
+      roiPct: toNum(json['roi_pct']),
       isFull: json['is_full'] == true,
       status: (json['status'] ?? '').toString(),
       copyingPaused: json['copying_paused'] == true,
       copyingPausedAt: (json['copying_paused_at'] ?? '').toString(),
       strategyDescription: (json['strategy_description'] ?? '').toString(),
       riskInformation: (json['risk_information'] ?? '').toString(),
-      noFeeDays: (json['no_fee_days'] ?? 0) is num
-          ? (json['no_fee_days'] as num).toInt()
-          : (int.tryParse((json['no_fee_days'] ?? '').toString()) ?? 0),
+      noFeeDays: toInt(json['no_fee_days']),
       createdAt: (json['created_at'] ?? '').toString(),
     );
   }
@@ -354,22 +368,189 @@ class CopyTradingMasterDashboardController extends GetxController {
   final RxList<CopyTradingEligibleAccount> eligibleAccounts =
       <CopyTradingEligibleAccount>[].obs;
 
+  /// Currently selected overview time-range preset (e.g. '1m', '3m', '6m', 'all').
+  final RxString overviewRange = RxString('1m');
+
+  /// True while [loadDashboardOverview] is in-flight. Lets the overview tab
+  /// show its own spinner without interfering with the rest of the dashboard.
+  final RxBool isOverviewLoading = false.obs;
+
+  /// Default-empty overview so legacy getters on existing screens keep working.
+  /// Set to a real [CopyTradingDashboardOverview] once the backend ships the
+  /// overview endpoint.
+  final Rxn<CopyTradingDashboardOverview> overview =
+      Rxn<CopyTradingDashboardOverview>();
+
+  /// Derived metrics used by the redesigned dashboard cards.
+  CopyTradingDerivedDashboardMetrics get derivedMetrics {
+    final s = stats.value;
+    final planList = plans.toList();
+
+    int approved = 0, pending = 0, paused = 0, inactive = 0, activeCopiers = 0;
+    num totalAum = 0;
+    num roiSum = 0;
+    int roiCount = 0;
+    num commissionPctSum = 0;
+    num subscriptionFeeSum = 0;
+
+    for (final plan in planList) {
+      final status = plan.status.toLowerCase();
+      if (status == 'approved') {
+        approved++;
+      } else if (status == 'pending' ||
+          status == 'pending_admin' ||
+          status == 'pending_admin_approval' ||
+          status == 'awaiting_approval') {
+        pending++;
+      } else if (status == 'rejected' ||
+          status == 'inactive' ||
+          status == 'inactivated' ||
+          status == 'cancelled') {
+        inactive++;
+      }
+
+      if (plan.copyingPaused) paused++;
+
+      activeCopiers += plan.activeCopiersCount;
+      totalAum += plan.totalCapital;
+      if (plan.roiPct != 0) {
+        roiSum += plan.roiPct;
+        roiCount++;
+      }
+      commissionPctSum += plan.commissionPercentage;
+      subscriptionFeeSum += plan.subscriptionFee;
+    }
+
+    return CopyTradingDerivedDashboardMetrics(
+      plansCount: planList.length,
+      approvedPlansCount: approved,
+      pendingPlansCount: pending,
+      pausedPlansCount: paused,
+      inactivePlansCount: inactive,
+      activeCopiersCount: s?.activeCopiersCount ?? activeCopiers,
+      totalAum: s?.totalAum ?? totalAum,
+      averageRoiPct: roiCount > 0 ? roiSum / roiCount : 0,
+      commissionEarnedTotal: s?.commissionEarned ?? 0,
+      totalCommissionAcrossPlans: commissionPctSum,
+      totalSubscriptionFee: subscriptionFeeSum,
+    );
+  }
+
+  /// Map a chip label (Today / 7D / 30D / 90D / 1Y / All) to the API range
+  /// preset the overview endpoint expects.
+  static String chipToRangePreset(String chip) {
+    switch (chip) {
+      case 'Today':
+        return 'today';
+      case '7D':
+        return '7d';
+      case '30D':
+        return '30d';
+      case '90D':
+        return '90d';
+      case '1Y':
+        return '1y';
+      case 'All':
+      default:
+        return 'all';
+    }
+  }
+
+  /// Apply a new overview time-range preset and reload relevant data.
+  ///
+  /// Accepts either a chip label (`Today`, `7D`, `30D`, `90D`, `1Y`, `All`)
+  /// or a backend preset string (`today`, `7d`, `30d`, `90d`, `1y`, `all`,
+  /// `1m`, `3m`, `6m`).
+  Future<void> changeRange(String presetOrChip) async {
+    final p = presetOrChip.trim();
+    String normalised = p.toLowerCase();
+    // If it looks like a chip label (mixed case + trailing letter), map it.
+    if (p == 'Today' || p == '7D' || p == '30D' || p == '90D' || p == '1Y' || p == 'All') {
+      normalised = chipToRangePreset(p);
+    }
+    debugPrint('[MasterDashboard] changeRange chip="$presetOrChip" '
+        '→ preset="$normalised" (was: "${overviewRange.value}")');
+    overviewRange.value = normalised;
+    await loadDashboardOverview();
+  }
+
   @override
   void onInit() {
     super.onInit();
     refreshAll(showLoading: true);
   }
 
+  /// Reload every panel of the master dashboard: stats, profile, plans,
+  /// MT5 accounts, open positions, AND the redesigned overview block.
   Future<void> refreshAll({bool showLoading = false}) async {
     if (showLoading) isLoading.value = true;
     errorMessage.value = '';
     try {
-      await Future.wait([_loadStats(), _loadProfile(), _loadPlans(), _loadMt5Accounts()]);
+      await Future.wait([
+        _loadStats(),
+        _loadProfile(),
+        _loadPlans(),
+        _loadMt5Accounts(),
+        loadDashboardOverview(),
+      ]);
       await _loadOpenPositions();
     } catch (e) {
       errorMessage.value = 'Failed to load dashboard: $e';
     } finally {
       if (showLoading) isLoading.value = false;
+    }
+  }
+
+  /// Fetch the redesigned `master/dashboard-overview` panel
+  /// (range, hero, main_chart, copier_health, plans, payouts,
+  /// recent_trades, alerts). Populates [overview]; non-fatal on failure.
+  Future<void> loadDashboardOverview() async {
+    isOverviewLoading.value = true;
+    // IMPORTANT: do NOT embed `?range=` in the endpoint path.
+    // `ApiService.get` uses `Uri.replace(queryParameters: ...)`, which
+    // *wipes* any query string already in the endpoint string. So we
+    // pass both the range and the cache-buster in queryParameters here.
+    // (Bug: previously the endpoint was `...dashboard-overview?range=7d`
+    // and `queryParameters: {_t: ...}` overwrote it → API always
+    // received only `_t`, returned the default 30d window, so every
+    // chip felt like it returned the same data.)
+    final range = overviewRange.value;
+    final endpoint = ApiConstants.copyTradingMasterDashboardOverviewPath;
+    final queryParameters = {
+      'range': range,
+      '_t': DateTime.now().millisecondsSinceEpoch.toString(),
+    };
+    debugPrint(
+      '[MasterDashboard] loadDashboardOverview → range="$range" '
+      'endpoint="$endpoint" query=$queryParameters',
+    );
+    try {
+      final res = await ApiService.get(
+        endpoint: endpoint,
+        queryParameters: queryParameters,
+      );
+      debugPrint(
+        '[MasterDashboard] loadDashboardOverview ← success=${res.success} '
+        'hasData=${res.data != null}',
+      );
+      debugPrint(
+        '[MasterDashboard] loadDashboardOverview ← success=${res.success} '
+        'hasData=${res.data != null}',
+      );
+      if (!res.success || res.data == null) {
+        // Non-fatal — many screens fall back to derived metrics.
+        return;
+      }
+      final body = res.data?['data'];
+      if (body is Map) {
+        overview.value = CopyTradingDashboardOverview.fromJson(
+          body.cast<String, dynamic>(),
+        );
+      }
+    } catch (e) {
+      debugPrint('loadDashboardOverview error: $e');
+    } finally {
+      isOverviewLoading.value = false;
     }
   }
 
@@ -437,7 +618,7 @@ class CopyTradingMasterDashboardController extends GetxController {
 
   Future<void> _loadProfile() async {
     final res = await ApiService.get(
-      endpoint: ApiConstants.copyTradingMasterProfile(masterCode, timeframe: '1m'),
+      endpoint: ApiConstants.copyTradingMasterProfile(masterCode, timeframe: overviewRange.value),
       queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
     );
     if (!res.success || res.data == null) {
@@ -623,3 +804,45 @@ class CopyTradingMasterDashboardController extends GetxController {
   }
 }
 
+/// Compact dashboard metrics card derived from `plans` + `profile`.
+class CopyTradingDerivedDashboardMetrics {
+  final int plansCount;
+  final int approvedPlansCount;
+  final int pendingPlansCount;
+  final int pausedPlansCount;
+  final int inactivePlansCount;
+  final int activeCopiersCount;
+  final num totalAum;
+  final num averageRoiPct;
+  final num commissionEarnedTotal;
+  final num totalCommissionAcrossPlans;
+  final num totalSubscriptionFee;
+
+  const CopyTradingDerivedDashboardMetrics({
+    required this.plansCount,
+    required this.approvedPlansCount,
+    required this.pendingPlansCount,
+    required this.pausedPlansCount,
+    required this.inactivePlansCount,
+    required this.activeCopiersCount,
+    required this.totalAum,
+    required this.averageRoiPct,
+    required this.commissionEarnedTotal,
+    required this.totalCommissionAcrossPlans,
+    required this.totalSubscriptionFee,
+  });
+
+  factory CopyTradingDerivedDashboardMetrics.empty() => const CopyTradingDerivedDashboardMetrics(
+        plansCount: 0,
+        approvedPlansCount: 0,
+        pendingPlansCount: 0,
+        pausedPlansCount: 0,
+        inactivePlansCount: 0,
+        activeCopiersCount: 0,
+        totalAum: 0,
+        averageRoiPct: 0,
+        commissionEarnedTotal: 0,
+        totalCommissionAcrossPlans: 0,
+        totalSubscriptionFee: 0,
+      );
+}

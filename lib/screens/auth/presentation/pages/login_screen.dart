@@ -192,6 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         obscureText
                                             ? "assets/svg/eye-slash.svg"
                                             : "assets/svg/eye_icon.svg",
+                                            color: AppColors.textPrimary,
                                       ),
                                       onPressed: () {
                                         setState(() {

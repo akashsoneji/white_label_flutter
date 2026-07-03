@@ -12,6 +12,7 @@ import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_det
     show CopyTradingPlan;
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_hub_controller.dart';
 import 'package:crm_app/screens/home/trading_main_screen.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,7 +38,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
     CustomToastService.showError(
       title: 'Error',
       message: msg,
-      duration: Duration(milliseconds: 2500),
+      duration: const Duration(milliseconds: 2500),
       position: SnackPosition.TOP,
     );
   }
@@ -90,7 +91,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
               BlendMode.srcIn,
             ),
           ),
-          onPressed: () => Get.offAll(() => TradingMainScreen()),
+          onPressed: () => Get.offAll(() => const TradingMainScreen()),
         ),
         centerTitle: true,
         title: Text('My Investments', style: AppTextStyles.screenTitle),
@@ -140,7 +141,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
         final list = controller.subscriptions.toList();
 
         if (loading && list.isEmpty) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         return RefreshIndicator(
@@ -215,7 +216,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
                     ),
                     tabs: [
                       Tab(text: 'My Subscriptions (${list.length})'),
-                      Tab(text: 'Trade History'),
+                      const Tab(text: 'Trade History'),
                     ],
                   ),
                 ),
@@ -279,18 +280,18 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Add capital'),
+            title: const Text('Add capital'),
             content: TextField(
               controller: amountCtrl,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: InputDecoration(hintText: 'Amount (USD)'),
+              decoration: const InputDecoration(hintText: 'Amount (USD)'),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(null),
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () {
@@ -299,7 +300,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
                   if (v == null || v <= 0) return;
                   Navigator.of(ctx).pop(v);
                 },
-                child: Text('Add'),
+                child: const Text('Add'),
               ),
             ],
           ),
@@ -330,18 +331,18 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: Text('Stop investment?'),
-            content: Text(
+            title: const Text('Stop investment?'),
+            content: const Text(
               'This is permanent. You\'ll need to re-subscribe.',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: Text('Cancel'),
+                child: const Text('Cancel'),
               ),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: Text('Stop'),
+                child: const Text('Stop'),
               ),
             ],
           ),
@@ -362,7 +363,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
             sub.masterName.isNotEmpty ? sub.masterName : sub.masterCode,
       ),
       transition: Transition.rightToLeft,
-      duration: Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 250),
     );
   }
 
@@ -399,7 +400,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
         editSubscription: sub,
       ),
       transition: Transition.rightToLeft,
-      duration: Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 250),
     );
 
     controller.load(showLoading: false);
@@ -464,7 +465,7 @@ class _SummarySection extends StatelessWidget {
                         'My Investments',
                         style: AppTextStyles.labelOnChartPendingOrderBold,
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 8.w,
@@ -721,7 +722,7 @@ class _InvestmentRow extends StatelessWidget {
           BoxShadow(
             color: AppColors.border.withValues(alpha: 0.04),
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -945,7 +946,7 @@ class _InvestmentRow extends StatelessWidget {
                         ),
                       )
                     else
-                      Expanded(child: SizedBox.shrink()),
+                      const Expanded(child: SizedBox.shrink()),
                     SizedBox(width: 4.w),
                     if (canStop)
                       Expanded(
@@ -971,7 +972,8 @@ class _InvestmentRow extends StatelessWidget {
 class _FieldChip extends StatelessWidget {
   final String label;
   final String value;
-  const _FieldChip({required this.label, required this.value});
+  final Color? valueColor;
+  const _FieldChip({required this.label, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {
@@ -988,7 +990,7 @@ class _FieldChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: valueColor ?? AppColors.textPrimary,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -1089,8 +1091,8 @@ class _TradeHistoryTab extends StatelessWidget {
                 SizedBox(height: 16.h),
                 TextButton.icon(
                   onPressed: controller.loadTrades,
-                  icon: Icon(Icons.refresh, size: 16),
-                  label: Text('Retry'),
+                  icon: const Icon(Icons.refresh, size: 16),
+                  label: const Text('Retry'),
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.primary,
                   ),
@@ -1194,7 +1196,7 @@ class _TradeRowState extends State<_TradeRow>
     return GestureDetector(
       onTap: () => setState(() => _expanded = !_expanded),
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 220),
+        duration: const Duration(milliseconds: 220),
         curve: Curves.easeInOut,
         margin: EdgeInsets.only(bottom: 8.h),
         padding: EdgeInsets.all(12.r),
@@ -1284,7 +1286,7 @@ class _TradeRowState extends State<_TradeRow>
                 ),
                 SizedBox(width: 8.w),
                 AnimatedRotation(
-                  duration: Duration(milliseconds: 220),
+                  duration: const Duration(milliseconds: 220),
                   turns: _expanded ? 0.5 : 0,
                   child: Icon(
                     Icons.keyboard_arrow_down,
@@ -1308,7 +1310,7 @@ class _TradeRowState extends State<_TradeRow>
                           '\$${widget.item.commissionCharged.toDouble().toStringAsFixed(2)}',
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Expanded(
                     child: _TField(
                       label: 'Net Credited',
@@ -1330,7 +1332,7 @@ class _TradeRowState extends State<_TradeRow>
                       ),
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Expanded(
                     child: _TField(
                       label: 'Opened',
@@ -1351,7 +1353,7 @@ class _TradeRowState extends State<_TradeRow>
                       ),
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Expanded(
                     child: _TField(
                       label: 'Closed',
@@ -1371,7 +1373,8 @@ class _TradeRowState extends State<_TradeRow>
 class _TField extends StatelessWidget {
   final String label;
   final String value;
-  const _TField({required this.label, required this.value});
+  final Color? valueColor;
+  const _TField({required this.label, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {
@@ -1392,7 +1395,7 @@ class _TField extends StatelessWidget {
           style: TextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: valueColor ?? AppColors.textPrimary,
           ),
         ),
       ],
@@ -1442,7 +1445,7 @@ class _EmptyInvestmentsState extends StatelessWidget {
                       CopyTradingMasterApplicationStatus.approved;
                   hub.currentTabIndex.value = isApprovedMaster ? 3 : 1;
                 } else {
-                  Get.to(() => ExploreMastersScreen());
+                  Get.to(() => const ExploreMastersScreen());
                 }
               },
               icon: Icon(Icons.explore_outlined, size: 16.r),

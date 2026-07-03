@@ -214,6 +214,18 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
         case 'Sell Limit':
           orderType = OrderType.sellLimit;
           break;
+        case 'Buy Stop':
+          orderType = OrderType.buyStop;
+          break;
+        case 'Sell Stop':
+          orderType = OrderType.sellStop;
+          break;
+        case 'Buy Stop Limit':
+          orderType = OrderType.buyStopLimit;
+          break;
+        case 'Sell Stop Limit':
+          orderType = OrderType.sellStopLimit;
+          break;
         default:
           // Fallback to Buy Limit if somehow invalid
           orderType = OrderType.buyLimit;
@@ -240,24 +252,16 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
               ? double.tryParse(limitPriceControllerValue)
               : null;
 
-      // All dropdown order types (Buy Limit, Sell Limit) require a price
-      final requiresPrice =
-          selectedOrderTypeStr == 'Buy Limit' ||
-          selectedOrderTypeStr == 'Sell Limit';
-
-      final price =
-          requiresPrice
-              ? PrecisionHelper.formatPrice(
-                PrecisionHelper.parseDouble(
-                  (limitPriceFromController != null &&
-                          limitPriceFromController > 0)
-                      ? limitPriceControllerValue
-                      : _limitPrice.value.toString(),
-                  decimals: decimals,
-                ),
-                decimals: decimals,
-              )
-              : null;
+      // All dropdown order types require a price
+      final price = PrecisionHelper.formatPrice(
+        PrecisionHelper.parseDouble(
+          (limitPriceFromController != null && limitPriceFromController > 0)
+              ? limitPriceControllerValue
+              : _limitPrice.value.toString(),
+          decimals: decimals,
+        ),
+        decimals: decimals,
+      );
 
       final takeProfit =
           _takeProfitEnabled.value
@@ -324,7 +328,7 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
             'symbol': selectedSymbol,
             'orderType': orderType.value.toString(),
             'volume': volume,
-            'price': price != null ? double.tryParse(price) : null,
+            'price': double.tryParse(price),
             'executionPrice': price,
             'positionId': null,
             'orderId': null,

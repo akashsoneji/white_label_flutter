@@ -3925,6 +3925,22 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
     } else {}
   }
 
+  // Refresh current trading data without clearing cache/UI first.
+  // Use this on app resume so positions/orders stay visible while the socket resubscribes.
+  void refreshCurrentTradingData() {
+    AppLogger.websocket('Trading WS: Resume refresh requested');
+
+    if (isConnected.value && !_isDisposed) {
+      _requestTradingData();
+    }
+    if (isOpenPositionsConnected.value && !_isDisposed) {
+      _requestOpenPositionsData();
+    }
+    if (isPendingOrdersConnected.value && !_isDisposed) {
+      _requestPendingOrdersData();
+    }
+  }
+
   // Force refresh trading data (clears cache and requests fresh data)
   void forceRefreshTradingData() {
     AppLogger.websocket('Trading WS: Force refresh requested');
@@ -3933,9 +3949,7 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
     _tradingController.clearAllTradingData();
 
     // Request fresh data
-    if (isConnected.value && !_isDisposed) {
-      _requestTradingData();
-    } else {}
+    refreshCurrentTradingData();
   }
 
   // Update account without disconnecting (faster account switching)

@@ -1,6 +1,8 @@
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -9,9 +11,9 @@ import 'package:crm_app/screens/finance/presentation/pages/deposit_instruction_s
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/utils/navigation_helper.dart';
 
+import '../../../../services/api_service.dart';
 import '../../../../services/language_service.dart';
 import '../../../../widgets/custom_toast.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 
 class DepositRealScreen extends StatefulWidget {
   final Map<String, dynamic> object;
@@ -55,6 +57,7 @@ class DepositRealScreen extends StatefulWidget {
 
 class _DepositRealScreenState extends State<DepositRealScreen> {
   late final DepositController controller;
+  final ApiService apiService = Get.put(ApiService());
 
   String selectedPaymentMode = 'UPI';
   String selectedAccount = '0';
@@ -96,10 +99,10 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         amountController.text = '0.00';
       }
     });
+
+    // Rebuild "To be deposited" as user types
     amountController.addListener(() {
-      if (mounted) {
-        setState(() {});
-      }
+      if (mounted) setState(() {});
     });
     final preselectedAccount = widget.preselectedAccountNumber;
     print('DepositRealScreen: initState called');
@@ -157,13 +160,6 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         transferToController.text =
             "${account['meta_account_number']} - \$ ${account['balance'] ?? '0.00'}";
         selectedAccount = account['meta_account_number'].toString();
-        
-        final currency = account['currency']?.toString() ?? 'USD';
-        if (mounted) {
-          setState(() {
-            selectedCurrency = currency;
-          });
-        }
         print(
           'DepositRealScreen: Updated transferToController.text to: ${transferToController.text}',
         );
@@ -184,6 +180,9 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if keyboard is visible
+    final bool isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       resizeToAvoidBottomInset: true,
@@ -191,21 +190,15 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
-        leading: Padding(
-          padding: EdgeInsets.only(left: 10.w),
-          child: AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
-          ),
+        leading:
+        AppSvgBackButton(
+          onPressed: () => NavigationHelper.safeBack(context: context),
+          iconWidth: 30.w,
+          iconHeight: 30.h,
         ),
-
-        title: Text(
+            title: Text(
           languageService.tr('deposit'),
           style: AppTextStyles.screenTitle,
-        ),
-        shape: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade300, // divider color
-            width: 1, // divider thickness
-          ),
         ),
         centerTitle: true,
       ),
@@ -311,7 +304,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         onTap: () => _showAccountDropdown(),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 14.w),
-          child: RTLHelper.rtlIcon(Icons.arrow_drop_down, color: Colors.grey),
+          child: RTLHelper.rtlIcon(Icons.arrow_drop_down, color: AppColors.textGrey),
         ),
       ),
       decoration: InputDecoration(
@@ -355,7 +348,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         _SingleDecimalTextFormatter(),
       ],
       decoration: InputDecoration(
-        labelText: 'Amount',
+        labelText: _amountLabel(),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -377,6 +370,69 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     );
   }
 
+  bool get _hasConversion {
+    final m = controller.depositMethod.value;
+    return m != null && m['has_conversion'] == true;
+  }
+
+  String get _sourceCurrency {
+    final m = controller.depositMethod.value;
+    final name = m?['currency_name']?.toString();
+    return (name == null || name.isEmpty) ? selectedCurrency : name;
+  }
+
+  double get _conversionRate {
+    final m = controller.depositMethod.value;
+    final raw = m?['conversion_rate'];
+    if (raw == null) return 0;
+    return double.tryParse(raw.toString()) ?? 0;
+  }
+
+  String _amountLabel() {
+    if (_hasConversion) {
+      return 'Amount ($_sourceCurrency)';
+    }
+    return 'Amount';
+  }
+
+  String _convertedDepositText() {
+    final raw = amountController.text.trim();
+    final entered = double.tryParse(raw.isEmpty ? '0' : raw) ?? 0;
+    if (_hasConversion && _conversionRate > 0) {
+      final converted = entered / _conversionRate;
+      return '${converted.toStringAsFixed(2)} $selectedCurrency';
+    }
+    return '${raw.isEmpty ? "0.00" : raw} $selectedCurrency';
+  }
+
+  Widget _buildFeeDisplay() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '₹',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            TextSpan(
+              text: '${fee.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.icongrey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildToBeDepositedSection() {
     return Container(
       width: double.infinity,
@@ -393,17 +449,20 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: AppColors.icongrey,
+              color: AppColors.textGrey,
             ),
           ),
-          Text(
-            '${amountController.text.isEmpty ? "0.00" : amountController.text} $selectedCurrency',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
-            ),
-          ),
+          Obx(() {
+            controller.depositMethod.value; // reactive trigger
+            return Text(
+              _convertedDepositText(),
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -465,7 +524,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.scaffold,
+      backgroundColor: AppColors.whiteColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -482,7 +541,6 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
                   ),
                 ),
               ),

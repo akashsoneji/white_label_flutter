@@ -44,7 +44,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
     Get.to(
       () => CopyTradingCreatePlanScreen(controller: controller),
       transition: Transition.rightToLeft,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
     );
   }
 
@@ -106,7 +106,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
               BlendMode.srcIn,
             ),
           ),
-          onPressed: () => Get.offAll(() => TradingMainScreen()),
+          onPressed: () => Get.offAll(() => const TradingMainScreen()),
         ),
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
@@ -130,7 +130,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                     BoxShadow(
                       color: AppColors.primary.withValues(alpha: 0.30),
                       blurRadius: 8,
-                      offset: Offset(0, 3),
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
@@ -140,13 +140,13 @@ class _MyPlansTabState extends State<MyPlansTab> {
                     Icon(
                       Icons.add_rounded,
                       size: 15.sp,
-                      color: AppColors.whiteColor,
+                      color: AppColors.isDarkMode ? AppColors.whiteColorDark : AppColors.whiteColorLight,
                     ),
                     SizedBox(width: 4.w),
                     Text(
                       'Create Plan',
                       style: TextStyle(
-                        color: AppColors.whiteColor,
+                        color: AppColors.isDarkMode ? AppColors.whiteColorDark : AppColors.whiteColorLight ,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.2,
@@ -181,7 +181,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                           BoxShadow(
                             color: AppColors.border.withValues(alpha: 0.08),
                             blurRadius: 6,
-                            offset: Offset(0, 2),
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -222,7 +222,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                         BoxShadow(
                           color: AppColors.border.withValues(alpha: 0.08),
                           blurRadius: 6,
-                          offset: Offset(0, 2),
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -297,7 +297,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                   final err = controller.errorMessage.value;
                   if (err.isNotEmpty) {
                     listChild = ListView(
-                      physics: AlwaysScrollableScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
                         SizedBox(height: 80.h),
                         Center(
@@ -338,8 +338,11 @@ class _MyPlansTabState extends State<MyPlansTab> {
                                       () => controller.refreshAll(
                                         showLoading: true,
                                       ),
-                                  icon: Icon(Icons.refresh_rounded, size: 16),
-                                  label: Text('Try Again'),
+                                  icon: const Icon(
+                                    Icons.refresh_rounded,
+                                    size: 16,
+                                  ),
+                                  label: const Text('Try Again'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
                                     foregroundColor:
@@ -361,7 +364,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                     );
                   } else {
                     listChild = ListView(
-                      physics: AlwaysScrollableScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
                         SizedBox(height: 50.h),
                         _buildEmptyState(controller),
@@ -375,7 +378,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
 
                   if (filteredSortedPlans.isEmpty) {
                     listChild = ListView(
-                      physics: AlwaysScrollableScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: [
                         SizedBox(height: 80.h),
                         Center(
@@ -405,7 +408,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                     );
                   } else {
                     listChild = ListView.separated(
-                      physics: AlwaysScrollableScrollPhysics(),
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 100.h),
                       itemCount: filteredSortedPlans.length,
                       separatorBuilder: (_, index) => SizedBox(height: 14.h),
@@ -475,8 +478,8 @@ class _MyPlansTabState extends State<MyPlansTab> {
             SizedBox(height: 24.h),
             ElevatedButton.icon(
               onPressed: () => _openCreatePlanScreen(controller),
-              icon: Icon(Icons.add_rounded, size: 18),
-              label: Text('Create First Plan'),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('Create First Plan'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onColoredBackground,
@@ -600,7 +603,7 @@ class _PlanCardItem extends StatelessWidget {
           BoxShadow(
             color: AppColors.border.withValues(alpha: 0.12),
             blurRadius: 12,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -756,7 +759,7 @@ class _PlanCardItem extends StatelessWidget {
                     ),
                   ),
                 ],
-                Spacer(),
+                const Spacer(),
                 // isFull badge
                 if (plan.isFull)
                   Container(
@@ -892,7 +895,7 @@ class _PlanCardItem extends StatelessWidget {
                           controller: controller,
                         ),
                         transition: Transition.rightToLeft,
-                        duration: Duration(milliseconds: 250),
+                        duration: const Duration(milliseconds: 250),
                       );
                     },
                     icon: Icon(

@@ -40,16 +40,28 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  double _preserveNonZero(double incoming, double current) {
+    if (incoming != 0) return incoming;
+    return current != 0 ? current : incoming;
+  }
+
+  double _preserveOptionalNonZero(double? incoming, double current) {
+    if (incoming != null && incoming != 0) return incoming;
+    return current != 0 ? current : (incoming ?? 0);
+  }
+
   void _applyPriceUpdate(ListElement item) {
     // Queue and batch UI updates to keep scrolling smooth.
+    // During reconnect/REST hydrate the backend can send placeholder zero values.
+    // Preserve the last non-zero price until a valid new value arrives.
     final current = priceRx(item.symbol).value;
     _pendingPriceUpdates[item.symbol] = current.copyWith(
-      bid: item.bid,
-      ask: item.ask,
+      bid: _preserveNonZero(item.bid, current.bid),
+      ask: _preserveNonZero(item.ask, current.ask),
       digits: item.digits,
-      spreadDiff: item.spreadDiff,
-      dayLow: item.dayLow ?? current.dayLow,
-      dayHigh: item.dayHigh ?? current.dayHigh,
+      spreadDiff: _preserveNonZero(item.spreadDiff, current.spreadDiff),
+      dayLow: _preserveOptionalNonZero(item.dayLow, current.dayLow),
+      dayHigh: _preserveOptionalNonZero(item.dayHigh, current.dayHigh),
     );
     _schedulePriceFlush();
   }
@@ -100,7 +112,8 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Favorites management
   final RxList<String> favoriteInstruments = <String>[].obs;
-  final RxBool isLoadingFavorites = false.obs;
+  final RxBool isLoadingFavorites = true.obs;
+  final RxBool hasAttemptedInitialLoad = false.obs;
 
   // Put your WebSocket URL here
   late WebSocketChannel channel;
@@ -111,7 +124,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   // Connection management
   final RxBool isConnected = false.obs;
   /// True while initial REST hydrate + v2 subscribe runs ([startMarketWatchV2Only]).
-  final RxBool isHydratingInstrumentCatalog = false.obs;
+  /// Start as true so the very first Instruments frame cannot flash the empty
+  /// state before the post-frame hydrate begins.
+  final RxBool isHydratingInstrumentCatalog = true.obs;
   final RxBool isReconnecting = false.obs;
   Timer? _reconnectTimer;
 
@@ -151,6 +166,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       final activeAccount = accountController.activeMT5Account;
       return activeAccount?.tradingServer.toUpperCase() == "MT5";
     } catch (e) {
+      print('Error checking MT5 account: $e');
       return false;
     }
   }
@@ -183,6 +199,21 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
                 account.tradingServer.toUpperCase());
 
         if (accountChanged) {
+          print(
+            '═══════════════════════════════════════════════════════════',
+          );
+          print(
+            '🔄 ACCOUNT CHANGED - InstrumentsController',
+          );
+          print(
+            '   From: ${_lastAccount?.metaAccountNumber ?? "N/A"} (${_lastAccount?.tradingServer ?? "N/A"})',
+          );
+          print(
+            '   To:   ${account.metaAccountNumber} (${account.tradingServer})',
+          );
+          print(
+            '═══════════════════════════════════════════════════════════',
+          );
 
           // Update last account
           _lastAccount = account;
@@ -190,9 +221,13 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
           // DO NOT call startWebSocket() here
           // WebSocket reconnection is handled centrally by AccountController.setActiveMT5Account()
           // This listener only tracks _lastAccount for change detection
+          print(
+            'Instruments: Account change detected, reconnection will be handled by AccountController',
+          );
         }
       });
     } catch (e) {
+      print('⚠️ InstrumentsController: Error setting up account listener: $e');
     }
 
     _bindMarketWatchV2DecodedListener();
@@ -204,17 +239,66 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // _initializeWebSocket();
   }
 
+  /// Called synchronously from InstrumentsScreen.initState before the first
+  /// frame. This prevents the initial empty/no-data widget from flashing while
+  /// the post-frame background hydrate is about to start.
+  void markInitialScreenOpening() {
+    if (allInstruments.isEmpty && !hasAttemptedInitialLoad.value) {
+      isHydratingInstrumentCatalog.value = true;
+    }
+  }
+
   // Method to start WebSocket when screen becomes visible
   void startWebSocket() async {
     final isLoggedIn = await SecureStorageService.isUserLoggedIn();
     if (!isLoggedIn) {
       if (kDebugMode) {
+        print('Instruments: User not logged in, skipping WebSocket start');
       }
       return;
     }
 
+    print('🔌 InstrumentsController: Starting marketwatchv2 (legacy unified WS disabled)');
     _bindMarketWatchV2DecodedListener();
     await startMarketWatchV2Only();
+  }
+
+  /// Resume/foreground path: restore only price streaming for current favorites.
+  ///
+  /// Do NOT call REST hydrate and do NOT assign/clear instrument lists here.
+  /// That prevents full-screen refresh when returning from background/another app.
+  Future<void> resumePriceStreamOnly() async {
+    final isLoggedIn = await SecureStorageService.isUserLoggedIn();
+    if (!isLoggedIn) return;
+
+    _isClearingData = false;
+    _bindMarketWatchV2DecodedListener();
+
+    try {
+      final accountController = Get.find<AccountController>();
+      _currentAccountNumber =
+          accountController.activeMT5Account?.metaAccountNumber;
+    } catch (_) {}
+
+    if (!Get.isRegistered<MarketWatchV2Service>()) {
+      isConnected.value = false;
+      return;
+    }
+
+    final v2 = Get.find<MarketWatchV2Service>();
+    final syms =
+        favoriteInstruments
+            .map(MarketWatchV2Service.normalizeSymbol)
+            .where((s) => s.isNotEmpty)
+            .toSet()
+            .toList();
+
+    if (syms.isNotEmpty) {
+      await v2.resumeSubscribeSymbols(syms);
+    } else {
+      await v2.ensureAuthenticatedConnection();
+    }
+    isConnected.value = true;
   }
 
   /// REST snapshot for current favorites + v2 subscribe (replaces legacy `/ws/marketwatch`).
@@ -251,6 +335,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       isConnected.value = true;
     } finally {
       isHydratingInstrumentCatalog.value = false;
+      hasAttemptedInitialLoad.value = true;
     }
   }
 
@@ -333,23 +418,49 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       final incoming = <ListElement>[];
       for (final s in symbols) {
         if (!isFavorite(s.displaySymbol)) continue;
+        final current = priceRx(s.displaySymbol).value;
         incoming.add(
           ListElement(
             symbol: s.displaySymbol,
             digits: s.digits,
-            bid: 0,
-            ask: 0,
-            spreadDiff: 0,
+            bid: current.bid,
+            ask: current.ask,
+            spreadDiff: current.spreadDiff,
             last: 0,
             volume: 0,
             volumeReal: 0,
             logo: '',
             category: s.categoryName,
+            dayLow: current.dayLow > 0 ? current.dayLow : null,
+            dayHigh: current.dayHigh > 0 ? current.dayHigh : null,
           ),
         );
       }
 
-      allInstruments.assignAll(incoming);
+      final existingBySymbol = {
+        for (final item in allInstruments) item.symbol: item,
+      };
+      final merged = <ListElement>[];
+      for (final it in incoming) {
+        final existing = existingBySymbol[it.symbol];
+        if (existing != null) {
+          merged.add(
+            existing.copyWith(
+              digits: it.digits,
+              category: it.category,
+              bid: it.bid,
+              ask: it.ask,
+              spreadDiff: it.spreadDiff,
+              dayLow: it.dayLow,
+              dayHigh: it.dayHigh,
+            ),
+          );
+        } else {
+          merged.add(it);
+        }
+      }
+
+      allInstruments.assignAll(merged);
       for (final it in incoming) {
         _applyPriceUpdate(it);
       }
@@ -361,6 +472,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       _updateFilteredInstruments();
     } catch (e) {
       if (kDebugMode) {
+        print('InstrumentsController: hydrateFavoritesFromRest error: $e');
       }
     }
   }
@@ -441,9 +553,22 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Method to stop WebSocket when screen is hidden
   void stopWebSocket() {
+    print(
+      '═══════════════════════════════════════════════════════════',
+    );
+    print(
+      '🛑 STOPPING WEBSOCKET - InstrumentsController',
+    );
+    print(
+      '   Account: ${_currentAccountNumber ?? "N/A"}',
+    );
+    print(
+      '═══════════════════════════════════════════════════════════',
+    );
     
     // Cancel unified subscription FIRST to stop data flow
     if (_unifiedMwSub != null) {
+      print('   Cancelling unified WebSocket subscription...');
       _unifiedMwSub?.cancel();
       _unifiedMwSub = null;
       isConnected.value = false;
@@ -454,12 +579,17 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     _marketWatchV2Sub = null;
     _marketWatchV2ListenerBound = false;
 
-    // Set clearing flag to block any remaining in-flight messages
-    _isClearingData = true;
-    
+    // Lifecycle/navigation stop should not enter the full-reset clearing mode;
+    // otherwise marketwatchv2 frames after resume can be blocked. Full clearing
+    // is handled by clearInstrumentsData() for actual account switches.
+    _isClearingData = false;
+
     // Disconnect direct WebSocket if using it
     _disconnectWebSocket();
-    
+
+    print(
+      '✅ WebSocket stopped and data flow blocked',
+    );
   }
 
   // Check if we need to update defaults (for existing users)
@@ -477,17 +607,20 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       if (currentFavorites.contains('USIOL.c') ||
           currentFavorites.contains('NAS100.c') ||
           currentFavorites.contains('BTCUSD.c')) {
+        print('🔄 Detected old default favorites, updating to new ones');
         await forceReinitializeDefaults();
       }
 
       // Set migration flag so we don't wipe custom user favorites on next starts
       await prefs.setBool('migrated_favorites_defaults_v2', true);
     } catch (e) {
+      print('Error checking and updating defaults: $e');
     }
   }
 
   void _initializeWebSocket() async {
     if (_isConnecting) {
+      print('Instruments: Connection already in progress, skipping');
       return;
     }
 
@@ -495,6 +628,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     final isLoggedIn = await SecureStorageService.isUserLoggedIn();
     if (!isLoggedIn) {
       if (kDebugMode) {
+        print(
+          'Instruments: User not logged in, skipping WebSocket initialization',
+        );
       }
       return;
     }
@@ -503,10 +639,12 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult.contains(ConnectivityResult.none)) {
+        print('Instruments: No network connectivity, retrying later...');
         _scheduleReconnect();
         return;
       }
     } catch (e) {
+      print('Instruments: Error checking connectivity: $e');
       // Continue anyway - connectivity check might not be available
     }
 
@@ -521,15 +659,25 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       if (activeAccount == null) {
         activeAccount = await WebSocketEndpointHelper.getStoredPrimaryAccount();
         if (kDebugMode && activeAccount != null) {
+          print(
+            'Instruments: Using stored primary account from initialization',
+          );
         }
       }
 
       // ✅ Use centralized endpoint helper
       final wsUrl = WebSocketEndpointHelper.getMarketWatchUrl(activeAccount);
+      final accountType = WebSocketEndpointHelper.getAccountType(activeAccount);
 
+      print(
+        'Instruments: Endpoint change? prev=${_currentWsUrl ?? "none"} -> new=$wsUrl',
+      );
       WebSocketEndpointHelper.logSwitchStep(
         'Instruments connect start',
         url: wsUrl,
+      );
+      print(
+        'Instruments: Connecting to $wsUrl ($accountType account, Account: ${activeAccount?.metaAccountNumber ?? "N/A"}, trading_server: ${activeAccount?.tradingServer ?? "N/A"})',
       );
 
       // Connect with timeout handling
@@ -557,6 +705,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         _currentAccountNumber =
             accountController.activeMT5Account?.metaAccountNumber;
       } catch (e) {
+        print('Error updating account number: $e');
       }
 
       // Listen for data from socket server
@@ -567,6 +716,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
           // Set connected after receiving first valid message
           if (!isConnected.value) {
             isConnected.value = true;
+            print('Instruments: WebSocket connected and receiving data');
           }
           if (!_loggedFirstMessage) {
             _loggedFirstMessage = true;
@@ -577,11 +727,13 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
           }
         },
         onError: (error) {
+          print('Instruments: WebSocket error: $error');
           isConnected.value = false;
           _isConnecting = false;
           _scheduleReconnect();
         },
         onDone: () {
+          print('Instruments: WebSocket connection closed');
           isConnected.value = false;
           _isConnecting = false;
           _scheduleReconnect();
@@ -593,6 +745,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       getSocketdata();
       _isConnecting = false;
     } catch (e) {
+      print('Instruments: Failed to initialize WebSocket: $e');
       isConnected.value = false;
       _isConnecting = false;
       _scheduleReconnect();
@@ -682,12 +835,15 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
           _updateFilteredInstruments();
         } catch (e) {
+          print('Error parsing old format: $e');
         }
         return;
       }
 
       _processDecodedMarketPayload(decodedData);
-    } catch (_) {}
+    } catch (e, t) {
+      print('Error parsing JSON: $e\n $t');
+    }
   }
 
   void _handleJsonResponse(Map<String, dynamic> data) {
@@ -696,12 +852,16 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // Account group changed on server (e.g. admin changed group): resubscribe to get new spreads/market watch
     // Same behaviour as crmfrontend: unsubscribe then resubscribe with same account so server sends new group data
     if (type == 'group_changed') {
+      print(
+        '🔄 InstrumentsController: Group changed on server, resubscribing to refresh market watch',
+      );
       Future.microtask(() => _onGroupChanged());
       return;
     }
 
     // Handle unsubscribe confirmation
     if (type == 'marketwatch_left') {
+      print('✅ Unsubscribed from market watch');
       if (_unsubscribeCompleter != null &&
           !_unsubscribeCompleter!.isCompleted) {
         _unsubscribeCompleter!.complete();
@@ -714,8 +874,17 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // Note: This comes AFTER the initial snapshot (STEP 1)
     if (type == 'subscribed_pricing') {
       final status = data['status']?.toString();
+      final pricesCount = data['prices_count'];
+      final totalSymbols = data['total_symbols'];
+      final tradingAccount = data['trading_account'];
+      final isReconnection = data['is_reconnection'] ?? false;
 
       if (status == 'ok') {
+        print('✅ Instruments: Subscribed to pricing');
+        print('   Account: $tradingAccount');
+        print('   Prices count: $pricesCount / Total symbols: $totalSymbols');
+        print('   Is reconnection: $isReconnection');
+
         // Confirmation received - initial snapshot should have been processed already
         // Next arrays will be real-time updates (STEP 3)
         _isInitialSnapshot = false;
@@ -723,6 +892,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         // ✅ Clear reconnection flag after successful subscription
         if (_isReconnecting) {
           _isReconnecting = false;
+          print('✅ Reconnection complete - normal updates resumed');
         }
 
         // Set connected state after successful subscription
@@ -737,11 +907,26 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     if (type == 'marketwatch_joined' ||
         type == 'symbol_joined' ||
         type == 'authenticated') {
+      final status = data['status']?.toString();
+      final message = data['message']?.toString();
+
+      if (status == 'success') {
+        print('✅ WebSocket authenticated: $message');
+        if (type == 'marketwatch_joined') {
+          print(
+            '✅ Subscribed to market watch for account: ${data['trading_account']}',
+          );
+        } else if (type == 'symbol_joined') {
+          print('✅ Subscribed to symbol: ${data['symbol']}');
+        }
+      }
       return;
     }
 
     // Handle error responses
     if (type == 'error') {
+      final errorMessage = data['message']?.toString() ?? 'Unknown error';
+      print('❌ WebSocket error: $errorMessage');
       // Complete unsubscribe completer even on error to avoid hanging
       if (_unsubscribeCompleter != null &&
           !_unsubscribeCompleter!.isCompleted) {
@@ -752,6 +937,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     }
 
     // Handle other JSON responses (if any)
+    print('📨 Received JSON response: $data');
   }
 
   void _parseNewFormat(List decodedData) {
@@ -767,10 +953,31 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // ✅ FIX: During reconnection, always use merge logic to preserve prices
     if (_isInitialSnapshot && incomingItems.isNotEmpty && !_isReconnecting) {
       // This is the FIRST initial snapshot (not a reconnection) - replace all
+      print(
+        '═══════════════════════════════════════════════════════════',
+      );
+      print(
+        '📊 INITIAL SNAPSHOT RECEIVED',
+      );
+      print(
+        '   Account: ${_currentAccountNumber ?? "N/A"}',
+      );
+      print(
+        '   Symbols count: ${incomingItems.length}',
+      );
+      print(
+        '   Sample symbols: ${incomingItems.take(5).map((e) => e.symbol).join(", ")}${incomingItems.length > 5 ? "..." : ""}',
+      );
+      print(
+        '═══════════════════════════════════════════════════════════',
+      );
       
       // ✅ FIX: Reset clearing flag BEFORE assigning data (allows data processing)
       if (_isClearingData) {
         _isClearingData = false;
+        print(
+          '✅ Clearing flag reset - data processing enabled',
+        );
       }
       
       // ✅ COMPLETE REBUILD: Clear first, then assign new data
@@ -783,6 +990,12 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         _applyPriceUpdate(it);
       }
       
+      print(
+        '✅ Instruments list INSTANTIATED: ${allInstruments.length} total instruments',
+      );
+      print(
+        '   Verified count: ${allInstruments.length == incomingItems.length ? "✅ MATCH" : "❌ MISMATCH"} (expected ${incomingItems.length})',
+      );
     } else {
       // Real-time updates: update reactive prices only (no RxList assignAll).
       // Only touch allInstruments/instruments when structure changes (new symbols).
@@ -809,6 +1022,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       // ✅ Clear reconnection flag after first successful merge
       if (_isReconnecting) {
         _isReconnecting = false;
+        print('✅ Reconnection merge complete - prices preserved');
       }
 
       // Only update groups/filters when list structure changed.
@@ -869,6 +1083,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       // New format: [symbol, bid, ask, spread_points, digits, day_high, day_low, category]
       // spread_points is the spread in points (not percentage)
       if (item.length < 5) {
+        print(
+          "❌ Invalid item format: expected at least 5 elements, got ${item.length}",
+        );
         return null;
       }
 
@@ -904,6 +1121,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         dayLow: dayLow,
       );
     } catch (e) {
+      print("❌ Failed parsing $item — $e");
       return null;
     }
   }
@@ -1080,6 +1298,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     try {
       channel.sink.close();
     } catch (e) {
+      print('Error closing WebSocket: $e');
     }
 
     super.onClose();
@@ -1095,6 +1314,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   void _scheduleReconnect() {
     if (_reconnectAttempts >= _maxReconnectAttempts) {
+      print('Instruments: Max reconnection attempts reached');
       isReconnecting.value = false;
       return;
     }
@@ -1105,6 +1325,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     isReconnecting.value = true;
 
     final delay = _getReconnectDelay();
+    print(
+      'Instruments: Scheduling reconnection attempt $_reconnectAttempts in ${delay.inSeconds}s (exponential backoff)',
+    );
 
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(delay, () {
@@ -1119,6 +1342,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   void _reconnectWebSocket() {
     if (isConnected.value) return;
 
+    print('🔄 Attempting to reconnect WebSocket...');
     isReconnecting.value = true;
     _isReconnecting = true; // ✅ Mark as reconnection to preserve prices
 
@@ -1126,6 +1350,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       _disconnectWebSocket();
       _initializeWebSocket();
     } catch (e) {
+      print('Reconnection failed: $e');
       isReconnecting.value = false;
       _isReconnecting = false; // ✅ Clear flag on error
       _scheduleReconnect();
@@ -1138,7 +1363,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       isConnected.value = false;
       isReconnecting.value = false;
       _currentWsUrl = null;
+      print('InstrumentsController: WebSocket disconnected');
     } catch (e) {
+      print('Error disconnecting WebSocket: $e');
     }
   }
 
@@ -1216,6 +1443,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       favoriteInstruments.assignAll(favorites);
       // print('📱 Loaded ${favorites.length} favorite instruments: $favorites');
     } catch (e) {
+      print('Error loading favorites: $e');
     } finally {
       isLoadingFavorites.value = false;
     }
@@ -1240,25 +1468,18 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       if (success) {
         await _loadFavorites();
 
-        final isFavNow = isFavorite(instrumentSymbol);
-
         if (searchSymbol != null) {
-          _syncSearchSymbolLocally(searchSymbol, isFavoriteNow: isFavNow);
+          _syncSearchSymbolLocally(searchSymbol, isFavoriteNow: isFavorite(instrumentSymbol));
         } else {
           _updateFilteredInstruments();
         }
-
-        // Always sync socket subscription immediately on favorite change.
-        await syncMarketWatchV2AfterFavoriteChange(
-          instrumentSymbol,
-          isFavoriteNow: isFavNow,
-        );
 
         if (hydrateAfterChange) {
           await hydrateFavoritesFromRest();
         }
       }
     } catch (e) {
+      print('Error toggling favorite for $instrumentSymbol: $e');
     }
   }
 
@@ -1324,8 +1545,10 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
           instrumentSymbol,
           isFavoriteNow: true,
         );
+        print('Added $instrumentSymbol to favorites');
       }
     } catch (e) {
+      print('Error adding $instrumentSymbol to favorites: $e');
     }
   }
 
@@ -1351,7 +1574,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         instrumentSymbol,
         isFavoriteNow: false,
       );
+      print('Removed $instrumentSymbol (and variations) from favorites');
     } catch (e) {
+      print('Error removing $instrumentSymbol from favorites: $e');
     }
   }
 
@@ -1364,7 +1589,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       await FavoritesStorageService.instance.resetToDefaultFavorites();
       await _loadFavorites();
       _updateFilteredInstruments();
+      print('Reset to default favorites');
     } catch (e) {
+      print('Error resetting to default favorites: $e');
     }
   }
 
@@ -1374,7 +1601,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       await FavoritesStorageService.instance.forceReinitializeDefaults();
       await _loadFavorites();
       _updateFilteredInstruments();
+      print('Force reinitialized with new defaults');
     } catch (e) {
+      print('Error force reinitializing defaults: $e');
     }
   }
 
@@ -1401,7 +1630,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         // Update local RxList
         favoriteInstruments.assignAll(currentFavs);
         
+        print('Reordered favorites: $currentFavs');
       } catch (e) {
+        print('Error persisting reordered favorites: $e');
       }
     }
   }
@@ -1491,6 +1722,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Method to refresh socket data when account changes
   void refreshSocketData() {
+    print("Refreshing socket data for new account...");
 
     // Update current account number
     try {
@@ -1498,10 +1730,12 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       _currentAccountNumber =
           accountController.activeMT5Account?.metaAccountNumber;
     } catch (e) {
+      print('Error updating account number in refreshSocketData: $e');
     }
 
     // If not connected, try to reconnect first
     if (!isConnected.value) {
+      print("Not connected, attempting marketwatchv2 refresh...");
       Future.microtask(() async {
         await startMarketWatchV2Only();
       });
@@ -1515,15 +1749,36 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   void clearInstrumentsData() {
     // ✅ FIX: Prevent duplicate clearing - only clear once
     if (_isClearingData) {
+      print(
+        "⚠️ InstrumentsController: Already clearing data, skipping duplicate clear",
+      );
       return;
     }
 
     _isClearingData = true; // Set flag to prevent duplicate clearing and block data processing
     
+    print(
+      '═══════════════════════════════════════════════════════════',
+    );
+    print(
+      "🗑️ CLEARING INSTRUMENTS DATA - COMPLETE RESET",
+    );
+    print(
+      "   Account: ${_currentAccountNumber ?? "N/A"}",
+    );
+    print(
+      "   Before clear: Total=${allInstruments.length}, Filtered=${instruments.length}",
+    );
+    print(
+      '═══════════════════════════════════════════════════════════',
+    );
     
     // ✅ FIX: Cancel unified subscription FIRST to stop old data flow
     // This is critical when called from AccountController (dashboard switch)
     if (_unifiedMwSub != null) {
+      print(
+        '   Cancelling unified WebSocket subscription to stop old data...',
+      );
       _unifiedMwSub?.cancel();
       _unifiedMwSub = null;
       isConnected.value = false;
@@ -1546,8 +1801,13 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       final tradingController = Get.find<TradingController>();
       tradingController.clearAllTradingData();
     } catch (e) {
+      print('Error clearing trading data: $e');
     }
 
+    print("✅ InstrumentsController: ALL DATA CLEARED");
+    print(
+      "   After clear: Total=${allInstruments.length}, Filtered=${instruments.length}",
+    );
     
     // ✅ Force UI update to show cleared state
     update();
@@ -1558,6 +1818,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Method to manually reconnect (can be called from UI)
   Future<void> manualReconnect() async {
+    print("Manual reconnection requested");
     _reconnectAttempts = 0; // Reset attempts for manual reconnect
 
     // Ensure clean disconnect first
@@ -1582,6 +1843,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       } catch (_) {}
     }
     if (accountNumber == null || accountNumber.isEmpty) {
+      print(
+        '⚠️ InstrumentsController: Group changed but no current account, skipping resubscribe',
+      );
       return;
     }
     await unsubscribeAndResubscribe(accountNumber);
@@ -1589,6 +1853,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Unsubscribe and resubscribe with new account (keeps socket active)
   Future<void> unsubscribeAndResubscribe(String newAccountNumber) async {
+    print(
+      '🔄 InstrumentsController: marketwatchv2 resync for account: $newAccountNumber',
+    );
 
     _currentAccountNumber = newAccountNumber;
 
@@ -1602,6 +1869,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       final isNowMT5 = newAccount?.tradingServer.toUpperCase() == "MT5";
 
       if (wasMT5 != isNowMT5) {
+        print(
+          '🔄 InstrumentsController: Trading server changed (was MT5: $wasMT5, now MT5: $isNowMT5), resyncing v2',
+        );
         stopWebSocket();
         await Future.delayed(const Duration(milliseconds: 150));
         clearInstrumentsData();
@@ -1609,9 +1879,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         return;
       }
     } catch (e) {
+      print('⚠️ InstrumentsController: Error checking trading server: $e');
     }
 
     if (!isConnected.value) {
+      print('⚠️ InstrumentsController: Not connected, initializing marketwatchv2');
       clearInstrumentsData();
       await startMarketWatchV2Only();
       return;
@@ -1623,7 +1895,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       }
       clearInstrumentsData();
       await startMarketWatchV2Only();
+      print('✅ InstrumentsController: marketwatchv2 resync complete');
     } catch (e) {
+      print('❌ InstrumentsController: Error in unsubscribeAndResubscribe: $e');
       stopWebSocket();
       await Future.delayed(const Duration(milliseconds: 100));
       clearInstrumentsData();

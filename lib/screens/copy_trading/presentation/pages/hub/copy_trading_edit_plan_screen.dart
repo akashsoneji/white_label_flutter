@@ -3,7 +3,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/copy_trading/view_models/copy_trading_master_dashboard_controller.dart';
 import 'package:crm_app/utils/app_logger.dart';
 import 'package:crm_app/widgets/app_select_field.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
@@ -96,10 +96,10 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text('Edit Plan', style: AppTextStyles.heading),
-        leading: AppBackButton(
+        leading: AppSvgBackButton(
           onPressed: () => Get.back(closeOverlays: true),
-          
-          
+          iconWidth: 30.w,
+          iconHeight: 30.h,
         ),
       ),
       body: SingleChildScrollView(
@@ -385,7 +385,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
             TextFormField(
               controller: _noFeeDaysCtrl,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(),
+              decoration: const InputDecoration(),
             ),
             SizedBox(height: 4.h),
             Text(
@@ -457,7 +457,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
             TextFormField(
               controller: _copyRatioCtrl,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: '1',
               ),
             ),
@@ -582,9 +582,10 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
     final commissionValue = num.tryParse(_commissionCtrl.text.trim());
     final minCap = num.tryParse(_minCapitalCtrl.text.trim());
     if (commissionValue == null || minCap == null) {
-      CustomToastService.showError(
-        title: 'Invalid',
-        message: 'Enter valid numeric values',
+      Get.snackbar(
+        'Invalid',
+        'Enter valid numeric values',
+        snackPosition: SnackPosition.BOTTOM,
       );
       return;
     }
@@ -623,9 +624,10 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
         message: res.message ?? 'Plan updated successfully',
       );
     } else {
-      CustomToastService.showError(
-        title: 'Failed',
-        message: res.message ?? _controller.errorMessage.value,
+      Get.snackbar(
+        'Failed',
+        res.message ?? _controller.errorMessage.value,
+        snackPosition: SnackPosition.BOTTOM,
       );
     }
   }

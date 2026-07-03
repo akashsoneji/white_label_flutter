@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
@@ -195,11 +195,6 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
                         height: 1.4,
                       ),
                     ),
-                  ),
-                  SvgPicture.asset(
-                    "assets/svg/deshboard/mt5_chose_account.svg",
-                    height: 24.h,
-                    width: 28.w,
                   ),
                 ],
               ),

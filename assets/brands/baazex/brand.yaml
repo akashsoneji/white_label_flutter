@@ -1,0 +1,33 @@
+name: baazex
+type: child
+inheritsFrom: vantage
+label: Baazex
+themeMode: both
+
+android:
+  applicationId: com.baazex.app
+  appName: Baazex
+
+ios:
+  bundleId: com.baazex.app
+  appName: Baazex
+
+colors:
+  primary: "#BF235C"
+  secondary: "#212121"
+  accent: "#BF235C"
+  splashColor: "#BF235C"
+  launcherBackground: "#BF235C"
+
+urls:
+  api: https://demov.baazex.com/api/
+  websocket: wss://demov.baazex.com/trade-engine
+  chart: https://demov.baazex.com
+
+assets:
+  appIcon: icon.png
+  logo: logo.svg
+  splashLogo: splash_logo.svg
+
+features:
+  useNewChart: false

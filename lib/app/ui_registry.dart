@@ -46,12 +46,14 @@ class UiRegistry implements UiSlots {
   // Keep this synchronous for widget factories. Regenerate/update this map from
   // assets/config/brands/brands.yaml when parent-child UI inheritance changes.
 
+
   static const Map<String, String> _uiParentByClient = {
     'vantage': 'vantage',
     'celestial': 'celestial',
     'pipze': 'vantage',
     'skyriss': 'vantage',
     'tenax': 'vantage',
+ 'baazex': 'vantage',
  'telifox': 'vantage',
  };
 

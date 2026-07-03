@@ -24,6 +24,20 @@ class PmamRepositoryImpl implements PmamRepository {
   Future<ApiResponse> inactivatePlan(int planId) => _remote.inactivatePlan(planId);
 
   @override
+  Future<ApiResponse> pausePlan(int planId) => _remote.pausePlan(planId);
+
+  @override
+  Future<ApiResponse> resumePlan(int planId) => _remote.resumePlan(planId);
+
+  @override
+  Future<ApiResponse> updatePlan(int planId, Map<String, dynamic> body) =>
+      _remote.updatePlan(planId, body);
+
+  @override
+  Future<ApiResponse> getManagerDashboardOverview({String range = '30d'}) =>
+      _remote.getManagerDashboardOverview(range: range);
+
+  @override
   Future<ApiResponse> getManagerDashboardStats() => _remote.getManagerDashboardStats();
 
   @override
@@ -128,6 +142,29 @@ class PmamRepositoryImpl implements PmamRepository {
 
   @override
   Future<ApiResponse> getMyOpenAllocations() => _remote.getMyOpenAllocations();
+
+  @override
+  Future<ApiResponse> getManagerProfile(String managerCode) =>
+      _remote.getManagerProfile(managerCode);
+
+  @override
+  Future<ApiResponse> getManagerOpenPositions({
+    required String managerCode,
+    required int planId,
+  }) =>
+      _remote.getManagerOpenPositions(managerCode: managerCode, planId: planId);
+
+  @override
+  Future<ApiResponse> getManagerTradesPublic({
+    required String managerCode,
+    required int planId,
+    int perPage = 9999,
+  }) =>
+      _remote.getManagerTradesPublic(
+        managerCode: managerCode,
+        planId: planId,
+        perPage: perPage,
+      );
 
   @override
   Future<ApiResponse> getManagerTrades({

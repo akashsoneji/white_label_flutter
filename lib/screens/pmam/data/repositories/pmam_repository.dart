@@ -7,6 +7,10 @@ abstract class PmamRepository {
   Future<ApiResponse> getManagerPlans();
   Future<ApiResponse> createPlan(Map<String, dynamic> body);
   Future<ApiResponse> inactivatePlan(int planId);
+  Future<ApiResponse> pausePlan(int planId);
+  Future<ApiResponse> resumePlan(int planId);
+  Future<ApiResponse> updatePlan(int planId, Map<String, dynamic> body);
+  Future<ApiResponse> getManagerDashboardOverview({String range = '30d'});
   Future<ApiResponse> getManagerDashboardStats();
   Future<ApiResponse> getInvestorRequests(int planId);
   Future<ApiResponse> getManagerInvestors();
@@ -48,6 +52,16 @@ abstract class PmamRepository {
   Future<ApiResponse> getMyFundEntries();
   Future<ApiResponse> getInvestorEnrollments();
   Future<ApiResponse> getMyOpenAllocations();
+  Future<ApiResponse> getManagerProfile(String managerCode);
+  Future<ApiResponse> getManagerOpenPositions({
+    required String managerCode,
+    required int planId,
+  });
+  Future<ApiResponse> getManagerTradesPublic({
+    required String managerCode,
+    required int planId,
+    int perPage = 9999,
+  });
   Future<ApiResponse> getManagerTrades({
     required String managerCode,
     required int planId,

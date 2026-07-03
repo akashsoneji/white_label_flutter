@@ -140,6 +140,25 @@ class ApiConstants {
       '${ajax}copytrading/master/status';
   static const String copyTradingMasterDashboardStats =
       '${ajax}copytrading/master/dashboard-stats';
+
+  /// Master dashboard overview (range + hero + main chart + copier_health
+  /// + plans + payouts + recent_trades + alerts).
+  /// Example: copytrading/master/dashboard-overview?range=30d
+  ///
+  /// PREFERRED: use [copyTradingMasterDashboardOverviewPath] and pass the
+  /// `range` via `queryParameters` instead — `ApiService.get` uses
+  /// `Uri.replace(queryParameters: …)` which strips any query string
+  /// already in the endpoint, so inlining `?range=…` here gets silently
+  /// dropped when callers also pass other query params (e.g. cache-buster).
+  static String copyTradingMasterDashboardOverview({String range = '30d'}) =>
+      '$copyTradingMasterDashboardOverviewPath?range=$range';
+
+  /// Path-only form (no query string) of [copyTradingMasterDashboardOverview].
+  /// Combine with `queryParameters: {'range': '7d', ...}` when calling
+  /// `ApiService.get`.
+  static const String copyTradingMasterDashboardOverviewPath =
+      '${ajax}copytrading/master/dashboard-overview';
+
   static const String copyTradingMasterPlans = '${ajax}copytrading/master/plans';
   static String copyTradingMasterPlanOpenPositions(int planId) =>
       '$copyTradingMasterPlans/$planId/open-positions';

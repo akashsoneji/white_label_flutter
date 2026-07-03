@@ -35,13 +35,14 @@ void main(List<String> args) async {
     }
 
     final brandColors = await loadBrandColors(flavor);
+    final inheritance = await loadInheritance(flavor);
 
-    await cleanOtherClientAssets(flavor, allFlavors);
-    await copyClientAssets(flavor);
+    await cleanOtherClientAssets(flavor, allFlavors, inheritance);
+    await copyClientAssets(flavor, inheritance);
 
     await copyGoogleServicesIfPresent(flavor);
-    await writeBuildBrandRegistry(flavor);
-    await updatePubspec(flavor, allFlavors);
+    await writeBuildBrandRegistry(flavor, inheritance);
+    await updatePubspec(flavor, allFlavors, inheritance);
     await generateNativeSplash(flavor, brandColors: brandColors);
     await prepareAdaptiveForeground(flavor);
     await generateLauncherIcons(flavor);
@@ -163,15 +164,71 @@ String brandColorValue(
   return fallback;
 }
 
-Future<void> cleanOtherClientAssets(String currentFlavor, List<String> allFlavors) async {
+/// Reads the parent brand chain for [flavor] from its `brand.yaml`.
+/// Returns an ordered list including the active flavor and all ancestors
+/// (active first, root parent last). Empty list if the flavor is a parent.
+Future<List<String>> loadInheritance(String flavor) async {
+  final chain = <String>[flavor];
+  final brandYaml = File(path.join('assets', 'brands', flavor, 'brand.yaml'));
+  if (!await brandYaml.exists()) return chain;
+
+  String? inheritsFrom;
+  bool isChild = false;
+  for (final line in (await brandYaml.readAsString()).split('\n')) {
+    final trimmed = line.trim();
+    if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+    if (trimmed.startsWith('type:')) {
+      isChild = _yamlValue(trimmed).toLowerCase() == 'child';
+    } else if (trimmed.startsWith('inheritsFrom:')) {
+      inheritsFrom = _yamlValue(trimmed).toLowerCase();
+      if (inheritsFrom.isEmpty) inheritsFrom = null;
+    }
+  }
+
+  if (!isChild || inheritsFrom == null) return chain;
+
+  // Resolve recursively — but cap depth to avoid cycles.
+  const maxDepth = 5;
+  var depth = 0;
+  String? current = inheritsFrom;
+  while (current != null && depth < maxDepth) {
+    final name = current; // capture for non-null use
+    chain.add(name);
+    final parentYaml = File(path.join('assets', 'brands', name, 'brand.yaml'));
+    if (!await parentYaml.exists()) break;
+    current = null;
+    for (final line in (await parentYaml.readAsString()).split('\n')) {
+      final trimmed = line.trim();
+      if (trimmed.startsWith('inheritsFrom:')) {
+        final next = _yamlValue(trimmed).toLowerCase();
+        if (next.isNotEmpty) current = next;
+        break;
+      }
+    }
+    depth++;
+  }
+  return chain;
+}
+
+Future<void> cleanOtherClientAssets(
+  String currentFlavor,
+  List<String> allFlavors,
+  List<String> inheritance,
+) async {
   print('🧹 Cleaning other client assets...');
+
+  // Preserve the active flavor AND every ancestor (parent) it inherits from —
+  // child flavors resolve UI/screens through their parent chain at runtime.
+  final keep = inheritance.toSet();
 
   final clientsDir = Directory('assets/clients');
   if (await clientsDir.exists()) {
     await for (final entity in clientsDir.list()) {
       if (entity is Directory) {
         final folderName = path.basename(entity.path).toLowerCase();
-        if (folderName != currentFlavor && allFlavors.contains(folderName)) {
+        if (folderName != currentFlavor &&
+            !keep.contains(folderName) &&
+            allFlavors.contains(folderName)) {
           await entity.delete(recursive: true);
           print('  ✓ Removed: assets/clients/$folderName/');
         }
@@ -181,31 +238,46 @@ Future<void> cleanOtherClientAssets(String currentFlavor, List<String> allFlavor
     await clientsDir.create(recursive: true);
   }
 
-  print('  ✓ Cleanup complete - only $currentFlavor assets will remain after copy');
+  print('  ✓ Cleanup complete - keeping: ${keep.join(', ')}');
 }
 
 /// Copy editable source assets from assets/brands/{flavor}/ to prepared runtime assets/clients/{flavor}/.
-Future<void> copyClientAssets(String flavor) async {
+///
+/// For child flavors, also copies the ancestor chain (parent → grandparent → ...)
+/// so the BrandResolver can load app_config.json + icons at runtime.
+Future<void> copyClientAssets(
+  String flavor,
+  List<String> inheritance,
+) async {
   print('📂 Copying client assets...');
 
-  final sourceDir = Directory(path.join('assets', 'brands', flavor));
-  final targetDir = Directory(path.join('assets', 'clients', flavor));
+  for (final name in inheritance) {
+    final sourceDir = Directory(path.join('assets', 'brands', name));
+    final targetDir = Directory(path.join('assets', 'clients', name));
 
-  if (!await sourceDir.exists()) {
-    throw Exception('Brand source assets directory not found: ${sourceDir.path}');
-  }
+    if (!await sourceDir.exists()) {
+      if (name == flavor) {
+        throw Exception(
+          'Brand source assets directory not found: ${sourceDir.path}',
+        );
+      }
+      // Ancestor chain is optional in single-tenant builds — log and skip.
+      print('  ⚠️  Ancestor assets missing for $name (skipping)');
+      continue;
+    }
 
-  if (await targetDir.exists()) await targetDir.delete(recursive: true);
-  await targetDir.create(recursive: true);
+    if (await targetDir.exists()) await targetDir.delete(recursive: true);
+    await targetDir.create(recursive: true);
 
-  await for (final entity in sourceDir.list(recursive: true)) {
-    if (entity is File && !path.basename(entity.path).startsWith('.')) {
-      final relativePath = path.relative(entity.path, from: sourceDir.path);
-      final targetPath = path.join(targetDir.path, relativePath);
-      final targetFile = File(targetPath);
-      await targetFile.parent.create(recursive: true);
-      await entity.copy(targetPath);
-      print('  ✓ Copied: $relativePath');
+    await for (final entity in sourceDir.list(recursive: true)) {
+      if (entity is File && !path.basename(entity.path).startsWith('.')) {
+        final relativePath = path.relative(entity.path, from: sourceDir.path);
+        final targetPath = path.join(targetDir.path, relativePath);
+        final targetFile = File(targetPath);
+        await targetFile.parent.create(recursive: true);
+        await entity.copy(targetPath);
+        print('  ✓ [$name] Copied: $relativePath');
+      }
     }
   }
 }
@@ -233,30 +305,46 @@ Future<void> copyGoogleServicesIfPresent(String flavor) async {
   print('  ✓ Copied google-services.json to android/app/src/$flavor/google-services.json');
 }
 
-Future<void> writeBuildBrandRegistry(String flavor) async {
+Future<void> writeBuildBrandRegistry(
+  String flavor,
+  List<String> inheritance,
+) async {
   print('\n🔒 Writing build-scoped brand registry...');
 
-  final activeDetails = await loadBrandDetailsFromSource(flavor);
+  // Bundle metadata for the active flavor AND every ancestor — the
+  // BrandResolver's parent/child resolution requires the parent's
+  // brandDetails to be present at runtime, even though we only ship a
+  // single flavor in the APK.
+  final brandDetails = <Map<String, dynamic>>[];
+  for (final name in inheritance) {
+    final d = await loadBrandDetailsFromSource(name);
+    final isActive = name == flavor;
+    final inheritsFrom = isActive && inheritance.length > 1
+        ? inheritance[1]
+        : null;
+    brandDetails.add(<String, dynamic>{
+      'name': name,
+      'type': isActive
+          ? (inheritsFrom != null ? 'child' : 'parent')
+          : 'parent',
+      if (inheritsFrom != null) 'inheritsFrom': inheritsFrom,
+      'label': d['label'] ?? name,
+      'themeMode': d['themeMode'] ?? 'both',
+    });
+  }
+
   final safeRegistry = <String, dynamic>{
     'default': flavor,
-    'brands': <String>[flavor],
-    'brandDetails': <Map<String, dynamic>>[
-      {
-        'name': flavor,
-        // Keep this parent in the build-scoped registry so parent/child
-        // relationship metadata for other clients is not bundled in the APK.
-        'type': 'parent',
-        'label': activeDetails['label'] ?? flavor,
-        // Keep only the active brand theme lock/selectability.
-        'themeMode': activeDetails['themeMode'] ?? 'both',
-      },
-    ],
+    // BrandRegistry.loadFromAssets() will also merge BrandId.tenax as a
+    // safety net, but explicitly listing every kept brand keeps logs clear.
+    'brands': inheritance,
+    'brandDetails': brandDetails,
   };
 
   final registryFile = File('assets/config/brands/brands.json');
   await registryFile.parent.create(recursive: true);
   await registryFile.writeAsString('${const JsonEncoder.withIndent('  ').convert(safeRegistry)}\n');
-  print('  ✓ brands.json now contains only $flavor metadata');
+  print('  ✓ brands.json keeps: ${inheritance.join(', ')}');
 }
 
 Future<Map<String, String>> loadBrandDetailsFromSource(String flavor) async {
@@ -289,7 +377,11 @@ String _yamlValue(String line) {
       .replaceAll("'", '');
 }
 
-Future<void> updatePubspec(String flavor, List<String> allFlavors) async {
+Future<void> updatePubspec(
+  String flavor,
+  List<String> allFlavors,
+  List<String> inheritance,
+) async {
   print('\n📝 Updating pubspec.yaml...');
 
   final pubspecFile = File('pubspec.yaml');
@@ -297,8 +389,15 @@ Future<void> updatePubspec(String flavor, List<String> allFlavors) async {
 
   var content = await pubspecFile.readAsString();
 
+  // Bundle assets/clients/<flavor>/ for every kept brand (active + ancestors)
+  // so the parent/child UI resolver can load app_config.json and assets for
+  // any brand in the inheritance chain at runtime.
+  final clientAssetLines = inheritance
+      .map((f) => '    - assets/clients/$f/')
+      .join('\n');
+
   final managedBlock = '''    # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND
-    - assets/clients/$flavor/
+$clientAssetLines
     - assets/config/brands/brands.json
     # END GENERATED ACTIVE CLIENT ASSETS''';
 
@@ -331,8 +430,7 @@ Future<void> updatePubspec(String flavor, List<String> allFlavors) async {
   content = content.replaceAll(RegExp(r'\n{3,}'), '\n\n');
 
   await pubspecFile.writeAsString(content);
-  print('  ✓ Active client assets set to assets/clients/$flavor/');
-  print('  ✓ Active config assets included from assets/clients/$flavor/');
+  print('  ✓ Active client assets set to: ${inheritance.join(', ')}');
 }
 
 Future<void> generateNativeSplash(

@@ -5,7 +5,6 @@ import '../data/datasources/pmam_remote_data_source.dart';
 import '../data/repositories/pmam_repository_impl.dart';
 import '../data/repositories/pmam_repository.dart';
 import '../data/usecases/apply_as_manager.dart';
-import '../data/usecases/get_manager_dashboard.dart';
 import '../data/usecases/get_manager_status.dart';
 import 'package:crm_app/screens/pmam/view_models/pmam_controller.dart';
 
@@ -25,15 +24,11 @@ class PmamBinding extends Bindings {
     Get.lazyPut<ApplyAsManager>(
       () => ApplyAsManager(Get.find<PmamRepository>()),
     );
-    Get.lazyPut<GetManagerDashboard>(
-      () => GetManagerDashboard(Get.find<PmamRepository>()),
-    );
 
     Get.lazyPut<PmamController>(
       () => PmamController(
         getManagerStatus: Get.find<GetManagerStatus>(),
         applyAsManager: Get.find<ApplyAsManager>(),
-        getManagerDashboard: Get.find<GetManagerDashboard>(),
         repo: Get.find<PmamRepository>(),
       ),
     );

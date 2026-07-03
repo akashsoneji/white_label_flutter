@@ -1728,6 +1728,8 @@ class AccountMenuBottomSheet extends StatelessWidget {
                       _showMT5ChangePasswordDialog();
                     },
                   ),
+                ],
+                if (account.leverageChangeAllowed) ...[
                   SizedBox(height: 16),
                   _buildMenuItem(
                     icon: Icons.trending_up,

@@ -1,9 +1,24 @@
 {
-  "default": "celestial",
+  "default": "baazex",
   "brands": [
+    "baazex",
+    "vantage",
     "celestial"
   ],
   "brandDetails": [
+    {
+      "name": "baazex",
+      "type": "child",
+      "inheritsFrom": "vantage",
+      "label": "Baazex",
+      "themeMode": "both"
+    },
+    {
+      "name": "vantage",
+      "type": "parent",
+      "label": "Vantage",
+      "themeMode": "both"
+    },
     {
       "name": "celestial",
       "type": "parent",

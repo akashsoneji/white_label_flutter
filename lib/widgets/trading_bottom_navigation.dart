@@ -21,7 +21,10 @@ class TradingBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languageService = Get.find<LanguageService>();
-    final isVantage = FlavorConfig.isVantage();
+    // Baazex is a child of Vantage — it must use Vantage's UI tree (4-tab
+    // bottom nav with Prices as the default Chart tab) so the design stays
+    // consistent across the child brands.
+    final isVantage = FlavorConfig.usesVantageUi();
 
     if (isVantage) {
       return Container(
