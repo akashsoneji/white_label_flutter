@@ -18,9 +18,9 @@ class CelestialConfig extends BaseClientConfig {
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',
- apiBaseUrl: 'https://app.tenaxcode.com/api/',
- websocketUrl: 'wss://app.tenaxcode.com/trade-engine',
- chartBaseUrl: 'https://app.tenaxcode.custom',
+ apiBaseUrl: 'https://client.celestialtrader.com/api/',
+ websocketUrl: 'wss://client.celestialtrader.com/trade-engine',
+ chartBaseUrl: 'https://client.celestialtrader.custom',
  useNewChart: false,
  );
 }
