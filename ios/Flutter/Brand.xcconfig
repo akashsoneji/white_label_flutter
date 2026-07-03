@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart celestial
-// Active flavor: celestial
-PRODUCT_BUNDLE_IDENTIFIER=com.celestial.app
-BRAND_DISPLAY_NAME=Celestial
+//   dart run scripts/prepare_flavor.dart gtxprime
+// Active flavor: gtxprime
+PRODUCT_BUNDLE_IDENTIFIER=com.gtxprime.app
+BRAND_DISPLAY_NAME=GTX Prime
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPWNlbGVzdGlhbA==,RkxBVk9SPWNlbGVzdGlhbA==
+DART_DEFINES=Q0xJRU5UPWd0eHByaW1l,RkxBVk9SPWd0eHByaW1l

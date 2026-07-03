@@ -1,13 +1,21 @@
 {
-  "default": "celestial",
+  "default": "gtxprime",
   "brands": [
-    "celestial"
+    "gtxprime",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "celestial",
+      "name": "gtxprime",
+      "type": "child",
+      "inheritsFrom": "vantage",
+      "label": "GTX Prime",
+      "themeMode": "both"
+    },
+    {
+      "name": "vantage",
       "type": "parent",
-      "label": "Celestial",
+      "label": "Vantage",
       "themeMode": "both"
     }
   ]
