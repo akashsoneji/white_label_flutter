@@ -4,30 +4,89 @@
 default: vantage
 
 brands:
+  - name: baazex
+    type: child
+    inheritsFrom: vantage
+    label: Baazex
+    themeMode: both
+ android:
+ applicationId: "com.baazex.app"
+ appName: "Baazex"
+ ios:
+ bundleId: "com.baazex.app"
+ appName: "Baazex"
+ colors:
+ primary: "#BF235C"
+ secondary: "#212121"
+ accent: "#BF235C"
+ splashColor: "#BF235C"
+ launcherBackground: "#BF235C"
+ urls:
+ api: "https://demov.baazex.com/api/"
+ websocket: "wss://demov.baazex.com/trade-engine"
+ chart: "https://demov.baazex.com"
+ assets:
+ appIcon: "assets/brands/baazex/icon.png"
+ logo: "assets/brands/baazex/logo.svg"
+ splashLogo: "assets/brands/baazex/splash_logo.svg"
+ features:
+ useNewChart: "false"
+
   - name: celestial
     type: parent
     label: Celestial
     themeMode: both
-    android:
-      applicationId: "com.celestial.app"
-      appName: "Celestial"
-    ios:
-      bundleId: "com.celestial.app"
-      appName: "Celestial"
-    colors:
-      primary: "#24324D"
-      secondary: "#22D3EE"
-      accent: "#24324D"
-      splashColor: "#24324D"
-      launcherBackground: "#24324D"
-    urls:
-      api: "https://app.tenaxcode.com/api/"
-      websocket: "wss://app.tenaxcode.com/trade-engine"
-      chart: "https://app.tenaxcode.custom"
-    assets:
-      appIcon: "assets/brands/celestial/icon.png"
-      logo: "assets/brands/celestial/logo.svg"
-      splashLogo: "assets/brands/celestial/splash_logo.svg"
+ android:
+ applicationId: "com.celestial.app"
+ appName: "Celestial"
+ ios:
+ bundleId: "com.celestial.app"
+ appName: "Celestial"
+ colors:
+ primary: "#24324D69"
+ secondary: "#22D3EE"
+ accent: "#24324D"
+ splashColor: "#24324D"
+ launcherBackground: "#24324D"
+ urls:
+ api: "https://app.tenaxcode.com/api/"
+ websocket: "wss://app.tenaxcode.com/trade-engine"
+ chart: "https://app.tenaxcode.custom"
+ assets:
+ appIcon: "assets/brands/celestial/icon.png"
+ logo: "assets/brands/celestial/logo.svg"
+ splashLogo: "assets/brands/celestial/splash_logo.svg"
+ features:
+ useNewChart: "false"
+
+  - name: gtxprime
+    type: child
+    inheritsFrom: vantage
+    label: GTX Prime
+    themeMode: both
+ android:
+ applicationId: "com.gtxprime.app"
+ appName: "GTX Prime"
+ ios:
+ bundleId: "com.gtxprime.app"
+ appName: "GTX Prime"
+ colors:
+ primary: "#01061A"
+ darkPrimary: "#F8F3FF"
+ secondary: "#011947"
+ accent: "#011947"
+ splashColor: "#01061A"
+ launcherBackground: "#01061A"
+ urls:
+ api: "https://app.tenaxcode.com/api/"
+ websocket: "wss://app.tenaxcode.com/trade-engine"
+ chart: "https://app.tenaxcode.com"
+ assets:
+ appIcon: "assets/brands/gtxprime/icon.png"
+ logo: "assets/brands/gtxprime/logo.png"
+ splashLogo: "assets/brands/gtxprime/splash_logo.png"
+ features:
+ useNewChart: "false"
 
   - name: pipze
     type: child

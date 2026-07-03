@@ -53,9 +53,11 @@ class UiRegistry implements UiSlots {
     'pipze': 'vantage',
     'skyriss': 'vantage',
     'tenax': 'vantage',
- 'baazex': 'vantage',
- 'telifox': 'vantage',
- };
+    'baazex': 'vantage',
+    'gtxprime': 'vantage',
+    'telifox': 'vantage',
+    'acme': 'vantage',
+  };
 
   String get _uiBrand =>
       _uiParentByClient[client.toLowerCase()] ?? client.toLowerCase();

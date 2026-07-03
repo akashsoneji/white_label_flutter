@@ -1,6 +1,17 @@
 # Brand Flavor Workflow
 
-This project now supports a **simplified one client = one folder** layout.
+> **🆕 One-shot scaffolder available:** For most cases, you no longer need
+> this manual workflow. Run:
+> ```
+> dart run scripts/add_flavor.dart --name <id> --type child --parent vantage \
+>   --label "Display Name" --primary "#RRGGBB" \
+>   --api "https://api.<id>/api/" --websocket "wss://api.<id>/trade-engine" \
+>   --chart "https://api.<id>"
+> ```
+> See [`ADD_FLAVOR.md`](./ADD_FLAVOR.md) for the full guide. The rest of this
+> doc explains the underlying pipeline for understanding or troubleshooting.
+
+This project supports a **simplified one client = one folder** layout.
 All configurations, icons, and logo assets for a client live inside their specific directory.
 
 Each brand keeps editable artwork and configs in:
