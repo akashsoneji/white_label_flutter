@@ -18,9 +18,9 @@ class TenaxConfig extends BaseClientConfig {
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',
-        apiBaseUrl: 'https://app.tenaxcode.com/api/',
-        websocketUrl: 'wss://app.tenaxcode.com/trade-engine',
-        chartBaseUrl: 'https://app.tenaxcode.com',
-        useNewChart: false,
+ apiBaseUrl: 'https://demo.tenaxcode.com/api/',
+ websocketUrl: 'wss://demo.tenaxcode.com/trade-engine',
+ chartBaseUrl: 'https://demo.tenaxcode.com',
+ useNewChart: false,
  );
 }

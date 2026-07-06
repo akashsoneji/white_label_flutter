@@ -28,14 +28,16 @@ const String _activeClient = String.fromEnvironment(
 class FinanceUiRegistry implements FinanceUiSlots {
  const FinanceUiRegistry();
 
- bool get _usesVantageUi =>
- _activeClient.toLowerCase() == 'vantage' ||
- _activeClient.toLowerCase() == 'baazex' ||
- _activeClient.toLowerCase() == 'celestial' ||
- _activeClient.toLowerCase() == 'pipze' ||
- _activeClient.toLowerCase() == 'skyriss' ||
- _activeClient.toLowerCase() == 'telifox' ||
- _activeClient.toLowerCase() == 'tenax';
+  bool get _usesVantageUi =>
+      _activeClient.toLowerCase() == 'vantage' ||
+      _activeClient.toLowerCase() == 'baazex' ||
+      _activeClient.toLowerCase() == 'celestial' ||
+      _activeClient.toLowerCase() == 'gtxprime' ||
+      _activeClient.toLowerCase() == 'kantara' ||
+      _activeClient.toLowerCase() == 'pipze' ||
+      _activeClient.toLowerCase() == 'skyriss' ||
+      _activeClient.toLowerCase() == 'telifox' ||
+      _activeClient.toLowerCase() == 'tenax';
 
   @override
   Widget paymentMethods({required String accountNumber}) {

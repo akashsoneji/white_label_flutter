@@ -1,0 +1,24 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1_112)">
+<g clip-path="url(#clip1_1_112)">
+<rect width="1024" height="1024" rx="512" fill="white"/>
+<path d="M296 304L17 535L-9 519L-42 320L92 90L268 1H810L788 92L400 420L296 304Z" fill="#4AAF46"/>
+<path d="M289 382L25 613L-26 694L25 1126L597 1152L1070 1045V167L849 128L398 501L289 382Z" fill="#392F77"/>
+<rect x="726" y="306" width="60" height="196" rx="12" fill="white"/>
+<rect x="674" y="460" width="164" height="564" rx="12" fill="white"/>
+<rect x="482" y="460" width="60" height="196" rx="12" fill="white"/>
+<rect x="430" y="614" width="164" height="564" rx="12" fill="white"/>
+<rect x="238" y="614" width="60" height="196" rx="12" fill="white"/>
+<rect x="186" y="768" width="164" height="564" rx="12" fill="white"/>
+</g>
+<rect x="8" y="8" width="1008" height="1008" rx="504" stroke="#2E2174" stroke-width="16"/>
+</g>
+<defs>
+<clipPath id="clip0_1_112">
+<rect width="1024" height="1024" fill="white"/>
+</clipPath>
+<clipPath id="clip1_1_112">
+<rect width="1024" height="1024" rx="512" fill="white"/>
+</clipPath>
+</defs>
+</svg>

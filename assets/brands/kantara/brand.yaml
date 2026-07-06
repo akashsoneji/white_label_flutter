@@ -1,0 +1,33 @@
+name: kantara
+type: child
+inheritsFrom: vantage
+label: Kantara
+themeMode: both
+
+android:
+  applicationId: "com.kantara.app"
+  appName: "Kantara"
+
+ios:
+  bundleId: "com.kantara.app"
+  appName: "Kantara"
+
+colors:
+  primary: "#2E2174"
+  secondary: "#4AAF46"
+  accent: "#2E2174"
+  splashColor: "#2E2174"
+  launcherBackground: "#2E2174"
+
+urls:
+  api: "https://client.kantaracapital.io/api/"
+  websocket: "wss://client.kantaracapital.io/trade-engine"
+  chart: "https://client.kantaracapital.io/"
+
+assets:
+  appIcon: icon.png
+  logo: logo.svg
+  splashLogo: splash_logo.svg
+
+features:
+  useNewChart: false

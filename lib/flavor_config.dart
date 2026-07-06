@@ -3,24 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
-import 'clients/baazex/config.dart';
-import 'clients/celestial/config.dart';
-import 'clients/gtxprime/config.dart';
-import 'clients/pipze/config.dart';
-import 'clients/skyriss/config.dart';
-import 'clients/telifox/config.dart';
-import 'clients/tenax/config.dart';
-import 'clients/vantage/config.dart';
+import 'clients/kantara/config.dart';
 
 enum Flavor {
-  baazex,
-  celestial,
-  gtxprime,
-  pipze,
-  skyriss,
-  telifox,
-  tenax,
-  vantage,
+  kantara,
 }
 
 class FlavorConfig {
@@ -105,7 +91,7 @@ class FlavorConfig {
  this.useNewChart = false,
  }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.vantage);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.kantara);
 
   static void reset() {
     _instance = null;
@@ -121,68 +107,27 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.vantage,
+      orElse: () => Flavor.kantara,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
-      case Flavor.baazex:
-        const config = BaazexConfig();
-        return config.toFlavorConfig(Flavor.baazex, 'baazex');
-      case Flavor.celestial:
-        const config = CelestialConfig();
-        return config.toFlavorConfig(Flavor.celestial, 'celestial');
-      case Flavor.gtxprime:
-        const config = GtxprimeConfig();
-        return config.toFlavorConfig(Flavor.gtxprime, 'gtxprime');
-      case Flavor.pipze:
-        const config = PipzeConfig();
-        return config.toFlavorConfig(Flavor.pipze, 'pipze');
-      case Flavor.skyriss:
-        const config = SkyrissConfig();
-        return config.toFlavorConfig(Flavor.skyriss, 'skyriss');
-      case Flavor.telifox:
-        const config = TelifoxConfig();
-        return config.toFlavorConfig(Flavor.telifox, 'telifox');
-      case Flavor.tenax:
-        const config = TenaxConfig();
-        return config.toFlavorConfig(Flavor.tenax, 'tenax');
-      case Flavor.vantage:
-        const config = VantageConfig();
-        return config.toFlavorConfig(Flavor.vantage, 'vantage');
+      case Flavor.kantara:
+        const config = KantaraConfig();
+        return config.toFlavorConfig(Flavor.kantara, 'kantara');
     }
   }
 
-  static bool isBaazex() => _instance?.flavor == Flavor.baazex;
-  static FlavorConfig get baazex => activate(Flavor.baazex);
-
-  static bool isCelestial() => _instance?.flavor == Flavor.celestial;
-  static FlavorConfig get celestial => activate(Flavor.celestial);
-
-  static bool isGtxprime() => _instance?.flavor == Flavor.gtxprime;
-  static FlavorConfig get gtxprime => activate(Flavor.gtxprime);
-
-  static bool isPipze() => _instance?.flavor == Flavor.pipze;
-  static FlavorConfig get pipze => activate(Flavor.pipze);
-
-  static bool isSkyriss() => _instance?.flavor == Flavor.skyriss;
-  static FlavorConfig get skyriss => activate(Flavor.skyriss);
-
-  static bool isTelifox() => _instance?.flavor == Flavor.telifox;
-  static FlavorConfig get telifox => activate(Flavor.telifox);
-
-  static bool isTenax() => _instance?.flavor == Flavor.tenax;
-  static FlavorConfig get tenax => activate(Flavor.tenax);
-
-  static FlavorConfig get vantage => activate(Flavor.vantage);
+  static bool isKantara() => _instance?.flavor == Flavor.kantara;
+  static FlavorConfig get kantara => activate(Flavor.kantara);
 
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
-    return const <String>{'baazex', 'gtxprime', 'pipze', 'skyriss', 'telifox', 'tenax', 'vantage'}.contains(name);
+    final name = (_instance?.flavor.name ?? Flavor.kantara.name).toLowerCase();
+    return const <String>{'kantara'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;

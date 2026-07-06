@@ -1,13 +1,21 @@
 {
-  "default": "celestial",
+  "default": "kantara",
   "brands": [
-    "celestial"
+    "kantara",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "celestial",
+      "name": "kantara",
+      "type": "child",
+      "inheritsFrom": "vantage",
+      "label": "Kantara",
+      "themeMode": "both"
+    },
+    {
+      "name": "vantage",
       "type": "parent",
-      "label": "Celestial",
+      "label": "Vantage",
       "themeMode": "both"
     }
   ]

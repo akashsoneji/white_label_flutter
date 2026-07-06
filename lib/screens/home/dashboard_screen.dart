@@ -9,6 +9,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/models/websocket_trading_response.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/brand_switcher.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -1116,7 +1117,7 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final languageService = Get.find<LanguageService>();
     final isVantage = FlavorConfig.isVantage();
-    final isCelestial = FlavorConfig.isCelestial();
+    final isCelestial = BrandSwitcher.isCelestial;
     // ✅ FIX: Ensure WebSocket is initialized and always refresh accounts when Dashboard appears
     // This works for Get.back, Get.offAll, and bottom navigation
     WidgetsBinding.instance.addPostFrameCallback((_) {
