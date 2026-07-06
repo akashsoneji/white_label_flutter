@@ -1,0 +1,8 @@
+# GENERATED — Do not edit manually. Regenerate from brands.yaml.
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/brands/meta/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#1877F2"
+  adaptive_icon_foreground: "assets/clients/meta/ic_adaptive_foreground.png"

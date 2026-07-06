@@ -1,0 +1,33 @@
+name: meta
+type: parent
+label: Meta
+themeMode: both
+
+android:
+  applicationId: com.meta.app
+  appName: Meta
+
+ios:
+  bundleId: com.meta.app
+  appName: Meta
+
+colors:
+  primary: "#1877F2"
+  secondary: "#F0F2F5"
+  accent: "#1877F2"
+  splashColor: "#1877F2"
+  launcherBackground: "#1877F2"
+
+urls:
+  api: https://app.tenaxcode.com/api/
+  websocket: wss://app.tenaxcode.com/trade-engine
+  chart: https://app.tenaxcode.com
+
+
+assets:
+  appIcon: icon.png
+  logo: logo.svg
+  splashLogo: splash_logo.svg
+
+features:
+  useNewChart: false

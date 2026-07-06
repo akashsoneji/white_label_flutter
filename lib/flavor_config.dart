@@ -6,6 +6,7 @@ import 'clients/base_config.dart';
 import 'clients/baazex/config.dart';
 import 'clients/celestial/config.dart';
 import 'clients/gtxprime/config.dart';
+import 'clients/meta/config.dart';
 import 'clients/pipze/config.dart';
 import 'clients/skyriss/config.dart';
 import 'clients/telifox/config.dart';
@@ -16,6 +17,7 @@ enum Flavor {
   baazex,
   celestial,
   gtxprime,
+  meta,
   pipze,
   skyriss,
   telifox,
@@ -137,6 +139,9 @@ class FlavorConfig {
       case Flavor.gtxprime:
         const config = GtxprimeConfig();
         return config.toFlavorConfig(Flavor.gtxprime, 'gtxprime');
+      case Flavor.meta:
+        const config = MetaConfig();
+        return config.toFlavorConfig(Flavor.meta, 'meta');
       case Flavor.pipze:
         const config = PipzeConfig();
         return config.toFlavorConfig(Flavor.pipze, 'pipze');
@@ -163,6 +168,9 @@ class FlavorConfig {
 
   static bool isGtxprime() => _instance?.flavor == Flavor.gtxprime;
   static FlavorConfig get gtxprime => activate(Flavor.gtxprime);
+
+  static bool isMeta() => _instance?.flavor == Flavor.meta;
+  static FlavorConfig get meta => activate(Flavor.meta);
 
   static bool isPipze() => _instance?.flavor == Flavor.pipze;
   static FlavorConfig get pipze => activate(Flavor.pipze);

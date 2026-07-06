@@ -5,9 +5,10 @@ import 'flavor_config.dart';
 /// Provides easy methods to switch between different brands and inspect
 /// their runtime configuration.
 ///
-/// All 8 buildable flavors are supported:
+/// All 9 buildable flavors are supported:
 ///   - Vantage (parent, 4-tab UI tree)
-///   - Celestial (parent, 5-tab standalone UI tree)
+///   - Celestial (parent, 5-tab standalone UI tree — lib/brands/celestial/)
+///   - Meta (parent, 5-tab standalone UI tree — lib/brands/meta/, Facebook blue)
 ///   - Pipze / Tenax / Telifox / GTXPrime / Baazex / Skyriss
 ///     (Vantage children — share the 4-tab UI tree)
 class BrandSwitcher {
@@ -37,6 +38,9 @@ class BrandSwitcher {
 
   /// `true` when the active flavor is `Skyriss`.
   static bool get isSkyriss => FlavorConfig.instance.flavor == Flavor.skyriss;
+
+  /// `true` when the active flavor is `Meta`.
+  static bool get isMeta => FlavorConfig.instance.flavor == Flavor.meta;
 
   /// `true` when the active flavor should use Vantage's shared UI tree
   /// (4-tab Prices/Markets/Accounts/Settings). Equivalent to
@@ -111,6 +115,7 @@ class BrandSwitcher {
   static void switchToGtxprime() => switchTo('gtxprime');
   static void switchToBaazex() => switchTo('baazex');
   static void switchToSkyriss() => switchTo('skyriss');
+  static void switchToMeta() => switchTo('meta');
 
   /// Print the active brand summary to the console.
   static void printCurrentBrand() {
@@ -172,6 +177,8 @@ class BrandSwitcher {
         return 'Baazex';
       case Flavor.skyriss:
         return 'Skyriss';
+      case Flavor.meta:
+        return 'Meta';
     }
   }
 

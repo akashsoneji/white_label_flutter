@@ -1,13 +1,13 @@
 {
-  "default": "celestial",
+  "default": "meta",
   "brands": [
-    "celestial"
+    "meta"
   ],
   "brandDetails": [
     {
-      "name": "celestial",
+      "name": "meta",
       "type": "parent",
-      "label": "Celestial",
+      "label": "Meta",
       "themeMode": "both"
     }
   ]

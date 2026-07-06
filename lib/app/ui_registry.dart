@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../brands/celestial/celestial_main_shell.dart';
+import '../brands/meta/meta_main_shell.dart';
 import 'package:crm_app/screens/auth/presentation/pages/create_account_screen.dart';
 import 'package:crm_app/screens/auth/presentation/pages/create_new_password_screen.dart';
 import 'package:crm_app/screens/auth/presentation/pages/forgot_password_screen.dart';
@@ -31,7 +32,8 @@ import 'ui_slots.dart';
 
 /// Build-time selected client (no runtime switching).
 ///
-/// Use: `--dart-define=CLIENT=tenax|vantage|celestial|pipze|telifox`
+/// Use: `--dart-define=CLIENT=tenax|vantage|celestial|meta|pipze|telifox`
+/// Parents (vantage/celestial/meta) own their own UI tree.
 /// Child brands inherit their parent screen files based on brands.yaml.
 const String activeClient = String.fromEnvironment(
   'CLIENT',
@@ -50,6 +52,7 @@ class UiRegistry implements UiSlots {
   static const Map<String, String> _uiParentByClient = {
     'vantage': 'vantage',
     'celestial': 'celestial',
+    'meta': 'meta',
     'pipze': 'vantage',
     'skyriss': 'vantage',
     'tenax': 'vantage',
@@ -62,8 +65,9 @@ class UiRegistry implements UiSlots {
   String get _uiBrand =>
       _uiParentByClient[client.toLowerCase()] ?? client.toLowerCase();
 
-  bool get _usesCelestialUi => _uiBrand == 'celestial';
   bool get _usesVantageUi => _uiBrand == 'vantage';
+  bool get _usesMetaUi => _uiBrand == 'meta';
+  bool get _usesCelestialUi => _uiBrand == 'celestial';
 
   @override
   Widget splash() => const SplashScreen();
@@ -106,6 +110,7 @@ class UiRegistry implements UiSlots {
 
   @override
   Widget tradingMain() {
+    if (_usesMetaUi) return const MetaMainShell();
     if (_usesCelestialUi) return const CelestialMainShell();
     return const TradingMainScreen();
   }
