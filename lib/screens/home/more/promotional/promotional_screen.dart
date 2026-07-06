@@ -70,15 +70,15 @@ class PromotionalScreen extends StatelessWidget {
             }
 
             // Demo Contest is always visible under the Promotion section.
-            tiles.add(
-              MoreMenuTile(
-                iconAssetPath:
-                    'assets/svg/more/demo_contest/join-contest.svg',
-                label: languageService.tr('more_demo_contest'),
-                onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
-                textColor: AppColors.textPrimary,
-              ),
-            );
+            // tiles.add(
+            //   MoreMenuTile(
+            //     iconAssetPath:
+            //         'assets/svg/more/demo_contest/join-contest.svg',
+            //     label: languageService.tr('more_demo_contest'),
+            //     onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
+            //     textColor: AppColors.textPrimary,
+            //   ),
+            // );
 
             // Always show Bonus section
             tiles.add(
