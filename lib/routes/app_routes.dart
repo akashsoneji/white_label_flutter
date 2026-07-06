@@ -44,6 +44,12 @@ abstract class Routes {
   static const TRADER_DETAILS = _Paths.TRADER_DETAILS;
   static const BONUS = _Paths.BONUS;
   static const DEMO_CONTEST = _Paths.DEMO_CONTEST;
+  static const DEMO_CONTEST_RULES = _Paths.DEMO_CONTEST_RULES;
+  static const DEMO_CONTEST_JOIN = _Paths.DEMO_CONTEST_JOIN;
+  static const DEMO_CONTEST_DETAILS = _Paths.DEMO_CONTEST_DETAILS;
+  static const DEMO_CONTEST_LEADERBOARD = _Paths.DEMO_CONTEST_LEADERBOARD;
+  static const DEMO_CONTEST_HISTORY = _Paths.DEMO_CONTEST_HISTORY;
+  static const DEMO_CONTEST_WINNERS = _Paths.DEMO_CONTEST_WINNERS;
   static const SETTING = _Paths.SETTING;
   static const SUPPORT = _Paths.SUPPORT;
   static const TOOLS_EDUCATION = _Paths.TOOLS_EDUCATION;
@@ -130,6 +136,12 @@ abstract class _Paths {
   static const TRADER_DETAILS = '/trader-details';
   static const BONUS = '/bonus';
   static const DEMO_CONTEST = '/demo-contest';
+  static const DEMO_CONTEST_RULES = '/demo-contest-rules';
+  static const DEMO_CONTEST_JOIN = '/demo-contest-join';
+  static const DEMO_CONTEST_DETAILS = '/demo-contest-details';
+  static const DEMO_CONTEST_LEADERBOARD = '/demo-contest-leaderboard';
+  static const DEMO_CONTEST_HISTORY = '/demo-contest-history';
+  static const DEMO_CONTEST_WINNERS = '/demo-contest-winners';
   static const SETTING = '/setting';
   static const SUPPORT = '/support';
   static const TOOLS_EDUCATION = '/tools-education';
