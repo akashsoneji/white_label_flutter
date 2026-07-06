@@ -18,9 +18,9 @@ class BaazexConfig extends BaseClientConfig {
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',
- apiBaseUrl: 'https://demov.baazex.com/api/',
- websocketUrl: 'wss://demov.baazex.com/trade-engine',
- chartBaseUrl: 'https://demov.baazex.com',
- useNewChart: false,
+        apiBaseUrl: 'https://demov.baazex.com/api/',
+        websocketUrl: 'wss://demov.baazex.com/trade-engine',
+        chartBaseUrl: 'https://demov.baazex.com',
+        useNewChart: false,
  );
 }

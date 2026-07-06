@@ -10,14 +10,25 @@ class PrecisionHelper {
   /// PrecisionHelper.round(0.019999999999999997, 2) returns 0.02
   /// PrecisionHelper.round(1.23456789, 3) returns 1.235
   static double round(double value, {int decimals = 2}) {
+    // ✅ FIX: Guard against NaN / Infinity AND clamp decimals to a sane range
+    // so the multiplier loop can't overflow to Infinity (which would then make
+    // `value * multiplier` NaN and crash `.round()` with "Infinity or NaN toInt").
     if (value.isNaN || value.isInfinite) return 0.0;
+    final int safeDecimals = decimals.clamp(0, 12);
 
     double multiplier = 1.0;
-    for (int i = 0; i < decimals; i++) {
+    for (int i = 0; i < safeDecimals; i++) {
       multiplier *= 10.0;
+      if (multiplier.isInfinite) {
+        // Overflow protection — bail out and return 0.0 instead of poisoning
+        // downstream arithmetic with Infinity.
+        return 0.0;
+      }
     }
 
-    return (value * multiplier).round() / multiplier;
+    final double scaled = value * multiplier;
+    if (scaled.isNaN || scaled.isInfinite) return 0.0;
+    return scaled.round() / multiplier;
   }
 
   /// Format a double for display with proper precision

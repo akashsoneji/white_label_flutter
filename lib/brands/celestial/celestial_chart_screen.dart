@@ -247,7 +247,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
         child: Column(
           children: [
             _toolbar(context),
-            _priceHeader(context),
+            // _priceHeader(context),
             if (_tradeOpen) _tradePanel(context),
             Expanded(child: _chartArea(context)),
           ],

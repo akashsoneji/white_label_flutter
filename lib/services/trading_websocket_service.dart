@@ -3131,11 +3131,23 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
 
           final symbol = item[offset + 2].toString();
           final action = int.tryParse(item[offset + 3].toString()) ?? 0;
-          final volume = double.tryParse(item[offset + 4].toString()) ?? 0.0;
-          final priceOpen = double.tryParse(item[offset + 5].toString()) ?? 0.0;
-          final priceCurrent =
-              double.tryParse(item[offset + 6].toString()) ?? 0.0;
-          final profit = double.tryParse(item[offset + 7].toString()) ?? 0.0;
+          // ✅ FIX: double.tryParse("NaN") returns double.nan (NOT null), so
+          // `?? 0.0` does NOT catch NaN/Infinity. Sanitize at the source so
+          // bad WS payloads never reach PrecisionHelper and crash the UI.
+          double _sanitizeDouble(double v) =>
+              (v.isNaN || v.isInfinite) ? 0.0 : v;
+          final volume = _sanitizeDouble(
+            double.tryParse(item[offset + 4].toString()) ?? 0.0,
+          );
+          final priceOpen = _sanitizeDouble(
+            double.tryParse(item[offset + 5].toString()) ?? 0.0,
+          );
+          final priceCurrent = _sanitizeDouble(
+            double.tryParse(item[offset + 6].toString()) ?? 0.0,
+          );
+          final profit = _sanitizeDouble(
+            double.tryParse(item[offset + 7].toString()) ?? 0.0,
+          );
 
           // Detect 17-element self-hosted format with extra integer field at offset+8.
           final _bRaw8 = item.length > offset + 8 ? item[offset + 8] : null;
@@ -3151,24 +3163,21 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
               item.length > offset + 9 + _bXo
                   ? item[offset + 9 + _bXo].toString().trim()
                   : '0';
-          final swap =
+          final rawSwap =
               item.length > offset + 10 + _bXo
                   ? (double.tryParse(item[offset + 10 + _bXo].toString()) ?? 0.0)
                   : 0.0;
-          final priceSL =
-              (priceSLStr.isEmpty ||
-                      priceSLStr == '0' ||
-                      priceSLStr == 'null' ||
-                      priceSLStr == '-')
-                  ? 0.0
-                  : (double.tryParse(priceSLStr) ?? 0.0);
-          final priceTP =
-              (priceTPStr.isEmpty ||
-                      priceTPStr == '0' ||
-                      priceTPStr == 'null' ||
-                      priceTPStr == '-')
-                  ? 0.0
-                  : (double.tryParse(priceTPStr) ?? 0.0);
+          final swap = (rawSwap.isNaN || rawSwap.isInfinite) ? 0.0 : rawSwap;
+          // ✅ FIX: Sanitize parsed SL/TP — tryParse("NaN") returns NaN, not
+          // null, so the `?? 0.0` fallback does not catch it.
+          double _parsePrice(String s) {
+            if (s.isEmpty || s == '0' || s == 'null' || s == '-') return 0.0;
+            final v = double.tryParse(s) ?? 0.0;
+            return (v.isNaN || v.isInfinite) ? 0.0 : v;
+          }
+
+          final priceSL = _parsePrice(priceSLStr);
+          final priceTP = _parsePrice(priceTPStr);
 
           final openedAt =
               item.length > offset + 11 + _bXo

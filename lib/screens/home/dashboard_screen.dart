@@ -1927,6 +1927,8 @@ class _CelestialDetailRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
   }
 }
 

@@ -301,19 +301,33 @@ class TradingPosition {
     // If digits is 0 or not provided, use default of 5 (most forex pairs use 5 decimals)
     final displayDigits = digits > 0 ? digits : 5;
 
+    // ✅ FIX: double.tryParse("NaN") returns double.nan (NOT null), so the
+    // `?? 0.0` fallback does NOT catch NaN/Infinity strings. Sanitize here
+    // so a malformed WS payload can't crash the UI via PrecisionHelper.round.
+    double _safe(dynamic v) {
+      if (v == null) return 0.0;
+      final parsed = v is num ? v.toDouble() : (double.tryParse(v.toString()) ?? 0.0);
+      return (parsed.isNaN || parsed.isInfinite) ? 0.0 : parsed;
+    }
+
     // Parse and format prices with correct decimal places
-    final entryPriceDouble = double.tryParse(priceOpen) ?? 0.0;
-    final currentPriceDouble = double.tryParse(priceCurrent) ?? 0.0;
-    final priceSLDouble = double.tryParse(priceSL) ?? 0.0;
-    final priceTPDouble = double.tryParse(priceTP) ?? 0.0;
+    final entryPriceDouble = _safe(priceOpen);
+    final currentPriceDouble = _safe(priceCurrent);
+    final priceSLDouble = _safe(priceSL);
+    final priceTPDouble = _safe(priceTP);
+    final safeVolume = _safe(volume);
+    final safeSwap = (swap.isNaN || swap.isInfinite) ? 0.0 : swap;
+
+    final safeProfit =
+        (profit.isNaN || profit.isInfinite) ? 0.0 : profit;
 
     return TradePosition(
       symbol: symbol,
       // symbol: symbol.replaceAll('.c', ''), // Remove .c suffix
       flag: logo, // Use the actual logo URL from WebSocket
       action: action,
-      volume: double.tryParse(volume) ?? 0.0,
-      profitLoss: profit,
+      volume: safeVolume,
+      profitLoss: safeProfit,
       entryPrice: PrecisionHelper.formatPrice(
         entryPriceDouble,
         decimals: displayDigits,
@@ -349,7 +363,7 @@ class TradingPosition {
                 priceSLDouble,
                 decimals: displayDigits,
               ),
-      swap: swap,
+      swap: safeSwap,
       digits: displayDigits,
     );
   }
