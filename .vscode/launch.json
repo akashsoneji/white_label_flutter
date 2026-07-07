@@ -91,6 +91,7 @@
             "console": "terminal",
             "preLaunchTask": "prepare-gtxprime"
         },
+        {
             "name": "🔴 Meta (debug)",
             "request": "launch",
             "type": "dart",
