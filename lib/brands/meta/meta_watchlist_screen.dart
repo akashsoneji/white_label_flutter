@@ -435,29 +435,20 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
         ),
       );
     }
-    final parts = (_activeFolderId ?? '').split('::');
-    final visibleLabels = <String>[];
-    if (parts.isNotEmpty && parts[0].isNotEmpty) {
-      visibleLabels.add(_capitalize(parts[0]));
-    }
-    if (parts.length > 1 && parts[1].isNotEmpty) {
-      visibleLabels.add(_capitalize(parts[1]));
-    }
+    final label = _activeFolderLabel ?? _capitalize(_activeFolderId ?? '');
     return Padding(
       padding: EdgeInsets.fromLTRB(20.w, 14.h, 16.w, 4.h),
       child: Row(
         children: [
           _homeIcon(18.sp),
-          for (final label in visibleLabels) ...[
-            SizedBox(width: 6.w),
-            Text(label,
-                style: TextStyle(
-                    color: MetaTheme.subText(c),
-                    fontSize: 14.sp,
-                    decoration: TextDecoration.underline)),
-            SizedBox(width: 6.w),
-            _chevron(18, MetaTheme.subText(c)),
-          ],
+          SizedBox(width: 6.w),
+          _chevron(18, MetaTheme.subText(c)),
+          SizedBox(width: 6.w),
+          Text(label,
+              style: TextStyle(
+                  color: MetaTheme.buyBlue,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -467,6 +458,10 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
     return Obx(() {
       final loading = _sic.isLoading.value;
       final allSymbols = _sic.filteredSymbols;
+
+      if (_activeFolderId != null) {
+        return _folderContents(c, allSymbols, loading);
+      }
 
       if (_ctrl.text.trim().isEmpty) {
         return _folderTree(c, allSymbols, loading);
@@ -497,6 +492,45 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
         },
       );
     });
+  }
+
+  /// Show the list of symbols inside the active folder, with the
+  /// circular + / check toggle on the right (matches screenshot #3).
+  Widget _folderContents(
+      BuildContext c, List<SearchSymbol> all, bool loading) {
+    final folderKey = _activeFolderId!.toLowerCase();
+    final inFolder = all.where((s) {
+      final raw = s.categoryName.toLowerCase();
+      final parts = raw.split('/').map((p) => p.trim()).toList();
+      return parts.isNotEmpty &&
+          parts[0].isNotEmpty &&
+          parts[0] == folderKey;
+    }).toList();
+
+    if (loading && inFolder.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (inFolder.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(24.h),
+          child: Text('No symbols in this folder',
+              style: TextStyle(
+                  color: MetaTheme.subText(c), fontSize: 13.sp)),
+        ),
+      );
+    }
+    return ListView.separated(
+      padding: EdgeInsets.only(bottom: 16.h),
+      itemCount: inFolder.length,
+      separatorBuilder: (_, __) => Divider(
+          color: MetaTheme.divider(c), height: 1, thickness: 0.5),
+      itemBuilder: (_, i) {
+        final s = inFolder[i];
+        final symbol = s.displaySymbol;
+        return _symbolRow(c, s, symbol);
+      },
+    );
   }
 
   /// Build the folder tree from `SearchSymbol.categoryName` values,

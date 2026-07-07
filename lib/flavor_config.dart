@@ -7,6 +7,7 @@ import 'clients/baazex/config.dart';
 import 'clients/celestial/config.dart';
 import 'clients/gtxprime/config.dart';
 import 'clients/kantara/config.dart';
+import 'clients/meta/config.dart';
 import 'clients/pipze/config.dart';
 import 'clients/skyriss/config.dart';
 import 'clients/telifox/config.dart';
@@ -18,6 +19,7 @@ enum Flavor {
   celestial,
   gtxprime,
   kantara,
+  meta,
   pipze,
   skyriss,
   telifox,
@@ -142,6 +144,9 @@ class FlavorConfig {
       case Flavor.kantara:
         const config = KantaraConfig();
         return config.toFlavorConfig(Flavor.kantara, 'kantara');
+      case Flavor.meta:
+        const config = MetaConfig();
+        return config.toFlavorConfig(Flavor.meta, 'meta');
       case Flavor.pipze:
         const config = PipzeConfig();
         return config.toFlavorConfig(Flavor.pipze, 'pipze');
@@ -172,6 +177,9 @@ class FlavorConfig {
   static bool isKantara() => _instance?.flavor == Flavor.kantara;
   static FlavorConfig get kantara => activate(Flavor.kantara);
 
+  static bool isMeta() => _instance?.flavor == Flavor.meta;
+  static FlavorConfig get meta => activate(Flavor.meta);
+
   static bool isPipze() => _instance?.flavor == Flavor.pipze;
   static FlavorConfig get pipze => activate(Flavor.pipze);
 
@@ -191,6 +199,14 @@ class FlavorConfig {
   static bool usesVantageUi() {
     final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
     return const <String>{'baazex', 'gtxprime', 'kantara', 'pipze', 'skyriss', 'telifox', 'tenax', 'vantage'}.contains(name);
+  }
+
+  /// `true` when the active flavor is a parent brand with its own dedicated
+  /// UI tree (e.g. Vantage, Celestial, Meta). These brands do NOT inherit
+  /// Vantage's 4-tab shell.
+  static bool usesParentUi() {
+    final name = (_instance?.flavor.name ?? '').toLowerCase();
+    return const <String>{'celestial', 'meta', 'vantage'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;
