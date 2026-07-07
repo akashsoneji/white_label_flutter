@@ -38,6 +38,7 @@ import 'dashboard_screen.dart';
 import 'pending_order_content.dart';
 import 'pending_order_screen.dart';
 import 'search_instruments_screen.dart';
+import 'brands/vantage/vantage_chart_layout.dart';
 import '../../services/one_click_trading_service.dart';
 import '../../services/one_click_trading_queue_service.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
@@ -1569,6 +1570,20 @@ Placing Order:
   Widget build(BuildContext context) {
     // NOTE: WebSocket initialization is handled centrally by AccountController
     // DO NOT call ensureWebSocketInitialized() here - it causes redundant refreshes
+
+    // ── Vantage / Vantage-child brands (pipze, baazex, gtxprime, …)
+    //    use the TRADYN-style chart layout: slim ← SYMBOL ⌄ header,
+    //    purple BUY button, quantity + chart-icons + bell dock.
+    //    The full legacy Xelthio screen below is preserved for
+    //    non-Vantage flavors.
+    if (FlavorConfig.usesVantageUi()) {
+      // VantageChartLayout manages its own symbol-picker (favourites
+      // dropdown first, falls back to SearchInstrumentsScreen when the
+      // user has no favourites yet).
+      return VantageChartLayout(
+        onNavigateToTab: widget.onNavigateToTab,
+      );
+    }
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;

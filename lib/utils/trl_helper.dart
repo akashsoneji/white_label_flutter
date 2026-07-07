@@ -206,14 +206,30 @@ class RTLHelper {
             fontWeight: FontWeight.w400,
           ),
       cursorColor: AppColors.primary,
-      selectionControls: MaterialTextSelectionControls(),
+      // Use platform-default selection controls (null) instead of forcing
+      // MaterialTextSelectionControls. Forcing the Material controls on every
+      // platform causes real-device Android OEMs to drop the native
+      // long-press selection toolbar and drag-handle behaviour — the field
+      // then appears to "auto-select the whole string" and drag handles stop
+      // responding. Leaving this null lets Flutter pick the platform's
+      // appropriate controls (Material on Android, Cupertino on iOS).
+      // enableInteractiveSelection stays true (the default).
       readOnly: readOnly,
-      textInputAction: TextInputAction.next,
       onChanged: onChanged,
       inputFormatters: inputFormatters,
-      textDirection: RTLHelper.textDirection,
+      // IMPORTANT: do NOT set `textDirection` here. Let the field inherit the
+      // ambient Directionality (which MaterialApp now resolves from the
+      // active locale via flutter_localizations). Setting `textDirection`
+      // directly on the TextField was the root cause of two real-device bugs:
+      //   1) Tapping a sub-string (e.g. "xyz" in "abcd@xyz.com") caused the
+      //      whole field to auto-select because the hit-test was running
+      //      against the wrong direction.
+      //   2) Drag handles and the left/right cursor drag stopped working.
+      // textAlign IS still set, so the caret/placeholder render on the right
+      // edge in Arabic (matches RTL) and on the left edge in LTR languages —
+      // without overriding the field's own textDirection.
       textAlign: isRTL ? TextAlign.right : TextAlign.left,
-      maxLines: maxLines ?? 1,
+      maxLines: obscureText ? 1 : (maxLines ?? 1),
       decoration:
           decoration?.copyWith(
             hintStyle: TextStyle(color: AppColors.hint),
