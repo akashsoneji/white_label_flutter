@@ -91,7 +91,6 @@
             "console": "terminal",
             "preLaunchTask": "prepare-gtxprime"
         },
-        {
             "name": "🔴 Meta (debug)",
             "request": "launch",
             "type": "dart",
@@ -120,6 +119,36 @@
             "flutterMode": "release",
             "console": "terminal",
             "preLaunchTask": "prepare-meta"
+            },
+            {
+            "name": "🔴 Kantara (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "kantara", "--dart-define=CLIENT=kantara", "--dart-define=FLAVOR=kantara", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal",
+            "preLaunchTask": "prepare-kantara"
+        },
+        {
+            "name": "🔴 Kantara (profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "kantara", "--dart-define=CLIENT=kantara", "--dart-define=FLAVOR=kantara"],
+            "flutterMode": "profile",
+            "console": "terminal",
+            "preLaunchTask": "prepare-kantara"
+        },
+        {
+            "name": "🔴 Kantara (release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "kantara", "--dart-define=CLIENT=kantara", "--dart-define=FLAVOR=kantara"],
+            "flutterMode": "release",
+            "console": "terminal",
+            "preLaunchTask": "prepare-kantara"
         },
         {
             "name": "🟣 Pipze (debug)",

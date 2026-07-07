@@ -1,0 +1,8 @@
+# GENERATED — Do not edit manually. Regenerate from brands.yaml.
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/brands/kantara/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#2E2174"
+  adaptive_icon_foreground: "assets/clients/kantara/ic_adaptive_foreground.png"

@@ -15,29 +15,40 @@ class BrandSwitcher {
   BrandSwitcher._();
 
   // ── Brand-aware getters ────────────────────────────────────────────────────
+  // NOTE: these compare against `flavor.name` (a String) rather than `Flavor.x`
+  // enum values so they work in single-client release builds where the
+  // generated `enum Flavor` only contains the active brand.
+
   /// `true` when the active flavor is literally `Vantage` (not a child).
-  static bool get isVantage => FlavorConfig.instance.flavor == Flavor.vantage;
+  static bool get isVantage => _active == 'vantage';
 
   /// `true` when the active flavor is literally `Celestial` (not a child).
-  static bool get isCelestial => FlavorConfig.instance.flavor == Flavor.celestial;
+  static bool get isCelestial => _active == 'celestial';
 
   /// `true` when the active flavor is `Pipze`.
-  static bool get isPipze => FlavorConfig.instance.flavor == Flavor.pipze;
+  static bool get isPipze => _active == 'pipze';
 
   /// `true` when the active flavor is `Tenax`.
-  static bool get isTenax => FlavorConfig.instance.flavor == Flavor.tenax;
+  static bool get isTenax => _active == 'tenax';
 
   /// `true` when the active flavor is `Telifox`.
-  static bool get isTelifox => FlavorConfig.instance.flavor == Flavor.telifox;
+  static bool get isTelifox => _active == 'telifox';
 
   /// `true` when the active flavor is `GTX Prime`.
-  static bool get isGtxprime => FlavorConfig.instance.flavor == Flavor.gtxprime;
+  static bool get isGtxprime => _active == 'gtxprime';
 
   /// `true` when the active flavor is `Baazex`.
-  static bool get isBaazex => FlavorConfig.instance.flavor == Flavor.baazex;
+  static bool get isBaazex => _active == 'baazex';
 
   /// `true` when the active flavor is `Skyriss`.
-  static bool get isSkyriss => FlavorConfig.instance.flavor == Flavor.skyriss;
+  static bool get isSkyriss => _active == 'skyriss';
+
+  /// `true` when the active flavor is `Kantara`.
+  static bool get isKantara => _active == 'kantara';
+
+  /// Lowercased name of the active flavor. Always safe to read, even when
+  /// the `Flavor` enum is narrowed to a single client.
+  static String get _active => FlavorConfig.instance.flavor.name.toLowerCase();
 
   /// `true` when the active flavor is `Meta`.
   static bool get isMeta => FlavorConfig.instance.flavor == Flavor.meta;
@@ -116,6 +127,7 @@ class BrandSwitcher {
   static void switchToBaazex() => switchTo('baazex');
   static void switchToSkyriss() => switchTo('skyriss');
   static void switchToMeta() => switchTo('meta');
+  static void switchToKantara() => switchTo('kantara');
 
   /// Print the active brand summary to the console.
   static void printCurrentBrand() {
@@ -138,11 +150,15 @@ class BrandSwitcher {
   /// Useful in `brand_test_screen.dart` to preview what a brand would look
   /// like without re-running `flutter run`. Returns the brand that would
   /// be active after the cycle.
+  ///
+  /// NOTE: in single-client release builds the `Flavor` enum only contains
+  /// the active brand, so this is a no-op that just returns the current
+  /// flavor.
   static Flavor quickSwitchBrand() {
     final values = Flavor.values;
     if (values.isEmpty) {
       debugPrint('🎨 quickSwitchBrand: no flavors registered');
-      return Flavor.celestial;
+      return FlavorConfig.instance.flavor;
     }
     final current = FlavorConfig.instance.flavor;
     final idx = values.indexOf(current);
@@ -159,34 +175,44 @@ class BrandSwitcher {
   static Iterable<Flavor> get allFlavors => Flavor.values;
 
   /// Return the human label (appName) for any flavor without activating it.
+  ///
+  /// Uses a string lookup keyed on the enum's `name` so it works whether
+  /// the `Flavor` enum is the full 9-brand matrix or narrowed to a single
+  /// client in release builds.
   static String labelOf(Flavor flavor) {
-    switch (flavor) {
-      case Flavor.vantage:
+    return _labelForName(flavor.name);
+  }
+
+  /// Pretty display name for a brand id (e.g. `'gtxprime'` → `'GTX Prime'`).
+  /// Always safe to call — falls back to the raw input.
+  static String labelForName(String name) => _labelForName(name);
+
+  static String _labelForName(String name) {
+    switch (name.toLowerCase()) {
+      case 'vantage':
         return 'Vantage';
-      case Flavor.celestial:
+      case 'celestial':
         return 'Celestial';
-      case Flavor.pipze:
+      case 'pipze':
         return 'Pipze';
-      case Flavor.tenax:
+      case 'tenax':
         return 'Tenax';
-      case Flavor.telifox:
+      case 'telifox':
         return 'Telifox';
-      case Flavor.gtxprime:
+      case 'gtxprime':
         return 'GTX Prime';
-      case Flavor.baazex:
+      case 'baazex':
         return 'Baazex';
-      case Flavor.skyriss:
+      case 'skyriss':
         return 'Skyriss';
       case Flavor.meta:
         return 'Meta';
+      case 'kantara':
+        return 'Kantara';
+      default:
+        return name;
     }
   }
 
-  static String _label(Flavor f) {
-    try {
-      return labelOf(f);
-    } catch (_) {
-      return f.name;
-    }
-  }
+  static String _label(Flavor f) => _labelForName(f.name);
 }

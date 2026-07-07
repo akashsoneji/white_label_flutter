@@ -86,3 +86,4 @@ assets/clients/
 android/app/src/main/res/mipmap*/
 android/app/src/main/res/drawable-*/ic_launcher*
 android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+*.json

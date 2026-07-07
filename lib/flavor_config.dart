@@ -1,6 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate from brands.yaml.
 // Run: dart run scripts/generate_brand_config.dart
 
+import 'package:crm_app/clients/kantara/config.dart';
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
 import 'clients/baazex/config.dart';
@@ -23,7 +24,9 @@ enum Flavor {
   telifox,
   tenax,
   vantage,
-}
+  kantara
+  }
+
 
 class FlavorConfig {
   final Flavor flavor;
@@ -107,7 +110,7 @@ class FlavorConfig {
  this.useNewChart = false,
  }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.vantage);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.kantara);
 
   static void reset() {
     _instance = null;
@@ -123,7 +126,7 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.vantage,
+      orElse: () => Flavor.kantara,
     );
     return activate(flavor);
   }
@@ -154,6 +157,9 @@ class FlavorConfig {
       case Flavor.tenax:
         const config = TenaxConfig();
         return config.toFlavorConfig(Flavor.tenax, 'tenax');
+          case Flavor.kantara:
+        const config = KantaraConfig();
+        return config.toFlavorConfig(Flavor.kantara, 'kantara');
       case Flavor.vantage:
         const config = VantageConfig();
         return config.toFlavorConfig(Flavor.vantage, 'vantage');
@@ -185,12 +191,16 @@ class FlavorConfig {
   static FlavorConfig get tenax => activate(Flavor.tenax);
 
   static FlavorConfig get vantage => activate(Flavor.vantage);
+    
+  static bool isKantara() => _instance?.flavor == Flavor.kantara;
+  static FlavorConfig get kantara => activate(Flavor.kantara);
+
 
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
-    return const <String>{'baazex', 'gtxprime', 'pipze', 'skyriss', 'telifox', 'tenax', 'vantage'}.contains(name);
+    final name = (_instance?.flavor.name ?? Flavor.kantara.name).toLowerCase();
+    return const <String>{'kantara'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;
