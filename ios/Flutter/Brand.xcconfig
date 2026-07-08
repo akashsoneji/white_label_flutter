@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart baazex
-// Active flavor: baazex
-PRODUCT_BUNDLE_IDENTIFIER=com.baazex.app
-BRAND_DISPLAY_NAME=Baazex
+//   dart run scripts/prepare_flavor.dart meta
+// Active flavor: meta
+PRODUCT_BUNDLE_IDENTIFIER=com.meta.app
+BRAND_DISPLAY_NAME=Meta
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPWJhYXpleA==,RkxBVk9SPWJhYXpleA==
+DART_DEFINES=Q0xJRU5UPW1ldGE=,RkxBVk9SPW1ldGE=

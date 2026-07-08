@@ -31,11 +31,7 @@ class _MetaMainShellState extends State<MetaMainShell> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => MetaNewOrderScreen(
-              args: NewOrderArgs(
-                symbol: item.symbol,
-                displaySymbol: item.symbol,
-                digits: item.digits > 0 ? item.digits : 5,
-              ),
+              symbol: item.symbol,
             ),
           ),
         );

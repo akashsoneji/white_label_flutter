@@ -1,21 +1,13 @@
 {
-  "default": "baazex",
+  "default": "meta",
   "brands": [
-    "baazex",
-    "vantage"
+    "meta"
   ],
   "brandDetails": [
     {
-      "name": "baazex",
-      "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "Baazex",
-      "themeMode": "both"
-    },
-    {
-      "name": "vantage",
+      "name": "meta",
       "type": "parent",
-      "label": "Vantage",
+      "label": "Meta",
       "themeMode": "both"
     }
   ]
