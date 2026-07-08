@@ -6,6 +6,7 @@ import 'meta_history_screen.dart';
 import 'meta_settings_screen.dart';
 import 'meta_theme.dart';
 import 'meta_trade_screen.dart';
+import 'meta_new_order_screen.dart';
 import 'meta_watchlist_screen.dart';
 
 /// Meta — Main app shell with 5-tab bottom navigation
@@ -25,7 +26,24 @@ class _MetaMainShellState extends State<MetaMainShell> {
   int _index = 0;
 
   List<Widget> get _screens => [
-    MetaWatchlistScreen(onSymbolTap: (_) => setState(() => _index = 1)),
+    MetaWatchlistScreen(
+      onSymbolTap: (item) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => MetaNewOrderScreen(
+              args: NewOrderArgs(
+                symbol: item.symbol,
+                displaySymbol: item.symbol,
+                digits: item.digits > 0 ? item.digits : 5,
+              ),
+            ),
+          ),
+        );
+        // Also keep the chart tab updated in the background so
+        // returning to that tab shows the same instrument.
+        setState(() => _index = 1);
+      },
+    ),
     MetaChartScreen(),
     MetaTradeScreen(),
     MetaHistoryScreen(),

@@ -868,21 +868,31 @@ class AccountController extends GetxController with WidgetsBindingObserver {
         }
       } catch (_) {}
 
-      // Instruments WS — reconnect without clearing the cached instrument list
+      // Instruments WS — always reset and re-open on resume.
+      //
+      // On `paused`, `disconnectWebSocket()` closes the channel. On
+      // `resumed` we open a fresh channel AND re-sync favorites even if
+      // `isConnected.value` somehow still reads `true` (a stale flag
+      // would otherwise leave the price stream frozen).
       try {
         if (Get.isRegistered<InstrumentsController>()) {
           final instrumentsController = Get.find<InstrumentsController>();
-          if (!instrumentsController.isConnected.value) {
+          final needsReconnect = !instrumentsController.isConnected.value ||
+              instrumentsController.isReconnecting.value;
+          if (needsReconnect) {
             instrumentsController.startWebSocket();
-            Future.delayed(const Duration(milliseconds: 150), () {
-              try {
-                if (Get.isRegistered<MarketWatchV2Service>()) {
-                  Get.find<MarketWatchV2Service>()
-                      .reconnectAndResyncFavorites();
-                }
-              } catch (_) {}
-            });
           }
+          // Always resync favorites after resume so any symbols that
+          // were dropped by the server while the app was suspended come
+          // back. Safe to call even if the socket is healthy.
+          Future.delayed(const Duration(milliseconds: 300), () {
+            try {
+              if (Get.isRegistered<MarketWatchV2Service>()) {
+                Get.find<MarketWatchV2Service>()
+                    .reconnectAndResyncFavorites();
+              }
+            } catch (_) {}
+          });
         }
       } catch (_) {}
 

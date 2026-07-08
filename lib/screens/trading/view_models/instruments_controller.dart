@@ -55,6 +55,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // During reconnect/REST hydrate the backend can send placeholder zero values.
     // Preserve the last non-zero price until a valid new value arrives.
     final current = priceRx(item.symbol).value;
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
     _pendingPriceUpdates[item.symbol] = current.copyWith(
       bid: _preserveNonZero(item.bid, current.bid),
       ask: _preserveNonZero(item.ask, current.ask),
@@ -62,6 +63,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       spreadDiff: _preserveNonZero(item.spreadDiff, current.spreadDiff),
       dayLow: _preserveOptionalNonZero(item.dayLow, current.dayLow),
       dayHigh: _preserveOptionalNonZero(item.dayHigh, current.dayHigh),
+      tickAtMs: nowMs,
     );
     _schedulePriceFlush();
   }
@@ -248,7 +250,13 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  // Method to start WebSocket when screen becomes visible
+  // Method to start WebSocket when screen becomes visible (and on app resume).
+  //
+  // Resets the reconnect/retry state and opens a FRESH channel. Without the
+  // explicit `_initializeWebSocket()` call, resume-after-sleep would only
+  // re-bind the listener and re-subscribe to a channel that was already
+  // closed by `disconnectWebSocket()` during `paused` — so no ticks would
+  // ever arrive and the user would see the watchlist frozen.
   void startWebSocket() async {
     final isLoggedIn = await SecureStorageService.isUserLoggedIn();
     if (!isLoggedIn) {
@@ -258,8 +266,36 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       return;
     }
 
-    print('🔌 InstrumentsController: Starting marketwatchv2 (legacy unified WS disabled)');
+    // 1. Cancel any pending reconnect attempt and reset retry bookkeeping.
+    //    After a long OS suspend _reconnectAttempts may already be at
+    //    _maxReconnectAttempts; without a reset, any new onDone event
+    //    would give up immediately.
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    _reconnectAttempts = 0;
+    isReconnecting.value = false;
+
+    // 2. Tear down the (likely dead) channel from before the suspend so
+    //    the new connection starts cleanly. `channel` is `late`
+    //    non-nullable, so we just close it; the assignment in
+    //    `_initializeWebSocket()` overwrites it with a fresh channel.
+    try {
+      await channel.sink.close();
+    } catch (_) {}
+    _currentWsUrl = null;
+
+    // 3. Open a NEW channel. Without this step, `startMarketWatchV2Only`
+    //    below would try to subscribe to a closed channel and silently
+    //    fail — leaving `isConnected = false` forever.
     _bindMarketWatchV2DecodedListener();
+    _initializeWebSocket();
+    // Give the channel a moment to open before we send subscribe frames.
+    // Without this delay, startMarketWatchV2Only can race ahead and try
+    // to send on a channel that's still in CONNECTING state.
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+
+    // 4. Re-subscribe to the user's favorite symbols so the server starts
+    //    pushing ticks again.
     await startMarketWatchV2Only();
   }
 
@@ -1912,7 +1948,8 @@ class InstrumentPrice {
   final int digits;
   final double spreadDiff;
   final double dayLow;
-  final double dayHigh;
+final double dayHigh;
+  final int tickAtMs;
 
   const InstrumentPrice({
     required this.bid,
@@ -1921,6 +1958,7 @@ class InstrumentPrice {
     required this.spreadDiff,
     required this.dayLow,
     required this.dayHigh,
+    this.tickAtMs = 0,
   });
 
   factory InstrumentPrice.empty() =>
@@ -1933,6 +1971,7 @@ class InstrumentPrice {
     double? spreadDiff,
     double? dayLow,
     double? dayHigh,
+    int? tickAtMs,
   }) {
     return InstrumentPrice(
       bid: bid ?? this.bid,
@@ -1941,6 +1980,7 @@ class InstrumentPrice {
       spreadDiff: spreadDiff ?? this.spreadDiff,
       dayLow: dayLow ?? this.dayLow,
       dayHigh: dayHigh ?? this.dayHigh,
+      tickAtMs: tickAtMs ?? this.tickAtMs,
     );
   }
 }

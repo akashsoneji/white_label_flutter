@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/models/socket_response.dart';
@@ -18,7 +19,9 @@ import 'meta_theme.dart';
 ///      New Order / Chart / Properties / Depth Of Market /
 ///      Market Statistics / Simple view mode
 class MetaWatchlistScreen extends StatefulWidget {
-  final ValueChanged<String>? onSymbolTap;
+  /// Called when a watchlist row is tapped. The full `ListElement` is
+  /// handed over so the caller can extract digits, display symbol etc.
+  final ValueChanged<ListElement>? onSymbolTap;
   const MetaWatchlistScreen({super.key, this.onSymbolTap});
 
   @override
@@ -39,11 +42,12 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
     });
   }
 
-  void _onSymbolTap(String symbol) {
+  void _onSymbolTap(ListElement item) {
+    final symbol = item.symbol;
     try {
       Get.find<ChartSocketController>().currentSymbol.value = symbol;
     } catch (_) {}
-    widget.onSymbolTap?.call(symbol);
+    widget.onSymbolTap?.call(item);
   }
 
   void _openAddSymbolSheet(BuildContext c) =>
@@ -59,7 +63,35 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => _RowActionSheet(symbol: item, onTap: _onSymbolTap),
+      builder: (_) => _RowActionSheet(
+        symbol: item,
+        onAction: (action) {
+          switch (action) {
+            case RowAction.newOrder:
+              // Open the dedicated New Order screen (chart + bid/ask).
+              _onSymbolTap(item);
+              break;
+            case RowAction.chart:
+              // Just swap to the Chart tab without leaving the watchlist.
+              try {
+                Get.find<ChartSocketController>().currentSymbol.value = item.symbol;
+              } catch (_) {}
+              widget.onSymbolTap?.call(item);
+              break;
+            case RowAction.properties:
+            case RowAction.dom:
+            case RowAction.marketStats:
+            case RowAction.simpleView:
+              ScaffoldMessenger.of(c).showSnackBar(
+                SnackBar(
+                  content: Text('${item.symbol}: ${action.name}'),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+              break;
+          }
+        },
+      ),
     );
   }
 
@@ -174,7 +206,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
               : MetaTheme.mainText(c);
 
       return InkWell(
-        onTap: () => _onSymbolTap(item.symbol),
+        onTap: () => _openRowMenu(c, item),
         onLongPress: () => _openRowMenu(c, item),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
@@ -207,13 +239,32 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                           fontWeight: FontWeight.w500),
                     ),
                     SizedBox(height: 1.h),
+                    Row(
+                      children: [
+                         Text(
+                      _formatRowSubtitleDate(price),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: MetaTheme.subText(c), fontSize: 10.sp),
+                    ), 
+                    
+                     SvgPicture.asset(
+                                'assets/svg/spread.svg',
+                                width: 10.w,
+                                height: 10.h,
+                                // color: AppColors.textGrey,
+                              ),
                     Text(
-                      '11:06:26   ⌐⌐ 16',
+                      _formatRowSubtitleDiff(price),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                           color: MetaTheme.subText(c), fontSize: 10.sp),
                     ),
+                      ],
+                    ),
+                   
                   ],
                 ),
               ),
@@ -283,6 +334,29 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                 color: color, fontSize: 16.sp, fontWeight: FontWeight.w500)),
       ]),
     );
+  }
+
+  /// Dynamic subtitle for a watchlist row:
+  /// `<HH:mm:ss>   <chevron> <digits>`.
+  ///
+  /// - `HH:mm:ss` is the local time of the most recent socket tick
+  ///   (stamped in `InstrumentsController._applyPriceUpdate`).
+  ///   Falls back to the current local time when no tick has arrived yet.
+  /// - `<digits>` is the live `digits` field from the latest quote,
+  ///   representing decimal precision (e.g. `16`).
+  String _formatRowSubtitleDate(InstrumentPrice? p) {
+    final ms = (p?.tickAtMs ?? 0) > 0
+        ? p!.tickAtMs
+        : DateTime.now().millisecondsSinceEpoch;
+    final dt = DateTime.fromMillisecondsSinceEpoch(ms);
+    final hh = dt.hour.toString().padLeft(2, '0');
+    final mm = dt.minute.toString().padLeft(2, '0');
+    final ss = dt.second.toString().padLeft(2, '0');
+    return '$hh:$mm:$ss ';
+  }
+  String _formatRowSubtitleDiff(InstrumentPrice? p) {
+    final digits = p?.spreadDiff.toInt() ?? 0.0;
+    return ' $digits';
   }
 }
 
@@ -693,6 +767,10 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
 
   String _capitalize(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
+  /// Dynamic subtitle for a watchlist row:
+  /// `<HH:mm:ss>   <chevron> <digits-or-tick>`.
+  ///
 }
 
 class _FolderGroup {
@@ -926,37 +1004,17 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
 // ════════════════════════════════════════════════════════════════════════════
 // Row bottom-action sheet (screenshot #7)
 // ════════════════════════════════════════════════════════════════════════════
+/// Action selected from the row action sheet.
+enum RowAction { newOrder, chart, properties, dom, marketStats, simpleView }
+
 class _RowActionSheet extends StatelessWidget {
   final ListElement symbol;
-  final ValueChanged<String> onTap;
-  const _RowActionSheet({required this.symbol, required this.onTap});
+  final ValueChanged<RowAction> onAction;
+  const _RowActionSheet({required this.symbol, required this.onAction});
 
-  void _routeTo(BuildContext c, String key) {
+  void _routeTo(BuildContext c, RowAction action) {
     Navigator.of(c).pop();
-    switch (key) {
-      case 'new_order':
-      case 'chart':
-        onTap(symbol.symbol);
-        break;
-      case 'properties':
-        _toast(c, 'Properties for ${symbol.symbol}');
-        break;
-      case 'dom':
-        _toast(c, 'Depth Of Market for ${symbol.symbol}');
-        break;
-      case 'market_stats':
-        _toast(c, 'Market Statistics for ${symbol.symbol}');
-        break;
-      case 'simple_view':
-        _toast(c, 'Simple view mode toggled');
-        break;
-    }
-  }
-
-  void _toast(BuildContext c, String msg) {
-    ScaffoldMessenger.of(c).showSnackBar(
-      SnackBar(content: Text(msg), duration: const Duration(seconds: 1)),
-    );
+    onAction(action);
   }
 
   @override
@@ -979,12 +1037,12 @@ class _RowActionSheet extends StatelessWidget {
                     fontWeight: FontWeight.w500),
               ),
             ),
-            _menu(c, 'New Order', () => _routeTo(c, 'new_order')),
-            _menu(c, 'Chart', () => _routeTo(c, 'chart')),
-            _menu(c, 'Properties', () => _routeTo(c, 'properties')),
-            _menu(c, 'Depth Of Market', () => _routeTo(c, 'dom')),
-            _menu(c, 'Market Statistics', () => _routeTo(c, 'market_stats')),
-            _menu(c, 'Simple view mode', () => _routeTo(c, 'simple_view')),
+            _menu(c, 'New Order', () => _routeTo(c, RowAction.newOrder)),
+            _menu(c, 'Chart', () => _routeTo(c, RowAction.chart)),
+            _menu(c, 'Properties', () => _routeTo(c, RowAction.properties)),
+            _menu(c, 'Depth Of Market', () => _routeTo(c, RowAction.dom)),
+            _menu(c, 'Market Statistics', () => _routeTo(c, RowAction.marketStats)),
+            _menu(c, 'Simple view mode', () => _routeTo(c, RowAction.simpleView)),
             SizedBox(height: 4.h),
           ],
         ),
