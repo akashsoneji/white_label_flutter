@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -667,6 +668,17 @@ class MyGetXApp extends StatelessWidget {
                   debugShowCheckedModeBanner: false,
                   // showPerformanceOverlay: true, // Removed in favor of custom overlay
                   locale: languageService.getCurrentLocale(),
+                  // Wire flutter_localizations so Directionality is resolved from
+                  // the active locale. This is what lets TextFields render RTL
+                  // in Arabic / Hebrew / etc. without us forcing textDirection
+                  // on every field (which would break tap-to-cursor placement
+                  // on real devices).
+                  localizationsDelegates: const [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  supportedLocales: LanguageService.supportedLocales,
                   themeMode: themeService.themeMode,
                   theme: _buildLightTheme(),
                   darkTheme: _buildDarkTheme(),

@@ -94,7 +94,12 @@ class BonusClaim {
   final String status;
   final String createdAt;
   final String depositAmount;
+  // Whether lot tracking applies to this bonus. When the backend sends
+  // "N/A" for lot_size / current_lots, we keep the raw string for display
+  // and skip progress math entirely.
+  final bool hasLotTracking;
   final double currentLots;
+  final double totalLots;
   final String claimDate;
   final String remainingDays;
 
@@ -110,16 +115,40 @@ class BonusClaim {
     required this.status,
     required this.createdAt,
     required this.depositAmount,
+    required this.hasLotTracking,
     required this.currentLots,
+    required this.totalLots,
     required this.claimDate,
     required this.remainingDays,
   });
 
+  static double _parseLot(dynamic v) {
+    // Backend can send a real number ("0.50", "12.3"), a numeric string, or
+    // a sentinel like "N/A" / null. Anything non-numeric becomes 0.0 so
+    // casting never throws.
+    if (v == null) return 0.0;
+    if (v is num) return v.toDouble();
+    final s = v.toString().trim();
+    if (s.isEmpty || s.toUpperCase() == 'N/A') return 0.0;
+    return double.tryParse(s) ?? 0.0;
+  }
+
+  static bool _hasLotValue(dynamic v) {
+    if (v == null) return false;
+    final s = v.toString().trim();
+    return s.isNotEmpty && s.toUpperCase() != 'N/A';
+  }
+
   factory BonusClaim.fromJson(Map<String, dynamic> json) {
+    final rawLotSize = json['lot_size'];
+    final rawCurrentLots = json['current_lots'];
+    final hasTotal = _hasLotValue(rawLotSize);
+    final hasCurrent = _hasLotValue(rawCurrentLots);
+
     return BonusClaim(
-      id: json['id'] as int,
+      id: (json['id'] as num?)?.toInt() ?? 0,
       mt5Account: json['mt5_account']?.toString() ?? '',
-      lotSize: json['lot_size']?.toString() ?? '0.00',
+      lotSize: rawLotSize?.toString() ?? 'N/A',
       bonusType: json['bonus_type']?.toString() ?? '',
       allowBonusWithdrawal: json['allow_bonus_withdrawal'] as bool? ?? false,
       bonusPercentage: json['bonus_percentage']?.toString() ?? '',
@@ -128,7 +157,9 @@ class BonusClaim {
       status: json['status']?.toString() ?? '',
       createdAt: json['created_at']?.toString() ?? '',
       depositAmount: json['deposit_amount']?.toString() ?? '',
-      currentLots: (json['current_lots'] as num?)?.toDouble() ?? 0.0,
+      hasLotTracking: hasTotal && hasCurrent,
+      currentLots: _parseLot(rawCurrentLots),
+      totalLots: _parseLot(rawLotSize),
       claimDate: json['claim_date']?.toString() ?? '',
       remainingDays: json['remaining_days']?.toString() ?? '',
     );
@@ -365,87 +396,110 @@ class BonusScreen extends StatelessWidget {
   // ───────────────────────────────────────────────────────────────────────────
   // TAB SWITCHER
   // ───────────────────────────────────────────────────────────────────────────
+  // Icon + label cards with an underline indicator.
+  // Reads cleanly in both light and dark mode and intentionally does NOT look
+  // like a segmented (Cupertino) control.
   Widget _buildTabSwitcher(BonusController controller) {
+    final isDark = AppColors.isDarkMode;
     return Container(
-      height: 48.h,
       decoration: BoxDecoration(
-        color: AppColors.isDarkMode ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7),
-        borderRadius: BorderRadius.circular(12.r),
+        color: isDark ? Colors.transparent : const Color(0xFFF7F7F9),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE9E9EE),
+          width: 1,
+        ),
       ),
-      padding: EdgeInsets.all(4.w),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => controller.tabIndex.value = 0,
-              child: Obx(() {
-                final active = controller.tabIndex.value == 0;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: active
-                        ? (AppColors.isDarkMode ? const Color(0xFF3A3A3C) : Colors.white)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(10.r),
-                    boxShadow: active && !AppColors.isDarkMode
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            )
-                          ]
-                        : null,
-                  ),
-                  child: Text(
-                    'Available Bonuses',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                      color: active ? AppColors.primary : AppColors.textSecondary,
-                    ),
-                  ),
-                );
-              }),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+      child: Obx(
+        () => Row(
+          children: [
+            _buildTabCard(
+              controller: controller,
+              index: 0,
+              icon: Icons.card_giftcard_rounded,
+              label: 'Available Bonuses',
             ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => controller.tabIndex.value = 1,
-              child: Obx(() {
-                final active = controller.tabIndex.value == 1;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: active
-                        ? (AppColors.isDarkMode ? const Color(0xFF3A3A3C) : Colors.white)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(10.r),
-                    boxShadow: active && !AppColors.isDarkMode
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            )
-                          ]
-                        : null,
-                  ),
-                  child: Text(
-                    'Claim History',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                      color: active ? AppColors.primary : AppColors.textSecondary,
-                    ),
-                  ),
-                );
-              }),
+            SizedBox(width: 8.w),
+            _buildTabCard(
+              controller: controller,
+              index: 1,
+              icon: Icons.history_rounded,
+              label: 'Claim History',
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabCard({
+    required BonusController controller,
+    required int index,
+    required IconData icon,
+    required String label,
+  }) {
+    final isDark = AppColors.isDarkMode;
+    final isActive = controller.tabIndex.value == index;
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => controller.tabIndex.value = index,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
+          decoration: BoxDecoration(
+            // Active: brand-tinted surface (light) / elevated surface (dark).
+            // Inactive: transparent. No white pill, no shadows — so it never
+            // reads as a Cupertino segmented control.
+            color: isActive
+                ? (isDark
+                    ? const Color(0xFF2C2C2E)
+                    : AppColors.primary.withValues(alpha: 0.08))
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10.r),
           ),
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20.h,
+                color: isActive
+                    ? AppColors.primary
+                    : (isDark
+                        ? const Color(0xFF9A9AA0)
+                        : AppColors.textSecondary),
+              ),
+              SizedBox(height: 6.h),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: isActive
+                      ? AppColors.textPrimary
+                      : (isDark
+                          ? const Color(0xFF8E8E93)
+                          : AppColors.textSecondary),
+                ),
+              ),
+              SizedBox(height: 6.h),
+              // Underline indicator — only 24px wide, so it reads as a tab
+              // selection cue, not a segmented slider.
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                height: 2.5.h,
+                width: isActive ? 24.w : 0,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -851,13 +905,10 @@ class BonusScreen extends StatelessWidget {
               final claim = controller.claims[index];
 
               double progressPercent = 0.0;
-              try {
-                final current = claim.currentLots;
-                final total = double.tryParse(claim.lotSize) ?? 0.0;
-                if (total > 0.0) {
-                  progressPercent = (current / total).clamp(0.0, 1.0);
-                }
-              } catch (_) {}
+              if (claim.hasLotTracking && claim.totalLots > 0.0) {
+                progressPercent =
+                    (claim.currentLots / claim.totalLots).clamp(0.0, 1.0);
+              }
 
               return Container(
                 padding: EdgeInsets.all(16.w),
@@ -952,8 +1003,9 @@ class BonusScreen extends StatelessWidget {
 
                     SizedBox(height: 16.h),
 
-                    // Bottom Section: Progress bar
-                    if (claim.lotSize != '0.00' && claim.lotSize.isNotEmpty) ...[
+                    // Bottom Section: Progress bar (only when backend reports
+                    // real lot values — otherwise show the Remaining Time row).
+                    if (claim.hasLotTracking && claim.totalLots > 0.0) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

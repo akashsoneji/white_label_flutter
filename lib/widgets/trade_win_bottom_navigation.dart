@@ -130,7 +130,7 @@ class TradeWinBottomNavigation extends StatelessWidget {
                             ],
                           )
                           : null,
-                  color: selected ? null : AppColors.secondary,
+                  color: selected ? null : AppColors.iconBgTertiary,
                   border: Border.all(
                     color:
                         selected
@@ -156,7 +156,7 @@ class TradeWinBottomNavigation extends StatelessWidget {
                       ? (ThemeData.estimateBrightnessForColor(AppColors.primary) == Brightness.light
                           ? Colors.black
                           : AppColors.pureWhite)
-                      : inactiveColor,
+                      : AppColors.textPrimary,
                 ),
               ),
               SizedBox(height: 6.h),

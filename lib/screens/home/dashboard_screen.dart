@@ -977,10 +977,10 @@ class DashboardScreen extends StatelessWidget {
                             vertical: 18.h,
                           ),
                           constraints: const BoxConstraints(maxWidth: 520),
-                          decoration:
-                              isVantage
-                              ? _vantageGlassCardDecoration()
-                              : null,
+                          decoration: null,
+                              // isVantage
+                              // ? _vantageGlassCardDecoration()
+                              // : null,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,

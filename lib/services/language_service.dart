@@ -18,6 +18,15 @@ class LanguageService extends GetxService {
     'es': 'Español',
   };
 
+  /// Supported locales for MaterialApp.supportedLocales. Derived from
+  /// [supportedLanguages] so it stays in sync with the language picker.
+  /// Used by `GetMaterialApp` (see `lib/main.dart`) so flutter_localizations
+  /// can resolve `Directionality` from the active locale automatically —
+  /// TextFields render RTL in Arabic without us having to force
+  /// `textDirection` on every field.
+  static List<Locale> get supportedLocales =>
+      supportedLanguages.keys.map((code) => Locale(code)).toList(growable: false);
+
   // RTL languages
   static const List<String> rtlLanguages = ['ar'];
 

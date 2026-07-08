@@ -20,9 +20,9 @@ colors:
   launcherBackground: "#BF235C"
 
 urls:
-  api: https://demov.baazex.com/api/
-  websocket: wss://demov.baazex.com/trade-engine
-  chart: https://demov.baazex.com
+  api: https://my.baazex.com/api/
+  websocket: wss://my.baazex.com/trade-engine
+  chart: https://my.baazex.com
 
 assets:
   appIcon: icon.png

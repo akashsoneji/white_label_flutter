@@ -335,7 +335,7 @@ class _OverviewCompactRow extends StatelessWidget {
             ),
             child: Icon(
               data.icon,
-              color: AppColors.onPrimaryTint,
+              color: AppColors.primary,
               size: 16.sp,
             ),
           ),
@@ -671,7 +671,7 @@ class _CatalogFilterChip extends StatelessWidget {
             style: TextStyle(
               color:
                   selected
-                      ? AppColors.onPrimaryTint
+                      ? AppColors.primary
                       : AppColors.textPrimary,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               fontSize: 13.sp,
