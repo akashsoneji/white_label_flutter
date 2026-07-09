@@ -83,8 +83,8 @@ brands:
  chart: "https://member.gtxprime.com"
  assets:
  appIcon: "assets/brands/gtxprime/icon.png"
- logo: "assets/brands/gtxprime/logo.png"
- splashLogo: "assets/brands/gtxprime/splash_logo.png"
+ logo: "assets/brands/gtxprime/logo.svg"
+ splashLogo: "assets/brands/gtxprime/splash_logo.svg"
  features:
  useNewChart: "false"
 
