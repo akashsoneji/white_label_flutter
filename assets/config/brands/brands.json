@@ -1,21 +1,13 @@
 {
-  "default": "skyriss",
+  "default": "meta",
   "brands": [
-    "skyriss",
-    "vantage"
+    "meta"
   ],
   "brandDetails": [
     {
-      "name": "skyriss",
-      "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "Skyriss",
-      "themeMode": "dark"
-    },
-    {
-      "name": "vantage",
+      "name": "meta",
       "type": "parent",
-      "label": "Vantage",
+      "label": "Meta",
       "themeMode": "both"
     }
   ]

@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart skyriss
-// Active flavor: skyriss
-PRODUCT_BUNDLE_IDENTIFIER=com.skyriss.app
-BRAND_DISPLAY_NAME=Skyriss
+//   dart run scripts/prepare_flavor.dart meta
+// Active flavor: meta
+PRODUCT_BUNDLE_IDENTIFIER=com.meta.app
+BRAND_DISPLAY_NAME=Meta
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPXNreXJpc3M=,RkxBVk9SPXNreXJpc3M=
+DART_DEFINES=Q0xJRU5UPW1ldGE=,RkxBVk9SPW1ldGE=
