@@ -34,10 +34,10 @@ class TradingMainScreen extends StatefulWidget {
 
 class _TradingMainScreenState extends State<TradingMainScreen> {
   int _currentIndex = 0;
+  int _preChartIndex = 0;
   late List<Widget> _screens;
   late final bool _isVantage;
   late PageController _pageController;
-
 
   // Get the instruments controller
   final InstrumentsController instrumentsController =
@@ -76,8 +76,8 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       )?.then((_) {
         if (cameFromChartTab && !userNavigatedAwayFromChart) {
           // Pop landed us back on the transparent Chart tab host —
-          // bounce to Prices (tab 0) so the user sees a real screen.
-          _onTabChanged(0);
+          // bounce to the previous screen instead of Prices (0).
+          _onTabChanged(_preChartIndex);
         }
       });
     } catch (e) {
@@ -242,6 +242,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
     setState(() {
       _currentIndex = index;
+      if (index == 1 && previousIndex != 1) {
+        _preChartIndex = previousIndex;
+      }
     });
 
     if (_pageController.hasClients && _pageController.page?.round() != index) {

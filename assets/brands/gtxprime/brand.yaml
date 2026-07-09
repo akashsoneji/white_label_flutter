@@ -27,8 +27,8 @@ urls:
 
 assets:
   appIcon: icon.png
-  logo: logo.png
-  splashLogo: splash_logo.png
+  logo: logo.svg
+  splashLogo: splash_logo.svg
 
 features:
   useNewChart: false
