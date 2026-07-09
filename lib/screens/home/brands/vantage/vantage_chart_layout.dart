@@ -4,7 +4,7 @@
 // Used by all Vantage-child brands (pipze, baazex, gtxprime, …).
 // Mirrors the TRADYN/JSX reference design (pixel-perfect):
 //   • Slim header   : ←  SYMBOL ⌄  ●(tick)         [slider pill] top-right
-//   • Top-right     : purple settings/sound icon
+//   • Top-right     : brand-primary icon (light mode) / white icon (dark mode)
 //   • Chart area    : TradingView WebView (free widget)
 //   • Bottom dock   : Quantity stepper + [pending-pill icon] + bell
 //                     ─────────────────────────────────────────
@@ -103,7 +103,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     super.dispose();
   }
 
-  // ── Symbol / price helpers ───────────────�───────────────────────────
+  // ── Symbol / price helpers ──────────────────────────────────────────
   String _rawSymbol() {
     final s = Get.find<SymbolSelectionService>().currentSymbol;
     if (s.isEmpty) return 'XAUUSD';
@@ -158,7 +158,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     });
   }
 
-  // ── Symbol dropdown (all instruments, scrollable) ──────────────────────
+  // ─�� Symbol dropdown (all instruments, scrollable) ──────────────────────
   Future<void> _openFavouritesDropdown() async {
     if (!mounted) return;
 
@@ -392,7 +392,8 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
 }
 
 // ────────────────────────────────────────────────────────────────────
-//  Header  :  ←  SYMBOL ⌄  ●  +  purple top-right pill icon
+//  Header  :  ←  SYMBOL ⌄  ●  +  brand-primary (light) / white (dark)
+//              top-right pill icon
 // ────────────────────────────────────────────────────────────────────
 class _Header extends StatelessWidget {
   final String symbol;
@@ -415,6 +416,15 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = isDark ? Colors.white : const Color(0xFF111114);
     final muted = isDark ? Colors.white60 : const Color(0xFF6B6B7A);
+    // Top-right icon tint rule:
+    //   • Light mode → brand's configured primary color (whatever the
+    //     flavor sets as primaryColor — NOT darkPrimaryColor).
+    //   • Dark mode  → pure white.
+    // Note: deliberately NOT `AppColors.primary` here, because that
+    // getter auto-switches to darkPrimaryColor in dark mode, which is
+    // exactly what the user wants to avoid for this button.
+    final iconColor =
+        isDark ? Colors.white : FlavorConfig.instance.primaryColor;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 8.h),
@@ -448,12 +458,12 @@ class _Header extends StatelessWidget {
                   ),
                   SizedBox(width: 2.w),
                   Icon(Icons.keyboard_arrow_down, size: 22.sp, color: muted),
-                  
+
                 ],
               ),
             ),
           ),
-          // Top-right purple settings/sound icon
+          // Top-right settings/sound icon
           InkResponse(
             onTap: onSettingsTap,
             radius: 24,
@@ -465,7 +475,10 @@ class _Header extends StatelessWidget {
                 color: primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: AppSvgIcon(assetPath: 'assets/svg/bottom_navigation/candle_bold.svg'),
+              child: AppSvgIcon(
+                assetPath: 'assets/svg/bottom_navigation/candle_bold.svg',
+                color: iconColor,
+              ),
             ),
           ),
         ],
@@ -536,6 +549,18 @@ class _BottomDock extends StatelessWidget {
     required this.onBell,
   });
 
+  /// Strip trailing zeros (and a dangling `.`) so 20.00 -> "20",
+  /// 20.50 -> "20.5", 1.08000 -> "1.08". Used to display
+  /// bid/ask/spreadDiff as the server sent them, without a forced
+  /// fixed-decimal count.
+  static String _trimTrailingZeros(double value) {
+    var s = value.toString();
+    if (!s.contains('.')) return s;
+    s = s.replaceFirst(RegExp(r'0+$'), '');
+    if (s.endsWith('.')) s = s.substring(0, s.length - 1);
+    return s;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -550,10 +575,40 @@ class _BottomDock extends StatelessWidget {
       ),
       padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 14.h),
       child: Obx(() {
-        // Touch _tick from the parent state so Obx rebuilds on every tick
-        // and whenever the user changes the symbol from the dropdown.
+        // ──────────────────────────────────────────�───────────────
         // ignore: unused_local_variable
         final _ = tick.value;
+        final socket = Get.find<ChartSocketController>();
+        // ignore: invalid_use_of_protected_member
+        final priceMap = socket.realTimePrice.value;
+
+        // Direct display - no digit-rounding, no pip-conversion.
+        // The server already sends bid/ask at the symbol's natural
+        // precision (5 digits for EURUSD, 2 for XAUUSD/JPY pairs,
+        // 3 for JPY crosses). bid.toString() preserves those
+        // decimals exactly.
+        // spreadDiff comes from the WS pre-converted to *points*
+        // (the controller's // spread_points comment). Display
+        // it as-is - no extra /pip math.
+        final bid = priceMap['bid'] is num
+            ? (priceMap['bid'] as num).toDouble()
+            : null;
+        final ask = priceMap['ask'] is num
+            ? (priceMap['ask'] as num).toDouble()
+            : null;
+        final spreadDiff = priceMap['spreadDiff'] is num
+            ? (priceMap['spreadDiff'] as num).toDouble()
+            : null;
+
+        final bidStr = (bid != null && bid != 0.0)
+            ? _trimTrailingZeros(bid)
+            : '—';
+        final askStr = (ask != null && ask != 0.0)
+            ? _trimTrailingZeros(ask)
+            : '—';
+        final spreadStr = (spreadDiff != null && spreadDiff > 0)
+            ? _trimTrailingZeros(spreadDiff)
+            : '—';
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -572,7 +627,7 @@ class _BottomDock extends StatelessWidget {
                 Expanded(
                   child: _SideButton(
                     label: 'SELL',
-                    sub: _currentBidString(context),
+                    sub: bidStr,
                     color: AppColors.error,
                     onTap: onSell,
                   ),
@@ -589,7 +644,7 @@ class _BottomDock extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Text(
-                    _currentSpreadString(context),
+                    spreadStr,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -600,7 +655,7 @@ class _BottomDock extends StatelessWidget {
                 Expanded(
                   child: _SideButton(
                     label: 'BUY',
-                    sub: _currentAskString(context),
+                    sub: askStr,
                     color: primary,
                     onTap: onBuy,
                   ),
@@ -611,51 +666,6 @@ class _BottomDock extends StatelessWidget {
         );
       }),
     );
-  }
-
-  // These run inside Obx so they refresh on every price tick.
-  String _currentBidString(BuildContext _) {
-    final b = Get.find<ChartSocketController>().getBidPrice();
-    if (b == null || b == 0.0) return '—';
-    final sym = Get.find<SymbolSelectionService>().currentSymbol;
-    return b.toStringAsFixed(_heuristicDigits(sym));
-  }
-
-  String _currentAskString(BuildContext _) {
-    final a = Get.find<ChartSocketController>().getAskPrice();
-    if (a == null || a == 0.0) return '—';
-    final sym = Get.find<SymbolSelectionService>().currentSymbol;
-    return a.toStringAsFixed(_heuristicDigits(sym));
-  }
-
-  String _currentSpreadString(BuildContext _) {
-    final sock = Get.find<ChartSocketController>();
-    final b = sock.getBidPrice();
-    final a = sock.getAskPrice();
-    if (b == null || a == null) return '0.0';
-    final sym = Get.find<SymbolSelectionService>().currentSymbol;
-    final digits = _heuristicDigits(sym);
-    final pip = (digits == 3 || digits == 5)
-        ? 0.0001
-        : digits == 2
-            ? 0.01
-            : 0.1;
-    final raw = (a - b) / pip;
-    return raw.isFinite ? raw.toStringAsFixed(1) : '0.0';
-  }
-
-  static int _heuristicDigits(String symbol) {
-    final upper = symbol.toUpperCase();
-    if (upper.isEmpty) return 2;
-    if (upper.contains('JPY') && !upper.startsWith('JPY')) return 3;
-    final base = upper.split('.')[0];
-    if (base.length == 6 &&
-        !base.endsWith('USD') &&
-        !base.startsWith('USD') &&
-        !base.contains('BTC')) {
-      return 5;
-    }
-    return 2;
   }
 }
 

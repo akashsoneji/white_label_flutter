@@ -18,9 +18,9 @@ class GtxprimeConfig extends BaseClientConfig {
           logoSvgPath: 'logo.png',
           splashLogoPath: 'splash_logo.png',
           appIconPath: 'icon.png',
- apiBaseUrl: 'https://app.tenaxcode.com/api/',
- websocketUrl: 'wss://app.tenaxcode.com/trade-engine',
- chartBaseUrl: 'https://app.tenaxcode.com',
+ apiBaseUrl: 'https://member.gtxprime.com/api/',
+ websocketUrl: 'wss://member.gtxprime.com/trade-engine',
+ chartBaseUrl: 'https://member.gtxprime.com',
  useNewChart: false,
  );
 }

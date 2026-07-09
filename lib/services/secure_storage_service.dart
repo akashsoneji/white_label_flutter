@@ -304,4 +304,114 @@ class SecureStorageService {
       return null;
     }
   }
+
+  // ── Tenax multi-broker support ────────────────────────────────────
+  // Keys for Tenax broker data, profiles, and current selection.
+  static const String _tenaxBrokerSelectionKey = 'tenax_broker_selection';
+  static const String _tenaxBrokerSelectionFlagKey =
+      'tenax_broker_selection_enabled';
+  static const String _tenaxUserBrokerProfilesKey =
+      'tenax_user_broker_profiles';
+  static const String _tenaxCurrentProfileKeyKey = 'tenax_current_profile_key';
+
+  /// Returns the persisted broker selection payload (JSON) for Tenax.
+  static Future<Map<String, dynamic>?> getTenaxBrokerSelection() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_tenaxBrokerSelectionKey);
+      if (raw == null || raw.isEmpty) return null;
+      final decoded = json.decode(raw);
+      if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
+      }
+      return null;
+    } catch (e) {
+      print('SecureStorage: Error reading Tenax broker selection: $e');
+      return null;
+    }
+  }
+
+  /// Persist the broker selection payload (JSON-serializable map).
+  static Future<void> saveTenaxBrokerSelection(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_tenaxBrokerSelectionKey, json.encode(data));
+    } catch (e) {
+      print('SecureStorage: Error saving Tenax broker selection: $e');
+    }
+  }
+
+  /// Feature flag: whether the Tenax multi-broker UI is enabled.
+  static Future<bool> getTenaxBrokerSelectionFlag() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_tenaxBrokerSelectionFlagKey) ?? false;
+    } catch (e) {
+      print('SecureStorage: Error reading Tenax broker selection flag: $e');
+      return false;
+    }
+  }
+
+  /// Stored list of broker profiles the user has logged into.
+  static Future<List<Map<String, dynamic>>> getTenaxUserBrokerProfiles() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_tenaxUserBrokerProfilesKey);
+      if (raw == null || raw.isEmpty) return <Map<String, dynamic>>[];
+      final decoded = json.decode(raw);
+      if (decoded is List) {
+        return decoded
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+      }
+      return <Map<String, dynamic>>[];
+    } catch (e) {
+      print('SecureStorage: Error reading Tenax user broker profiles: $e');
+      return <Map<String, dynamic>>[];
+    }
+  }
+
+  /// Insert or update a broker profile keyed by `profile_key` (email+broker).
+  static Future<void> upsertTenaxUserBrokerProfile(
+    Map<String, dynamic> profile,
+  ) async {
+    try {
+      final profiles = await getTenaxUserBrokerProfiles();
+      final key = profile['profile_key']?.toString() ?? '';
+      final filtered =
+          profiles.where((p) => p['profile_key']?.toString() != key).toList();
+      filtered.add(profile);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+        _tenaxUserBrokerProfilesKey,
+        json.encode(filtered),
+      );
+    } catch (e) {
+      print('SecureStorage: Error upserting Tenax user broker profile: $e');
+    }
+  }
+
+  /// Current active broker profile key (email+broker composite).
+  static Future<String?> getTenaxCurrentProfileKey() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_tenaxCurrentProfileKeyKey);
+    } catch (e) {
+      print('SecureStorage: Error reading Tenax current profile key: $e');
+      return null;
+    }
+  }
+
+  /// Set the current active broker profile key (email+broker composite).
+  static Future<void> setTenaxCurrentProfileKey(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_tenaxCurrentProfileKeyKey, key);
+    } catch (e) {
+      print('SecureStorage: Error setting Tenax current profile key: $e');
+    }
+  }
 }
