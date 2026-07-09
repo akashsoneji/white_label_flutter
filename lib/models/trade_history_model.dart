@@ -171,7 +171,13 @@ class TradeHistoryItem {
   static double _parseNumericValue(dynamic value) {
     if (value == null) return 0.0;
     if (value is num) return value.toDouble();
-    if (value is String) return double.tryParse(value.replaceAll(',', '').trim()) ?? 0.0;
+    if (value is String) {
+      String strVal = value.replaceAll(',', '').trim();
+      if (strVal.contains('/')) {
+        strVal = strVal.split('/')[0];
+      }
+      return double.tryParse(strVal) ?? 0.0;
+    }
     return 0.0;
   }
 
