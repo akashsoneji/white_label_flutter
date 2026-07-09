@@ -7,10 +7,10 @@
 //   • Live bid/ask horizontal lines drawn on chart
 //   • Open position lines (from TradingController)
 //   • Pending order lines (from TradingController)
-//   • Buy/Sell quick-trade panel
+//   • Buy/Sell quick-trade panel (toggled by the "Trade" pill in the toolbar)
 //   • Symbol + timeframe picker in Flutter toolbar
 //   • Live price header (bid/ask/H/L) via InstrumentsController
-//   • Dark/light theme sync
+//   • Dark/light theme sync (Meta blue + Meta dark palette)
 // ============================================================
 
 import 'dart:async';
@@ -67,7 +67,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
   StreamSubscription<Map<String, dynamic>>? _tickSub;
   Worker? _symbolWorker;
 
-  // ─────────────────────────────────────────────────────────────────────
+  // ────────────────────────────────────────────────�────────────────────
   // Lifecycle
   // ─────────────────────────────────────────────────────────────────────
 
@@ -294,7 +294,8 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
             ),
           ),
           const Spacer(),
-          // Trade toggle button
+          // Trade toggle button — clicking shows/hides the inline Buy/Sell
+          // panel with live bid/ask + lot stepper (matches the screenshot).
           GestureDetector(
             onTap: () => setState(() => _tradeOpen = !_tradeOpen),
             child: Container(
