@@ -83,12 +83,12 @@
       }
     },
     {
-      "label": "prepare-meta",
+      "label": "prepare-kantara",
       "type": "shell",
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart meta && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart kantara && rm -rf .dart_tool/flutter_build"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -102,12 +102,12 @@
       }
     },
     {
-      "label": "prepare-kantara",
+      "label": "prepare-meta",
       "type": "shell",
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart kantara && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart meta && rm -rf .dart_tool/flutter_build"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

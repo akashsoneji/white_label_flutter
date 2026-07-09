@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
 
-import '../brands/celestial/celestial_main_shell.dart';
+import 'package:crm_app/flavor_config.dart';
+
 import '../brands/meta/meta_main_shell.dart';
+import '../brands/celestial/celestial_main_shell.dart';
 import 'package:crm_app/screens/auth/presentation/pages/create_account_screen.dart';
 import 'package:crm_app/screens/auth/presentation/pages/create_new_password_screen.dart';
 import 'package:crm_app/screens/auth/presentation/pages/forgot_password_screen.dart';
@@ -16,99 +18,127 @@ import 'package:crm_app/screens/kyc/presentation/pages/kyc_intro_screen.dart';
 import 'package:crm_app/screens/trading/presentation/pages/trading_main_screen.dart';
 
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/create_account_screen.dart'
-    as vantage_auth;
+    as vantage;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/create_new_password_screen.dart'
-    as vantage_auth;
+    as vantage;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/forgot_password_screen.dart'
-    as vantage_auth;
+    as vantage;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/get_started_screen.dart'
-    as vantage_auth;
+    as vantage;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/login_screen.dart'
-    as vantage_auth;
+    as vantage;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/verify_code_screen.dart'
-    as vantage_auth;
+    as vantage;
 
 import 'ui_slots.dart';
 
 /// Build-time selected client (no runtime switching).
 ///
 /// Use: `--dart-define=CLIENT=tenax|vantage|celestial|meta|pipze|telifox`
-/// Parents (vantage/celestial/meta) own their own UI tree.
-/// Child brands inherit their parent screen files based on brands.yaml.
-const String activeClient = String.fromEnvironment(
-  'CLIENT',
-  defaultValue: 'tenax',
-);
+///
+/// Falls back to the build-time `FLAVOR` define when `CLIENT` is empty.
+/// Defaults to `tenax` only if neither define is set (matches the
+/// previous default so existing dev workflows keep working).
+String get activeClient {
+  final clientFromDefine = String.fromEnvironment('CLIENT', defaultValue: '');
+  if (clientFromDefine.isNotEmpty) return clientFromDefine.toLowerCase();
 
-class UiRegistry implements UiSlots {
-  final String client;
+  // Read the active flavor that `main.dart` already resolved via
+  // `_initializeFlavor()`. This makes UI routing honour the same brand
+  // the rest of the app is configured for (colors, theme, API endpoints,
+  // etc.) — previously the UI registry used its own env-define and
+  // silently defaulted to 'tenax' for builds that only set FLAVOR,
+  // causing Tenax's UI to render for every other brand.
+  try {
+    final name = FlavorConfig.instance.flavor.name.toLowerCase();
+    if (name.isNotEmpty) return name;
+  } catch (_) {
+    // FlavorConfig may not be initialised yet (very early startup).
+    // Fall through to the FLAVOR env-define below.
+  }
 
-  const UiRegistry({required this.client});
+  final flavorFromDefine =
+      String.fromEnvironment('FLAVOR', defaultValue: '').toLowerCase();
+  if (flavorFromDefine.isNotEmpty) return flavorFromDefine;
 
-  // Keep this synchronous for widget factories. Regenerate/update this map from
-  // assets/config/brands/brands.yaml when parent-child UI inheritance changes.
+  return 'tenax';
+}
 
-
-  static const Map<String, String> _uiParentByClient = {
-    'vantage': 'vantage',
-    'celestial': 'celestial',
-    'meta': 'meta',
-    'pipze': 'vantage',
-    'skyriss': 'vantage',
-    'tenax': 'vantage',
-    'baazex': 'vantage',
-    'gtxprime': 'vantage',
-    'telifox': 'vantage',
-    'acme': 'vantage',
-  
-    'kantara': 'vantage',
+/// Routes a CLIENT to its design parent. Child brands inherit their
+/// parent's screens. Tenax is its own parent (it has its own design).
+const Map<String, String> _uiParentByClient = {
+  'vantage': 'vantage',
+  'celestial': 'celestial',
+  'pipze': 'vantage',
+  'telifox': 'vantage',
+  'kantara': 'vantage',
+  'gtxprime': 'vantage',
+  'baazex': 'vantage',
+  'skyriss': 'vantage',
+  'meta': 'meta',
+  'tenax': 'tenax',
 };
 
-  String get _uiBrand =>
-      _uiParentByClient[client.toLowerCase()] ?? client.toLowerCase();
+/// Picks the right `screens.dart`-style widget set for the active client.
+class UiRegistry implements UiSlots {
+  UiRegistry._();
 
-  bool get _usesVantageUi => _uiBrand == 'vantage';
+  static final UiRegistry instance = UiRegistry._();
+
+  /// Lower-cased client key (e.g. `pipze`, `tenax`, `vantage`).
+  String get _uiBrand => activeClient;
+
+  /// True for brands whose auth/UI design was authored for Vantage and
+  /// is shared by all Vantage-inherited children.
+  bool get _usesVantageUi => _uiParentByClient[_uiBrand] == 'vantage';
+
+  bool get _usesCelestialUi => _uiParentByClient[_uiBrand] == 'celestial';
+
   bool get _usesMetaUi => _uiBrand == 'meta';
-  bool get _usesCelestialUi => _uiBrand == 'celestial';
 
+  // ─── Auth flow ───────────────────────────────────────────────────────────
+
+  // Vantage has no dedicated splash screen — fall back to the generic one.
   @override
   Widget splash() => const SplashScreen();
 
   @override
   Widget getStarted() {
-    if (_usesVantageUi) return vantage_auth.VantageGetStartedScreen();
+    if (_usesVantageUi) return vantage.VantageGetStartedScreen();
     return GetStartedScreen();
   }
 
   @override
   Widget login() {
-    if (_usesVantageUi) return const vantage_auth.VantageLoginScreen();
-    return const LoginScreen();
+    if (_usesVantageUi) return vantage.VantageLoginScreen();
+    return LoginScreen();
   }
 
   @override
   Widget createAccount() {
-    if (_usesVantageUi) return const vantage_auth.VantageCreateAccountScreen();
-    return const CreateAccountScreen();
+    if (_usesVantageUi) return vantage.VantageCreateAccountScreen();
+    return CreateAccountScreen();
   }
 
   @override
   Widget forgotPassword() {
-    if (_usesVantageUi) return const vantage_auth.VantageForgotPasswordScreen();
-    return const ForgotPasswordScreen();
+    if (_usesVantageUi) return vantage.VantageForgotPasswordScreen();
+    return ForgotPasswordScreen();
   }
 
   @override
   Widget verifyCode({required String email}) {
-    if (_usesVantageUi) return vantage_auth.VantageVerifyCodeScreen(email: email);
+    if (_usesVantageUi) return vantage.VantageVerifyCodeScreen(email: email);
     return VerifyCodeScreen(email: email);
   }
 
   @override
   Widget createNewPassword() {
-    if (_usesVantageUi) return const vantage_auth.VantageCreateNewPasswordScreen();
-    return const CreateNewPasswordScreen();
+    if (_usesVantageUi) return vantage.VantageCreateNewPasswordScreen();
+    return CreateNewPasswordScreen();
   }
+
+  // ─── Main shell + tabs ───────────────────────────────────────────────────
 
   @override
   Widget tradingMain() {

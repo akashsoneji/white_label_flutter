@@ -3,28 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
-import 'clients/baazex/config.dart';
-import 'clients/celestial/config.dart';
-import 'clients/gtxprime/config.dart';
-import 'clients/kantara/config.dart';
-import 'clients/meta/config.dart';
 import 'clients/pipze/config.dart';
-import 'clients/skyriss/config.dart';
-import 'clients/telifox/config.dart';
-import 'clients/tenax/config.dart';
-import 'clients/vantage/config.dart';
 
 enum Flavor {
-  baazex,
-  celestial,
-  gtxprime,
-  kantara,
-  meta,
   pipze,
-  skyriss,
-  telifox,
-  tenax,
-  vantage,
 }
 
 class FlavorConfig {
@@ -109,7 +91,7 @@ class FlavorConfig {
  this.useNewChart = false,
  }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.vantage);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.pipze);
 
   static void reset() {
     _instance = null;
@@ -125,88 +107,27 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.vantage,
+      orElse: () => Flavor.pipze,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
-      case Flavor.baazex:
-        const config = BaazexConfig();
-        return config.toFlavorConfig(Flavor.baazex, 'baazex');
-      case Flavor.celestial:
-        const config = CelestialConfig();
-        return config.toFlavorConfig(Flavor.celestial, 'celestial');
-      case Flavor.gtxprime:
-        const config = GtxprimeConfig();
-        return config.toFlavorConfig(Flavor.gtxprime, 'gtxprime');
-      case Flavor.kantara:
-        const config = KantaraConfig();
-        return config.toFlavorConfig(Flavor.kantara, 'kantara');
-      case Flavor.meta:
-        const config = MetaConfig();
-        return config.toFlavorConfig(Flavor.meta, 'meta');
       case Flavor.pipze:
         const config = PipzeConfig();
         return config.toFlavorConfig(Flavor.pipze, 'pipze');
-      case Flavor.skyriss:
-        const config = SkyrissConfig();
-        return config.toFlavorConfig(Flavor.skyriss, 'skyriss');
-      case Flavor.telifox:
-        const config = TelifoxConfig();
-        return config.toFlavorConfig(Flavor.telifox, 'telifox');
-      case Flavor.tenax:
-        const config = TenaxConfig();
-        return config.toFlavorConfig(Flavor.tenax, 'tenax');
-      case Flavor.vantage:
-        const config = VantageConfig();
-        return config.toFlavorConfig(Flavor.vantage, 'vantage');
     }
   }
-
-  static bool isBaazex() => _instance?.flavor == Flavor.baazex;
-  static FlavorConfig get baazex => activate(Flavor.baazex);
-
-  static bool isCelestial() => _instance?.flavor == Flavor.celestial;
-  static FlavorConfig get celestial => activate(Flavor.celestial);
-
-  static bool isGtxprime() => _instance?.flavor == Flavor.gtxprime;
-  static FlavorConfig get gtxprime => activate(Flavor.gtxprime);
-
-  static bool isKantara() => _instance?.flavor == Flavor.kantara;
-  static FlavorConfig get kantara => activate(Flavor.kantara);
-
-  static bool isMeta() => _instance?.flavor == Flavor.meta;
-  static FlavorConfig get meta => activate(Flavor.meta);
 
   static bool isPipze() => _instance?.flavor == Flavor.pipze;
   static FlavorConfig get pipze => activate(Flavor.pipze);
 
-  static bool isSkyriss() => _instance?.flavor == Flavor.skyriss;
-  static FlavorConfig get skyriss => activate(Flavor.skyriss);
-
-  static bool isTelifox() => _instance?.flavor == Flavor.telifox;
-  static FlavorConfig get telifox => activate(Flavor.telifox);
-
-  static bool isTenax() => _instance?.flavor == Flavor.tenax;
-  static FlavorConfig get tenax => activate(Flavor.tenax);
-
-  static FlavorConfig get vantage => activate(Flavor.vantage);
-
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
-    return const <String>{'baazex', 'gtxprime', 'kantara', 'pipze', 'skyriss', 'telifox', 'tenax', 'vantage'}.contains(name);
-  }
-
-  /// `true` when the active flavor is a parent brand with its own dedicated
-  /// UI tree (e.g. Vantage, Celestial, Meta). These brands do NOT inherit
-  /// Vantage's 4-tab shell.
-  static bool usesParentUi() {
-    final name = (_instance?.flavor.name ?? '').toLowerCase();
-    return const <String>{'celestial', 'meta', 'vantage'}.contains(name);
+    final name = (_instance?.flavor.name ?? Flavor.pipze.name).toLowerCase();
+    return const <String>{'pipze'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;
@@ -215,78 +136,6 @@ class FlavorConfig {
   static String get effectiveLogo => remoteLogo ?? svgLogoAsset;
   static Map<String, dynamic>? get brokerData => instance.selectedBrokerData;
   static String get appNameDisplay => instance.appName;
-
-  /// Returns true when multi-broker selection is enabled (Tenax flavor).
-  static bool get isMultiBrokerEnabled => isTenax();
-
-  /// Returns true for the ONS A flavor (currently a no-op alias for
-  /// non-Tenax builds). Reserved for future brand-specific gating.
-  static bool get isONSA => false;
-
-  /// Apply Tenax-specific runtime branding (logo, colors) from a broker
-  /// payload. No-op when the active flavor is not Tenax.
-  static void applyTenaxBrokerRuntimeConfig(Map<String, dynamic>? data) {
-    if (!isTenax()) return;
-    if (data == null) return;
-    final config = _instance;
-    if (config == null) return;
-    final palette = (data['palette'] as Map?)?.cast<String, dynamic>();
-    final colors = (data['colors'] as Map?)?.cast<String, dynamic>() ?? palette;
-    Color? pick(String key) {
-      final v = colors?[key];
-      if (v == null) return null;
-      return _parseColor(v);
-    }
-    final next = config.copyWith(
-      svgLogoPath: data['logoSvgPath']?.toString() ?? config.svgLogoPath,
-      remoteLogoUrl: data['remoteLogoUrl']?.toString() ?? config.remoteLogoUrl,
-      primaryColor: pick('primaryColor') ?? config.primaryColor,
-      darkPrimaryColor: pick('darkPrimaryColor') ?? config.darkPrimaryColor,
-      secondaryColor: pick('secondaryColor') ?? config.secondaryColor,
-      accentColor: pick('accentColor') ?? config.accentColor,
-      selectedBrokerData:
-          (data['selectedBrokerData'] as Map?)?.cast<String, dynamic>() ??
-              config.selectedBrokerData,
-    );
-    _instance = next;
-  }
-
-  FlavorConfig copyWith({
-    String? appName,
-    String? appTitle,
-    Color? primaryColor,
-    Color? darkPrimaryColor,
-    Color? secondaryColor,
-    Color? accentColor,
-    String? apiBaseUrl,
-    String? websocketUrl,
-    String? chartBaseUrl,
-    String? appIconPath,
-    String? svgLogoPath,
-    String? splashLogoPath,
-    String? remoteLogoUrl,
-    Map<String, dynamic>? selectedBrokerData,
-    bool? useNewChart,
-  }) {
-    return FlavorConfig._internal(
-      flavor: flavor,
-      title: appTitle ?? this.appTitle,
-      appName: appName ?? this.appName,
-      primaryColor: primaryColor ?? this.primaryColor,
-      darkPrimaryColor: darkPrimaryColor ?? this.darkPrimaryColor,
-      secondaryColor: secondaryColor ?? this.secondaryColor,
-      accentColor: accentColor ?? this.accentColor,
-      apiBaseUrl: apiBaseUrl ?? this.apiBaseUrl,
-      websocketUrl: websocketUrl ?? this.websocketUrl,
-      chartBaseUrl: chartBaseUrl ?? this.chartBaseUrl,
-      appIconPath: appIconPath ?? this.appIconPath,
-      svgLogoPath: svgLogoPath ?? this.svgLogoPath,
-      splashLogoPath: splashLogoPath ?? this.splashLogoPath,
-      remoteLogoUrl: remoteLogoUrl ?? this.remoteLogoUrl,
-      selectedBrokerData: selectedBrokerData ?? this.selectedBrokerData,
-      useNewChart: useNewChart ?? this.useNewChart,
-    );
-  }
 
   static void applyBranding({
     required Map<String, dynamic> config,
@@ -329,7 +178,82 @@ class FlavorConfig {
     final parsed = int.tryParse(hex, radix: 16);
     return parsed == null ? null : Color(parsed);
   }
+
+  /// True when the active flavor supports per-user multi-broker selection
+  /// (the Tenax-style flow stored in `SecureStorageService`).
+  ///
+  /// Returns `true` when the flavor id is `tenax` or when the active config
+  /// already carries a non-empty `selectedBrokerData` payload. For all
+  /// other flavors the feature is disabled.
+  static bool get isMultiBrokerEnabled {
+    final inst = _instance;
+    if (inst == null) return false;
+    final name = inst.flavor.name.toLowerCase();
+    if (name == 'tenax') return true;
+    return (inst.selectedBrokerData?.isNotEmpty ?? false);
+  }
+
+  /// Legacy "ONSA" brand flag. Kept for backward compatibility with code
+  /// that gates UI on this brand — always false in this build.
+  static bool get isONSA => false;
+
+  /// Applies a Tenax multi-broker runtime payload onto the active
+  /// [FlavorConfig]. When [payload] is null or empty this is a no-op so
+  /// non-Tenax flavors stay untouched. The shape mirrors [applyBranding] —
+  /// callers build a single map merging tenant-supplied config + selected
+  /// broker name / logo overrides.
+  static void applyTenaxBrokerRuntimeConfig(Map<String, dynamic>? payload) {
+    if (payload == null || payload.isEmpty) return;
+    applyBranding(
+      config: payload,
+      brokerName: payload['appName']?.toString(),
+      brokerLogoUrl: payload['logoSvgPath']?.toString() ??
+          payload['remoteLogoUrl']?.toString(),
+      brokerData: payload,
+    );
+  }
 }
+
+ /// Public copy-with helper so brand-specific wrappers can derive a tweaked
+ /// instance without re-constructing the whole config.
+ extension FlavorConfigCopyWith on FlavorConfig {
+  FlavorConfig copyWith({
+    Color? primaryColor,
+    Color? darkPrimaryColor,
+    Color? secondaryColor,
+    Color? accentColor,
+    String? appName,
+    String? appTitle,
+    String? apiBaseUrl,
+    String? websocketUrl,
+    String? chartBaseUrl,
+    String? appIconPath,
+    String? svgLogoPath,
+    String? splashLogoPath,
+    String? remoteLogoUrl,
+    Map<String, dynamic>? selectedBrokerData,
+    bool? useNewChart,
+  }) {
+    return FlavorConfig._internal(
+      flavor: flavor,
+      title: appTitle ?? this.appTitle,
+      appName: appName ?? this.appName,
+      primaryColor: primaryColor ?? this.primaryColor,
+      darkPrimaryColor: darkPrimaryColor ?? this.darkPrimaryColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
+      accentColor: accentColor ?? this.accentColor,
+      apiBaseUrl: apiBaseUrl ?? this.apiBaseUrl,
+      websocketUrl: websocketUrl ?? this.websocketUrl,
+      chartBaseUrl: chartBaseUrl ?? this.chartBaseUrl,
+      appIconPath: appIconPath ?? this.appIconPath,
+      svgLogoPath: svgLogoPath ?? this.svgLogoPath,
+      splashLogoPath: splashLogoPath ?? this.splashLogoPath,
+      remoteLogoUrl: remoteLogoUrl ?? this.remoteLogoUrl,
+      selectedBrokerData: selectedBrokerData ?? this.selectedBrokerData,
+      useNewChart: useNewChart ?? this.useNewChart,
+    );
+  }
+ }
 
  extension _BaseClientConfigFlavorConfigX on BaseClientConfig {
  FlavorConfig toFlavorConfig(Flavor flavor, String clientName) {

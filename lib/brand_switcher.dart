@@ -51,7 +51,7 @@ class BrandSwitcher {
   static String get _active => FlavorConfig.instance.flavor.name.toLowerCase();
 
   /// `true` when the active flavor is `Meta`.
-  static bool get isMeta => FlavorConfig.instance.flavor == Flavor.meta;
+  static bool get isMeta => _active == 'meta';
 
   /// `true` when the active flavor should use Vantage's shared UI tree
   /// (4-tab Prices/Markets/Accounts/Settings). Equivalent to
@@ -205,7 +205,7 @@ class BrandSwitcher {
         return 'Baazex';
       case 'skyriss':
         return 'Skyriss';
-      case Flavor.meta:
+      case 'meta':
         return 'Meta';
       case 'kantara':
         return 'Kantara';

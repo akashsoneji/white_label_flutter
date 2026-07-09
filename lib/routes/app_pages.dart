@@ -31,18 +31,12 @@ import 'package:crm_app/screens/home/open_account_screen.dart';
 import 'package:crm_app/screens/home/choose_account_screen.dart';
 import 'package:crm_app/screens/home/create_crm_app_account_screen.dart';
 import 'package:crm_app/screens/home/chart_screen.dart';
+import '../app/ui_registry.dart';
 import '../bindings/deposit_binding.dart';
 import '../bindings/payment_method_binding.dart';
-import '../screens/auth/presentation/pages/splash_screen.dart';
-import '../screens/auth/presentation/pages/get_started_screen.dart';
-import '../screens/auth/presentation/pages/login_screen.dart';
-import '../screens/auth/presentation/pages/create_account_screen.dart';
 import '../screens/auth/presentation/pages/legal_documents_screen.dart';
 import '../screens/auth/presentation/pages/privacy_policy_screen.dart';
 import '../screens/auth/presentation/pages/account_created_screen.dart';
-import '../screens/auth/presentation/pages/forgot_password_screen.dart';
-import '../screens/auth/presentation/pages/verify_code_screen.dart';
-import '../screens/auth/presentation/pages/create_new_password_screen.dart';
 import '../screens/home/change_password_screen.dart';
 import '../screens/home/more/two_factor_auth_screen.dart';
 import '../screens/auth/presentation/pages/google_login_otp_screen.dart';
@@ -59,7 +53,6 @@ import '../screens/kyc/presentation/pages/kyc_details_screen.dart';
 import '../screens/kyc/presentation/pages/kyc_docs_screen.dart';
 import '../screens/kyc/presentation/pages/kyc_success_screen.dart';
 import '../screens/finance/presentation/pages/transaction_history_screen.dart';
-import '../screens/home/trading_main_screen.dart';
 import '../screens/home/order_confirmation_screen.dart';
 import '../screens/settings/presentation/pages/language_selector_screen.dart';
 import '../screens/settings/presentation/pages/account_management_screen.dart';
@@ -193,12 +186,16 @@ class AppPages {
   static final routes = [
     GetPage(
       name: _Paths.SPLASH,
-      page: () => const SplashScreen(),
+      // ✅ Route through UiRegistry so brand-inherited auth UI renders
+      // for Vantage-family clients (Pipze/Celestial/etc.) and the legacy
+      // UI for Tenax/Meta. Previously the page was hardcoded to the
+      // legacy SplashScreen, so no brand-specific splash could ever show.
+      page: () => UiRegistry.instance.splash(),
       binding: SplashBinding(),
     ),
     GetPage(
       name: _Paths.GET_STARTED,
-      page: () => GetStartedScreen(),
+      page: () => UiRegistry.instance.getStarted(),
     ),
     GetPage(name: _Paths.KYC_BANK, page: () => KycBankScreen()),
     GetPage(
@@ -217,7 +214,9 @@ class AppPages {
     GetPage(name: _Paths.BANK_LIST, page: () => BankListScreen()),
     GetPage(
       name: _Paths.LOGIN,
-      page: () => const LoginScreen(),
+      // ✅ UiRegistry picks VantageLoginScreen for Pipze/Celestial/
+      // Vantage and falls back to LoginScreen for Tenax/Meta.
+      page: () => UiRegistry.instance.login(),
       binding: AuthBinding(),
     ),
     GetPage(
@@ -227,7 +226,8 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.CREATE_ACCOUNT,
-      page: () => const CreateAccountScreen(),
+      // ✅ Same routing pattern as LOGIN.
+      page: () => UiRegistry.instance.createAccount(),
       binding: AuthBinding(),
     ),
     GetPage(
@@ -245,22 +245,25 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.FORGOT_PASSWORD,
-      page: () => const ForgotPasswordScreen(),
+      page: () => UiRegistry.instance.forgotPassword(),
       binding: AuthBinding(),
     ),
     GetPage(
       name: _Paths.VERIFY_CODE,
-      page: () => const VerifyCodeScreen(email: ''),
+      page: () => UiRegistry.instance.verifyCode(email: ''),
       binding: AuthBinding(),
     ),
     GetPage(
       name: _Paths.CREATE_NEW_PASSWORD,
-      page: () => const CreateNewPasswordScreen(),
+      page: () => UiRegistry.instance.createNewPassword(),
       binding: AuthBinding(),
     ),
     GetPage(
       name: _Paths.TRADING,
-      page: () => const TradingMainScreen(),
+      // ✅ Route through UiRegistry so the brand's parent UI renders:
+      //    Celestial → CelestialMainShell, Meta → MetaMainShell,
+      //    Vantage-family → TradingMainScreen (legacy shared shell).
+      page: () => UiRegistry.instance.tradingMain(),
       binding: TradingBinding(),
     ),
     GetPage(

@@ -92,36 +92,6 @@
             "preLaunchTask": "prepare-gtxprime"
         },
         {
-            "name": "🔴 Meta (debug)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "meta", "--dart-define=CLIENT=meta", "--dart-define=FLAVOR=meta", "--no-enable-impeller"],
-            "flutterMode": "debug",
-            "console": "terminal",
-            "preLaunchTask": "prepare-meta"
-        },
-        {
-            "name": "🔴 Meta (profile)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "meta", "--dart-define=CLIENT=meta", "--dart-define=FLAVOR=meta"],
-            "flutterMode": "profile",
-            "console": "terminal",
-            "preLaunchTask": "prepare-meta"
-        },
-        {
-            "name": "🔴 Meta (release)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "meta", "--dart-define=CLIENT=meta", "--dart-define=FLAVOR=meta"],
-            "flutterMode": "release",
-            "console": "terminal",
-            "preLaunchTask": "prepare-meta"
-            },
-            {
             "name": "🔴 Kantara (debug)",
             "request": "launch",
             "type": "dart",
@@ -152,7 +122,37 @@
             "preLaunchTask": "prepare-kantara"
         },
         {
-            "name": "🟣 Pipze (debug)",
+            "name": "🟣 Meta (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "meta", "--dart-define=CLIENT=meta", "--dart-define=FLAVOR=meta", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal",
+            "preLaunchTask": "prepare-meta"
+        },
+        {
+            "name": "🟣 Meta (profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "meta", "--dart-define=CLIENT=meta", "--dart-define=FLAVOR=meta"],
+            "flutterMode": "profile",
+            "console": "terminal",
+            "preLaunchTask": "prepare-meta"
+        },
+        {
+            "name": "🟣 Meta (release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "meta", "--dart-define=CLIENT=meta", "--dart-define=FLAVOR=meta"],
+            "flutterMode": "release",
+            "console": "terminal",
+            "preLaunchTask": "prepare-meta"
+        },
+        {
+            "name": "🟠 Pipze (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -162,7 +162,7 @@
             "preLaunchTask": "prepare-pipze"
         },
         {
-            "name": "🟣 Pipze (profile)",
+            "name": "🟠 Pipze (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -172,7 +172,7 @@
             "preLaunchTask": "prepare-pipze"
         },
         {
-            "name": "🟣 Pipze (release)",
+            "name": "🟠 Pipze (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -182,7 +182,7 @@
             "preLaunchTask": "prepare-pipze"
         },
         {
-            "name": "🟠 Skyriss (debug)",
+            "name": "🔶 Skyriss (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -192,7 +192,7 @@
             "preLaunchTask": "prepare-skyriss"
         },
         {
-            "name": "🟠 Skyriss (profile)",
+            "name": "🔶 Skyriss (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -202,7 +202,7 @@
             "preLaunchTask": "prepare-skyriss"
         },
         {
-            "name": "🟠 Skyriss (release)",
+            "name": "🔶 Skyriss (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -212,7 +212,7 @@
             "preLaunchTask": "prepare-skyriss"
         },
         {
-            "name": "🔶 Telifox (debug)",
+            "name": "🩵 Telifox (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -222,7 +222,7 @@
             "preLaunchTask": "prepare-telifox"
         },
         {
-            "name": "🔶 Telifox (profile)",
+            "name": "🩵 Telifox (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -232,7 +232,7 @@
             "preLaunchTask": "prepare-telifox"
         },
         {
-            "name": "🔶 Telifox (release)",
+            "name": "🩵 Telifox (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -242,7 +242,7 @@
             "preLaunchTask": "prepare-telifox"
         },
         {
-            "name": "🩵 Tenax (debug)",
+            "name": "🩷 Tenax (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -252,7 +252,7 @@
             "preLaunchTask": "prepare-tenax"
         },
         {
-            "name": "🩵 Tenax (profile)",
+            "name": "🩷 Tenax (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -262,7 +262,7 @@
             "preLaunchTask": "prepare-tenax"
         },
         {
-            "name": "🩵 Tenax (release)",
+            "name": "🩷 Tenax (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -272,7 +272,7 @@
             "preLaunchTask": "prepare-tenax"
         },
         {
-            "name": "🩷 Vantage (debug)",
+            "name": "🟤 Vantage (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -282,7 +282,7 @@
             "preLaunchTask": "prepare-vantage"
         },
         {
-            "name": "🩷 Vantage (profile)",
+            "name": "🟤 Vantage (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -292,7 +292,7 @@
             "preLaunchTask": "prepare-vantage"
         },
         {
-            "name": "🩷 Vantage (release)",
+            "name": "🟤 Vantage (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",

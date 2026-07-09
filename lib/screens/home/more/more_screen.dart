@@ -1071,27 +1071,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     );
   }
 
-  String _logoutBrokerLogoSource() {
-    final brokerData = FlavorConfig.brokerData;
-    final candidates = <String>[
-      (brokerData?['selected_logo_local_path'] ?? '').toString(),
-      (brokerData?['selected_logo_url'] ?? '').toString(),
-      (brokerData?['app_icon_url'] ?? '').toString(),
-      (brokerData?['app_logo_url'] ?? '').toString(),
-      (brokerData?['logo_url'] ?? '').toString(),
-      (brokerData?['logoUrl'] ?? '').toString(),
-      FlavorConfig.effectiveLogo,
-    ];
-
-    for (final candidate in candidates) {
-      final value = candidate.trim();
-      if (value.isNotEmpty) return value;
-    }
-    return FlavorConfig.svgLogoAsset;
-  }
-
   void _showLogoutDialog(AuthController authController) {
-    final logoSource = _logoutBrokerLogoSource();
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -1451,92 +1431,6 @@ class _CardGroup extends StatelessWidget {
             ],
           );
         }).toList(),
-      ),
-    );
-  }
-}
-
-class _MenuItemWithButton extends StatelessWidget {
-  final String icon;
-  final String label;
-  final String buttonText;
-  final VoidCallback onTap;
-  final VoidCallback onButtonTap;
-
-  const _MenuItemWithButton({
-    required this.icon,
-    required this.label,
-    required this.buttonText,
-    required this.onTap,
-    required this.onButtonTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-          child: Row(
-            children: [
-              Container(
-                width: 30.w,
-                height: 30.w,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.08),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    'assets/svg/more/$icon.svg',
-                    height: 16.h,
-                    width: 16.w,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-              SizedBox(width: 14.w),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: onButtonTap,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.whiteColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 4.h,
-                  ),
-                  elevation: 0,
-                  minimumSize: Size(0, 30.h),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  buttonText,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -655,7 +655,82 @@ $getters
     final parsed = int.tryParse(hex, radix: 16);
     return parsed == null ? null : Color(parsed);
   }
+
+  /// True when the active flavor supports per-user multi-broker selection
+  /// (the Tenax-style flow stored in `SecureStorageService`).
+  ///
+  /// Returns `true` when the flavor id is `tenax` or when the active config
+  /// already carries a non-empty `selectedBrokerData` payload. For all
+  /// other flavors the feature is disabled.
+  static bool get isMultiBrokerEnabled {
+    final inst = _instance;
+    if (inst == null) return false;
+    final name = inst.flavor.name.toLowerCase();
+    if (name == 'tenax') return true;
+    return (inst.selectedBrokerData?.isNotEmpty ?? false);
+  }
+
+  /// Legacy "ONSA" brand flag. Kept for backward compatibility with code
+  /// that gates UI on this brand — always false in this build.
+  static bool get isONSA => false;
+
+  /// Applies a Tenax multi-broker runtime payload onto the active
+  /// [FlavorConfig]. When [payload] is null or empty this is a no-op so
+  /// non-Tenax flavors stay untouched. The shape mirrors [applyBranding] —
+  /// callers build a single map merging tenant-supplied config + selected
+  /// broker name / logo overrides.
+  static void applyTenaxBrokerRuntimeConfig(Map<String, dynamic>? payload) {
+    if (payload == null || payload.isEmpty) return;
+    applyBranding(
+      config: payload,
+      brokerName: payload['appName']?.toString(),
+      brokerLogoUrl: payload['logoSvgPath']?.toString() ??
+          payload['remoteLogoUrl']?.toString(),
+      brokerData: payload,
+    );
+  }
 }
+
+ /// Public copy-with helper so brand-specific wrappers can derive a tweaked
+ /// instance without re-constructing the whole config.
+ extension FlavorConfigCopyWith on FlavorConfig {
+  FlavorConfig copyWith({
+    Color? primaryColor,
+    Color? darkPrimaryColor,
+    Color? secondaryColor,
+    Color? accentColor,
+    String? appName,
+    String? appTitle,
+    String? apiBaseUrl,
+    String? websocketUrl,
+    String? chartBaseUrl,
+    String? appIconPath,
+    String? svgLogoPath,
+    String? splashLogoPath,
+    String? remoteLogoUrl,
+    Map<String, dynamic>? selectedBrokerData,
+    bool? useNewChart,
+  }) {
+    return FlavorConfig._internal(
+      flavor: flavor,
+      title: appTitle ?? this.appTitle,
+      appName: appName ?? this.appName,
+      primaryColor: primaryColor ?? this.primaryColor,
+      darkPrimaryColor: darkPrimaryColor ?? this.darkPrimaryColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
+      accentColor: accentColor ?? this.accentColor,
+      apiBaseUrl: apiBaseUrl ?? this.apiBaseUrl,
+      websocketUrl: websocketUrl ?? this.websocketUrl,
+      chartBaseUrl: chartBaseUrl ?? this.chartBaseUrl,
+      appIconPath: appIconPath ?? this.appIconPath,
+      svgLogoPath: svgLogoPath ?? this.svgLogoPath,
+      splashLogoPath: splashLogoPath ?? this.splashLogoPath,
+      remoteLogoUrl: remoteLogoUrl ?? this.remoteLogoUrl,
+      selectedBrokerData: selectedBrokerData ?? this.selectedBrokerData,
+      useNewChart: useNewChart ?? this.useNewChart,
+    );
+  }
+ }
 
  extension _BaseClientConfigFlavorConfigX on BaseClientConfig {
  FlavorConfig toFlavorConfig(Flavor flavor, String clientName) {

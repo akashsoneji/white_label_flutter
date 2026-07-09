@@ -1,28 +1,21 @@
 {
-  "default": "gtxprime",
+  "default": "pipze",
   "brands": [
-    "gtxprime",
-    "vantage",
-    "meta"
+    "pipze",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "gtxprime",
+      "name": "pipze",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "GTX Prime",
+      "label": "Pipze",
       "themeMode": "both"
     },
     {
       "name": "vantage",
       "type": "parent",
       "label": "Vantage",
-      "themeMode": "both"
-    },
-    {
-      "name": "meta",
-      "type": "parent",
-      "label": "Meta",
       "themeMode": "both"
     }
   ]
