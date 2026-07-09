@@ -26,6 +26,7 @@ class AppColors {
   static Color get secondary => FlavorConfig.instance.secondaryColor;
   static Color get accent => FlavorConfig.instance.accentColor;
   static const Color _pureBlack = Color(0xFF000000);
+  static Color get pureBlack => _pureBlack;
   static Color get toastBackground => _pureBlack.withValues(alpha: 0.87);
 
   // ── Common Black & Grey ───────────────────────────────────────────────────

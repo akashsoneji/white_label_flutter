@@ -1,15 +1,15 @@
 {
-  "default": "baazex",
+  "default": "gtxprime",
   "brands": [
-    "baazex",
+    "gtxprime",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "baazex",
+      "name": "gtxprime",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "Baazex",
+      "label": "GTX Prime",
       "themeMode": "both"
     },
     {

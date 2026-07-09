@@ -200,6 +200,78 @@ class FlavorConfig {
   static Map<String, dynamic>? get brokerData => instance.selectedBrokerData;
   static String get appNameDisplay => instance.appName;
 
+  /// Returns true when multi-broker selection is enabled (Tenax flavor).
+  static bool get isMultiBrokerEnabled => isTenax();
+
+  /// Returns true for the ONS A flavor (currently a no-op alias for
+  /// non-Tenax builds). Reserved for future brand-specific gating.
+  static bool get isONSA => false;
+
+  /// Apply Tenax-specific runtime branding (logo, colors) from a broker
+  /// payload. No-op when the active flavor is not Tenax.
+  static void applyTenaxBrokerRuntimeConfig(Map<String, dynamic>? data) {
+    if (!isTenax()) return;
+    if (data == null) return;
+    final config = _instance;
+    if (config == null) return;
+    final palette = (data['palette'] as Map?)?.cast<String, dynamic>();
+    final colors = (data['colors'] as Map?)?.cast<String, dynamic>() ?? palette;
+    Color? pick(String key) {
+      final v = colors?[key];
+      if (v == null) return null;
+      return _parseColor(v);
+    }
+    final next = config.copyWith(
+      svgLogoPath: data['logoSvgPath']?.toString() ?? config.svgLogoPath,
+      remoteLogoUrl: data['remoteLogoUrl']?.toString() ?? config.remoteLogoUrl,
+      primaryColor: pick('primaryColor') ?? config.primaryColor,
+      darkPrimaryColor: pick('darkPrimaryColor') ?? config.darkPrimaryColor,
+      secondaryColor: pick('secondaryColor') ?? config.secondaryColor,
+      accentColor: pick('accentColor') ?? config.accentColor,
+      selectedBrokerData:
+          (data['selectedBrokerData'] as Map?)?.cast<String, dynamic>() ??
+              config.selectedBrokerData,
+    );
+    _instance = next;
+  }
+
+  FlavorConfig copyWith({
+    String? appName,
+    String? appTitle,
+    Color? primaryColor,
+    Color? darkPrimaryColor,
+    Color? secondaryColor,
+    Color? accentColor,
+    String? apiBaseUrl,
+    String? websocketUrl,
+    String? chartBaseUrl,
+    String? appIconPath,
+    String? svgLogoPath,
+    String? splashLogoPath,
+    String? remoteLogoUrl,
+    Map<String, dynamic>? selectedBrokerData,
+    bool? useNewChart,
+  }) {
+    return FlavorConfig._internal(
+      flavor: flavor,
+      title: appTitle ?? this.appTitle,
+      appName: appName ?? this.appName,
+      primaryColor: primaryColor ?? this.primaryColor,
+      darkPrimaryColor: darkPrimaryColor ?? this.darkPrimaryColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
+      accentColor: accentColor ?? this.accentColor,
+      apiBaseUrl: apiBaseUrl ?? this.apiBaseUrl,
+      websocketUrl: websocketUrl ?? this.websocketUrl,
+      chartBaseUrl: chartBaseUrl ?? this.chartBaseUrl,
+      appIconPath: appIconPath ?? this.appIconPath,
+      svgLogoPath: svgLogoPath ?? this.svgLogoPath,
+      splashLogoPath: splashLogoPath ?? this.splashLogoPath,
+      remoteLogoUrl: remoteLogoUrl ?? this.remoteLogoUrl,
+      selectedBrokerData: selectedBrokerData ?? this.selectedBrokerData,
+      useNewChart: useNewChart ?? this.useNewChart,
+    );
+  }
+
   static void applyBranding({
     required Map<String, dynamic> config,
     String? brokerName,

@@ -17,10 +17,12 @@ abstract class Routes {
   static const LANGUAGE_SELECTOR = _Paths.LANGUAGE_SELECTOR;
   static const ACCOUNT_MANAGEMENT = _Paths.ACCOUNT_MANAGEMENT;
   static const EDIT_PROFILE = _Paths.EDIT_PROFILE;
+  static const VIEW_PROFILE = _Paths.VIEW_PROFILE;
   static const WITHDRAWAL = _Paths.WITHDRAWAL;
   static const DEPOSIT = _Paths.DEPOSIT;
   static const WALLET = _Paths.WALLET;
   static const TRANSACTION_HISTORY = _Paths.TRANSACTION_HISTORY;
+  static const TWO_FACTOR_AUTH = _Paths.TWO_FACTOR_AUTH;
   static const KYC_VERIFICATION = _Paths.KYC_VERIFICATION;
   static const KYC_INTRO = _Paths.KYC_INTRO;
   static const KYC_DETAILS = _Paths.KYC_DETAILS;
@@ -32,13 +34,6 @@ abstract class Routes {
   static const CHOOSE_ACCOUNT = _Paths.CHOOSE_ACCOUNT;
   static const INTERNAL_TRANSFER = _Paths.INTERNAL_TRANSFER;
   static const INTERNAL_TRANSFER_HISTORY = _Paths.INTERNAL_TRANSFER_HISTORY;
-  static const GOOGLE_LOGIN_OTP = _Paths.GOOGLE_LOGIN_OTP;
-  static const TWO_FACTOR_AUTH = _Paths.TWO_FACTOR_AUTH;
-  static const TRADE_WIN_MAIN = _Paths.TRADE_WIN_MAIN;
-  static const TRADE_WIN_PRODUCT_DETAIL = _Paths.TRADE_WIN_PRODUCT_DETAIL;
-  static const TRADE_WIN_REDEEM = _Paths.TRADE_WIN_REDEEM;
-  static const TRADE_WIN_REDEMPTION_SUCCESS = _Paths.TRADE_WIN_REDEMPTION_SUCCESS;
-  static const TRADE_WIN_PAST_WIN_DETAIL = _Paths.TRADE_WIN_PAST_WIN_DETAIL;
   static const COPY_TRADING_MAIN = _Paths.COPY_TRADING_MAIN;
   static const COPY_TRADING_HUB = _Paths.COPY_TRADING_HUB;
   static const TRADER_DETAILS = _Paths.TRADER_DETAILS;
@@ -52,11 +47,16 @@ abstract class Routes {
   static const DEMO_CONTEST_WINNERS = _Paths.DEMO_CONTEST_WINNERS;
   static const SETTING = _Paths.SETTING;
   static const SUPPORT = _Paths.SUPPORT;
+  static const TICKET_LIST = _Paths.TICKET_LIST;
+  static const TICKET_CREATE = _Paths.TICKET_CREATE;
+  static const TICKET_DETAIL = _Paths.TICKET_DETAIL;
   static const TOOLS_EDUCATION = _Paths.TOOLS_EDUCATION;
   static const MORE = _Paths.MORE;
   static const PARTNERSHIP_PROGRAM = _Paths.PARTNERSHIP_PROGRAM;
   static const BRAND_TEST = _Paths.BRAND_TEST;
   static const ORDER_CONFIRMATION = _Paths.ORDER_CONFIRMATION;
+  static const TENAX_BROKER_SELECTION = _Paths.TENAX_BROKER_SELECTION;
+  static const TENAX_BROKER_INFO = _Paths.TENAX_BROKER_INFO;
   static const COPY_TRADING_WALLET = _Paths.COPY_TRADING_WALLET;
   static const COPY_TRADING_DEPOSIT = _Paths.COPY_TRADING_DEPOSIT;
   static const COPY_TRADING_PAYMENT_METHODS =
@@ -65,10 +65,9 @@ abstract class Routes {
   static const COPY_TRADING_INTERNAL_TRANSFER =
       _Paths.COPY_TRADING_INTERNAL_TRANSFER;
 
-  static const FEATURE_UNAVAILABLE = _Paths.FEATURE_UNAVAILABLE;
-
   // ── PMAM Routes ──
   static const PMAM_MAIN = _Paths.PMAM_MAIN;
+  static const PMAM_MY_INVESTMENT = _Paths.PMAM_MY_INVESTMENT;
   static const PMAM_BECOME_MANAGER = _Paths.PMAM_BECOME_MANAGER;
   static const PMAM_MANAGER_DASHBOARD = _Paths.PMAM_MANAGER_DASHBOARD;
   static const PMAM_MANAGER_PORTAL = _Paths.PMAM_MANAGER_PORTAL;
@@ -77,14 +76,16 @@ abstract class Routes {
   static const PMAM_MANAGER_DETAIL = _Paths.PMAM_MANAGER_DETAIL;
   static const PMAM_MANAGER_PLAN_DETAIL = _Paths.PMAM_MANAGER_PLAN_DETAIL;
   static const PMAM_FUND_MANAGER_VIEW = _Paths.PMAM_FUND_MANAGER_VIEW;
+
+  // ── Trade & Win ──
+  static const TRADE_WIN_MAIN = _Paths.TRADE_WIN_MAIN;
+  static const TRADE_WIN_PRODUCT_DETAIL = _Paths.TRADE_WIN_PRODUCT_DETAIL;
+  static const TRADE_WIN_REDEEM = _Paths.TRADE_WIN_REDEEM;
+  static const TRADE_WIN_REDEMPTION_SUCCESS = _Paths.TRADE_WIN_REDEMPTION_SUCCESS;
+  static const TRADE_WIN_PAST_WIN_DETAIL = _Paths.TRADE_WIN_PAST_WIN_DETAIL;
   static const CREGIS_CHECKOUT = _Paths.CREGIS_CHECKOUT;
   static const CREGIS_ADDRESS = _Paths.CREGIS_ADDRESS;
   static const CREGIS_SUCCESS = _Paths.CREGIS_SUCCESS;
-
-  // ── Support Ticket Routes ──
-  static const TICKET_LIST = _Paths.TICKET_LIST;
-  static const TICKET_CREATE = _Paths.TICKET_CREATE;
-  static const TICKET_DETAIL = _Paths.TICKET_DETAIL;
 }
 
 abstract class _Paths {
@@ -104,6 +105,7 @@ abstract class _Paths {
   static const LANGUAGE_SELECTOR = '/language-selector';
   static const ACCOUNT_MANAGEMENT = '/account-management';
   static const EDIT_PROFILE = '/edit-profile';
+  static const VIEW_PROFILE = '/view-profile';
   static const WITHDRAWAL = '/withdrawal';
   static const DEPOSIT = '/deposit';
   static const WALLET = '/wallet';
@@ -117,16 +119,9 @@ abstract class _Paths {
   static const OPEN_ACCOUNT = '/open-account';
   static const CREATE_TRADING_ACCOUNT = '/create-trading-account';
   static const CHOOSE_ACCOUNT = '/choose-account';
-  static const CREATE_APP_ACCOUNT = '/create-app-account';
+  static const CREATE_APP_ACCOUNT = '/create-pipze-account';
   static const INTERNAL_TRANSFER = '/internal-transfer';
   static const INTERNAL_TRANSFER_HISTORY = '/internal-transfer-history';
-  static const GOOGLE_LOGIN_OTP = '/google-login-otp';
-  static const TWO_FACTOR_AUTH = '/two-factor-auth';
-  static const TRADE_WIN_MAIN = '/trade-win-main';
-  static const TRADE_WIN_PRODUCT_DETAIL = '/trade-win-product-detail';
-  static const TRADE_WIN_REDEEM = '/trade-win-redeem';
-  static const TRADE_WIN_REDEMPTION_SUCCESS = '/trade-win-redemption-success';
-  static const TRADE_WIN_PAST_WIN_DETAIL = '/trade-win-past-win-detail';
   static const CHART = '/chart';
   static const FINANCE = '/finance';
   static const IB_DASHBOARD = '/ib-dashboard';
@@ -136,14 +131,17 @@ abstract class _Paths {
   static const TRADER_DETAILS = '/trader-details';
   static const BONUS = '/bonus';
   static const DEMO_CONTEST = '/demo-contest';
-  static const DEMO_CONTEST_RULES = '/demo-contest-rules';
-  static const DEMO_CONTEST_JOIN = '/demo-contest-join';
-  static const DEMO_CONTEST_DETAILS = '/demo-contest-details';
-  static const DEMO_CONTEST_LEADERBOARD = '/demo-contest-leaderboard';
-  static const DEMO_CONTEST_HISTORY = '/demo-contest-history';
-  static const DEMO_CONTEST_WINNERS = '/demo-contest-winners';
+  static const DEMO_CONTEST_RULES = '/demo-contest/rules';
+  static const DEMO_CONTEST_JOIN = '/demo-contest/join';
+  static const DEMO_CONTEST_DETAILS = '/demo-contest/details';
+  static const DEMO_CONTEST_LEADERBOARD = '/demo-contest/leaderboard';
+  static const DEMO_CONTEST_HISTORY = '/demo-contest/history';
+  static const DEMO_CONTEST_WINNERS = '/demo-contest/winners';
   static const SETTING = '/setting';
   static const SUPPORT = '/support';
+  static const TICKET_LIST = '/ticket-list';
+  static const TICKET_CREATE = '/ticket-create';
+  static const TICKET_DETAIL = '/ticket-detail';
   static const TOOLS_EDUCATION = '/tools-education';
   static const MORE = '/more';
   static const PARTNERSHIP_PROGRAM = '/partnership-program';
@@ -155,6 +153,10 @@ abstract class _Paths {
   static const DEPOSIT_INSTRUCTION_SCREEN = '/deposit-instruction';
   static const BANK_LIST = '/bank-list';
   static const CHANGE_PASSWORD = '/change-password';
+  static const TWO_FACTOR_AUTH = '/two-factor-auth';
+  static const GOOGLE_LOGIN_OTP = '/google-login-otp';
+  static const TENAX_BROKER_SELECTION = '/tenax-broker-selection';
+  static const TENAX_BROKER_INFO = '/tenax-broker-info';
   static const COPY_TRADING_WALLET = '/copy-trading-wallet';
   static const COPY_TRADING_DEPOSIT = '/copy-trading-deposit';
   static const COPY_TRADING_PAYMENT_METHODS = '/copy-trading-payment-methods';
@@ -162,10 +164,9 @@ abstract class _Paths {
   static const COPY_TRADING_INTERNAL_TRANSFER =
       '/copy-trading-internal-transfer';
 
-  static const FEATURE_UNAVAILABLE = '/feature-unavailable';
-
   // ── PMAM Paths ──
   static const PMAM_MAIN = '/pmam-main';
+  static const PMAM_MY_INVESTMENT = '/pmam-my-investment';
   static const PMAM_BECOME_MANAGER = '/pmam-become-manager';
   static const PMAM_MANAGER_DASHBOARD = '/pmam-manager-dashboard';
   static const PMAM_MANAGER_PORTAL = '/pmam-manager-portal';
@@ -174,12 +175,14 @@ abstract class _Paths {
   static const PMAM_MANAGER_DETAIL = '/pmam-manager-detail';
   static const PMAM_MANAGER_PLAN_DETAIL = '/pmam-manager-plan-detail';
   static const PMAM_FUND_MANAGER_VIEW = '/pmam-fund-manager-view';
+
+  // ── Trade & Win ──
+  static const TRADE_WIN_MAIN = '/trade-win-main';
+  static const TRADE_WIN_PRODUCT_DETAIL = '/trade-win-product-detail';
+  static const TRADE_WIN_REDEEM = '/trade-win-redeem';
+  static const TRADE_WIN_REDEMPTION_SUCCESS = '/trade-win-redemption-success';
+  static const TRADE_WIN_PAST_WIN_DETAIL = '/trade-win-past-win-detail';
   static const CREGIS_CHECKOUT = '/cregis-checkout';
   static const CREGIS_ADDRESS = '/cregis-address';
   static const CREGIS_SUCCESS = '/cregis-success';
-
-  // ── Support Ticket Paths ──
-  static const TICKET_LIST = '/ticket-list';
-  static const TICKET_CREATE = '/ticket-create';
-  static const TICKET_DETAIL = '/ticket-detail';
 }
