@@ -44,6 +44,7 @@ import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+import 'package:crm_app/services/favorites_storage_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/widgets/advanced_chart_inapp_webview.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
@@ -158,7 +159,15 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     });
   }
 
-  // ─�� Symbol dropdown (all instruments, scrollable) ──────────────────────
+  // Symbol dropdown (only favourites, scrollable).
+  //
+  // Mirrors the watchlist behaviour: tapping a symbol in this sheet
+  // (a) updates the chart via SymbolSelectionService,
+  // (b) flips the chart socket so the bottom-dock bid/ask/spread
+  //     refreshes for the new symbol (same as
+  //     `ChartScreen.setSelectedSymbol` does on watchlist tap), and
+  // (c) notifies the host via `widget.onSymbolSelected` so the parent
+  //     (e.g. TradingMainScreen) can react if needed.
   Future<void> _openFavouritesDropdown() async {
     if (!mounted) return;
 
@@ -177,15 +186,52 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     // Active symbol so we can highlight it in the list.
     final active = _displaySymbol();
 
-    // Pull ALL instruments from the live instruments stream.
+    // Pull favourites from storage. FavoritesStorageService persists the
+    // user's list across launches (with sensible defaults if it has
+    // never been written yet) — it is the same source of truth the
+    // watchlist's "Favorites" filter uses.
+    final favoritesRaw =
+        await FavoritesStorageService.instance.getFavoriteInstruments();
+
+    if (!mounted) return;
+
+    // Pull ALL instruments from the live instruments stream so we can
+    // resolve favourites → display names + metadata. If the stream is
+    // still empty (cold start), we fall back to the raw favourites
+    // strings so the user still sees their list.
     final instruments =
         Get.find<InstrumentsController>().allInstruments.toList();
 
     if (!mounted) return;
 
-    if (instruments.isEmpty) {
-      // Nothing loaded yet — fall back to the full search screen so the
-      // user can still pick a symbol (and trigger instruments load).
+    // Normalize favourites to the same stripped form we display, so a
+    // favourite like "EURUSD.c" matches an instrument stored as
+    // "EURUSD.c" and a display label "EURUSD".
+    final favSet = favoritesRaw
+        .map((s) => _stripSuffix(s).toUpperCase())
+        .toSet();
+
+    // Build a list of raw symbol strings. Prefer symbols that resolve
+    // to an entry in `allInstruments` (so the row taps the same backing
+    // data the rest of the app uses); fall back to the favourite string
+    // itself if the stream hasn't loaded yet.
+    final filtered = <String>[];
+    if (instruments.isNotEmpty) {
+      for (final inst in instruments) {
+        if (favSet.contains(_stripSuffix(inst.symbol).toUpperCase())) {
+          filtered.add(inst.symbol);
+        }
+      }
+    } else {
+      filtered.addAll(favoritesRaw);
+    }
+    filtered.sort((a, b) => _stripSuffix(a)
+        .toUpperCase()
+        .compareTo(_stripSuffix(b).toUpperCase()));
+
+    if (filtered.isEmpty) {
+      // Nothing favourited yet — open the full search screen so the user
+      // can pick a symbol AND promote it to favourites in one go.
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => const SearchInstrumentsScreen(),
@@ -194,12 +240,6 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
       );
       return;
     }
-
-    // Sort alphabetically by display symbol for predictable ordering.
-    final sorted = [...instruments]
-      ..sort((a, b) => _stripSuffix(a.symbol)
-          .toUpperCase()
-          .compareTo(_stripSuffix(b.symbol).toUpperCase()));
 
     await showModalBottomSheet<void>(
       context: context,
@@ -230,22 +270,38 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
-                // Scrollable list of ALL symbols only
+                // Scrollable list of FAVOURITE symbols only
                 Flexible(
                   child: ListView.separated(
                     shrinkWrap: true,
                     padding: EdgeInsets.symmetric(vertical: 4.h),
-                    itemCount: sorted.length,
+                    itemCount: filtered.length,
                     separatorBuilder: (_, __) =>
                         Divider(height: 1, color: dividerColor),
                     itemBuilder: (_, i) {
-                      final raw = sorted[i].symbol;
+                      final raw = filtered[i];
                       final sym = _stripSuffix(raw);
                       final isActive = sym == active;
                       return InkWell(
-                        onTap: () {
+                        onTap: () async {
                           Navigator.of(sheetCtx).pop();
+                          // (a) tell the rest of the app which symbol to
+                          //     use (drives chart rebuild via ValueKey in
+                          //     `_ChartArea`).
                           Get.find<SymbolSelectionService>().setSymbol(raw);
+                          // (b) flip the chart socket so the bottom dock
+                          //     bid / ask / spread refresh for the new
+                          //     symbol — same as the watchlist row tap
+                          //     flow does via `ChartScreen.setSelectedSymbol`.
+                          try {
+                            await _socket.changeSymbol(raw);
+                          } catch (_) {}
+                          // (c) bump the local tick so the dock Obx
+                          //     rebuilds even before the first tick of
+                          //     the new symbol arrives (avoids stale '—').
+                          _tick.value++;
+                          // (d) notify the host — same semantics the
+                          //     watchlist gives the TradingMainScreen.
                           widget.onSymbolSelected?.call(raw);
                         },
                         child: Padding(
@@ -355,13 +411,30 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
               isDark: isDark,
               onBack: () => Navigator.of(context).maybePop(),
               onSymbolTap: _openFavouritesDropdown,
-              // Top-right button jumps to the Vantage "Trade" tab
-              // (Vantage 4-tab nav: Prices(0), Markets(1)=Trade, Accounts(2), Settings(3)).
+              // Top-right button jumps to the Vantage "Trade" tab.
+              // Vantage 5-tab nav (as of 2026-07-09):
+              //   Prices(0), Chart(1), Markets(2)=Trade, Accounts(3), Settings(4).
               onSettingsTap: () {
+                // Always jump to the Markets tab (index 2 in the Vantage
+                // 5-tab layout: Prices(0), Chart(1), Markets(2), Accounts(3),
+                // Settings(4)).
+                //
+                // The parent (TradingMainScreen._openChartScreenVantage)
+                // wires onNavigateToTab to a callback that pops the chart
+                // route and calls _onTabChanged(2). We MUST NOT call
+                // Navigator.pop / Get.back here — that would double-pop
+                // and tear down TradingMainScreen, kicking the user out
+                // of the app.
+                print(
+                  '🔧 VantageChartLayout: onSettingsTap fired, onNavigateToTab=${widget.onNavigateToTab != null}',
+                );
                 if (widget.onNavigateToTab != null) {
-                  Navigator.of(context).maybePop();
-                  widget.onNavigateToTab!(1);
+                  widget.onNavigateToTab!(2);
                 } else {
+                  // Standalone context (chart shown outside the bottom-nav
+                  // tree, e.g. opened from a deep link). Fall back to a
+                  // regular pop so the user can still leave the chart.
+                  Navigator.of(context).maybePop();
                   CustomToastService.showInfo(
                     message: 'Trade tab is not available in this context.',
                   );

@@ -51,6 +51,12 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
     _hasLoadedInitialData = false;
     moreController.loadMoreScreenData();
     _loadTenaxProfiles();
+    // Ensure the optional-module flags (PAMM, Copy Trading, Scratch Card,
+    // Trade Win) are reloaded the first time the More tab is opened — they
+    // are otherwise only refreshed on login / app-resume.
+    if (Get.isRegistered<EnabledModulesService>()) {
+      Get.find<EnabledModulesService>().fetchEnabledModules(force: true);
+    }
     _hasLoadedInitialData = true;
     _lastRefreshTime = DateTime.now();
   }

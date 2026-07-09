@@ -568,17 +568,21 @@ class DashboardController extends GetxController {
   }
 
   void onSettings(String accountNumber) {
-    // Navigate to More tab in bottom navigation
+    // Navigate to Settings (More) tab in bottom navigation.
+    // Vantage 5-tab nav (as of 2026-07-09): Settings is at index 4
+    // (Prices 0, Chart 1, Markets 2, Accounts 3, Settings=More 4).
     if (onNavigateToTab != null) {
-      onNavigateToTab!(FlavorConfig.isVantage() ? 3 : 4);
+      onNavigateToTab!(FlavorConfig.isVantage() ? 4 : 4);
     }
   }
 
   void switchToTrade(String accountNumber) async {
     await changePrimaryAccount(accountNumber);
-    // Navigate to Trade screen and update bottom navigation
+    // Navigate to Trade screen and update bottom navigation.
+    // Vantage 5-tab nav (as of 2026-07-09): Trade is at index 2
+    // (Prices 0, Chart 1, Markets=Trade 2, Accounts 3, Settings 4).
     if (onNavigateToTab != null) {
-      onNavigateToTab!(FlavorConfig.isVantage() ? 1 : 2);
+      onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 2);
     }
   }
 

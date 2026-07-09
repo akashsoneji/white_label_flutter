@@ -43,35 +43,44 @@ class TradingBottomNavigation extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildVantageNavItem(
-                0,
-                "assets/svg/bottom_navigation/trend-up.svg",
-                "assets/svg/bottom_navigation/trend-up_bold.svg",
-                'Prices',
-              ),
-              _buildVantageNavItem(
-                1,
-                "assets/svg/bottom_navigation/candle.svg",
-                "assets/svg/bottom_navigation/candle_bold.svg",
-                'Markets',
-              ),
-              _buildVantageNavItem(
-                2,
-                "assets/svg/bottom_navigation/wallet.svg",
-                "assets/svg/bottom_navigation/wallet_bold.svg",
-                'Accounts',
-              ),
-              _buildVantageNavItem(
-                3,
-                "assets/svg/bottom_navigation/setting.svg",
-                "assets/svg/bottom_navigation/setting_bold.svg",
-                'Settings',
-              ),
-            ],
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildVantageNavItem(
+                  0,
+                  "assets/svg/bottom_navigation/trend-up.svg",
+                  "assets/svg/bottom_navigation/trend-up_bold.svg",
+                  'Prices',
+                ),
+                _buildVantageNavItem(
+                  1,
+                  "assets/svg/bottom_navigation/chart.svg",
+                  "assets/svg/bottom_navigation/chart_bold.svg",
+                  'Chart',
+                ),
+                _buildVantageNavItem(
+                  2,
+                  "assets/svg/bottom_navigation/candle.svg",
+                  "assets/svg/bottom_navigation/candle_bold.svg",
+                  'Markets',
+                ),
+                _buildVantageNavItem(
+                  3,
+                  "assets/svg/bottom_navigation/wallet.svg",
+                  "assets/svg/bottom_navigation/wallet_bold.svg",
+                  'Accounts',
+                ),
+                _buildVantageNavItem(
+                  4,
+                  "assets/svg/bottom_navigation/setting.svg",
+                  "assets/svg/bottom_navigation/setting_bold.svg",
+                  'Settings',
+                ),
+              ],
+            ),
           ),
         );
     }

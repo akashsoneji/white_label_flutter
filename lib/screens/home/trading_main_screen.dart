@@ -12,6 +12,7 @@ import 'package:crm_app/widgets/exit_confirmation_wrapper.dart';
 import '../../widgets/trading_bottom_navigation.dart';
 import 'instruments_screen.dart';
 import 'chart_screen.dart';
+import 'chart_tab_host.dart';
 import 'more/more_screen.dart';
 import 'trade_screen.dart';
 import 'dashboard_screen.dart';
@@ -22,6 +23,7 @@ import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/flavor_config.dart';
 import '../../services/one_click_trading_service.dart';
 import '../../services/app_status/app_status_service.dart';
+import '../../services/symbol_selection_service.dart';
 
 class TradingMainScreen extends StatefulWidget {
   const TradingMainScreen({super.key});
@@ -44,25 +46,48 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   void _openChartScreenVantage(String symbol) {
     try {
       ChartScreen.setSelectedSymbol(symbol);
+      // Track whether the chart was opened via the Chart tab (index 1)
+      // vs. the watchlist on Prices (index 0). On pop, we only redirect
+      // to Prices if the user was on the Chart tab AND didn't already
+      // navigate elsewhere via a tab callback — otherwise leave them on
+      // whatever tab the user (or callback) chose.
+      final cameFromChartTab = _currentIndex == 1;
+      // `_userNavigatedAwayFromChart` flips when onNavigateToTab or
+      // onNavigateToTrade fires, so the .then() handler below knows to
+      // skip its Prices-redirect (the callback already chose a tab).
+      bool userNavigatedAwayFromChart = false;
       Get.to(
         () => ChartScreen(
           onNavigateToTrade: (tabIndex) {
-            Get.back();
+            userNavigatedAwayFromChart = true;
             _switchToTradeTab(tabIndex ?? 0);
+            // Pop the chart AFTER tab switch so the PageView is up-to-date.
+            // (Calling Get.back() before _switchToTradeTab can briefly
+            // expose the transparent Chart tab host on slow frames.)
+            Get.back();
           },
           onNavigateToTab: (index) {
-            Get.back();
+            userNavigatedAwayFromChart = true;
             _onTabChanged(index);
+            // Pop the chart AFTER tab switch.
+            Get.back();
           },
         ),
-      );
+      )?.then((_) {
+        if (cameFromChartTab && !userNavigatedAwayFromChart) {
+          // Pop landed us back on the transparent Chart tab host —
+          // bounce to Prices (tab 0) so the user sees a real screen.
+          _onTabChanged(0);
+        }
+      });
     } catch (e) {
       print('🚨 TradingMainScreen: Error opening chart screen: $e');
     }
   }
 
   void _switchToTradeTab(int tabIndex) {
-    final tradeIndex = _isVantage ? 1 : 2;
+    // Vantage 5-tab layout: Trade is at index 2 (Chart shifted in at 1).
+    final tradeIndex = _isVantage ? 2 : 2;
     _onTabChanged(tradeIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<TradingController>()) {
@@ -91,8 +116,8 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     // This allows navigating directly to a specific tab (e.g., dashboard at index 3)
     final arguments = Get.arguments;
     if (arguments != null && arguments is int) {
-      // If argument is a valid tab index, set it (vantage: 0-3, default: 0-4)
-      final maxIndex = _isVantage ? 3 : 4;
+      // If argument is a valid tab index, set it (vantage: 0-4, default: 0-4)
+      final maxIndex = _isVantage ? 4 : 4;
       if (arguments >= 0 && arguments <= maxIndex) {
         _currentIndex = arguments;
         print('TradingMainScreen: Initial tab set to index $arguments');
@@ -102,8 +127,24 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     _pageController = PageController(initialPage: _currentIndex);
 
     if (_isVantage) {
+      // Vantage 5-tab layout (as of 2026-07-09):
+      //   0: Prices    → InstrumentsScreen (watchlist)
+      //   1: Chart     → ChartTabHost (auto-pushes ChartScreen → VantageChartLayout)
+      //   2: Markets   → TradeScreen
+      //   3: Accounts  → DashboardScreen
+      //   4: Settings  → MoreScreen
+      //
+      // The Chart tab pushes a full-screen route on top of the PageView,
+      // so the bottom nav is naturally hidden while chart is open —
+      // matching the existing watchlist → chart flow.
       _screens = [
         KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _openChartScreenVantage)),
+        // Chart tab: transparent host. The actual ChartScreen →
+        // VantageChartLayout push is driven from `_onTabChanged` when the
+        // user navigates to index 1 (via the post-frame callback there).
+        // The pushed route sits on top of the PageView so the bottom nav
+        // is naturally hidden while chart is open.
+        const KeepAliveWrapper(child: ChartTabHost()),
         KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _openChartScreenVantage)),
         KeepAliveWrapper(
           child: DashboardScreen(
@@ -115,6 +156,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         const KeepAliveWrapper(child: MoreScreen()),
       ];
     } else {
+      // Non-Vantage (5-tab legacy): keep as-is.
       _screens = [
         KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _switchToChartTab)),
         KeepAliveWrapper(
@@ -156,8 +198,8 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       } catch (_) {}
     });
     
-    // ✅ If initial tab is dashboard, refresh accounts (vantage index 2, default index 3)
-    final dashboardIndex = _isVantage ? 2 : 3;
+    // ✅ If initial tab is dashboard, refresh accounts (vantage index 3, default index 3)
+    final dashboardIndex = _isVantage ? 3 : 3;
     if (_currentIndex == dashboardIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         try {
@@ -206,9 +248,42 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       _pageController.jumpToPage(index);
     }
 
-    final tradeIndex = _isVantage ? 1 : 2;
-    final dashboardIndex = _isVantage ? 2 : 3;
-    final moreIndex = _isVantage ? 3 : 4;
+    // Vantage 5-tab layout: Prices(0), Chart(1), Markets(2), Accounts(3), Settings(4).
+    final tradeIndex = _isVantage ? 2 : 2;
+    final dashboardIndex = _isVantage ? 3 : 3;
+    final moreIndex = _isVantage ? 4 : 4;
+
+    // Vantage UI brands (pipze, baazex, gtxprime, kantara, skyriss,
+    // telifox, tenax, vantage): the Chart tab (index 1) is a transparent
+    // host that needs to auto-push the chart route when the user lands on
+    // it. _screens is built once in initState, so ChartTabHost.isSelected
+    // captures the *initial* index (usually 0) and never sees the new
+    // value when the user taps the Chart tab. We trigger the push here so
+    // it works regardless of the initial tab.
+    //
+    // We avoid double-pushing if the chart route is already on top by
+    // checking Get.currentRoute for an existing ChartScreen entry.
+    if (_isVantage && index == 1 && previousIndex != 1) {
+      // Defer to post-frame so the PageView transition completes before
+      // we push (avoids race with the PageView animation).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        // Only push if no ChartScreen route is already on the stack.
+        final currentRoute = Get.currentRoute;
+        // Get.currentRoute returns the route's name (or '/' when none);
+        // the ChartScreen route appears here when it's been pushed.
+        if (currentRoute.contains('ChartScreen')) return;
+        // Resolve the initial symbol. If SymbolSelectionService hasn't
+        // been registered yet (cold start edge case), fall back to XAUUSD
+        // — ChartScreen will hydrate from instruments data once loaded.
+        String initialSymbol = 'XAUUSD';
+        if (Get.isRegistered<SymbolSelectionService>()) {
+          final svc = Get.find<SymbolSelectionService>();
+          if (svc.currentSymbol.isNotEmpty) initialSymbol = svc.currentSymbol;
+        }
+        _openChartScreenVantage(initialSymbol);
+      });
+    }
 
     // Reset to Market tab when switching to Trade screen via bottom navigation
     if (index == tradeIndex && previousIndex != tradeIndex) {

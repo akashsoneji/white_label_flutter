@@ -32,8 +32,19 @@ class PmamMainScreen extends StatefulWidget {
 class _PmamMainScreenState extends State<PmamMainScreen> {
   final PmamController _c = Get.put(PmamController(), permanent: true);
 
-  int _idx = 0;
+  /// Index of the "Explore Fund Managers" tab within [_pagesFor] for a mode.
+  /// • manager  → 5 tabs → Explore is at index 3
+  /// • investor → 3 tabs → Explore is at index 1
+  static const int _exploreIdxForManager = 3;
+  static const int _exploreIdxForInvestor = 1;
+
+  int? _idx; // null until first mode is known → then resolves to Explore
   PmamNavMode? _lastMode;
+
+  /// Default tab index for a given mode — always lands on "Explore".
+  int _defaultIdxFor(PmamNavMode mode) => mode == PmamNavMode.manager
+      ? _exploreIdxForManager
+      : _exploreIdxForInvestor;
 
   @override
   void initState() {
@@ -95,16 +106,18 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
       final mode = _modeFor(_c.managerStatus.value);
 
       // Reset the active index whenever the tab set changes so we don't end
-      // up pointing at a missing tab.
+      // up pointing at a missing tab. Default lands on "Explore".
       if (_lastMode != mode) {
         _lastMode = mode;
+        final defaultIdx = _defaultIdxFor(mode);
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() => _idx = 0);
+          if (mounted) setState(() => _idx = defaultIdx);
         });
       }
 
       final pages = _pagesFor(mode);
-      final safeIdx = _idx.clamp(0, pages.length - 1);
+      final int resolvedIdx = _idx ?? _defaultIdxFor(mode);
+      final safeIdx = resolvedIdx.clamp(0, pages.length - 1);
 
       return Scaffold(
         backgroundColor: AppColors.background,

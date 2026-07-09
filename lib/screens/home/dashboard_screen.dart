@@ -723,7 +723,9 @@ class DashboardScreen extends StatelessWidget {
                       );
                       if (onNavigateToTab != null) {
                         onNavigateToTab!(
-                          FlavorConfig.isVantage() ? 1 : 2,
+                          // Vantage 5-tab nav (as of 2026-07-09): Trade is at index 2
+                          // for BOTH Vantage and Celestial (Chart shifted to 1 in Vantage).
+                          FlavorConfig.isVantage() ? 2 : 2,
                         );
                       }
                     },
@@ -1500,7 +1502,9 @@ class DashboardScreen extends StatelessWidget {
                         );
                         if (onNavigateToTab != null) {
                           onNavigateToTab!(
-                            FlavorConfig.isVantage() ? 1 : 2,
+                            // Vantage 5-tab nav (as of 2026-07-09): Trade is at index 2
+                            // for BOTH Vantage and Celestial (Chart shifted to 1 in Vantage).
+                            FlavorConfig.isVantage() ? 2 : 2,
                           );
                         }
                       },
@@ -1625,10 +1629,12 @@ class DashboardScreen extends StatelessWidget {
                       await accountController.setActiveMT5Account(
                         account.metaAccountNumber,
                       );
-                      // Navigate to Trade screen and update bottom navigation
+                      // Navigate to Trade screen and update bottom navigation.
+                      // Vantage 5-tab nav (as of 2026-07-09): Trade is at index 2
+                      // for ALL flavors (Vantage + non-Vantage legacy 5-tab).
                       if (onNavigateToTab != null) {
                         onNavigateToTab!(
-                          FlavorConfig.isVantage() ? 1 : 2,
+                          FlavorConfig.isVantage() ? 2 : 2,
                         );
                       }
                     },
