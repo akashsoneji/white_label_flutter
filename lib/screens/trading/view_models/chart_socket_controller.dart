@@ -231,7 +231,11 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     }
 
     currentSymbol.value = symbol;
-    realTimePrice.clear();
+    // ✅ KEEP last bid/ask so subscribers (e.g. MetaNativeChart) can
+    // render an immediate price line. The cached tick will be replaced
+    // by the next live tick for the new symbol — clearing it made the
+    // chart sit empty until the first socket frame arrived.
+    realTimePrice['symbol'] = symbol;
     await Future.delayed(const Duration(milliseconds: 150));
 
     if (!_isDisposed) initializeWebSocket();

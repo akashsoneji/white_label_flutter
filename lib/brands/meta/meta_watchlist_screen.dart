@@ -19,10 +19,19 @@ import 'meta_theme.dart';
 ///      New Order / Chart / Properties / Depth Of Market /
 ///      Market Statistics / Simple view mode
 class MetaWatchlistScreen extends StatefulWidget {
-  /// Called when a watchlist row is tapped. The full `ListElement` is
-  /// handed over so the caller can extract digits, display symbol etc.
-  final ValueChanged<ListElement>? onSymbolTap;
-  const MetaWatchlistScreen({super.key, this.onSymbolTap});
+  /// Called when the user picks "New Order" from the row menu.
+  /// The shell is expected to push the New Order screen (no tab change).
+  final ValueChanged<ListElement>? onOpenNewOrder;
+
+  /// Called when the user picks "Chart" from the row menu (or taps the
+  /// row itself). The shell is expected to switch to the Chart tab.
+  final ValueChanged<ListElement>? onOpenChart;
+
+  const MetaWatchlistScreen({
+    super.key,
+    this.onOpenNewOrder,
+    this.onOpenChart,
+  });
 
   @override
   State<MetaWatchlistScreen> createState() => _MetaWatchlistScreenState();
@@ -30,6 +39,10 @@ class MetaWatchlistScreen extends StatefulWidget {
 
 class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
   InstrumentsController get _c => Get.find<InstrumentsController>();
+
+  /// `true`  → simple view mode (compact Symbol / Bid / Ask list, image #2)
+  /// `false` → advanced view mode (full data per row, image #1)
+  bool _simpleView = false;
 
   @override
   void initState() {
@@ -42,12 +55,25 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
     });
   }
 
-  void _onSymbolTap(ListElement item) {
+  /// Triggered from the "New Order" row-menu action. Updates the chart
+  /// controller (so whichever tab the user returns to is in sync) and
+  /// notifies the shell to push the New Order screen.
+  void _openNewOrder(ListElement item) {
     final symbol = item.symbol;
     try {
       Get.find<ChartSocketController>().currentSymbol.value = symbol;
     } catch (_) {}
-    widget.onSymbolTap?.call(item);
+    widget.onOpenNewOrder?.call(item);
+  }
+
+  /// Triggered from the "Chart" row-menu action. Just hands the symbol
+  /// to the shell so it can switch to the Chart tab.
+  void _openChart(ListElement item) {
+    final symbol = item.symbol;
+    try {
+      Get.find<ChartSocketController>().currentSymbol.value = symbol;
+    } catch (_) {}
+    widget.onOpenChart?.call(item);
   }
 
   void _openAddSymbolSheet(BuildContext c) =>
@@ -65,29 +91,30 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
       ),
       builder: (_) => _RowActionSheet(
         symbol: item,
+        simpleView: _simpleView,
         onAction: (action) {
           switch (action) {
             case RowAction.newOrder:
-              // Open the dedicated New Order screen (chart + bid/ask).
-              _onSymbolTap(item);
+              // Push the dedicated New Order screen; keep the WatchList
+              // tab selected so back returns here.
+              _openNewOrder(item);
               break;
             case RowAction.chart:
-              // Just swap to the Chart tab without leaving the watchlist.
-              try {
-                Get.find<ChartSocketController>().currentSymbol.value = item.symbol;
-              } catch (_) {}
-              widget.onSymbolTap?.call(item);
+              // Swap to the Chart tab without leaving the watchlist.
+              _openChart(item);
               break;
             case RowAction.properties:
             case RowAction.dom:
             case RowAction.marketStats:
-            case RowAction.simpleView:
               ScaffoldMessenger.of(c).showSnackBar(
                 SnackBar(
                   content: Text('${item.symbol}: ${action.name}'),
                   duration: const Duration(seconds: 1),
                 ),
               );
+              break;
+            case RowAction.toggleView:
+              setState(() => _simpleView = !_simpleView);
               break;
           }
         },
@@ -155,7 +182,120 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
     return Obx(() {
       final items = _c.instruments.toList();
       if (items.isEmpty) return _empty(c);
-      return _instrumentList(c, items);
+      return _simpleView
+          ? _simpleInstrumentList(c, items)
+          : _instrumentList(c, items);
+    });
+  }
+
+  // ── Simple view (image #2): Symbol/Bid/Ask header + minimal rows ─────
+  Widget _simpleInstrumentList(BuildContext c, List<ListElement> items) {
+    return ListView.separated(
+      padding: EdgeInsets.only(bottom: 8.h),
+      itemCount: items.length + 1,
+      separatorBuilder: (_, __) => Divider(
+          color: MetaTheme.divider(c), height: 1, thickness: 0.5),
+      itemBuilder: (_, i) {
+        if (i == 0) {
+          // Header row: Symbol | Bid | Ask
+          return Padding(
+            padding:
+                EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: Text(
+                    'Symbol',
+                    style: TextStyle(
+                        color: MetaTheme.headerText(c),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    'Bid',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                        color: MetaTheme.headerText(c),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    'Ask',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                        color: MetaTheme.headerText(c),
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return _simpleRow(c, items[i - 1]);
+      },
+    );
+  }
+
+  Widget _simpleRow(BuildContext c, ListElement item) {
+    return Obx(() {
+      final price = _c.priceRx(item.symbol).value;
+      final digits = price.digits > 0 ? price.digits : item.digits;
+      return InkWell(
+        onTap: () => _openRowMenu(c, item),
+        onLongPress: () => _openRowMenu(c, item),
+        child: Padding(
+          padding:
+              EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 4,
+                child: Text(
+                  item.symbol,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      color: MetaTheme.headerText(c),
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  price.bid.toStringAsFixed(digits),
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                      color: MetaTheme.sell(c),
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  price.ask.toStringAsFixed(digits),
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                      color: MetaTheme.tpGreen,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     });
   }
 
@@ -1005,12 +1145,17 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
 // Row bottom-action sheet (screenshot #7)
 // ════════════════════════════════════════════════════════════════════════════
 /// Action selected from the row action sheet.
-enum RowAction { newOrder, chart, properties, dom, marketStats, simpleView }
+enum RowAction { newOrder, chart, properties, dom, marketStats, toggleView }
 
 class _RowActionSheet extends StatelessWidget {
   final ListElement symbol;
+  final bool simpleView;
   final ValueChanged<RowAction> onAction;
-  const _RowActionSheet({required this.symbol, required this.onAction});
+  const _RowActionSheet({
+    required this.symbol,
+    required this.simpleView,
+    required this.onAction,
+  });
 
   void _routeTo(BuildContext c, RowAction action) {
     Navigator.of(c).pop();
@@ -1019,6 +1164,10 @@ class _RowActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext c) {
+    // When currently in simple view, offer to switch back to advanced,
+    // and vice-versa — matches the two screenshots (#1 / #2).
+    final toggleLabel =
+        simpleView ? 'Advanced view mode' : 'Simple view mode';
     return SafeArea(
       top: false,
       child: Padding(
@@ -1042,7 +1191,7 @@ class _RowActionSheet extends StatelessWidget {
             _menu(c, 'Properties', () => _routeTo(c, RowAction.properties)),
             _menu(c, 'Depth Of Market', () => _routeTo(c, RowAction.dom)),
             _menu(c, 'Market Statistics', () => _routeTo(c, RowAction.marketStats)),
-            _menu(c, 'Simple view mode', () => _routeTo(c, RowAction.simpleView)),
+            _menu(c, toggleLabel, () => _routeTo(c, RowAction.toggleView)),
             SizedBox(height: 4.h),
           ],
         ),

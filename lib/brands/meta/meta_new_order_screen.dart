@@ -531,7 +531,8 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
   Widget _buildTriggerPriceRow() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
+      // padding: EdgeInsets.zero,
       color: AppColors.whiteColor,
       child: Row(
         children: [
@@ -602,7 +603,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
   Widget _buildStopLimitPriceRow() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
       color: AppColors.whiteColor,
       child: Row(
         children: [
@@ -686,10 +687,11 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
                       right: BorderSide(color: AppColors.border.withOpacity(0.5)),
                       bottom: _slEnabled.value
                           ? BorderSide(color: _sellRed, width: 2)
-                          : BorderSide(color: AppColors.border.withOpacity(0.5), width: 0.5),
+                          :BorderSide.none
+                          // : BorderSide(color: AppColors.border.withOpacity(0.5), width: 0.0),
                     ),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  padding: EdgeInsets.symmetric(vertical: 1.h),
                   child: _SlTpInner(
                     controller: _slController,
                     focusNode: _slFocus,
@@ -715,7 +717,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
                           : BorderSide(color: AppColors.border.withOpacity(0.5), width: 0.5),
                     ),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  padding: EdgeInsets.symmetric(vertical: 1.h),
                   child: _SlTpInner(
                     controller: _tpController,
                     focusNode: _tpFocus,
@@ -766,7 +768,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
   Widget _buildExpirationRow() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 1.h),
       color: AppColors.whiteColor,
       child: ValueListenableBuilder<_Expiration>(
         valueListenable: _expiration,
@@ -852,7 +854,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
                     : () => _submit(type: OrderType.sellMarket),
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 8.w),
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
                   decoration: BoxDecoration(
                     color: _sellRed,
                     borderRadius: BorderRadius.circular(8.r),
@@ -891,7 +893,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
                     : () => _submit(type: OrderType.buyMarket),
                 child: Container(
                   margin: EdgeInsets.symmetric(horizontal: 8.w),
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
                   decoration: BoxDecoration(
                     color: _brandBlue,
                     borderRadius: BorderRadius.circular(8.r),
@@ -975,7 +977,9 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: const AppBackButton(),
+        leading: AppBackButton(onPressed: (){
+          Get.back();
+        },),
         actions: [
           IconButton(
             icon: Icon(Icons.refresh, color: AppColors.textPrimary),

@@ -27,7 +27,10 @@ class _MetaMainShellState extends State<MetaMainShell> {
 
   List<Widget> get _screens => [
     MetaWatchlistScreen(
-      onSymbolTap: (item) {
+      // "New Order" row-menu action: push the New Order screen on top.
+      // Do NOT switch tabs here — the WatchList tab is still selected
+      // underneath, so pressing back returns to the WatchList.
+      onOpenNewOrder: (item) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => MetaNewOrderScreen(
@@ -35,8 +38,11 @@ class _MetaMainShellState extends State<MetaMainShell> {
             ),
           ),
         );
-        // Also keep the chart tab updated in the background so
-        // returning to that tab shows the same instrument.
+      },
+      // "Chart" row-menu action: switch to the Chart tab. The chart
+      // screen reads `currentSymbol` from ChartSocketController, which
+      // the watchlist already updates before invoking this callback.
+      onOpenChart: (item) {
         setState(() => _index = 1);
       },
     ),

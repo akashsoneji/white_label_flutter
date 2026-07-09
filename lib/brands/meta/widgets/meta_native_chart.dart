@@ -14,10 +14,18 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 ///
 /// Subscribes to the active [ChartSocketController.priceStream] and renders
 /// two line series — **ask (red)** on top, **bid (blue)** below — with
-/// right‑axis price labels, a faint grid, and a last‑tick marker badge on
+/// right-axis price labels, a faint grid, and a last-tick marker badge on
 /// the right edge showing the latest ask/bid values.
 ///
 /// Free of any webview. Driven 100% by your MT5 websocket ticks.
+///
+/// **Data-integrity rules:**
+///   • Ticks must include BOTH a non-zero bid AND ask.
+///   • Ticks must declare a `symbol` that matches (after suffix stripping).
+///   • The chart only renders once we have at least 2 ticks for our symbol
+///     (single-tick renders were misleading the user with stale/cached
+///     prices from a previous symbol — see screenshot regression).
+///   • Until then, a clean "Waiting for ticks…" placeholder is shown.
 class MetaNativeChart extends StatefulWidget {
   const MetaNativeChart({
     super.key,
@@ -49,26 +57,31 @@ class _MetaNativeChartState extends State<MetaNativeChart> {
     super.initState();
     _socket = Get.find<ChartSocketController>();
 
-    // Seed from whatever last known price we have.
-    final seed = _socket.realTimePrice;
-    final ask = _asDouble(seed['ask']);
-    final bid = _asDouble(seed['bid']);
-    if (ask != null && bid != null) {
-      _push(_Tick(_x++, bid, ask));
-    }
+    // ✅ Do NOT seed from realTimePrice — a cached tick from a previous
+    // symbol (e.g. USDJPY) would render garbage on the EURJPY chart
+    // (collapses Y-axis to ±0.5 or worse). Instead, wait for the first
+    // real, symbol-matched tick to arrive over the websocket, then
+    // render. The placeholder is much friendlier than a flat red line
+    // at y=0 over a 4000-pip Y-range.
+    _sub = _socket.priceStream.listen(_onTick);
+  }
 
-    _sub = _socket.priceStream.listen((m) {
-      final a = _asDouble(m['ask']);
-      final b = _asDouble(m['bid']);
-      if (a == null || b == null) return;
-      if (!_isForOurSymbol(m)) return;
-      setState(() => _push(_Tick(_x++, b, a)));
-    });
+  void _onTick(Map<String, dynamic> m) {
+    if (!mounted) return;
+    final a = _asDouble(m['ask']);
+    final b = _asDouble(m['bid']);
+    // Reject garbage: zero bid/ask or zero/missing symbol.
+    if (a == null || b == null || a <= 0 || b <= 0) return;
+    if (!_isForOurSymbol(m)) return;
+    setState(() => _push(_Tick(_x++, b, a)));
   }
 
   bool _isForOurSymbol(Map<String, dynamic> m) {
     final s = m['symbol']?.toString();
-    if (s == null || s.isEmpty) return true;
+    // Reject ticks with no symbol declared — they cannot be matched to
+    // our symbol reliably and were the source of "phantom" ticks that
+    // broke the chart's Y-axis.
+    if (s == null || s.isEmpty) return false;
     return s == widget.symbol ||
         s == _stripSuffix(widget.symbol) ||
         _stripSuffix(s) == _stripSuffix(widget.symbol);
@@ -76,6 +89,19 @@ class _MetaNativeChartState extends State<MetaNativeChart> {
 
   static String _stripSuffix(String s) =>
       s.contains('.') ? s.substring(0, s.lastIndexOf('.')) : s;
+
+  @override
+  void didUpdateWidget(covariant MetaNativeChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the symbol changed (e.g. user picked a different instrument),
+    // drop the existing tick buffer so the chart starts fresh for the
+    // new symbol — never mixing EURJPY ticks with the new USDJPY
+    // subscription.
+    if (oldWidget.symbol != widget.symbol) {
+      _ticks.clear();
+      _x = 0;
+    }
+  }
 
   @override
   void dispose() {
@@ -101,8 +127,8 @@ class _MetaNativeChartState extends State<MetaNativeChart> {
     final d = _socket.realTimePrice['digits'];
     if (d is int) return d;
     if (d is num) return d.toInt();
-    if (d is String) return int.tryParse(d) ?? 5;
-    return 5;
+    if (d is String) return int.tryParse(d) ?? 3;
+    return 3;
   }
 
   String _fmt(double v) {
@@ -112,7 +138,11 @@ class _MetaNativeChartState extends State<MetaNativeChart> {
 
   @override
   Widget build(BuildContext context) {
-    if (_ticks.isEmpty) {
+    // ✅ Require at least 2 ticks before showing any chart — a single
+    // tick produces a horizontal line at one Y value which is
+    // uninformative at best and misleading at worst. The "Waiting for
+    // ticks…" placeholder flashes for ~1–2 ticks (sub-second).
+    if (_ticks.length < 2) {
       return _placeholder();
     }
     return Padding(
@@ -151,12 +181,19 @@ class _MetaNativeChartState extends State<MetaNativeChart> {
     }
 
     final last = _ticks.last;
-    // Pad range so the line never touches the chart edges.
-    final pad = (maxY - minY).abs() * 0.1;
-    if (pad <= 0) {
-      minY -= 0.5;
-      maxY += 0.5;
+    // Pad range so the line never touches the chart edges. Use a
+    // pip-aware padding that works for both 4-digit forex pairs and
+    // 5-digit FX / 2-digit JPY pairs.
+    final range = (maxY - minY).abs();
+    if (range < 1e-9) {
+      // Defensive: shouldn't happen because we require >= 2 ticks,
+      // but keep the branch to avoid NaN/divide-by-zero in fl_chart.
+      final pip = math.pow(10, -_digits).toDouble();
+      final flatPad = math.max(pip * 50, maxY.abs() * 0.0005 + pip);
+      minY -= flatPad;
+      maxY += flatPad;
     } else {
+      final pad = range * 0.1;
       minY -= pad;
       maxY += pad;
     }
