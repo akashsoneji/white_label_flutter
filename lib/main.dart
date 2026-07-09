@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -867,8 +868,21 @@ Future<void> _initializeFlavor() async {
   const clientFromDefine = String.fromEnvironment('CLIENT', defaultValue: '');
   const flavorFromDefine = String.fromEnvironment('FLAVOR', defaultValue: '');
 
-  final selectedRaw =
+  String selectedRaw =
       clientFromDefine.isNotEmpty ? clientFromDefine : flavorFromDefine;
+      
+  if (selectedRaw.isEmpty) {
+    try {
+      final jsonStr = await rootBundle.loadString('assets/config/brands/brands.json');
+      final data = json.decode(jsonStr) as Map<String, dynamic>;
+      if (data['default'] != null) {
+        selectedRaw = data['default'].toString();
+      }
+    } catch (e) {
+      AppLogger.error('Failed to load default flavor from brands.json: $e');
+    }
+  }
+  
   final selected = selectedRaw.trim().toLowerCase();
 
   FlavorConfig.activateByName(selected);

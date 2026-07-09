@@ -250,7 +250,16 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.VERIFY_CODE,
-      page: () => UiRegistry.instance.verifyCode(email: ''),
+      page: () {
+        // Pull email from Get.arguments (set by
+        // authController.requestPasswordResetOTP at lib/screens/auth/view_models/auth_controller.dart:1587).
+        // Previously this was hardcoded to `email: ''`, which caused the
+        // /password/verify-otp request body to ship with `"email": ""` and
+        // the backend to reject the OTP.
+        final emailArg = Get.arguments;
+        final email = emailArg is String ? emailArg : '';
+        return UiRegistry.instance.verifyCode(email: email);
+      },
       binding: AuthBinding(),
     ),
     GetPage(

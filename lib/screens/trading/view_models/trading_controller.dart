@@ -1141,10 +1141,19 @@ class TradingController extends GetxController {
         orElse: () => throw Exception('Position not found'),
       );
 
+      // Get correct mt5Account
+      String accountToUse = position.accountId.isEmpty ? position.mt5Account : position.accountId;
+      if (accountToUse.isEmpty) {
+        if (Get.isRegistered<AccountController>()) {
+          final accountController = Get.find<AccountController>();
+          accountToUse = accountController.activeMT5Account?.metaAccountNumber ?? '';
+        }
+      }
+
       // Call the API to close position
       final response = await _tradingRepo.closePositionByPositionId(
         data: {
-          'mt5_account': position.accountId,
+          'mt5_account': accountToUse,
           'position_id': int.parse(position.orderId),
           if (volume != null) 'volume': volume, // For partial close
         },
@@ -1263,10 +1272,19 @@ class TradingController extends GetxController {
       _setLoading(true);
       _clearError();
 
+      // Get correct mt5Account
+      String accountToUse = mt5Account;
+      if (accountToUse.isEmpty) {
+        if (Get.isRegistered<AccountController>()) {
+          final accountController = Get.find<AccountController>();
+          accountToUse = accountController.activeMT5Account?.metaAccountNumber ?? '';
+        }
+      }
+
       // Call the API to close position
       final response = await _tradingRepo.closePositionByPositionId(
         data: {
-          'mt5_account': mt5Account,
+          'mt5_account': accountToUse,
           'position_id': positionId,
           if (volume != null) 'volume': volume, // For partial close
         },
@@ -2579,11 +2597,19 @@ class TradingController extends GetxController {
       }
 
       // Prepare payload
+      String accountToUse = mt5Account ?? '';
+      if (accountToUse.isEmpty) {
+        if (Get.isRegistered<AccountController>()) {
+          final accountController = Get.find<AccountController>();
+          accountToUse = accountController.activeMT5Account?.metaAccountNumber ?? '';
+        }
+      }
+
       final payload = {
         'symbol': symbol,
         'volume': volume,
         'type': orderType.value,
-        'mt5_account': mt5Account ?? '',
+        'mt5_account': accountToUse,
       };
 
       // Add optional parameters

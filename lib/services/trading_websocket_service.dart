@@ -2722,13 +2722,13 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
         }
 
         // Validate account number matches current account
-        if (currentAccount != null && account != currentAccount) {
+        if (currentAccount != null && currentAccount.isNotEmpty && !_accountMatches(currentAccount, account)) {
           return; // Skip this order
         }
 
         // Also check _lastSubscribedAccount for additional safety
         if (_lastSubscribedAccount != null &&
-            account != _lastSubscribedAccount) {
+            !_accountMatches(_lastSubscribedAccount, account)) {
           return; // Skip this order
         }
 
@@ -3121,11 +3121,11 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           final account = item[offset + 1].toString();
 
           // ✅ FIX: Validate account - block messages from wrong accounts
-          if (account != currentAccount) {
+          if (!_accountMatches(currentAccount, account)) {
             continue;
           }
           if (_lastSubscribedAccount != null &&
-              account != _lastSubscribedAccount) {
+              !_accountMatches(_lastSubscribedAccount, account)) {
             continue;
           }
 
@@ -3149,27 +3149,10 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
             double.tryParse(item[offset + 7].toString()) ?? 0.0,
           );
 
-          // Detect 17-element self-hosted format with extra integer field at offset+8.
-          final _bRaw8 = item.length > offset + 8 ? item[offset + 8] : null;
-          final _bRaw9 = item.length > offset + 9 ? item[offset + 9] : null;
-          final _bHasExtra = _bRaw8 is int && (_bRaw9 is String || _bRaw9 == null);
-          final _bXo = _bHasExtra ? 1 : 0;
+          final swap = item.length > offset + 8 ? (double.tryParse(item[offset + 8].toString()) ?? 0.0) : 0.0;
+          final priceSLStr = item.length > offset + 9 ? item[offset + 9].toString().trim() : '0';
+          final priceTPStr = item.length > offset + 10 ? item[offset + 10].toString().trim() : '0';
 
-          final priceSLStr =
-              item.length > offset + 8 + _bXo
-                  ? item[offset + 8 + _bXo].toString().trim()
-                  : '0';
-          final priceTPStr =
-              item.length > offset + 9 + _bXo
-                  ? item[offset + 9 + _bXo].toString().trim()
-                  : '0';
-          final rawSwap =
-              item.length > offset + 10 + _bXo
-                  ? (double.tryParse(item[offset + 10 + _bXo].toString()) ?? 0.0)
-                  : 0.0;
-          final swap = (rawSwap.isNaN || rawSwap.isInfinite) ? 0.0 : rawSwap;
-          // ✅ FIX: Sanitize parsed SL/TP — tryParse("NaN") returns NaN, not
-          // null, so the `?? 0.0` fallback does not catch it.
           double _parsePrice(String s) {
             if (s.isEmpty || s == '0' || s == 'null' || s == '-') return 0.0;
             final v = double.tryParse(s) ?? 0.0;
@@ -3179,14 +3162,16 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           final priceSL = _parsePrice(priceSLStr);
           final priceTP = _parsePrice(priceTPStr);
 
-          final openedAt =
-              item.length > offset + 11 + _bXo
-                  ? (int.tryParse(item[offset + 11 + _bXo].toString()) ?? 0)
-                  : 0;
-          final digits =
-              item.length > offset + 12 + _bXo
-                  ? (int.tryParse(item[offset + 12 + _bXo].toString()) ?? 5)
-                  : 5;
+          bool hasServerField = item.length > offset + 11 && item[offset + 11] is String && !RegExp(r'^\d+$').hasMatch(item[offset + 11].toString());
+          int serverOffset = hasServerField ? 1 : 0;
+
+          final openedAt = item.length > offset + 11 + serverOffset
+              ? (int.tryParse(item[offset + 11 + serverOffset].toString()) ?? 0)
+              : 0;
+          final digits = item.length > offset + 12 + serverOffset
+              ? (int.tryParse(item[offset + 12 + serverOffset].toString()) ?? 5)
+              : 5;
+
 
           // ✅ FIX: Handle "zombie" positions that come back after removal.
           // We only allow a removed position back in if it's a valid PARTIAL close
@@ -3345,12 +3330,12 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
       // Validate account number matches current account
       final currentAccount =
           _accountController.activeMT5Account?.metaAccountNumber;
-      if (currentAccount != null && account != currentAccount) {
+      if (currentAccount != null && currentAccount.isNotEmpty && !_accountMatches(currentAccount, account)) {
         return; // Skip this position
       }
 
       // Also check _lastSubscribedAccount for additional safety
-      if (_lastSubscribedAccount != null && account != _lastSubscribedAccount) {
+      if (_lastSubscribedAccount != null && !_accountMatches(_lastSubscribedAccount, account)) {
         return; // Skip this position
       }
       final symbol = item[offset + 2].toString();
@@ -3361,57 +3346,29 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
       final priceCurrent = double.tryParse(item[offset + 6].toString()) ?? 0.0;
       final profit = double.tryParse(item[offset + 7].toString()) ?? 0.0;
 
-      // Detect 17-element self-hosted format which has an extra integer field at
-      // offset+8 (before swap). We identify it by checking whether the value at
-      // offset+8 is a raw integer while offset+9 is a string — e.g. 0 vs "0.00".
-      // In the legacy 16-element format offset+8 is already the swap string.
-      final _raw8 = item.length > offset + 8 ? item[offset + 8] : null;
-      final _raw9 = item.length > offset + 9 ? item[offset + 9] : null;
-      final _hasExtraField =
-          _raw8 is int && (_raw9 is String || _raw9 == null);
-      final _xo = _hasExtraField ? 1 : 0; // extra-field offset shift
+      final swap = item.length > offset + 8 ? (double.tryParse(item[offset + 8].toString()) ?? 0.0) : 0.0;
+          final priceSLStr = item.length > offset + 9 ? item[offset + 9].toString().trim() : '0';
+          final priceTPStr = item.length > offset + 10 ? item[offset + 10].toString().trim() : '0';
 
-      // swap is at offset+8 (legacy) or offset+9 (17-element format)
-      final swap =
-          item.length > offset + 8 + _xo
-              ? (double.tryParse(item[offset + 8 + _xo].toString()) ?? 0.0)
-              : 0.0;
-      // SL is at offset+9 (legacy) or offset+10 (17-element format)
-      final priceSLStr =
-          item.length > offset + 9 + _xo
-              ? item[offset + 9 + _xo].toString().trim()
-              : '0';
-      // TP: not present in 17-element self-hosted format; keep at offset+10 (legacy)
-      // In 17-element format offset+10+_xo is SL, so TP falls back to '0'.
-      final priceTPStr =
-          !_hasExtraField && item.length > offset + 10
-              ? item[offset + 10].toString().trim()
-              : '0';
-      final priceSL =
-          (priceSLStr.isEmpty ||
-                  priceSLStr == '0' ||
-                  priceSLStr == 'null' ||
-                  priceSLStr == '-')
-              ? 0.0
-              : (double.tryParse(priceSLStr) ?? 0.0);
-      final priceTP =
-          (priceTPStr.isEmpty ||
-                  priceTPStr == '0' ||
-                  priceTPStr == 'null' ||
-                  priceTPStr == '-')
-              ? 0.0
-              : (double.tryParse(priceTPStr) ?? 0.0);
-      // server_type is at offset+10+_xo (17-el) or offset+11 (legacy)
-      // opened_at is at offset+11+_xo (17-el) or offset+12 (legacy)
-      // digits   is at offset+12+_xo (17-el) or offset+13 (legacy)
-      final openedAt =
-          item.length > offset + 11 + _xo
-              ? (int.tryParse(item[offset + 11 + _xo].toString()) ?? 0)
+          double _parsePrice(String s) {
+            if (s.isEmpty || s == '0' || s == 'null' || s == '-') return 0.0;
+            final v = double.tryParse(s) ?? 0.0;
+            return (v.isNaN || v.isInfinite) ? 0.0 : v;
+          }
+
+          final priceSL = _parsePrice(priceSLStr);
+          final priceTP = _parsePrice(priceTPStr);
+
+          bool hasServerField = item.length > offset + 11 && item[offset + 11] is String && !RegExp(r'^\d+$').hasMatch(item[offset + 11].toString());
+          int serverOffset = hasServerField ? 1 : 0;
+
+          final openedAt = item.length > offset + 11 + serverOffset
+              ? (int.tryParse(item[offset + 11 + serverOffset].toString()) ?? 0)
               : 0;
-      final digits =
-          item.length > offset + 12 + _xo
-              ? (int.tryParse(item[offset + 12 + _xo].toString()) ?? 5)
+          final digits = item.length > offset + 12 + serverOffset
+              ? (int.tryParse(item[offset + 12 + serverOffset].toString()) ?? 5)
               : 5;
+
 
       // ✅ FIX: Handle "zombie" positions for single updates
       final positionIdStr = positionId.toString();
@@ -3593,13 +3550,13 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
         final account = item[offset + 1].toString();
 
         // Validate account number matches current account
-        if (currentAccount != null && account != currentAccount) {
+        if (currentAccount != null && currentAccount.isNotEmpty && !_accountMatches(currentAccount, account)) {
           continue; // Skip this position
         }
 
         // Also check _lastSubscribedAccount for additional safety
         if (_lastSubscribedAccount != null &&
-            account != _lastSubscribedAccount) {
+            !_accountMatches(_lastSubscribedAccount, account)) {
           continue; // Skip this position
         }
 
@@ -3610,42 +3567,29 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
         final priceCurrent =
             double.tryParse(item[offset + 6].toString()) ?? 0.0;
         final profit = double.tryParse(item[offset + 7].toString()) ?? 0.0;
-        // Parse swap (index 10) - NEW position
-        final swap =
-            item.length > offset + 8
-                ? (double.tryParse(item[offset + 8].toString()) ?? 0.0)
-                : 0.0;
-        // Parse price_sl and price_tp - New format: swap at index 10, price_sl at index 11, price_tp at index 12
-        final priceSLStr =
-            item.length > offset + 9 ? item[offset + 9].toString().trim() : '0';
-        final priceTPStr =
-            item.length > offset + 10
-                ? item[offset + 10].toString().trim()
-                : '0';
-        final priceSL =
-            (priceSLStr.isEmpty ||
-                    priceSLStr == '0' ||
-                    priceSLStr == 'null' ||
-                    priceSLStr == '-')
-                ? 0.0
-                : (double.tryParse(priceSLStr) ?? 0.0);
-        final priceTP =
-            (priceTPStr.isEmpty ||
-                    priceTPStr == '0' ||
-                    priceTPStr == 'null' ||
-                    priceTPStr == '-')
-                ? 0.0
-                : (double.tryParse(priceTPStr) ?? 0.0);
-        // server_type is at offset+11, opened_at is at offset+12
-        // digits is always the last element in the array
-        final openedAt =
-            item.length > offset + 12
-                ? (int.tryParse(item[offset + 12].toString()) ?? 0)
-                : 0;
-        final digits =
-            item.length > offset + 13
-                ? (int.tryParse(item[offset + 13].toString()) ?? 5)
-                : 5;
+        final swap = item.length > offset + 8 ? (double.tryParse(item[offset + 8].toString()) ?? 0.0) : 0.0;
+          final priceSLStr = item.length > offset + 9 ? item[offset + 9].toString().trim() : '0';
+          final priceTPStr = item.length > offset + 10 ? item[offset + 10].toString().trim() : '0';
+
+          double _parsePrice(String s) {
+            if (s.isEmpty || s == '0' || s == 'null' || s == '-') return 0.0;
+            final v = double.tryParse(s) ?? 0.0;
+            return (v.isNaN || v.isInfinite) ? 0.0 : v;
+          }
+
+          final priceSL = _parsePrice(priceSLStr);
+          final priceTP = _parsePrice(priceTPStr);
+
+          bool hasServerField = item.length > offset + 11 && item[offset + 11] is String && !RegExp(r'^\d+$').hasMatch(item[offset + 11].toString());
+          int serverOffset = hasServerField ? 1 : 0;
+
+          final openedAt = item.length > offset + 11 + serverOffset
+              ? (int.tryParse(item[offset + 11 + serverOffset].toString()) ?? 0)
+              : 0;
+          final digits = item.length > offset + 12 + serverOffset
+              ? (int.tryParse(item[offset + 12 + serverOffset].toString()) ?? 5)
+              : 5;
+
 
         final position = TradingPosition(
           mt5Account: int.tryParse(account) ?? 0,
@@ -3736,13 +3680,13 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
             final account = data[offset + 1].toString();
 
             // Validate account number matches current account
-            if (currentAccount != null && account != currentAccount) {
+            if (currentAccount != null && currentAccount.isNotEmpty && !_accountMatches(currentAccount, account)) {
               continue; // Skip this change
             }
 
             // Also check _lastSubscribedAccount for additional safety
             if (_lastSubscribedAccount != null &&
-                account != _lastSubscribedAccount) {
+                !_accountMatches(_lastSubscribedAccount, account)) {
               continue; // Skip this change
             }
           }
