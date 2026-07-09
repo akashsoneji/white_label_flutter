@@ -27,6 +27,7 @@ class AppSelectField<T> extends StatelessWidget {
   final EdgeInsetsGeometry? contentPadding;
   final double? fontSize;
   final bool enabled;
+  final Color? backgroundColor;
 
   const AppSelectField({
     super.key,
@@ -40,6 +41,7 @@ class AppSelectField<T> extends StatelessWidget {
     this.contentPadding,
     this.fontSize,
     this.enabled = true,
+    this.backgroundColor,
   });
 
   bool _isEqual(T a, T b) {
@@ -204,7 +206,7 @@ class AppSelectField<T> extends StatelessWidget {
                 contentPadding ??
                 EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: AppColors.whiteColor,
+              color: backgroundColor ?? AppColors.whiteColor,
               borderRadius: radius,
               border: Border.all(color: AppColors.border),
             ),

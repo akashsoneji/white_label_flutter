@@ -21,9 +21,9 @@ colors:
   launcherBackground: "#01061A"
 
 urls:
-  api: https://app.tenaxcode.com/api/
-  websocket: wss://app.tenaxcode.com/trade-engine
-  chart: https://app.tenaxcode.com
+  api: https://member.gtxprime.com/api/
+  websocket: wss://member.gtxprime.com/trade-engine
+  chart: https://member.gtxprime.com
 
 assets:
   appIcon: icon.png
