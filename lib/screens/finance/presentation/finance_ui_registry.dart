@@ -31,13 +31,15 @@ class FinanceUiRegistry implements FinanceUiSlots {
   bool get _usesVantageUi =>
       _activeClient.toLowerCase() == 'vantage' ||
       _activeClient.toLowerCase() == 'baazex' ||
-      _activeClient.toLowerCase() == 'celestial' ||
       _activeClient.toLowerCase() == 'gtxprime' ||
       _activeClient.toLowerCase() == 'kantara' ||
       _activeClient.toLowerCase() == 'pipze' ||
       _activeClient.toLowerCase() == 'skyriss' ||
       _activeClient.toLowerCase() == 'telifox' ||
       _activeClient.toLowerCase() == 'tenax';
+  // NOTE: `celestial` and `meta` are PARENT brands with their own UI tree
+  // (CelestialMainShell / MetaMainShell). They deliberately do NOT use
+  // Vantage's finance screens — so they are intentionally omitted here.
 
   @override
   Widget paymentMethods({required String accountNumber}) {

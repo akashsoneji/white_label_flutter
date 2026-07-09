@@ -50,17 +50,17 @@ class UiRegistry implements UiSlots {
 
 
   static const Map<String, String> _uiParentByClient = {
+    // Parents — own their own UI tree.
     'vantage': 'vantage',
     'celestial': 'celestial',
     'meta': 'meta',
+    // Vantage children — inherit Vantage's UI tree.
     'pipze': 'vantage',
     'skyriss': 'vantage',
     'tenax': 'vantage',
     'baazex': 'vantage',
     'gtxprime': 'vantage',
     'telifox': 'vantage',
-    'acme': 'vantage',
-  
     'kantara': 'vantage',
 };
 

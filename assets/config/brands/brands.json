@@ -1,28 +1,21 @@
 {
-  "default": "gtxprime",
+  "default": "skyriss",
   "brands": [
-    "gtxprime",
-    "vantage",
-    "meta"
+    "skyriss",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "gtxprime",
+      "name": "skyriss",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "GTX Prime",
-      "themeMode": "both"
+      "label": "Skyriss",
+      "themeMode": "dark"
     },
     {
       "name": "vantage",
       "type": "parent",
       "label": "Vantage",
-      "themeMode": "both"
-    },
-    {
-      "name": "meta",
-      "type": "parent",
-      "label": "Meta",
       "themeMode": "both"
     }
   ]
