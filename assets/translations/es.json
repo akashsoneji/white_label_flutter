@@ -197,5 +197,18 @@
   "dc_faq_q2": "¿Puedo unirme a más de un concurso?",
   "dc_faq_a2": "Sí — puedes unirte a varios concursos simultáneamente. Cada uno usa su propia cuenta demo.",
   "dc_faq_q3": "¿Qué pasa si me desconecto durante el concurso?",
-  "dc_faq_a3": "Tus operaciones siguen activas. El concurso usa la G/P al final de la ventana, por lo que desconexiones temporales no te descalifican."
+  "dc_faq_a3": "Tus operaciones siguen activas. El concurso usa la G/P al final de la ventana, por lo que desconexiones temporales no te descalifican.",
+  "view_profile": "Ver perfil",
+  "profile_verified": "Verificado",
+  "view_profile_readonly_note": "Tu perfil está verificado y bloqueado para ediciones. Contacta al soporte para actualizar tu información.",
+  "edit_profile_personal_info": "Información personal",
+  "edit_profile_contact_info": "Información de contacto",
+  "edit_profile_address_info": "Información de dirección",
+  "switch_account_title": "Cambiar cuenta",
+  "switch_account_no_accounts": "Aún no hay cuentas",
+  "switch_account_add_new_broker": "+ Agregar nuevo bróker",
+  "switch_account_broker_label": "Bróker: {broker}",
+  "add_account_title": "Agregar cuenta",
+  "add_account_current_broker": "Bróker actual: {broker}",
+  "add_account_choose_broker": "Elegir bróker"
 }

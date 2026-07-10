@@ -146,11 +146,26 @@ class _VantageTransactionHistoryScreenState
     }
   }
 
+  /// Universal back handler used by BOTH the AppBar arrow and device/swipe
+  /// back. If a normal push put us here, `Navigator.canPop()` is true and
+  /// `Get.back()` returns to the origin (More, Celestial/Meta settings).
+  /// If the screen was reached via `Get.offAllNamed(...)` (Cregis flow wipes
+  /// the stack), `canPop()` is false and we send the user to the dashboard.
+  void _handleBack() {
+    if (Navigator.of(context).canPop()) {
+      Get.back();
+      return;
+    }
+    Get.offAllNamed(Routes.TRADING);
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {},
+      onPopInvoked: (didPop) {
+        if (!didPop) _handleBack();
+      },
       child: Scaffold(
         backgroundColor:
             AppColors.isDarkMode
@@ -188,17 +203,7 @@ class _VantageTransactionHistoryScreenState
       leading: Padding(
         padding: EdgeInsets.only(left: 8.w),
         child: AppBackButton(
-          onPressed: () {
-            final fromTab =
-                Get.arguments != null && Get.arguments['from'] != null
-                    ? Get.arguments['from']
-                    : 'dashboard';
-            if (fromTab == 'finance') {
-              Get.back();
-            } else {
-              Get.offAllNamed(Routes.TRADING);
-            }
-          },
+          onPressed: _handleBack,
         ),
       ),
       title: Text(

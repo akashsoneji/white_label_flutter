@@ -508,5 +508,18 @@
   "dc_faq_q2": "Birden fazla yarışmaya katılabilir miyim?",
   "dc_faq_a2": "Evet — birden fazla aktif veya yaklaşan yarışmaya aynı anda katılabilirsin. Her birinin kendi demo hesabı vardır.",
   "dc_faq_q3": "İşlem sırasında bağlantım koparsa ne olur?",
-  "dc_faq_a3": "İşlemlerin geçerli kalır. Yarışma pencere sonu K/Z'sini kullanır, bu yüzden pozisyonların süre bitmeden kapanması kaydıyla geçici kopmalar diskalifiye etmez."
+  "dc_faq_a3": "İşlemlerin geçerli kalır. Yarışma pencere sonu K/Z'sini kullanır, bu yüzden pozisyonların süre bitmeden kapanması kaydıyla geçici kopmalar diskalifiye etmez.",
+  "view_profile": "Profili görüntüle",
+  "profile_verified": "Doğrulandı",
+  "view_profile_readonly_note": "Profiliniz doğrulandı ve düzenlemelere kapatıldı. Bilgilerinizi güncellemek için destek ile iletişime geçin.",
+  "edit_profile_personal_info": "Kişisel bilgiler",
+  "edit_profile_contact_info": "İletişim bilgileri",
+  "edit_profile_address_info": "Adres bilgileri",
+  "switch_account_title": "Hesap değiştir",
+  "switch_account_no_accounts": "Henüz hesap yok",
+  "switch_account_add_new_broker": "+ Yeni komisyoncu ekle",
+  "switch_account_broker_label": "Komisyoncu: {broker}",
+  "add_account_title": "Hesap ekle",
+  "add_account_current_broker": "Mevcut komisyoncu: {broker}",
+  "add_account_choose_broker": "Komisyoncu seç"
 }

@@ -97,6 +97,49 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureMarketWatchV2ForTab();
     });
+
+    // Start the screen-local idle keep-alive timer. This is a redundant
+    // safety net on top of InstrumentsController's own lifecycle timer:
+    // even if the controller's timer is somehow not running (e.g. controller
+    // replaced due to account switch), this loop keeps nudging the socket so
+    // prices don't go stale while the user has the screen visible but is not
+    // touching it. Stops automatically on dispose.
+    _startIdleKeepAlive();
+  }
+
+  // ── Idle keep-alive ─────────────────────────────────────────────
+  // Fires every [_idleKeepAliveInterval] while this screen is alive
+  // and triggers a soft refresh on the controller. The controller
+  // itself already debounces this — if ticks just arrived, the
+  // controller's `_schedulePriceFlush` path handles the UI flush
+  // cheaply. If no ticks have arrived recently, this forces a
+  // resubscribe so the watchlist doesn't freeze.
+  Timer? _idleKeepAliveTimer;
+  static const Duration _idleKeepAliveInterval = Duration(seconds: 20);
+  int _lastTickEpochMs = 0;
+
+  void _startIdleKeepAlive() {
+    _idleKeepAliveTimer?.cancel();
+    _idleKeepAliveTimer = Timer.periodic(_idleKeepAliveInterval, (_) {
+      if (!mounted) return;
+      // Nudge the controller to (re)flush prices and, if necessary,
+      // re-subscribe. notifyUserScrollActivity() is the existing
+      // public API that triggers _schedulePriceFlush() with no real
+      // scroll event required.
+      try {
+        _controller.notifyUserScrollActivity();
+      } catch (_) {}
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      final sinceLastTick = nowMs - _lastTickEpochMs;
+      if (sinceLastTick > _idleKeepAliveInterval.inMilliseconds * 2) {
+        // No tick seen for >40s — the socket may be dead. Try to
+        // revive it without doing a full reconnect.
+        try {
+          // ignore: discarded_futures
+          _controller.resumePriceStreamOnly();
+        } catch (_) {}
+      }
+    });
   }
 
   /// Opens `ws/marketwatchv2` from this tab.
@@ -587,7 +630,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                                 'assets/svg/spread.svg',
                                 width: 10.w,
                                 height: 10.h,
-                                // color: AppColors.textGrey,
+                                color: AppColors.isDarkMode ? Colors.white : AppColors.primary
                               ),
                               SizedBox(width: 2.w),
                               Flexible(
@@ -1034,8 +1077,11 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
   @override
   void dispose() {
     _searchDebounceTimer?.cancel();
+    _searchDebounceTimer = null;
     _searchController.removeListener(_onSearchTextChanged);
     _searchController.dispose();
+    _idleKeepAliveTimer?.cancel();
+    _idleKeepAliveTimer = null;
     super.dispose();
   }
 }

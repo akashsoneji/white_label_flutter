@@ -36,9 +36,11 @@ class DepositInstructionController extends GetxController {
   final cregisPollingStatus = ''.obs;
   final cregisChainId = ''.obs;
   Map<String, dynamic>? cregisNetworkMap;
-  int get cregisPollingAttemptCount => _pollingAttempts;
-  Timer? _pollingTimer;
-  int _pollingAttempts = 0;
+
+  // The moment the user tapped "Generate Address" / proceeded to the waiting
+  // screen. The waiting screen polls Transaction History and treats any
+  // transaction newer than this timestamp as a successful deposit.
+  DateTime? _cregisTapTime;
 
   // Text editing controller
   final amountController = TextEditingController();
@@ -58,7 +60,6 @@ class DepositInstructionController extends GetxController {
 
   @override
   void onClose() {
-    _stopPolling();
     amountController.dispose();
     _disposeCamera();
     super.onClose();
@@ -432,13 +433,14 @@ class DepositInstructionController extends GetxController {
         cregisQrPath.value = data['qr_path']?.toString() ?? '';
 
         if (cregisCheckoutUrl.value.isNotEmpty) {
-          _startPolling();
+          _cregisTapTime = DateTime.now();
           Get.toNamed(
             AppPages.CREGIS_SUCCESS,
             arguments: {
               'checkoutUrl': cregisCheckoutUrl.value,
               'referenceNumber': cregisReferenceNumber.value,
               'amount': amount,
+              'tapTimeIso': _cregisTapTime!.toIso8601String(),
             },
           );
         } else if (cregisDepositAddress.value.isNotEmpty) {
@@ -465,90 +467,20 @@ class DepositInstructionController extends GetxController {
     }
   }
 
-  void _startPolling() {
-    _stopPolling();
-    _pollingAttempts = 0;
-    cregisPollingStatus.value = 'pending';
-
-    _pollingTimer = Timer.periodic(const Duration(seconds: 4), (timer) async {
-      if (_pollingAttempts >= 20) {
-        _stopPolling();
-        cregisPollingStatus.value = 'timeout';
-        CustomToastService.showError(
-          message:
-              'Payment timeout. Please check Transaction History for status.',
-        );
-        return;
-      }
-
-      _pollingAttempts++;
-      await _pollCregisStatus();
-    });
-  }
-
-  void _stopPolling() {
-    _pollingTimer?.cancel();
-    _pollingTimer = null;
-  }
-
-  Future<void> _pollCregisStatus() async {
-    if (cregisReferenceNumber.value.isEmpty) return;
-
-    try {
-      final token = await SecureStorageService.getAuthToken();
-      final response = await ApiService.get(
-        endpoint:
-            '${ApiConstants.cregisDepositStatus}?ref=${cregisReferenceNumber.value}',
-        token: token,
-      );
-
-      if (response.success && response.data != null) {
-        final data = response.data['data'] ?? response.data;
-        final status = data['status']?.toString().toLowerCase() ?? 'pending';
-        cregisPollingStatus.value = status;
-
-        if (status == 'approved' || status == 'confirmed') {
-          _stopPolling();
-          CustomToastService.showSuccess(
-            message: 'Payment confirmed! Funds credited to your account.',
-          );
-
-          try {
-            final dashboardController = Get.find<DashboardController>();
-            dashboardController.markMT5AccountsAsStale();
-          } catch (_) {}
-
-          Get.toNamed(
-            AppPages.TRANSACTION_HISTORY,
-            arguments: {'from': 'dashboard'},
-          );
-          _clearCregisState();
-        } else if (status == 'rejected' || status == 'failed') {
-          _stopPolling();
-          CustomToastService.showError(
-            message:
-                'Payment $status. Please contact support if problem persists.',
-          );
-        }
-      }
-    } catch (e) {
-      print('Error polling Cregis status: $e');
-    }
-  }
-
   Future<void> submitCregisDeposit({
     required String gatewayMethodId,
     required String amount,
     required String mt5AccountId,
   }) async {
     if (cregisCheckoutUrl.value.isNotEmpty) {
-      _startPolling();
+      _cregisTapTime = DateTime.now();
       Get.toNamed(
         AppPages.CREGIS_SUCCESS,
         arguments: {
           'checkoutUrl': cregisCheckoutUrl.value,
           'referenceNumber': cregisReferenceNumber.value,
           'amount': amount,
+          'tapTimeIso': _cregisTapTime!.toIso8601String(),
         },
       );
       return;
@@ -561,7 +493,7 @@ class DepositInstructionController extends GetxController {
       return;
     }
 
-    _startPolling();
+    _cregisTapTime = DateTime.now();
     Get.toNamed(
       AppPages.CREGIS_ADDRESS,
       arguments: {
@@ -569,20 +501,9 @@ class DepositInstructionController extends GetxController {
         'referenceNumber': cregisReferenceNumber.value,
         'amount': amount,
         'networkKey': selectedCregisNetwork.value,
+        'tapTimeIso': _cregisTapTime!.toIso8601String(),
       },
     );
   }
 
-  void _clearCregisState() {
-    _stopPolling();
-    cregisNetworks.clear();
-    selectedCregisNetwork.value = '';
-    cregisDepositAddress.value = '';
-    cregisQrPath.value = '';
-    cregisCheckoutUrl.value = '';
-    cregisReferenceNumber.value = '';
-    cregisPollingStatus.value = '';
-    cregisChainId.value = '';
-    _pollingAttempts = 0;
-  }
 }

@@ -197,8 +197,84 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // Connection state is centrally coordinated by AccountController to prevent race conditions.
-    return;
+    // Account-level lifecycle (account switching) is centrally coordinated
+    // by AccountController to prevent race conditions. The cross-app
+    // pause/resume case is NOT covered there, though: the OS can silently
+    // drop the WebSocket TCP connection when the app is suspended, and
+    // on resume the listener stays bound to a dead channel until the
+    // user does something that triggers a manual reconnect. We handle
+    // that explicitly here, mirroring the fix on InstrumentsController.
+    switch (state) {
+      case AppLifecycleState.resumed:
+        if (kDebugMode) {
+          dev.log('ChartSocketController: App resumed — restarting symbol stream');
+        }
+        _startIdleKeepAlive();
+        // Only attempt a restart if we actually have a symbol selected
+        // — otherwise startWebSocket() will no-op anyway.
+        if (currentSymbol.value.isNotEmpty) {
+          Future.microtask(() => handleAppRestart());
+        }
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        _stopIdleKeepAlive();
+        break;
+    }
+  }
+
+  // ── Idle keep-alive for chart symbol stream ───────────────────────────
+  //
+  // The chart socket only carries ticks for ONE symbol (currentSymbol).
+  // When the app is idle (no UI interaction, screen off, OS think it's
+  // idle), the TCP socket can sit quiet for long enough that intermediate
+  // proxies drop the connection. Periodic resubscribe frames keep the
+  // server side warm and let us cheaply detect a dead socket.
+  Timer? _idleKeepAliveTimer;
+  static const Duration _idleKeepAliveInterval = Duration(seconds: 15);
+  int _lastTickEpochMs = 0;
+  bool _keepAliveRunning = false;
+
+  void _startIdleKeepAlive() {
+    if (_keepAliveRunning) return;
+    _keepAliveRunning = true;
+    _idleKeepAliveTimer?.cancel();
+    _idleKeepAliveTimer = Timer.periodic(_idleKeepAliveInterval, (_) async {
+      try {
+        final isLoggedIn = await SecureStorageService.isUserLoggedIn();
+        if (!isLoggedIn) return;
+        if (currentSymbol.value.isEmpty) return;
+        // If ticks are flowing, skip — server is happily pushing.
+        final nowMs = DateTime.now().millisecondsSinceEpoch;
+        final sinceLastTick = nowMs - _lastTickEpochMs;
+        if (isConnected.value &&
+            sinceLastTick < _idleKeepAliveInterval.inMilliseconds) {
+          return;
+        }
+        // Force a soft re-subscribe to wake the server up.
+        if (isConnected.value) {
+          getSocketData();
+        } else {
+          handleAppRestart();
+        }
+      } catch (_) {
+        // Best-effort — never crash the controller.
+      }
+    });
+  }
+
+  void _stopIdleKeepAlive() {
+    _idleKeepAliveTimer?.cancel();
+    _idleKeepAliveTimer = null;
+    _keepAliveRunning = false;
+  }
+
+  /// Call from the price-tick handler to let the keep-alive timer
+  /// skip needless resubscribes while the socket is happy.
+  void noteTickObserved() {
+    _lastTickEpochMs = DateTime.now().millisecondsSinceEpoch;
   }
 
   // ---------- Public API ----------
@@ -633,7 +709,10 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
               'volume': single['Volume'],
             };
 
-            if (!_isDisposed) realTimePrice.value = transformed;
+            if (!_isDisposed) {
+              realTimePrice.value = transformed;
+              noteTickObserved();
+            }
             if (!_priceStreamController.isClosed) {
               _priceStreamController.add(
                 Map<String, dynamic>.from(transformed),
@@ -659,6 +738,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
           }
           if (!_isDisposed) {
             realTimePrice.value = Map<String, dynamic>.from(data);
+            noteTickObserved();
             if (kDebugMode) {
               dev.log(
                 '📊 Chart: Updated realTimePrice - bid: ${data['bid']}, ask: ${data['ask']}',
@@ -712,6 +792,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
           if (!_isDisposed) {
             realTimePrice.value = transformed;
+            noteTickObserved();
           }
           if (!_priceStreamController.isClosed) {
             _priceStreamController.add(Map<String, dynamic>.from(transformed));
@@ -755,7 +836,10 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
               'last': 0,
               'volume': 0,
             };
-            if (!_isDisposed) realTimePrice.value = transformed;
+            if (!_isDisposed) {
+              realTimePrice.value = transformed;
+              noteTickObserved();
+            }
             if (!_priceStreamController.isClosed) {
               _priceStreamController.add(
                 Map<String, dynamic>.from(transformed),
@@ -777,7 +861,10 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
               'spreadDiff': it['SpreadDiff'],
               'volume': it['Volume'],
             };
-            if (!_isDisposed) realTimePrice.value = transformed;
+            if (!_isDisposed) {
+              realTimePrice.value = transformed;
+              noteTickObserved();
+            }
             if (!_priceStreamController.isClosed) {
               _priceStreamController.add(
                 Map<String, dynamic>.from(transformed),

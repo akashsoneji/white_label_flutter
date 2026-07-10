@@ -4,7 +4,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/utils/trl_helper.dart';
-import 'package:crm_app/utils/navigation_helper.dart';
 import '../../../../constants/text_styles.dart';
 import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart';
 import '../../../../routes/app_pages.dart';
@@ -175,13 +174,25 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     }
   }
 
+  /// Universal back handler for BOTH the AppBar arrow and device/swipe back.
+  /// If this screen was pushed normally (More / Celestial / Meta settings) the
+  /// navigator can pop, so return to the origin. If it was reached via
+  /// `Get.offAllNamed` (the Cregis deposit flow wipes the stack), there is
+  /// nothing to pop, so land on the dashboard.
+  void _handleBack() {
+    if (Navigator.of(context).canPop()) {
+      Get.back();
+      return;
+    }
+    Get.offAllNamed(Routes.TRADING);
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false, // Disable device back button completely
+      canPop: false,
       onPopInvoked: (didPop) {
-        // Do nothing - device back button is disabled
-        // User must use app bar back button instead
+        if (!didPop) _handleBack();
       },
       child: Scaffold(
         backgroundColor: AppColors.whiteColor,
@@ -191,18 +202,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
           elevation: 0,
           leading: Padding(
             padding: EdgeInsets.only(left: 0.w),
-            child: AppBackButton(onPressed: () {
-                final fromTab =
-                    Get.arguments != null && Get.arguments['from'] != null
-                        ? Get.arguments['from']
-                        : 'dashboard';
-                if (fromTab == 'finance') {
-                  NavigationHelper.safeBack(context: context);
-                } else {
-                  Get.offAllNamed(Routes.TRADING);
-                }
-              },
-            ),
+            child: AppBackButton(onPressed: _handleBack),
           ),
           title: Text(
             languageService.tr('transaction_history'),

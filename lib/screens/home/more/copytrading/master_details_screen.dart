@@ -677,7 +677,7 @@ class _TimeChip extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               selected
-                  ? AppColors.textPrimary
+                  ? AppColors.textPrimary.withOpacity(0.35)
                   : AppColors.tradeBackgroundCenterColor.withOpacity(0.35),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: AppColors.border),

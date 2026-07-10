@@ -650,14 +650,14 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               onRefresh: _loadProfile,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 32.h),
+                padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 24.h),
                 children: [
                   _buildTopCard(),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 10.h),
                   _buildPerformanceChart(),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 10.h),
                   _buildOpenPositionsSection(),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 10.h),
                   _buildTradeHistory(),
                 ],
               ),
@@ -705,61 +705,75 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.all(16.w),
+            padding: EdgeInsets.all(12.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        CircleAvatar(
-                          radius: 26.r,
-                          backgroundColor: AppColors.chipSurface,
-                          child: Text(
-                            _initials,
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.sp,
+                    SizedBox(
+                      width: 50.w,
+                      height: 50.h,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned(
+                            left: 3.w,
+                            top: 1.h,
+                            child: CircleAvatar(
+                              radius: 22.r,
+                              backgroundColor: AppColors.chipSurface,
+                              child: Text(
+                                _initials,
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.sp,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                        Positioned(
-                          bottom: -2,
-                          right: -2,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.onColoredBackground,
-                            ),
-                            padding: const EdgeInsets.all(2),
-                            child: Icon(
-                              Icons.check_circle,
-                              size: 16.sp,
-                              color: AppColors.textPrimary,
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.card,
+                              ),
+                              padding: const EdgeInsets.all(1),
+                              child: Icon(
+                                Icons.check_circle,
+                                size: 14.sp,
+                                color: const Color(0xFF10B981),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    SizedBox(width: 12.w),
+                    SizedBox(width: 10.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w800,
                               color: AppColors.textPrimary,
                             ),
                           ),
                           SizedBox(height: 4.h),
-                          Row(
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 6.w,
+                            runSpacing: 2.h,
                             children: [
                               Container(
                                 padding: EdgeInsets.symmetric(
@@ -779,16 +793,16 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 8.w),
-                              Expanded(
-                                child: Text(
-                                  '• Member since $since',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 10.sp,
-                                    color: AppColors.textGrey,
-                                  ),
+                              Text(
+                                since.isNotEmpty
+                                    ? 'Member since $since'
+                                    : 'Verified Manager',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textGrey,
                                 ),
                               ),
                             ],
@@ -796,28 +810,29 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                         ],
                       ),
                     ),
+                    SizedBox(width: 8.w),
                     Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 4.h,
+                        horizontal: 7.w,
+                        vertical: 3.h,
                       ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEF3C7),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.shield,
-                            size: 12.sp,
+                            size: 11.sp,
                             color: const Color(0xFFD97706),
                           ),
-                          SizedBox(width: 4.w),
+                          SizedBox(width: 3.w),
                           Text(
-                            risk,
+                            risk.isNotEmpty ? risk : 'Moderate Risk',
                             style: TextStyle(
-                              fontSize: 10.sp,
+                              fontSize: 9.sp,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFFD97706),
                             ),
@@ -827,7 +842,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 10.h),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -864,13 +879,13 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 2.h),
                 Align(
                   alignment: Alignment.centerRight,
                   child: Text(
                     'Min. Investment: \$${minInv.toStringAsFixed(0)}',
                     style: TextStyle(
-                      fontSize: 10.sp,
+                      fontSize: 9.sp,
                       color: AppColors.textGrey,
                     ),
                   ),
@@ -932,7 +947,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
           if (description.isNotEmpty) ...[
             const Divider(height: 1, color: Color(0xFFE5E7EB)),
             Padding(
-              padding: EdgeInsets.all(16.w),
+              padding: EdgeInsets.all(12.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -945,11 +960,15 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       letterSpacing: 0.5,
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 8.h),
                   Text(
                     description,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: true,
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 13.sp,
+                      height: 1.4,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -964,23 +983,24 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
 
   Widget _buildTopMetric(String label, String value, Color valueColor) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
             style: TextStyle(
-              fontSize: 10.sp,
+              fontSize: 9.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textGrey,
               letterSpacing: 0.5,
             ),
           ),
-          SizedBox(height: 6.h),
+          SizedBox(height: 2.h),
           Text(
             value,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 13.sp,
               fontWeight: FontWeight.w800,
               color: valueColor,
             ),
@@ -1001,7 +1021,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
       ),
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(12.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1011,7 +1031,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               Text(
                 'Performance',
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
@@ -1022,21 +1042,21 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   children: ['1W', '1M', '3M', '6M', '1Y', 'All'].map((e) {
                     final isSelected = e == '1M';
                     return Container(
-                      margin: EdgeInsets.only(left: 4.w),
+                      margin: EdgeInsets.only(left: 3.w),
                       padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 4.h,
+                        horizontal: 7.w,
+                        vertical: 3.h,
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.textPrimary
                             : AppColors.chipSurface,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         e,
                         style: TextStyle(
-                          fontSize: 10.sp,
+                          fontSize: 9.sp,
                           fontWeight: FontWeight.bold,
                           color: isSelected
                               ? AppColors.isDarkMode
@@ -1051,9 +1071,9 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               ),
             ],
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: 12.h),
           SizedBox(
-            height: 200.h,
+            height: 180.h,
             child: LineChart(
               LineChartData(
                 gridData: FlGridData(
@@ -1167,28 +1187,28 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.all(16.w),
+            padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 8.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Open Positions',
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
                   decoration: BoxDecoration(
                     color: const Color(0xFFECFDF5),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '${_openPositions.length} live',
                     style: TextStyle(
-                      fontSize: 10.sp,
+                      fontSize: 9.sp,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF10B981),
                     ),
@@ -1200,12 +1220,12 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
           const Divider(height: 1, color: Color(0xFFE5E7EB)),
           if (_loadingOpen)
             Padding(
-              padding: EdgeInsets.all(24.h),
+              padding: EdgeInsets.all(16.h),
               child: const Center(child: CircularProgressIndicator()),
             )
           else if (_openPositions.isEmpty)
             Padding(
-              padding: EdgeInsets.all(24.h),
+              padding: EdgeInsets.all(16.h),
               child: Center(
                 child: Text(
                   'No open positions',
@@ -1215,7 +1235,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             )
           else ...[
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               child: Row(
                 children: [
                   Expanded(flex: 3, child: _colHeader('Symbol')),
@@ -1245,8 +1265,8 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 final openTime = (p['open_time'] ?? '—').toString();
                 return Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 10.h,
+                    horizontal: 12.w,
+                    vertical: 6.h,
                   ),
                   child: Row(
                     children: [
@@ -1366,28 +1386,28 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.all(16.w),
+            padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 8.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Trade History',
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
                   decoration: BoxDecoration(
                     color: AppColors.chipSurface,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '${_trades.length} trades',
                     style: TextStyle(
-                      fontSize: 10.sp,
+                      fontSize: 9.sp,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textGrey,
                     ),
@@ -1398,7 +1418,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
           ),
           const Divider(height: 1, color: Color(0xFFE5E7EB)),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             child: Row(
               children: [
                 Expanded(flex: 3, child: _colHeader('Symbol')),
@@ -1412,12 +1432,12 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
           const Divider(height: 1, color: Color(0xFFE5E7EB)),
           if (_loadingTrades)
             Padding(
-              padding: EdgeInsets.all(24.h),
+              padding: EdgeInsets.all(16.h),
               child: const Center(child: CircularProgressIndicator()),
             )
           else if (_trades.isEmpty)
             Padding(
-              padding: EdgeInsets.all(24.h),
+              padding: EdgeInsets.all(16.h),
               child: const Center(child: Text('No trades available')),
             )
           else
@@ -1444,12 +1464,12 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               },
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(12.w),
+                padding: EdgeInsets.symmetric(vertical: 8.h),
                 alignment: Alignment.center,
                 child: Text(
                   'View All',
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
@@ -1466,7 +1486,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 10.sp,
+        fontSize: 9.sp,
         fontWeight: FontWeight.w600,
         color: AppColors.textGrey,
       ),
@@ -1501,7 +1521,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
     final isProfit = profit >= 0;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
       child: Row(
         children: [
           Expanded(

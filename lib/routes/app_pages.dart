@@ -42,6 +42,7 @@ import '../screens/home/more/two_factor_auth_screen.dart';
 import '../screens/auth/presentation/pages/google_login_otp_screen.dart';
 import '../screens/home/more/chat_with_us_screen.dart';
 import '../screens/home/more/edit_profile_screen.dart';
+import '../screens/home/more/view_profile_screen.dart';
 import '../screens/finance/presentation/pages/deposit_screen.dart';
 import '../screens/finance/presentation/pages/internal_transfer_history_screen.dart';
 import '../screens/finance/presentation/pages/internal_transfer_screen.dart';
@@ -85,6 +86,10 @@ import '../bindings/trading_binding.dart';
 import '../screens/common/webview_screen.dart';
 import '../screens/finance/presentation/pages/cregis_address_screen.dart';
 import '../screens/finance/presentation/pages/cregis_success_screen.dart';
+import '../screens/finance/view_models/transaction_history_controller.dart';
+import '../screens/finance/presentation/brands/vantage/pages/transaction_history_screen.dart'
+    as vantage;
+import '../flavor_config.dart';
 
 part 'app_routes.dart';
 
@@ -285,6 +290,10 @@ class AppPages {
       binding: AccountBinding(),
     ),
     GetPage(name: _Paths.EDIT_PROFILE, page: () => EditProfile()),
+    GetPage(
+      name: _Paths.VIEW_PROFILE,
+      page: () => const ViewProfileScreen(),
+    ),
     GetPage(name: _Paths.WITHDRAWAL, page: () => const WithdrawalScreen()),
     GetPage(
       name: _Paths.DEPOSIT,
@@ -294,7 +303,14 @@ class AppPages {
     GetPage(name: _Paths.WALLET, page: () => WalletScreen()),
     GetPage(
       name: _Paths.TRANSACTION_HISTORY,
-      page: () => const TransactionHistoryScreen(),
+      page: () {
+        // Vantage UI brands (vantage + its 7 children) use the branded
+        // transaction history screen; everything else uses the plain one.
+        if (FlavorConfig.usesVantageUi()) {
+          return const vantage.VantageTransactionHistoryScreen();
+        }
+        return const TransactionHistoryScreen();
+      },
     ),
     GetPage(
       name: _Paths.KYC_VERIFICATION,
@@ -548,6 +564,14 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.CREGIS_ADDRESS,
+      binding: BindingsBuilder(() {
+        // Ensure TransactionHistoryController is registered BEFORE the
+        // screen builds so the Cregis polling can call
+        // `Get.find<TransactionHistoryController>()` from its first tick.
+        if (!Get.isRegistered<TransactionHistoryController>()) {
+          Get.put(TransactionHistoryController());
+        }
+      }),
       page: () {
         final args = Get.arguments as Map<String, dynamic>?;
         return CregisAddressScreen(
@@ -555,17 +579,24 @@ class AppPages {
           referenceNumber: args?['referenceNumber'] ?? '',
           amount: args?['amount'] ?? '',
           networkKey: args?['networkKey'] ?? 'trc20',
+          tapTimeIso: args?['tapTimeIso'] ?? '',
         );
       },
     ),
     GetPage(
       name: _Paths.CREGIS_SUCCESS,
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<TransactionHistoryController>()) {
+          Get.put(TransactionHistoryController());
+        }
+      }),
       page: () {
         final args = Get.arguments as Map<String, dynamic>?;
         return CregisSuccessScreen(
           referenceNumber: args?['referenceNumber'] ?? '',
           amount: args?['amount'] ?? '',
           checkoutUrl: args?['checkoutUrl'] ?? '',
+          tapTimeIso: args?['tapTimeIso'] ?? '',
         );
       },
     ),

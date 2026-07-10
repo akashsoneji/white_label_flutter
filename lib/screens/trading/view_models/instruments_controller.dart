@@ -66,6 +66,10 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       tickAtMs: nowMs,
     );
     _schedulePriceFlush();
+    // Tell the keep-alive timer that we just saw a live tick —
+    // it can skip its periodic re-subscribe while the socket is
+    // happily pushing.
+    noteTickObserved();
   }
 
   void notifyUserScrollActivity() {
@@ -239,6 +243,12 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // 1. User is logged in (checked in startWebSocket method)
     // 2. Screen explicitly calls startWebSocket()
     // _initializeWebSocket();
+
+    // Start the idle keep-alive timer — it stays a no-op until the
+    // screen actually starts the socket. Once `startMarketWatchV2Only`
+    // flips `isConnected = true` and ticks start landing, the timer
+    // quietly backs off (see `_startIdleKeepAlive`).
+    _startIdleKeepAlive();
   }
 
   /// Called synchronously from InstrumentsScreen.initState before the first
@@ -1329,6 +1339,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     _marketWatchV2ListenerBound = false; // reset so rebind works on next init
     _priceFlushTimer?.cancel();
     _scrollIdleTimer?.cancel();
+    _stopIdleKeepAlive();
 
     // Close WebSocket connection when controller disposed
     try {
@@ -1340,12 +1351,105 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     super.onClose();
   }
 
+  // ── Idle keep-alive & lifecycle ──────────────────────────────────────
+  //
+  // The marketwatchv2 socket is a TCP connection that the OS can
+  // silently drop when the app goes to background. Without an
+  // explicit heartbeat / re-subscribe timer, the listener stays
+  // bound to a dead channel and the watchlist appears "frozen" on
+  // resume (last prices stay on screen but no new ticks arrive).
+  //
+  // The fix has two halves:
+  //   1. A periodic idle-keep-alive timer that re-sends the
+  //      favorites subscribe frame every [_idleKeepAliveSeconds]
+  //      when no fresh tick has been observed. Cheap on the wire
+  //      (server idempotently acknowledges) but enough to keep the
+  //      socket warm.
+  //   2. didChangeAppLifecycleState hooks: on `resumed`, force a
+  //      fresh re-subscribe via `resumePriceStreamOnly()` if the
+  //      socket is not currently connected.
+  Timer? _idleKeepAliveTimer;
+  static const Duration _idleKeepAliveInterval = Duration(seconds: 15);
+  int _lastTickEpochMs = 0;
+  bool _keepAliveRunning = false;
+
+  /// Start the idle keep-alive timer that periodically re-sends
+  /// the favorites subscribe frame so the server keeps pushing
+  /// ticks even when the OS would otherwise let the TCP socket
+  /// idle out. Safe to call multiple times.
+  void _startIdleKeepAlive() {
+    if (_keepAliveRunning) return;
+    _keepAliveRunning = true;
+    _idleKeepAliveTimer?.cancel();
+    _idleKeepAliveTimer = Timer.periodic(_idleKeepAliveInterval, (_) async {
+      try {
+        final isLoggedIn = await SecureStorageService.isUserLoggedIn();
+        if (!isLoggedIn) return;
+        // If we're already connected and saw a tick recently,
+        // skip the resubscribe — the server is happily pushing.
+        final nowMs = DateTime.now().millisecondsSinceEpoch;
+        final sinceLastTick = nowMs - _lastTickEpochMs;
+        if (isConnected.value && sinceLastTick < _idleKeepAliveInterval.inMilliseconds) {
+          return;
+        }
+        // Otherwise, force a soft re-subscribe (no full reconnect).
+        await resumePriceStreamOnly();
+      } catch (_) {
+        // Best-effort keep-alive — never crash the controller.
+      }
+    });
+  }
+
+  void _stopIdleKeepAlive() {
+    _idleKeepAliveTimer?.cancel();
+    _idleKeepAliveTimer = null;
+    _keepAliveRunning = false;
+  }
+
+  /// Notify the controller that a live tick just arrived.
+  /// Used by the keep-alive timer to skip needless re-subscribes.
+  void noteTickObserved() {
+    _lastTickEpochMs = DateTime.now().millisecondsSinceEpoch;
+  }
+
   // Handle app lifecycle changes
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    // Connection state is centrally coordinated by AccountController to prevent race conditions.
-    return;
+    // Connection state is centrally coordinated by AccountController to
+    // prevent race conditions WITH ACCOUNT CHANGES, but that coordination
+    // doesn't cover the common case of "user backgrounds the app for a few
+    // minutes then returns" — the WebSocket TCP connection can silently
+    // drop, the listener stays bound to a dead channel, and the watchlist
+    // appears frozen until the user does something that triggers a manual
+    // reconnect. We handle that here.
+    switch (state) {
+      case AppLifecycleState.resumed:
+        if (kDebugMode) {
+          print('InstrumentsController: App resumed — resuming price stream');
+        }
+        // Keep-alive timer is enough while foregrounded; ensure it's on.
+        _startIdleKeepAlive();
+        // If the underlying socket is dead (TCP dropped while suspended),
+        // `resumePriceStreamOnly` rebinds the listener and re-sends the
+        // favorites subscribe frame. Cheap, idempotent, no full restart.
+        Future.microtask(() async {
+          if (!isConnected.value) {
+            await resumePriceStreamOnly();
+          }
+        });
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        // Don't tear down the socket — the OS will give us a chance
+        // to resume, and `resumePriceStreamOnly` will repair anything
+        // that got dropped. But DO stop the keep-alive timer; it
+        // would just spam the socket for nothing while backgrounded.
+        _stopIdleKeepAlive();
+        break;
+    }
   }
 
   void _scheduleReconnect() {

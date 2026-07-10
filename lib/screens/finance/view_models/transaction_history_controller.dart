@@ -679,6 +679,70 @@ class TransactionHistoryController extends GetxController {
     }
   }
 
+  /// Lightweight poll helper for the Cregis waiting screens: fetches the first
+  /// page of transactions and returns the newest `created_at` (as a UTC
+  /// DateTime), without touching [userTransactions] or emitting the verbose
+  /// debug logs of [fetchUserTransactions]. Returns null on error / no rows.
+  Future<DateTime?> fetchLatestTransactionTime() async {
+    try {
+      final token = await SecureStorageService.getAuthToken();
+      final response = await _repo.getTransactions(token: token ?? '');
+      if (!response.success || response.data == null) return null;
+
+      final parsed = Transaction.fromJson(response.data as Map<String, dynamic>);
+      final rows = parsed.data;
+      if (rows == null || rows.isEmpty) return null;
+
+      DateTime? newest;
+      for (final row in rows) {
+        final ts = DateTime.tryParse(row.createdAt ?? '');
+        if (ts == null) continue;
+        if (newest == null || ts.isAfter(newest)) newest = ts;
+      }
+      return newest;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Cregis poll helper: returns the FIRST row whose `referenceNumber` matches
+  /// the Cregis `ref` param. Used by the waiting screens to detect a confirmed
+  /// deposit without caring about tap-time / clock skew.
+  ///
+  /// `statusFilter` (optional) restricts the match to rows whose status is
+  /// one of `approved`, `success`, `completed` (case-insensitive) — only
+  /// terminal-positive states. Pass `null` to match any status.
+  ///
+  /// Returns null on error / no match. Logging is intentionally verbose so
+  /// the Cregis screen can show a debug badge of the latest API response.
+  Future<({Data? row, int totalRows, String rawStatus})>
+      fetchLatestTransactionForRef(String ref, {bool statusFilter = true}) async {
+    try {
+      final token = await SecureStorageService.getAuthToken();
+      final response = await _repo.getTransactions(token: token ?? '');
+      if (!response.success || response.data == null) {
+        return (row: null, totalRows: 0, rawStatus: 'http_error');
+      }
+
+      final parsed =
+          Transaction.fromJson(response.data as Map<String, dynamic>);
+      final rows = parsed.data ?? <Data>[];
+
+      for (final row in rows) {
+        if ((row.referenceNumber ?? '').trim() != ref.trim()) continue;
+        if (statusFilter) {
+          final s = (row.status ?? '').toLowerCase().trim();
+          const allowed = {'approved', 'success', 'completed'};
+          if (!allowed.contains(s)) continue;
+        }
+        return (row: row, totalRows: rows.length, rawStatus: 'match');
+      }
+      return (row: null, totalRows: rows.length, rawStatus: 'no_match');
+    } catch (e) {
+      return (row: null, totalRows: 0, rawStatus: 'exception:$e');
+    }
+  }
+
   void updateDate(DateTime date) {
     selectedDate.value = date;
   }

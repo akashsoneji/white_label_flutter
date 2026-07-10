@@ -73,6 +73,13 @@ class VantageChartLayout extends StatefulWidget {
 class _VantageChartLayoutState extends State<VantageChartLayout> {
   double _volume = 0.01;
 
+  /// Editable backing field for the quantity TextField. Keeps the
+  /// raw user-typed string so the user can clear & retype a value
+  /// without the field forcing a fixed-decimal format mid-edit.
+  late final TextEditingController _volumeController;
+  // ignore: prefer_final_fields
+  bool _userTypingVolume = false;
+
   // Bumped on every price tick AND when the active symbol changes so
   // the bottom-dock Obx rebuilds bid/ask/spread for the new symbol.
   final RxInt _tick = 0.obs;
@@ -86,6 +93,9 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   @override
   void initState() {
     super.initState();
+    _volumeController = TextEditingController(
+      text: _volume.toStringAsFixed(2),
+    );
     // Push the active symbol into the socket so its bid/ask maps start
     // streaming ticks for the selected instrument.
     final initial = _rawSymbol();
@@ -101,6 +111,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   @override
   void dispose() {
     _priceSub?.cancel();
+    _volumeController.dispose();
     super.dispose();
   }
 
@@ -156,7 +167,63 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     setState(() {
       _volume = (_volume + delta).clamp(0.01, 100.0);
       _volume = double.parse(_volume.toStringAsFixed(2));
+      // Sync the editable field ONLY when the user isn't actively
+      // typing — otherwise typing becomes a fight with the +/- keys.
+      if (!_userTypingVolume) {
+        _volumeController.value = TextEditingValue(
+          text: _volume.toStringAsFixed(2),
+          selection: TextSelection.collapsed(
+            offset: _volume.toStringAsFixed(2).length,
+          ),
+        );
+      }
     });
+  }
+
+  /// Parse text typed into the Quantity TextField. Accepts partial
+  /// input (e.g. "0.", ".5", "12.") so the user can edit naturally,
+  /// but commits a clamped 2-decimal double to `_volume` on every
+  /// keystroke so the order handlers always see a usable value.
+  void _onVolumeTextChanged(String raw) {
+    // Empty / just a dot / just a leading-zero dot: keep the typed
+    // text visible (don't clobber with a fixed format) but don't
+    // change `_volume` so the place-order code stays guarded.
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty || trimmed == '.' || trimmed == '-') {
+      _userTypingVolume = true;
+      return;
+    }
+    final parsed = double.tryParse(trimmed);
+    if (parsed == null) {
+      // Invalid input — revert the field back to the last known good
+      // value so the user can keep editing.
+      _userTypingVolume = true;
+      _volumeController.value = TextEditingValue(
+        text: _volume.toStringAsFixed(2),
+        selection: TextSelection.collapsed(
+          offset: _volume.toStringAsFixed(2).length,
+        ),
+      );
+      return;
+    }
+    _userTypingVolume = true;
+    setState(() {
+      _volume = parsed.clamp(0.01, 100.0).toDouble();
+      // Don't rewrite the field on every keystroke — that would lose
+      // the cursor position. We only sync from `+` / `-` buttons.
+    });
+  }
+
+  /// Called when the TextField loses focus — final normalization:
+  /// snap the displayed text back to 2-decimal format.
+  void _onVolumeEditingComplete() {
+    _userTypingVolume = false;
+    final formatted = _volume.toStringAsFixed(2);
+    _volumeController.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+    if (mounted) setState(() {});
   }
 
   // Symbol dropdown (only favourites, scrollable).
@@ -450,6 +517,9 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
               isDark: isDark,
               volume: _volume,
               tick: _tick,
+              volumeController: _volumeController,
+              onVolumeChanged: _onVolumeTextChanged,
+              onVolumeSubmitted: _onVolumeEditingComplete,
               onMinus: () => _bumpVolume(-0.01),
               onPlus: () => _bumpVolume(0.01),
               onPending: _openPendingOrderScreen,
@@ -602,6 +672,9 @@ class _BottomDock extends StatelessWidget {
   final bool isDark;
   final double volume;
   final RxInt tick;
+  final TextEditingController volumeController;
+  final ValueChanged<String> onVolumeChanged;
+  final VoidCallback onVolumeSubmitted;
   final VoidCallback onMinus;
   final VoidCallback onPlus;
   final VoidCallback onPending;
@@ -614,6 +687,9 @@ class _BottomDock extends StatelessWidget {
     required this.isDark,
     required this.volume,
     required this.tick,
+    required this.volumeController,
+    required this.onVolumeChanged,
+    required this.onVolumeSubmitted,
     required this.onMinus,
     required this.onPlus,
     required this.onPending,
@@ -689,6 +765,9 @@ class _BottomDock extends StatelessWidget {
               primary: primary,
               isDark: isDark,
               volume: volume,
+              volumeController: volumeController,
+              onVolumeChanged: onVolumeChanged,
+              onVolumeSubmitted: onVolumeSubmitted,
               onMinus: onMinus,
               onPlus: onPlus,
               onPending: onPending,
@@ -743,12 +822,15 @@ class _BottomDock extends StatelessWidget {
 }
 
 // ────────────────────────────────────────────────────────────────────
-//  Quantity bar  :  [−]  Quantity (lots) 0.01  [+]  [📋]  [🔔]
+//  Quantity bar  :  [−]  Quantity (lots) 0.01 (editable)  [+]  [📋]  [🔔]
 // ────────────────────────────────────────────────────────────────────
 class _QuantityBar extends StatelessWidget {
   final Color primary;
   final bool isDark;
   final double volume;
+  final TextEditingController volumeController;
+  final ValueChanged<String> onVolumeChanged;
+  final VoidCallback onVolumeSubmitted;
   final VoidCallback onMinus;
   final VoidCallback onPlus;
   final VoidCallback onPending;
@@ -758,6 +840,9 @@ class _QuantityBar extends StatelessWidget {
     required this.primary,
     required this.isDark,
     required this.volume,
+    required this.volumeController,
+    required this.onVolumeChanged,
+    required this.onVolumeSubmitted,
     required this.onMinus,
     required this.onPlus,
     required this.onPending,
@@ -791,12 +876,44 @@ class _QuantityBar extends StatelessWidget {
                       color: muted,
                     ),
                   ),
-                  Text(
-                    volume.toStringAsFixed(2),
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: fg,
+                  // Editable TextField in place of the static Text widget.
+                  // Same footprint as the previous Text so the +/- icons
+                  // and pending/bell buttons stay in their existing slots.
+                  SizedBox(
+                    height: 24.h,
+                    child: TextField(
+                      controller: volumeController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: false,
+                      ),
+                      textAlign: TextAlign.center,
+                      textAlignVertical: TextAlignVertical.center,
+                      // Don't fight the +/- buttons while user is mid-typing.
+                      // The parent normalizes the displayed value once on
+                      // focus-loss / submit via `onVolumeSubmitted`.
+                      onChanged: onVolumeChanged,
+                      onEditingComplete: onVolumeSubmitted,
+                      onSubmitted: (_) => onVolumeSubmitted(),
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        // color: fg,
+                        height: 1.1,
+
+                      ),
+                      decoration: const InputDecoration(
+                        isCollapsed: true,
+                        isDense: true,
+                        filled: false,
+                        fillColor: Colors.transparent,
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        counterText: '',
+                      ),
+                      maxLines: 1,
                     ),
                   ),
                 ],

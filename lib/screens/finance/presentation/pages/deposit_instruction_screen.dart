@@ -1437,7 +1437,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Waiting for payment... polling ${controller.cregisPollingAttemptCount}/20',
+                        'Waiting for payment... polling…',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.blue.shade800,

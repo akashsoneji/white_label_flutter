@@ -252,9 +252,10 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
             children: [
               Row(
                 children: [
-                  Expanded(
-                    child: Text('Switch Account', style: AppTextStyles.heading),
-                  ),
+                Expanded(
+                  child: Text(languageService.tr('switch_account_title'),
+                      style: AppTextStyles.heading),
+                ),
                   InkWell(
                     onTap: () => Navigator.pop(context),
                     child: Container(
@@ -274,7 +275,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 20.h),
                   child: Text(
-                    'No accounts yet',
+                    languageService.tr('switch_account_no_accounts'),
                     style: TextStyle(
                       color: AppColors.textGrey,
                       fontSize: 14.sp,
