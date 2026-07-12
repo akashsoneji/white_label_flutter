@@ -1118,7 +1118,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     // TP enabled state is checked by caller
     if (!stopLossEnabled || !takeProfitEnabled) return;
 
-    final slPrice = PrecisionHelper.parseDouble(stopLossController.text);
+    final slPrice = PrecisionHelper.parseDouble(stopLossController.text, decimals: _positionDigits);
     // Use entry price (static from order), not current price (from datafeed)
     final entryPrice = double.tryParse(widget.position.entryPrice) ?? 0.0;
 
@@ -1594,11 +1594,11 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     final hasTPValue =
         takeProfitEnabled &&
         takeProfitController.text.isNotEmpty &&
-        PrecisionHelper.parseDouble(takeProfitController.text) > 0;
+        PrecisionHelper.parseDouble(takeProfitController.text, decimals: _positionDigits) > 0;
     final hasSLValue =
         stopLossEnabled &&
         stopLossController.text.isNotEmpty &&
-        PrecisionHelper.parseDouble(stopLossController.text) > 0;
+        PrecisionHelper.parseDouble(stopLossController.text, decimals: _positionDigits) > 0;
     final canConfirm = hasTPValue || hasSLValue;
 
     final bool hasInvalidSLTP =
@@ -1717,7 +1717,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       return null;
     }
 
-    final tpPrice = PrecisionHelper.parseDouble(takeProfitController.text);
+    final tpPrice = PrecisionHelper.parseDouble(takeProfitController.text, decimals: _positionDigits);
     if (tpPrice <= 0) return null;
 
     // Use entry price (static from order), not current price (from datafeed)
@@ -1768,7 +1768,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       return null;
     }
 
-    final slPrice = PrecisionHelper.parseDouble(stopLossController.text);
+    final slPrice = PrecisionHelper.parseDouble(stopLossController.text, decimals: _positionDigits);
     if (slPrice <= 0) {
       print(
         'EditOrderScreen: SL P&L - Invalid SL price: ${stopLossController.text}',

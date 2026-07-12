@@ -559,6 +559,7 @@ class _EnhancedPendingOrderContentState
       priceController.text,
       isIncrease,
       orderType,
+      decimals: currentDigits,
     );
     priceController.text = newPrice;
     isManuallyEditingPrice = true;
@@ -588,6 +589,7 @@ class _EnhancedPendingOrderContentState
         isIncrease,
         orderType,
         entryPrice,
+        decimals: currentDigits,
       );
       stopLossController.text = newValue;
       isManuallyEditingStopLoss = true;
@@ -597,6 +599,7 @@ class _EnhancedPendingOrderContentState
         isIncrease,
         orderType,
         entryPrice,
+        decimals: currentDigits,
       );
       takeProfitController.text = newValue;
       isManuallyEditingTakeProfit = true;

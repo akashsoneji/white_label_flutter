@@ -90,15 +90,18 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
 
   final ValueNotifier<int> _tpPnLUpdateNotifier = ValueNotifier<int>(0);
   final ValueNotifier<int> _slPnLUpdateNotifier = ValueNotifier<int>(0);
-  final ValueNotifier<bool> _riskExpanded = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _riskExpanded = ValueNotifier<bool>(true);
 
   Map<String, dynamic>? _lastTPPnL;
   Map<String, dynamic>? _lastSLPnL;
 
   int _getCurrentDigits() {
     final priceData = chartSocketController.getCurrentPrice();
-    if (priceData != null && priceData.containsKey('digits')) {
-      return int.tryParse(priceData['digits'].toString()) ?? 5;
+    if (priceData != null) {
+      final digitsVal = priceData['digits'] ?? priceData['Digits'];
+      if (digitsVal != null) {
+        return int.tryParse(digitsVal.toString()) ?? 5;
+      }
     }
     return 5;
   }
@@ -137,6 +140,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
       currentPrice,
       isIncrease,
       orderType,
+      decimals: currentDigits,
     );
 
     final newPriceValue = double.tryParse(newPrice) ?? widget.limitPrice.value;
@@ -264,6 +268,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
     }
     final tpPrice = PrecisionHelper.parseDouble(
       widget.takeProfitController.text,
+      decimals: currentDigits,
     );
     if (tpPrice <= 0) return null;
 
@@ -288,7 +293,10 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
         widget.stopLossController.text.isEmpty) {
       return null;
     }
-    final slPrice = PrecisionHelper.parseDouble(widget.stopLossController.text);
+    final slPrice = PrecisionHelper.parseDouble(
+      widget.stopLossController.text,
+      decimals: currentDigits,
+    );
     if (slPrice <= 0) return null;
 
     final entryPrice = widget.limitPrice.value;
@@ -333,9 +341,14 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
     widget.limitPriceController.addListener(() {
       final text = widget.limitPriceController.text;
       if (text.isEmpty) return;
-      final newPrice = PrecisionHelper.parseDouble(text);
+      final newPrice = PrecisionHelper.parseDouble(
+        text,
+        decimals: currentDigits,
+      );
       if (newPrice > 0) {
-        widget.limitPrice.value = newPrice;
+        if (widget.limitPrice.value != newPrice) {
+          widget.limitPrice.value = newPrice;
+        }
         _recalculateTPSL();
       }
     });
@@ -613,14 +626,6 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                                               ? 'ON'
                                               : 'OFF',
                                       tint: AppColors.error,
-                                    ),
-                                    Text(
-                                      'Tap to edit',
-                                      style: AppTextStyles.label.copyWith(
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textGrey,
-                                      ),
                                     ),
                                   ],
                                 ),
@@ -971,9 +976,14 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         onChanged: (value) {
           isManuallyEditingPrice = true;
-          final newPrice = PrecisionHelper.parseDouble(value);
+          final newPrice = PrecisionHelper.parseDouble(
+            value,
+            decimals: currentDigits,
+          );
           if (newPrice > 0) {
-            widget.limitPrice.value = newPrice;
+            if (widget.limitPrice.value != newPrice) {
+              widget.limitPrice.value = newPrice;
+            }
             setState(() {});
           }
         },
@@ -992,7 +1002,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
     return Container(
       width: size,
       height: size,
-        decoration: BoxDecoration(
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: borderColor),
       ),
@@ -1168,11 +1178,21 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
   }
 
   double _getPriceIncrement() {
-    final s = widget.selectedSymbol;
-    if (s.contains('JPY')) return 0.01;
-    if (s.contains('XAU') || s.contains('GOLD')) return 0.01;
-    if (s.contains('XAG') || s.contains('SILVER')) return 0.001;
-    return 0.0001;
+    final decimals = currentDigits;
+    if (decimals <= 0) return 1.0;
+    if (decimals == 1) return 0.1;
+    if (decimals == 2) return 0.01;
+    if (decimals == 3) return 0.001;
+    if (decimals == 4) return 0.0001;
+    if (decimals == 5) return 0.00001;
+    if (decimals == 6) return 0.000001;
+    if (decimals == 7) return 0.0000001;
+    if (decimals == 8) return 0.00000001;
+    double val = 1.0;
+    for (int i = 0; i < decimals; i++) {
+      val /= 10.0;
+    }
+    return val;
   }
 
   String _formatPrice(double value) =>

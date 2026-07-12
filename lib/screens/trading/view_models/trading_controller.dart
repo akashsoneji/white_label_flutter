@@ -2683,47 +2683,50 @@ API Response:
     }
   }
 
+  // Helper to get point value (1 in the last decimal place)
+  double _getPointValue(int decimals) {
+    if (decimals <= 0) return 1.0;
+    if (decimals == 1) return 0.1;
+    if (decimals == 2) return 0.01;
+    if (decimals == 3) return 0.001;
+    if (decimals == 4) return 0.0001;
+    if (decimals == 5) return 0.00001;
+    if (decimals == 6) return 0.000001;
+    if (decimals == 7) return 0.0000001;
+    if (decimals == 8) return 0.00000001;
+    double val = 1.0;
+    for (int i = 0; i < decimals; i++) {
+      val /= 10.0;
+    }
+    return val;
+  }
+
   /// Adjust price by pip value
   String adjustPriceByPip(
     String currentPrice,
     bool isIncrease,
-    OrderType orderType,
-  ) {
+    OrderType orderType, {
+    required int decimals,
+  }) {
     if (currentPrice.isEmpty) {
       final defaultPrice =
           orderType.isBuyOrder ? currentAskPrice : currentBidPrice;
       return PrecisionHelper.formatPrice(
         defaultPrice,
-        decimals: getDecimalDigits(currentPrice),
+        decimals: decimals,
       );
     }
 
     final priceValue = double.tryParse(currentPrice) ?? 0.0;
-    final pipValue = calculatePipGap(currentPrice);
-    final adjustment = isIncrease ? pipValue : -pipValue;
+    final stepValue = _getPointValue(decimals);
+    final adjustment = isIncrease ? stepValue : -stepValue;
 
     // Apply order type specific logic
     double newValue = priceValue + adjustment;
 
-    final marketPrice =
-        orderType.isBuyOrder ? currentAskPrice : currentBidPrice;
-    final minGap = calculatePipGap(currentPrice);
-
-    if (orderType == OrderType.buyLimit ||
-        orderType == OrderType.sellStop ||
-        orderType == OrderType.sellStopLimit) {
-      // For buy limit, sell stop, and sell stop limit, ensure price is BELOW market
-      newValue = newValue.clamp(0.0, marketPrice - minGap);
-    } else if (orderType == OrderType.sellLimit ||
-        orderType == OrderType.buyStop ||
-        orderType == OrderType.buyStopLimit) {
-      // For sell limit, buy stop, and buy stop limit, ensure price is ABOVE market
-      newValue = newValue.clamp(marketPrice + minGap, double.infinity);
-    }
-
     return PrecisionHelper.formatPrice(
       newValue,
-      decimals: getDecimalDigits(currentPrice),
+      decimals: decimals,
     );
   }
 
@@ -2732,27 +2735,28 @@ API Response:
     String currentValue,
     bool isIncrease,
     OrderType orderType,
-    String entryPrice,
-  ) {
+    String entryPrice, {
+    required int decimals,
+  }) {
     if (currentValue.isEmpty) {
       final entryPriceValue = double.tryParse(entryPrice) ?? 0.0;
-      final pipValue = calculateSLTPPipGap(entryPrice);
+      final stepValue = _getPointValue(decimals);
       final defaultValue =
-          isIncrease ? entryPriceValue + pipValue : entryPriceValue - pipValue;
+          isIncrease ? entryPriceValue + stepValue : entryPriceValue - stepValue;
       return PrecisionHelper.formatPrice(
         defaultValue,
-        decimals: getDecimalDigits(entryPrice),
+        decimals: decimals,
       );
     }
 
     final currentValueNum = double.tryParse(currentValue) ?? 0.0;
-    final pipValue = calculateSLTPPipGap(entryPrice);
-    final adjustment = isIncrease ? pipValue : -pipValue;
+    final stepValue = _getPointValue(decimals);
+    final adjustment = isIncrease ? stepValue : -stepValue;
     final newValue = currentValueNum + adjustment;
 
     return PrecisionHelper.formatPrice(
       newValue,
-      decimals: getDecimalDigits(entryPrice),
+      decimals: decimals,
     );
   }
 

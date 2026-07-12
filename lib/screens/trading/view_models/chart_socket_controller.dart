@@ -724,7 +724,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
         // Handle other JSON responses
         // ✅ FIX: Check symbol match more flexibly (with or without suffix)
-        final responseSymbol = data['symbol']?.toString();
+        final responseSymbol = data['symbol']?.toString() ?? data['Symbol']?.toString();
         final isSymbolMatch =
             responseSymbol != null &&
             (_matchesCurrentSymbol(responseSymbol) ||
@@ -736,17 +736,37 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
               '✅ Chart: Processing price update for symbol: $responseSymbol (current: ${currentSymbol.value})',
             );
           }
+          final normalized = Map<String, dynamic>.from(data);
+          if (normalized.containsKey('Bid') && !normalized.containsKey('bid')) {
+            normalized['bid'] = normalized['Bid'];
+          }
+          if (normalized.containsKey('Ask') && !normalized.containsKey('ask')) {
+            normalized['ask'] = normalized['Ask'];
+          }
+          if (normalized.containsKey('Digits') && !normalized.containsKey('digits')) {
+            normalized['digits'] = normalized['Digits'];
+          }
+          if (normalized.containsKey('SpreadDiff') && !normalized.containsKey('spread_diff')) {
+            normalized['spread_diff'] = normalized['SpreadDiff'];
+          }
+          if (normalized.containsKey('SpreadDiff') && !normalized.containsKey('spreadDiff')) {
+            normalized['spreadDiff'] = normalized['SpreadDiff'];
+          }
+          if (normalized.containsKey('Symbol') && !normalized.containsKey('symbol')) {
+            normalized['symbol'] = normalized['Symbol'];
+          }
+
           if (!_isDisposed) {
-            realTimePrice.value = Map<String, dynamic>.from(data);
+            realTimePrice.value = normalized;
             noteTickObserved();
             if (kDebugMode) {
               dev.log(
-                '📊 Chart: Updated realTimePrice - bid: ${data['bid']}, ask: ${data['ask']}',
+                '📊 Chart: Updated realTimePrice - bid: ${normalized['bid']}, ask: ${normalized['ask']}',
               );
             }
           }
           if (!_priceStreamController.isClosed) {
-            _priceStreamController.add(Map<String, dynamic>.from(data));
+            _priceStreamController.add(Map<String, dynamic>.from(normalized));
             if (kDebugMode) {
               dev.log('📡 Chart: Broadcasted price update to stream');
             }
@@ -1043,16 +1063,22 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
   double? getBidPrice() {
     final p = getCurrentPrice();
-    if (p != null && p.containsKey('bid')) {
-      return double.tryParse(p['bid'].toString());
+    if (p != null) {
+      final bidVal = p['bid'] ?? p['Bid'];
+      if (bidVal != null) {
+        return double.tryParse(bidVal.toString());
+      }
     }
     return null;
   }
 
   double? getAskPrice() {
     final p = getCurrentPrice();
-    if (p != null && p.containsKey('ask')) {
-      return double.tryParse(p['ask'].toString());
+    if (p != null) {
+      final askVal = p['ask'] ?? p['Ask'];
+      if (askVal != null) {
+        return double.tryParse(askVal.toString());
+      }
     }
     return null;
   }
