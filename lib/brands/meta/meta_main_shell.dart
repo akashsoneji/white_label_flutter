@@ -10,7 +10,7 @@ import 'meta_new_order_screen.dart';
 import 'meta_watchlist_screen.dart';
 
 /// Meta — Main app shell with 5-tab bottom navigation
-/// (WatchList, Chart, Trade, History, Settings)
+/// (WatchList, Chart, Trade, History, Messages)
 ///
 /// This is Meta's parent UI design (Facebook-blue inspired). Wires
 /// `MetaThemeBus.mode` so the settings screen's dark-mode toggle changes
@@ -55,8 +55,8 @@ class _MetaMainShellState extends State<MetaMainShell> {
   ];
 
   static const List<_NavTab> _tabs = <_NavTab>[
-    _NavTab(icon: Icons.grid_view_outlined, activeIcon: Icons.grid_view, label: 'WatchList'),
-    _NavTab(icon: Icons.candlestick_chart_outlined, activeIcon: Icons.candlestick_chart, label: 'Chart'),
+    _NavTab(icon: Icons.swap_vert, activeIcon: Icons.swap_vert, label: 'Quotes'),
+    _NavTab(icon: Icons.bar_chart_outlined, activeIcon: Icons.bar_chart, label: 'Charts'),
     _NavTab(icon: Icons.show_chart, activeIcon: Icons.trending_up, label: 'Trade'),
     _NavTab(icon: Icons.history, activeIcon: Icons.history, label: 'History'),
     _NavTab(icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings'),
@@ -88,7 +88,7 @@ class _MetaMainShellState extends State<MetaMainShell> {
             ),
           ),
         ),
-        height: 60.h,
+        height: 65.h,
         child: Row(
           children: List.generate(_tabs.length, (i) {
             final selected = i == _index;
@@ -101,18 +101,21 @@ class _MetaMainShellState extends State<MetaMainShell> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: 28.w,
-                      height: 2.5.h,
-                      child: selected
-                          ? Container(color: accent)
-                          : const SizedBox.shrink(),
-                    ),
-                    SizedBox(height: 4.h),
-                    Icon(
-                      selected ? tab.activeIcon : tab.icon,
-                      size: 22.sp,
-                      color: selected ? accent : inactive,
+                    SizedBox(height: 6.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 8.w, vertical: 2.h),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? accent.withValues(alpha: 0.12)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Icon(
+                        selected ? tab.activeIcon : tab.icon,
+                        size: 22.sp,
+                        color: selected ? accent : inactive,
+                      ),
                     ),
                     SizedBox(height: 2.h),
                     Text(
@@ -123,6 +126,7 @@ class _MetaMainShellState extends State<MetaMainShell> {
                         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
+                    SizedBox(height: 4.h),
                   ],
                 ),
               ),
