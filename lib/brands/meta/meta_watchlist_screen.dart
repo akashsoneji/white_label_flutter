@@ -431,7 +431,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     _fractionPrice(c, price.ask.toStringAsFixed(digits),
-                        MetaTheme.tpGreen),
+                        MetaTheme.buyBlue),
                     SizedBox(height: 1.h),
                     Text(
                       'H: ${price.dayHigh.toStringAsFixed(digits)}',

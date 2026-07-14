@@ -62,7 +62,7 @@ class MetaTheme {
   static bool _isDark(BuildContext c) => Theme.of(c).brightness == Brightness.dark;
 
   static Color bg(BuildContext c) => _isDark(c) ? _darkBg : _lightBg;
-  static Color headerText(BuildContext c) => _isDark(c) ? _darkMainText : _lightHeader;
+  static Color headerText(BuildContext c) => _isDark(c) ? _darkMainText : _darkBg;
   static Color card(BuildContext c) => _isDark(c) ? _darkCard : _lightCard;
   static Color softBg(BuildContext c) => _isDark(c) ? _darkSoftBg : _lightSoftBg;
   static Color divider(BuildContext c) => _isDark(c) ? _darkDivider : _lightDivider;
