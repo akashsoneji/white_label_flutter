@@ -140,6 +140,25 @@
       }
     },
     {
+      "label": "prepare-riyadex",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "dart run scripts/prepare_flavor.dart riyadex && rm -rf .dart_tool/flutter_build"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": true
+      }
+    },
+    {
       "label": "prepare-skyriss",
       "type": "shell",
       "command": "bash",

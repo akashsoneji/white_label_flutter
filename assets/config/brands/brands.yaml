@@ -49,9 +49,9 @@ brands:
  splashColor: "#24324D"
  launcherBackground: "#24324D"
  urls:
- api: "https://client.celestialtrader.com/api/"
- websocket: "wss://client.celestialtrader.com/trade-engine"
- chart: "https://client.celestialtrader.com"
+ api: "https://app.askbidfx.com/api/"
+ websocket: "wss://app.askbidfx.com/trade-engine"
+ chart: "https://app.askbidfx.com"
  assets:
  appIcon: "assets/brands/celestial/icon.png"
  logo: "assets/brands/celestial/logo.svg"
@@ -168,6 +168,34 @@ brands:
  appIcon: "assets/brands/pipze/icon.png"
  logo: "assets/brands/pipze/icon.png"
  splashLogo: "assets/brands/pipze/icon.png"
+ features:
+ useNewChart: "false"
+
+  - name: riyadex
+    type: child
+    inheritsFrom: vantage
+    label: Riyadex
+    themeMode: both
+ android:
+ applicationId: "com.riyadex.app"
+ appName: "Riyadex"
+ ios:
+ bundleId: "com.riyadex.app"
+ appName: "Riyadex"
+ colors:
+ primary: "#802920"
+ secondary: "#9B5848"
+ accent: "#802920"
+ splashColor: "#FFFFFF"
+ launcherBackground: "#802920"
+ urls:
+ api: "https://app.riyadex.com/api/"
+ websocket: "wss://app.riyadex.com/trade-engine"
+ chart: "https://app.riyadex.com/"
+ assets:
+ appIcon: "assets/brands/riyadex/icon.png"
+ logo: "assets/brands/riyadex/logo.svg"
+ splashLogo: "assets/brands/riyadex/splash_logo.svg"
  features:
  useNewChart: "false"
 
