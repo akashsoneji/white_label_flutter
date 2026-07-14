@@ -3,10 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
-import 'clients/skyriss/config.dart';
+import 'clients/pipze/config.dart';
 
 enum Flavor {
-  skyriss,
+  pipze,
 }
 
 class FlavorConfig {
@@ -91,7 +91,7 @@ class FlavorConfig {
  this.useNewChart = false,
  }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.skyriss);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.pipze);
 
   static void reset() {
     _instance = null;
@@ -107,27 +107,27 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.skyriss,
+      orElse: () => Flavor.pipze,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
-      case Flavor.skyriss:
-        const config = SkyrissConfig();
-        return config.toFlavorConfig(Flavor.skyriss, 'skyriss');
+      case Flavor.pipze:
+        const config = PipzeConfig();
+        return config.toFlavorConfig(Flavor.pipze, 'pipze');
     }
   }
 
-  static bool isSkyriss() => _instance?.flavor == Flavor.skyriss;
-  static FlavorConfig get skyriss => activate(Flavor.skyriss);
+  static bool isPipze() => _instance?.flavor == Flavor.pipze;
+  static FlavorConfig get pipze => activate(Flavor.pipze);
 
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.skyriss.name).toLowerCase();
-    return const <String>{'skyriss'}.contains(name);
+    final name = (_instance?.flavor.name ?? Flavor.pipze.name).toLowerCase();
+    return const <String>{'pipze'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;

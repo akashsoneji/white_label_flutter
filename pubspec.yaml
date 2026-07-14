@@ -160,7 +160,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND
-    - assets/clients/skyriss/
+    - assets/clients/pipze/
     - assets/clients/vantage/
     - assets/config/brands/brands.json
     # END GENERATED ACTIVE CLIENT ASSETS
