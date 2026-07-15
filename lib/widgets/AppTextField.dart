@@ -122,6 +122,8 @@ class AppTextFormField extends StatelessWidget {
   final TextStyle? hintStyle;
   final List<TextInputFormatter>? inputFormatters;
   final EdgeInsetsGeometry? contentPadding;
+  final bool readOnly;
+  final VoidCallback? onTap;
 
   const AppTextFormField({
     super.key,
@@ -144,6 +146,8 @@ class AppTextFormField extends StatelessWidget {
     this.hintStyle,
     this.inputFormatters,
     this.contentPadding,
+    this.readOnly = false,
+    this.onTap,
   });
 
   @override
@@ -161,6 +165,8 @@ class AppTextFormField extends StatelessWidget {
       focusNode: focusNode,
       textAlign: textAlign,
       inputFormatters: inputFormatters,
+      readOnly: readOnly,
+      onTap: onTap,
       style: style ?? TextStyle(
         color: AppColors.textPrimary,
         fontSize: 14.sp,
