@@ -19,9 +19,9 @@ colors:
   launcherBackground: "#24324D"
 
 urls:
-  api: https://client.celestialtrader.com/api/
-  websocket: wss://client.celestialtrader.com/trade-engine
-  chart: https://client.celestialtrader.com
+  api: https://app.askbidfx.com/api/
+  websocket: wss://app.askbidfx.com/trade-engine
+  chart: https://app.askbidfx.com
   
 assets:
  appIcon: icon.png

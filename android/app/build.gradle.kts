@@ -35,6 +35,12 @@ android {
 
     packaging {
         jniLibs {
+            // Store .so files uncompressed and page-aligned inside the APK
+            // so the OS can mmap them directly. This is REQUIRED for
+            // Android 15+ devices that use 16 KB pages (e.g. Pixel 10 Pro XL)
+            // and fixes the "Android App Compatibility / RELRO alignment"
+            // warning that appears when plugin prebuilt .so files (camera,
+            // flutter_image_compress, datastore, etc.) aren't aligned.
             useLegacyPackaging = false
         }
     }
@@ -114,6 +120,46 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     // Android 12+ splash screen customization (disable default app icon splash)
     implementation("androidx.core:core-splashscreen:1.0.1")
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// 16 KB page-size compatibility (Android 15+ requirement)
+// ────────────────────────────────────────────────────────────────────────────
+// Pixel 10 Pro XL and other devices running Android 15+ use 16 KB memory pages.
+// The OS refuses to load .so files whose PT_LOAD / PT_GNU_RELRO program-header
+// p_align is not at least 0x4000, showing the "Android App Compatibility /
+// RELRO alignment" dialog.
+//
+// To fix prebuilt libraries shipped by older Flutter plugins (camera,
+// flutter_image_compress, datastore, etc.) without needing each plugin author
+// to release a new build, we run Google's `realign_elf` shim AFTER mergeJniLibs
+// for every variant. See scripts/realign_elf_16kb.py for the implementation.
+afterEvaluate {
+    val realignScript = rootProject.file("scripts/realign_elf_16kb.py")
+    if (!realignScript.exists()) {
+        logger.warn("16KB: scripts/realign_elf_16kb.py not found — skipping ELF realignment.")
+    } else {
+        android.applicationVariants.all {
+            val mergeTask = tasks.findByName("merge${name.capitalize()}JniLibs")
+            if (mergeTask != null) {
+                mergeTask.doLast {
+                    val jniRoot = file("$buildDir/intermediates/merged_native_libs/${name}/out/lib")
+                    if (!jniRoot.exists()) return@doLast
+                    val soFiles = jniRoot.walkTopDown().filter { it.extension == "so" }.toList()
+                    if (soFiles.isNotEmpty()) {
+                        logger.lifecycle("16KB: realigning ${soFiles.size} .so file(s) in ${jniRoot.path}")
+                        exec {
+                            commandLine(
+                                "python3", realignScript.absolutePath,
+                                "--lib-dir", jniRoot.absolutePath,
+                                "--ndk", "${android.sdkDirectory}/ndk/${android.ndkVersion}"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 // Skip Google Services task for flavors without Firebase config

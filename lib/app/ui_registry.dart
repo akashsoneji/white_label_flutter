@@ -75,6 +75,7 @@ const Map<String, String> _uiParentByClient = {
   'gtxprime': 'vantage',
   'baazex': 'vantage',
   'skyriss': 'vantage',
+  'riyadex': 'vantage',
   'meta': 'meta',
   'tenax': 'tenax',
 };

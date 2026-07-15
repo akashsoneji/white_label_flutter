@@ -3,10 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
-import 'clients/meta/config.dart';
+import 'clients/riyadex/config.dart';
 
 enum Flavor {
-  meta,
+  riyadex,
 }
 
 class FlavorConfig {
@@ -91,7 +91,7 @@ class FlavorConfig {
  this.useNewChart = false,
  }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.meta);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.riyadex);
 
   static void reset() {
     _instance = null;
@@ -107,27 +107,27 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.meta,
+      orElse: () => Flavor.riyadex,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
-      case Flavor.meta:
-        const config = MetaConfig();
-        return config.toFlavorConfig(Flavor.meta, 'meta');
+      case Flavor.riyadex:
+        const config = RiyadexConfig();
+        return config.toFlavorConfig(Flavor.riyadex, 'riyadex');
     }
   }
 
-  static bool isMeta() => _instance?.flavor == Flavor.meta;
-  static FlavorConfig get meta => activate(Flavor.meta);
+  static bool isRiyadex() => _instance?.flavor == Flavor.riyadex;
+  static FlavorConfig get riyadex => activate(Flavor.riyadex);
 
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
-    final name = (_instance?.flavor.name ?? Flavor.meta.name).toLowerCase();
-    return const <String>{}.contains(name);
+    final name = (_instance?.flavor.name ?? Flavor.riyadex.name).toLowerCase();
+    return const <String>{'riyadex'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;
