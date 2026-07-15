@@ -1,21 +1,13 @@
 {
-  "default": "riyadex",
+  "default": "meta",
   "brands": [
-    "riyadex",
-    "vantage"
+    "meta"
   ],
   "brandDetails": [
     {
-      "name": "riyadex",
-      "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "Riyadex",
-      "themeMode": "both"
-    },
-    {
-      "name": "vantage",
+      "name": "meta",
       "type": "parent",
-      "label": "Vantage",
+      "label": "Meta",
       "themeMode": "both"
     }
   ]

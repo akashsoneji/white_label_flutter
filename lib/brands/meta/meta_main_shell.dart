@@ -47,7 +47,12 @@ class _MetaMainShellState extends State<MetaMainShell> {
       },
     ),
     MetaChartScreen(),
-    MetaTradeScreen(),
+    MetaTradeScreen(
+      // "Chart" row-menu action on a position: switch the bottom nav
+      // to the Chart tab. The trade screen already sets the chart
+      // socket's currentSymbol before invoking this.
+      onSwitchTab: (i) => setState(() => _index = i),
+    ),
     MetaHistoryScreen(),
     MetaSettingsScreen(
       onNavigateToTab: (i) => setState(() => _index = i),

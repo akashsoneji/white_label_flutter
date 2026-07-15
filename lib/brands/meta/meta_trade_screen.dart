@@ -17,6 +17,7 @@ import 'meta_theme.dart';
 import 'widgets/meta_native_chart.dart';
 import 'meta_close_position_screen.dart';
 import 'meta_modify_position_screen.dart';
+import 'meta_new_order_screen.dart';
 
 double _d(String? v) => double.tryParse(v ?? '') ?? 0;
 String _fmt(double v, int d) => v.toStringAsFixed(d);
@@ -47,7 +48,11 @@ String _fmtPL(double v) => '${v < 0 ? '' : '+'}${v.toStringAsFixed(2)}';
 /// The bottomsheet flows (close/modify/pending-cancel/new-order) are
 /// preserved unchanged — only the in-page layout is restyled.
 class MetaTradeScreen extends StatefulWidget {
-  const MetaTradeScreen({super.key});
+  /// Called from the position row's action sheet when the user picks
+  /// "Chart" — the shell is expected to switch to the Chart tab (index 1).
+  final ValueChanged<int>? onSwitchTab;
+
+  const MetaTradeScreen({super.key, this.onSwitchTab});
 
   @override
   State<MetaTradeScreen> createState() => _MetaTradeScreenState();
@@ -216,7 +221,33 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                             _openModify(p);
                             break;
                           case _PosAction.newOrder:
-                            _openOrderTicket(p.symbol);
+                            // Swipe-strip "New order" → push the
+                            // dedicated Meta New Order screen pre-filled
+                            // with this position's symbol. Same behavior
+                            // as the long-press action sheet's
+                            // "New order".
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    MetaNewOrderScreen(symbol: p.symbol),
+                              ),
+                            );
+                            break;
+                          case _PosAction.chart:
+                            // Swipe-strip "Chart" → update the chart
+                            // socket's current symbol so the TradingView
+                            // WebView re-renders with this symbol, then
+                            // ask the shell to switch to the Chart tab.
+                            // Matches the long-press action sheet's
+                            // "Chart" item.
+                            if (p.symbol.isNotEmpty) {
+                              try {
+                                Get.find<ChartSocketController>()
+                                    .currentSymbol
+                                    .value = p.symbol;
+                              } catch (_) {}
+                            }
+                            widget.onSwitchTab?.call(1);
                             break;
                         }
                       },
@@ -475,19 +506,28 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
       BuildContext c, Color accent, ValueChanged<_PosAction> onAction) {
     return Container(
       color: accent,
+      // Fill the Stack's height (= the position row's natural height,
+      // which grows when the row is expanded with detail). This way
+      // the strip always matches the row height — no clipping of
+      // icons in the collapsed state, no empty space below in the
+      // expanded state.
+      height: double.infinity,
       alignment: Alignment.center,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        // Expanded already enforces equal widths, so no extra
+        // mainAxisAlignment is needed; using `start` removes the
+        // implicit outer gutters that `spaceEvenly` adds.
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _actionButton(c, Icons.edit_note, 'Close',
               () => onAction(_PosAction.close)),
-          _actionButton(c, Icons.edit, 'Partial',
-              () => onAction(_PosAction.partial)),
           _actionButton(c, Icons.add_circle_outline, 'Modify',
               () => onAction(_PosAction.modify)),
-          _actionButton(c, Icons.show_chart, 'New',
+          _actionButton(c, Icons.add_box_outlined, 'New order',
               () => onAction(_PosAction.newOrder)),
+          _actionButton(c, Icons.show_chart, 'Chart',
+              () => onAction(_PosAction.chart)),
         ],
       ),
     );
@@ -1061,8 +1101,16 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 icon: Icons.add_box_outlined,
                 label: 'New order',
                 onTap: () {
+                  final sym = p.symbol;
                   Navigator.pop(sheetCtx);
-                  _openOrderTicket(p.symbol);
+                  // Push the dedicated Meta New Order screen pre-filled
+                  // with this position's symbol (matches the Watchlist's
+                  // "New Order" row action).
+                  Navigator.of(c).push(
+                    MaterialPageRoute(
+                      builder: (_) => MetaNewOrderScreen(symbol: sym),
+                    ),
+                  );
                 },
               ),
               Divider(
@@ -1075,8 +1123,19 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 icon: Icons.show_chart,
                 label: 'Chart',
                 onTap: () {
+                  final sym = p.symbol;
                   Navigator.pop(sheetCtx);
-                  Get.toNamed('/chart', arguments: p.symbol);
+                  // Update the chart socket's current symbol so the
+                  // TradingView WebView re-renders with this symbol,
+                  // then ask the shell to switch to the Chart tab.
+                  if (sym.isNotEmpty) {
+                    try {
+                      Get.find<ChartSocketController>()
+                          .currentSymbol
+                          .value = sym;
+                    } catch (_) {}
+                  }
+                  widget.onSwitchTab?.call(1);
                 },
               ),
               Divider(
@@ -1130,7 +1189,13 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
 // Inline position-row UI: tap-to-expand details + swipe-left to reveal
 // the 4-icon action strip (Close / Partial close / Modify / New order).
 // ─────────────────────────────────────────────────────────────────────────────
-enum _PosAction { close, partial, modify, newOrder }
+enum _PosAction {
+  close,
+  partial,
+  modify,
+  newOrder,
+  chart,
+}
 
 /// A horizontal-drag row that reveals an action strip behind it.
 /// Unlike `Dismissible`, this widget persists its open/closed offset and
@@ -1193,7 +1258,9 @@ class _SwipeablePositionRowState extends State<_SwipeablePositionRow> {
 
   void _onPanUpdate(DragUpdateDetails d) {
     // Lazily compute the strip width if LayoutBuilder hasn't run yet.
-    _actionStripWidth ??= MediaQuery.sizeOf(context).width * 0.40;
+    // Must match the strip's rendered width (see LayoutBuilder below)
+    // so the row slides far enough to reveal all 4 action buttons.
+    _actionStripWidth ??= MediaQuery.sizeOf(context).width * 0.62;
     final w = _actionStripWidth ?? 0.0;
     if (w <= 0) return;
     setState(() {
@@ -1249,7 +1316,12 @@ class _SwipeablePositionRowState extends State<_SwipeablePositionRow> {
     final bg = MetaTheme.bg(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        _actionStripWidth = constraints.maxWidth * 0.40;
+        // Match the strip's rendered width (also 0.62 of screen) so a
+        // full swipe reveals ALL 4 buttons (Close / Partial / Modify /
+        // New). When these two values differ, the row only slides far
+        // enough to expose the rightmost icons and the leftmost ones
+        // (Close, Partial) end up hidden behind the row content.
+        _actionStripWidth = constraints.maxWidth * 0.62;
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onPanStart: _onPanStart,
@@ -1260,8 +1332,18 @@ class _SwipeablePositionRowState extends State<_SwipeablePositionRow> {
           onLongPress: _isDragging ? null : widget.onLongPress,
           child: Stack(
             children: [
-              // Action strip behind, full-width.
-              Positioned.fill(child: widget.actionStrip),
+              // Action strip behind, anchored to the right edge with
+              // a width equal to the swipe target (_actionStripWidth).
+              // Using Positioned.fill would make the strip as wide as
+              // the whole row, so only the rightmost icons would be
+              // visible after the row slides left by _actionStripWidth.
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: _actionStripWidth,
+                child: widget.actionStrip,
+              ),
               // Foreground card, dragged left to reveal.
               Transform.translate(
                 offset: Offset(_dragOffset, 0),
