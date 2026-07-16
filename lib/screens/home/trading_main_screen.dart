@@ -24,6 +24,9 @@ import 'package:crm_app/flavor_config.dart';
 import '../../services/one_click_trading_service.dart';
 import '../../services/app_status/app_status_service.dart';
 import '../../services/symbol_selection_service.dart';
+import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
+import 'package:crm_app/screens/kyc/view_models/compliance_controller.dart';
 
 class TradingMainScreen extends StatefulWidget {
   const TradingMainScreen({super.key});
@@ -196,6 +199,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
           unawaited(Get.find<AppStatusService>().checkAppStatus());
         }
       } catch (_) {}
+
+      // Trigger background compliance check
+      _checkCompliance();
     });
     
     // ✅ If initial tab is dashboard, refresh accounts (vantage index 3, default index 3)
@@ -364,6 +370,41 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _checkCompliance() async {
+    try {
+      if (!Get.isRegistered<AuthController>()) return;
+      final authController = Get.find<AuthController>();
+      
+      final profile = await authController.getProfile();
+      if (profile != null) {
+        final user = profile.data.user;
+        final details = user.userDetails;
+        final forceRegulatedForm = user.forceRegulatedForm;
+        final regulationSubmitted = user.regulationSubmitted;
+        final documentsSubmitted = details.documentsSubmitted;
+
+        if (forceRegulatedForm == 1) {
+          if (regulationSubmitted == 0) {
+            // Step 1: Questionnaire is required, redirect and block
+            Get.toNamed(AppPages.COMPLIANCE_WIZARD);
+          } else if (!documentsSubmitted) {
+            // Step 2: Upload documents is required, redirect and block
+            Get.toNamed(AppPages.COMPLIANCE_WIZARD);
+            
+            // Set Step 2 active in controller
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (Get.isRegistered<ComplianceController>()) {
+                Get.find<ComplianceController>().currentStep.value = 1;
+              }
+            });
+          }
+        }
+      }
+    } catch (e) {
+      print('TradingMainScreen: Compliance check failed: $e');
+    }
   }
 }
 

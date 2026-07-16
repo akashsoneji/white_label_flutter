@@ -28,6 +28,7 @@ abstract class Routes {
   static const KYC_DETAILS = _Paths.KYC_DETAILS;
   static const KYC_DOCS = _Paths.KYC_DOCS;
   static const KYC_SUCCESS = _Paths.KYC_SUCCESS;
+  static const COMPLIANCE_WIZARD = _Paths.COMPLIANCE_WIZARD;
   static const CHAT_WITH_US = _Paths.CHAT_WITH_US;
   static const OPEN_ACCOUNT = _Paths.OPEN_ACCOUNT;
   static const CREATE_TRADING_ACCOUNT = _Paths.CREATE_TRADING_ACCOUNT;
@@ -115,6 +116,7 @@ abstract class _Paths {
   static const KYC_DETAILS = '/kyc/details';
   static const KYC_DOCS = '/kyc/docs';
   static const KYC_SUCCESS = '/kyc/success';
+  static const COMPLIANCE_WIZARD = '/compliance-wizard';
   static const CHAT_WITH_US = '/chat-with-us';
   static const OPEN_ACCOUNT = '/open-account';
   static const CREATE_TRADING_ACCOUNT = '/create-trading-account';

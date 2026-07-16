@@ -22,5 +22,21 @@ abstract class KycRepository {
     required Map<String, dynamic> formData,
     void Function(double progress)? onProgress,
   });
+
+  Future<ApiResponse> getRegulationSchema({required String token});
+
+  Future<ApiResponse> submitRegulationDetails({
+    required String token,
+    required Map<String, dynamic> payload,
+  });
+
+  Future<ApiResponse> submitUnifiedKyc({
+    required String token,
+    required Map<String, dynamic> fields,
+    required File identityFront,
+    required File addressFront,
+    File? identityBack,
+    File? addressBack,
+  });
 }
 

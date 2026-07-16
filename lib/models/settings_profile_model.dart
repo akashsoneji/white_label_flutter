@@ -70,7 +70,13 @@ class User {
   final String status;
   final int regComplete;
   final String deletedAt;
+  final int forceRegulatedForm;
+  final int regulationSubmitted;
+  final int regulationRequired;
+  final int regulatedBrokerEnabled;
   final UserDetails userDetails;
+
+  String get fullName => '$firstName $lastName'.trim();
 
   User({
     required this.id,
@@ -86,6 +92,10 @@ class User {
     required this.status,
     required this.regComplete,
     required this.deletedAt,
+    required this.forceRegulatedForm,
+    required this.regulationSubmitted,
+    required this.regulationRequired,
+    required this.regulatedBrokerEnabled,
     required this.userDetails,
   });
 
@@ -110,6 +120,22 @@ class User {
               ? json['reg_complete']
               : int.tryParse(json['reg_complete'].toString()) ?? 0,
       deletedAt: json['deleted_at'] ?? '',
+      forceRegulatedForm:
+          json['force_regulated_form'] is int
+              ? json['force_regulated_form']
+              : int.tryParse(json['force_regulated_form'].toString()) ?? 0,
+      regulationSubmitted:
+          json['regulation_submitted'] is int
+              ? json['regulation_submitted']
+              : int.tryParse(json['regulation_submitted'].toString()) ?? 0,
+      regulationRequired:
+          json['regulation_required'] is int
+              ? json['regulation_required']
+              : int.tryParse(json['regulation_required'].toString()) ?? 0,
+      regulatedBrokerEnabled:
+          json['regulated_broker_enabled'] is int
+              ? json['regulated_broker_enabled']
+              : int.tryParse(json['regulated_broker_enabled'].toString()) ?? 0,
       userDetails:
           json['user_details'] is Map<String, dynamic>
               ? UserDetails.fromJson(
@@ -161,6 +187,10 @@ class User {
       'status': status,
       'reg_complete': regComplete,
       'deleted_at': deletedAt,
+      'force_regulated_form': forceRegulatedForm,
+      'regulation_submitted': regulationSubmitted,
+      'regulation_required': regulationRequired,
+      'regulated_broker_enabled': regulatedBrokerEnabled,
       'user_details': userDetails.toJson(),
     };
   }
@@ -180,6 +210,10 @@ class User {
       status: '',
       regComplete: 0,
       deletedAt: '',
+      forceRegulatedForm: 0,
+      regulationSubmitted: 0,
+      regulationRequired: 0,
+      regulatedBrokerEnabled: 0,
       userDetails: UserDetails.empty(),
     );
   }
@@ -198,6 +232,10 @@ class User {
     String? status,
     int? regComplete,
     String? deletedAt,
+    int? forceRegulatedForm,
+    int? regulationSubmitted,
+    int? regulationRequired,
+    int? regulatedBrokerEnabled,
     UserDetails? userDetails,
   }) => User(
     id: id ?? this.id,
@@ -213,6 +251,10 @@ class User {
     status: status ?? this.status,
     regComplete: regComplete ?? this.regComplete,
     deletedAt: deletedAt ?? this.deletedAt,
+    forceRegulatedForm: forceRegulatedForm ?? this.forceRegulatedForm,
+    regulationSubmitted: regulationSubmitted ?? this.regulationSubmitted,
+    regulationRequired: regulationRequired ?? this.regulationRequired,
+    regulatedBrokerEnabled: regulatedBrokerEnabled ?? this.regulatedBrokerEnabled,
     userDetails: userDetails ?? this.userDetails,
   );
 }
@@ -273,6 +315,11 @@ class UserDetails {
   final String kycVerificationLevel;
   final String kycVerificationNotes;
   final String branch;
+  final bool documentsSubmitted;
+  final String documentsSubmittedAt;
+  final String country_name;
+  final String state_name;
+  final String city_name;
 
   UserDetails({
     required this.id,
@@ -330,6 +377,11 @@ class UserDetails {
     required this.kycVerificationLevel,
     required this.kycVerificationNotes,
     required this.branch,
+    required this.documentsSubmitted,
+    required this.documentsSubmittedAt,
+    required this.country_name,
+    required this.state_name,
+    required this.city_name,
   });
 
   factory UserDetails.fromJson(Map<String, dynamic> json) {
@@ -410,7 +462,19 @@ class UserDetails {
       kycVerificationLevel: json['kyc_verification_level'] ?? '',
       kycVerificationNotes: json['kyc_verification_notes'] ?? '',
       branch: json['branch'] ?? '',
+      documentsSubmitted: _parseBool(json['documents_submitted']),
+      documentsSubmittedAt: json['documents_submitted_at']?.toString() ?? '',
+      country_name: json['country_name']?.toString() ?? '',
+      state_name: json['state_name']?.toString() ?? '',
+      city_name: json['city_name']?.toString() ?? '',
     );
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is int) return value == 1;
+    if (value is String) return value == '1' || value.toLowerCase() == 'true';
+    return false;
   }
 
   static DateTime _parseDateTime(dynamic value) {
@@ -497,6 +561,11 @@ class UserDetails {
       'kyc_verification_level': kycVerificationLevel,
       'kyc_verification_notes': kycVerificationNotes,
       'branch': branch,
+      'documents_submitted': documentsSubmitted,
+      'documents_submitted_at': documentsSubmittedAt,
+      'country_name': country_name,
+      'state_name': state_name,
+      'city_name': city_name,
     };
   }
 
@@ -557,6 +626,11 @@ class UserDetails {
       kycVerificationLevel: '',
       kycVerificationNotes: '',
       branch: '',
+      documentsSubmitted: false,
+      documentsSubmittedAt: '',
+      country_name: '',
+      state_name: '',
+      city_name: '',
     );
   }
 
@@ -616,6 +690,11 @@ class UserDetails {
     String? kycVerificationLevel,
     String? kycVerificationNotes,
     String? branch,
+    bool? documentsSubmitted,
+    String? documentsSubmittedAt,
+    String? country_name,
+    String? state_name,
+    String? city_name,
   }) => UserDetails(
     id: id ?? this.id,
     userId: userId ?? this.userId,
@@ -675,5 +754,10 @@ class UserDetails {
     kycVerificationLevel: kycVerificationLevel ?? this.kycVerificationLevel,
     kycVerificationNotes: kycVerificationNotes ?? this.kycVerificationNotes,
     branch: branch ?? this.branch,
+    documentsSubmitted: documentsSubmitted ?? this.documentsSubmitted,
+    documentsSubmittedAt: documentsSubmittedAt ?? this.documentsSubmittedAt,
+    country_name: country_name ?? this.country_name,
+    state_name: state_name ?? this.state_name,
+    city_name: city_name ?? this.city_name,
   );
 }

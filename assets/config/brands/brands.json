@@ -1,13 +1,21 @@
 {
-  "default": "meta",
+  "default": "pipze",
   "brands": [
-    "meta"
+    "pipze",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "meta",
+      "name": "pipze",
+      "type": "child",
+      "inheritsFrom": "vantage",
+      "label": "Pipze",
+      "themeMode": "both"
+    },
+    {
+      "name": "vantage",
       "type": "parent",
-      "label": "Meta",
+      "label": "Vantage",
       "themeMode": "both"
     }
   ]

@@ -507,39 +507,45 @@ class ApiService {
       final responseData = jsonDecode(responseBody);
 
       // Check if the API response indicates success/failure
-      if (responseData is Map<String, dynamic>) {
-        // Check both 'status' and 'success' fields (some APIs use different fields)
-        final apiStatus = responseData['status'];
-        final apiSuccess = responseData['success'];
+ if (responseData is Map<String, dynamic>) {
+ // Check both 'status' and 'success' fields (some APIs use different fields)
+ // NOTE: must resolve dynamic → bool BEFORE the comparison so AOT/release
+ // builds don't silently mis-evaluate `true == false` due to type promotion
+ // or dart2js/AOT tree-shaking edge cases.
+ final rawStatus = responseData['status'];
+ final rawSuccess = responseData['success'];
+ final bool apiStatus = rawStatus is bool
+ ? rawStatus
+ : (rawStatus?.toString().toLowerCase() == 'true');
+ final bool apiSuccess = rawSuccess is bool
+ ? rawSuccess
+ : (rawSuccess?.toString().toLowerCase() == 'true');
 
-        // Extract message - prioritize 'message' field, fallback to 'error' or default
-        String message =
-            responseData['message'] ??
-            responseData['error'] ??
-            responseData['error_message'] ??
-            'Request failed';
+ // Extract message - prioritize 'message' field, fallback to 'error' or default
+ String message =
+ responseData['message'] ??
+ responseData['error'] ??
+ responseData['error_message'] ??
+ 'Request failed';
 
-        // Treat as error if:
-        // 1. status is explicitly false
-        // 2. success is explicitly false
-        // 3. status exists and is not true (handles null/undefined as error)
-        // 4. success exists and is not true (handles null/undefined as error)
-        final hasStatusField = responseData.containsKey('status');
-        final hasSuccessField = responseData.containsKey('success');
+ // Treat as error if:
+ // 1. status is explicitly false
+ // 2. success is explicitly false
+ // 3. If neither field present, be conservative (treat as success).
+ final bool hasStatusField = responseData.containsKey('status');
+ final bool hasSuccessField = responseData.containsKey('success');
 
-        bool isError = false;
+ bool isError = false;
 
-        if (hasStatusField) {
-          // If status field exists, check if it's explicitly false
-          isError = apiStatus == false;
-        }
+ if (hasStatusField) {
+ isError = !apiStatus;
+ }
 
-        if (!isError && hasSuccessField) {
-          // If success field exists, check if it's explicitly false
-          isError = apiSuccess == false;
-        }
+ if (!isError && hasSuccessField) {
+ isError = !apiSuccess;
+ }
 
-        // If neither field exists, check if message suggests an error
+ // If neither field exists, check if message suggests an error
         if (!hasStatusField &&
             !hasSuccessField &&
             message != 'Request failed') {
@@ -1253,6 +1259,89 @@ class ApiService {
       );
     } catch (e, t) {
       _logError('UPLOAD_FILES', endpoint, e, t);
+      return ApiResponse(
+        success: false,
+        message: 'Upload failed: $e',
+        data: null,
+      );
+    }
+  }
+
+  /// UPLOAD: Upload multiple files with form data using custom field keys
+  static Future<ApiResponse> uploadMultipleNamedFiles({
+    required String endpoint,
+    required Map<String, File> files,
+    required Map<String, dynamic> formData,
+    String? token,
+  }) async {
+    try {
+      // If no token provided, try to get from secure storage
+      String? authToken = token ?? await SecureStorageService.getAuthToken();
+
+      final headers = {
+        'Accept': 'application/json',
+        if (authToken != null && authToken.isNotEmpty)
+          'Authorization': 'Bearer $authToken',
+      };
+
+      _logRequest(
+        'UPLOAD_NAMED_FILES',
+        endpoint,
+        queryParameters: formData,
+        extraHeaders: headers,
+      );
+
+      final uri = Uri.parse('${ApiConstants.baseUrl}$endpoint');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add headers
+      request.headers.addAll(headers);
+      request.headers.remove('Content-Type'); // Let framework handle multipart boundary
+
+      // Add form data
+      formData.forEach((key, value) {
+        request.fields[key] = value.toString();
+      });
+
+      // Add files with their specific keys
+      for (final entry in files.entries) {
+        final fileKey = entry.key;
+        final file = entry.value;
+        if (await file.exists()) {
+          final fileSize = await file.length();
+          if (fileSize > 0) {
+            request.files.add(
+              await http.MultipartFile.fromPath(
+                fileKey,
+                file.path,
+              ),
+            );
+            developer.log(
+              'Added named file: ${file.path} as $fileKey',
+              name: 'ApiService',
+            );
+          }
+        }
+      }
+
+      final streamedResponse = await request.send().timeout(_timeout);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      _logResponse(response);
+
+      if (response.statusCode == 401) {
+        return _handleError(response);
+      }
+
+      final responseData = json.decode(response.body);
+
+      return ApiResponse(
+        success: response.statusCode >= 200 && response.statusCode < 300,
+        message: responseData['message'] ?? 'Upload completed',
+        data: responseData,
+      );
+    } catch (e, t) {
+      _logError('UPLOAD_NAMED_FILES', endpoint, e, t);
       return ApiResponse(
         success: false,
         message: 'Upload failed: $e',

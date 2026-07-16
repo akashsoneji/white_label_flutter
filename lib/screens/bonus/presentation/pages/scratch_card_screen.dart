@@ -64,10 +64,43 @@ class ScratchCardApiModel {
   bool get isActive => status == 'active';
 
   DateTime? get _groupingDateTime {
-    final raw = (isScratched ? scratchedAt : null) ?? createdAt ?? expiresAt;
-    if (raw.isEmpty) return null;
+    // Try all 3 timestamps — whichever parses wins.
+    // Note: empty-string fallback matters because "?? createdAt ?? expiresAt"
+    // was being applied to non-null empty strings, which then crashed DateTime.parse.
+    final candidates = <String?>[
+      if (isScratched) scratchedAt,
+      createdAt,
+      expiresAt,
+    ];
+    for (final raw in candidates) {
+      if (raw == null) continue;
+      final trimmed = raw.trim();
+      if (trimmed.isEmpty) continue;
+      // Try ISO-8601 first (e.g. "2026-07-16T08:00:00Z").
+      DateTime? dt = DateTime.tryParse(trimmed);
+      // Fallback: space-separated (e.g. "2026-07-16 08:00:00") — treat as UTC.
+      dt ??= _tryParseSpaceSeparated(trimmed);
+      if (dt != null) return dt.toLocal();
+    }
+    return null;
+  }
+
+  static DateTime? _tryParseSpaceSeparated(String s) {
+    // "2026-07-16 08:00:00" or "2026-07-16 08:00:00.000"
+    final re = RegExp(
+      r'^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,6}))?$',
+    );
+    final m = re.firstMatch(s);
+    if (m == null) return null;
     try {
-      return DateTime.parse(raw).toLocal();
+      final year = int.parse(m.group(1)!);
+      final month = int.parse(m.group(2)!);
+      final day = int.parse(m.group(3)!);
+      final hour = int.parse(m.group(4)!);
+      final min = int.parse(m.group(5)!);
+      final sec = int.parse(m.group(6)!);
+      // Treat naive timestamps as UTC; UI then converts to local via .toLocal().
+      return DateTime.utc(year, month, day, hour, min, sec);
     } catch (_) {
       return null;
     }
@@ -75,7 +108,14 @@ class ScratchCardApiModel {
 
   bool get isToday {
     final dt = _groupingDateTime;
-    if (dt == null) return false;
+    if (dt == null) {
+      // Robust fallback: if we couldn't parse any date, treat the card as
+      // "current" so it isn't silently hidden in release builds where the
+      // backend might send a slightly different timestamp format.
+      final fb = status.toLowerCase();
+      if (fb == 'active') return true;
+      return false;
+    }
     final now = DateTime.now();
     return dt.year == now.year && dt.month == now.month && dt.day == now.day;
   }
@@ -510,7 +550,7 @@ class ScratchCardController extends GetxController {
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // ───────────────────────────────────────────────────��─────────────────────
   // 1) Fetch cards
   // ─────────────────────────────────────────────────────────────────────────
   Future<void> fetchCards({bool showLoader = true}) async {
@@ -524,28 +564,57 @@ class ScratchCardController extends GetxController {
       final response = await _bonusRepo.getScratchCards();
 
       if (response.success) {
-        final data = response.data?['data'];
-        if (data != null && data is Map<String, dynamic>) {
-          // Parse summary
-          if (data['summary'] != null) {
-            summary.value = ScratchCardSummaryModel.fromJson(
-              data['summary'] as Map<String, dynamic>,
-            );
-          }
-          // Parse cards
-          if (data['cards'] != null && data['cards'] is List) {
-            final rawCards = data['cards'] as List<dynamic>;
-            cards.assignAll(
-              rawCards
-                  .map(
-                    (e) =>
-                        ScratchCardApiModel.fromJson(e as Map<String, dynamic>),
-                  )
-                  .toList(),
-            );
-          }
+        final rootData = response.data;
+        // response.data is ApiResponse.data — could be:
+        //   - the raw envelope {data: {...}}  (most common)
+        //   - or already unwrapped {summary, cards, ...}
+        final Map<String, dynamic>? envelope =
+            (rootData is Map<String, dynamic>) ? rootData : null;
+        final Map<String, dynamic>? payload = envelope != null &&
+                envelope['data'] is Map<String, dynamic>
+            ? envelope['data'] as Map<String, dynamic>
+            : envelope;
+
+        if (payload == null) {
+          // Success but unparseable — wipe stale state so UI doesn't lie.
+          cards.clear();
+          summary.value = null;
+          return;
+        }
+
+        // ── Summary (always overwrite, even with null payload value) ──
+        final rawSummary = payload['summary'];
+        if (rawSummary is Map<String, dynamic>) {
+          summary.value = ScratchCardSummaryModel.fromJson(rawSummary);
+        } else {
+          summary.value = null;
+        }
+
+        // ── Cards (always overwrite — never keep stale list) ──
+        final rawCards = payload['cards'];
+        if (rawCards is List) {
+          cards.assignAll(
+            rawCards
+                .whereType<Map>()
+                .map(
+                  (e) => ScratchCardApiModel.fromJson(
+                    e.cast<String, dynamic>(),
+                  ),
+                )
+                .toList(),
+          );
+        } else {
+          // Backend sent success but no cards field → clear stale data.
+          cards.clear();
         }
       } else {
+        // Server-level error — don't wipe local state on transient errors
+        // (e.g. timeout) so user keeps seeing last known cards.
+        // But DO surface a toast.
+        if (cards.isEmpty) {
+          // First-load failure → also wipe so empty-state renders correctly.
+          summary.value = null;
+        }
         CustomToastService.showError(
           title: 'Error',
           message:
@@ -555,8 +624,12 @@ class ScratchCardController extends GetxController {
         );
       }
     } catch (e, t) {
-      debugPrint(e.toString());
+      debugPrint('[ScratchCard] fetchCards exception: $e');
       debugPrint(t.toString());
+      // Same logic as failure: keep stale on transient, clear on first-load.
+      if (cards.isEmpty) {
+        summary.value = null;
+      }
       CustomToastService.showError(
         title: 'Error',
         message: 'Network error. Please check your connection.',
