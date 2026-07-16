@@ -18,9 +18,8 @@ class MetaHistoryScreen extends StatefulWidget {
   State<MetaHistoryScreen> createState() => _MetaHistoryScreenState();
 }
 
-class _MetaHistoryScreenState extends State<MetaHistoryScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabs;
+class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
+  final ScrollController _scrollController = ScrollController();
 
   String _selectedSymbol = 'All symbols';
   String _selectedPeriodLabel = 'Today';
@@ -30,33 +29,51 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
   String _sortKey = 'Open time';
   final Set<String> _expanded = <String>{};
   String? _lastError;
-  bool _hasMore = true;
+
+  // Dynamic cache for all symbols seen, initialized with common defaults
+  final Set<String> _cachedSymbols = {
+    'All symbols',
+    'BTCUSD.c',
+    'XAUUSD.c',
+    'EURUSD.c',
+    'GBPUSD.c',
+    'USDJPY',
+    'EURUSD',
+    'XAUUSD'
+  };
 
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 3, vsync: this);
-    _tabs.addListener(() {
-      if (mounted && !_tabs.indexIsChanging) setState(() {});
-    });
     _applyPeriod(_selectedPeriodLabel);
+
+    // Infinite scrolling scroll listener
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+        if (!_tc.isLoadingHistory && _hasMore) {
+          _loadMore();
+        }
+      }
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
   }
 
   @override
   void dispose() {
-    _tabs.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   TradingController get _tc => Get.find<TradingController>();
+
+  bool get _hasMore => _tc.paginationInfo?.hasNextPage ?? false;
 
   // ── Data ───────────────────────────────────────────────────────────
 
   Future<void> _refresh() async {
     setState(() {
       _lastError = null;
-      _hasMore = true;
     });
     try {
       await _tc.loadTradeHistoryWithFilters(
@@ -73,11 +90,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
   }
 
   Future<void> _loadMore() async {
-    final countBefore = _tc.tradeHistory.length;
     await _tc.loadNextPage();
-    if (mounted && _tc.tradeHistory.length <= countBefore) {
-      setState(() => _hasMore = false);
-    }
   }
 
   String? _isoDate(DateTime? d) {
@@ -125,6 +138,85 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
     _periodTo = to;
   }
 
+  List<TradeHistoryItem> _getFilteredAndSortedRows() {
+    final originalList = _tc.tradeHistory.toList(growable: true);
+
+    // Cache any new symbols dynamically
+    for (final item in originalList) {
+      if (item.tradeSymbol.isNotEmpty) {
+        _cachedSymbols.add(item.tradeSymbol);
+      }
+    }
+
+    List<TradeHistoryItem> list = originalList;
+
+    // Filter by symbol locally if necessary
+    if (_selectedSymbol != 'All symbols') {
+      list = list.where((item) => item.tradeSymbol == _selectedSymbol).toList();
+    }
+
+    // Sort list locally
+    list.sort((a, b) => _localCompare(a, b, _sortKey, _sortAscending));
+
+    // Append virtual Deposit transaction if at the end of the pages
+    final totals = _tc.tradeHistoryTotals;
+    if (!_hasMore && _selectedSymbol == 'All symbols' && totals != null && totals.deposit > 0) {
+      String depositTime = '';
+      if (originalList.isNotEmpty) {
+        final sortedByTime = List<TradeHistoryItem>.from(originalList)
+          ..sort((a, b) => a.tradeOpenTime.compareTo(b.tradeOpenTime));
+        final earliestTime = DateTime.tryParse(sortedByTime.first.tradeOpenTime);
+        if (earliestTime != null) {
+          depositTime = earliestTime.subtract(const Duration(minutes: 1)).toString();
+        }
+      }
+      if (depositTime.isEmpty) {
+        depositTime = '2026-07-05 10:45:42';
+      }
+
+      final virtualDeposit = TradeHistoryItem(
+        mt5Account: originalList.isNotEmpty ? originalList.first.mt5Account : 2000004,
+        tradePositionId: 0,
+        tradeType: 'balance',
+        tradeSymbol: '',
+        tradeVolume: '0.00',
+        tradePriceOrder: '0.00',
+        tradeOpenTime: depositTime,
+        tradeCloseTime: depositTime,
+        tradePriceClose: '0.00',
+        tradeProfit: totals.deposit.toString(),
+        tradePriceTp: '0.00',
+        tradePriceSl: '0.00',
+        tradeCommission: '0.00',
+        swap: 0.0,
+        duration: '',
+      );
+
+      // Deposit is the oldest transaction, so it belongs at the bottom when sorting by time descending,
+      // or at the top if sorting is ascending. Let's add it before sorting to let it fit organically.
+      if (!list.any((element) => element.tradeType == 'balance')) {
+        list.add(virtualDeposit);
+        list.sort((a, b) => _localCompare(a, b, _sortKey, _sortAscending));
+      }
+    }
+
+    return list;
+  }
+
+  int _localCompare(TradeHistoryItem a, TradeHistoryItem b, String key, bool asc) {
+    int cmp;
+    switch (key) {
+      case 'Symbol': cmp = a.tradeSymbol.compareTo(b.tradeSymbol); break;
+      case 'Ticket': cmp = a.tradePositionId.compareTo(b.tradePositionId); break;
+      case 'Type': cmp = a.tradeType.compareTo(b.tradeType); break;
+      case 'Volume': cmp = a.volume.compareTo(b.volume); break;
+      case 'Close time': cmp = a.tradeCloseTime.compareTo(b.tradeCloseTime); break;
+      case 'Profit': cmp = _parseDouble(a.tradeProfit).compareTo(_parseDouble(b.tradeProfit)); break;
+      case 'Open time': default: cmp = a.tradeOpenTime.compareTo(b.tradeOpenTime); break;
+    }
+    return asc ? cmp : -cmp;
+  }
+
   // ── Build ──────────────────────────────────────────────────────────
 
   @override
@@ -145,16 +237,8 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
           child: Column(
             children: [
               _buildHeader(context),
-              _buildTabs(context),
               Expanded(
-                child: TabBarView(
-                  controller: _tabs,
-                  children: [
-                    _buildList(context, kind: _HistoryKind.positions),
-                    _buildList(context, kind: _HistoryKind.orders),
-                    _buildList(context, kind: _HistoryKind.deals),
-                  ],
-                ),
+                child: _buildList(context),
               ),
             ],
           ),
@@ -184,40 +268,36 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
               ],
             ),
           ),
-          _HeaderIcon(icon: Icons.refresh, tooltip: 'Cycle period', onTap: () => _openPeriodSheet(context)),
-          _HeaderIcon(icon: _sortAscending ? Icons.arrow_upward : Icons.arrow_downward, tooltip: 'Sort', onTap: () => _openSortSheet(context)),
-          _HeaderIcon(icon: Icons.calendar_view_month, tooltip: 'Columns', onTap: () => _openColumnsSheet(context)),
+          _HeaderIcon(icon: Icons.sync, tooltip: 'Select symbol', onTap: () => _openSymbolSheet(context)),
+          _HeaderIcon(icon: Icons.swap_vert, tooltip: 'Sort columns', onTap: () => _openSortSheet(context)),
+          InkResponse(
+            onTap: () => _openPeriodSheet(context),
+            radius: 26,
+            child: SizedBox(
+              width: 44,
+              height: 44,
+              child: Center(
+                child: CalendarIcon(
+                  color: MetaTheme.mainText(context),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTabs(BuildContext context) {
-    const labels = ['POSITIONS', 'ORDERS', 'DEALS'];
-    return Container(
-      color: MetaTheme.bg(context),
-      child: TabBar(
-        controller: _tabs,
-        isScrollable: false,
-        labelColor: MetaTheme.mainText(context),
-        unselectedLabelColor: MetaTheme.subText(context),
-        indicatorColor: MetaTheme.buyBlue,
-        indicatorWeight: 3,
-        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.4),
-        unselectedLabelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, letterSpacing: 0.4),
-        tabs: [for (final l in labels) Tab(text: l, height: 44)],
-      ),
-    );
-  }
-
-  Widget _buildList(BuildContext context, {required _HistoryKind kind}) {
+  Widget _buildList(BuildContext context) {
     return Obx(() {
       final loading = _tc.isLoadingHistory && _tc.tradeHistory.isEmpty;
-      final rows = _projectRows(_tc.tradeHistory.toList(growable: false), kind: kind);
+      final rows = _getFilteredAndSortedRows();
+
       return RefreshIndicator(
         color: MetaTheme.buyBlue,
         onRefresh: _refresh,
         child: ListView(
+          controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 24),
           children: [
@@ -236,7 +316,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
             else
               ..._buildRowList(context, rows),
             _PaginationSentinel(
-              hasMore: _hasMore && rows.length >= 10,
+              hasMore: _hasMore,
               loading: _tc.isLoadingHistory,
               onLoadMore: _loadMore,
             ),
@@ -255,18 +335,18 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            SizedBox(width: 110, child: Text(label, style: TextStyle(color: MetaTheme.mainText(context), fontSize: 14, height: 1.2))),
-            Expanded(child: CustomPaint(size: const Size(double.infinity, 1), painter: _DottedLeaderPainter(color: MetaTheme.subText(context).withOpacity(0.55)))),
-            const SizedBox(width: 8),
+            Text(label, style: TextStyle(color: MetaTheme.mainText(context), fontSize: 14, height: 1.2)),
+            const SizedBox(width: 4),
+            Expanded(child: CustomPaint(size: const Size(double.infinity, 1), painter: _DottedLeaderPainter(color: MetaTheme.subText(context).withOpacity(0.35)))),
+            const SizedBox(width: 4),
             Text(value, style: TextStyle(color: valueColor ?? MetaTheme.mainText(context), fontSize: 14, fontWeight: FontWeight.w400, height: 1.2)),
           ],
         ),
       );
     }
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(color: MetaTheme.bg(context), borderRadius: BorderRadius.circular(10)),
+      color: MetaTheme.bg(context),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -274,7 +354,9 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
           row('Deposit', _format(t.deposit)),
           row('Swap:', _format(t.swap)),
           row('Commission:', _format(t.commission)),
-          row('Balance:', _format(t.balance), valueColor: profitColor),
+          row('Balance:', _format(t.balance)),
+          const SizedBox(height: 8),
+          Divider(height: 1, thickness: 0.5, color: MetaTheme.divider(context)),
         ],
       ),
     );
@@ -282,22 +364,29 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
 
   List<Widget> _buildRowList(BuildContext context, List<TradeHistoryItem> rows) {
     final widgets = <Widget>[];
-    for (final r in rows) {
-      final key = '${_tabs.index}_${r.tradePositionId}_${r.tradeOpenTime}';
+    for (int i = 0; i < rows.length; i++) {
+      final r = rows[i];
+      final key = '${r.tradePositionId}_${r.tradeOpenTime}';
       final isOpen = _expanded.contains(key);
       widgets.add(_PositionCard(row: r, expanded: isOpen, onTap: () => setState(() { isOpen ? _expanded.remove(key) : _expanded.add(key); })));
+      if (i < rows.length - 1) {
+        widgets.add(Divider(height: 1, thickness: 0.5, color: MetaTheme.divider(context)));
+      }
     }
     return widgets;
   }
 
   Widget _buildEmptyState(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 60, 24, 0),
-      child: Column(children: [
-        Icon(Icons.history, color: MetaTheme.subText(context), size: 56),
-        const SizedBox(height: 12),
-        Text('No trades in this period', style: TextStyle(color: MetaTheme.subText(context), fontSize: 14)),
-      ]),
+      padding: const EdgeInsets.only(top: 120),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox_outlined, color: MetaTheme.subText(context).withOpacity(0.4), size: 80),
+          const SizedBox(height: 16),
+          Text('Empty history', style: TextStyle(color: MetaTheme.subText(context), fontSize: 14, fontWeight: FontWeight.w400)),
+        ],
+      ),
     );
   }
 
@@ -314,34 +403,6 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
     );
   }
 
-  List<TradeHistoryItem> _projectRows(List<TradeHistoryItem> rows, {required _HistoryKind kind}) {
-    List<TradeHistoryItem> list;
-    switch (kind) {
-      case _HistoryKind.positions: list = rows; break;
-      case _HistoryKind.orders:
-        list = rows.where((r) => r.tradeOpenTime == r.tradeCloseTime || (_parseDouble(r.tradePriceTp) == 0 && _parseDouble(r.tradePriceSl) == 0)).toList();
-        if (list.isEmpty) list = rows;
-        break;
-      case _HistoryKind.deals: list = rows; break;
-    }
-    list.sort((a, b) => _localCompare(a, b, _sortKey, _sortAscending));
-    return list;
-  }
-
-  int _localCompare(TradeHistoryItem a, TradeHistoryItem b, String key, bool asc) {
-    int cmp;
-    switch (key) {
-      case 'Symbol': cmp = a.tradeSymbol.compareTo(b.tradeSymbol); break;
-      case 'Ticket': cmp = a.tradePositionId.compareTo(b.tradePositionId); break;
-      case 'Type': cmp = a.tradeType.compareTo(b.tradeType); break;
-      case 'Volume': cmp = a.volume.compareTo(b.volume); break;
-      case 'Close time': cmp = a.tradeCloseTime.compareTo(b.tradeCloseTime); break;
-      case 'Profit': cmp = _parseDouble(a.tradeProfit).compareTo(_parseDouble(b.tradeProfit)); break;
-      case 'Open time': default: cmp = a.tradeOpenTime.compareTo(b.tradeOpenTime); break;
-    }
-    return asc ? cmp : -cmp;
-  }
-
   // ── Bottom sheets ──────────────────────────────────────────────────
 
   Future<void> _openDrawer(BuildContext context) async {
@@ -356,7 +417,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
           const _SheetDivider(),
           _SheetRow(icon: Icons.sort, leading: 'Sort: $_sortKey', onTap: () { Navigator.of(ctx).pop(); _openSortSheet(context); }),
           const _SheetDivider(),
-          _SheetRow(icon: Icons.view_column, leading: 'Symbol: $_selectedSymbol', onTap: () { Navigator.of(ctx).pop(); _openColumnsSheet(context); }),
+          _SheetRow(icon: Icons.view_column, leading: 'Symbol: $_selectedSymbol', onTap: () { Navigator.of(ctx).pop(); _openSymbolSheet(context); }),
           const _SheetDivider(),
           _SheetRow(icon: Icons.refresh, leading: 'Reload', onTap: () { Navigator.of(ctx).pop(); _refresh(); }),
         ]),
@@ -412,8 +473,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
     );
   }
 
-  Future<void> _openColumnsSheet(BuildContext context) async {
-    final symbols = <String>['All symbols', ..._tc.tradeHistory.map((r) => r.tradeSymbol).toSet()..remove('')];
+  Future<void> _openSymbolSheet(BuildContext context) async {
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: MetaTheme.bg(context),
@@ -424,10 +484,10 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.6),
           child: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
-              for (final s in symbols) ...[
+              for (final s in _cachedSymbols) ...[
                 _SheetRow(icon: null, leading: s, selected: s == _selectedSymbol,
                   onTap: () async { Navigator.of(ctx).pop(); setState(() => _selectedSymbol = s); await _refresh(); }),
-                if (s != symbols.last) const _SheetDivider(),
+                if (s != _cachedSymbols.last) const _SheetDivider(),
               ],
             ]),
           ),
@@ -469,11 +529,11 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
 
   IconData _iconForPeriod(String p) {
     switch (p) {
-      case 'Today': return Icons.calendar_view_day;
-      case 'Last week': return Icons.calendar_view_week;
-      case 'Last month': return Icons.calendar_view_month;
+      case 'Today': return Icons.calendar_today_outlined;
+      case 'Last week': return Icons.date_range_outlined;
+      case 'Last month': return Icons.calendar_month_outlined;
       case 'Last 3 months': return Icons.calendar_month;
-      case 'Custom period': return Icons.tune;
+      case 'Custom period': return Icons.date_range;
     }
     return Icons.calendar_today;
   }
@@ -481,17 +541,11 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen>
   String _format(double v) => NumberFormat.currency(symbol: '', decimalDigits: 2).format(v).trim();
   Color _moneyColor(double v, BuildContext ctx) => v > 0 ? MetaTheme.buy(ctx) : (v < 0 ? MetaTheme.sell(ctx) : MetaTheme.mainText(ctx));
   double _parseDouble(String? v) => (v == null || v.isEmpty) ? 0 : (double.tryParse(v.replaceAll(',', '')) ?? 0);
-  // ignore: unused_element
-  /// Parse ISO date string — kept for reference (used via inline DateTime.tryParse).
-  // ignore: unused_element
-  DateTime? _parseDateTime(String v) => v.isEmpty ? null : DateTime.tryParse(v);
 }
 
 // ──────────────────────────────────────────────────────────────────────
 // Sub-widgets
 // ──────────────────────────────────────────────────────────────────────
-
-enum _HistoryKind { positions, orders, deals }
 
 class _HeaderIcon extends StatelessWidget {
   const _HeaderIcon({required this.icon, required this.onTap, this.tooltip});
@@ -513,48 +567,101 @@ class _PositionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rawSide = row.tradeType.toLowerCase();
+    final isBalance = rawSide == 'balance' || rawSide == 'deposit';
+    final priceFmt = NumberFormat('#,##0.00', 'en_US');
+
+    if (isBalance) {
+      final depositAmount = _parseProfit(row.tradeProfit);
+      final depositColor = MetaTheme.buy(context);
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Balance',
+                    style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Deposit',
+                    style: TextStyle(color: MetaTheme.subText(context), fontSize: 13, height: 1.2),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (row.tradeCloseTime.isNotEmpty)
+                  Text(
+                    DateFormat('yyyy.MM.dd HH:mm:ss').format(_parseDate(row.tradeCloseTime).toLocal()),
+                    style: TextStyle(color: MetaTheme.subText(context), fontSize: 12),
+                  ),
+                const SizedBox(height: 2),
+                Text(
+                  priceFmt.format(depositAmount),
+                  style: TextStyle(color: depositColor, fontSize: 14, fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     final profit = _parseProfit(row.tradeProfit);
     final openPrice = _parsePrice(row.tradePriceOrder);
     final closePrice = _parsePrice(row.tradePriceClose);
     final profitColor = profit > 0 ? MetaTheme.buy(context) : (profit < 0 ? MetaTheme.sell(context) : MetaTheme.mainText(context));
-    final rawSide = row.tradeType.toLowerCase();
     final sideColor = rawSide == 'buy' ? MetaTheme.buy(context) : rawSide == 'sell' ? MetaTheme.sell(context) : MetaTheme.buyBlue;
     final sideLabel = rawSide == 'buy' ? 'buy' : rawSide == 'sell' ? 'sell' : rawSide;
-    final priceFmt = NumberFormat('#,##0.00', 'en_US');
     final volFmt = NumberFormat('0.##');
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          curve: Curves.easeOut,
-          decoration: BoxDecoration(color: MetaTheme.bg(context), borderRadius: BorderRadius.circular(10)),
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                RichText(text: TextSpan(style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.2), children: [
-                  TextSpan(text: '${row.tradeSymbol}, '),
-                  TextSpan(text: '$sideLabel ${volFmt.format(row.volume)}', style: TextStyle(color: sideColor)),
-                ])),
-                const SizedBox(height: 2),
-                Text('${priceFmt.format(openPrice)} → ${priceFmt.format(closePrice)}', style: TextStyle(color: MetaTheme.subText(context), fontSize: 13, height: 1.2)),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              RichText(text: TextSpan(style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.2), children: [
+                TextSpan(text: '${row.tradeSymbol}, '),
+                TextSpan(text: '$sideLabel ${volFmt.format(row.volume)}', style: TextStyle(color: sideColor)),
               ])),
-              const SizedBox(width: 8),
-              Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text(DateFormat('yyyy.MM.dd HH:mm:ss').format(_parseDate(row.tradeCloseTime).toLocal()), style: TextStyle(color: MetaTheme.subText(context), fontSize: 12)),
-                const SizedBox(height: 2),
-                Text(_formatProfit(profit), style: TextStyle(color: profitColor, fontSize: 14, fontWeight: FontWeight.w700)),
-              ]),
+              const SizedBox(height: 2),
+              Text('${_formatPrice(openPrice, row.tradeSymbol)} → ${_formatPrice(closePrice, row.tradeSymbol)}', style: TextStyle(color: MetaTheme.subText(context), fontSize: 13, height: 1.2)),
+            ])),
+            const SizedBox(width: 8),
+            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+              Text(DateFormat('yyyy.MM.dd HH:mm:ss').format(_parseDate(row.tradeCloseTime).toLocal()), style: TextStyle(color: MetaTheme.subText(context), fontSize: 12)),
+              const SizedBox(height: 2),
+              Text(_formatProfit(profit), style: TextStyle(color: profitColor, fontSize: 14, fontWeight: FontWeight.w700)),
             ]),
-            if (expanded) ...[const SizedBox(height: 8), _ExpandedDetail(row: row)],
           ]),
-        ),
+          if (expanded) ...[const SizedBox(height: 8), _ExpandedDetail(row: row)],
+        ]),
       ),
     );
+  }
+
+  String _formatPrice(double price, String symbol) {
+    if (price == 0) return '0.00';
+    int decimals = 2;
+    final upperSymbol = symbol.toUpperCase();
+    if (upperSymbol.contains('USD') && !upperSymbol.contains('JPY') && !upperSymbol.contains('XAU') && !upperSymbol.contains('BTC') && !upperSymbol.contains('ETH')) {
+      decimals = 5;
+    } else if (price < 10) {
+      decimals = 5;
+    }
+    return NumberFormat.currency(symbol: '', decimalDigits: decimals).format(price).trim();
   }
 
   double _parseProfit(String v) => (v.isEmpty) ? 0 : (double.tryParse(v.replaceAll(',', '')) ?? 0);
@@ -569,37 +676,88 @@ class _ExpandedDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double fontSize = 13;
+    final labelStyle = TextStyle(color: MetaTheme.subText(context), fontSize: fontSize);
+    final valueStyle = TextStyle(color: MetaTheme.mainText(context), fontSize: fontSize);
+    final ticketStyle = TextStyle(color: MetaTheme.subText(context), fontSize: fontSize);
+
     final fmt = NumberFormat('0.00');
     final dateFmt = DateFormat('yyyy.MM.dd HH:mm:ss');
-
-    Widget pair(String label, String value, {Color? valueColor}) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(children: [
-          SizedBox(width: 90, child: Text(label, style: TextStyle(color: MetaTheme.subText(context), fontSize: 13))),
-          Expanded(child: Text(value, style: TextStyle(color: valueColor ?? MetaTheme.mainText(context), fontSize: 13))),
-        ]),
-      );
-    }
-
+    
     final parsedOpen = DateTime.tryParse(row.tradeOpenTime);
     final openTimeStr = parsedOpen == null ? '—' : dateFmt.format(parsedOpen.toLocal());
     final tp = _parseVal(row.tradePriceTp);
     final sl = _parseVal(row.tradePriceSl);
     final ticket = row.tradePositionId == 0 ? '—' : '#${row.tradePositionId}';
+    final comm = _parseVal(row.tradeCommission);
 
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        pair(ticket, ''),
-        pair('S / L:', sl == 0 ? '—' : fmt.format(sl)),
-        pair('T / P:', tp == 0 ? '—' : fmt.format(tp)),
-      ])),
-      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        pair('Open:', openTimeStr),
-        pair('Swap:', fmt.format(row.swap)),
-        pair('Commission:', fmt.format(_parseVal(row.tradeCommission))),
-      ])),
-    ]);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left Column (40% width)
+          Expanded(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(ticket, style: ticketStyle),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text('S / L:', style: labelStyle),
+                    const Spacer(),
+                    Text(sl == 0 ? '—' : fmt.format(sl), style: valueStyle),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text('T / P:', style: labelStyle),
+                    const Spacer(),
+                    Text(tp == 0 ? '—' : fmt.format(tp), style: valueStyle),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Right Column (60% width)
+          Expanded(
+            flex: 6,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text('Open:', style: labelStyle),
+                    const Spacer(),
+                    Text(openTimeStr, style: valueStyle),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text('Swap:', style: labelStyle),
+                    const Spacer(),
+                    Text(fmt.format(row.swap), style: valueStyle),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text('Commission:', style: labelStyle),
+                    const Spacer(),
+                    Text(fmt.format(comm), style: valueStyle),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   double _parseVal(String v) => (v.isEmpty || v == '0') ? 0 : (double.tryParse(v.replaceAll(',', '')) ?? 0);
@@ -690,37 +848,65 @@ class _SheetDivider extends StatelessWidget {
 // Pagination sentinel
 // ──────────────────────────────────────────────────────────────────────
 
-class _PaginationSentinel extends StatefulWidget {
+class _PaginationSentinel extends StatelessWidget {
   const _PaginationSentinel({required this.hasMore, required this.loading, required this.onLoadMore});
   final bool hasMore;
   final bool loading;
   final Future<void> Function() onLoadMore;
-  @override
-  State<_PaginationSentinel> createState() => _PaginationSentinelState();
-}
 
-class _PaginationSentinelState extends State<_PaginationSentinel> {
-  bool _scheduled = false;
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (n) {
-        if (!widget.hasMore || widget.loading || _scheduled) return false;
-        if (n.metrics.pixels > n.metrics.maxScrollExtent - 240) {
-          _scheduled = true;
-          widget.onLoadMore().whenComplete(() { if (mounted) _scheduled = false; });
-        }
-        return false;
-      },
-      child: SizedBox(
-        height: 56,
-        child: Center(
-          child: widget.loading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(MetaTheme.buyBlue)))
-              : widget.hasMore
-                  ? Text('Loading more…', style: TextStyle(color: MetaTheme.subText(context), fontSize: 12))
-                  : const SizedBox.shrink(),
-        ),
+    return SizedBox(
+      height: 56,
+      child: Center(
+        child: loading
+            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(MetaTheme.buyBlue)))
+            : hasMore
+                ? Text('Loading more…', style: TextStyle(color: MetaTheme.subText(context), fontSize: 12))
+                : const SizedBox.shrink(),
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Custom Calendar Icon
+// ──────────────────────────────────────────────────────────────────────
+
+class CalendarIcon extends StatelessWidget {
+  final Color color;
+  const CalendarIcon({required this.color, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        border: Border.all(color: color, width: 2),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Column(
+        children: [
+          Container(
+            height: 4,
+            width: double.infinity,
+            color: color,
+          ),
+          Expanded(
+            child: Center(
+              child: Text(
+                '3',
+                style: TextStyle(
+                  color: color,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
