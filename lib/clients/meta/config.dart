@@ -11,10 +11,10 @@ class MetaConfig extends BaseClientConfig {
       : super(
           brandName: 'Meta',
           appTitle: 'Meta',
-          primaryColor: const Color(0xFF1877F2),
+          primaryColor: const Color(0xFF3283FF),
           darkPrimaryColor: const Color(0xFFFFFFFF),
           secondaryColor: const Color(0xFFF0F2F5),
-          accentColor: const Color(0xFF1877F2),
+          accentColor: const Color(0xFF3283FF),
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',

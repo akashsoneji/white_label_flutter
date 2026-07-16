@@ -314,53 +314,6 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
     );
   }
 
-  // ── Price header ──────────────────────────────────────────────────────
-  Widget _priceHeader(BuildContext c) {
-    return Obx(() {
-      final sym    = _chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value;
-      final price  = _inst.priceRx(sym).value;
-      final digits = price.digits > 0 ? price.digits : 2;
-      final mid    = (price.dayHigh + price.dayLow) / 2;
-      final change = mid == 0 ? 0.0 : price.ask - mid;
-      final pct    = mid == 0 ? 0.0 : (change / mid) * 100;
-      final col    = change >= 0 ? CelTheme.tpGreen : CelTheme.sellRed;
-
-      return Padding(
-        padding: EdgeInsets.fromLTRB(14.w, 2.h, 14.w, 4.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(sym, style: TextStyle(
-                  color: CelTheme.subText(c), fontSize: 11.sp,
-                  fontWeight: FontWeight.w600)),
-              SizedBox(height: 1.h),
-              Text(price.ask.toStringAsFixed(digits), style: TextStyle(
-                  color: CelTheme.mainText(c), fontSize: 20.sp,
-                  fontWeight: FontWeight.w800)),
-            ]),
-            SizedBox(width: 8.w),
-            Padding(
-              padding: EdgeInsets.only(bottom: 2.h),
-              child: Text(
-                '${change >= 0 ? '+' : ''}${change.toStringAsFixed(digits)} (${pct.toStringAsFixed(2)}%)',
-                style: TextStyle(color: col, fontSize: 12.sp,
-                    fontWeight: FontWeight.w700),
-              ),
-            ),
-            const Spacer(),
-            Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text('H: ${price.dayHigh.toStringAsFixed(digits)}',
-                  style: TextStyle(color: CelTheme.subText(c), fontSize: 10.sp)),
-              Text('L: ${price.dayLow.toStringAsFixed(digits)}',
-                  style: TextStyle(color: CelTheme.subText(c), fontSize: 10.sp)),
-            ]),
-          ],
-        ),
-      );
-    });
-  }
-
   // ── Trade panel — plain inline row, no card/elevation/overlay ────────
   Widget _tradePanel(BuildContext c) {
     return Obx(() {

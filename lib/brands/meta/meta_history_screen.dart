@@ -303,10 +303,10 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
           children: [
             _buildSummary(context),
             if (loading)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 48),
-                child: Center(
-                  child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation(MetaTheme.buyBlue))),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 48),
+                child: const Center(
+                  child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5)),
                 ),
               )
             else if (_lastError != null && rows.isEmpty)
@@ -860,7 +860,7 @@ class _PaginationSentinel extends StatelessWidget {
       height: 56,
       child: Center(
         child: loading
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(MetaTheme.buyBlue)))
+            ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: MetaTheme.buyBlue))
             : hasMore
                 ? Text('Loading more…', style: TextStyle(color: MetaTheme.subText(context), fontSize: 12))
                 : const SizedBox.shrink(),

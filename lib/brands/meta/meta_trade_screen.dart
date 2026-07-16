@@ -323,16 +323,14 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.swap_vert, color: sub, size: 22.sp),
-            onPressed: _openOrderTicket,
-            tooltip: 'New order',
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-          SizedBox(width: 10.w),
-          IconButton(
             icon: Icon(Icons.note_add_outlined, color: sub, size: 22.sp),
-            onPressed: _openOrderTicket,
+            onPressed: (){
+               Navigator.of(c).push(
+                    MaterialPageRoute(
+                      builder: (_) => MetaNewOrderScreen(),
+                    )
+               );
+            },
             tooltip: 'Add ticket',
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
