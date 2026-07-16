@@ -51,4 +51,12 @@ abstract class ApiClient {
     String? token,
     Function(double)? onProgress,
   });
+  
+  /// Upload multiple named files in a single request
+  Future<ApiResponse> uploadMultipleNamedFiles({
+    required String endpoint,
+    required Map<String, File> files,
+    required Map<String, dynamic> formData,
+    String? token,
+  });
 }

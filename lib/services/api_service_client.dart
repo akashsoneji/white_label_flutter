@@ -90,5 +90,20 @@ class ApiServiceClient implements ApiClient {
       onProgress: onProgress,
     );
   }
+
+  @override
+  Future<ApiResponse> uploadMultipleNamedFiles({
+    required String endpoint,
+    required Map<String, File> files,
+    required Map<String, dynamic> formData,
+    String? token,
+  }) {
+    return ApiService.uploadMultipleNamedFiles(
+      endpoint: endpoint,
+      files: files,
+      formData: formData,
+      token: token,
+    );
+  }
 }
 

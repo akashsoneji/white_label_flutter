@@ -45,6 +45,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   String _selectedCountryCode = '';
   String _selectedCountryFlag = '';
   IsoCode? _selectedIsoCode;
+  // ISO-3166-1 alpha-2 country code (e.g. "IN", "US") — captured from
+  // country_picker's `Country.countryCode` so we can pass it to the API
+  // as both `country` (uppercase) and `country_slug` (lowercase).
+  String _selectedCountryIso = '';
   // Max number of national digits allowed for the selected country.
   int _maxPhoneDigits = 15;
   bool _isFormValid = false;
@@ -171,6 +175,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       _selectedCountryCode = "+$phoneCode";
       _selectedCountryFlag = "$flagEmoji +$phoneCode";
       _selectedIsoCode = iso;
+      // country_picker exposes the ISO-3166-1 alpha-2 code via
+      // `Country.countryCode` (already uppercase, e.g. "IN", "US").
+      // Store it as-provided so callers can build both `country`
+      // (uppercase) and `country_slug` (lowercase) for the API.
+      _selectedCountryIso = countryIso2;
       _maxPhoneDigits = _maxDigitsForIso(iso);
     });
     // Re-trim/format any existing input to the newly selected country.
@@ -180,6 +189,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     }
     _formatPhoneInput();
     _validateForm();
+  }
+
+  /// Builds the phone payload for the register API call. The ISO country
+  /// code is exposed by `country_picker` via `Country.countryCode` —
+  /// already in ISO-3166-1 alpha-2 form (e.g. "IN", "US"). We pass it
+  /// through as `country` (uppercase) and lowercase it for `country_slug`.
+  Map<String, String> _buildPhonePayload() {
+    final digits = _phoneDigits;
+    final isoUpper = _selectedCountryIso.toUpperCase();
+    return <String, String>{
+      'mobile': digits,
+      'national': digits,
+      'country_code': _selectedCountryCode,
+      'country': isoUpper,
+      'country_slug': _selectedCountryIso.toLowerCase(),
+    };
   }
 
   // -----------------------------------------------------------------------
@@ -218,12 +243,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Future<void> _verifyOtpAndCompleteRegistration(String otp) async {
     try {
       _showLoadingDialog('Verifying OTP...');
+      final phonePayload = _buildPhonePayload();
       final registrationData = {
         "first_name": _firstNameController.text.trim(),
         "last_name": _lastNameController.text.trim(),
         "email": _emailController.text.trim(),
+        "mobile": phonePayload["mobile"],
+        "phone_number": phonePayload["national"],
+        "country_code": phonePayload["country_code"],
+        "register_country_code": phonePayload["country_code"],
+        "country": phonePayload["country"],
+        "country_slug": phonePayload["country_slug"],
         "password": _passwordController.text.trim(),
-        "mobile": _phoneDigits,
         "otp_verification_type": "email",
         "register_event_type": "verifyOtp",
         "accept_terms": true,
@@ -293,16 +324,21 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       return;
     }
 
+    final phonePayload = _buildPhonePayload();
     final registrationData = {
       "first_name": _firstNameController.text.trim(),
       "last_name": _lastNameController.text.trim(),
       "email": email,
+      "mobile": phonePayload["mobile"],
+      "phone_number": phonePayload["national"],
+      "country_code": phonePayload["country_code"],
+      "register_country_code": phonePayload["country_code"],
+      "country": phonePayload["country"],
+      "country_slug": phonePayload["country_slug"],
       "password": _passwordController.text.trim(),
-      "mobile": _phoneDigits,
       "otp_verification_type": "email",
       "register_event_type": "register",
       "accept_terms": true,
-      "country_code": _selectedCountryCode,
     };
 
     final referrerCode = _referrerController.text.trim();

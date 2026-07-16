@@ -5,4 +5,4 @@ flutter_launcher_icons:
   image_path: "assets/brands/riyadex/icon.png"
   min_sdk_android: 21
   adaptive_icon_background: "#802920"
-  adaptive_icon_foreground: "assets/clients/riyadex/ic_adaptive_foreground.png"
+  adaptive_icon_foreground: "assets/brands/riyadex/icon.png"

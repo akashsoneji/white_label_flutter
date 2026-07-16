@@ -38,6 +38,8 @@ class _VantageCreateAccountScreenState
 
   String _selectedCountryCode = '';
   String _selectedCountryFlag = '';
+  // ISO-3166-1 alpha-2 code from country_picker (e.g. "IN", "US").
+  String _selectedCountryIso = '';
   Map<String, dynamic>? _registrationData;
 
   bool _isFormValid = false;
@@ -92,6 +94,8 @@ class _VantageCreateAccountScreenState
         setState(() {
           _selectedCountryCode = "+${country.phoneCode}";
           _selectedCountryFlag = country.flagEmoji;
+          // country_picker exposes ISO-3166-1 alpha-2 via `Country.countryCode`.
+          _selectedCountryIso = country.countryCode;
           _validateForm();
         });
       },
@@ -111,28 +115,46 @@ class _VantageCreateAccountScreenState
       setState(() {
         _selectedCountryCode = "+${deviceCountry.phoneCode}";
         _selectedCountryFlag = deviceCountry.flagEmoji;
+        _selectedCountryIso = deviceCountry.countryCode;
         _validateForm();
       });
     } catch (_) {}
+  }
+
+  /// Builds the phone payload for the register API call. `Country.countryCode`
+  /// from `country_picker` is already ISO-3166-1 alpha-2 (e.g. "IN", "US"),
+  /// so we forward it as `country` (uppercase) and lowercase it for `country_slug`.
+  Map<String, String> _buildPhonePayload() {
+    final digits = _phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    return <String, String>{
+      'mobile': digits,
+      'national': digits,
+      'country_code': _selectedCountryCode,
+      'country': _selectedCountryIso.toUpperCase(),
+      'country_slug': _selectedCountryIso.toLowerCase(),
+    };
   }
 
   Map<String, dynamic> _buildRegistrationData({
     required String registerEventType,
     String? otp,
   }) {
+    final phonePayload = _buildPhonePayload();
     final data = <String, dynamic>{
       'first_name': _firstNameController.text.trim(),
       'last_name': _lastNameController.text.trim(),
       'email': _emailController.text.trim(),
       'password': _passwordController.text.trim(),
-      'mobile': _phoneController.text.trim(),
+      'mobile': phonePayload['mobile'],
+      'phone_number': phonePayload['national'],
+      'country_code': phonePayload['country_code'],
+      'register_country_code': phonePayload['country_code'],
+      'country': phonePayload['country'],
+      'country_slug': phonePayload['country_slug'],
       'otp_verification_type': 'email',
       'register_event_type': registerEventType,
       'accept_terms': true,
     };
-    if (_selectedCountryCode.isNotEmpty) {
-      data['country_code'] = _selectedCountryCode;
-    }
     if (otp != null && otp.isNotEmpty) {
       data['otp'] = otp;
     }

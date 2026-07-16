@@ -53,5 +53,41 @@ class KycRepositoryImpl implements KycRepository {
       onProgress: onProgress,
     );
   }
+
+  @override
+  Future<ApiResponse> getRegulationSchema({required String token}) {
+    return _api.get(endpoint: ApiConstants.regulation, token: token);
+  }
+
+  @override
+  Future<ApiResponse> submitRegulationDetails({
+    required String token,
+    required Map<String, dynamic> payload,
+  }) {
+    return _api.post(endpoint: ApiConstants.regulation, token: token, data: payload);
+  }
+
+  @override
+  Future<ApiResponse> submitUnifiedKyc({
+    required String token,
+    required Map<String, dynamic> fields,
+    required File identityFront,
+    required File addressFront,
+    File? identityBack,
+    File? addressBack,
+  }) {
+    final Map<String, File> files = {
+      'identity_front': identityFront,
+      'address_front': addressFront,
+      if (identityBack != null) 'identity_back': identityBack,
+      if (addressBack != null) 'address_back': addressBack,
+    };
+    return _api.uploadMultipleNamedFiles(
+      endpoint: ApiConstants.submitUnifiedKyc,
+      files: files,
+      formData: fields,
+      token: token,
+    );
+  }
 }
 

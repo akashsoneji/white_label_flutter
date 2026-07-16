@@ -1,15 +1,15 @@
 {
-  "default": "riyadex",
+  "default": "pipze",
   "brands": [
-    "riyadex",
+    "pipze",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "riyadex",
+      "name": "pipze",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "Riyadex",
+      "label": "Pipze",
       "themeMode": "both"
     },
     {

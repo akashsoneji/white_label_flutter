@@ -6,6 +6,7 @@ import 'package:get/get.dart' as g;
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/account_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/screens/kyc/view_models/compliance_controller.dart';
 
 import 'package:crm_app/routes/app_pages.dart';
 import 'dart:convert';
@@ -401,7 +402,7 @@ class AuthController extends GetxController {
         _fetchEnabledModulesInBackground();
 
         // Navigate to trading screen AFTER controllers are ready
-        Get.offAllNamed(AppPages.TRADING);
+        await _navigatePostAuth();
 
         // Navigate to trading screen
         // final navigationStart = stopwatch.elapsedMilliseconds;
@@ -583,7 +584,7 @@ class AuthController extends GetxController {
 
     _reinitializeTradingControllers();
     _fetchEnabledModulesInBackground();
-    Get.offAllNamed(AppPages.TRADING);
+    await _navigatePostAuth();
   }
 
   void _reinitializeTradingControllers() {
@@ -1666,6 +1667,35 @@ class AuthController extends GetxController {
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> _navigatePostAuth() async {
+    try {
+      final profile = await getProfile();
+      if (profile != null) {
+        final user = profile.data.user;
+        final details = user.userDetails;
+        
+        final forceRegulatedForm = user.forceRegulatedForm;
+        final regulationSubmitted = user.regulationSubmitted;
+        final documentsSubmitted = details.documentsSubmitted;
+
+        if (forceRegulatedForm == 1) {
+          if (regulationSubmitted == 0) {
+            Get.offAllNamed(AppPages.COMPLIANCE_WIZARD);
+            return;
+          } else if (!documentsSubmitted) {
+            Get.offAllNamed(AppPages.COMPLIANCE_WIZARD);
+            // Set Step 2 active in controller
+            Get.put(ComplianceController()).currentStep.value = 1;
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      print('AuthController: Post auth compliance check failed: $e');
+    }
+    Get.offAllNamed(AppPages.TRADING);
   }
 
   Future<void> _registerFcmTokenInBackground(String authToken) async {

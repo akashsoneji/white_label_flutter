@@ -53,6 +53,7 @@ import '../screens/kyc/presentation/pages/kyc_intro_screen.dart';
 import '../screens/kyc/presentation/pages/kyc_details_screen.dart';
 import '../screens/kyc/presentation/pages/kyc_docs_screen.dart';
 import '../screens/kyc/presentation/pages/kyc_success_screen.dart';
+import '../screens/kyc/presentation/pages/unified_compliance_wizard.dart';
 import '../screens/finance/presentation/pages/transaction_history_screen.dart';
 import '../screens/home/order_confirmation_screen.dart';
 import '../screens/settings/presentation/pages/language_selector_screen.dart';
@@ -121,6 +122,7 @@ class AppPages {
   static const KYC_DETAILS = _Paths.KYC_DETAILS;
   static const KYC_DOCS = _Paths.KYC_DOCS;
   static const KYC_SUCCESS = _Paths.KYC_SUCCESS;
+  static const COMPLIANCE_WIZARD = _Paths.COMPLIANCE_WIZARD;
   static const CHAT_WITH_US = _Paths.CHAT_WITH_US;
   static const CHOOSE_ACCOUNT = _Paths.CHOOSE_ACCOUNT;
   static const CREATE_APP_ACCOUNT = _Paths.CREATE_APP_ACCOUNT;
@@ -328,6 +330,10 @@ class AppPages {
     GetPage(
       name: _Paths.KYC_SUCCESS,
       page: () => const KycSuccessScreen(),
+    ),
+    GetPage(
+      name: _Paths.COMPLIANCE_WIZARD,
+      page: () => const UnifiedComplianceWizard(),
     ),
     GetPage(
       name: _Paths.CHAT_WITH_US,
