@@ -2136,10 +2136,10 @@ class TradingController extends GetxController {
       additionalParams['action'] = action;
     }
     if (dateFrom != null && dateFrom.isNotEmpty) {
-      additionalParams['date_from'] = dateFrom;
+      additionalParams['from'] = dateFrom;
     }
     if (dateTo != null && dateTo.isNotEmpty) {
-      additionalParams['date_to'] = dateTo;
+      additionalParams['to'] = dateTo;
     }
     if (sortBy != null && sortBy.isNotEmpty) {
       additionalParams['sort_by'] = sortBy;
