@@ -692,10 +692,6 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         scrolledUnderElevation: 0.0,
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        title: Text(
-          languageService.tr('dashboard_title'),
-          style: AppTextStyles.screenTitle,
-        ),
         centerTitle: true,
         actions: [
           Obx(() {

@@ -1,16 +1,16 @@
 {
-  "default": "skyriss",
+  "default": "pipze",
   "brands": [
-    "skyriss",
+    "pipze",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "skyriss",
+      "name": "pipze",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "Skyriss",
-      "themeMode": "dark"
+      "label": "Pipze",
+      "themeMode": "both"
     },
     {
       "name": "vantage",
