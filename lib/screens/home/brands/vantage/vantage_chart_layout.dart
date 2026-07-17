@@ -93,9 +93,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   @override
   void initState() {
     super.initState();
-    _volumeController = TextEditingController(
-      text: _volume.toStringAsFixed(2),
-    );
+    _volumeController = TextEditingController(text: _volume.toStringAsFixed(2));
     // Push the active symbol into the socket so its bid/ask maps start
     // streaming ticks for the selected instrument.
     final initial = _rawSymbol();
@@ -143,9 +141,10 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
 
     try {
       final ok = await _trade.placeTradeOrder(
-        orderType: side.toLowerCase() == 'buy'
-            ? OrderType.buyMarket
-            : OrderType.sellMarket,
+        orderType:
+            side.toLowerCase() == 'buy'
+                ? OrderType.buyMarket
+                : OrderType.sellMarket,
         symbol: _rawSymbol(),
         volume: _volume.toStringAsFixed(2),
         price: (side.toLowerCase() == 'buy' ? ask : bid).toString(),
@@ -153,9 +152,10 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
 
       if (!mounted) return;
       CustomToastService.showInfo(
-        message: ok
-            ? '${side.toUpperCase()} $_volume ${_rawSymbol()} placed.'
-            : 'Order failed. Please try again.',
+        message:
+            ok
+                ? '${side.toUpperCase()} $_volume ${_rawSymbol()} placed.'
+                : 'Order failed. Please try again.',
       );
     } catch (e) {
       if (!mounted) return;
@@ -274,9 +274,8 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     // Normalize favourites to the same stripped form we display, so a
     // favourite like "EURUSD.c" matches an instrument stored as
     // "EURUSD.c" and a display label "EURUSD".
-    final favSet = favoritesRaw
-        .map((s) => _stripSuffix(s).toUpperCase())
-        .toSet();
+    final favSet =
+        favoritesRaw.map((s) => _stripSuffix(s).toUpperCase()).toSet();
 
     // Build a list of raw symbol strings. Prefer symbols that resolve
     // to an entry in `allInstruments` (so the row taps the same backing
@@ -292,9 +291,11 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     } else {
       filtered.addAll(favoritesRaw);
     }
-    filtered.sort((a, b) => _stripSuffix(a)
-        .toUpperCase()
-        .compareTo(_stripSuffix(b).toUpperCase()));
+    filtered.sort(
+      (a, b) => _stripSuffix(
+        a,
+      ).toUpperCase().compareTo(_stripSuffix(b).toUpperCase()),
+    );
 
     if (filtered.isEmpty) {
       // Nothing favourited yet — open the full search screen so the user
@@ -343,8 +344,8 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                     shrinkWrap: true,
                     padding: EdgeInsets.symmetric(vertical: 4.h),
                     itemCount: filtered.length,
-                    separatorBuilder: (_, __) =>
-                        Divider(height: 1, color: dividerColor),
+                    separatorBuilder:
+                        (_, __) => Divider(height: 1, color: dividerColor),
                     itemBuilder: (_, i) {
                       final raw = filtered[i];
                       final sym = _stripSuffix(raw);
@@ -373,16 +374,19 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                         },
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                              horizontal: 16.w, vertical: 12.h),
+                            horizontal: 16.w,
+                            vertical: 12.h,
+                          ),
                           child: Row(
                             children: [
                               Container(
                                 width: 28.w,
                                 height: 28.h,
                                 decoration: BoxDecoration(
-                                  color: isActive
-                                      ? primary.withValues(alpha: 0.12)
-                                      : rowBg,
+                                  color:
+                                      isActive
+                                          ? primary.withValues(alpha: 0.12)
+                                          : rowBg,
                                   borderRadius: BorderRadius.circular(7.r),
                                 ),
                                 alignment: Alignment.center,
@@ -398,16 +402,16 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                                   sym,
                                   style: TextStyle(
                                     fontSize: 15.sp,
-                                    fontWeight: isActive
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
+                                    fontWeight:
+                                        isActive
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
                                     color: isActive ? primary : fg,
                                   ),
                                 ),
                               ),
                               if (isActive)
-                                Icon(Icons.check,
-                                    size: 18.sp, color: primary),
+                                Icon(Icons.check, size: 18.sp, color: primary),
                             ],
                           ),
                         ),
@@ -451,10 +455,8 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
       backgroundColor: Colors.transparent,
       enableDrag: true,
       isDismissible: true,
-      builder: (_) => PriceAlertDialog(
-        symbol: symbol,
-        currentPrice: marketPrice,
-      ),
+      builder:
+          (_) => PriceAlertDialog(symbol: symbol, currentPrice: marketPrice),
     );
   }
 
@@ -601,7 +603,6 @@ class _Header extends StatelessWidget {
                   ),
                   SizedBox(width: 2.w),
                   Icon(Icons.keyboard_arrow_down, size: 22.sp, color: muted),
-
                 ],
               ),
             ),
@@ -641,9 +642,10 @@ class _ChartArea extends StatelessWidget {
   Widget build(BuildContext context) {
     final useNew = FlavorConfig.instance.useNewChart;
     final sym = Get.find<SymbolSelectionService>().currentSymbol;
-    final raw = sym.contains('.')
-        ? sym.substring(0, sym.lastIndexOf('.'))
-        : (sym.isEmpty ? 'XAUUSD' : sym);
+    final raw =
+        sym.contains('.')
+            ? sym.substring(0, sym.lastIndexOf('.'))
+            : (sym.isEmpty ? 'XAUUSD' : sym);
 
     if (useNew) {
       return AdvancedChartInAppWebView(
@@ -717,9 +719,10 @@ class _BottomDock extends StatelessWidget {
         color: isDark ? const Color(0xFF0F0F12) : Colors.white,
         boxShadow: const [
           BoxShadow(
-              color: Color(0x0F000000),
-              blurRadius: 12,
-              offset: Offset(0, -2)),
+            color: Color(0x0F000000),
+            blurRadius: 12,
+            offset: Offset(0, -2),
+          ),
         ],
       ),
       padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 14.h),
@@ -739,25 +742,23 @@ class _BottomDock extends StatelessWidget {
         // spreadDiff comes from the WS pre-converted to *points*
         // (the controller's // spread_points comment). Display
         // it as-is - no extra /pip math.
-        final bid = priceMap['bid'] is num
-            ? (priceMap['bid'] as num).toDouble()
-            : null;
-        final ask = priceMap['ask'] is num
-            ? (priceMap['ask'] as num).toDouble()
-            : null;
-        final spreadDiff = priceMap['spreadDiff'] is num
-            ? (priceMap['spreadDiff'] as num).toDouble()
-            : null;
+        final bid =
+            priceMap['bid'] is num ? (priceMap['bid'] as num).toDouble() : null;
+        final ask =
+            priceMap['ask'] is num ? (priceMap['ask'] as num).toDouble() : null;
+        final spreadDiff =
+            priceMap['spreadDiff'] is num
+                ? (priceMap['spreadDiff'] as num).toDouble()
+                : null;
 
-        final bidStr = (bid != null && bid != 0.0)
-            ? _trimTrailingZeros(bid)
-            : '—';
-        final askStr = (ask != null && ask != 0.0)
-            ? _trimTrailingZeros(ask)
-            : '—';
-        final spreadStr = (spreadDiff != null && spreadDiff > 0)
-            ? _trimTrailingZeros(spreadDiff)
-            : '—';
+        final bidStr =
+            (bid != null && bid != 0.0) ? _trimTrailingZeros(bid) : '—';
+        final askStr =
+            (ask != null && ask != 0.0) ? _trimTrailingZeros(ask) : '—';
+        final spreadStr =
+            (spreadDiff != null && spreadDiff > 0)
+                ? _trimTrailingZeros(spreadDiff)
+                : '—';
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -774,45 +775,48 @@ class _BottomDock extends StatelessWidget {
               onBell: onBell,
             ),
             SizedBox(height: 10.h),
-            Row(
-              children: [
-                Expanded(
-                  child: _SideButton(
-                    label: 'SELL',
-                    sub: bidStr,
-                    color: AppColors.error,
-                    onTap: onSell,
-                  ),
-                ),
-                Container(
-                  width: 56.w,
-                  height: 56.h,
-                  margin: EdgeInsets.symmetric(horizontal: 6.w),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF1A1A20)
-                        : const Color(0xFFF6F4F8),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Text(
-                    spreadStr,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: isDark ? Colors.white : Colors.black87,
+            SafeArea(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _SideButton(
+                      label: 'SELL',
+                      sub: bidStr,
+                      color: AppColors.error,
+                      onTap: onSell,
                     ),
                   ),
-                ),
-                Expanded(
-                  child: _SideButton(
-                    label: 'BUY',
-                    sub: askStr,
-                    color: primary,
-                    onTap: onBuy,
+                  Container(
+                    width: 56.w,
+                    height: 56.h,
+                    margin: EdgeInsets.symmetric(horizontal: 6.w),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color:
+                          isDark
+                              ? const Color(0xFF1A1A20)
+                              : const Color(0xFFF6F4F8),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Text(
+                      spreadStr,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: _SideButton(
+                      label: 'BUY',
+                      sub: askStr,
+                      color: primary,
+                      onTap: onBuy,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         );
@@ -871,10 +875,7 @@ class _QuantityBar extends StatelessWidget {
                 children: [
                   Text(
                     'Quantity (lots)',
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      color: muted,
-                    ),
+                    style: TextStyle(fontSize: 10.sp, color: muted),
                   ),
                   // Editable TextField in place of the static Text widget.
                   // Same footprint as the previous Text so the +/- icons
@@ -900,7 +901,6 @@ class _QuantityBar extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         // color: fg,
                         height: 1.1,
-
                       ),
                       decoration: const InputDecoration(
                         isCollapsed: true,
@@ -922,16 +922,12 @@ class _QuantityBar extends StatelessWidget {
           ),
           _QtyBtn(icon: Icons.add, color: primary, onTap: onPlus),
           // Pending order (pen + note) icon — opens the pending screen
-          _QtyBtn(
-            icon: Icons.edit_note,
-            color: primary,
-            onTap: onPending,
-          ),
-          _QtyBtn(
-            icon: Icons.notifications_none,
-            color: primary,
-            onTap: onBell,
-          ),
+          _QtyBtn(icon: Icons.edit_note, color: primary, onTap: onPending),
+          // _QtyBtn(
+          //   icon: Icons.notifications_none,
+          //   color: primary,
+          //   onTap: onBell,
+          // ),
         ],
       ),
     );
@@ -942,8 +938,7 @@ class _QtyBtn extends StatelessWidget {
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
-  const _QtyBtn(
-      {required this.icon, required this.color, required this.onTap});
+  const _QtyBtn({required this.icon, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -987,20 +982,24 @@ class _SideButton extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(label,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.whiteColor,
-                  letterSpacing: 0.5,
-                )),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.whiteColor,
+                letterSpacing: 0.5,
+              ),
+            ),
             SizedBox(height: 2.h),
-            Text(sub,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.whiteColor,
-                )),
+            Text(
+              sub,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.whiteColor,
+              ),
+            ),
           ],
         ),
       ),

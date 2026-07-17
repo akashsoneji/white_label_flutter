@@ -32,7 +32,8 @@ class CopyTradingBottomNavigation extends StatelessWidget {
     CopyTradingBottomNavItem(
       label: 'Become Master',
       icon: "assets/svg/copy_trading/bottom_navigation/become_master.svg",
-      iconActive: "assets/svg/copy_trading/bottom_navigation/become_master_bold.svg",
+      iconActive:
+          "assets/svg/copy_trading/bottom_navigation/become_master_bold.svg",
     ),
     CopyTradingBottomNavItem(
       label: 'Explore',
@@ -90,7 +91,9 @@ class CopyTradingBottomNavigation extends StatelessWidget {
             borderRadius: BorderRadius.circular(32.r),
             boxShadow: [
               BoxShadow(
-                color: AppColors.textPrimary.withValues(alpha: AppColors.isDarkMode ? 0.22 : 0.15),
+                color: AppColors.textPrimary.withValues(
+                  alpha: AppColors.isDarkMode ? 0.22 : 0.15,
+                ),
                 blurRadius: 22,
                 spreadRadius: 2,
                 offset: const Offset(0, 8),
@@ -102,7 +105,10 @@ class CopyTradingBottomNavigation extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: isMaster ? 4.w : 8.w, vertical: 8.h),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMaster ? 4.w : 8.w,
+                  vertical: 8.h,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.whiteColor,
                   borderRadius: BorderRadius.circular(32.r),
@@ -111,29 +117,29 @@ class CopyTradingBottomNavigation extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children:
-                    items.asMap().entries.map((entry) {
-                      final idx = entry.key;
-                      final item = entry.value;
-                      return _buildNavItem(
-                        context,
-                        idx,
-                        item.icon,
-                        item.iconActive,
-                        item.label,
-                      );
-                    }).toList(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children:
+                      items.asMap().entries.map((entry) {
+                        final idx = entry.key;
+                        final item = entry.value;
+                        return _buildNavItem(
+                          context,
+                          idx,
+                          item.icon,
+                          item.iconActive,
+                          item.label,
+                        );
+                      }).toList(),
+                ),
               ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
- 
+    );
+  }
+
   Widget _buildNavItem(
     BuildContext context,
     int index,
@@ -142,12 +148,19 @@ class CopyTradingBottomNavigation extends StatelessWidget {
     String label,
   ) {
     final bool isSelected = currentIndex == index;
- 
+
+    // Determine colors based on selection and theme
+    final Color selectedBgColor =
+        AppColors.isDarkMode ? Colors.white : AppColors.primary;
+    final Color selectedTextColor =
+        AppColors.isDarkMode ? const Color(0xFF1A1A1A) : Colors.white;
+    final Color unselectedTextColor = AppColors.textGrey;
+
     return InkWell(
       borderRadius: BorderRadius.circular(50.r),
       onTap: () => onTap(index),
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 220),
+        duration: const Duration(milliseconds: 220),
         curve: Curves.easeOut,
         padding: EdgeInsets.symmetric(
           horizontal:
@@ -155,10 +168,7 @@ class CopyTradingBottomNavigation extends StatelessWidget {
           vertical: 6.h,
         ),
         decoration: BoxDecoration(
-          color:
-              isSelected
-                  ? AppColors.primary.withOpacity(0.1)
-                  : Colors.transparent,
+          color: isSelected ? selectedBgColor : Colors.transparent,
           borderRadius: BorderRadius.circular(50.r),
         ),
         child: Column(
@@ -168,7 +178,7 @@ class CopyTradingBottomNavigation extends StatelessWidget {
               isSelected ? iconActive : icon,
               height: isSelected ? 20.h : 18.h,
               width: isSelected ? 20.w : 18.w,
-              color: isSelected ? AppColors.primary : AppColors.textGrey,
+              color: isSelected ? selectedTextColor : unselectedTextColor,
             ),
             SizedBox(height: 1.h),
             Text(
@@ -177,7 +187,7 @@ class CopyTradingBottomNavigation extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.subheading.copyWith(
                 fontSize: 10.sp,
-                color: isSelected ? AppColors.primary : AppColors.textGrey,
+                color: isSelected ? selectedTextColor : unselectedTextColor,
                 fontWeight: FontWeight.w600,
               ),
             ),

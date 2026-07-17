@@ -547,7 +547,7 @@ class _TradeScreenState extends State<TradeScreen> {
                     ),
                     backgroundColor:
                         FlavorConfig.isVantage()
-                            ? Colors.transparent
+                            ? AppColors.primary
                             : AppColors.cardBackGround,
                     padding: EdgeInsets.symmetric(horizontal: 8.w),
                   ),
@@ -563,7 +563,7 @@ class _TradeScreenState extends State<TradeScreen> {
                           FlavorConfig.isVantage()
                               ? FontWeight.w600
                               : FontWeight.w400,
-                      color: AppColors.primary,
+                      color: AppColors.whiteColor,
                     ),
                   ),
                 ),
@@ -1834,16 +1834,19 @@ class _TradeScreenState extends State<TradeScreen> {
                                           }
                                         }
                                       },
-                                      activeColor: AppColors.isDarkMode
-                                          ? Colors.white
-                                          : AppColors.primary,
-                                      checkColor: AppColors.isDarkMode
-                                          ? Colors.black
-                                          : Colors.white,
+                                      activeColor:
+                                          AppColors.isDarkMode
+                                              ? Colors.white
+                                              : AppColors.primary,
+                                      checkColor:
+                                          AppColors.isDarkMode
+                                              ? Colors.black
+                                              : Colors.white,
                                       side: BorderSide(
-                                        color: AppColors.isDarkMode
-                                            ? Colors.white
-                                            : AppColors.primary,
+                                        color:
+                                            AppColors.isDarkMode
+                                                ? Colors.white
+                                                : AppColors.primary,
                                         width: 1.5,
                                       ),
                                       shape: RoundedRectangleBorder(

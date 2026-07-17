@@ -29,20 +29,20 @@ class VantageAuthScaffold extends StatelessWidget {
       child: Scaffold(
       backgroundColor: VantageAuthTheme.background,
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight:
-                            MediaQuery.of(context).size.height -
-                            MediaQuery.of(context).padding.vertical,
-                      ),
-                      child: Column(
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight:
+                        MediaQuery.of(context).size.height -
+                        MediaQuery.of(context).padding.vertical,
+                  ),
+                  child: Stack(
+                    children: [
+                      Column(
                         children: [
                           SizedBox(height: 12.h),
                           if (showBack)
@@ -61,21 +61,21 @@ class VantageAuthScaffold extends StatelessWidget {
                           SizedBox(height: 22.h),
                         ],
                       ),
-                    ),
+                      Positioned(
+                        left: 4.w,
+                        top: 56.h,
+                        child: _LogoBubble(),
+                      ),
+                    ],
                   ),
                 ),
-                if (bottom != null)
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 16.h),
-                    child: bottom!,
-                  ),
-              ],
+              ),
             ),
-            Positioned(
-              left: 24.w,
-              top: 56.h,
-              child: _LogoBubble(),
-            ),
+            if (bottom != null)
+              Padding(
+                padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 16.h),
+                child: bottom!,
+              ),
           ],
         ),
       ),

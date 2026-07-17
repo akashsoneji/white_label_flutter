@@ -51,8 +51,10 @@ class MasterDashboardOverviewTab extends StatelessWidget {
       // ValueKey on the data column forces Flutter to discard the old
       // sub-tree (including any CustomPainter state that holds a cached
       // points list) and build a brand-new one when the range changes.
-      final dataKey = ValueKey('overview-${overview.range.preset}-'
-          '${overview.range.from}-${overview.range.to}');
+      final dataKey = ValueKey(
+        'overview-${overview.range.preset}-'
+        '${overview.range.from}-${overview.range.to}',
+      );
 
       return Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
@@ -76,29 +78,30 @@ class MasterDashboardOverviewTab extends StatelessWidget {
                 ),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
-                  child: isLoading
-                      ? Row(
-                          key: const ValueKey('loading'),
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(
-                              width: 12,
-                              height: 12,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 1.6,
+                  child:
+                      isLoading
+                          ? Row(
+                            key: const ValueKey('loading'),
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.6,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Updating…',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.textTheme.bodySmall?.color
-                                    ?.withValues(alpha: 0.6),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Updating…',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.textTheme.bodySmall?.color
+                                      ?.withValues(alpha: 0.6),
+                                ),
                               ),
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(key: ValueKey('idle')),
+                            ],
+                          )
+                          : const SizedBox.shrink(key: ValueKey('idle')),
                 ),
               ],
             ),
@@ -198,8 +201,7 @@ class _RangePills extends StatelessWidget {
   final String current;
   final ValueChanged<String> onChanged;
 
-  bool _isSelected(String chip) =>
-      chip.toLowerCase() == current.toLowerCase();
+  bool _isSelected(String chip) => chip.toLowerCase() == current.toLowerCase();
 
   @override
   Widget build(BuildContext context) {
@@ -214,15 +216,18 @@ class _RangePills extends StatelessWidget {
               onTap: () => onChanged(chip),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: _isSelected(chip) ? brand : theme.cardColor,
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
-                    color: _isSelected(chip)
-                        ? brand
-                        : theme.dividerColor.withValues(alpha: 0.6),
+                    color:
+                        _isSelected(chip)
+                            ? brand
+                            : theme.dividerColor.withValues(alpha: 0.6),
                   ),
                 ),
                 alignment: Alignment.center,
@@ -230,11 +235,12 @@ class _RangePills extends StatelessWidget {
                   chip,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: _isSelected(chip)
-                        ? Colors.white
-                        : theme.textTheme.bodyMedium?.color?.withValues(
-                            alpha: 0.7,
-                          ),
+                    color:
+                        _isSelected(chip)
+                            ? Colors.white
+                            : theme.textTheme.bodyMedium?.color?.withValues(
+                              alpha: 0.7,
+                            ),
                   ),
                 ),
               ),
@@ -277,12 +283,9 @@ class _KpiGrid extends StatelessWidget {
         accent: const Color(0xFF00BFA6),
         accentSoft: const Color(0xFFD7F6F0),
         value: '${copiers.current}',
-        pill: _TrendPill(
-          value: copiers.delta,
-          signed: true,
-          isInt: true,
-        ),
-        sub: 'Net new in window: ${copiers.delta > 0 ? '+' : ''}${copiers.delta}',
+        pill: _TrendPill(value: copiers.delta, signed: true, isInt: true),
+        sub:
+            'Net new in window: ${copiers.delta > 0 ? '+' : ''}${copiers.delta}',
         spark: copiers.series.values,
       ),
       _KpiCard(
@@ -290,9 +293,10 @@ class _KpiGrid extends StatelessWidget {
         accent: const Color(0xFF1DB954),
         accentSoft: const Color(0xFFE6F8EE),
         value: _fmtMoney(earnings.current),
-        sub: earnings.nextPayoutDate.isEmpty
-            ? 'Lifetime total credited'
-            : 'Next payout: ${_fmtMoney(earnings.nextPayoutAmount)} on ${_fmtDate(earnings.nextPayoutDate)}',
+        sub:
+            earnings.nextPayoutDate.isEmpty
+                ? 'Lifetime total credited'
+                : 'Next payout: ${_fmtMoney(earnings.nextPayoutAmount)} on ${_fmtDate(earnings.nextPayoutDate)}',
         spark: earnings.series.values,
       ),
       _KpiCard(
@@ -405,6 +409,7 @@ class _KpiCard extends StatelessWidget {
                       fontSize: 20,
                       height: 1.1,
                       letterSpacing: -0.3,
+                      color: AppColors.textGrey,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -428,16 +433,17 @@ class _KpiCard extends StatelessWidget {
             // Sparkline strip at the bottom — flush to card edge.
             SizedBox(
               height: 28,
-              child: pts.length < 2
-                  ? const SizedBox.shrink()
-                  : CustomPaint(
-                      size: Size.infinite,
-                      painter: _SparklinePainter(
-                        points: pts,
-                        color: accent,
-                        fillColor: accentSoft,
+              child:
+                  pts.length < 2
+                      ? const SizedBox.shrink()
+                      : CustomPaint(
+                        size: Size.infinite,
+                        painter: _SparklinePainter(
+                          points: pts,
+                          color: accent,
+                          fillColor: accentSoft,
+                        ),
                       ),
-                    ),
             ),
           ],
         ),
@@ -470,7 +476,8 @@ class _TrendPill extends StatelessWidget {
       text = '${value >= 0 ? '+' : ''}${value.toInt()}';
     } else {
       final absVal = value.abs().toDouble();
-      text = '${positive ? '↗' : '↘'} '
+      text =
+          '${positive ? '↗' : '↘'} '
           '${absVal.toStringAsFixed(2)}$suffix';
     }
 
@@ -619,6 +626,7 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
             'Performance overview',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
+              color: AppColors.textGrey,
             ),
           ),
           const SizedBox(height: 10),
@@ -652,24 +660,25 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
           const SizedBox(height: 12),
           SizedBox(
             height: 200,
-            child: hasData
-                ? CustomPaint(
-                    size: Size.infinite,
-                    painter: _AreaChartPainter(
-                      points: points,
-                      color: _seriesColor,
-                    ),
-                  )
-                : Center(
-                    child: Text(
-                      'No performance data for this range',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.textTheme.bodySmall?.color?.withValues(
-                          alpha: 0.6,
+            child:
+                hasData
+                    ? CustomPaint(
+                      size: Size.infinite,
+                      painter: _AreaChartPainter(
+                        points: points,
+                        color: _seriesColor,
+                      ),
+                    )
+                    : Center(
+                      child: Text(
+                        'No performance data for this range',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.textTheme.bodySmall?.color?.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                       ),
                     ),
-                  ),
           ),
           const SizedBox(height: 8),
           if (labels.length >= 2) _ChartXAxis(labels: labels),
@@ -700,9 +709,7 @@ class _ChartToggle extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected
-              ? color.withValues(alpha: 0.12)
-              : Colors.transparent,
+          color: selected ? color.withValues(alpha: 0.12) : Colors.transparent,
           borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: selected ? color : theme.dividerColor.withValues(alpha: 0.6),
@@ -715,17 +722,14 @@ class _ChartToggle extends StatelessWidget {
             Container(
               width: 6,
               height: 6,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(width: 6),
             Text(
               label,
               style: theme.textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: selected ? color : null,
+                color: selected ? color : AppColors.textGreyDark,
               ),
             ),
           ],
@@ -748,9 +752,10 @@ class _AreaChartPainter extends CustomPainter {
     final range = (maxV - minV).abs() < 1e-9 ? 1.0 : (maxV - minV);
     final dx = size.width / (points.length - 1);
 
-    final gridPaint = Paint()
-      ..color = const Color(0xFF000000).withValues(alpha: 0.05)
-      ..strokeWidth = 1;
+    final gridPaint =
+        Paint()
+          ..color = const Color(0xFF000000).withValues(alpha: 0.05)
+          ..strokeWidth = 1;
     for (var i = 0; i <= 3; i++) {
       final y = size.height * i / 3;
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
@@ -758,9 +763,10 @@ class _AreaChartPainter extends CustomPainter {
 
     if (minV < 0 && maxV > 0) {
       final y0 = size.height - ((0 - minV) / range) * size.height;
-      final zeroPaint = Paint()
-        ..color = const Color(0xFF000000).withValues(alpha: 0.15)
-        ..strokeWidth = 1;
+      final zeroPaint =
+          Paint()
+            ..color = const Color(0xFF000000).withValues(alpha: 0.15)
+            ..strokeWidth = 1;
       canvas.drawLine(Offset(0, y0), Offset(size.width, y0), zeroPaint);
     }
 
@@ -823,8 +829,18 @@ class _ChartXAxis extends StatelessWidget {
     final dt = DateTime.tryParse(raw);
     if (dt == null) return raw;
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     final mm = months[dt.month - 1];
     final dd = dt.day.toString().padLeft(2, '0');
@@ -853,16 +869,15 @@ class _ChartXAxis extends StatelessWidget {
               _short(labels[indices[n]]),
               maxLines: 1,
               overflow: TextOverflow.clip,
-              textAlign: n == 0
-                  ? TextAlign.start
-                  : (n == indices.length - 1
-                        ? TextAlign.end
-                        : TextAlign.center),
+              textAlign:
+                  n == 0
+                      ? TextAlign.start
+                      : (n == indices.length - 1
+                          ? TextAlign.end
+                          : TextAlign.center),
               style: theme.textTheme.labelSmall?.copyWith(
                 fontSize: 10,
-                color: theme.textTheme.labelSmall?.color?.withValues(
-                  alpha: 0.5,
-                ),
+                color: AppColors.textGreyDark,
               ),
             ),
           ),
@@ -904,6 +919,7 @@ class _CopierHealthCard extends StatelessWidget {
             'Copier health',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 14),
@@ -915,18 +931,9 @@ class _CopierHealthCard extends StatelessWidget {
                 child: CustomPaint(
                   painter: _DonutPainter(
                     segments: [
-                      _DonutSegment(
-                        health.active,
-                        const Color(0xFF1DB954),
-                      ),
-                      _DonutSegment(
-                        health.paused,
-                        const Color(0xFFF79009),
-                      ),
-                      _DonutSegment(
-                        health.stopped,
-                        const Color(0xFFE5484D),
-                      ),
+                      _DonutSegment(health.active, const Color(0xFF1DB954)),
+                      _DonutSegment(health.paused, const Color(0xFFF79009)),
+                      _DonutSegment(health.stopped, const Color(0xFFE5484D)),
                     ],
                   ),
                   child: Center(
@@ -934,6 +941,7 @@ class _CopierHealthCard extends StatelessWidget {
                       '$total',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -1015,10 +1023,11 @@ class _DonutPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final total = segments.fold<int>(0, (s, e) => s + e.value);
     if (total == 0) {
-      final paint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 12
-        ..color = AppColors.border;
+      final paint =
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 12
+            ..color = AppColors.border;
       final rect = Offset.zero & size;
       canvas.drawArc(rect.deflate(6), 0, 6.283, false, paint);
       return;
@@ -1030,11 +1039,12 @@ class _DonutPainter extends CustomPainter {
     for (final seg in segments) {
       if (seg.value == 0) continue;
       final sweep = (seg.value / total) * 6.2831853;
-      final paint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = stroke
-        ..strokeCap = StrokeCap.butt
-        ..color = seg.color;
+      final paint =
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = stroke
+            ..strokeCap = StrokeCap.butt
+            ..color = seg.color;
       canvas.drawArc(rect.deflate(stroke / 2), start, sweep, false, paint);
       start += sweep;
     }
@@ -1065,12 +1075,7 @@ class _LegendDot extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            label,
-            style: theme.textTheme.bodyMedium,
-          ),
-        ),
+        Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
         Text(
           '$value',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -1098,7 +1103,7 @@ class _CopierStat extends StatelessWidget {
           style: theme.textTheme.labelSmall?.copyWith(
             fontWeight: FontWeight.w700,
             letterSpacing: 0.6,
-            color: theme.textTheme.labelSmall?.color?.withValues(alpha: 0.6),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 4),
@@ -1106,6 +1111,7 @@ class _CopierStat extends StatelessWidget {
           value,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -1134,6 +1140,7 @@ class _PlanPerformanceCard extends StatelessWidget {
             'Plan performance',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -1192,9 +1199,7 @@ class _PlanRow extends StatelessWidget {
                 Text(
                   plan.status,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.textTheme.labelSmall?.color?.withValues(
-                      alpha: 0.6,
-                    ),
+                    color: AppColors.textGreyDark,
                   ),
                 ),
               ],
@@ -1253,6 +1258,7 @@ class _PayoutsCard extends StatelessWidget {
             'Payouts',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -1279,7 +1285,7 @@ class _PayoutsCard extends StatelessWidget {
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 0.6,
-              color: theme.textTheme.labelSmall?.color?.withValues(alpha: 0.6),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -1289,9 +1295,7 @@ class _PayoutsCard extends StatelessWidget {
               child: Text(
                 'No upcoming payouts.',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color?.withValues(
-                    alpha: 0.6,
-                  ),
+                  color: AppColors.textPrimary,
                 ),
               ),
             )
@@ -1303,7 +1307,7 @@ class _PayoutsCard extends StatelessWidget {
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 0.6,
-              color: theme.textTheme.labelSmall?.color?.withValues(alpha: 0.6),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
@@ -1348,7 +1352,7 @@ class _PayoutStat extends StatelessWidget {
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w700,
               letterSpacing: 0.6,
-              color: theme.textTheme.labelSmall?.color?.withValues(alpha: 0.6),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -1356,6 +1360,7 @@ class _PayoutStat extends StatelessWidget {
             value,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
+              color: AppColors.textGrey,
             ),
           ),
         ],
@@ -1438,6 +1443,7 @@ class _RecentTradesCard extends StatelessWidget {
                   'Recent trades',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -1513,9 +1519,7 @@ class _TradeRow extends StatelessWidget {
             child: Text(
               _timeLabel(),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withValues(
-                  alpha: 0.7,
-                ),
+                color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
               ),
             ),
           ),
@@ -1536,9 +1540,8 @@ class _TradeRow extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.6,
-                color: isBuy
-                    ? const Color(0xFF1DB954)
-                    : const Color(0xFFE5484D),
+                color:
+                    isBuy ? const Color(0xFF1DB954) : const Color(0xFFE5484D),
               ),
             ),
           ),
@@ -1557,9 +1560,10 @@ class _TradeRow extends StatelessWidget {
               textAlign: TextAlign.right,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: isProfit
-                    ? const Color(0xFF1DB954)
-                    : isLoss
+                color:
+                    isProfit
+                        ? const Color(0xFF1DB954)
+                        : isLoss
                         ? const Color(0xFFE5484D)
                         : theme.textTheme.bodyMedium?.color,
                 fontFeatures: const [FontFeature.tabularFigures()],
@@ -1593,6 +1597,7 @@ class _RiskAlertsCard extends StatelessWidget {
             'Risk alerts',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 10),
