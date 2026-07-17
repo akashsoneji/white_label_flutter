@@ -87,22 +87,24 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
 
         // ─── Filtered view ─────────────────────────────────────
         final filter = controller.selectedFilter.value;
-        final filtered = controller.allMasters.where((m) {
-          if (filter == MasterFilterTab.enrolled) return m.isEnrolled;
-          if (filter == MasterFilterTab.discover) return !m.isEnrolled;
-          return true;
-        }).toList();
+        final filtered =
+            controller.allMasters.where((m) {
+              if (filter == MasterFilterTab.enrolled) return m.isEnrolled;
+              if (filter == MasterFilterTab.discover) return !m.isEnrolled;
+              return true;
+            }).toList();
         final q = controller.searchQuery.value.trim().toLowerCase();
-        final visible = q.isEmpty
-            ? filtered
-            : filtered
-                  .where(
-                    (m) =>
-                        m.nickname.toLowerCase().contains(q) ||
-                        m.name.toLowerCase().contains(q) ||
-                        m.masterCode.toLowerCase().contains(q),
-                  )
-                  .toList();
+        final visible =
+            q.isEmpty
+                ? filtered
+                : filtered
+                    .where(
+                      (m) =>
+                          m.nickname.toLowerCase().contains(q) ||
+                          m.name.toLowerCase().contains(q) ||
+                          m.masterCode.toLowerCase().contains(q),
+                    )
+                    .toList();
 
         return RefreshIndicator(
           onRefresh: controller.refreshMasters,
@@ -175,13 +177,13 @@ class _SummaryCards extends StatelessWidget {
       0,
       (sum, m) => sum + (m.totalAum as num).toDouble(),
     );
-    final gains = all
-        .map((m) => (m.totalGainPercent as num).toDouble())
-        .where((g) => g != 0)
-        .toList();
-    final avgGain = gains.isEmpty
-        ? 0.0
-        : gains.reduce((a, b) => a + b) / gains.length;
+    final gains =
+        all
+            .map((m) => (m.totalGainPercent as num).toDouble())
+            .where((g) => g != 0)
+            .toList();
+    final avgGain =
+        gains.isEmpty ? 0.0 : gains.reduce((a, b) => a + b) / gains.length;
     final enrolled = all.where((m) => m.isEnrolled).length;
 
     // Use plain SizedBox rows instead of Wrap + fixed-height SizedBox
@@ -229,9 +231,8 @@ class _SummaryCards extends StatelessWidget {
               child: _SummaryCard(
                 label: 'Enrolled by you',
                 value: '$enrolled',
-                valueColor: enrolled > 0
-                    ? AppColors.success
-                    : AppColors.textPrimary,
+                valueColor:
+                    enrolled > 0 ? AppColors.success : AppColors.textPrimary,
                 icon: Icons.people_alt_outlined,
                 tag: 'Subscribed',
                 color: AppColors.primary,
@@ -287,7 +288,11 @@ class _SummaryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 alignment: Alignment.center,
-                child: Icon(icon, size: 13.sp, color: AppColors.onColoredBackground),
+                child: Icon(
+                  icon,
+                  size: 13.sp,
+                  color: AppColors.onColoredBackground,
+                ),
               ),
               SizedBox(width: 6.w),
               Expanded(
@@ -397,16 +402,20 @@ class _FilterTabs extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? AppColors.onColoredBackground : AppColors.textPrimary,
+                color:
+                    selected
+                        ? AppColors.onColoredBackground
+                        : AppColors.textPrimary,
               ),
             ),
             SizedBox(width: 6.w),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
               decoration: BoxDecoration(
-                color: selected
-                    ? AppColors.whiteColor.withValues(alpha: 0.30)
-                    : AppColors.background,
+                color:
+                    selected
+                        ? AppColors.onColoredBackground.withValues(alpha: 0.30)
+                        : AppColors.background,
                 borderRadius: BorderRadius.circular(10.r),
               ),
               child: Text(
@@ -414,7 +423,10 @@ class _FilterTabs extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w700,
-                  color: selected ? AppColors.onColoredBackground : AppColors.textGrey,
+                  color:
+                      selected
+                          ? AppColors.onColoredBackground
+                          : AppColors.textGrey,
                 ),
               ),
             ),
@@ -553,40 +565,41 @@ class _FilterChips extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Search Masters',
-              style: AppTextStyles.heading.copyWith(fontSize: 16.sp),
-            ),
-            SizedBox(height: 12.h),
-            TextField(
-              controller: ctrl,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'Nickname, name or code',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.r),
+      builder:
+          (ctx) => Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Search Masters',
+                  style: AppTextStyles.heading.copyWith(fontSize: 16.sp),
                 ),
-              ),
-              onChanged: (v) => c.search.value = v.trim(),
+                SizedBox(height: 12.h),
+                TextField(
+                  controller: ctrl,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Nickname, name or code',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                  ),
+                  onChanged: (v) => c.search.value = v.trim(),
+                ),
+                SizedBox(height: 12.h),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Done'),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 12.h),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Done'),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -603,28 +616,33 @@ class _FilterChips extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: AppTextStyles.heading.copyWith(fontSize: 16.sp)),
-            SizedBox(height: 8.h),
-            for (final o in options)
-              ListTile(
-                title: Text(o),
-                trailing: o == current
-                    ? Icon(Icons.check, color: AppColors.primary)
-                    : null,
-                onTap: () {
-                  onSelect(o);
-                  Navigator.pop(ctx);
-                },
-              ),
-          ],
-        ),
-      ),
+      builder:
+          (ctx) => Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyles.heading.copyWith(fontSize: 16.sp),
+                ),
+                SizedBox(height: 8.h),
+                for (final o in options)
+                  ListTile(
+                    title: Text(o),
+                    trailing:
+                        o == current
+                            ? Icon(Icons.check, color: AppColors.primary)
+                            : null,
+                    onTap: () {
+                      onSelect(o);
+                      Navigator.pop(ctx);
+                    },
+                  ),
+              ],
+            ),
+          ),
     );
   }
 }
@@ -653,19 +671,19 @@ class _MasterCardHorizontal extends StatelessWidget {
     final hasPlan = (item.planCount as int) > 0;
     final serverType =
         (item.serverType is String && (item.serverType as String).isNotEmpty)
-        ? (item.serverType as String)
-        : 'mt5';
+            ? (item.serverType as String)
+            : 'mt5';
     final commissionPct = _safeCommission(item);
-    final displayName = (item.nickname?.toString().isNotEmpty ?? false)
-        ? item.nickname.toString()
-        : item.name.toString();
+    final displayName =
+        (item.nickname?.toString().isNotEmpty ?? false)
+            ? item.nickname.toString()
+            : item.name.toString();
 
     final gainText = '${gain >= 0 ? '+' : ''}${gain.toStringAsFixed(2)}%';
     final drawdownText = '-${drawdown.toStringAsFixed(0)}%';
     final pnlText = _formatPnl(pnl);
-    final minInvestText = minInvest == 0
-        ? '\$0'
-        : '\$${minInvest.toStringAsFixed(0)}';
+    final minInvestText =
+        minInvest == 0 ? '\$0' : '\$${minInvest.toStringAsFixed(0)}';
     final pnlColor = pnl >= 0 ? AppColors.success : AppColors.error;
     final gainColor = gain >= 0 ? AppColors.success : AppColors.error;
 
@@ -699,7 +717,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                     child: Text(
                       _initials(displayName),
                       style: TextStyle(
-                        color: AppColors.whiteColor,
+                        color: AppColors.onColoredBackground,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -750,9 +768,10 @@ class _MasterCardHorizontal extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: serverType == 'self_hosted'
-                                      ? AppColors.primary
-                                      : AppColors.textGrey,
+                                  color:
+                                      serverType == 'self_hosted'
+                                          ? AppColors.primary
+                                          : AppColors.textGrey,
                                 ),
                               ),
                             ),
@@ -972,15 +991,16 @@ class _LoadingList extends StatelessWidget {
         ListView.builder(
           padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 100.h),
           itemCount: 4,
-          itemBuilder: (_, __) => Container(
-            height: 200.h,
-            margin: EdgeInsets.only(bottom: 12.h),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(color: AppColors.border),
-            ),
-          ),
+          itemBuilder:
+              (_, __) => Container(
+                height: 200.h,
+                margin: EdgeInsets.only(bottom: 12.h),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(color: AppColors.border),
+                ),
+              ),
         ),
         const Positioned(
           top: 12,

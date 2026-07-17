@@ -19,6 +19,9 @@ class VantageAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? toolbarHeight;
   final double titleSpacing;
 
+  final Widget? leading;
+  final double? leadingWidth;
+
   const VantageAppBar({
     super.key,
     required this.title,
@@ -30,6 +33,8 @@ class VantageAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.toolbarHeight,
     this.titleSpacing = 0,
+    this.leading,
+    this.leadingWidth,
   });
 
   factory VantageAppBar.text(
@@ -44,6 +49,8 @@ class VantageAppBar extends StatelessWidget implements PreferredSizeWidget {
     double? toolbarHeight,
     double titleSpacing = 0,
     TextStyle? titleStyle,
+    Widget? leading,
+    double? leadingWidth,
   }) {
     return VantageAppBar(
       key: key,
@@ -65,6 +72,8 @@ class VantageAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: backgroundColor,
       toolbarHeight: toolbarHeight,
       titleSpacing: titleSpacing,
+      leading: leading,
+      leadingWidth: leadingWidth,
     );
   }
 
@@ -83,12 +92,13 @@ class VantageAppBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: toolbarHeight,
       titleSpacing: titleSpacing,
       automaticallyImplyLeading: showBack,
-      leading:
+      leadingWidth: leadingWidth,
+      leading: leading ?? (
           showBack
               ? AppBackButton(
                 onPressed: onBack ?? () => AppBackButton.popRoute(context),
               )
-              : null,
+              : null),
       title: DefaultTextStyle.merge(
         style: AppTextStyles.heading.copyWith(
           fontSize: 16.sp,
