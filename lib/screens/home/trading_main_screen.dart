@@ -389,16 +389,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
           if (regulationSubmitted == 0) {
             // Step 1: Questionnaire is required, redirect and block
             Get.toNamed(AppPages.COMPLIANCE_WIZARD);
-          } else if (!documentsSubmitted) {
-            // Step 2: Upload documents is required, redirect and block
-            Get.toNamed(AppPages.COMPLIANCE_WIZARD);
-            
-            // Set Step 2 active in controller
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (Get.isRegistered<ComplianceController>()) {
-                Get.find<ComplianceController>().currentStep.value = 1;
-              }
-            });
           }
         }
       }

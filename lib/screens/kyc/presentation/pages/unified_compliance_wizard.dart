@@ -16,7 +16,8 @@ class UnifiedComplianceWizard extends StatefulWidget {
   const UnifiedComplianceWizard({Key? key}) : super(key: key);
 
   @override
-  State<UnifiedComplianceWizard> createState() => _UnifiedComplianceWizardState();
+  State<UnifiedComplianceWizard> createState() =>
+      _UnifiedComplianceWizardState();
 }
 
 class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
@@ -62,7 +63,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   height: 24.h,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.textPrimary.withOpacity(0.6)),
+                    border: Border.all(
+                      color: AppColors.textPrimary.withOpacity(0.6),
+                    ),
                   ),
                   child: Icon(
                     Icons.close,
@@ -81,18 +84,22 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               children: [
                 _buildStepper(),
                 Expanded(
-                  child: controller.isSchemaLoading.value
-                      ? Center(
-                          child: CommonLoadingWidget(
-                            message: 'Loading details...',
-                            size: 40.0,
-                            color: AppColors.primary,
+                  child:
+                      controller.isSchemaLoading.value
+                          ? Center(
+                            child: CommonLoadingWidget(
+                              message: 'Loading details...',
+                              size: 40.0,
+                              color: AppColors.primary,
+                            ),
+                          )
+                          : SingleChildScrollView(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 16.h,
+                            ),
+                            child: _buildCurrentStepChild(step),
                           ),
-                        )
-                      : SingleChildScrollView(
-                          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-                          child: _buildCurrentStepChild(step),
-                        ),
                 ),
               ],
             ),
@@ -237,17 +244,28 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           children: [
             Text(
               'Rendering Error (Step $step):',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14.sp),
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 14.sp,
+              ),
             ),
             SizedBox(height: 8.h),
             Text(
               e.toString(),
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600, fontSize: 12.sp),
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.w600,
+                fontSize: 12.sp,
+              ),
             ),
             SizedBox(height: 8.h),
             Text(
               stack.toString(),
-              style: TextStyle(color: Colors.red.withOpacity(0.7), fontSize: 10.sp),
+              style: TextStyle(
+                color: Colors.red.withOpacity(0.7),
+                fontSize: 10.sp,
+              ),
             ),
           ],
         ),
@@ -290,10 +308,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             step == 0
                 ? 'Complete Your Profile'
                 : step == 1
-                    ? 'Upload Documents'
-                    : step == 2
-                        ? 'Review and Submit'
-                        : 'Verification Submitted',
+                ? 'Upload Documents'
+                : step == 2
+                ? 'Review and Submit'
+                : 'Verification Submitted',
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w800,
@@ -305,11 +323,15 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             step == 0
                 ? 'Please provide your personal details to continue'
                 : step == 1
-                    ? 'Please upload front and back pictures of verification proofs'
-                    : step == 2
-                        ? 'Confirm details before finishing'
-                        : 'Your details have been successfully saved',
-            style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500),
+                ? 'Please upload front and back pictures of verification proofs'
+                : step == 2
+                ? 'Confirm details before finishing'
+                : 'Your details have been successfully saved',
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: AppColors.textGrey,
+              fontWeight: FontWeight.w500,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -327,25 +349,28 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           width: 32.w,
           height: 32.h,
           decoration: BoxDecoration(
-            color: isCurrent
-                ? AppColors.primary
-                : isActive
+            color:
+                isCurrent
+                    ? AppColors.primary
+                    : isActive
                     ? AppColors.primary.withOpacity(0.12)
                     : AppColors.surface,
             shape: BoxShape.circle,
-            boxShadow: isCurrent
-                ? [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ]
-                : null,
+            boxShadow:
+                isCurrent
+                    ? [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                    : null,
             border: Border.all(
-              color: isCurrent
-                  ? AppColors.primary
-                  : isActive
+              color:
+                  isCurrent
+                      ? AppColors.primary
+                      : isActive
                       ? AppColors.primary.withOpacity(0.4)
                       : AppColors.border,
               width: 1.5,
@@ -357,9 +382,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w800,
-                color: isCurrent
-                    ? Colors.white
-                    : isActive
+                color:
+                    isCurrent
+                        ? Colors.black
+                        : isActive
                         ? AppColors.primary
                         : AppColors.textGrey,
               ),
@@ -374,7 +400,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
             color: isCurrent ? AppColors.primary : AppColors.textGrey,
           ),
-        )
+        ),
       ],
     );
   }
@@ -406,18 +432,34 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: AppColors.isDarkMode ? Colors.green.withOpacity(0.08) : const Color(0xFFF0FDF4),
+              color:
+                  AppColors.isDarkMode
+                      ? Colors.green.withOpacity(0.08)
+                      : const Color(0xFFF0FDF4),
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: AppColors.isDarkMode ? Colors.green.withOpacity(0.3) : const Color(0xFFDCFCE7)),
+              border: Border.all(
+                color:
+                    AppColors.isDarkMode
+                        ? Colors.green.withOpacity(0.3)
+                        : const Color(0xFFDCFCE7),
+              ),
             ),
             child: Row(
               children: [
-                Icon(Icons.verified_user_rounded, color: const Color(0xFF16A34A), size: 18.w),
+                Icon(
+                  Icons.verified_user_rounded,
+                  color: const Color(0xFF16A34A),
+                  size: 18.w,
+                ),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
                     'Profile details loaded dynamically from client database.',
-                    style: TextStyle(fontSize: 11.5.sp, color: const Color(0xFF15803D), fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 11.5.sp,
+                      color: const Color(0xFF15803D),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -431,13 +473,35 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             icon: Icons.person_pin_rounded,
             children: [
               _buildFormRow(
-                _buildFormInput('email', 'Email Address', isRequired: true, readOnly: true, prefixIcon: Icons.email_outlined),
-                _buildFormInput('mobile', 'Mobile Number', isRequired: true, isPhone: true, prefixIcon: Icons.phone_android_outlined),
+                _buildFormInput(
+                  'email',
+                  'Email Address',
+                  isRequired: true,
+                  readOnly: true,
+                  prefixIcon: Icons.email_outlined,
+                ),
+                _buildFormInput(
+                  'mobile',
+                  'Mobile Number',
+                  isRequired: true,
+                  isPhone: true,
+                  prefixIcon: Icons.phone_android_outlined,
+                ),
               ),
               SizedBox(height: 14.h),
               _buildFormRow(
-                _buildFormInput('first_name', 'First Name', isRequired: true, prefixIcon: Icons.badge_outlined),
-                _buildFormInput('last_name', 'Last Name', isRequired: true, prefixIcon: Icons.badge_outlined),
+                _buildFormInput(
+                  'first_name',
+                  'First Name',
+                  isRequired: true,
+                  prefixIcon: Icons.badge_outlined,
+                ),
+                _buildFormInput(
+                  'last_name',
+                  'Last Name',
+                  isRequired: true,
+                  prefixIcon: Icons.badge_outlined,
+                ),
               ),
               SizedBox(height: 14.h),
               _buildOptionsDropdownField(
@@ -462,7 +526,12 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 ],
               ),
               SizedBox(height: 14.h),
-              _buildDatePickerInput('dob', 'Date of Birth (DD-MM-YYYY)', isRequired: true, prefixIcon: Icons.calendar_today_outlined),
+              _buildDatePickerInput(
+                'dob',
+                'Date of Birth (DD-MM-YYYY)',
+                isRequired: true,
+                prefixIcon: Icons.calendar_today_outlined,
+              ),
             ],
           ),
 
@@ -473,37 +542,53 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             title: 'Residential Address',
             icon: Icons.map_rounded,
             children: [
-              _buildFormRow(
-                _buildLocationDropdown(
-                  label: 'Country',
-                  type: 'country',
-                  prefixIcon: Icons.public_rounded,
-                  isRequired: true,
-                ),
-                _buildFormInput('nationality', 'Nationality', isRequired: true, prefixIcon: Icons.flag_outlined),
+              _buildLocationDropdown(
+                label: 'Country',
+                type: 'country',
+                prefixIcon: Icons.public_rounded,
+                isRequired: true,
               ),
               SizedBox(height: 14.h),
-              _buildFormRow(
-                _buildLocationDropdown(
-                  label: 'State',
-                  type: 'state',
-                  prefixIcon: Icons.landscape_outlined,
-                  isRequired: true,
-                ),
-                _buildLocationDropdown(
-                  label: 'City',
-                  type: 'city',
-                  prefixIcon: Icons.location_city_outlined,
-                  isRequired: true,
-                ),
+              _buildLocationDropdown(
+                label: 'Nationality',
+                type: 'nationality',
+                prefixIcon: Icons.flag_outlined,
+                isRequired: true,
               ),
               SizedBox(height: 14.h),
-              _buildFormRow(
-                _buildFormInput('address_1', 'Address Line 1', isRequired: true, prefixIcon: Icons.location_on_outlined),
-                _buildFormInput('address_2', 'Address Line 2 (Optional)', prefixIcon: Icons.location_on_outlined),
+              _buildLocationDropdown(
+                label: 'State',
+                type: 'state',
+                prefixIcon: Icons.landscape_outlined,
+                isRequired: true,
               ),
               SizedBox(height: 14.h),
-              _buildFormInput('postcode', 'Pincode / ZIP', isRequired: true, prefixIcon: Icons.pin_drop_outlined),
+              _buildLocationDropdown(
+                label: 'City',
+                type: 'city',
+                prefixIcon: Icons.location_city_outlined,
+                isRequired: true,
+              ),
+              SizedBox(height: 14.h),
+              _buildFormInput(
+                'address_1',
+                'Address Line 1',
+                isRequired: true,
+                prefixIcon: Icons.location_on_outlined,
+              ),
+              SizedBox(height: 14.h),
+              _buildFormInput(
+                'address_2',
+                'Address Line 2 (Optional)',
+                prefixIcon: Icons.location_on_outlined,
+              ),
+              SizedBox(height: 14.h),
+              _buildFormInput(
+                'postcode',
+                'Pincode / ZIP',
+                isRequired: true,
+                prefixIcon: Icons.pin_drop_outlined,
+              ),
             ],
           ),
 
@@ -513,9 +598,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           _buildPremiumSectionCard(
             title: 'Compliance Information',
             icon: Icons.gavel_rounded,
-            children: [
-              _buildComplianceSchemaFields(),
-            ],
+            children: [_buildComplianceSchemaFields()],
           ),
         ],
       ),
@@ -576,7 +659,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
       itemBuilder: (context, index) {
         final field = controller.schemaFields[index];
         if (field is! Map<String, dynamic>) return const SizedBox.shrink();
-        
+
         if (!controller.isFieldVisible(field)) {
           return const SizedBox.shrink();
         }
@@ -592,16 +675,27 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             margin: EdgeInsets.symmetric(vertical: 14.h),
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
-              color: AppColors.isDarkMode ? AppColors.surface : const Color(0xFFFBF8F6),
+              color:
+                  AppColors.isDarkMode
+                      ? AppColors.surface
+                      : const Color(0xFFFBF8F6),
               borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: AppColors.isDarkMode ? AppColors.border : const Color(0xFFEEE5E0)),
+              border: Border.all(
+                color:
+                    AppColors.isDarkMode
+                        ? AppColors.border
+                        : const Color(0xFFEEE5E0),
+              ),
             ),
             child: Text(
               label,
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w800,
-                color: AppColors.isDarkMode ? AppColors.textPrimary : const Color(0xFF85533A),
+                color:
+                    AppColors.isDarkMode
+                        ? AppColors.textPrimary
+                        : const Color(0xFF85533A),
               ),
             ),
           );
@@ -611,12 +705,15 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           // The title selector (Mr/Mrs/...) is rendered as a normal
           // dropdown field with a bottom-sheet picker instead of the
           // segment-card style used for other radio fields.
-          final List options = field['options'] is List ? field['options'] as List : [];
+          final List options =
+              field['options'] is List ? field['options'] as List : [];
           if (key == 'title') {
             final currentVal = controller.formAnswers[key] ?? '';
-            final selectedLabel = options
-                    .firstWhereOrNull((opt) => opt['value']?.toString() == currentVal)
-                    ?['label']
+            final selectedLabel =
+                options
+                    .firstWhereOrNull(
+                      (opt) => opt['value']?.toString() == currentVal,
+                    )?['label']
                     ?.toString() ??
                 'Select...';
             return Padding(
@@ -627,9 +724,17 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   _buildInputLabel(label, isRequired),
                   SizedBox(height: 6.h),
                   GestureDetector(
-                    onTap: () => _showOptionsSelectorBottomSheet(key, label, options),
+                    onTap:
+                        () => _showOptionsSelectorBottomSheet(
+                          key,
+                          label,
+                          options,
+                        ),
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 12.h,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.textFieldBg,
                         borderRadius: BorderRadius.circular(10.r),
@@ -637,21 +742,33 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.person_outline_rounded, color: AppColors.primary, size: 16.w),
+                          Icon(
+                            Icons.person_outline_rounded,
+                            color: AppColors.primary,
+                            size: 16.w,
+                          ),
                           SizedBox(width: 8.w),
                           Expanded(
                             child: Text(
                               selectedLabel,
                               style: TextStyle(
                                 fontSize: 12.5.sp,
-                                color: currentVal.isEmpty
-                                    ? AppColors.textSecondary
-                                    : AppColors.textPrimary,
-                                fontWeight: currentVal.isEmpty ? FontWeight.w400 : FontWeight.w600,
+                                color:
+                                    currentVal.isEmpty
+                                        ? AppColors.textSecondary
+                                        : AppColors.textPrimary,
+                                fontWeight:
+                                    currentVal.isEmpty
+                                        ? FontWeight.w400
+                                        : FontWeight.w600,
                               ),
                             ),
                           ),
-                          Icon(Icons.unfold_more_rounded, color: AppColors.textGrey, size: 18.w),
+                          Icon(
+                            Icons.unfold_more_rounded,
+                            color: AppColors.textGrey,
+                            size: 18.w,
+                          ),
                         ],
                       ),
                     ),
@@ -675,9 +792,16 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         }
 
         if (type == 'select') {
-          final List options = field['options'] is List ? field['options'] as List : [];
+          final List options =
+              field['options'] is List ? field['options'] as List : [];
           final currentVal = controller.formAnswers[key] ?? '';
-          final selectedLabel = options.firstWhereOrNull((opt) => opt['value']?.toString() == currentVal)?['label']?.toString() ?? 'Select Option...';
+          final selectedLabel =
+              options
+                  .firstWhereOrNull(
+                    (opt) => opt['value']?.toString() == currentVal,
+                  )?['label']
+                  ?.toString() ??
+              'Select Option...';
 
           return Padding(
             padding: EdgeInsets.only(bottom: 16.h),
@@ -687,9 +811,14 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 _buildInputLabel(label, isRequired),
                 SizedBox(height: 6.h),
                 GestureDetector(
-                  onTap: () => _showOptionsSelectorBottomSheet(key, label, options),
+                  onTap:
+                      () =>
+                          _showOptionsSelectorBottomSheet(key, label, options),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 12.h,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.textFieldBg,
                       borderRadius: BorderRadius.circular(10.r),
@@ -697,19 +826,33 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.layers_outlined, color: AppColors.primary, size: 16.w),
+                        Icon(
+                          Icons.layers_outlined,
+                          color: AppColors.primary,
+                          size: 16.w,
+                        ),
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
                             selectedLabel,
                             style: TextStyle(
                               fontSize: 12.5.sp,
-                              color: currentVal.isEmpty ? AppColors.textSecondary : AppColors.textPrimary,
-                              fontWeight: currentVal.isEmpty ? FontWeight.w400 : FontWeight.w600,
+                              color:
+                                  currentVal.isEmpty
+                                      ? AppColors.textSecondary
+                                      : AppColors.textPrimary,
+                              fontWeight:
+                                  currentVal.isEmpty
+                                      ? FontWeight.w400
+                                      : FontWeight.w600,
                             ),
                           ),
                         ),
-                        Icon(Icons.unfold_more_rounded, color: AppColors.textGrey, size: 18.w),
+                        Icon(
+                          Icons.unfold_more_rounded,
+                          color: AppColors.textGrey,
+                          size: 18.w,
+                        ),
                       ],
                     ),
                   ),
@@ -731,14 +874,28 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 onChanged: (val) {
                   controller.formAnswers[key] = val;
                 },
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Enter details...',
-                  hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
-                  prefixIcon: Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 18.w),
+                  hintStyle: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12.sp,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.edit_note_rounded,
+                    color: AppColors.primary,
+                    size: 18.w,
+                  ),
                   filled: true,
                   fillColor: AppColors.textFieldBg,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 12.h,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.r),
                     borderSide: BorderSide(color: AppColors.border),
@@ -749,7 +906,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.r),
-                    borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                    borderSide: BorderSide(
+                      color: AppColors.primary,
+                      width: 1.5,
+                    ),
                   ),
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.r),
@@ -774,53 +934,64 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
   Widget _buildVisualSelectableCards(String key, List options) {
     final currentVal = controller.formAnswers[key] ?? '';
     return Row(
-      children: options.map((opt) {
-        final String val = opt['value']?.toString() ?? '';
-        final String label = opt['label']?.toString() ?? '';
-        final isSelected = currentVal == val;
+      children:
+          options.map((opt) {
+            final String val = opt['value']?.toString() ?? '';
+            final String label = opt['label']?.toString() ?? '';
+            final isSelected = currentVal == val;
 
-        return Expanded(
-          child: GestureDetector(
-            onTap: () {
-              controller.formAnswers[key] = val;
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: EdgeInsets.only(right: opt == options.last ? 0 : 10.w),
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary.withOpacity(0.06)
-                    : AppColors.textFieldBg,
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.border,
-                  width: isSelected ? 1.5 : 1.0,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    isSelected ? Icons.check_circle_rounded : Icons.radio_button_off_rounded,
-                    color: isSelected ? AppColors.primary : AppColors.textGrey,
-                    size: 16.w,
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  controller.formAnswers[key] = val;
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: EdgeInsets.only(
+                    right: opt == options.last ? 0 : 10.w,
                   ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12.5.sp,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                  decoration: BoxDecoration(
+                    color:
+                        isSelected
+                            ? AppColors.primary.withOpacity(0.06)
+                            : AppColors.textFieldBg,
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(
+                      color: isSelected ? AppColors.primary : AppColors.border,
+                      width: isSelected ? 1.5 : 1.0,
                     ),
                   ),
-                ],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        isSelected
+                            ? Icons.check_circle_rounded
+                            : Icons.radio_button_off_rounded,
+                        color:
+                            isSelected ? AppColors.primary : AppColors.textGrey,
+                        size: 16.w,
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12.5.sp,
+                          fontWeight:
+                              isSelected ? FontWeight.w700 : FontWeight.w600,
+                          color:
+                              isSelected
+                                  ? AppColors.primary
+                                  : AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 
@@ -833,18 +1004,34 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         Container(
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
-            color: AppColors.isDarkMode ? Colors.green.withOpacity(0.08) : const Color(0xFFF0FDF4),
+            color:
+                AppColors.isDarkMode
+                    ? Colors.green.withOpacity(0.08)
+                    : const Color(0xFFF0FDF4),
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: AppColors.isDarkMode ? Colors.green.withOpacity(0.3) : const Color(0xFFDCFCE7)),
+            border: Border.all(
+              color:
+                  AppColors.isDarkMode
+                      ? Colors.green.withOpacity(0.3)
+                      : const Color(0xFFDCFCE7),
+            ),
           ),
           child: Row(
             children: [
-              Icon(Icons.check_circle, color: const Color(0xFF16A34A), size: 18.w),
+              Icon(
+                Icons.check_circle,
+                color: const Color(0xFF16A34A),
+                size: 18.w,
+              ),
               SizedBox(width: 10.w),
               Expanded(
                 child: Text(
                   'Your profile details have been saved. Please upload the required documents.',
-                  style: TextStyle(fontSize: 12.sp, color: const Color(0xFF15803D), fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: const Color(0xFF15803D),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -854,12 +1041,20 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
         Text(
           'Upload Verification Documents',
-          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
         SizedBox(height: 2.h),
         Text(
           'Supported formats: JPG, PNG, PDF (Max 15MB each)',
-          style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 11.sp,
+            color: AppColors.textGrey,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         SizedBox(height: 16.h),
 
@@ -919,7 +1114,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         children: [
           Row(
             children: [
-              Icon(Icons.description_outlined, color: AppColors.primary, size: 18.w),
+              Icon(
+                Icons.description_outlined,
+                color: AppColors.primary,
+                size: 18.w,
+              ),
               SizedBox(width: 8.w),
               Text(
                 title,
@@ -974,11 +1173,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     required bool isRequired,
   }) {
     final hasFile = file != null;
-    final isImage = hasFile && (
-      file.path.toLowerCase().endsWith('.png') ||
-      file.path.toLowerCase().endsWith('.jpg') ||
-      file.path.toLowerCase().endsWith('.jpeg')
-    );
+    final isImage =
+        hasFile &&
+        (file.path.toLowerCase().endsWith('.png') ||
+            file.path.toLowerCase().endsWith('.jpg') ||
+            file.path.toLowerCase().endsWith('.jpeg'));
 
     return AspectRatio(
       aspectRatio: 1.25,
@@ -986,9 +1185,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         onTap: () => controller.pickDocument(key),
         child: Container(
           decoration: BoxDecoration(
-            color: hasFile
-                ? AppColors.primary.withOpacity(0.01)
-                : AppColors.textFieldBg,
+            color:
+                hasFile
+                    ? AppColors.primary.withOpacity(0.01)
+                    : AppColors.textFieldBg,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: hasFile ? AppColors.primary : AppColors.border,
@@ -1001,16 +1201,17 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             children: [
               if (hasFile) ...[
                 if (isImage)
-                  Image.file(
-                    file,
-                    fit: BoxFit.cover,
-                  )
+                  Image.file(file, fit: BoxFit.cover)
                 else
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.picture_as_pdf_rounded, color: Colors.red, size: 36.w),
+                        Icon(
+                          Icons.picture_as_pdf_rounded,
+                          color: Colors.red,
+                          size: 36.w,
+                        ),
                         SizedBox(height: 4.h),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.w),
@@ -1029,7 +1230,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       ],
                     ),
                   ),
-                
+
                 Positioned(
                   top: 6.h,
                   right: 6.w,
@@ -1051,7 +1252,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     ),
                   ),
                 ),
-                
+
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -1097,11 +1298,15 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     ),
                     SizedBox(height: 4.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
-                        color: isRequired
-                            ? Colors.red.withOpacity(0.08)
-                            : AppColors.textGrey.withOpacity(0.12),
+                        color:
+                            isRequired
+                                ? Colors.red.withOpacity(0.08)
+                                : AppColors.textGrey.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
@@ -1135,29 +1340,75 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Upload Details Summary', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          Text(
+            'Upload Details Summary',
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
           SizedBox(height: 8.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Required Documents Selected:', style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
-              Text('${controller.getRequiredCount()}/2', style: TextStyle(fontSize: 12.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+              Text(
+                'Required Documents Selected:',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              Text(
+                '${controller.getRequiredCount()}/2',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
           SizedBox(height: 6.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Optional Documents Selected:', style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
-              Text('${controller.getOptionalCount()}/2', style: TextStyle(fontSize: 12.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+              Text(
+                'Optional Documents Selected:',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              Text(
+                '${controller.getOptionalCount()}/2',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
           SizedBox(height: 6.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total Combined Upload Size:', style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary)),
-              Text(controller.getUploadedSizeSummary(), style: TextStyle(fontSize: 12.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+              Text(
+                'Total Combined Upload Size:',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              Text(
+                controller.getUploadedSizeSummary(),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
         ],
@@ -1180,15 +1431,19 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           ),
           child: Row(
             children: [
-              Icon(Icons.security_rounded, color: AppColors.primary, size: 20.w),
+              Icon(
+                Icons.security_rounded,
+                color: AppColors.primary,
+                size: 20.w,
+              ),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   'Please confirm that all details entered below are 100% accurate and match your uploaded documents.',
                   style: TextStyle(
-                    fontSize: 11.5.sp, 
-                    color: AppColors.primary, 
-                    fontWeight: FontWeight.w700, 
+                    fontSize: 11.5.sp,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
                     height: 1.3,
                   ),
                 ),
@@ -1200,13 +1455,20 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
         // Profile & Address Card
         _buildReviewSectionCard('Profile & Address Details', {
-          'Name': '${controller.formAnswers['first_name'] ?? ''} ${controller.formAnswers['last_name'] ?? ''}'.trim(),
+          'Name':
+              '${controller.formAnswers['first_name'] ?? ''} ${controller.formAnswers['last_name'] ?? ''}'
+                  .trim(),
           'Email': controller.formAnswers['email']?.toString() ?? '',
           'Mobile': controller.formAnswers['mobile']?.toString() ?? '',
-          'Gender / Date of Birth': '${controller.formAnswers['gender']?.toString().toUpperCase() ?? ''} (${controller.formAnswers['dob'] ?? ''})',
-          'Address': '${controller.formAnswers['address_1'] ?? ''}, ${controller.formAnswers['address_2'] ?? ''}'.trim(),
-          'City / State': '${controller.formAnswers['city_name'] ?? ''}, ${controller.formAnswers['state_name'] ?? ''}',
-          'Country / Pincode': '${controller.formAnswers['country_name'] ?? ''} - ${controller.formAnswers['postcode'] ?? ''}',
+          'Gender / Date of Birth':
+              '${controller.formAnswers['gender']?.toString().toUpperCase() ?? ''} (${controller.formAnswers['dob'] ?? ''})',
+          'Address':
+              '${controller.formAnswers['address_1'] ?? ''}, ${controller.formAnswers['address_2'] ?? ''}'
+                  .trim(),
+          'City / State':
+              '${controller.formAnswers['city_name'] ?? ''}, ${controller.formAnswers['state_name'] ?? ''}',
+          'Country / Pincode':
+              '${controller.formAnswers['country_name'] ?? ''} - ${controller.formAnswers['postcode'] ?? ''}',
         }),
         SizedBox(height: 20.h),
 
@@ -1217,9 +1479,17 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           children: [
             Row(
               children: [
-                _buildDocumentReviewTile('ID Proof Front', controller.idProofFront.value, true),
+                _buildDocumentReviewTile(
+                  'ID Proof Front',
+                  controller.idProofFront.value,
+                  true,
+                ),
                 SizedBox(width: 10.w),
-                _buildDocumentReviewTile('ID Proof Back', controller.idProofBack.value, false),
+                _buildDocumentReviewTile(
+                  'ID Proof Back',
+                  controller.idProofBack.value,
+                  false,
+                ),
               ],
             ),
           ],
@@ -1232,9 +1502,17 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           children: [
             Row(
               children: [
-                _buildDocumentReviewTile('Address Front', controller.addressProofFront.value, true),
+                _buildDocumentReviewTile(
+                  'Address Front',
+                  controller.addressProofFront.value,
+                  true,
+                ),
                 SizedBox(width: 10.w),
-                _buildDocumentReviewTile('Address Back', controller.addressProofBack.value, false),
+                _buildDocumentReviewTile(
+                  'Address Back',
+                  controller.addressProofBack.value,
+                  false,
+                ),
               ],
             ),
           ],
@@ -1250,18 +1528,27 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: hasFile ? AppColors.primary.withOpacity(0.04) : AppColors.textFieldBg,
+          color:
+              hasFile
+                  ? AppColors.primary.withOpacity(0.04)
+                  : AppColors.textFieldBg,
           borderRadius: BorderRadius.circular(10.r),
           border: Border.all(
-            color: hasFile ? AppColors.primary.withOpacity(0.4) : AppColors.border,
+            color:
+                hasFile ? AppColors.primary.withOpacity(0.4) : AppColors.border,
             width: hasFile ? 1.2 : 1.0,
           ),
         ),
         child: Row(
           children: [
             Icon(
-              hasFile ? Icons.check_circle_rounded : (isRequired ? Icons.cancel_outlined : Icons.info_outline),
-              color: hasFile ? const Color(0xFF16A34A) : (isRequired ? Colors.red : AppColors.textGrey),
+              hasFile
+                  ? Icons.check_circle_rounded
+                  : (isRequired ? Icons.cancel_outlined : Icons.info_outline),
+              color:
+                  hasFile
+                      ? const Color(0xFF16A34A)
+                      : (isRequired ? Colors.red : AppColors.textGrey),
               size: 16.w,
             ),
             SizedBox(width: 8.w),
@@ -1281,7 +1568,14 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   ),
                   SizedBox(height: 1.h),
                   Text(
-                    hasFile ? file.path.split('/').last.split('.').last.toUpperCase() : 'Not Uploaded',
+                    hasFile
+                        ? file.path
+                            .split('/')
+                            .last
+                            .split('.')
+                            .last
+                            .toUpperCase()
+                        : 'Not Uploaded',
                     style: TextStyle(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.w800,
@@ -1318,14 +1612,26 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         children: [
           Row(
             children: [
-              Icon(Icons.summarize_outlined, color: AppColors.primary, size: 18.w),
+              Icon(
+                Icons.summarize_outlined,
+                color: AppColors.primary,
+                size: 18.w,
+              ),
               SizedBox(width: 8.w),
-              Text(heading, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.primary)),
+              Text(
+                heading,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
             ],
           ),
           Divider(color: AppColors.border, thickness: 0.8, height: 24.h),
           ...values.entries.map((e) {
-            if (e.value.isEmpty || e.value.startsWith('-')) return const SizedBox.shrink();
+            if (e.value.isEmpty || e.value.startsWith('-'))
+              return const SizedBox.shrink();
             return Padding(
               padding: EdgeInsets.only(bottom: 10.h),
               child: Row(
@@ -1335,14 +1641,22 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     flex: 4,
                     child: Text(
                       '${e.key}:',
-                      style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   Expanded(
                     flex: 6,
                     child: Text(
                       e.value,
-                      style: TextStyle(fontSize: 12.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
@@ -1368,7 +1682,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             width: 90.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.isDarkMode ? Colors.green.withOpacity(0.08) : const Color(0xFFF0FDF4),
+              color:
+                  AppColors.isDarkMode
+                      ? Colors.green.withOpacity(0.08)
+                      : const Color(0xFFF0FDF4),
               border: Border.all(color: const Color(0xFF22C55E), width: 1.5),
               boxShadow: [
                 BoxShadow(
@@ -1421,7 +1738,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               children: [
                 Text(
                   'Verification Timeline Progress',
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 SizedBox(height: 16.h),
                 _buildTimelineStep(
@@ -1464,12 +1785,18 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
                 elevation: 0,
               ),
               child: Text(
                 "Done",
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -1496,32 +1823,39 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               height: 20.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isCompleted
-                    ? const Color(0xFF16A34A)
-                    : isActive
+                color:
+                    isCompleted
+                        ? const Color(0xFF16A34A)
+                        : isActive
                         ? AppColors.primary
                         : AppColors.border,
                 border: Border.all(
-                  color: isCompleted
-                      ? const Color(0xFF16A34A)
-                      : isActive
+                  color:
+                      isCompleted
+                          ? const Color(0xFF16A34A)
+                          : isActive
                           ? AppColors.primary
                           : AppColors.border,
                   width: 1.5,
                 ),
               ),
               child: Center(
-                child: isCompleted
-                    ? Icon(Icons.check_rounded, color: Colors.white, size: 12.w)
-                    : isActive
+                child:
+                    isCompleted
+                        ? Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 12.w,
+                        )
+                        : isActive
                         ? Container(
-                            width: 6.w,
-                            height: 6.h,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                          )
+                          width: 6.w,
+                          height: 6.h,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        )
                         : const SizedBox.shrink(),
               ),
             ),
@@ -1543,9 +1877,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 style: TextStyle(
                   fontSize: 12.5.sp,
                   fontWeight: FontWeight.w700,
-                  color: isCompleted || isActive
-                      ? AppColors.textPrimary
-                      : AppColors.textGrey,
+                  color:
+                      isCompleted || isActive
+                          ? AppColors.textPrimary
+                          : AppColors.textGrey,
                 ),
               ),
               SizedBox(height: 1.h),
@@ -1567,134 +1902,196 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
   // --- Dynamic Bottom Action Bar ---
   Widget? _buildBottomActionBar(int step) {
     if (step == 3) return null; // Complete page manages its own Done button
-    
-    return Container(
-      padding: EdgeInsets.only(
-        left: 16.w, 
-        right: 16.w, 
-        top: 12.h, 
-        bottom: Platform.isIOS ? 24.h : 12.h,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          if (step == 0)
-            Expanded(
-              child: SizedBox(
-                height: 46.h,
-                child: ElevatedButton(
-                  onPressed: controller.isLoading.value
-                      ? null
-                      : () async {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            FocusScope.of(context).unfocus();
-                            await controller.submitQuestionnaire();
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.border,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    elevation: 0,
-                  ),
-                  child: controller.isLoading.value
-                      ? ButtonLoadingWidget(size: 20.0, color: Colors.white)
-                      : Text(
-                          'Update Profile & Continue',
-                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white),
-                        ),
-                ),
-              ),
-            ),
-          if (step == 1) ...[
-            OutlinedButton(
-              onPressed: () {
-                controller.currentStep.value = 0;
-              },
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-              ),
-              child: Text('Back', style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.w600)),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: SizedBox(
-                height: 46.h,
-                child: ElevatedButton(
-                  onPressed: (controller.idProofFront.value == null || controller.addressProofFront.value == null)
-                      ? null
-                      : () {
-                          controller.currentStep.value = 2; // Move to Review
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.border,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Continue to Review',
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white),
-                  ),
-                ),
-              ),
+
+    return SafeArea(
+      bottom: true,
+      child: Container(
+        padding: EdgeInsets.only(
+          left: 16.w,
+          right: 16.w,
+          top: 12.h,
+          bottom: 12.h,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: const Offset(0, -2),
             ),
           ],
-          if (step == 2) ...[
-            OutlinedButton(
-              onPressed: () {
-                controller.currentStep.value = 1;
-              },
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.border),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-              ),
-              child: Text('Edit Info', style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.w600)),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: SizedBox(
-                height: 46.h,
-                child: ElevatedButton(
-                  onPressed: controller.isLoading.value
-                      ? null
-                      : () async {
-                          final success = await controller.submitDocuments();
-                          if (success) {
-                            controller.currentStep.value = 3;
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    disabledBackgroundColor: AppColors.border,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    elevation: 0,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            if (step == 0)
+              Expanded(
+                child: SizedBox(
+                  height: 46.h,
+                  child: ElevatedButton(
+                    onPressed:
+                        controller.isLoading.value
+                            ? null
+                            : () async {
+                              if (_formKey.currentState?.validate() ?? false) {
+                                FocusScope.of(context).unfocus();
+                                await controller.submitQuestionnaire();
+                              }
+                            },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      disabledBackgroundColor: AppColors.grey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child:
+                        controller.isLoading.value
+                            ? ButtonLoadingWidget(
+                              size: 20.0,
+                              color: Colors.white,
+                            )
+                            : Text(
+                              'Update Profile & Continue',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color:
+                                    AppColors.isDarkMode
+                                        ? AppColors.textPrimaryLight
+                                        : Colors.white,
+                              ),
+                            ),
                   ),
-                  child: controller.isLoading.value
-                      ? ButtonLoadingWidget(size: 20.0, color: Colors.white)
-                      : Text(
-                          'Confirm & Submit',
-                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.white),
-                        ),
                 ),
               ),
-            ),
+            if (step == 1) ...[
+              OutlinedButton(
+                onPressed: () {
+                  controller.currentStep.value = 0;
+                },
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.border),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 12.h,
+                  ),
+                ),
+                child: Text(
+                  'Back',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: SizedBox(
+                  height: 46.h,
+                  child: ElevatedButton(
+                    onPressed:
+                        (controller.idProofFront.value == null ||
+                                controller.addressProofFront.value == null)
+                            ? null
+                            : () {
+                              controller.currentStep.value =
+                                  2; // Move to Review
+                            },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      disabledBackgroundColor: AppColors.border,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Continue to Review',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (step == 2) ...[
+              OutlinedButton(
+                onPressed: () {
+                  controller.currentStep.value = 1;
+                },
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.border),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 12.h,
+                  ),
+                ),
+                child: Text(
+                  'Edit Info',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: SizedBox(
+                  height: 46.h,
+                  child: ElevatedButton(
+                    onPressed:
+                        controller.isLoading.value
+                            ? null
+                            : () async {
+                              final success =
+                                  await controller.submitDocuments();
+                              if (success) {
+                                controller.currentStep.value = 3;
+                              }
+                            },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      disabledBackgroundColor: AppColors.border,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child:
+                        controller.isLoading.value
+                            ? ButtonLoadingWidget(
+                              size: 20.0,
+                              color: Colors.white,
+                            )
+                            : Text(
+                              'Confirm & Submit',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                  ),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -1742,11 +2139,17 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           ),
           decoration: InputDecoration(
             hintText: readOnly ? '' : 'Enter...',
-            hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+            hintStyle: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12.sp,
+            ),
             prefixIcon: Icon(prefixIcon, color: AppColors.primary, size: 18.w),
             filled: true,
             fillColor: readOnly ? AppColors.surface : AppColors.textFieldBg,
-            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 12.w,
+              vertical: 12.h,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.r),
               borderSide: BorderSide(color: AppColors.border),
@@ -1781,20 +2184,34 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     SizedBox(
                       width: 10.w,
                       height: 10.h,
-                      child: CircularProgressIndicator(strokeWidth: 1.5, valueColor: AlwaysStoppedAnimation(AppColors.primary)),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.5,
+                        valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                      ),
                     ),
                     SizedBox(width: 6.w),
-                    Text('Checking availability...', style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey)),
+                    Text(
+                      'Checking availability...',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppColors.textGrey,
+                      ),
+                    ),
                   ],
                 ),
               );
             }
-            if (!controller.isMobileAvailable.value && controller.mobileError.value.isNotEmpty) {
+            if (!controller.isMobileAvailable.value &&
+                controller.mobileError.value.isNotEmpty) {
               return Padding(
                 padding: EdgeInsets.only(top: 4.h, left: 4.w),
                 child: Text(
                   controller.mobileError.value,
-                  style: TextStyle(fontSize: 11.sp, color: Colors.red, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               );
             }
@@ -1815,9 +2232,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     IconData prefixIcon = Icons.expand_circle_down_outlined,
   }) {
     final currentVal = controller.formAnswers[fieldKey]?.toString() ?? '';
-    final selectedLabel = options
-            .firstWhereOrNull((opt) => opt['value'] == currentVal)
-            ?['label']
+    final selectedLabel =
+        options
+            .firstWhereOrNull((opt) => opt['value'] == currentVal)?['label']
             ?.toString() ??
         'Select...';
     return Column(
@@ -1826,7 +2243,8 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         _buildLabelText('$label *'),
         SizedBox(height: 6.h),
         GestureDetector(
-          onTap: () => _showOptionsSelectorBottomSheet(fieldKey, label, options),
+          onTap:
+              () => _showOptionsSelectorBottomSheet(fieldKey, label, options),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
             decoration: BoxDecoration(
@@ -1843,14 +2261,22 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     selectedLabel,
                     style: TextStyle(
                       fontSize: 13.sp,
-                      color: currentVal.isEmpty
-                          ? AppColors.textSecondary
-                          : AppColors.textPrimary,
-                      fontWeight: currentVal.isEmpty ? FontWeight.w400 : FontWeight.w600,
+                      color:
+                          currentVal.isEmpty
+                              ? AppColors.textSecondary
+                              : AppColors.textPrimary,
+                      fontWeight:
+                          currentVal.isEmpty
+                              ? FontWeight.w400
+                              : FontWeight.w600,
                     ),
                   ),
                 ),
-                Icon(Icons.unfold_more_rounded, color: AppColors.textGrey, size: 18.w),
+                Icon(
+                  Icons.unfold_more_rounded,
+                  color: AppColors.textGrey,
+                  size: 18.w,
+                ),
               ],
             ),
           ),
@@ -1859,7 +2285,12 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     );
   }
 
-  Widget _buildDatePickerInput(String key, String label, {bool isRequired = false, required IconData prefixIcon}) {
+  Widget _buildDatePickerInput(
+    String key,
+    String label, {
+    bool isRequired = false,
+    required IconData prefixIcon,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1895,7 +2326,8 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               lastDate: lastDate,
             );
             if (picked != null) {
-              controller.formAnswers[key] = picked.toIso8601String().split('T')[0];
+              controller.formAnswers[key] =
+                  picked.toIso8601String().split('T')[0];
             }
           },
           child: Container(
@@ -1913,21 +2345,27 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 // formAnswers[key] changes. Without this, picking a date
                 // mutates the RxMap but the Text widget never rebuilds.
                 Expanded(
-                  child: Obx(
-                    () {
-                      final v = controller.formAnswers[key]?.toString() ?? '';
-                      return Text(
-                        v.isNotEmpty ? v : 'Select Date of Birth',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: v.isEmpty ? AppColors.textSecondary : AppColors.textPrimary,
-                          fontWeight: v.isEmpty ? FontWeight.w400 : FontWeight.w600,
-                        ),
-                      );
-                    },
-                  ),
+                  child: Obx(() {
+                    final v = controller.formAnswers[key]?.toString() ?? '';
+                    return Text(
+                      v.isNotEmpty ? v : 'Select Date of Birth',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color:
+                            v.isEmpty
+                                ? AppColors.textSecondary
+                                : AppColors.textPrimary,
+                        fontWeight:
+                            v.isEmpty ? FontWeight.w400 : FontWeight.w600,
+                      ),
+                    );
+                  }),
                 ),
-                Icon(Icons.calendar_month_rounded, color: AppColors.textGrey, size: 16.w),
+                Icon(
+                  Icons.calendar_month_rounded,
+                  color: AppColors.textGrey,
+                  size: 16.w,
+                ),
               ],
             ),
           ),
@@ -1939,7 +2377,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
   Widget _buildLabelText(String text) {
     return Text(
       text,
-      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+      style: TextStyle(
+        fontSize: 12.sp,
+        fontWeight: FontWeight.w700,
+        color: AppColors.textPrimary,
+      ),
     );
   }
 
@@ -1947,10 +2389,17 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     return RichText(
       text: TextSpan(
         text: label,
-        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+        style: TextStyle(
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
         children: [
           if (isRequired)
-            const TextSpan(text: ' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            const TextSpan(
+              text: ' *',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
         ],
       ),
     );
@@ -1971,9 +2420,23 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(width: 36.w, height: 4.h, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2.r))),
+              Container(
+                width: 36.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
               SizedBox(height: 12.h),
-              Text(title, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
               Divider(color: AppColors.border, height: 20.h),
               Flexible(
                 child: ListView.builder(
@@ -1991,8 +2454,23 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                         controller.formAnswers[key] = val;
                         Get.back();
                       },
-                      title: Text(lbl, style: TextStyle(fontSize: 14.sp, color: isSel ? AppColors.primary : AppColors.textPrimary, fontWeight: isSel ? FontWeight.bold : FontWeight.w600)),
-                      trailing: isSel ? Icon(Icons.check_circle, color: AppColors.primary, size: 20.w) : null,
+                      title: Text(
+                        lbl,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color:
+                              isSel ? AppColors.primary : AppColors.textPrimary,
+                          fontWeight: isSel ? FontWeight.bold : FontWeight.w600,
+                        ),
+                      ),
+                      trailing:
+                          isSel
+                              ? Icon(
+                                Icons.check_circle,
+                                color: AppColors.primary,
+                                size: 20.w,
+                              )
+                              : null,
                     );
                   },
                 ),
@@ -2017,20 +2495,37 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
       VoidCallback? onTap;
 
       if (type == 'country') {
-        displayValue = controller.dropdownService.selectedCountry.value?.name ?? '';
+        displayValue =
+            controller.dropdownService.selectedCountry.value?.name ?? '';
         onTap = () => _showCountryOptions();
+      } else if (type == 'nationality') {
+        displayValue = controller.formAnswers['nationality']?.toString() ?? '';
+        onTap = () => _showNationalityOptions();
       } else if (type == 'state') {
-        displayValue = controller.dropdownService.selectedState.value?.name ?? '';
-        final hasCountry = controller.dropdownService.selectedCountry.value != null;
-        onTap = hasCountry ? () => _showStateOptions() : () {
-          CustomToastService.showWarning(message: 'Please select a country first.');
-        };
+        displayValue =
+            controller.dropdownService.selectedState.value?.name ?? '';
+        final hasCountry =
+            controller.dropdownService.selectedCountry.value != null;
+        onTap =
+            hasCountry
+                ? () => _showStateOptions()
+                : () {
+                  CustomToastService.showWarning(
+                    message: 'Please select a country first.',
+                  );
+                };
       } else if (type == 'city') {
-        displayValue = controller.dropdownService.selectedCity.value?.name ?? '';
+        displayValue =
+            controller.dropdownService.selectedCity.value?.name ?? '';
         final hasState = controller.dropdownService.selectedState.value != null;
-        onTap = hasState ? () => _showCityOptions() : () {
-          CustomToastService.showWarning(message: 'Please select a state first.');
-        };
+        onTap =
+            hasState
+                ? () => _showCityOptions()
+                : () {
+                  CustomToastService.showWarning(
+                    message: 'Please select a state first.',
+                  );
+                };
       }
 
       return Column(
@@ -2056,14 +2551,24 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       displayValue.isNotEmpty ? displayValue : 'Select...',
                       style: TextStyle(
                         fontSize: 12.5.sp,
-                        color: displayValue.isEmpty ? AppColors.textSecondary : AppColors.textPrimary,
-                        fontWeight: displayValue.isEmpty ? FontWeight.w400 : FontWeight.w600,
+                        color:
+                            displayValue.isEmpty
+                                ? AppColors.textSecondary
+                                : AppColors.textPrimary,
+                        fontWeight:
+                            displayValue.isEmpty
+                                ? FontWeight.w400
+                                : FontWeight.w600,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Icon(Icons.arrow_drop_down_rounded, color: AppColors.textGrey, size: 20.w),
+                  Icon(
+                    Icons.arrow_drop_down_rounded,
+                    color: AppColors.textGrey,
+                    size: 20.w,
+                  ),
                 ],
               ),
             ),
@@ -2116,22 +2621,35 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
                 decoration: InputDecoration(
                   hintText: 'Search countries...',
-                  hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
-                  prefixIcon: Icon(Icons.search, color: AppColors.textGrey, size: 18.w),
+                  hintStyle: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12.sp,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: AppColors.textGrey,
+                    size: 18.w,
+                  ),
                   filled: true,
                   fillColor: AppColors.textFieldBg,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 12.h,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.r),
                     borderSide: BorderSide(color: AppColors.border),
                   ),
                 ),
                 onChanged: (value) {
-                  filteredCountries.value = controller.dropdownService.countries
-                      .where((country) => (country.name ?? '')
-                          .toLowerCase()
-                          .contains(value.toLowerCase()))
-                      .toList();
+                  filteredCountries.value =
+                      controller.dropdownService.countries
+                          .where(
+                            (country) => (country.name ?? '')
+                                .toLowerCase()
+                                .contains(value.toLowerCase()),
+                          )
+                          .toList();
                 },
               ),
               SizedBox(height: 16.h),
@@ -2149,10 +2667,129 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                         ),
                         title: Text(
                           country.name ?? '',
-                          style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         onTap: () {
                           controller.dropdownService.selectCountry(country);
+                          Get.back();
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
+  void _showNationalityOptions() {
+    final searchController = TextEditingController();
+    final filteredCountries = controller.dropdownService.countries.toList().obs;
+
+    Get.bottomSheet(
+      ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+          ),
+          padding: EdgeInsets.all(20.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                'Select Nationality',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              TextField(
+                controller: searchController,
+                style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
+                decoration: InputDecoration(
+                  hintText: 'Search nationalities...',
+                  hintStyle: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12.sp,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: AppColors.textGrey,
+                    size: 18.w,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.textFieldBg,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 12.h,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                ),
+                onChanged: (value) {
+                  filteredCountries.value =
+                      controller.dropdownService.countries
+                          .where(
+                            (country) => (country.nationality ?? '')
+                                .toLowerCase()
+                                .contains(value.toLowerCase()),
+                          )
+                          .toList();
+                },
+              ),
+              SizedBox(height: 16.h),
+              Flexible(
+                child: Obx(
+                  () => ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: filteredCountries.length,
+                    itemBuilder: (context, index) {
+                      final country = filteredCountries[index];
+                      if ((country.nationality ?? '').isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return ListTile(
+                        leading: Text(
+                          country.emoji ?? '',
+                          style: TextStyle(fontSize: 22.sp),
+                        ),
+                        title: Text(
+                          country.nationality ?? '',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        onTap: () {
+                          controller.formAnswers['nationality'] =
+                              country.nationality ?? '';
                           Get.back();
                         },
                       );
@@ -2212,22 +2849,35 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
                 decoration: InputDecoration(
                   hintText: 'Search states...',
-                  hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
-                  prefixIcon: Icon(Icons.search, color: AppColors.textGrey, size: 18.w),
+                  hintStyle: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12.sp,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: AppColors.textGrey,
+                    size: 18.w,
+                  ),
                   filled: true,
                   fillColor: AppColors.textFieldBg,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 12.h,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.r),
                     borderSide: BorderSide(color: AppColors.border),
                   ),
                 ),
                 onChanged: (value) {
-                  filteredStates.value = controller.dropdownService.states
-                      .where((state) => state.name
-                          .toLowerCase()
-                          .contains(value.toLowerCase()))
-                      .toList();
+                  filteredStates.value =
+                      controller.dropdownService.states
+                          .where(
+                            (state) => state.name.toLowerCase().contains(
+                              value.toLowerCase(),
+                            ),
+                          )
+                          .toList();
                 },
               ),
               SizedBox(height: 16.h),
@@ -2241,7 +2891,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       return ListTile(
                         title: Text(
                           state.name,
-                          style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         onTap: () {
                           controller.dropdownService.selectState(state);
@@ -2304,22 +2958,35 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
                 decoration: InputDecoration(
                   hintText: 'Search cities...',
-                  hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
-                  prefixIcon: Icon(Icons.search, color: AppColors.textGrey, size: 18.w),
+                  hintStyle: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12.sp,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: AppColors.textGrey,
+                    size: 18.w,
+                  ),
                   filled: true,
                   fillColor: AppColors.textFieldBg,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 12.h,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.r),
                     borderSide: BorderSide(color: AppColors.border),
                   ),
                 ),
                 onChanged: (value) {
-                  filteredCities.value = controller.dropdownService.cities
-                      .where((city) => city.name
-                          .toLowerCase()
-                          .contains(value.toLowerCase()))
-                      .toList();
+                  filteredCities.value =
+                      controller.dropdownService.cities
+                          .where(
+                            (city) => city.name.toLowerCase().contains(
+                              value.toLowerCase(),
+                            ),
+                          )
+                          .toList();
                 },
               ),
               SizedBox(height: 16.h),
@@ -2333,7 +3000,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       return ListTile(
                         title: Text(
                           city.name,
-                          style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         onTap: () {
                           controller.dropdownService.selectCity(city);

@@ -1684,11 +1684,6 @@ class AuthController extends GetxController {
           if (regulationSubmitted == 0) {
             Get.offAllNamed(AppPages.COMPLIANCE_WIZARD);
             return;
-          } else if (!documentsSubmitted) {
-            Get.offAllNamed(AppPages.COMPLIANCE_WIZARD);
-            // Set Step 2 active in controller
-            Get.put(ComplianceController()).currentStep.value = 1;
-            return;
           }
         }
       }
