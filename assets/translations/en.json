@@ -24,6 +24,7 @@
   "biometric_not_supported": "Biometric authentication is not supported on this device.",
   "biometric_not_enrolled_title": "No biometrics enrolled",
   "biometric_not_enrolled_message": "Please add Face ID / Touch ID / Fingerprint in your device settings to enable biometric login.",
+  "common_close" : "Close",
   "login_forgot_password": "Forgot Password?",
   "login_or_with": "Or with",
   "login_google": "Continue with Google",

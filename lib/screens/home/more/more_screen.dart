@@ -1757,14 +1757,14 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
             borderRadius: BorderRadius.circular(16.r),
           ),
           title: Text(
-            _languageService.tr('biometric_not_enabled_title'),
+            _languageService.tr('biometric_not_enrolled_title'),
             style: TextStyle(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
           content: Text(
-            _languageService.tr('biometric_not_enabled_message'),
+            _languageService.tr('biometric_not_enrolled_message'),
             style: TextStyle(color: AppColors.textSecondary),
           ),
           actions: [
@@ -1820,7 +1820,7 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
       }
 
       final ok = await bio.authenticate(
-        reason: _languageService.tr('biometric_auth_reason_enable'),
+        reason: _languageService.tr('biometric_enable_reason'),
       );
       if (!ok) {
         await SecureStorageService.setBiometricEnabled(false);
@@ -1867,7 +1867,7 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
           SizedBox(width: 14.w),
           Expanded(
             child: Text(
-              _languageService.tr('biometric_login'),
+              _languageService.tr('biometric_login_toggle'),
               style: TextStyle(
                 fontFamily: 'Roboto',
                 fontSize: 14.sp,
