@@ -17,6 +17,7 @@ import 'package:crm_app/services/loading_service.dart';
 import 'package:crm_app/services/notification_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
+import 'package:crm_app/services/trading_websocket_service.dart';
 import 'constants/color.dart';
 
 import 'flavor_config.dart';
@@ -765,6 +766,16 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
               ),
             );
           }
+
+          // ✅ PRE-LOAD WEBSOCKETS: Initialize TradingWebSocketService immediately in the background
+          // so it can connect to the server while the UI is navigating/rendering.
+          // This eliminates the delay in showing open positions and symbols.
+          unawaited(Future.microtask(() {
+            if (!Get.isRegistered<TradingWebSocketService>()) {
+              Get.put(TradingWebSocketService(), permanent: true);
+              print('AuthCheckScreen: TradingWebSocketService initialized in background');
+            }
+          }));
 
           print('AuthCheckScreen: Navigating to Trading screen (Home)');
           // End startup phase so normal 401 handling (session expired) resumes

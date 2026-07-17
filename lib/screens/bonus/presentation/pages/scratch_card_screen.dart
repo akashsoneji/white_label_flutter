@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/services/loading_service.dart';
@@ -44,9 +45,19 @@ class ScratchCardApiModel {
 
   factory ScratchCardApiModel.fromJson(Map<String, dynamic> json) {
     final rawReward = json['reward_amount'];
+
+    // Safely parse ID
+    int parsedId = 0;
+    if (json['id'] != null) {
+      if (json['id'] is int)
+        parsedId = json['id'];
+      else if (json['id'] is String)
+        parsedId = int.tryParse(json['id']) ?? 0;
+    }
+
     return ScratchCardApiModel(
-      id: json['id'] as int,
-      status: json['status'] as String? ?? 'active',
+      id: parsedId,
+      status: json['status']?.toString() ?? 'active',
       rewardAmount:
           (rawReward is num)
               ? rawReward.toDouble()
@@ -60,8 +71,9 @@ class ScratchCardApiModel {
     );
   }
 
-  bool get isScratched => status == 'scratched';
-  bool get isActive => status == 'active';
+  bool get isScratched => status.toLowerCase() == 'scratched';
+  bool get isActive =>
+      status.toLowerCase() != 'scratched' && status.toLowerCase() != 'expired';
 
   DateTime? get _groupingDateTime {
     // Try all 3 timestamps — whichever parses wins.
@@ -104,20 +116,6 @@ class ScratchCardApiModel {
     } catch (_) {
       return null;
     }
-  }
-
-  bool get isToday {
-    final dt = _groupingDateTime;
-    if (dt == null) {
-      // Robust fallback: if we couldn't parse any date, treat the card as
-      // "current" so it isn't silently hidden in release builds where the
-      // backend might send a slightly different timestamp format.
-      final fb = status.toLowerCase();
-      if (fb == 'active') return true;
-      return false;
-    }
-    final now = DateTime.now();
-    return dt.year == now.year && dt.month == now.month && dt.day == now.day;
   }
 
   /// Human-readable expires_at label, e.g. "20 Mar 08:00"
@@ -570,10 +568,10 @@ class ScratchCardController extends GetxController {
         //   - or already unwrapped {summary, cards, ...}
         final Map<String, dynamic>? envelope =
             (rootData is Map<String, dynamic>) ? rootData : null;
-        final Map<String, dynamic>? payload = envelope != null &&
-                envelope['data'] is Map<String, dynamic>
-            ? envelope['data'] as Map<String, dynamic>
-            : envelope;
+        final Map<String, dynamic>? payload =
+            envelope != null && envelope['data'] is Map<String, dynamic>
+                ? envelope['data'] as Map<String, dynamic>
+                : envelope;
 
         if (payload == null) {
           // Success but unparseable — wipe stale state so UI doesn't lie.
@@ -597,9 +595,8 @@ class ScratchCardController extends GetxController {
             rawCards
                 .whereType<Map>()
                 .map(
-                  (e) => ScratchCardApiModel.fromJson(
-                    e.cast<String, dynamic>(),
-                  ),
+                  (e) =>
+                      ScratchCardApiModel.fromJson(e.cast<String, dynamic>()),
                 )
                 .toList(),
           );
@@ -672,7 +669,7 @@ class ScratchCardController extends GetxController {
         if (errData is Map<String, dynamic> &&
             errData['code'] == 'SCRATCH_ACCOUNT_REQUIRED') {
           _pendingRevealCardId = cardId;
-          
+
           final rawGroupId = errData['scratch_group_id'];
           if (rawGroupId is num) {
             _pendingScratchGroupId = rawGroupId.toInt();
@@ -687,9 +684,10 @@ class ScratchCardController extends GetxController {
           if (_pendingScratchGroupId == null) {
             CustomToastService.showError(
               title: 'Error',
-              message: (response.message?.isNotEmpty == true)
-                  ? response.message!
-                  : 'Scratch group is not configured.',
+              message:
+                  (response.message?.isNotEmpty == true)
+                      ? response.message!
+                      : 'Scratch group is not configured.',
             );
             return null;
           }
@@ -732,10 +730,7 @@ class ScratchCardController extends GetxController {
     } catch (e, t) {
       debugPrint('ScratchCardScreen revealCard exception: $e');
       debugPrint('Stacktrace: $t');
-      CustomToastService.showError(
-        title: 'Error',
-        message: 'Error: $e',
-      );
+      CustomToastService.showError(title: 'Error', message: 'Error: $e');
     } finally {
       isRevealing.value = false;
     }
@@ -801,10 +796,7 @@ class ScratchCardController extends GetxController {
     } catch (e, t) {
       debugPrint('ScratchCardScreen createScratchAccount exception: $e');
       debugPrint('Stacktrace: $t');
-      CustomToastService.showError(
-        title: 'Error',
-        message: 'Error: $e',
-      );
+      CustomToastService.showError(title: 'Error', message: 'Error: $e');
     } finally {
       isCreatingAccount.value = false;
     }
@@ -1020,7 +1012,7 @@ class _ScratchCardsGridState extends State<_ScratchCardsGrid> {
       final hasLocked =
           widget.controller.summary.value?.hasUpcomingCard == true;
       final scratchCards =
-          widget.controller.cards.where((c) => c.isToday).toList();
+          widget.controller.cards.where((c) => c.isActive).toList();
       final totalCards = scratchCards.length;
       final visibleCards = _showAll ? totalCards : min(4, totalCards);
 
@@ -1051,6 +1043,7 @@ class _ScratchCardsGridState extends State<_ScratchCardsGrid> {
               ],
             ),
           ),
+          // Debug info to help identify data issues in release
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             child: GridView.builder(
@@ -2392,9 +2385,7 @@ class _ScratchHistoryListState extends State<_ScratchHistoryList> {
   Widget build(BuildContext context) {
     return Obx(() {
       final history =
-          widget.controller.cards
-              .where((c) => c.isScratched && !c.isToday)
-              .toList();
+          widget.controller.cards.where((c) => c.isScratched).toList();
 
       if (history.isEmpty) return const SizedBox.shrink();
 
@@ -3165,10 +3156,15 @@ class _LockedScratchCardGridItemState
                   Colors.black.withOpacity(0.31),
                   BlendMode.saturation,
                 ),
-                child: SvgPicture.asset(
-                  'assets/svg/more/scratch-card.svg',
-                  fit: BoxFit.cover,
-                  colorMapper: PurpleToAppColorMapper(AppColors.primary),
+                child: ColoredBox(
+                  color: FlavorConfig.instance.primaryColor,
+                  child: SvgPicture.asset(
+                    'assets/svg/more/scratch-card.svg',
+                    fit: BoxFit.cover,
+                    colorMapper: PurpleToAppColorMapper(
+                      Colors.white.withOpacity(0.3),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -3235,12 +3231,40 @@ class _ScratchCardGridItem extends StatelessWidget {
           children: [
             // Background SVG
             Positioned.fill(
-              child: SvgPicture.asset(
-                'assets/svg/more/scratch_complete_with_cup.svg',
-                fit: BoxFit.cover,
-                colorMapper: PurpleToAppColorMapper(AppColors.primary),
+              child: ColoredBox(
+                color: FlavorConfig.instance.primaryColor,
+                child: SvgPicture.asset(
+                  card.isScratched
+                      ? 'assets/svg/more/scratch_complete_with_cup.svg'
+                      : 'assets/svg/more/scratch-card.svg',
+                  fit: BoxFit.cover,
+                  colorMapper: PurpleToAppColorMapper(AppColors.primary),
+                  // colorMapper: PurpleToAppColorMapper(Colors.white.withOpacity(0.3)),
+                ),
               ),
             ),
+
+            // Text overlay for active cards
+            if (!card.isScratched)
+              Positioned.fill(
+                child: Center(
+                  child: Text(
+                    'Tap to Scratch',
+                    style: TextStyle(
+                      color: AppColors.pureWhite,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.5),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
             // Revealed overlay
             if (card.isScratched)
@@ -4527,13 +4551,13 @@ class PurpleToAppColorMapper extends ColorMapper {
         opaqueHex == '9D63D8';
 
     if (opaqueHex == '7E41B8') {
-      return AppColors.primary.withOpacity(0.9);
+      return targetColor.withOpacity(0.9);
     }
     if (opaqueHex == '5F259E') {
-      return AppColors.primary.withOpacity(0.9);
+      return targetColor.withOpacity(0.9);
     }
     if (isPurple) {
-      return AppColors.primary.withOpacity(0.7);
+      return targetColor.withOpacity(0.7);
     }
     return color;
   }
