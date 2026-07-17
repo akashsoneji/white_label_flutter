@@ -112,7 +112,9 @@ class AppColors {
   static Color get chipText => onColoredBackground;
 
   // ── Common Aliases ─────────────────────────────────────────────────────────
-  static Color get onColoredBackground => Colors.white;
+  static Color get onPrimary =>
+      primary.computeLuminance() > 0.5 ? pureBlack : pureWhite;
+  static Color get onColoredBackground => onPrimary;
 
   /// @deprecated Use `onColoredBackground` instead
   static Color get onPrimaryTint => onColoredBackground;
@@ -180,9 +182,12 @@ class AppColors {
   static const Color stepperComplete = Color(0xFFBDBDBD);
 
   // ── KYC & Feature Background Colors ────────────────────────────────────────
-  static const Color kycComplete = Color(0xFFE8F5E8);
-  static const Color kycActive = Color(0xFFF8F3FF);
-  static const Color kycBorder = Color(0xFFE3E7EF);
+  static Color get kycComplete =>
+      isDarkMode ? const Color(0xFF1E3324) : const Color(0xFFE8F5E8);
+  static Color get kycActive =>
+      isDarkMode ? primary.withValues(alpha: 0.15) : const Color(0xFFF8F3FF);
+  static Color get kycBorder =>
+      isDarkMode ? const Color(0xFF333333) : const Color(0xFFE3E7EF);
   static const Color featureBgGreen = Color(0xFFE8F5E8);
   static const Color featureBgPurple = Color(0xFFF8F3FF);
   static const Color featureBorder = Color(0xFFE3E7EF);
@@ -345,13 +350,13 @@ class AppColors {
       isDark ? success.withValues(alpha: 0.9) : successText;
 
   /// @deprecated Use `kycComplete` instead
-  static const Color kycStageComplete = Color(0xFFE8F5E8);
+  static Color get kycStageComplete => kycComplete;
 
   /// @deprecated Use `kycActive` instead
-  static const Color kycStageActive = Color(0xFFF8F3FF);
+  static Color get kycStageActive => kycActive;
 
   /// @deprecated Use `kycBorder` instead
-  static const Color kycFeatureBorder = Color(0xFFE3E7EF);
+  static Color get kycFeatureBorder => kycBorder;
 
   /// @deprecated Use `successBorder` instead
   static const Color successBorderLight = Color(0xFFBBF7D0);

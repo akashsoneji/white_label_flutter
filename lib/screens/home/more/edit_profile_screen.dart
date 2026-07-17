@@ -239,8 +239,8 @@ class _EditProfileState extends State<EditProfile> {
           topRight: Radius.circular(20.0),
         ),
         inputDecoration: InputDecoration(
-          labelText: 'Search',
-          hintText: 'Start typing to search',
+          labelText: languageService.tr('edit_profile_search'),
+          hintText: languageService.tr('edit_profile_start_typing'),
           prefixIcon: Icon(Icons.search, color: AppColors.textPrimary),
           border: OutlineInputBorder(
             borderSide: BorderSide(color: AppColors.placeholderSoft),
@@ -257,11 +257,30 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
+  void _applyDefaultDeviceCountryCode() {
+    final deviceCountryCode = Get.deviceLocale?.countryCode ?? 'US';
+    final countries = CountryService().getAll();
+    final countryToApply = countries.firstWhereOrNull(
+      (c) => c.countryCode.toUpperCase() == deviceCountryCode.toUpperCase(),
+    ) ?? countries.firstWhereOrNull((c) => c.countryCode == 'US');
+
+    if (countryToApply != null) {
+      final iso = _isoFromCountryCode(countryToApply.countryCode);
+      setState(() {
+        _selectedCountryCode = "+${countryToApply.phoneCode}";
+        _selectedCountryFlag = "${countryToApply.flagEmoji} +${countryToApply.phoneCode}";
+        _selectedIsoCode = iso;
+        _maxPhoneDigits = _maxDigitsForIso(iso);
+      });
+    }
+  }
+
   void _parseAndSetPhoneNumber(String fullNumber) {
     if (fullNumber.isEmpty) {
       if (_phoneController.text.isNotEmpty) {
         _phoneController.text = '';
       }
+      _applyDefaultDeviceCountryCode();
       return;
     }
 
@@ -308,23 +327,27 @@ class _EditProfileState extends State<EditProfile> {
       }
     } else {
       final selectedCountry = dropdownService.selectedCountry.value;
+      Country? country;
       if (selectedCountry != null) {
         final countries = CountryService().getAll();
-        final country = countries.firstWhereOrNull(
+        country = countries.firstWhereOrNull(
           (c) =>
               c.name.toLowerCase() == selectedCountry.name?.toLowerCase() ||
               c.countryCode.toLowerCase() ==
                   selectedCountry.iso2?.toLowerCase(),
         );
-        if (country != null) {
-          final iso = _isoFromCountryCode(country.countryCode);
-          setState(() {
-            _selectedCountryCode = "+${country.phoneCode}";
-            _selectedCountryFlag = "${country.flagEmoji} +${country.phoneCode}";
-            _selectedIsoCode = iso;
-            _maxPhoneDigits = _maxDigitsForIso(iso);
-          });
-        }
+      }
+      
+      if (country != null) {
+        final iso = _isoFromCountryCode(country!.countryCode);
+        setState(() {
+          _selectedCountryCode = "+${country!.phoneCode}";
+          _selectedCountryFlag = "${country!.flagEmoji} +${country!.phoneCode}";
+          _selectedIsoCode = iso;
+          _maxPhoneDigits = _maxDigitsForIso(iso);
+        });
+      } else {
+        _applyDefaultDeviceCountryCode();
       }
     }
 
@@ -394,7 +417,7 @@ class _EditProfileState extends State<EditProfile> {
                   ),
                   SizedBox(height: 20.h),
                   Text(
-                    'Select Country',
+                    languageService.tr('edit_profile_select_country'),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -408,7 +431,7 @@ class _EditProfileState extends State<EditProfile> {
                     autocorrect: false,
                     style: TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
-                      hintText: 'Search countries...',
+                      hintText: languageService.tr('edit_profile_search_countries'),
                       hintStyle: TextStyle(color: AppColors.textGrey),
                       prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
                       border: OutlineInputBorder(
@@ -492,7 +515,7 @@ class _EditProfileState extends State<EditProfile> {
                   ),
                   SizedBox(height: 20.h),
                   Text(
-                    'Select State',
+                    languageService.tr('edit_profile_select_state'),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -506,7 +529,7 @@ class _EditProfileState extends State<EditProfile> {
                     autocorrect: false,
                     style: TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
-                      hintText: 'Search states...',
+                      hintText: languageService.tr('edit_profile_search_states'),
                       hintStyle: TextStyle(color: AppColors.textGrey),
                       prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
                       border: OutlineInputBorder(
@@ -586,7 +609,7 @@ class _EditProfileState extends State<EditProfile> {
                   ),
                   SizedBox(height: 20.h),
                   Text(
-                    'Select City',
+                    languageService.tr('edit_profile_select_city'),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -600,7 +623,7 @@ class _EditProfileState extends State<EditProfile> {
                     autocorrect: false,
                     style: TextStyle(color: AppColors.textPrimary),
                     decoration: InputDecoration(
-                      hintText: 'Search cities...',
+                      hintText: languageService.tr('edit_profile_search_cities'),
                       hintStyle: TextStyle(color: AppColors.textGrey),
                       prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
                       border: OutlineInputBorder(
@@ -732,7 +755,7 @@ class _EditProfileState extends State<EditProfile> {
                 if (controller.isInitializing.value) {
                   return Center(
                     child: CommonLoadingWidget(
-                      message: 'Loading profile data...',
+                      message: languageService.tr('edit_profile_loading'),
                       size: 50.0,
                       color: AppColors.primary,
                     ),
@@ -1218,7 +1241,7 @@ class _EditProfileState extends State<EditProfile> {
                     () => RTLHelper.rtlButton(
                       text:
                           controller.isSaving.value
-                              ? 'Saving...'
+                              ? languageService.tr('edit_profile_saving')
                               : languageService.tr('navigation_save'),
                       onPressed:
                           controller.isFormValid.value &&
@@ -1251,45 +1274,51 @@ class _EditProfileState extends State<EditProfile> {
   Widget _buildCountryDropdown() {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
-      child: Obx(
-        () => RTLHelper.rtlTextField(
-          readOnly: true,
-          controller: TextEditingController(
-            text: dropdownService.selectedCountryText,
+      child: InkWell(
+        onTap: isProfileVerified ? null : () => _showCountryOptions(),
+        borderRadius: BorderRadius.circular(12),
+        child: AbsorbPointer(
+          absorbing: !isProfileVerified,
+          child: Obx(
+            () => RTLHelper.rtlTextField(
+              readOnly: true,
+              controller: TextEditingController(
+                text: dropdownService.selectedCountryText,
+              ),
+              decoration: InputDecoration(
+                labelText: languageService.tr('register_country'),
+                labelStyle: TextStyle(color: AppColors.textGrey),
+                floatingLabelStyle: TextStyle(color: AppColors.primary),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 16.h,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.error),
+                ),
+                suffixIcon: Icon(Icons.arrow_drop_down, color: AppColors.icongrey),
+              ),
+              validator: (value) {
+                if (dropdownService.selectedCountry.value == null) {
+                  return languageService.tr('validation_country_required');
+                }
+                return null;
+              },
+            ),
           ),
-          onTap: isProfileVerified ? null : () => _showCountryOptions(),
-          decoration: InputDecoration(
-            labelText: languageService.tr('register_country'),
-            labelStyle: TextStyle(color: AppColors.textGrey),
-            floatingLabelStyle: TextStyle(color: AppColors.primary),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 16.h,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.error),
-            ),
-            suffixIcon: Icon(Icons.arrow_drop_down, color: AppColors.icongrey),
-          ),
-          validator: (value) {
-            if (dropdownService.selectedCountry.value == null) {
-              return languageService.tr('validation_country_required');
-            }
-            return null;
-          },
         ),
       ),
     );
@@ -1298,43 +1327,49 @@ class _EditProfileState extends State<EditProfile> {
   Widget _buildStateDropdown() {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
-      child: Obx(
-        () => RTLHelper.rtlTextField(
-          readOnly: true,
-          controller: TextEditingController(
-            text: dropdownService.selectedStateText,
-          ),
-          onTap:
-              isProfileVerified
-                  ? null
-                  : (dropdownService.selectedCountry.value != null
-                      ? () => _showStateOptions()
-                      : null),
-          decoration: InputDecoration(
-            labelText: languageService.tr('edit_profile_state'),
-            labelStyle: TextStyle(color: AppColors.textGrey),
-            floatingLabelStyle: TextStyle(color: AppColors.primary),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 16.h,
+      child: InkWell(
+        onTap:
+            isProfileVerified
+                ? null
+                : (dropdownService.selectedCountry.value != null
+                    ? () => _showStateOptions()
+                    : null),
+        borderRadius: BorderRadius.circular(12),
+        child: AbsorbPointer(
+          absorbing: !isProfileVerified,
+          child: Obx(
+            () => RTLHelper.rtlTextField(
+              readOnly: true,
+              controller: TextEditingController(
+                text: dropdownService.selectedStateText,
+              ),
+              decoration: InputDecoration(
+                labelText: languageService.tr('edit_profile_state'),
+                labelStyle: TextStyle(color: AppColors.textGrey),
+                floatingLabelStyle: TextStyle(color: AppColors.primary),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 16.h,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.error),
+                ),
+                suffixIcon: Icon(Icons.arrow_drop_down, color: AppColors.icongrey),
+              ),
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.error),
-            ),
-            suffixIcon: Icon(Icons.arrow_drop_down, color: AppColors.icongrey),
           ),
         ),
       ),
@@ -1344,43 +1379,49 @@ class _EditProfileState extends State<EditProfile> {
   Widget _buildCityDropdown() {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
-      child: Obx(
-        () => RTLHelper.rtlTextField(
-          readOnly: true,
-          controller: TextEditingController(
-            text: dropdownService.selectedCityText,
-          ),
-          onTap:
-              isProfileVerified
-                  ? null
-                  : (dropdownService.selectedState.value != null
-                      ? () => _showCityOptions()
-                      : null),
-          decoration: InputDecoration(
-            labelText: languageService.tr('edit_profile_city'),
-            labelStyle: TextStyle(color: AppColors.textGrey),
-            floatingLabelStyle: TextStyle(color: AppColors.primary),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 16.h,
+      child: InkWell(
+        onTap:
+            isProfileVerified
+                ? null
+                : (dropdownService.selectedState.value != null
+                    ? () => _showCityOptions()
+                    : null),
+        borderRadius: BorderRadius.circular(12),
+        child: AbsorbPointer(
+          absorbing: !isProfileVerified,
+          child: Obx(
+            () => RTLHelper.rtlTextField(
+              readOnly: true,
+              controller: TextEditingController(
+                text: dropdownService.selectedCityText,
+              ),
+              decoration: InputDecoration(
+                labelText: languageService.tr('edit_profile_city'),
+                labelStyle: TextStyle(color: AppColors.textGrey),
+                floatingLabelStyle: TextStyle(color: AppColors.primary),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 16.h,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.error),
+                ),
+                suffixIcon: Icon(Icons.arrow_drop_down, color: AppColors.icongrey),
+              ),
             ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.error),
-            ),
-            suffixIcon: Icon(Icons.arrow_drop_down, color: AppColors.icongrey),
           ),
         ),
       ),

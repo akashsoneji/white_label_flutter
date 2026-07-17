@@ -82,8 +82,9 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
         title:
             Text(lang.tr('ticket_new_ticket'), style: AppTextStyles.screenTitle),
       ),
-      body: Form(
-        key: _formKey,
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
         child: ListView(
           padding: EdgeInsets.all(16.w),
           children: [
@@ -152,6 +153,9 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 14.h),
                       side: BorderSide(color: AppColors.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
                     ),
                     child: Text(lang.tr('ticket_cancel'),
                         style: TextStyle(color: AppColors.textPrimary)),
@@ -166,6 +170,9 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
                       ),
                       child: controller.isSubmitting.value
                           ? SizedBox(
@@ -189,6 +196,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

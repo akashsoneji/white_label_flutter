@@ -73,6 +73,7 @@ class DashboardScreen extends StatelessWidget {
         : Get.put(WalletController());
 
     return Container(
+      constraints: BoxConstraints(maxWidth: 150.w),
       height: 40.h,
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -102,21 +103,26 @@ class DashboardScreen extends StatelessWidget {
                   color: AppColors.primary,
                 ),
                 SizedBox(width: 6.w),
-                Obx(() {
-                  final bal = walletCtrl.balance.value;
-                  final displayBal = bal.isEmpty ? '0.00' : bal;
-                  final formattedBal = displayBal.startsWith('\$')
-                      ? displayBal
-                      : '\$$displayBal';
-                  return Text(
-                    formattedBal,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  );
-                }),
+                Flexible(
+                  child: Obx(() {
+                    final bal = walletCtrl.balance.value;
+                    final displayBal = bal.isEmpty ? '0.00' : bal;
+                    final formattedBal = displayBal.startsWith('\$')
+                        ? displayBal
+                        : '\$$displayBal';
+                    return FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        formattedBal,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
               ],
             ),
           ),
@@ -132,6 +138,7 @@ class DashboardScreen extends StatelessWidget {
         : Get.put(WalletController());
 
     return Container(
+      constraints: BoxConstraints(maxWidth: 150.w),
       height: 36.h,
       decoration: BoxDecoration(
         color: CelTheme.buyTint(context),
@@ -155,21 +162,26 @@ class DashboardScreen extends StatelessWidget {
                   color: CelTheme.buyBlue,
                 ),
                 SizedBox(width: 6.w),
-                Obx(() {
-                  final bal = walletCtrl.balance.value;
-                  final displayBal = bal.isEmpty ? '0.00' : bal;
-                  final formattedBal = displayBal.startsWith('\$')
-                      ? displayBal
-                      : '\$$displayBal';
-                  return Text(
-                    formattedBal,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: CelTheme.mainText(context),
-                    ),
-                  );
-                }),
+                Flexible(
+                  child: Obx(() {
+                    final bal = walletCtrl.balance.value;
+                    final displayBal = bal.isEmpty ? '0.00' : bal;
+                    final formattedBal = displayBal.startsWith('\$')
+                        ? displayBal
+                        : '\$$displayBal';
+                    return FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        formattedBal,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: CelTheme.mainText(context),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
               ],
             ),
           ),
@@ -1146,17 +1158,23 @@ class DashboardScreen extends StatelessWidget {
               backgroundColor: AppColors.tradeBackgroundCenterColor,
               showBack: false,
               centerTitle: true,
+              leadingWidth: 180.w,
+              leading: Padding(
+                padding: EdgeInsets.only(left: 16.w),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _buildWalletHeaderButton(),
+                ),
+              ),
               title: Text(
                 languageService.tr('dashboard_title'),
                 style: AppTextStyles.screenTitle,
               ),
               actions: [
-                _buildWalletHeaderButton(),
-                SizedBox(width: 8.w),
                 _buildHeaderIconButton(
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
-                  margin: EdgeInsets.only(right: 8.w),
+                  margin: EdgeInsets.only(right: 16.w),
                 ),
               ],
             )
@@ -1167,10 +1185,15 @@ class DashboardScreen extends StatelessWidget {
               elevation: 0,
               surfaceTintColor: Colors.transparent,
               automaticallyImplyLeading: false,
-              // Custom back + title, matching Celestial chart/history screens
               titleSpacing: 0,
-              leading: _buildCelestialBackButton(context),
-              leadingWidth: 44.w,
+              leadingWidth: 180.w,
+              leading: Padding(
+                padding: EdgeInsets.only(left: 16.w),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _buildCelestialWalletHeaderButton(context),
+                ),
+              ),
               centerTitle: false,
               title: Padding(
                 padding: EdgeInsets.only(left: 4.w),
@@ -1184,14 +1207,12 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               actions: [
-                _buildCelestialWalletHeaderButton(context),
-                SizedBox(width: 8.w),
                 _buildCelestialHeaderIconButton(
                   context,
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(width: 16.w),
               ],
             )
             : AppBar(
@@ -1199,18 +1220,24 @@ class DashboardScreen extends StatelessWidget {
               backgroundColor: AppColors.tradeBackgroundCenterColor,
               elevation: 0,
               automaticallyImplyLeading: false,
+              leadingWidth: 160.w,
+              leading: Padding(
+                padding: EdgeInsets.only(left: 16.w),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _buildWalletHeaderButton(),
+                ),
+              ),
               title: Text(
                 languageService.tr('dashboard_title'),
                 style: AppTextStyles.screenTitle,
               ),
               centerTitle: true,
               actions: [
-                _buildWalletHeaderButton(),
-                SizedBox(width: 8.w),
                 _buildHeaderIconButton(
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
-                  margin: EdgeInsets.only(right: 8.w),
+                  margin: EdgeInsets.only(right: 16.w),
                 ),
               ],
             );
@@ -1236,8 +1263,7 @@ class DashboardScreen extends StatelessWidget {
     if (isVantage) {
       return Obx(
         () => VantageDashboardLayout(
-          appBar:
-              null, // AppBar moved to SliverAppBar in _buildDashboardContent
+          appBar: appBar,
           backgroundColor: AppColors.tradeBackgroundCenterColor,
           onRefresh: _onRefresh,
           dimmed: controller.isBottomSheetOpen.value,
