@@ -693,7 +693,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
         title: Text(
-          languageService.tr('setting_title'),
+          languageService.tr('dashboard_title'),
           style: AppTextStyles.screenTitle,
         ),
         centerTitle: true,
@@ -890,19 +890,17 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   final completion = _calculateCompletion(stage);
                   return completion == 100
                       ? const SizedBox.shrink()
-                      : Column(
-                          children: [
-                            VerifyAccountCard(
-                              title: languageService.tr('verify_your_account'),
-                              subTitle: languageService.tr(
-                                'complete_verification_to_unlock',
-                              ),
-                              percentage: '',
-                            ),
-                          ],
+                      : VerifyAccountCard(
+                          title: languageService.tr('verify_your_account'),
+                          subTitle: languageService.tr(
+                            'complete_verification_to_unlock',
+                          ),
+                          percentage: '',
                         );
                 },
               ),
+              SizedBox(height: 8.h),
+              const _CreateAccountActionCard(),
               SizedBox(height: 8.h),
 
               // Quick Actions Bar
@@ -1323,6 +1321,98 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CreateAccountActionCard extends StatelessWidget {
+  const _CreateAccountActionCard();
+
+  void _openRealAccount() {
+    Get.back(closeOverlays: true);
+    Get.toNamed(Routes.CHOOSE_ACCOUNT);
+  }
+
+  void _openDemoAccount() {
+    Get.back(closeOverlays: true);
+    Get.toNamed(Routes.CHOOSE_ACCOUNT, arguments: {'isDemo': true});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = Get.find<LanguageService>();
+    return Row(
+      children: [
+        Expanded(
+          child: _AccountActionButton(
+            icon: 'wallet',
+            label: lang.tr('create_account_open_real_account'),
+            color: AppColors.quickActionGreen,
+            onTap: _openRealAccount,
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: _AccountActionButton(
+            icon: 'demo-account',
+            label: lang.tr('create_account_open_demo_account'),
+            color: AppColors.quickActionBlue,
+            onTap: _openDemoAccount,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AccountActionButton extends StatelessWidget {
+  final String icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _AccountActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 14.h),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(
+              'assets/svg/more/$icon.svg',
+              width: 18.w,
+              height: 18.w,
+              color: color,
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );

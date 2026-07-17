@@ -1,16 +1,16 @@
 {
-  "default": "riyadex",
+  "default": "skyriss",
   "brands": [
-    "riyadex",
+    "skyriss",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "riyadex",
+      "name": "skyriss",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "Riyadex",
-      "themeMode": "both"
+      "label": "Skyriss",
+      "themeMode": "dark"
     },
     {
       "name": "vantage",

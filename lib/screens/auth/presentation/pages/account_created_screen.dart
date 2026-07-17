@@ -156,11 +156,11 @@ class AccountCreatedScreen extends StatelessWidget {
               );
             },
           ),
-          SizedBox(height: 12.h),
-          VantageOutlinedButton(
-            text: languageService.tr("common_skip_for_now"),
-            onPressed: () => Get.offAllNamed(AppPages.TRADING),
-          ),
+          // SizedBox(height: 12.h),
+          // VantageOutlinedButton(
+          //   text: languageService.tr("common_skip_for_now"),
+          //   onPressed: () => Get.offAllNamed(AppPages.TRADING),
+          // ),
         ],
       );
     }

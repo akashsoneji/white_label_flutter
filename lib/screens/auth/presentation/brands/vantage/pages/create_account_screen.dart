@@ -90,6 +90,10 @@ class _VantageCreateAccountScreenState
     showCountryPicker(
       context: context,
       showPhoneCode: true,
+      useSafeArea: true,
+      countryListTheme: CountryListThemeData(
+        bottomSheetHeight: MediaQuery.of(context).size.height * 0.65,
+      ),
       onSelect: (Country country) {
         setState(() {
           _selectedCountryCode = "+${country.phoneCode}";
