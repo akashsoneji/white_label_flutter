@@ -1,0 +1,7 @@
+1087:                      'Bid Price (SELL): ${PrecisionHelper.formatPrice(bidPrice, decimals: _getCurrentDigits())}',
+1090:                      'Ask Price (BUY): ${PrecisionHelper.formatPrice(askPrice, decimals: _getCurrentDigits())}',
+1576:    //    purple BUY button, quantity + chart-icons + bell dock.
+2250:                // SELL Button - now wrapped in GestureDetector
+2462:                              'SELL',
+2484:                // BUY Button - now wrapped in GestureDetector
+2696:                              'BUY',

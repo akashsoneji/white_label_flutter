@@ -1,0 +1,11 @@
+42:  late final bool _isVantage;
+93:    final tradeIndex = _isVantage ? 2 : 2;
+116:    _isVantage = FlavorConfig.isVantage();
+123:      final maxIndex = _isVantage ? 4 : 4;
+132:    if (_isVantage) {
+208:    final dashboardIndex = _isVantage ? 3 : 3;
+244:  void _onTabChanged(int index) {
+261:    final tradeIndex = _isVantage ? 2 : 2;
+262:    final dashboardIndex = _isVantage ? 3 : 3;
+263:    final moreIndex = _isVantage ? 4 : 4;
+275:    if (_isVantage && index == 1 && previousIndex != 1) {

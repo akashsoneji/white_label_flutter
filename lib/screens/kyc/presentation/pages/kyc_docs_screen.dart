@@ -411,7 +411,7 @@ class KycDocsScreen extends StatelessWidget {
         break;
       case 'rejected':
         bg = Colors.red;
-        text = 'Rejected - re-upload';
+        text = 'Rejected  \nre-upload';
         break;
       default:
         bg = Colors.orange;

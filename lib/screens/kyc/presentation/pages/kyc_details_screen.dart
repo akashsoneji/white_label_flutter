@@ -67,6 +67,20 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
   IsoCode? _selectedIsoCode;
   int _maxPhoneDigits = 15;
 
+  // Per-field error state
+  String? _titleError;
+  String? _firstNameError;
+  String? _lastNameError;
+  String? _emailError;
+  String? _dobError;
+  String? _genderError;
+  String? _phoneError;
+  String? _countryError;
+  String? _stateError;
+  String? _cityError;
+  String? _postcodeError;
+  String? _addressError;
+
   @override
   void initState() {
     super.initState();
@@ -423,41 +437,45 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                       _buildFormField(
                         label: languageService.tr('kyc_details_first_name'),
                         controller: _firstNameController,
+                        errorText: _firstNameError,
                       ),
 
                       _buildFormField(
                         label: languageService.tr('kyc_details_last'),
                         controller: _lastNameController,
+                        errorText: _lastNameError,
                       ),
 
                       _buildFormField(
                         label: languageService.tr('kyc_details_email'),
                         controller: _emailController,
+                        errorText: _emailError,
                       ),
 
                       _buildDateOfBirthField(),
 
                       _buildGenderDropdown(),
 
-                      // _buildFormField(label: 'OTP', controller: _otpController),
                       _buildPhoneField(),
 
                       // Country, State, and City dropdowns
                       _buildCountryDropdown(),
                       _buildStateDropdown(),
                       _buildCityDropdown(),
-                      _buildFormField(
-                        label: languageService.tr('kyc_details_postcode'),
-                        controller: _postcodeController,
-                        maxLines: 1,
-                      ),
 
                       _buildFormField(
                         label: languageService.tr(
                           'kyc_details_residence_address',
                         ),
                         controller: _addressController,
+                        errorText: _addressError,
                         maxLines: 3,
+                      ),
+                       _buildFormField(
+                        label: languageService.tr('kyc_details_postcode'),
+                        controller: _postcodeController,
+                        errorText: _postcodeError,
+                        maxLines: 1,
                       ),
 
                       SizedBox(height: 50.h),
@@ -514,8 +532,10 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
   Widget _buildFormField({
     required String label,
     required TextEditingController controller,
+    String? errorText,
     int maxLines = 1,
   }) {
+    final hasError = errorText != null;
     return Padding(
       padding: EdgeInsets.only(bottom: 24.h),
       child: RTLHelper.rtlTextField(
@@ -524,7 +544,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         style: AppTextStyles.black16400h1_5,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: AppColors.textGrey),
+          labelStyle: TextStyle(
+            color: hasError ? AppColors.error : AppColors.textGrey,
+          ),
           floatingLabelStyle: TextStyle(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
@@ -532,11 +554,15 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(
+              color: hasError ? AppColors.error : AppColors.border,
+            ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(
+              color: hasError ? AppColors.error : AppColors.border,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -546,12 +572,15 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: AppColors.error),
           ),
+          errorText: errorText,
+          helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
         ),
       ),
     );
   }
 
   Widget _buildDateOfBirthField() {
+    final hasError = _dobError != null;
     return Padding(
       padding: EdgeInsets.only(bottom: 24.h),
       child: RTLHelper.rtlTextField(
@@ -561,7 +590,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         style: AppTextStyles.black16400h1_5,
         decoration: InputDecoration(
           labelText: 'Date of Birth (yyyy-MM-dd)',
-          labelStyle: TextStyle(color: AppColors.textGrey),
+          labelStyle: TextStyle(
+            color: hasError ? AppColors.error : AppColors.textGrey,
+          ),
           floatingLabelStyle: TextStyle(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
@@ -573,7 +604,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(
+              color: hasError ? AppColors.error : AppColors.border,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -587,15 +620,18 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
             padding: EdgeInsets.symmetric(horizontal: 14.w),
             child: RTLHelper.rtlIcon(
               Icons.calendar_today,
-              color: AppColors.icongrey,
+              color: hasError ? AppColors.error : AppColors.icongrey,
             ),
           ),
+          errorText: _dobError,
+          helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
         ),
       ),
     );
   }
 
   Widget _buildPhoneField() {
+    final hasError = _phoneError != null;
     return Padding(
       padding: EdgeInsets.only(bottom: 24.h),
       child: Row(
@@ -637,16 +673,22 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
               style: TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: 'Phone Number',
-                labelStyle: TextStyle(color: AppColors.textGrey),
+                labelStyle: TextStyle(
+                  color: hasError ? AppColors.error : AppColors.textGrey,
+                ),
                 floatingLabelStyle: TextStyle(color: AppColors.primary),
                 counterText: '',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.border),
+                  borderSide: BorderSide(
+                    color: hasError ? AppColors.error : AppColors.border,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.border),
+                  borderSide: BorderSide(
+                    color: hasError ? AppColors.error : AppColors.border,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -660,6 +702,8 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                   horizontal: 16.w,
                   vertical: 16.h,
                 ),
+                errorText: _phoneError,
+                helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
               ),
               validator: (value) {
                 final digits = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
@@ -677,6 +721,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
 
   // Country Dropdown
   Widget _buildCountryDropdown() {
+    final hasError = _countryError != null;
     return Padding(
       padding: EdgeInsets.only(bottom: 24.h),
       child: Obx(
@@ -688,7 +733,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           onTap: () => _showCountryOptions(),
           decoration: InputDecoration(
             labelText: 'Country',
-            labelStyle: TextStyle(color: AppColors.textGrey),
+            labelStyle: TextStyle(
+              color: hasError ? AppColors.error : AppColors.textGrey,
+            ),
             floatingLabelStyle: TextStyle(color: AppColors.primary),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16.w,
@@ -696,11 +743,15 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: BorderSide(
+                color: hasError ? AppColors.error : AppColors.border,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: BorderSide(
+                color: hasError ? AppColors.error : AppColors.border,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -730,9 +781,11 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
               padding: EdgeInsets.symmetric(horizontal: 14.w),
               child: RTLHelper.rtlIcon(
                 Icons.keyboard_arrow_down,
-                color: AppColors.icongrey,
+                color: hasError ? AppColors.error : AppColors.icongrey,
               ),
             ),
+            errorText: _countryError,
+            helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
           ),
         ),
       ),
@@ -741,6 +794,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
 
   // State Dropdown
   Widget _buildStateDropdown() {
+    final hasError = _stateError != null;
     return Padding(
       padding: EdgeInsets.only(bottom: 24.h),
       child: Obx(
@@ -758,7 +812,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                           : null,
                   decoration: InputDecoration(
                     labelText: 'State',
-                    labelStyle: TextStyle(color: AppColors.textGrey),
+                    labelStyle: TextStyle(
+                      color: hasError ? AppColors.error : AppColors.textGrey,
+                    ),
                     floatingLabelStyle: TextStyle(color: AppColors.primary),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 16.w,
@@ -766,11 +822,15 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(
+                        color: hasError ? AppColors.error : AppColors.border,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(
+                        color: hasError ? AppColors.error : AppColors.border,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -803,12 +863,15 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 14.w),
                       child: RTLHelper.rtlIcon(
                         Icons.keyboard_arrow_down,
-                        color:
-                            dropdownService.selectedCountry.value != null
+                        color: hasError
+                            ? AppColors.error
+                            : (dropdownService.selectedCountry.value != null
                                 ? AppColors.icongrey
-                                : AppColors.icongrey.withOpacity(0.5),
+                                : AppColors.icongrey.withOpacity(0.5)),
                       ),
                     ),
+                    errorText: _stateError,
+                    helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
                   ),
                 ),
       ),
@@ -823,6 +886,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
 
   // Title Dropdown
   Widget _buildTitleDropdown() {
+    final hasError = _titleError != null;
     return Padding(
       padding: EdgeInsets.only(bottom: 24.h),
       child: RTLHelper.rtlTextField(
@@ -833,7 +897,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         onTap: () => _showTitleOptions(),
         decoration: InputDecoration(
           labelText: languageService.tr('kyc_details_title'),
-          labelStyle: TextStyle(color: AppColors.textGrey),
+          labelStyle: TextStyle(
+            color: hasError ? AppColors.error : AppColors.textGrey,
+          ),
           floatingLabelStyle: TextStyle(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
@@ -841,11 +907,15 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(
+              color: hasError ? AppColors.error : AppColors.border,
+            ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(
+              color: hasError ? AppColors.error : AppColors.border,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -859,9 +929,11 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
             padding: EdgeInsets.symmetric(horizontal: 14.w),
             child: RTLHelper.rtlIcon(
               Icons.keyboard_arrow_down,
-              color: AppColors.icongrey,
+              color: hasError ? AppColors.error : AppColors.icongrey,
             ),
           ),
+          errorText: _titleError,
+          helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
         ),
       ),
     );
@@ -909,6 +981,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                           onTap: () {
                             setState(() {
                               _selectedTitle = title.toLowerCase();
+                              _titleError = null;
                             });
                             Navigator.pop(context);
                           },
@@ -962,6 +1035,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
 
   // Gender Dropdown
   Widget _buildGenderDropdown() {
+    final hasError = _genderError != null;
     return Padding(
       padding: EdgeInsets.only(bottom: 24.h),
       child: RTLHelper.rtlTextField(
@@ -972,7 +1046,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         onTap: () => _showGenderOptions(),
         decoration: InputDecoration(
           labelText: 'Gender',
-          labelStyle: TextStyle(color: AppColors.textGrey),
+          labelStyle: TextStyle(
+            color: hasError ? AppColors.error : AppColors.textGrey,
+          ),
           floatingLabelStyle: TextStyle(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
@@ -980,11 +1056,15 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(
+              color: hasError ? AppColors.error : AppColors.border,
+            ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(
+              color: hasError ? AppColors.error : AppColors.border,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -998,9 +1078,11 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
             padding: EdgeInsets.symmetric(horizontal: 14.w),
             child: RTLHelper.rtlIcon(
               Icons.keyboard_arrow_down,
-              color: AppColors.icongrey,
+              color: hasError ? AppColors.error : AppColors.icongrey,
             ),
           ),
+          errorText: _genderError,
+          helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
         ),
       ),
     );
@@ -1048,6 +1130,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                           onTap: () {
                             setState(() {
                               _selectedGender = gender.toLowerCase();
+                              _genderError = null;
                             });
                             Navigator.pop(context);
                           },
@@ -1101,6 +1184,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
 
   // City Dropdown
   Widget _buildCityDropdown() {
+    final hasError = _cityError != null;
     return Padding(
       padding: EdgeInsets.only(bottom: 24.h),
       child: Obx(
@@ -1118,7 +1202,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                           : null,
                   decoration: InputDecoration(
                     labelText: 'City',
-                    labelStyle: TextStyle(color: AppColors.textGrey),
+                    labelStyle: TextStyle(
+                      color: hasError ? AppColors.error : AppColors.textGrey,
+                    ),
                     floatingLabelStyle: TextStyle(color: AppColors.primary),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 16.w,
@@ -1126,11 +1212,15 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(
+                        color: hasError ? AppColors.error : AppColors.border,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.border),
+                      borderSide: BorderSide(
+                        color: hasError ? AppColors.error : AppColors.border,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -1163,12 +1253,15 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 14.w),
                       child: RTLHelper.rtlIcon(
                         Icons.keyboard_arrow_down,
-                        color:
-                            dropdownService.selectedState.value != null
+                        color: hasError
+                            ? AppColors.error
+                            : (dropdownService.selectedState.value != null
                                 ? AppColors.icongrey
-                                : AppColors.icongrey.withOpacity(0.5),
+                                : AppColors.icongrey.withOpacity(0.5)),
                       ),
                     ),
+                    errorText: _cityError,
+                    helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
                   ),
                 ),
       ),
@@ -1306,6 +1399,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
 
                           return InkWell(
                             onTap: () {
+                              setState(() => _countryError = null);
                               dropdownService.selectCountry(country);
                               Navigator.pop(context);
                             },
@@ -1487,6 +1581,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
 
                           return InkWell(
                             onTap: () {
+                              setState(() => _stateError = null);
                               dropdownService.selectState(state);
                               Navigator.pop(context);
                             },
@@ -1667,6 +1762,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
 
                           return InkWell(
                             onTap: () {
+                              setState(() => _cityError = null);
                               dropdownService.selectCity(city);
                               Navigator.pop(context);
                             },
@@ -1749,6 +1845,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
       setState(() {
         _dobController.text =
             "${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+        _dobError = null;
       });
     }
   }
@@ -1776,6 +1873,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
   void _handleSave() {
     // Validate form fields
     if (_firstNameController.text.trim().isEmpty) {
+      setState(() {
+        _firstNameError = 'Please enter your first name';
+      });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Please enter your first name',
@@ -1786,6 +1886,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
     }
 
     if (_lastNameController.text.trim().isEmpty) {
+      setState(() {
+        _lastNameError = 'Please enter your last name';
+      });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Please enter your last name',
@@ -1796,6 +1899,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
     }
 
     if (_emailController.text.trim().isEmpty) {
+      setState(() {
+        _emailError = 'Please enter your email';
+      });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Please enter your email',
@@ -1806,6 +1912,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
     }
 
     if (_phoneController.text.trim().isEmpty) {
+      setState(() {
+        _phoneError = 'Please enter your phone number';
+      });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Please enter your phone number',
@@ -1818,10 +1927,39 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
     final digits = _phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
     final combinedPhone = '$_selectedCountryCode$digits';
 
-    if (!dropdownService.isComplete) {
+    if (dropdownService.selectedCountry.value == null) {
+      setState(() {
+        _countryError = 'Please select country';
+      });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please select country, state, and city',
+          message: 'Please select country',
+          title: 'Error',
+        );
+      }
+      return;
+    }
+
+    if (dropdownService.selectedState.value == null) {
+      setState(() {
+        _stateError = 'Please select state';
+      });
+      if (Get.isRegistered<AppNotificationController>()) {
+        Get.find<AppNotificationController>().showError(
+          message: 'Please select state',
+          title: 'Error',
+        );
+      }
+      return;
+    }
+
+    if (dropdownService.selectedCity.value == null) {
+      setState(() {
+        _cityError = 'Please select city';
+      });
+      if (Get.isRegistered<AppNotificationController>()) {
+        Get.find<AppNotificationController>().showError(
+          message: 'Please select city',
           title: 'Error',
         );
       }
@@ -1829,9 +1967,25 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
     }
 
     if (_addressController.text.trim().isEmpty) {
+      setState(() {
+        _addressError = 'Please enter your address';
+      });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Please enter your address',
+          title: 'Error',
+        );
+      }
+      return;
+    }
+
+    if (_postcodeController.text.trim().isEmpty) {
+      setState(() {
+        _postcodeError = 'Please enter your postcode';
+      });
+      if (Get.isRegistered<AppNotificationController>()) {
+        Get.find<AppNotificationController>().showError(
+          message: 'Please enter your postcode',
           title: 'Error',
         );
       }
@@ -1849,6 +2003,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
     // }
 
     if (_selectedTitle.trim().isEmpty) {
+      setState(() {
+        _titleError = 'Please select title';
+      });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Please select title',
@@ -1859,6 +2016,9 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
     }
 
     if (_dobController.text.trim().isEmpty) {
+      setState(() {
+        _dobError = 'Please enter date of birth';
+      });
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: 'Please enter date of birth',

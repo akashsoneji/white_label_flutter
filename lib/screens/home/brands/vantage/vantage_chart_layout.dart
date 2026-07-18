@@ -612,8 +612,8 @@ class _Header extends StatelessWidget {
             onTap: onSettingsTap,
             radius: 24,
             child: Container(
-              width: 36.w,
-              height: 36.h,
+              width: 26.w,
+              height: 26.h,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: primary.withValues(alpha: 0.12),
@@ -622,6 +622,8 @@ class _Header extends StatelessWidget {
               child: AppSvgIcon(
                 assetPath: 'assets/svg/bottom_navigation/candle_bold.svg',
                 color: iconColor,
+                height: 18,
+                width: 18,
               ),
             ),
           ),

@@ -230,7 +230,7 @@ class _KycSuccessScreenState extends State<KycSuccessScreen>
                     child: FadeTransition(
                       opacity: _titleOpacity,
                       child: Text(
-                        'Verification Successful!',
+                        'Withdrawal Method Added!',
                         style: AppTextStyles.centerbodyHeading,
                         textAlign: TextAlign.center,
                       ),
@@ -250,7 +250,7 @@ class _KycSuccessScreenState extends State<KycSuccessScreen>
                     child: FadeTransition(
                       opacity: _messageOpacity,
                       child: Text(
-                        'Your identity and residential proof have been successfully verified.',
+                        'Your withdrawal method has been added and is pending verification.',
                         style: AppTextStyles.grey14400h57,
                         textAlign: TextAlign.center,
                       ),

@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/kyc/presentation/pages/kyc_camera_screen.dart';
 import 'package:crm_app/screens/kyc/data/repositories/kyc_repository.dart';
 
@@ -125,8 +128,91 @@ class KycDocsController extends GetxController {
         cameraController = null;
       }
 
+      // Pick camera lens (front/back) when both are available
+      final hasFront = _cameras!.any(
+        (c) => c.lensDirection == CameraLensDirection.front,
+      );
+      final hasBack = _cameras!.any(
+        (c) => c.lensDirection == CameraLensDirection.back,
+      );
+
+      CameraDescription selectedCamera;
+      if (hasFront && hasBack) {
+        final picked = await Get.bottomSheet<CameraDescription>(
+          Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: 24.h,
+                  horizontal: 24.w,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    Text(
+                      'Select Camera',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+                    ListTile(
+                      leading: const Icon(Icons.camera_front),
+                      title: const Text('Front Camera'),
+                      onTap: () => Get.back(
+                        result: _cameras!.firstWhere(
+                          (c) =>
+                              c.lensDirection == CameraLensDirection.front,
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.camera_rear),
+                      title: const Text('Back Camera'),
+                      onTap: () => Get.back(
+                        result: _cameras!.firstWhere(
+                          (c) => c.lensDirection == CameraLensDirection.back,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          isScrollControlled: true,
+        );
+        if (picked == null) {
+          return; // User dismissed the picker
+        }
+        selectedCamera = picked;
+      } else {
+        selectedCamera = hasFront
+            ? _cameras!.firstWhere(
+                (c) => c.lensDirection == CameraLensDirection.front,
+              )
+            : _cameras!.firstWhere(
+                (c) => c.lensDirection == CameraLensDirection.back,
+              );
+      }
+
       cameraController = CameraController(
-        _cameras![0],
+        selectedCamera,
         ResolutionPreset
             .medium, // Use medium instead of high for better memory management
       );

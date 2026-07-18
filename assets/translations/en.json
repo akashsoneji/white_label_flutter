@@ -555,6 +555,7 @@
   "kyc_verification_verification_complete": "Verification Complete",
   "kyc_add_bank_title": "Add Bank",
   "kyc_account_holder_name": "Account Holder Name *",
+  "kyc_address_holder_name": "Address Holder Name *",
   "kyc_bank_name": "Bank Name *",
   "kyc_bank_account_number": "Bank Account Number *",
   "kyc_confirm_bank_account_number": "Confirm Bank Account Number *",

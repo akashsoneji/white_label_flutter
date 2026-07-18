@@ -1,0 +1,7 @@
+Analyzing trading_main_screen.dart...                           
+
+warning • Unused import: '../../services/symbol_selection_service.dart'. Try removing the import directive • lib/screens/home/trading_main_screen.dart:24:8 • unused_import
+warning • Unused import: 'package:crm_app/screens/kyc/view_models/compliance_controller.dart'. Try removing the import directive • lib/screens/home/trading_main_screen.dart:27:8 • unused_import
+warning • The value of the local variable 'documentsSubmitted' isn't used. Try removing the variable or using it • lib/screens/home/trading_main_screen.dart:363:15 • unused_local_variable
+
+3 issues found. (ran in 3.7s)

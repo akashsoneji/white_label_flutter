@@ -190,10 +190,13 @@ class _KycBankScreenState extends State<KycBankScreen> {
                                     _buildCurrencyField(),
                                     // SizedBox(height: 8.h),
 
-                                    // Account Holder Name (common field)
+                                    // Account Holder / Address Holder (common field)
                                     _buildFormField(
                                       languageService.tr(
-                                        'kyc_account_holder_name',
+                                        controller.selectedAccountType.value ==
+                                                'Crypto'
+                                            ? 'kyc_address_holder_name'
+                                            : 'kyc_account_holder_name',
                                       ),
                                       _accountHolderController,
                                       onChanged:
@@ -298,7 +301,11 @@ class _KycBankScreenState extends State<KycBankScreen> {
                                     // Account Holder Name (common field)
                                     _buildFormField(
                                       languageService.tr(
-                                        'kyc_account_holder_name',
+                                         controller.selectedAccountType.value ==
+                                                'Crypto'
+                                            ? 'kyc_address_holder_name'
+                                            : 'kyc_account_holder_name',
+                                      
                                       ),
                                       _accountHolderController,
                                       onChanged:

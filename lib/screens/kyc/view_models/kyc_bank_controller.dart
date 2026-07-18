@@ -27,7 +27,7 @@ class KycBankController extends GetxController {
   final RxString successMessage = ''.obs;
 
   // Account type selection
-  final RxString selectedAccountType = 'Bank'.obs;
+  final RxString selectedAccountType = 'Crypto'.obs;
   final RxString selectedRelationship = 'Self'.obs;
   final RxList<String> accountTypes = ['Bank', 'Crypto', 'UPI'].obs;
   final RxList<String> relationShips =

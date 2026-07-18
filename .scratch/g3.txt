@@ -1,0 +1,2 @@
+1580:      // VantageChartLayout manages its own symbol-picker (favourites
+1583:      return VantageChartLayout(

@@ -9,6 +9,7 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/widgets/authenticated_network_image.dart';
 
 class BankListScreen extends StatefulWidget {
   const BankListScreen({Key? key}) : super(key: key);
@@ -354,6 +355,42 @@ class _BankListScreenState extends State<BankListScreen> {
     if (_hasValue(method.currency)) {
       detailRows.add(_buildDetailRow('Currency', method.currency!));
     }
+    if (_hasValue(method.cryptoNetwork)) {
+      detailRows.add(_buildDetailRow('Network', method.cryptoNetwork!));
+    }
+
+    // Proof image — fetched with auth header, tap to open full-screen view.
+    if (_hasValue(method.proofImg)) {
+      detailRows.add(
+        Padding(
+          padding: EdgeInsets.only(top: 8.h, bottom: 4.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Proof',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              GestureDetector(
+                onTap: () => _openProofViewer(method.proofImg!),
+                child: AuthenticatedNetworkImage(
+                  url: method.proofImg!,
+                  width: double.infinity,
+                  height: 180.h,
+                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -402,6 +439,16 @@ class _BankListScreenState extends State<BankListScreen> {
     );
   }
 
+  // Full-screen proof image viewer with pinch-to-zoom.
+  void _openProofViewer(String url) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => _ProofImageViewer(url: url),
+      ),
+    );
+  }
+
   // Get display title for withdrawal method
   String _getDisplayTitle(WithdrawalMethods method) {
     switch (method.withdrawalMethod?.toLowerCase()) {
@@ -434,5 +481,41 @@ class _BankListScreenState extends State<BankListScreen> {
       default:
         return '';
     }
+  }
+}
+
+/// Full-screen viewer for the proof image. Pinch-to-zoom is delegated to
+/// [InteractiveViewer] which gives natural pan + scale gestures out of the
+/// box. The image is fetched via [AuthenticatedNetworkImage] so the auth
+/// token is attached.
+class _ProofImageViewer extends StatelessWidget {
+  const _ProofImageViewer({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+        title: const Text(
+          'Proof',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      body: Center(
+        child: InteractiveViewer(
+          minScale: 1,
+          maxScale: 4,
+          child: AuthenticatedNetworkImage(
+            url: url,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    );
   }
 }
