@@ -608,25 +608,25 @@ class _Header extends StatelessWidget {
             ),
           ),
           // Top-right settings/sound icon
-          InkResponse(
-            onTap: onSettingsTap,
-            radius: 24,
-            child: Container(
-              width: 26.w,
-              height: 26.h,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: AppSvgIcon(
-                assetPath: 'assets/svg/bottom_navigation/candle_bold.svg',
-                color: iconColor,
-                height: 18,
-                width: 18,
-              ),
-            ),
-          ),
+          // InkResponse(
+          //   onTap: onSettingsTap,
+          //   radius: 24,
+          //   child: Container(
+          //     width: 26.w,
+          //     height: 26.h,
+          //     alignment: Alignment.center,
+          //     decoration: BoxDecoration(
+          //       color: primary.withValues(alpha: 0.12),
+          //       borderRadius: BorderRadius.circular(10.r),
+          //     ),
+          //     child: AppSvgIcon(
+          //       assetPath: 'assets/svg/bottom_navigation/candle_bold.svg',
+          //       color: iconColor,
+          //       height: 18,
+          //       width: 18,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -727,7 +727,7 @@ class _BottomDock extends StatelessWidget {
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 14.h),
+      padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 14.h + 70.h),
       child: Obx(() {
         // ──────────────────────────────────────────�───────────────
         // ignore: unused_local_variable

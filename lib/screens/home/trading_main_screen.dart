@@ -46,47 +46,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   final InstrumentsController instrumentsController =
       Get.find<InstrumentsController>();
 
-  void _openChartScreenVantage(String symbol) {
-    try {
-      ChartScreen.setSelectedSymbol(symbol);
-      // Track whether the chart was opened via the Chart tab (index 1)
-      // vs. the watchlist on Prices (index 0). On pop, we only redirect
-      // to Prices if the user was on the Chart tab AND didn't already
-      // navigate elsewhere via a tab callback — otherwise leave them on
-      // whatever tab the user (or callback) chose.
-      final cameFromChartTab = _currentIndex == 1;
-      // `_userNavigatedAwayFromChart` flips when onNavigateToTab or
-      // onNavigateToTrade fires, so the .then() handler below knows to
-      // skip its Prices-redirect (the callback already chose a tab).
-      bool userNavigatedAwayFromChart = false;
-      Get.to(
-        () => ChartScreen(
-          onNavigateToTrade: (tabIndex) {
-            userNavigatedAwayFromChart = true;
-            _switchToTradeTab(tabIndex ?? 0);
-            // Pop the chart AFTER tab switch so the PageView is up-to-date.
-            // (Calling Get.back() before _switchToTradeTab can briefly
-            // expose the transparent Chart tab host on slow frames.)
-            Get.back();
-          },
-          onNavigateToTab: (index) {
-            userNavigatedAwayFromChart = true;
-            _onTabChanged(index);
-            // Pop the chart AFTER tab switch.
-            Get.back();
-          },
-        ),
-      )?.then((_) {
-        if (cameFromChartTab && !userNavigatedAwayFromChart) {
-          // Pop landed us back on the transparent Chart tab host —
-          // bounce to the previous screen instead of Prices (0).
-          _onTabChanged(_preChartIndex);
-        }
-      });
-    } catch (e) {
-      print('🚨 TradingMainScreen: Error opening chart screen: $e');
-    }
-  }
+  // Chart is now shown in tab, no longer pushed as full screen route
 
   void _switchToTradeTab(int tabIndex) {
     // Vantage 5-tab layout: Trade is at index 2 (Chart shifted in at 1).
@@ -141,14 +101,18 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       // so the bottom nav is naturally hidden while chart is open —
       // matching the existing watchlist → chart flow.
       _screens = [
-        KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _openChartScreenVantage)),
-        // Chart tab: transparent host. The actual ChartScreen →
-        // VantageChartLayout push is driven from `_onTabChanged` when the
-        // user navigates to index 1 (via the post-frame callback there).
-        // The pushed route sits on top of the PageView so the bottom nav
-        // is naturally hidden while chart is open.
-        const KeepAliveWrapper(child: ChartTabHost()),
-        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _openChartScreenVantage)),
+        KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _switchToChartTab)),
+        KeepAliveWrapper(
+          child: ChartScreen(
+            onNavigateToTrade: (tabIndex) {
+              _switchToTradeTab(tabIndex ?? 0);
+            },
+            onNavigateToTab: (index) {
+              _onTabChanged(index);
+            },
+          ),
+        ),
+        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _switchToChartTab)),
         KeepAliveWrapper(
           child: DashboardScreen(
             onNavigateToTab: (index) {
@@ -263,36 +227,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     final moreIndex = _isVantage ? 4 : 4;
 
     // Vantage UI brands (pipze, baazex, gtxprime, kantara, skyriss,
-    // telifox, tenax, vantage): the Chart tab (index 1) is a transparent
-    // host that needs to auto-push the chart route when the user lands on
-    // it. _screens is built once in initState, so ChartTabHost.isSelected
-    // captures the *initial* index (usually 0) and never sees the new
-    // value when the user taps the Chart tab. We trigger the push here so
-    // it works regardless of the initial tab.
-    //
-    // We avoid double-pushing if the chart route is already on top by
-    // checking Get.currentRoute for an existing ChartScreen entry.
-    if (_isVantage && index == 1 && previousIndex != 1) {
-      // Defer to post-frame so the PageView transition completes before
-      // we push (avoids race with the PageView animation).
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        // Only push if no ChartScreen route is already on the stack.
-        final currentRoute = Get.currentRoute;
-        // Get.currentRoute returns the route's name (or '/' when none);
-        // the ChartScreen route appears here when it's been pushed.
-        if (currentRoute.contains('ChartScreen')) return;
-        // Resolve the initial symbol. If SymbolSelectionService hasn't
-        // been registered yet (cold start edge case), fall back to XAUUSD
-        // — ChartScreen will hydrate from instruments data once loaded.
-        String initialSymbol = 'XAUUSD';
-        if (Get.isRegistered<SymbolSelectionService>()) {
-          final svc = Get.find<SymbolSelectionService>();
-          if (svc.currentSymbol.isNotEmpty) initialSymbol = svc.currentSymbol;
-        }
-        _openChartScreenVantage(initialSymbol);
-      });
-    }
+    // telifox, tenax, vantage): The Chart tab is now handled directly in the PageView
+    // like other tabs, so we no longer push a new route on top.
+
 
     // Reset to Market tab when switching to Trade screen via bottom navigation
     if (index == tradeIndex && previousIndex != tradeIndex) {

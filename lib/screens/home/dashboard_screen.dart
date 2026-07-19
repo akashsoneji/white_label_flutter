@@ -43,9 +43,10 @@ class DashboardScreen extends StatelessWidget {
     await controller.refreshMT5Accounts(force: true);
     // Refresh wallet balance
     try {
-      final walletCtrl = Get.isRegistered<WalletController>()
-          ? Get.find<WalletController>()
-          : Get.put(WalletController());
+      final walletCtrl =
+          Get.isRegistered<WalletController>()
+              ? Get.find<WalletController>()
+              : Get.put(WalletController());
       walletCtrl.fetchWalletData();
     } catch (_) {}
     // Also request account data from WebSocket
@@ -68,9 +69,10 @@ class DashboardScreen extends StatelessWidget {
 
   // ── Default (non-vantage, non-celestial) header wallet pill ────────────────
   Widget _buildWalletHeaderButton() {
-    final walletCtrl = Get.isRegistered<WalletController>()
-        ? Get.find<WalletController>()
-        : Get.put(WalletController());
+    final walletCtrl =
+        Get.isRegistered<WalletController>()
+            ? Get.find<WalletController>()
+            : Get.put(WalletController());
 
     return Container(
       constraints: BoxConstraints(maxWidth: 150.w),
@@ -107,9 +109,10 @@ class DashboardScreen extends StatelessWidget {
                   child: Obx(() {
                     final bal = walletCtrl.balance.value;
                     final displayBal = bal.isEmpty ? '0.00' : bal;
-                    final formattedBal = displayBal.startsWith('\$')
-                        ? displayBal
-                        : '\$$displayBal';
+                    final formattedBal =
+                        displayBal.startsWith('\$')
+                            ? displayBal
+                            : '\$$displayBal';
                     return FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
@@ -133,9 +136,10 @@ class DashboardScreen extends StatelessWidget {
 
   // ── Celestial wallet pill (lighter, MT5-inspired) ─────────────────────────
   Widget _buildCelestialWalletHeaderButton(BuildContext context) {
-    final walletCtrl = Get.isRegistered<WalletController>()
-        ? Get.find<WalletController>()
-        : Get.put(WalletController());
+    final walletCtrl =
+        Get.isRegistered<WalletController>()
+            ? Get.find<WalletController>()
+            : Get.put(WalletController());
 
     return Container(
       constraints: BoxConstraints(maxWidth: 150.w),
@@ -166,9 +170,10 @@ class DashboardScreen extends StatelessWidget {
                   child: Obx(() {
                     final bal = walletCtrl.balance.value;
                     final displayBal = bal.isEmpty ? '0.00' : bal;
-                    final formattedBal = displayBal.startsWith('\$')
-                        ? displayBal
-                        : '\$$displayBal';
+                    final formattedBal =
+                        displayBal.startsWith('\$')
+                            ? displayBal
+                            : '\$$displayBal';
                     return FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
@@ -299,22 +304,14 @@ class DashboardScreen extends StatelessWidget {
                         right: 16.w,
                         top: 8.h,
                         bottom:
-                            16 +
-                            77.h +
-                            MediaQuery.of(context).padding.bottom,
+                            16 + 77.h + MediaQuery.of(context).padding.bottom,
                       ),
                       sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((
-                          context,
-                          index,
-                        ) {
+                        delegate: SliverChildBuilderDelegate((context, index) {
                           final account = controller.mt5Accounts[index];
                           return Container(
                             margin: EdgeInsets.only(bottom: 14.h),
-                            child: _buildCelestialAccountCard(
-                              context,
-                              account,
-                            ),
+                            child: _buildCelestialAccountCard(context, account),
                           );
                         }, childCount: controller.mt5Accounts.length),
                       ),
@@ -396,10 +393,7 @@ class DashboardScreen extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: controller.openRealAccount,
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                            color: CelTheme.buyBlue,
-                            width: 1,
-                          ),
+                          side: BorderSide(color: CelTheme.buyBlue, width: 1),
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.r),
@@ -450,10 +444,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCelestialAccountCard(
-    BuildContext context,
-    MT5Account account,
-  ) {
+  Widget _buildCelestialAccountCard(BuildContext context, MT5Account account) {
     final dashboardController = Get.find<DashboardController>();
     final languageService = Get.find<LanguageService>();
 
@@ -462,12 +453,14 @@ class DashboardScreen extends StatelessWidget {
         account.metaAccountNumber,
       );
 
-      final balance = accountInfo != null
-          ? accountInfo.balance
-          : double.tryParse(account.balance.toString()) ?? 0;
-      final equity = accountInfo != null
-          ? accountInfo.equity
-          : double.tryParse(account.equity.toString()) ?? 0;
+      final balance =
+          accountInfo != null
+              ? accountInfo.balance
+              : double.tryParse(account.balance.toString()) ?? 0;
+      final equity =
+          accountInfo != null
+              ? accountInfo.equity
+              : double.tryParse(account.equity.toString()) ?? 0;
       final margin =
           accountInfo != null
               ? accountInfo.margin
@@ -479,21 +472,15 @@ class DashboardScreen extends StatelessWidget {
       final pnl = accountInfo?.profit ?? 0;
 
       final isLive = account.accountType.toLowerCase() == 'live';
-      final accentColor = isLive
-          ? CelTheme.sell(context)
-          : CelTheme.buyBlue;
-      final accentTint = isLive
-          ? CelTheme.pillBg(context)
-          : CelTheme.buyTint(context);
+      final accentColor = isLive ? CelTheme.sell(context) : CelTheme.buyBlue;
+      final accentTint =
+          isLive ? CelTheme.pillBg(context) : CelTheme.buyTint(context);
 
       return Container(
         decoration: BoxDecoration(
           color: CelTheme.card(context),
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: CelTheme.divider(context),
-            width: 0.6,
-          ),
+          border: Border.all(color: CelTheme.divider(context), width: 0.6),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -618,9 +605,10 @@ class DashboardScreen extends StatelessWidget {
                       vertical: 4.h,
                     ),
                     decoration: BoxDecoration(
-                      color: pnl >= 0
-                          ? CelTheme.tpGreen.withOpacity(0.10)
-                          : CelTheme.slRed.withOpacity(0.10),
+                      color:
+                          pnl >= 0
+                              ? CelTheme.tpGreen.withOpacity(0.10)
+                              : CelTheme.slRed.withOpacity(0.10),
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Row(
@@ -636,9 +624,7 @@ class DashboardScreen extends StatelessWidget {
                         Text(
                           '${pnl >= 0 ? '+' : '-'}\$${pnl.abs().toStringAsFixed(2)}',
                           style: TextStyle(
-                            color: pnl >= 0
-                                ? CelTheme.tpGreen
-                                : CelTheme.slRed,
+                            color: pnl >= 0 ? CelTheme.tpGreen : CelTheme.slRed,
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w700,
                           ),
@@ -654,10 +640,7 @@ class DashboardScreen extends StatelessWidget {
             Padding(
               padding: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 0),
               child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10.w,
-                  vertical: 8.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                 decoration: BoxDecoration(
                   color: CelTheme.buyTint(context).withOpacity(0.45),
                   borderRadius: BorderRadius.circular(8.r),
@@ -728,8 +711,7 @@ class DashboardScreen extends StatelessWidget {
                     icon: Icons.candlestick_chart_outlined,
                     color: CelTheme.buyBlue,
                     onTap: () async {
-                      final accountController =
-                          Get.find<AccountController>();
+                      final accountController = Get.find<AccountController>();
                       await accountController.setActiveMT5Account(
                         account.metaAccountNumber,
                       );
@@ -767,18 +749,14 @@ class DashboardScreen extends StatelessWidget {
                       context,
                       label:
                           account.accountType.toLowerCase() == 'live'
-                          ? languageService.tr('dashboard_withdraw')
-                          : languageService.tr('more_settings'),
+                              ? languageService.tr('dashboard_withdraw')
+                              : languageService.tr('more_settings'),
                       color: isLive ? CelTheme.sellRed : CelTheme.buyBlue,
                       onTap: () {
                         if (account.accountType.toLowerCase() == 'live') {
-                          controller.onWithdraw(
-                            account.metaAccountNumber,
-                          );
+                          controller.onWithdraw(account.metaAccountNumber);
                         } else {
-                          controller.onSettings(
-                            account.metaAccountNumber,
-                          );
+                          controller.onSettings(account.metaAccountNumber);
                         }
                       },
                     ),
@@ -797,8 +775,7 @@ class DashboardScreen extends StatelessWidget {
                   height: 38.h,
                   child: OutlinedButton(
                     onPressed: () {
-                      final accountController =
-                          Get.find<AccountController>();
+                      final accountController = Get.find<AccountController>();
                       accountController
                           .setActiveMT5Account(account.metaAccountNumber)
                           .catchError((e) {
@@ -808,10 +785,7 @@ class DashboardScreen extends StatelessWidget {
                           });
                     },
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: CelTheme.buyBlue,
-                        width: 1,
-                      ),
+                      side: BorderSide(color: CelTheme.buyBlue, width: 1),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.r),
                       ),
@@ -910,10 +884,7 @@ class DashboardScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: CelTheme.buyTint(context),
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(
-            color: CelTheme.divider(context),
-            width: 0.6,
-          ),
+          border: Border.all(color: CelTheme.divider(context), width: 0.6),
         ),
         alignment: Alignment.center,
         child: Icon(icon, color: color, size: 20.sp),
@@ -978,7 +949,6 @@ class DashboardScreen extends StatelessWidget {
                   // (VantageDashboardLayout). Celestial renders a single
                   // AppBar in this build() method (see below), so no inner
                   // sliver AppBar is needed for either.
-
                   if (isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
@@ -992,9 +962,9 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           constraints: const BoxConstraints(maxWidth: 520),
                           decoration: null,
-                              // isVantage
-                              // ? _vantageGlassCardDecoration()
-                              // : null,
+                          // isVantage
+                          // ? _vantageGlassCardDecoration()
+                          // : null,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1037,13 +1007,9 @@ class DashboardScreen extends StatelessWidget {
                                 width: 333.w,
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
-                                    side: BorderSide(
-                                      color: AppColors.primary,
-                                    ),
+                                    side: BorderSide(color: AppColors.primary),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        12.r,
-                                      ),
+                                      borderRadius: BorderRadius.circular(12.r),
                                     ),
                                   ),
                                   onPressed: controller.openRealAccount,
@@ -1052,9 +1018,7 @@ class DashboardScreen extends StatelessWidget {
                                       'dashboard_open_real_account',
                                     ),
                                     style: AppTextStyles.black14600h1_71
-                                        .copyWith(
-                                          color: AppColors.primary,
-                                        ),
+                                        .copyWith(color: AppColors.primary),
                                   ),
                                 ),
                               ),
@@ -1069,9 +1033,7 @@ class DashboardScreen extends StatelessWidget {
                                       color: AppColors.backgroundLight,
                                     ),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        12.r,
-                                      ),
+                                      borderRadius: BorderRadius.circular(12.r),
                                     ),
                                   ),
                                   onPressed: controller.openDemoAccount,
@@ -1080,9 +1042,7 @@ class DashboardScreen extends StatelessWidget {
                                       'dashboard_open_demo_account',
                                     ),
                                     style: AppTextStyles.black14600h1_71
-                                        .copyWith(
-                                          color: AppColors.whiteColor,
-                                        ),
+                                        .copyWith(color: AppColors.whiteColor),
                                   ),
                                 ),
                               ),
@@ -1103,10 +1063,7 @@ class DashboardScreen extends StatelessWidget {
                             MediaQuery.of(context).padding.bottom,
                       ),
                       sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((
-                          context,
-                          index,
-                        ) {
+                        delegate: SliverChildBuilderDelegate((context, index) {
                           final account = controller.mt5Accounts[index];
                           return Container(
                             margin: EdgeInsets.only(bottom: 16),
@@ -1118,8 +1075,7 @@ class DashboardScreen extends StatelessWidget {
                 ],
               ),
             ),
-            if (includeLoadingOverlay &&
-                controller.isLoadingMT5Accounts.value)
+            if (includeLoadingOverlay && controller.isLoadingMT5Accounts.value)
               Center(child: CommonLoadingWidget(isFullScreen: true)),
           ],
         );
@@ -1140,9 +1096,10 @@ class DashboardScreen extends StatelessWidget {
       controller.refreshMT5Accounts(force: true);
       // Fetch wallet balance
       try {
-        final walletCtrl = Get.isRegistered<WalletController>()
-            ? Get.find<WalletController>()
-            : Get.put(WalletController());
+        final walletCtrl =
+            Get.isRegistered<WalletController>()
+                ? Get.find<WalletController>()
+                : Get.put(WalletController());
         walletCtrl.fetchWalletData();
       } catch (_) {}
       // Dashboard controller will handle account data request via _requestAccountData()
@@ -1166,10 +1123,7 @@ class DashboardScreen extends StatelessWidget {
                   child: _buildWalletHeaderButton(),
                 ),
               ),
-              title: Text(
-                languageService.tr('dashboard_title'),
-                style: AppTextStyles.screenTitle,
-              ),
+              title: Text('', style: AppTextStyles.screenTitle),
               actions: [
                 _buildHeaderIconButton(
                   assetPath: 'assets/svg/deshboard/add-square.svg',
@@ -1272,10 +1226,7 @@ class DashboardScreen extends StatelessWidget {
               controller.isLoadingMT5Accounts.value
                   ? Center(child: CommonLoadingWidget(isFullScreen: true))
                   : null,
-          child: _buildDashboardContent(
-            context,
-            includeLoadingOverlay: false,
-          ),
+          child: _buildDashboardContent(context, includeLoadingOverlay: false),
         ),
       );
     }
@@ -1287,10 +1238,7 @@ class DashboardScreen extends StatelessWidget {
       body: Obx(
         () => RefreshIndicator(
           onRefresh: _onRefresh,
-          child: _buildDashboardContent(
-            context,
-            includeLoadingOverlay: true,
-          ),
+          child: _buildDashboardContent(context, includeLoadingOverlay: true),
         ),
       ),
     );
@@ -1334,18 +1282,18 @@ class DashboardScreen extends StatelessWidget {
       padding: EdgeInsets.all(isVantage ? 14 : 12),
       decoration:
           isVantage
-          ? VantageUiTokens.cardDecoration()
-          : BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.divider.withOpacity(0.5),
-                blurRadius: 10,
-                offset: Offset(0, 2),
+              ? VantageUiTokens.cardDecoration()
+              : BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.divider.withOpacity(0.5),
+                    blurRadius: 10,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
-            ],
-          ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1372,19 +1320,16 @@ class DashboardScreen extends StatelessWidget {
                     Container(
                       height: 22,
                       width: 42,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 4,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                       alignment: Alignment.center,
                       // padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color:
                             AppColors.isDarkMode
-                            ? Colors.white.withOpacity(0.12)
-                            : (account.accountType == 'live'
-                                ? AppColors.accent
-                                : AppColors.blue),
+                                ? Colors.white.withOpacity(0.12)
+                                : (account.accountType == 'live'
+                                    ? AppColors.accent
+                                    : AppColors.blue),
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
@@ -1392,9 +1337,10 @@ class DashboardScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.isDarkMode
-                              ? Colors.white
-                              : Colors.white,
+                          color:
+                              AppColors.isDarkMode
+                                  ? Colors.white
+                                  : Colors.white,
                         ),
                       ),
                     ),
@@ -1475,12 +1421,10 @@ class DashboardScreen extends StatelessWidget {
                       style: TextStyle(
                         backgroundColor:
                             AppColors.isDarkMode
-                            ? Colors.white.withOpacity(0.12)
-                            : (isVantage
-                                ? AppColors.primary.withValues(
-                                    alpha: 0.10,
-                                  )
-                                : AppColors.accent.withAlpha(50)),
+                                ? Colors.white.withOpacity(0.12)
+                                : (isVantage
+                                    ? AppColors.primary.withValues(alpha: 0.10)
+                                    : AppColors.accent.withAlpha(50)),
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
                         height: 1.4,
@@ -1493,9 +1437,8 @@ class DashboardScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
-                        color: isVantage
-                            ? AppColors.textGrey
-                            : AppColors.icongrey,
+                        color:
+                            isVantage ? AppColors.textGrey : AppColors.icongrey,
                         height: 1.4,
                       ),
                     ),
@@ -1513,16 +1456,12 @@ class DashboardScreen extends StatelessWidget {
           isVantage
               ? Container(
                 decoration: _vantageSegmentedBarDecoration(),
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10.w,
-                  vertical: 6.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 child: Row(
                   children: [
                     InkWell(
                       onTap: () async {
-                        final accountController =
-                            Get.find<AccountController>();
+                        final accountController = Get.find<AccountController>();
                         await accountController.setActiveMT5Account(
                           account.metaAccountNumber,
                         );
@@ -1543,8 +1482,8 @@ class DashboardScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color:
                               AppColors.isDarkMode
-                              ? AppColors.primary.withValues(alpha: 0.12)
-                              : AppColors.cardBackGround,
+                                  ? AppColors.primary.withValues(alpha: 0.12)
+                                  : AppColors.cardBackGround,
                           borderRadius: BorderRadius.circular(12.r),
                           border: Border.all(
                             color: AppColors.border.withValues(
@@ -1557,9 +1496,10 @@ class DashboardScreen extends StatelessWidget {
                               'assets/svg/bottom_navigation/candle_bold.svg',
                           height: 16.h,
                           width: 16.w,
-                          color: AppColors.isDarkMode
-                              ? AppColors.primary
-                              : AppColors.primary,
+                          color:
+                              AppColors.isDarkMode
+                                  ? AppColors.primary
+                                  : AppColors.primary,
                         ),
                       ),
                     ),
@@ -1578,9 +1518,7 @@ class DashboardScreen extends StatelessWidget {
                               account.metaAccountNumber,
                             );
                           } else {
-                            controller.onDeposit(
-                              account.metaAccountNumber,
-                            );
+                            controller.onDeposit(account.metaAccountNumber);
                           }
                         },
                       ),
@@ -1589,28 +1527,28 @@ class DashboardScreen extends StatelessWidget {
                     Expanded(
                       child: _buildActionButton(
                         compact: true,
-                        color: account.accountType.toLowerCase() == 'live'
-                            ? AppColors.red
-                            : AppColors.primary,
+                        color:
+                            account.accountType.toLowerCase() == 'live'
+                                ? AppColors.red
+                                : AppColors.primary,
                         isSvg: true,
-                        svg: account.accountType.toLowerCase() == 'live'
-                            ? "assets/svg/deshboard/money-send.svg"
-                            : 'assets/svg/more/settings.svg',
-                        icon: account.accountType.toLowerCase() == 'live'
-                            ? Icons.trending_down
-                            : Icons.settings,
-                        label: account.accountType.toLowerCase() == 'live'
-                            ? languageService.tr('dashboard_withdraw')
-                            : languageService.tr('more_settings'),
+                        svg:
+                            account.accountType.toLowerCase() == 'live'
+                                ? "assets/svg/deshboard/money-send.svg"
+                                : 'assets/svg/more/settings.svg',
+                        icon:
+                            account.accountType.toLowerCase() == 'live'
+                                ? Icons.trending_down
+                                : Icons.settings,
+                        label:
+                            account.accountType.toLowerCase() == 'live'
+                                ? languageService.tr('dashboard_withdraw')
+                                : languageService.tr('more_settings'),
                         onTap: () {
                           if (account.accountType.toLowerCase() == 'live') {
-                            controller.onWithdraw(
-                              account.metaAccountNumber,
-                            );
+                            controller.onWithdraw(account.metaAccountNumber);
                           } else {
-                            controller.onSettings(
-                              account.metaAccountNumber,
-                            );
+                            controller.onSettings(account.metaAccountNumber);
                           }
                         },
                       ),
@@ -1650,8 +1588,7 @@ class DashboardScreen extends StatelessWidget {
                   InkWell(
                     onTap: () async {
                       // Call setActiveMT5Account which handles socket reconnection
-                      final accountController =
-                          Get.find<AccountController>();
+                      final accountController = Get.find<AccountController>();
                       await accountController.setActiveMT5Account(
                         account.metaAccountNumber,
                       );
@@ -1659,9 +1596,7 @@ class DashboardScreen extends StatelessWidget {
                       // Vantage 5-tab nav (as of 2026-07-09): Trade is at index 2
                       // for ALL flavors (Vantage + non-Vantage legacy 5-tab).
                       if (onNavigateToTab != null) {
-                        onNavigateToTab!(
-                          FlavorConfig.isVantage() ? 2 : 2,
-                        );
+                        onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 2);
                       }
                     },
                     borderRadius: BorderRadius.circular(5.r),
@@ -1701,9 +1636,7 @@ class DashboardScreen extends StatelessWidget {
                             account.metaAccountNumber,
                           );
                         } else {
-                          controller.onDeposit(
-                            account.metaAccountNumber,
-                          );
+                          controller.onDeposit(account.metaAccountNumber);
                         }
                       },
                     ),
@@ -1715,28 +1648,28 @@ class DashboardScreen extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: _buildActionButton(
-                      color: account.accountType.toLowerCase() == 'live'
-                          ? AppColors.red
-                          : AppColors.primary,
+                      color:
+                          account.accountType.toLowerCase() == 'live'
+                              ? AppColors.red
+                              : AppColors.primary,
                       isSvg: true,
-                      svg: account.accountType.toLowerCase() == 'live'
-                          ? "assets/svg/deshboard/money-send.svg"
-                          : 'assets/svg/more/settings.svg',
-                      icon: account.accountType.toLowerCase() == 'live'
-                          ? Icons.trending_down
-                          : Icons.settings,
-                      label: account.accountType.toLowerCase() == 'live'
-                          ? languageService.tr('dashboard_withdraw')
-                          : languageService.tr('more_settings'),
+                      svg:
+                          account.accountType.toLowerCase() == 'live'
+                              ? "assets/svg/deshboard/money-send.svg"
+                              : 'assets/svg/more/settings.svg',
+                      icon:
+                          account.accountType.toLowerCase() == 'live'
+                              ? Icons.trending_down
+                              : Icons.settings,
+                      label:
+                          account.accountType.toLowerCase() == 'live'
+                              ? languageService.tr('dashboard_withdraw')
+                              : languageService.tr('more_settings'),
                       onTap: () {
                         if (account.accountType.toLowerCase() == 'live') {
-                          controller.onWithdraw(
-                            account.metaAccountNumber,
-                          );
+                          controller.onWithdraw(account.metaAccountNumber);
                         } else {
-                          controller.onSettings(
-                            account.metaAccountNumber,
-                          );
+                          controller.onSettings(account.metaAccountNumber);
                         }
                       },
                     ),
@@ -1793,12 +1726,13 @@ class DashboardScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
                   ),
-                  padding: isVantage
-                      ? EdgeInsets.symmetric(
-                          vertical: 8.h,
-                          horizontal: 12.w,
-                        )
-                      : null,
+                  padding:
+                      isVantage
+                          ? EdgeInsets.symmetric(
+                            vertical: 8.h,
+                            horizontal: 12.w,
+                          )
+                          : null,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1843,17 +1777,19 @@ class DashboardScreen extends StatelessWidget {
         final screenWidth = MediaQuery.of(context).size.width;
         // Calculate responsive font size based on screen width
         // Small devices (< 400px): 11sp, Medium (400-600px): 12sp, Large (> 600px): 13sp
-        final double baseFontSize = screenWidth < 400
-            ? 11.sp
-            : screenWidth < 600
-            ? 12.sp
-            : 13.sp;
+        final double baseFontSize =
+            screenWidth < 400
+                ? 11.sp
+                : screenWidth < 600
+                ? 12.sp
+                : 13.sp;
         final double fontSize =
             compact ? (baseFontSize - 2).clamp(9.5, 11.0) : baseFontSize;
         final double iconSize = compact ? 13.sp : 16.sp;
-        final EdgeInsets padding = compact
-            ? EdgeInsets.symmetric(vertical: 6.h, horizontal: 6.w)
-            : EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w);
+        final EdgeInsets padding =
+            compact
+                ? EdgeInsets.symmetric(vertical: 6.h, horizontal: 6.w)
+                : EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w);
 
         final bool isDarkMode = AppColors.isDarkMode;
         final Color buttonBgColor =
@@ -1863,9 +1799,7 @@ class DashboardScreen extends StatelessWidget {
         return GestureDetector(
           onTap: onTap,
           child: Container(
-            constraints: BoxConstraints(
-              minHeight: compact ? 30.h : 40.h,
-            ),
+            constraints: BoxConstraints(minHeight: compact ? 30.h : 40.h),
             padding: padding,
             decoration: BoxDecoration(
               color: buttonBgColor,
@@ -1877,11 +1811,11 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 (isSvg == true)
                     ? AppSvgIcon(
-                        assetPath: svg!,
-                        height: compact ? 13.h : 16.h,
-                        width: compact ? 13.w : 16.w,
-                        color: textAndIconColor,
-                      )
+                      assetPath: svg!,
+                      height: compact ? 13.h : 16.h,
+                      width: compact ? 13.w : 16.w,
+                      color: textAndIconColor,
+                    )
                     : Icon(icon, color: textAndIconColor, size: iconSize),
                 SizedBox(width: 4.w),
                 Flexible(
@@ -2036,11 +1970,12 @@ class AccountInfoBottomSheet extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.isDarkMode
-                                ? Colors.white.withOpacity(0.12)
-                                : (account.accountType == 'live'
-                                    ? AppColors.accent
-                                    : AppColors.blue),
+                            color:
+                                AppColors.isDarkMode
+                                    ? Colors.white.withOpacity(0.12)
+                                    : (account.accountType == 'live'
+                                        ? AppColors.accent
+                                        : AppColors.blue),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -2048,9 +1983,10 @@ class AccountInfoBottomSheet extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.isDarkMode
-                                  ? Colors.white
-                                  : Colors.white,
+                              color:
+                                  AppColors.isDarkMode
+                                      ? Colors.white
+                                      : Colors.white,
                             ),
                           ),
                         ),
@@ -2066,9 +2002,10 @@ class AccountInfoBottomSheet extends StatelessWidget {
                               // width: 29.w,
                               padding: EdgeInsets.only(left: 4.w, right: 4.w),
                               decoration: BoxDecoration(
-                                color: AppColors.isDarkMode
-                                    ? AppColors.primary.withOpacity(0.12)
-                                    : AppColors.accent.withAlpha(50),
+                                color:
+                                    AppColors.isDarkMode
+                                        ? AppColors.primary.withOpacity(0.12)
+                                        : AppColors.accent.withAlpha(50),
                                 borderRadius: BorderRadius.circular(2.r),
                               ),
                               child: Text.rich(
@@ -2216,20 +2153,20 @@ class AccountInfoBottomSheet extends StatelessWidget {
                 SizedBox(width: 12),
                 account.accountType.toLowerCase() == 'live'
                     ? Expanded(
-                        child: _buildActionButton(
-                          isSvg: true,
-                          color: AppColors.red,
-                          svg: 'assets/svg/deshboard/money-send.svg',
-                          icon: Icons.arrow_downward,
-                          label: languageService.tr('dashboard_withdraw'),
-                          onTap: () {
-                            Get.back(closeOverlays: true);
-                            Get.find<DashboardController>().onWithdraw(
-                              account.metaAccountNumber,
-                            );
-                          },
-                        ),
-                      )
+                      child: _buildActionButton(
+                        isSvg: true,
+                        color: AppColors.red,
+                        svg: 'assets/svg/deshboard/money-send.svg',
+                        icon: Icons.arrow_downward,
+                        label: languageService.tr('dashboard_withdraw'),
+                        onTap: () {
+                          Get.back(closeOverlays: true);
+                          Get.find<DashboardController>().onWithdraw(
+                            account.metaAccountNumber,
+                          );
+                        },
+                      ),
+                    )
                     : SizedBox.shrink(),
                 SizedBox(width: 12),
                 Expanded(
@@ -2312,11 +2249,11 @@ class AccountInfoBottomSheet extends StatelessWidget {
           children: [
             (isSvg == true)
                 ? AppSvgIcon(
-                    assetPath: svg!,
-                    height: 18,
-                    width: 18,
-                    color: color,
-                  )
+                  assetPath: svg!,
+                  height: 18,
+                  width: 18,
+                  color: color,
+                )
                 : Icon(icon, size: 18, color: color),
             SizedBox(width: 6),
             Flexible(
@@ -2503,44 +2440,45 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         width: double.infinity,
                         height: 46.h,
                         child: ElevatedButton(
-                          onPressed: isLoading.value
-                              ? null
-                              : () async {
-                                  if (formKey.currentState!.validate()) {
-                                    isLoading.value = true;
-                                    try {
-                                      final response = await authService
-                                          .changePassword(
-                                            mt5Account:
-                                                account.metaAccountNumber,
-                                            newPassword: passwordController
-                                                .text
-                                                .trim(),
-                                          );
+                          onPressed:
+                              isLoading.value
+                                  ? null
+                                  : () async {
+                                    if (formKey.currentState!.validate()) {
+                                      isLoading.value = true;
+                                      try {
+                                        final response = await authService
+                                            .changePassword(
+                                              mt5Account:
+                                                  account.metaAccountNumber,
+                                              newPassword:
+                                                  passwordController.text
+                                                      .trim(),
+                                            );
 
-                                      if (response.success) {
-                                        CustomToastService.showSuccess(
-                                          message:
-                                              response.data?['message'] ??
-                                              'Password changed successfully',
-                                        );
-                                        Get.back(closeOverlays: true);
-                                      } else {
+                                        if (response.success) {
+                                          CustomToastService.showSuccess(
+                                            message:
+                                                response.data?['message'] ??
+                                                'Password changed successfully',
+                                          );
+                                          Get.back(closeOverlays: true);
+                                        } else {
+                                          CustomToastService.showError(
+                                            message:
+                                                response.message ??
+                                                'Failed to change password',
+                                          );
+                                        }
+                                      } catch (e) {
                                         CustomToastService.showError(
-                                          message:
-                                              response.message ??
-                                              'Failed to change password',
+                                          message: 'Error: $e',
                                         );
+                                      } finally {
+                                        isLoading.value = false;
                                       }
-                                    } catch (e) {
-                                      CustomToastService.showError(
-                                        message: 'Error: $e',
-                                      );
-                                    } finally {
-                                      isLoading.value = false;
                                     }
-                                  }
-                                },
+                                  },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             disabledBackgroundColor: AppColors.border,
@@ -2548,25 +2486,26 @@ class AccountMenuBottomSheet extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: isLoading.value
-                              ? SizedBox(
-                                  width: 20.w,
-                                  height: 20.h,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.whiteColor,
+                          child:
+                              isLoading.value
+                                  ? SizedBox(
+                                    width: 20.w,
+                                    height: 20.h,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.whiteColor,
+                                      ),
+                                    ),
+                                  )
+                                  : Text(
+                                    'Change Password',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.whiteColor,
                                     ),
                                   ),
-                                )
-                              : Text(
-                                  'Change Password',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.whiteColor,
-                                  ),
-                                ),
                         ),
                       ),
                     ),
