@@ -1,6 +1,9 @@
 name: baazex
 type: child
-inheritsFrom: vantage
+inheritsFrom: iquote
+parents:
+  - iquote
+  - vantage
 label: Baazex
 themeMode: both
 

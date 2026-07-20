@@ -1,0 +1,32 @@
+name: iquote
+type: parent
+label: iQuote
+themeMode: both
+
+android:
+  applicationId: com.iquote.app
+  appName: iQuote
+
+ios:
+  bundleId: com.iquote.app
+  appName: iQuote
+
+colors:
+  primary: "#5F259E"
+  secondary: "#F8F3FF"
+  accent: "#FFC93C"
+  splashColor: "#5F259E"
+  launcherBackground: "#5F259E"
+
+urls:
+  api: https://my.pipze.com/api/
+  websocket: wss://my.pipze.com/trade-engine
+  chart: https://my.pipze.com
+
+assets:
+  appIcon: icon.png
+  logo: logo.svg
+  splashLogo: splash_logo.svg
+
+features:
+ useNewChart: false

@@ -13,7 +13,7 @@ ext.brandFlavors = [
         splashColor: "#BF235C",
         launcherBackground: "#BF235C",
         type: "child",
-        inheritsFrom: "vantage",
+        inheritsFrom: "iquote",
     ],
     [
         name: "celestial",
@@ -39,6 +39,18 @@ ext.brandFlavors = [
         launcherBackground: "#01061A",
         type: "child",
         inheritsFrom: "vantage",
+    ],
+    [
+        name: "iquote",
+        label: "iQuote",
+        appId: "com.iquote.app",
+        appName: "iQuote",
+        primary: "#5F259E",
+        secondary: "#F8F3FF",
+        accent: "#FFC93C",
+        splashColor: "#5F259E",
+        launcherBackground: "#5F259E",
+        type: "parent",
     ],
     [
         name: "kantara",
@@ -76,7 +88,7 @@ ext.brandFlavors = [
         splashColor: "#5F259E",
         launcherBackground: "#5F259E",
         type: "child",
-        inheritsFrom: "vantage",
+        inheritsFrom: "iquote",
     ],
     [
         name: "riyadex",
@@ -102,7 +114,7 @@ ext.brandFlavors = [
         splashColor: "#000000",
         launcherBackground: "#000000",
         type: "child",
-        inheritsFrom: "vantage",
+        inheritsFrom: "iquote",
     ],
     [
         name: "telifox",

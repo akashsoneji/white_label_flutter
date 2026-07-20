@@ -814,59 +814,148 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
   }
 
   Widget _buildNoData() {
+    final dashboardController = Get.isRegistered<DashboardController>()
+        ? Get.find<DashboardController>()
+        : Get.put(DashboardController());
+
     return Center(
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // SvgPicture.asset('assets/svg/no_imge_icon.svg'),
-            FutureBuilder<Widget>(
-              future: SvgColorHelper.loadSvgWithColor(
-                assetPath: 'assets/svg/no_imge_icon.svg',
-                targetColor: AppColors.primary,
-                colorToReplace: '#5F259E', // Replace this color in the SVG
-                height: 100.h,
-                width: 100.w,
-              ),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) return snapshot.data!;
-                return SizedBox(height: 100.h, width: 100.w);
-              },
+        child: Obx(() {
+          final isFavoritesFilter =
+              _controller.currentFilter.value == 'Favorites';
+          
+          if (isFavoritesFilter) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FutureBuilder<Widget>(
+                  future: SvgColorHelper.loadSvgWithColor(
+                    assetPath: 'assets/svg/no_imge_icon.svg',
+                    targetColor: AppColors.primary,
+                    colorToReplace: '#5F259E',
+                    height: 100.h,
+                    width: 100.w,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) return snapshot.data!;
+                    return SizedBox(height: 100.h, width: 100.w);
+                  },
+                ),
+                SizedBox(height: 24.h),
+                Text(
+                  languageService.tr("no_favorites_added"),
+                  style: AppTextStyles.heading.copyWith(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  languageService.tr("tap_circle_icon_to_add_instruments"),
+                  style: AppTextStyles.subheading.copyWith(
+                    color: AppColors.textPrimary,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 32.h),
+              ],
+            );
+          }
+
+          // Show Dashboard's empty state for non-favorites (Create Real/Demo Account)
+          return Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: 18.w,
+              vertical: 18.h,
             ),
-            SizedBox(height: 24.h),
-            Obx(() {
-              final isFavoritesFilter =
-                  _controller.currentFilter.value == 'Favorites';
-              return Text(
-                isFavoritesFilter
-                    ? languageService.tr("no_favorites_added")
-                    : languageService.tr("common_no_data"),
-                style: AppTextStyles.heading.copyWith(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textPrimary,
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                FutureBuilder<Widget>(
+                  future: SvgColorHelper.loadSvgWithColor(
+                    assetPath: 'assets/svg/deshboard/no_account.svg',
+                    targetColor: AppColors.primary,
+                    colorToReplace: '#5F259E',
+                    height: 96.h,
+                    width: 96.w,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return snapshot.data!;
+                    }
+                    return SizedBox(height: 96.h, width: 96.w);
+                  },
                 ),
-                textAlign: TextAlign.center,
-              );
-            }),
-            Obx(() {
-              final isFavoritesFilter =
-                  _controller.currentFilter.value == 'Favorites';
-              return Text(
-                isFavoritesFilter
-                    ? languageService.tr("tap_circle_icon_to_add_instruments")
-                    : languageService.tr("common_no_data_description"),
-                style: AppTextStyles.subheading.copyWith(
-                  color: AppColors.textPrimary,
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w400,
+                SizedBox(height: 12.h),
+                Text(
+                  languageService.tr(
+                    'dashboard_new_account_title',
+                  ),
+                  style: AppTextStyles.heading,
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              );
-            }),
-            SizedBox(height: 32.h),
-          ],
-        ),
+                SizedBox(height: 10.h),
+                Text(
+                  languageService.tr(
+                    'dashboard_new_account_description',
+                  ),
+                  style: AppTextStyles.grey14400h57,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 14.h),
+                SizedBox(
+                  height: 44.h,
+                  width: 333.w,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    onPressed: dashboardController.openRealAccount,
+                    child: Text(
+                      languageService.tr(
+                        'dashboard_open_real_account',
+                      ),
+                      style: AppTextStyles.black14600h1_71
+                          .copyWith(color: AppColors.primary),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10.h),
+                SizedBox(
+                  height: 44.h,
+                  width: 333.w,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      side: BorderSide(
+                        color: AppColors.backgroundLight,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    onPressed: dashboardController.openDemoAccount,
+                    child: Text(
+                      languageService.tr(
+                        'dashboard_open_demo_account',
+                      ),
+                      style: AppTextStyles.black14600h1_71
+                          .copyWith(color: AppColors.whiteColor),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }

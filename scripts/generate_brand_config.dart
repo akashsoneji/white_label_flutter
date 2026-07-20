@@ -231,6 +231,16 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
       continue;
     }
 
+    // Supports YAML lists like:
+    //   parents:
+    //     - iquote
+    //     - vantage
+    if (trimmed.startsWith('parents:')) {
+      currentEntry['parents'] = <String>[];
+      currentSection = 'parents';
+      continue;
+    }
+
     var foundSection = false;
     for (final section in [
       'android',
@@ -248,6 +258,16 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
     }
     if (foundSection) continue;
     if (currentSection.isEmpty) continue;
+
+    // List items inside the `parents:` block.
+    if (currentSection == 'parents') {
+      final listMatch = RegExp(r'^-\s*(.+)$').firstMatch(trimmed);
+      if (listMatch != null) {
+        (currentEntry['parents'] as List<String>)
+            .add(listMatch.group(1)!.trim().toLowerCase());
+      }
+      continue;
+    }
 
     final keyMatch = RegExp(r'^(\s*)([^:#]+):\s*(.*)$').firstMatch(line);
     if (keyMatch != null) {
@@ -548,13 +568,8 @@ Future<void> generateFlavorConfig(
   final enumValues = buildBrands
       .map((brand) => '  ${brand['name']},')
       .join('\n');
-  final vantageUiBrands = buildBrands
-      .where(
-        (brand) =>
-            brand['name'] == 'vantage' || brand['inheritsFrom'] == 'vantage',
-      )
-      .map((brand) => "'${brand['name']}'")
-      .join(', ');
+  final vantageUiBrands = const <String>{'vantage', 'gtxprime', 'kantara', 'riyadex', 'telifox', 'tenax'}.map((n) => "'$n'").join(', ');
+  final iquoteUiBrands = const <String>{'iquote', 'pipze', 'skyriss', 'baazex'}.map((n) => "'$n'").join(', ');
   final cases = buildBrands
       .map((brand) {
         final name = brand['name'] as String;
@@ -703,6 +718,11 @@ $getters
   static bool usesVantageUi() {
     final name = (_instance?.flavor.name ?? Flavor.$fallbackBrand.name).toLowerCase();
     return const <String>{$vantageUiBrands}.contains(name);
+  }
+
+  static bool usesIquoteUi() {
+    final name = (_instance?.flavor.name ?? Flavor.$fallbackBrand.name).toLowerCase();
+    return const <String>{$iquoteUiBrands}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;
@@ -1056,31 +1076,89 @@ String _androidManifestTemplate() =>
 </manifest>
 ''';
 
+/// Returns a map of child-name → parent-label for every brand whose
+/// `inheritsFrom` points at another known brand. Used by
+/// `updateLaunchJson` to make the parent visible in the VS Code
+/// run-configuration dropdown.
+Map<String, String> _buildParentLabelMap(List<Map<String, dynamic>> brands) {
+  final byName = <String, String>{};
+  for (final brand in brands) {
+    final label = brand['label'] as String;
+    final name = brand['name'] as String;
+    byName[name] = label.isEmpty ? name : label;
+  }
+  final parents = <String, String>{};
+  for (final brand in brands) {
+    final name = brand['name'] as String;
+    final inheritsFrom = brand['inheritsFrom'] as String?;
+    if (inheritsFrom != null && inheritsFrom.isNotEmpty) {
+      parents[name] = byName[inheritsFrom] ?? inheritsFrom;
+    }
+  }
+  return parents;
+}
+
+/// Returns every parent this child can run as, in preference order.
+///
+/// If the child's `brand.yaml` declares `parents:` (a list of parent names),
+/// that list is used verbatim (preserves the author's ordering).
+/// Otherwise falls back to `[inheritsFrom]` so existing single-parent brands
+/// keep their single entry.
+List<String> _parentBrandsFor(Map<String, dynamic> brand) {
+  final raw = brand['parents'];
+  if (raw is List && raw.isNotEmpty) {
+    return raw.map((e) => e.toString().trim().toLowerCase()).toList();
+  }
+  final inherits = brand['inheritsFrom']?.toString().trim().toLowerCase();
+  if (inherits != null && inherits.isNotEmpty) return [inherits];
+  return [brand['name'].toString().toLowerCase()];
+}
+
 Future<void> updateLaunchJson(List<Map<String, dynamic>> brands) async {
   print('\n6. Updating .vscode/launch.json...');
 
   final configs = <Map<String, dynamic>>[];
+  final parentLabelFor = _buildParentLabelMap(brands);
+  final byName = <String, Map<String, dynamic>>{};
   for (final brand in brands) {
-    final name = brand['name'] as String;
+    byName[brand['name'].toString().toLowerCase()] = brand;
+  }
+
+  for (final brand in brands) {
+    final name = brand['name']as String;
     final label = brand['label'] as String;
-    for (final mode in ['debug', 'profile', 'release']) {
-      final args = [
-        '--flavor',
-        name,
-        '--dart-define=CLIENT=$name',
-        '--dart-define=FLAVOR=$name',
-      ];
-      if (mode == 'debug') args.add('--no-enable-impeller');
-      configs.add({
-        'name': '${_getIconEmoji(name, brands.indexOf(brand))} $label ($mode)',
-        'request': 'launch',
-        'type': 'dart',
-        'program': 'lib/main.dart',
-        'args': args,
-        'flutterMode': mode,
-        'console': 'terminal',
-        'preLaunchTask': 'prepare-$name',
-      });
+    final isParent = (brand['inheritsFrom'] == null || (brand['inheritsFrom'] as String).isEmpty) &&
+        (brand['parents'] == null || !(brand['parents'] as List).any((e) => e.toString().isNotEmpty));
+    final parentBrands = _parentBrandsFor(brand);
+
+    for (final parent in parentBrands) {
+      final parentBrand = byName[parent];
+      final parentLabel = parentBrand != null
+          ? (parentBrand['label']?.toString() ?? parent)
+          : parent;
+      for (final mode in ['debug', 'profile', 'release']) {
+        final args = [
+          '--flavor',
+          name,
+          '--dart-define=CLIENT=$name',
+          '--dart-define=FLAVOR=$name',
+          '--dart-define=PARENT=$parent',
+        ];
+        if (mode == 'debug') args.add('--no-enable-impeller');
+        final displayName = isParent
+            ? '$label (parent) ($mode)'
+            : '$label (parent: $parentLabel) ($mode)';
+        configs.add({
+          'name': displayName,
+          'request': 'launch',
+          'type': 'dart',
+          'program': 'lib/main.dart',
+          'args': args,
+          'flutterMode': mode,
+          'console': 'terminal',
+          'preLaunchTask': 'prepare-$name',
+        });
+      }
     }
   }
 

@@ -32,8 +32,10 @@ class FinanceUiRegistry implements FinanceUiSlots {
       _activeClient.toLowerCase() == 'vantage' ||
       _activeClient.toLowerCase() == 'baazex' ||
       _activeClient.toLowerCase() == 'gtxprime' ||
+      _activeClient.toLowerCase() == 'iquote' ||
       _activeClient.toLowerCase() == 'kantara' ||
       _activeClient.toLowerCase() == 'pipze' ||
+      _activeClient.toLowerCase() == 'riyadex' ||
       _activeClient.toLowerCase() == 'skyriss' ||
       _activeClient.toLowerCase() == 'telifox' ||
       _activeClient.toLowerCase() == 'tenax';
@@ -81,4 +83,3 @@ class FinanceUiRegistry implements FinanceUiSlots {
     return const base.TransactionHistoryScreen();
   }
 }
-

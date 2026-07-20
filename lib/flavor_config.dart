@@ -6,6 +6,7 @@ import 'clients/base_config.dart';
 import 'clients/baazex/config.dart';
 import 'clients/celestial/config.dart';
 import 'clients/gtxprime/config.dart';
+import 'clients/iquote/config.dart';
 import 'clients/kantara/config.dart';
 import 'clients/meta/config.dart';
 import 'clients/pipze/config.dart';
@@ -19,6 +20,7 @@ enum Flavor {
   baazex,
   celestial,
   gtxprime,
+  iquote,
   kantara,
   meta,
   pipze,
@@ -143,6 +145,9 @@ class FlavorConfig {
       case Flavor.gtxprime:
         const config = GtxprimeConfig();
         return config.toFlavorConfig(Flavor.gtxprime, 'gtxprime');
+      case Flavor.iquote:
+        const config = IquoteConfig();
+        return config.toFlavorConfig(Flavor.iquote, 'iquote');
       case Flavor.kantara:
         const config = KantaraConfig();
         return config.toFlavorConfig(Flavor.kantara, 'kantara');
@@ -179,6 +184,9 @@ class FlavorConfig {
   static bool isGtxprime() => _instance?.flavor == Flavor.gtxprime;
   static FlavorConfig get gtxprime => activate(Flavor.gtxprime);
 
+  static bool isIquote() => _instance?.flavor == Flavor.iquote;
+  static FlavorConfig get iquote => activate(Flavor.iquote);
+
   static bool isKantara() => _instance?.flavor == Flavor.kantara;
   static FlavorConfig get kantara => activate(Flavor.kantara);
 
@@ -206,7 +214,12 @@ class FlavorConfig {
 
   static bool usesVantageUi() {
     final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
-    return const <String>{'baazex', 'gtxprime', 'kantara', 'pipze', 'riyadex', 'skyriss', 'telifox', 'tenax', 'vantage'}.contains(name);
+    return const <String>{'vantage', 'gtxprime', 'kantara', 'riyadex', 'telifox', 'tenax'}.contains(name);
+  }
+
+  static bool usesIquoteUi() {
+    final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
+    return const <String>{'iquote', 'pipze', 'skyriss', 'baazex'}.contains(name);
   }
 
   static String get svgLogoAsset => instance.svgLogoPath;
