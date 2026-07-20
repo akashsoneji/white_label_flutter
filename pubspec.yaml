@@ -161,7 +161,7 @@ flutter:
   assets:
     # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND
     - assets/clients/pipze/
-    - assets/clients/vantage/
+    - assets/clients/iquote/
     - assets/config/brands/brands.json
     # END GENERATED ACTIVE CLIENT ASSETS
 
@@ -237,13 +237,13 @@ flutter:
       #     weight: 700
       #     - family: Roboto
       fonts:
-        - asset: assets/font/inter/Inter_18pt-light.ttf
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
           weight: 300
-        - asset: assets/font/inter/Inter_18pt-Regular.ttf
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
           weight: 400
-        - asset: assets/font/inter/Inter_18pt-Medium.ttf
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
           weight: 500
-        - asset: assets/font/inter/Inter_18pt-SemiBold.ttf
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
           weight: 600
-        - asset: assets/font/inter/Inter_18pt-Bold.ttf
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
           weight: 700
