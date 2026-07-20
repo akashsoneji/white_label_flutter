@@ -1,3 +1,4 @@
+import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -106,7 +107,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
               BlendMode.srcIn,
             ),
           ),
-          onPressed: () => Get.offAll(() => const TradingMainScreen()),
+          onPressed: () => Get.offAllNamed(AppPages.TRADING),
         ),
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,

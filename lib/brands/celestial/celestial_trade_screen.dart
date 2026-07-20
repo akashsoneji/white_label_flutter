@@ -19,8 +19,7 @@ import 'celestial_theme.dart';
 
 double _d(String? v) => double.tryParse(v ?? '') ?? 0;
 String _fmt(double v, int d) => v.toStringAsFixed(d);
-String _fmtPL(double v) =>
-    '${v < 0 ? '' : '+'}${v.toStringAsFixed(2)}';
+String _fmtPL(double v) => '${v < 0 ? '' : '+'}${v.toStringAsFixed(2)}';
 
 /// Trade screen — positions, account summary, order ticket, close, modify.
 class CelestialTradeScreen extends StatefulWidget {
@@ -71,7 +70,9 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Celestial Trade Screen: Error ensuring WebSocket connections: $e');
+        print(
+          'Celestial Trade Screen: Error ensuring WebSocket connections: $e',
+        );
       }
     }
   }
@@ -83,11 +84,14 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       _lastAccountNumber = currentAccount?.metaAccountNumber;
 
       _accountChangeSubscription?.cancel();
-      _accountChangeSubscription = accountController.activeMT5AccountRx.listen((account) {
+      _accountChangeSubscription = accountController.activeMT5AccountRx.listen((
+        account,
+      ) {
         if (!mounted) return;
 
         final newAccountNumber = account?.metaAccountNumber;
-        if (newAccountNumber != null && newAccountNumber != _lastAccountNumber) {
+        if (newAccountNumber != null &&
+            newAccountNumber != _lastAccountNumber) {
           _lastAccountNumber = newAccountNumber;
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -106,7 +110,9 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
               }
             } catch (e) {
               if (kDebugMode) {
-                print('Celestial Trade Screen: Error handling account change: $e');
+                print(
+                  'Celestial Trade Screen: Error handling account change: $e',
+                );
               }
             }
           });
@@ -114,7 +120,9 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       });
     } catch (e) {
       if (kDebugMode) {
-        print('Celestial Trade Screen: Error setting up account change listener: $e');
+        print(
+          'Celestial Trade Screen: Error setting up account change listener: $e',
+        );
       }
     }
   }
@@ -132,19 +140,26 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       body: SafeArea(
         child: Obx(() {
           final account = _c.accountInfoRx.value;
-          final active  = _c.marketPositionsRx;
+          final active = _c.marketPositionsRx;
           final pending = _c.pendingPositions;
-          final netPL   = active.fold<double>(0, (s, p) => s + p.profitLoss);
+          final netPL = active.fold<double>(0, (s, p) => s + p.profitLoss);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _header(context, netPL),
               _summary(context, account),
               _tabBar(context, active.length, pending.length),
-              Divider(height: 1, thickness: 0.5, color: CelTheme.divider(context)),
-              Expanded(child: _tab == 0
-                  ? _posList(context, active.toList())
-                  : _posList(context, pending.toList())),
+              Divider(
+                height: 1,
+                thickness: 0.5,
+                color: CelTheme.divider(context),
+              ),
+              Expanded(
+                child:
+                    _tab == 0
+                        ? _posList(context, active.toList())
+                        : _posList(context, pending.toList()),
+              ),
             ],
           );
         }),
@@ -165,9 +180,14 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(_fmtPL(netPL),
-                  style: TextStyle(
-                      color: col, fontSize: 22.sp, fontWeight: FontWeight.w800)),
+              Text(
+                _fmtPL(netPL),
+                style: TextStyle(
+                  color: col,
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               Text('Net P/L', style: CelTheme.label(c)),
             ],
           ),
@@ -182,33 +202,42 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
     Widget cell(String lbl, String val) => Row(
       children: [
         Expanded(
-            child:
-                Text(lbl, style: CelTheme.label(c).copyWith(fontSize: 12.sp))),
-        Text(val,
-            style: TextStyle(
-                color: CelTheme.mainText(c),
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600)),
+          child: Text(lbl, style: CelTheme.label(c).copyWith(fontSize: 12.sp)),
+        ),
+        Text(
+          val,
+          style: TextStyle(
+            color: CelTheme.mainText(c),
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ],
     );
     Widget row2(String l1, String v1, String l2, String v2) => Padding(
-          padding: EdgeInsets.symmetric(vertical: 3.h),
-          child: Row(
-            children: [
-              Expanded(child: cell(l1, v1)),
-              SizedBox(width: 24.w),
-              Expanded(child: cell(l2, v2)),
-            ],
-          ),
-        );
+      padding: EdgeInsets.symmetric(vertical: 3.h),
+      child: Row(
+        children: [
+          Expanded(child: cell(l1, v1)),
+          SizedBox(width: 24.w),
+          Expanded(child: cell(l2, v2)),
+        ],
+      ),
+    );
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
-      child: Column(children: [
-        row2('Balance', f(a?.balance), 'Equity', f(a?.equity)),
-        row2('Margin', f(a?.margin), 'Free Margin', f(a?.marginFree)),
-        row2('Margin Level', '${(a?.marginLevel ?? 0).toStringAsFixed(0)}%',
-            'Floating P/L', _fmtPL(a?.profit ?? 0)),
-      ]),
+      child: Column(
+        children: [
+          row2('Balance', f(a?.balance), 'Equity', f(a?.equity)),
+          row2('Margin', f(a?.margin), 'Free Margin', f(a?.marginFree)),
+          row2(
+            'Margin Level',
+            '${(a?.marginLevel ?? 0).toStringAsFixed(0)}%',
+            'Floating P/L',
+            _fmtPL(a?.profit ?? 0),
+          ),
+        ],
+      ),
     );
   }
 
@@ -232,25 +261,30 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
           ),
           child: Row(
             children: [
-              Text(label,
-                  style: TextStyle(
-                      color: active ? CelTheme.mainText(c) : CelTheme.subText(c),
-                      fontSize: 13.sp,
-                      fontWeight: active ? FontWeight.w700 : FontWeight.w500)),
+              Text(
+                label,
+                style: TextStyle(
+                  color: active ? CelTheme.mainText(c) : CelTheme.subText(c),
+                  fontSize: 13.sp,
+                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
               if (count > 0) ...[
                 SizedBox(width: 6.w),
                 Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     color: active ? CelTheme.buy(c) : CelTheme.softBg(c),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
-                  child: Text('$count',
-                      style: TextStyle(
-                          color: active ? Colors.white : CelTheme.subText(c),
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700)),
+                  child: Text(
+                    '$count',
+                    style: TextStyle(
+                      color: active ? Colors.white : CelTheme.subText(c),
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ],
             ],
@@ -270,15 +304,21 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
           // + new order button
           GestureDetector(
             onTap: _openOrderTicket,
-            child: Icon(Icons.add,
-                color: CelTheme.mainText(context), size: 22.sp),
+            child: Icon(
+              Icons.add,
+              color: CelTheme.mainText(context),
+              size: 22.sp,
+            ),
           ),
           SizedBox(width: 14.w),
           // ... three-dot close-positions menu
           GestureDetector(
             onTap: () => _showCloseMenu(context),
-            child: Icon(Icons.more_horiz,
-                color: CelTheme.mainText(context), size: 22.sp),
+            child: Icon(
+              Icons.more_horiz,
+              color: CelTheme.mainText(context),
+              size: 22.sp,
+            ),
           ),
         ],
       ),
@@ -294,11 +334,14 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
           children: [
             Icon(Icons.inbox_outlined, size: 56.sp, color: CelTheme.subText(c)),
             SizedBox(height: 8.h),
-            Text(_tab == 0 ? 'No open positions' : 'No pending orders',
-                style: TextStyle(
-                    color: CelTheme.subText(c),
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600)),
+            Text(
+              _tab == 0 ? 'No open positions' : 'No pending orders',
+              style: TextStyle(
+                color: CelTheme.subText(c),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
       );
@@ -313,13 +356,13 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
 
   // ── Position card ──────────────────────────────────────────────────────────
   Widget _card(BuildContext c, TradePosition p, {bool isPending = false}) {
-    final isBuy  = p.action.toUpperCase().contains('BUY');
+    final isBuy = p.action.toUpperCase().contains('BUY');
     final sideColor = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
-    final plColor   = p.profitLoss >= 0 ? CelTheme.tpGreen : CelTheme.sell(c);
-    final entry  = _d(p.entryPrice);
-    final cur    = _d(p.currentPrice);
-    final tp     = _d(p.takeProfit);
-    final sl     = _d(p.stopLoss);
+    final plColor = p.profitLoss >= 0 ? CelTheme.tpGreen : CelTheme.sell(c);
+    final entry = _d(p.entryPrice);
+    final cur = _d(p.currentPrice);
+    final tp = _d(p.takeProfit);
+    final sl = _d(p.stopLoss);
 
     return GestureDetector(
       onTap: () => _openDetail(p, isPending: isPending),
@@ -336,11 +379,14 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
             // Row 1: symbol + side badge + P/L
             Row(
               children: [
-                Text(p.symbol,
-                    style: TextStyle(
-                        color: CelTheme.mainText(c),
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w800)),
+                Text(
+                  p.symbol,
+                  style: TextStyle(
+                    color: CelTheme.mainText(c),
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 SizedBox(width: 8.w),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
@@ -348,37 +394,49 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                     color: sideColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(4.r),
                   ),
-                  child: Text('${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
-                      style: TextStyle(
-                          color: sideColor,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w700)),
+                  child: Text(
+                    '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      color: sideColor,
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
                 const Spacer(),
-                Text(_fmtPL(p.profitLoss),
-                    style: TextStyle(
-                        color: plColor,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w800)),
+                Text(
+                  _fmtPL(p.profitLoss),
+                  style: TextStyle(
+                    color: plColor,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ],
             ),
             SizedBox(height: 6.h),
             // Row 2: entry → current prices
             Row(
               children: [
-                Icon(Icons.arrow_forward, size: 12.sp, color: CelTheme.subText(c)),
-                SizedBox(width: 4.w),
-                Text('${_fmt(entry, p.digits)}  →  ${_fmt(cur, p.digits)}',
-                    style: TextStyle(
-                        color: CelTheme.subText(c),
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600)),
+                // Icon(Icons.arrow_forward, size: 12.sp, color: CelTheme.subText(c)),
+                // SizedBox(width: 4.w),
+                Text(
+                  '${_fmt(entry, p.digits)}  →  ${_fmt(cur, p.digits)}',
+                  style: TextStyle(
+                    color: CelTheme.subText(c),
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const Spacer(),
-                Text(p.time,
-                    style: TextStyle(
-                        color: CelTheme.subText(c),
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w500)),
+                Text(
+                  p.time,
+                  style: TextStyle(
+                    color: CelTheme.subText(c),
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
             // Row 3: TP / SL / Swap / Commission (if set)
@@ -416,28 +474,39 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
         color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(4.r),
       ),
-      child: Text('$label $value',
-          style: TextStyle(
-              color: color, fontSize: 10.sp, fontWeight: FontWeight.w700)),
+      child: Text(
+        '$label $value',
+        style: TextStyle(
+          color: color,
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 
   Widget _metaText(BuildContext c, String label, String value) {
     return RichText(
-      text: TextSpan(children: [
-        TextSpan(
+      text: TextSpan(
+        children: [
+          TextSpan(
             text: '$label ',
             style: TextStyle(
-                color: CelTheme.subText(c),
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w500)),
-        TextSpan(
+              color: CelTheme.subText(c),
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          TextSpan(
             text: value,
             style: TextStyle(
-                color: CelTheme.mainText(c),
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w700)),
-      ]),
+              color: CelTheme.mainText(c),
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -471,8 +540,12 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
         final text = CelTheme.mainText(ctx);
         final sub = CelTheme.subText(ctx);
 
-        Widget _item(String label, VoidCallback? onTap,
-            {bool isHeader = false, bool isCancel = false}) {
+        Widget _item(
+          String label,
+          VoidCallback? onTap, {
+          bool isHeader = false,
+          bool isCancel = false,
+        }) {
           return InkWell(
             onTap: onTap,
             child: Container(
@@ -480,15 +553,17 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
               padding: EdgeInsets.symmetric(vertical: 16.h),
               decoration: BoxDecoration(
                 border: Border(
-                    bottom: BorderSide(color: sub.withOpacity(.15), width: .5)),
+                  bottom: BorderSide(color: sub.withOpacity(.15), width: .5),
+                ),
               ),
               alignment: Alignment.center,
               child: Text(
                 label,
                 style: TextStyle(
-                  color: isHeader
-                      ? sub
-                      : isCancel
+                  color:
+                      isHeader
+                          ? sub
+                          : isCancel
                           ? sub
                           : text,
                   fontSize: isHeader ? 13.sp : 15.sp,
@@ -502,43 +577,44 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
         return Container(
           decoration: BoxDecoration(
             color: bg,
-            borderRadius:
-                BorderRadius.vertical(top: Radius.circular(16.r)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(height: 6.h),
               Container(
-                  width: 36.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                      color: sub.withOpacity(.3),
-                      borderRadius: BorderRadius.circular(2.r))),
+                width: 36.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: sub.withOpacity(.3),
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
               _item('Close Positions', null, isHeader: true),
-              _item('All', positions.isEmpty
-                  ? null
-                  : () => closeWith(positions)),
+              _item(
+                'All',
+                positions.isEmpty ? null : () => closeWith(positions),
+              ),
               _item('With profit', () {
-                final list =
-                    positions.where((p) => p.profitLoss > 0).toList();
+                final list = positions.where((p) => p.profitLoss > 0).toList();
                 closeWith(list);
               }),
               _item('With loss', () {
-                final list =
-                    positions.where((p) => p.profitLoss < 0).toList();
+                final list = positions.where((p) => p.profitLoss < 0).toList();
                 closeWith(list);
               }),
               if (dominantSym != null)
                 _item('All $dominantSym With Loss', () {
-                  final list = positions
-                      .where((p) =>
-                          p.symbol == dominantSym && p.profitLoss < 0)
-                      .toList();
+                  final list =
+                      positions
+                          .where(
+                            (p) => p.symbol == dominantSym && p.profitLoss < 0,
+                          )
+                          .toList();
                   closeWith(list);
                 }),
-              _item('Cancel', () => Navigator.pop(ctx),
-                  isCancel: true),
+              _item('Cancel', () => Navigator.pop(ctx), isCancel: true),
               SizedBox(height: 16.h + MediaQuery.of(ctx).padding.bottom),
             ],
           ),
@@ -557,18 +633,23 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _DetailSheet(
-        position: p,
-        onModify: () {
-          Navigator.pop(context);
-          _openModify(p);
-        },
-        onClose: (volume) async {
-          Navigator.pop(context);
-          final isFullClose = (volume - p.volume).abs() < 0.0001 || volume >= p.volume;
-          await _c.closePosition(p.orderId, volume: isFullClose ? null : volume);
-        },
-      ),
+      builder:
+          (_) => _DetailSheet(
+            position: p,
+            onModify: () {
+              Navigator.pop(context);
+              _openModify(p);
+            },
+            onClose: (volume) async {
+              Navigator.pop(context);
+              final isFullClose =
+                  (volume - p.volume).abs() < 0.0001 || volume >= p.volume;
+              await _c.closePosition(
+                p.orderId,
+                volume: isFullClose ? null : volume,
+              );
+            },
+          ),
     );
   }
 
@@ -579,9 +660,9 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       context: ctx,
       backgroundColor: Colors.transparent,
       builder: (_) {
-        final bg   = CelTheme.card(ctx);
+        final bg = CelTheme.card(ctx);
         final text = CelTheme.mainText(ctx);
-        final sub  = CelTheme.subText(ctx);
+        final sub = CelTheme.subText(ctx);
 
         return Container(
           decoration: BoxDecoration(
@@ -605,17 +686,24 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Row(
                   children: [
-                    Text(p.symbol,
-                        style: TextStyle(
-                            color: text,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700)),
+                    Text(
+                      p.symbol,
+                      style: TextStyle(
+                        color: text,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     SizedBox(width: 8.w),
-                    Text(p.action,
-                        style: TextStyle(color: sub, fontSize: 13.sp)),
+                    Text(
+                      p.action,
+                      style: TextStyle(color: sub, fontSize: 13.sp),
+                    ),
                     const Spacer(),
-                    Text('${p.volume.toStringAsFixed(2)} lot',
-                        style: TextStyle(color: sub, fontSize: 13.sp)),
+                    Text(
+                      '${p.volume.toStringAsFixed(2)} lot',
+                      style: TextStyle(color: sub, fontSize: 13.sp),
+                    ),
                   ],
                 ),
               ),
@@ -624,11 +712,15 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Row(
                   children: [
-                    Text('Price: ${_fmt(_d(p.entryPrice), p.digits)}',
-                        style: TextStyle(color: sub, fontSize: 12.sp)),
+                    Text(
+                      'Price: ${_fmt(_d(p.entryPrice), p.digits)}',
+                      style: TextStyle(color: sub, fontSize: 12.sp),
+                    ),
                     if (_d(p.currentPrice) > 0) ...[
-                      Text('  →  ${_fmt(_d(p.currentPrice), p.digits)}',
-                          style: TextStyle(color: sub, fontSize: 12.sp)),
+                      Text(
+                        '  →  ${_fmt(_d(p.currentPrice), p.digits)}',
+                        style: TextStyle(color: sub, fontSize: 12.sp),
+                      ),
                     ],
                   ],
                 ),
@@ -641,7 +733,8 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   Navigator.pop(ctx);
                   final accountController = Get.find<AccountController>();
                   final activeAccount = accountController.activeMT5Account;
-                  if (activeAccount == null || activeAccount.metaAccountNumber.isEmpty) {
+                  if (activeAccount == null ||
+                      activeAccount.metaAccountNumber.isEmpty) {
                     if (Get.isRegistered<AppNotificationController>()) {
                       Get.find<AppNotificationController>().showError(
                         title: 'Error',
@@ -673,11 +766,14 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   alignment: Alignment.center,
-                  child: Text('Cancel Order',
-                      style: TextStyle(
-                          color: CelTheme.sell(ctx),
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600)),
+                  child: Text(
+                    'Cancel Order',
+                    style: TextStyle(
+                      color: CelTheme.sell(ctx),
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
               Divider(height: 1, thickness: 0.5, color: sub.withOpacity(.2)),
@@ -687,8 +783,10 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   alignment: Alignment.center,
-                  child: Text('Dismiss',
-                      style: TextStyle(color: sub, fontSize: 15.sp)),
+                  child: Text(
+                    'Dismiss',
+                    style: TextStyle(color: sub, fontSize: 15.sp),
+                  ),
                 ),
               ),
               SizedBox(height: 16.h + MediaQuery.of(ctx).padding.bottom),
@@ -712,39 +810,42 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
   // ── New order ticket ────────────────────────────────────────────────────────
   void _openOrderTicket() {
     final positions = _c.marketPositions;
-    final symbol   = positions.isNotEmpty ? positions.first.symbol : 'XAUUSD';
-    final p        = positions.isNotEmpty ? positions.first : null;
+    final symbol = positions.isNotEmpty ? positions.first.symbol : 'XAUUSD';
+    final p = positions.isNotEmpty ? positions.first : null;
     final accountController = Get.find<AccountController>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _OrderTicket(
-        symbol: symbol,
-        bid: _d(p?.entryPrice),
-        ask: _d(p?.currentPrice),
-        digits: p?.digits ?? 2,
-        onSubmit: (isSell, type, volume, price, tp, sl) {
-          final activeAccount = accountController.activeMT5Account;
-          if (activeAccount == null || activeAccount.metaAccountNumber.isEmpty) {
-            if (Get.isRegistered<AppNotificationController>()) {
-              Get.find<AppNotificationController>().showError(
-                title: 'Error',
-                message: 'No active trading account found',
+      builder:
+          (_) => _OrderTicket(
+            symbol: symbol,
+            bid: _d(p?.entryPrice),
+            ask: _d(p?.currentPrice),
+            digits: p?.digits ?? 2,
+            onSubmit: (isSell, type, volume, price, tp, sl) {
+              final activeAccount = accountController.activeMT5Account;
+              if (activeAccount == null ||
+                  activeAccount.metaAccountNumber.isEmpty) {
+                if (Get.isRegistered<AppNotificationController>()) {
+                  Get.find<AppNotificationController>().showError(
+                    title: 'Error',
+                    message: 'No active trading account found',
+                  );
+                }
+                return Future.value(false);
+              }
+              return _c.placeTradeOrder(
+                mt5Account: activeAccount.metaAccountNumber,
+                symbol: symbol,
+                volume: volume.toStringAsFixed(2),
+                orderType: type,
+                price: price,
+                takeProfit: tp,
+                stopLoss: sl,
               );
-            }
-            return Future.value(false);
-          }
-          return _c.placeTradeOrder(
-              mt5Account: activeAccount.metaAccountNumber,
-              symbol: symbol,
-              volume: volume.toStringAsFixed(2),
-              orderType: type,
-              price: price,
-              takeProfit: tp,
-              stopLoss: sl);
-        },
-      ),
+            },
+          ),
     );
   }
 }
@@ -758,8 +859,11 @@ class _DetailSheet extends StatefulWidget {
   final TradePosition position;
   final VoidCallback onModify;
   final _CloseCallback onClose;
-  const _DetailSheet(
-      {required this.position, required this.onModify, required this.onClose});
+  const _DetailSheet({
+    required this.position,
+    required this.onModify,
+    required this.onClose,
+  });
 
   @override
   State<_DetailSheet> createState() => _DetailSheetState();
@@ -771,7 +875,9 @@ class _DetailSheetState extends State<_DetailSheet> {
   @override
   void initState() {
     super.initState();
-    _volController = TextEditingController(text: widget.position.volume.toStringAsFixed(2));
+    _volController = TextEditingController(
+      text: widget.position.volume.toStringAsFixed(2),
+    );
     _volController.addListener(() {
       if (mounted) {
         setState(() {});
@@ -790,17 +896,22 @@ class _DetailSheetState extends State<_DetailSheet> {
     final TradingController _c = Get.find<TradingController>();
     return _Sheet(
       child: Obx(() {
-        final p = _c.marketPositions.firstWhereOrNull((pos) => pos.orderId == widget.position.orderId) 
-               ?? _c.pendingPositions.firstWhereOrNull((pos) => pos.orderId == widget.position.orderId) 
-               ?? widget.position;
+        final p =
+            _c.marketPositions.firstWhereOrNull(
+              (pos) => pos.orderId == widget.position.orderId,
+            ) ??
+            _c.pendingPositions.firstWhereOrNull(
+              (pos) => pos.orderId == widget.position.orderId,
+            ) ??
+            widget.position;
         final isBuy = p.action.toUpperCase().contains('BUY');
         final plCol = p.profitLoss >= 0 ? CelTheme.tpGreen : CelTheme.sell(c);
-        final side  = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
+        final side = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
         final entry = _d(p.entryPrice);
-        final cur   = _d(p.currentPrice);
-        final pct   = entry == 0 ? 0.0 : (cur - entry) / entry * 100;
-        final tp    = _d(p.takeProfit);
-        final sl    = _d(p.stopLoss);
+        final cur = _d(p.currentPrice);
+        final pct = entry == 0 ? 0.0 : (cur - entry) / entry * 100;
+        final tp = _d(p.takeProfit);
+        final sl = _d(p.stopLoss);
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -818,23 +929,32 @@ class _DetailSheetState extends State<_DetailSheet> {
                 children: [
                   Row(
                     children: [
-                      Text(p.symbol,
-                          style: TextStyle(
-                              color: CelTheme.mainText(c),
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.w800)),
+                      Text(
+                        p.symbol,
+                        style: TextStyle(
+                          color: CelTheme.mainText(c),
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       SizedBox(width: 8.w),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 3.h,
+                        ),
                         decoration: BoxDecoration(
-                            color: side,
-                            borderRadius: BorderRadius.circular(6.r)),
+                          color: side,
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
                         child: Text(
-                            '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w700)),
+                          '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -842,30 +962,39 @@ class _DetailSheetState extends State<_DetailSheet> {
                   Row(
                     children: [
                       Text(
-                          '${_fmt(entry, p.digits)}  →  ${_fmt(cur, p.digits)}',
-                          style: TextStyle(
-                              color: CelTheme.mainText(c),
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w700)),
+                        '${_fmt(entry, p.digits)}  →  ${_fmt(cur, p.digits)}',
+                        style: TextStyle(
+                          color: CelTheme.mainText(c),
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       SizedBox(width: 8.w),
-                      Text('${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(2)}%',
-                          style: TextStyle(
-                              color: plCol,
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w700)),
+                      Text(
+                        '${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(2)}%',
+                        style: TextStyle(
+                          color: plCol,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                       const Spacer(),
                       Icon(
-                          p.profitLoss >= 0
-                              ? Icons.trending_up
-                              : Icons.trending_down,
-                          color: plCol,
-                          size: 18.sp),
+                        p.profitLoss >= 0
+                            ? Icons.trending_up
+                            : Icons.trending_down,
+                        color: plCol,
+                        size: 18.sp,
+                      ),
                       SizedBox(width: 4.w),
-                      Text(_fmtPL(p.profitLoss),
-                          style: TextStyle(
-                              color: plCol,
-                              fontSize: 22.sp,
-                              fontWeight: FontWeight.w800)),
+                      Text(
+                        _fmtPL(p.profitLoss),
+                        style: TextStyle(
+                          color: plCol,
+                          fontSize: 22.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -884,23 +1013,30 @@ class _DetailSheetState extends State<_DetailSheet> {
               children: [
                 Expanded(child: _kv(c, 'SWAP', p.swap.toStringAsFixed(2))),
                 Expanded(
-                    child: _kv(c, 'COMMISSION', p.commission.toStringAsFixed(2))),
+                  child: _kv(c, 'COMMISSION', p.commission.toStringAsFixed(2)),
+                ),
               ],
             ),
             SizedBox(height: 14.h),
             // Risk management row
             Row(
               children: [
-                Text('Risk Management',
-                    style: TextStyle(
-                        color: CelTheme.mainText(c),
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w800)),
+                Text(
+                  'Risk Management',
+                  style: TextStyle(
+                    color: CelTheme.mainText(c),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const Spacer(),
                 GestureDetector(
                   onTap: widget.onModify,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
                     decoration: BoxDecoration(
                       color: CelTheme.buyTint(c),
                       borderRadius: BorderRadius.circular(8.r),
@@ -908,14 +1044,20 @@ class _DetailSheetState extends State<_DetailSheet> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.edit_outlined,
-                            color: CelTheme.buy(c), size: 14.sp),
+                        Icon(
+                          Icons.edit_outlined,
+                          color: CelTheme.buy(c),
+                          size: 14.sp,
+                        ),
                         SizedBox(width: 4.w),
-                        Text('Modify',
-                            style: TextStyle(
-                                color: CelTheme.buy(c),
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w700)),
+                        Text(
+                          'Modify',
+                          style: TextStyle(
+                            color: CelTheme.buy(c),
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -926,12 +1068,20 @@ class _DetailSheetState extends State<_DetailSheet> {
             Row(
               children: [
                 Expanded(
-                    child: _riskBox(c, 'Stop Loss',
-                        sl > 0 ? _fmt(sl, p.digits) : 'Not Set')),
+                  child: _riskBox(
+                    c,
+                    'Stop Loss',
+                    sl > 0 ? _fmt(sl, p.digits) : 'Not Set',
+                  ),
+                ),
                 SizedBox(width: 12.w),
                 Expanded(
-                    child: _riskBox(c, 'Take Profit',
-                        tp > 0 ? _fmt(tp, p.digits) : 'Not Set')),
+                  child: _riskBox(
+                    c,
+                    'Take Profit',
+                    tp > 0 ? _fmt(tp, p.digits) : 'Not Set',
+                  ),
+                ),
               ],
             ),
             SizedBox(height: 14.h),
@@ -944,28 +1094,38 @@ class _DetailSheetState extends State<_DetailSheet> {
               ),
               child: Row(
                 children: [
-                  Text('Volume',
-                      style: TextStyle(
-                          color: CelTheme.subText(c),
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600)),
+                  Text(
+                    'Volume',
+                    style: TextStyle(
+                      color: CelTheme.subText(c),
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const Spacer(),
                   GestureDetector(
                     onTap: () {
-                      final currentVal = double.tryParse(_volController.text) ?? p.volume;
+                      final currentVal =
+                          double.tryParse(_volController.text) ?? p.volume;
                       final newVal = (currentVal - 0.01).clamp(0.01, p.volume);
                       setState(() {
                         _volController.text = newVal.toStringAsFixed(2);
                       });
                     },
-                    child: Icon(Icons.remove, color: CelTheme.subText(c), size: 20.sp),
+                    child: Icon(
+                      Icons.remove,
+                      color: CelTheme.subText(c),
+                      size: 20.sp,
+                    ),
                   ),
                   SizedBox(width: 14.w),
                   SizedBox(
                     width: 100.w,
                     child: AppTextFormField(
                       controller: _volController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: CelTheme.mainText(c),
@@ -975,7 +1135,10 @@ class _DetailSheetState extends State<_DetailSheet> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: CelTheme.card(c),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 8.h,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.r),
                           borderSide: BorderSide(color: CelTheme.divider(c)),
@@ -986,7 +1149,10 @@ class _DetailSheetState extends State<_DetailSheet> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.r),
-                          borderSide: BorderSide(color: CelTheme.buy(c), width: 1.5),
+                          borderSide: BorderSide(
+                            color: CelTheme.buy(c),
+                            width: 1.5,
+                          ),
                         ),
                       ),
                       onChanged: (val) {
@@ -1002,7 +1168,8 @@ class _DetailSheetState extends State<_DetailSheet> {
                   SizedBox(width: 14.w),
                   GestureDetector(
                     onTap: () {
-                      final currentVal = double.tryParse(_volController.text) ?? p.volume;
+                      final currentVal =
+                          double.tryParse(_volController.text) ?? p.volume;
                       final newVal = (currentVal + 0.01).clamp(0.01, p.volume);
                       setState(() {
                         _volController.text = newVal.toStringAsFixed(2);
@@ -1014,7 +1181,11 @@ class _DetailSheetState extends State<_DetailSheet> {
                         color: CelTheme.buy(c).withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6.r),
                       ),
-                      child: Icon(Icons.add, color: CelTheme.buy(c), size: 16.sp),
+                      child: Icon(
+                        Icons.add,
+                        color: CelTheme.buy(c),
+                        size: 16.sp,
+                      ),
                     ),
                   ),
                 ],
@@ -1040,19 +1211,22 @@ class _DetailSheetState extends State<_DetailSheet> {
     final proportionalProfitLoss = p.profitLoss * closeVolumeRatio;
     final isPositive = proportionalProfitLoss >= 0;
 
-    final formattedProfitLoss = '\$${PrecisionHelper.formatPnL(proportionalProfitLoss.abs())}';
+    final formattedProfitLoss =
+        '\$${PrecisionHelper.formatPnL(proportionalProfitLoss.abs())}';
 
     final isPartialClose = closeVolume < totalVolume - 0.0001;
 
     String buttonText;
     if (isPartialClose) {
-      buttonText = isPositive
-          ? 'Close ${PrecisionHelper.formatVolume(closeVolume)} Lots with Profit +$formattedProfitLoss'
-          : 'Close ${PrecisionHelper.formatVolume(closeVolume)} Lots with Loss $formattedProfitLoss';
+      buttonText =
+          isPositive
+              ? 'Close ${PrecisionHelper.formatVolume(closeVolume)} Lots with Profit +$formattedProfitLoss'
+              : 'Close ${PrecisionHelper.formatVolume(closeVolume)} Lots with Loss $formattedProfitLoss';
     } else {
-      buttonText = isPositive
-          ? 'Close with Profit +$formattedProfitLoss'
-          : 'Close with Loss $formattedProfitLoss';
+      buttonText =
+          isPositive
+              ? 'Close with Profit +$formattedProfitLoss'
+              : 'Close with Loss $formattedProfitLoss';
     }
 
     final color = isPositive ? CelTheme.tpGreen : CelTheme.slRed;
@@ -1085,12 +1259,16 @@ class _ModifySheetState extends State<_ModifySheet> {
     _c = Get.find<TradingController>();
     final tp = _d(widget.position.takeProfit);
     final sl = _d(widget.position.stopLoss);
-    _tpOn  = tp > 0;
-    _slOn  = sl > 0;
-    
+    _tpOn = tp > 0;
+    _slOn = sl > 0;
+
     // Format TP/SL according to digits
-    _tpController = TextEditingController(text: _tpOn ? _fmt(tp, widget.position.digits) : '');
-    _slController = TextEditingController(text: _slOn ? _fmt(sl, widget.position.digits) : '');
+    _tpController = TextEditingController(
+      text: _tpOn ? _fmt(tp, widget.position.digits) : '',
+    );
+    _slController = TextEditingController(
+      text: _slOn ? _fmt(sl, widget.position.digits) : '',
+    );
 
     // Pre-connect/ensure socket connection is active for this symbol
     try {
@@ -1114,7 +1292,8 @@ class _ModifySheetState extends State<_ModifySheet> {
   void _calculateTPFromRiskReward() {
     if (!_slOn || !_tpOn) return;
 
-    final slPrice = double.tryParse(_slController.text.replaceAll(',', '')) ?? 0.0;
+    final slPrice =
+        double.tryParse(_slController.text.replaceAll(',', '')) ?? 0.0;
     final entryPrice = double.tryParse(widget.position.entryPrice) ?? 0.0;
 
     if (slPrice <= 0 || entryPrice <= 0) return;
@@ -1133,8 +1312,13 @@ class _ModifySheetState extends State<_ModifySheet> {
     _tpController.text = _fmt(tpPrice, widget.position.digits);
   }
 
-  void _incrementValue(TextEditingController controller, double step, bool isTP) {
-    final currentValue = double.tryParse(controller.text.replaceAll(',', '')) ?? 
+  void _incrementValue(
+    TextEditingController controller,
+    double step,
+    bool isTP,
+  ) {
+    final currentValue =
+        double.tryParse(controller.text.replaceAll(',', '')) ??
         (double.tryParse(widget.position.currentPrice) ?? 0.0);
     final newValue = currentValue + step;
     controller.text = _fmt(newValue, widget.position.digits);
@@ -1143,8 +1327,13 @@ class _ModifySheetState extends State<_ModifySheet> {
     }
   }
 
-  void _decrementValue(TextEditingController controller, double step, bool isTP) {
-    final currentValue = double.tryParse(controller.text.replaceAll(',', '')) ?? 
+  void _decrementValue(
+    TextEditingController controller,
+    double step,
+    bool isTP,
+  ) {
+    final currentValue =
+        double.tryParse(controller.text.replaceAll(',', '')) ??
         (double.tryParse(widget.position.currentPrice) ?? 0.0);
     final newValue = (currentValue - step).clamp(0.0, double.infinity);
     controller.text = _fmt(newValue, widget.position.digits);
@@ -1158,13 +1347,18 @@ class _ModifySheetState extends State<_ModifySheet> {
     return _Sheet(
       child: Obx(() {
         // Find the live position to get real-time price/profit updates
-        final p = _c.marketPositions.firstWhereOrNull((pos) => pos.orderId == widget.position.orderId) 
-               ?? _c.pendingPositions.firstWhereOrNull((pos) => pos.orderId == widget.position.orderId) 
-               ?? widget.position;
-               
+        final p =
+            _c.marketPositions.firstWhereOrNull(
+              (pos) => pos.orderId == widget.position.orderId,
+            ) ??
+            _c.pendingPositions.firstWhereOrNull(
+              (pos) => pos.orderId == widget.position.orderId,
+            ) ??
+            widget.position;
+
         final isBuy = p.action.toUpperCase().contains('BUY');
-        final side  = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
-        final step  = 1 / pow10(p.digits);
+        final side = isBuy ? CelTheme.buy(c) : CelTheme.sell(c);
+        final step = 1 / pow10(p.digits);
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -1178,34 +1372,49 @@ class _ModifySheetState extends State<_ModifySheet> {
               ),
               child: Row(
                 children: [
-                  Text(p.symbol,
-                      style: TextStyle(
-                          color: CelTheme.mainText(c),
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w800)),
+                  Text(
+                    p.symbol,
+                    style: TextStyle(
+                      color: CelTheme.mainText(c),
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                   SizedBox(width: 8.w),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 7.w,
+                      vertical: 2.h,
+                    ),
                     decoration: BoxDecoration(
-                        color: side, borderRadius: BorderRadius.circular(4.r)),
+                      color: side,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
                     child: Text(
-                        '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w700)),
+                      '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                   const Spacer(),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('CURRENT',
-                          style: CelTheme.label(c).copyWith(fontSize: 10.sp)),
-                      Text(_fmt(_d(p.currentPrice), p.digits),
-                          style: TextStyle(
-                              color: CelTheme.mainText(c),
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w800)),
+                      Text(
+                        'CURRENT',
+                        style: CelTheme.label(c).copyWith(fontSize: 10.sp),
+                      ),
+                      Text(
+                        _fmt(_d(p.currentPrice), p.digits),
+                        style: TextStyle(
+                          color: CelTheme.mainText(c),
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -1217,10 +1426,14 @@ class _ModifySheetState extends State<_ModifySheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('#${p.orderId}',
-                      style: CelTheme.label(c).copyWith(fontSize: 11.sp)),
-                  Text(p.time,
-                      style: CelTheme.label(c).copyWith(fontSize: 11.sp)),
+                  Text(
+                    '#${p.orderId}',
+                    style: CelTheme.label(c).copyWith(fontSize: 11.sp),
+                  ),
+                  Text(
+                    p.time,
+                    style: CelTheme.label(c).copyWith(fontSize: 11.sp),
+                  ),
                 ],
               ),
             ),
@@ -1237,8 +1450,10 @@ class _ModifySheetState extends State<_ModifySheet> {
                     on: _tpOn,
                     controller: _tpController,
                     onToggle: (v) => setState(() => _tpOn = v),
-                    onIncrement: () => _incrementValue(_tpController, step, true),
-                    onDecrement: () => _decrementValue(_tpController, step, true),
+                    onIncrement:
+                        () => _incrementValue(_tpController, step, true),
+                    onDecrement:
+                        () => _decrementValue(_tpController, step, true),
                     onChanged: (_) {},
                   ),
                 ),
@@ -1251,8 +1466,10 @@ class _ModifySheetState extends State<_ModifySheet> {
                     on: _slOn,
                     controller: _slController,
                     onToggle: (v) => setState(() => _slOn = v),
-                    onIncrement: () => _incrementValue(_slController, step, false),
-                    onDecrement: () => _decrementValue(_slController, step, false),
+                    onIncrement:
+                        () => _incrementValue(_slController, step, false),
+                    onDecrement:
+                        () => _decrementValue(_slController, step, false),
                     onChanged: (_) => _calculateTPFromRiskReward(),
                   ),
                 ),
@@ -1260,16 +1477,26 @@ class _ModifySheetState extends State<_ModifySheet> {
             ),
             SizedBox(height: 18.h),
             _btn(c, 'Modify', CelTheme.buy(c), () async {
-              final double takeProfit = _tpOn && _tpController.text.isNotEmpty
-                  ? (double.tryParse(_tpController.text.replaceAll(',', '')) ?? 0.0)
-                  : 0.0;
-              final double stopLoss = _slOn && _slController.text.isNotEmpty
-                  ? (double.tryParse(_slController.text.replaceAll(',', '')) ?? 0.0)
-                  : 0.0;
+              final double takeProfit =
+                  _tpOn && _tpController.text.isNotEmpty
+                      ? (double.tryParse(
+                            _tpController.text.replaceAll(',', ''),
+                          ) ??
+                          0.0)
+                      : 0.0;
+              final double stopLoss =
+                  _slOn && _slController.text.isNotEmpty
+                      ? (double.tryParse(
+                            _slController.text.replaceAll(',', ''),
+                          ) ??
+                          0.0)
+                      : 0.0;
 
               final positionId = int.tryParse(p.orderId) ?? 0;
-              final activeAccount = Get.find<AccountController>().activeMT5Account;
-              if (activeAccount == null || activeAccount.metaAccountNumber.isEmpty) {
+              final activeAccount =
+                  Get.find<AccountController>().activeMT5Account;
+              if (activeAccount == null ||
+                  activeAccount.metaAccountNumber.isEmpty) {
                 if (Get.isRegistered<AppNotificationController>()) {
                   Get.find<AppNotificationController>().showError(
                     title: 'Error',
@@ -1322,11 +1549,14 @@ class _ModifySheetState extends State<_ModifySheet> {
         children: [
           Row(
             children: [
-              Text(label,
-                  style: TextStyle(
-                      color: on ? color : CelTheme.subText(c),
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700)),
+              Text(
+                label,
+                style: TextStyle(
+                  color: on ? color : CelTheme.subText(c),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const Spacer(),
               Transform.scale(
                 scale: 0.85,
@@ -1337,30 +1567,38 @@ class _ModifySheetState extends State<_ModifySheet> {
                     if (val) {
                       final currentText = controller.text;
                       final parsed =
-                          double.tryParse(currentText.replaceAll(',', '')) ?? 0.0;
+                          double.tryParse(currentText.replaceAll(',', '')) ??
+                          0.0;
                       if (currentText.isEmpty || parsed == 0.0) {
                         final entryPrice =
                             double.tryParse(widget.position.entryPrice) ?? 0.0;
                         if (entryPrice > 0) {
                           final isBuy =
                               widget.position.action.toLowerCase() == 'buy';
-                          final isJPY = widget.position.symbol.contains('JPY') ||
+                          final isJPY =
+                              widget.position.symbol.contains('JPY') ||
                               widget.position.symbol.contains('GOLD') ||
                               widget.position.symbol.contains('XAU');
                           if (label == 'TP') {
                             final standardReward = isJPY ? 1.00 : 0.0100;
-                            final defaultTP = isBuy
-                                ? entryPrice + standardReward
-                                : entryPrice - standardReward;
-                            controller.text =
-                                _fmt(defaultTP, widget.position.digits);
+                            final defaultTP =
+                                isBuy
+                                    ? entryPrice + standardReward
+                                    : entryPrice - standardReward;
+                            controller.text = _fmt(
+                              defaultTP,
+                              widget.position.digits,
+                            );
                           } else {
                             final standardRisk = isJPY ? 0.50 : 0.0050;
-                            final defaultSL = isBuy
-                                ? entryPrice - standardRisk
-                                : entryPrice + standardRisk;
-                            controller.text =
-                                _fmt(defaultSL, widget.position.digits);
+                            final defaultSL =
+                                isBuy
+                                    ? entryPrice - standardRisk
+                                    : entryPrice + standardRisk;
+                            controller.text = _fmt(
+                              defaultSL,
+                              widget.position.digits,
+                            );
                           }
                         }
                       }
@@ -1393,8 +1631,7 @@ class _ModifySheetState extends State<_ModifySheet> {
                       color: color.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
-                    child: Icon(Icons.remove,
-                        color: color, size: 18.sp),
+                    child: Icon(Icons.remove, color: color, size: 18.sp),
                   ),
                 ),
                 SizedBox(width: 8.w),
@@ -1402,8 +1639,9 @@ class _ModifySheetState extends State<_ModifySheet> {
                   child: AppTextFormField(
                     controller: controller,
                     enabled: on,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: on ? CelTheme.mainText(c) : CelTheme.subText(c),
@@ -1415,7 +1653,9 @@ class _ModifySheetState extends State<_ModifySheet> {
                       fillColor: CelTheme.card(c),
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(
-                          horizontal: 4.w, vertical: 8.h),
+                        horizontal: 4.w,
+                        vertical: 8.h,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.r),
                         borderSide: BorderSide(color: CelTheme.divider(c)),
@@ -1443,8 +1683,7 @@ class _ModifySheetState extends State<_ModifySheet> {
                       color: color.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
-                    child: Icon(Icons.add,
-                        color: color, size: 18.sp),
+                    child: Icon(Icons.add, color: color, size: 18.sp),
                   ),
                 ),
               ],
@@ -1459,8 +1698,15 @@ class _ModifySheetState extends State<_ModifySheet> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Order ticket
 // ─────────────────────────────────────────────────────────────────────────────
-typedef _Submit = Future<bool> Function(
-    bool isSell, OrderType type, double vol, String? price, String? tp, String? sl);
+typedef _Submit =
+    Future<bool> Function(
+      bool isSell,
+      OrderType type,
+      double vol,
+      String? price,
+      String? tp,
+      String? sl,
+    );
 
 class _OrderTicket extends StatefulWidget {
   final String symbol;
@@ -1468,12 +1714,13 @@ class _OrderTicket extends StatefulWidget {
   final double ask;
   final int digits;
   final _Submit onSubmit;
-  const _OrderTicket(
-      {required this.symbol,
-      required this.bid,
-      required this.ask,
-      required this.digits,
-      required this.onSubmit});
+  const _OrderTicket({
+    required this.symbol,
+    required this.bid,
+    required this.ask,
+    required this.digits,
+    required this.onSubmit,
+  });
 
   @override
   State<_OrderTicket> createState() => _OrderTicketState();
@@ -1511,8 +1758,10 @@ class _OrderTicketState extends State<_OrderTicket> {
     _socketController = Get.find<ChartSocketController>();
     _socketController.changeSymbol(widget.symbol);
     _c = Get.find<TradingController>();
-    
-    _priceController = TextEditingController(text: (_isSell ? widget.bid : widget.ask).toStringAsFixed(widget.digits));
+
+    _priceController = TextEditingController(
+      text: (_isSell ? widget.bid : widget.ask).toStringAsFixed(widget.digits),
+    );
     _tpController = TextEditingController();
     _slController = TextEditingController();
 
@@ -1534,7 +1783,8 @@ class _OrderTicketState extends State<_OrderTicket> {
   void _calculateTPFromRiskRewardOrderTicket(double entryPrice) {
     if (!_sl || !_tp) return;
 
-    final slPrice = double.tryParse(_slController.text.replaceAll(',', '')) ?? 0.0;
+    final slPrice =
+        double.tryParse(_slController.text.replaceAll(',', '')) ?? 0.0;
     if (slPrice <= 0 || entryPrice <= 0) return;
 
     final isBuy = !_isSell;
@@ -1565,7 +1815,7 @@ class _OrderTicketState extends State<_OrderTicket> {
           _priceController.text = price.toStringAsFixed(widget.digits);
         }
 
-        final color  = _isSell ? CelTheme.sell(c) : CelTheme.buy(c);
+        final color = _isSell ? CelTheme.sell(c) : CelTheme.buy(c);
         // ✅ FIX: Guard ask/bid against NaN/Infinity before .round() — otherwise
         // a transient WS payload with bad prices crashes the build sheet with
         // "UnsupportedError: Infinity or NaN toInt".
@@ -1596,24 +1846,34 @@ class _OrderTicketState extends State<_OrderTicket> {
                 children: [
                   Row(
                     children: [
-                      Text(widget.symbol,
-                          style: TextStyle(
-                              color: CelTheme.mainText(c),
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w800)),
+                      Text(
+                        widget.symbol,
+                        style: TextStyle(
+                          color: CelTheme.mainText(c),
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
                       SizedBox(width: 2.w),
-                      Icon(Icons.keyboard_arrow_down,
-                          color: CelTheme.subText(c), size: 18.sp),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        color: CelTheme.subText(c),
+                        size: 18.sp,
+                      ),
                       SizedBox(width: 8.w),
                       Container(
                         padding: EdgeInsets.symmetric(
-                            horizontal: 7.w, vertical: 2.h),
+                          horizontal: 7.w,
+                          vertical: 2.h,
+                        ),
                         decoration: BoxDecoration(
-                            color: CelTheme.card(c),
-                            borderRadius: BorderRadius.circular(5.r)),
-                        child: Text('Spread $spread',
-                            style: CelTheme.label(c)
-                                .copyWith(fontSize: 10.sp)),
+                          color: CelTheme.card(c),
+                          borderRadius: BorderRadius.circular(5.r),
+                        ),
+                        child: Text(
+                          'Spread $spread',
+                          style: CelTheme.label(c).copyWith(fontSize: 10.sp),
+                        ),
                       ),
                     ],
                   ),
@@ -1621,13 +1881,19 @@ class _OrderTicketState extends State<_OrderTicket> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      _bidAsk(c, 'BID',
-                          bid.toStringAsFixed(widget.digits),
-                          CelTheme.sell(c)),
+                      _bidAsk(
+                        c,
+                        'BID',
+                        bid.toStringAsFixed(widget.digits),
+                        CelTheme.sell(c),
+                      ),
                       SizedBox(width: 16.w),
-                      _bidAsk(c, 'ASK',
-                          ask.toStringAsFixed(widget.digits),
-                          CelTheme.buy(c)),
+                      _bidAsk(
+                        c,
+                        'ASK',
+                        ask.toStringAsFixed(widget.digits),
+                        CelTheme.buy(c),
+                      ),
                     ],
                   ),
                 ],
@@ -1655,24 +1921,35 @@ class _OrderTicketState extends State<_OrderTicket> {
               child: Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                      vertical: 10.h,
+                    ),
                     child: Row(
                       children: [
-                        Text('PRICE',
-                            style: CelTheme.label(c).copyWith(fontSize: 12.sp)),
+                        Text(
+                          'PRICE',
+                          style: CelTheme.label(c).copyWith(fontSize: 12.sp),
+                        ),
                         const Spacer(),
                         if (_orderIdx == 0)
-                          Text(price.toStringAsFixed(widget.digits),
-                              style: TextStyle(
-                                  color: color,
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w800))
+                          Text(
+                            price.toStringAsFixed(widget.digits),
+                            style: TextStyle(
+                              color: color,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          )
                         else
                           SizedBox(
                             width: 120.w,
                             child: AppTextFormField(
                               controller: _priceController,
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: color,
@@ -1682,18 +1959,28 @@ class _OrderTicketState extends State<_OrderTicket> {
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: CelTheme.card(c),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8.w,
+                                  vertical: 8.h,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8.r),
-                                  borderSide: BorderSide(color: CelTheme.divider(c)),
+                                  borderSide: BorderSide(
+                                    color: CelTheme.divider(c),
+                                  ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8.r),
-                                  borderSide: BorderSide(color: CelTheme.divider(c)),
+                                  borderSide: BorderSide(
+                                    color: CelTheme.divider(c),
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8.r),
-                                  borderSide: BorderSide(color: color, width: 1.5),
+                                  borderSide: BorderSide(
+                                    color: color,
+                                    width: 1.5,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1703,23 +1990,41 @@ class _OrderTicketState extends State<_OrderTicket> {
                   ),
                   Divider(height: 1, color: CelTheme.divider(c)),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                      vertical: 10.h,
+                    ),
                     child: Row(
                       children: [
-                        Text('VOLUME',
-                            style: CelTheme.label(c).copyWith(fontSize: 12.sp)),
+                        Text(
+                          'VOLUME',
+                          style: CelTheme.label(c).copyWith(fontSize: 12.sp),
+                        ),
                         const Spacer(),
-                        _stepBtn(c, Icons.remove, color,
-                            () => setState(() => _vol = (_vol - 0.01).clamp(0.01, 100))),
+                        _stepBtn(
+                          c,
+                          Icons.remove,
+                          color,
+                          () => setState(
+                            () => _vol = (_vol - 0.01).clamp(0.01, 100),
+                          ),
+                        ),
                         SizedBox(width: 18.w),
-                        Text(_vol.toStringAsFixed(2),
-                            style: TextStyle(
-                                color: CelTheme.mainText(c),
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w800)),
+                        Text(
+                          _vol.toStringAsFixed(2),
+                          style: TextStyle(
+                            color: CelTheme.mainText(c),
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                         SizedBox(width: 18.w),
-                        _stepBtn(c, Icons.add, color,
-                            () => setState(() => _vol += 0.01)),
+                        _stepBtn(
+                          c,
+                          Icons.add,
+                          color,
+                          () => setState(() => _vol += 0.01),
+                        ),
                       ],
                     ),
                   ),
@@ -1740,14 +2045,26 @@ class _OrderTicketState extends State<_OrderTicket> {
                     controller: _tpController,
                     onToggle: (v) => setState(() => _tp = v),
                     onIncrement: () {
-                      final curVal = double.tryParse(_tpController.text.replaceAll(',', '')) ?? price;
+                      final curVal =
+                          double.tryParse(
+                            _tpController.text.replaceAll(',', ''),
+                          ) ??
+                          price;
                       final step = 1 / pow10(widget.digits);
-                      _tpController.text = (curVal + step).toStringAsFixed(widget.digits);
+                      _tpController.text = (curVal + step).toStringAsFixed(
+                        widget.digits,
+                      );
                     },
                     onDecrement: () {
-                      final curVal = double.tryParse(_tpController.text.replaceAll(',', '')) ?? price;
+                      final curVal =
+                          double.tryParse(
+                            _tpController.text.replaceAll(',', ''),
+                          ) ??
+                          price;
                       final step = 1 / pow10(widget.digits);
-                      _tpController.text = (curVal - step).toStringAsFixed(widget.digits);
+                      _tpController.text = (curVal - step).toStringAsFixed(
+                        widget.digits,
+                      );
                     },
                   ),
                 ),
@@ -1761,18 +2078,31 @@ class _OrderTicketState extends State<_OrderTicket> {
                     controller: _slController,
                     onToggle: (v) => setState(() => _sl = v),
                     onIncrement: () {
-                      final curVal = double.tryParse(_slController.text.replaceAll(',', '')) ?? price;
+                      final curVal =
+                          double.tryParse(
+                            _slController.text.replaceAll(',', ''),
+                          ) ??
+                          price;
                       final step = 1 / pow10(widget.digits);
-                      _slController.text = (curVal + step).toStringAsFixed(widget.digits);
+                      _slController.text = (curVal + step).toStringAsFixed(
+                        widget.digits,
+                      );
                       _calculateTPFromRiskRewardOrderTicket(price);
                     },
                     onDecrement: () {
-                      final curVal = double.tryParse(_slController.text.replaceAll(',', '')) ?? price;
+                      final curVal =
+                          double.tryParse(
+                            _slController.text.replaceAll(',', ''),
+                          ) ??
+                          price;
                       final step = 1 / pow10(widget.digits);
-                      _slController.text = (curVal - step).toStringAsFixed(widget.digits);
+                      _slController.text = (curVal - step).toStringAsFixed(
+                        widget.digits,
+                      );
                       _calculateTPFromRiskRewardOrderTicket(price);
                     },
-                    onChanged: (_) => _calculateTPFromRiskRewardOrderTicket(price),
+                    onChanged:
+                        (_) => _calculateTPFromRiskRewardOrderTicket(price),
                   ),
                 ),
               ],
@@ -1786,47 +2116,73 @@ class _OrderTicketState extends State<_OrderTicket> {
               _placing
                   ? null
                   : () async {
-                      setState(() => _placing = true);
-                      final priceStr = _orderIdx == 0 ? null : _priceController.text;
-                      final tpStr = _tp && _tpController.text.isNotEmpty ? _tpController.text : null;
-                      final slStr = _sl && _slController.text.isNotEmpty ? _slController.text : null;
+                    setState(() => _placing = true);
+                    final priceStr =
+                        _orderIdx == 0 ? null : _priceController.text;
+                    final tpStr =
+                        _tp && _tpController.text.isNotEmpty
+                            ? _tpController.text
+                            : null;
+                    final slStr =
+                        _sl && _slController.text.isNotEmpty
+                            ? _slController.text
+                            : null;
 
-                      final success = await widget.onSubmit(_isSell, _type, _vol, priceStr, tpStr, slStr);
-                      if (mounted) {
-                        setState(() => _placing = false);
-                        if (success) {
-                          Navigator.pop(c);
-                        } else {
-                          final errMsg = _c.errorMessage;
-                          if (Get.isRegistered<AppNotificationController>()) {
-                            Get.find<AppNotificationController>().showError(
-                              title: 'Error',
-                              message: errMsg.isNotEmpty ? errMsg : 'Failed to place order',
-                            );
-                          }
+                    final success = await widget.onSubmit(
+                      _isSell,
+                      _type,
+                      _vol,
+                      priceStr,
+                      tpStr,
+                      slStr,
+                    );
+                    if (mounted) {
+                      setState(() => _placing = false);
+                      if (success) {
+                        Navigator.pop(c);
+                      } else {
+                        final errMsg = _c.errorMessage;
+                        if (Get.isRegistered<AppNotificationController>()) {
+                          Get.find<AppNotificationController>().showError(
+                            title: 'Error',
+                            message:
+                                errMsg.isNotEmpty
+                                    ? errMsg
+                                    : 'Failed to place order',
+                          );
                         }
                       }
-                    },
-              customChild: _placing
-                  ? SizedBox(
-                      width: 20.w,
-                      height: 20.h,
-                      child: const CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white))
-                  : Column(
-                      children: [
-                        Text(_isSell ? 'Sell' : 'Buy',
+                    }
+                  },
+              customChild:
+                  _placing
+                      ? SizedBox(
+                        width: 20.w,
+                        height: 20.h,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                      : Column(
+                        children: [
+                          Text(
+                            _isSell ? 'Sell' : 'Buy',
                             style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w800)),
-                        Text(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
                             '${_vol.toStringAsFixed(2)} ${widget.symbol} @ ${['Market', 'Limit', 'Stop', 'Stop Limit'][_orderIdx]}',
                             style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.85),
-                                fontSize: 11.sp)),
-                      ],
-                    ),
+                              color: Colors.white.withValues(alpha: 0.85),
+                              fontSize: 11.sp,
+                            ),
+                          ),
+                        ],
+                      ),
             ),
             SizedBox(height: 8.h),
           ],
@@ -1837,7 +2193,7 @@ class _OrderTicketState extends State<_OrderTicket> {
 
   Widget _sideBtn(BuildContext c, String label, bool sell) {
     final selected = _isSell == sell;
-    final color    = sell ? CelTheme.sell(c) : CelTheme.buy(c);
+    final color = sell ? CelTheme.sell(c) : CelTheme.buy(c);
     return GestureDetector(
       onTap: () => setState(() => _isSell = sell),
       child: Container(
@@ -1848,11 +2204,14 @@ class _OrderTicketState extends State<_OrderTicket> {
           borderRadius: BorderRadius.circular(10.r),
           border: selected ? Border.all(color: color, width: 1) : null,
         ),
-        child: Text(label,
-            style: TextStyle(
-                color: selected ? color : CelTheme.subText(c),
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w700)),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? color : CelTheme.subText(c),
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }
@@ -1861,8 +2220,9 @@ class _OrderTicketState extends State<_OrderTicket> {
     final labels = ['Market', 'Limit', 'Stop', 'Stop Limit'];
     return Container(
       decoration: BoxDecoration(
-          color: CelTheme.softBg(c),
-          borderRadius: BorderRadius.circular(10.r)),
+        color: CelTheme.softBg(c),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
       child: Row(
         children: List.generate(labels.length, (i) {
           final active = i == _orderIdx;
@@ -1877,13 +2237,14 @@ class _OrderTicketState extends State<_OrderTicket> {
                   color: active ? CelTheme.card(c) : Colors.transparent,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Text(labels[i],
-                    style: TextStyle(
-                        color: active
-                            ? CelTheme.mainText(c)
-                            : CelTheme.subText(c),
-                        fontSize: 13.sp,
-                        fontWeight: active ? FontWeight.w700 : FontWeight.w500)),
+                child: Text(
+                  labels[i],
+                  style: TextStyle(
+                    color: active ? CelTheme.mainText(c) : CelTheme.subText(c),
+                    fontSize: 13.sp,
+                    fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
               ),
             ),
           );
@@ -1904,9 +2265,10 @@ class _OrderTicketState extends State<_OrderTicket> {
     required VoidCallback onDecrement,
     ValueChanged<String>? onChanged,
   }) {
-    final price = _isSell
-        ? (_socketController.getBidPrice() ?? widget.bid)
-        : (_socketController.getAskPrice() ?? widget.ask);
+    final price =
+        _isSell
+            ? (_socketController.getBidPrice() ?? widget.bid)
+            : (_socketController.getAskPrice() ?? widget.ask);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
       decoration: BoxDecoration(
@@ -1918,11 +2280,14 @@ class _OrderTicketState extends State<_OrderTicket> {
         children: [
           Row(
             children: [
-              Text(label,
-                  style: TextStyle(
-                      color: on ? color : CelTheme.subText(c),
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700)),
+              Text(
+                label,
+                style: TextStyle(
+                  color: on ? color : CelTheme.subText(c),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const Spacer(),
               Transform.scale(
                 scale: 0.85,
@@ -1932,23 +2297,26 @@ class _OrderTicketState extends State<_OrderTicket> {
                     onToggle(newVal);
                     if (newVal) {
                       final isBuy = !_isSell;
-                      final isJPY = widget.symbol.contains('JPY') ||
+                      final isJPY =
+                          widget.symbol.contains('JPY') ||
                           widget.symbol.contains('GOLD') ||
                           widget.symbol.contains('XAU');
                       if (label == 'TP') {
                         final standardReward = isJPY ? 1.00 : 0.0100;
-                        final defaultTP = isBuy
-                            ? price + standardReward
-                            : price - standardReward;
-                        controller.text =
-                            defaultTP.toStringAsFixed(widget.digits);
+                        final defaultTP =
+                            isBuy
+                                ? price + standardReward
+                                : price - standardReward;
+                        controller.text = defaultTP.toStringAsFixed(
+                          widget.digits,
+                        );
                       } else {
                         final standardRisk = isJPY ? 0.50 : 0.0050;
-                        final defaultSL = isBuy
-                            ? price - standardRisk
-                            : price + standardRisk;
-                        controller.text =
-                            defaultSL.toStringAsFixed(widget.digits);
+                        final defaultSL =
+                            isBuy ? price - standardRisk : price + standardRisk;
+                        controller.text = defaultSL.toStringAsFixed(
+                          widget.digits,
+                        );
                         _calculateTPFromRiskRewardOrderTicket(price);
                       }
                     } else {
@@ -1973,8 +2341,9 @@ class _OrderTicketState extends State<_OrderTicket> {
                   child: AppTextFormField(
                     controller: controller,
                     enabled: on,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: on ? CelTheme.mainText(c) : CelTheme.subText(c),
@@ -1986,7 +2355,9 @@ class _OrderTicketState extends State<_OrderTicket> {
                       fillColor: CelTheme.card(c),
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(
-                          horizontal: 4.w, vertical: 8.h),
+                        horizontal: 4.w,
+                        vertical: 8.h,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.r),
                         borderSide: BorderSide(color: CelTheme.divider(c)),
@@ -2052,14 +2423,19 @@ Widget _kv(BuildContext c, String label, String value) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label,
-          style: CelTheme.label(c).copyWith(fontSize: 11.sp, letterSpacing: 0.4)),
+      Text(
+        label,
+        style: CelTheme.label(c).copyWith(fontSize: 11.sp, letterSpacing: 0.4),
+      ),
       SizedBox(height: 2.h),
-      Text(value,
-          style: TextStyle(
-              color: CelTheme.mainText(c),
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700)),
+      Text(
+        value,
+        style: TextStyle(
+          color: CelTheme.mainText(c),
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     ],
   );
 }
@@ -2076,11 +2452,14 @@ Widget _riskBox(BuildContext c, String label, String value) {
       children: [
         Text(label, style: CelTheme.label(c).copyWith(fontSize: 11.sp)),
         SizedBox(height: 4.h),
-        Text(value,
-            style: TextStyle(
-                color: CelTheme.mainText(c),
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w800)),
+        Text(
+          value,
+          style: TextStyle(
+            color: CelTheme.mainText(c),
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ],
     ),
   );
@@ -2092,15 +2471,25 @@ Widget _bidAsk(BuildContext c, String label, String value, Color color) {
     children: [
       Text(label, style: CelTheme.label(c).copyWith(fontSize: 11.sp)),
       SizedBox(height: 2.h),
-      Text(value,
-          style:
-              TextStyle(color: color, fontSize: 20.sp, fontWeight: FontWeight.w800)),
+      Text(
+        value,
+        style: TextStyle(
+          color: color,
+          fontSize: 20.sp,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     ],
   );
 }
 
-Widget _btn(BuildContext c, String label, Color color, VoidCallback? onTap,
-    {Widget? customChild}) {
+Widget _btn(
+  BuildContext c,
+  String label,
+  Color color,
+  VoidCallback? onTap, {
+  Widget? customChild,
+}) {
   return GestureDetector(
     onTap: onTap,
     child: Container(
@@ -2111,17 +2500,26 @@ Widget _btn(BuildContext c, String label, Color color, VoidCallback? onTap,
         color: onTap == null ? CelTheme.subText(c) : color,
         borderRadius: BorderRadius.circular(10.r),
       ),
-      child: customChild ??
-          Text(label,
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w800)),
+      child:
+          customChild ??
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
     ),
   );
 }
 
-Widget _stepBtn(BuildContext c, IconData icon, Color color, VoidCallback onTap) {
+Widget _stepBtn(
+  BuildContext c,
+  IconData icon,
+  Color color,
+  VoidCallback onTap,
+) {
   return GestureDetector(
     onTap: onTap,
     child: Container(

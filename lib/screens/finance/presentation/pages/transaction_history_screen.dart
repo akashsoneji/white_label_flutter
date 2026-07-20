@@ -180,6 +180,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   /// `Get.offAllNamed` (the Cregis deposit flow wipes the stack), there is
   /// nothing to pop, so land on the dashboard.
   void _handleBack() {
+    final args = Get.arguments;
+    if (args != null && args is Map && args['from'] != null) {
+      Get.offAllNamed(Routes.TRADING, arguments: 4);
+      return;
+    }
     if (Navigator.of(context).canPop()) {
       Get.back();
       return;

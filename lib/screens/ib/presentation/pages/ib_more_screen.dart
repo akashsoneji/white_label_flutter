@@ -1,3 +1,4 @@
+import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -47,7 +48,7 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
         elevation: 0,
          leading: IconButton(
           icon: SvgPicture.asset("assets/svg/ib_dashboard/home.svg", colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn)),
-          onPressed: () => Get.offAll(() => const TradingMainScreen()),
+          onPressed: () => Get.offAllNamed(AppPages.TRADING),
         ),
         title: Text(
           'More',
@@ -102,7 +103,7 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
                           label: 'Home',
                           onTap: () {
                             // Navigate to dashboard/home
-                                      Get.offAll(() => const TradingMainScreen());
+                                      Get.offAllNamed(AppPages.TRADING);
 
                           },
                           showTopBorder: false,

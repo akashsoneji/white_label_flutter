@@ -147,7 +147,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                 : OrderType.sellMarket,
         symbol: _rawSymbol(),
         volume: _volume.toStringAsFixed(2),
-        price: (side.toLowerCase() == 'buy' ? ask : bid).toString(),
+        price: '',
       );
 
       if (!mounted) return;

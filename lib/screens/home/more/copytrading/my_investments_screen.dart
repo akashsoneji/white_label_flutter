@@ -1,3 +1,4 @@
+import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_copier_subscriptions_controller.dart'
@@ -91,7 +92,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
               BlendMode.srcIn,
             ),
           ),
-          onPressed: () => Get.offAll(() => const TradingMainScreen()),
+          onPressed: () => Get.offAllNamed(AppPages.TRADING),
         ),
         centerTitle: true,
         title: Text('My Investments', style: AppTextStyles.screenTitle),

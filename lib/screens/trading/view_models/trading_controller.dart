@@ -2615,6 +2615,8 @@ class TradingController extends GetxController {
       // Add optional parameters
       if (price != null && price.isNotEmpty) {
         payload['price'] = price;
+      } else {
+        payload['price'] = '';
       }
       if (takeProfit != null && takeProfit.isNotEmpty) {
         payload['take_profit'] = takeProfit;

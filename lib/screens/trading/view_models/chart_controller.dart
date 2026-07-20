@@ -259,7 +259,7 @@ class ChartController extends GetxController {
         "type": type,
         "pricesl": priceSl,
         "pricetp": priceTp,
-        "price": price,
+        "price": (price == null || price.isEmpty) ? '' : price,
       };
 
       print(

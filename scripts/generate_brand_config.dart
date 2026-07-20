@@ -32,7 +32,9 @@ void main() async {
     exit(1);
   }
 
-  print('Found ${brands.length} brand(s): ${brands.map((b) => b['name']).join(', ')}\n');
+  print(
+    'Found ${brands.length} brand(s): ${brands.map((b) => b['name']).join(', ')}\n',
+  );
 
   await generateBrandConfigs(brands);
   if (loadBrandsFromBrandFolders().isNotEmpty) {
@@ -59,17 +61,21 @@ class BrandSource {
 BrandSource loadBrandSource() {
   final folderBrands = loadBrandsFromBrandFolders();
   if (folderBrands.isNotEmpty) {
-    final defaultBrand = Platform.environment['DEFAULT_BRAND']?.trim().toLowerCase();
-    final legacyDefault = File(yamlPath).existsSync()
-        ? parseDefaultBrand(File(yamlPath).readAsStringSync()).toLowerCase()
-        : '';
-    final preferredDefault = defaultBrand != null && defaultBrand.isNotEmpty
-        ? defaultBrand
-        : legacyDefault;
-    final resolvedDefault = preferredDefault.isNotEmpty &&
-            folderBrands.any((brand) => brand['name'] == preferredDefault)
-        ? preferredDefault
-        : folderBrands.first['name'] as String;
+    final defaultBrand =
+        Platform.environment['DEFAULT_BRAND']?.trim().toLowerCase();
+    final legacyDefault =
+        File(yamlPath).existsSync()
+            ? parseDefaultBrand(File(yamlPath).readAsStringSync()).toLowerCase()
+            : '';
+    final preferredDefault =
+        defaultBrand != null && defaultBrand.isNotEmpty
+            ? defaultBrand
+            : legacyDefault;
+    final resolvedDefault =
+        preferredDefault.isNotEmpty &&
+                folderBrands.any((brand) => brand['name'] == preferredDefault)
+            ? preferredDefault
+            : folderBrands.first['name'] as String;
 
     print('Using per-client brand.yaml files from $brandRootPath/*/brand.yaml');
     return BrandSource(defaultBrand: resolvedDefault, brands: folderBrands);
@@ -77,13 +83,18 @@ BrandSource loadBrandSource() {
 
   final yamlFile = File(yamlPath);
   if (!yamlFile.existsSync()) {
-    print('ERROR: No brand source found. Add $brandRootPath/{brand}/brand.yaml or $yamlPath');
+    print(
+      'ERROR: No brand source found. Add $brandRootPath/{brand}/brand.yaml or $yamlPath',
+    );
     exit(1);
   }
 
   final yaml = yamlFile.readAsStringSync();
   print('Using legacy source: $yamlPath');
-  return BrandSource(defaultBrand: parseDefaultBrand(yaml), brands: parseYaml(yaml));
+  return BrandSource(
+    defaultBrand: parseDefaultBrand(yaml),
+    brands: parseYaml(yaml),
+  );
 }
 
 List<Map<String, dynamic>> loadBrandsFromBrandFolders() {
@@ -95,7 +106,10 @@ List<Map<String, dynamic>> loadBrandsFromBrandFolders() {
     final yamlFile = File('${entity.path}/brand.yaml');
     if (!yamlFile.existsSync()) continue;
 
-    final parsed = parseSingleBrandYaml(yamlFile.readAsStringSync(), entity.path);
+    final parsed = parseSingleBrandYaml(
+      yamlFile.readAsStringSync(),
+      entity.path,
+    );
     brands.add(parsed);
   }
 
@@ -104,7 +118,9 @@ List<Map<String, dynamic>> loadBrandsFromBrandFolders() {
 }
 
 Map<String, dynamic> parseSingleBrandYaml(String yaml, String brandDir) {
-  final parsed = parseYaml('brands:\n${yaml.split('\n').map((line) => '  $line').join('\n')}');
+  final parsed = parseYaml(
+    'brands:\n${yaml.split('\n').map((line) => '  $line').join('\n')}',
+  );
   if (parsed.isEmpty) {
     throw Exception('Invalid brand config: $brandDir/brand.yaml');
   }
@@ -116,18 +132,30 @@ Map<String, dynamic> parseSingleBrandYaml(String yaml, String brandDir) {
   final label = (brand['label'] as String).trim();
   brand['label'] = label.isEmpty ? name : label;
 
- final assets = brand['assets'] as Map<String, dynamic>;
- assets['appIcon'] = _resolveBrandAssetPath(brandDir, name, assets['appIcon'] ?? 'icon.png');
- assets['logo'] = _resolveBrandAssetPath(brandDir, name, assets['logo'] ?? 'logo.svg');
- assets['splashLogo'] = _resolveBrandAssetPath(brandDir, name, assets['splashLogo'] ?? 'splash_logo.svg');
+  final assets = brand['assets'] as Map<String, dynamic>;
+  assets['appIcon'] = _resolveBrandAssetPath(
+    brandDir,
+    name,
+    assets['appIcon'] ?? 'icon.png',
+  );
+  assets['logo'] = _resolveBrandAssetPath(
+    brandDir,
+    name,
+    assets['logo'] ?? 'logo.svg',
+  );
+  assets['splashLogo'] = _resolveBrandAssetPath(
+    brandDir,
+    name,
+    assets['splashLogo'] ?? 'splash_logo.svg',
+  );
 
- // Ensure features section exists with sensible defaults.
- final features = brand['features'] as Map<String, dynamic>;
- if (!features.containsKey('useNewChart')) {
- features['useNewChart'] = 'false';
- }
- brand['features'] = features;
- return brand;
+  // Ensure features section exists with sensible defaults.
+  final features = brand['features'] as Map<String, dynamic>;
+  if (!features.containsKey('useNewChart')) {
+    features['useNewChart'] = 'false';
+  }
+  brand['features'] = features;
+  return brand;
 }
 
 String _resolveBrandAssetPath(String brandDir, String name, dynamic value) {
@@ -137,7 +165,10 @@ String _resolveBrandAssetPath(String brandDir, String name, dynamic value) {
 }
 
 String parseDefaultBrand(String yaml) {
-  final match = RegExp(r'^\s*default:\s*(\S+)\s*$', multiLine: true).firstMatch(yaml);
+  final match = RegExp(
+    r'^\s*default:\s*(\S+)\s*$',
+    multiLine: true,
+  ).firstMatch(yaml);
   return match?.group(1)?.trim() ?? 'tenax';
 }
 
@@ -152,22 +183,23 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
     final trimmed = line.trim();
 
     if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
-    if (trimmed.startsWith('brands:') || trimmed.startsWith('default:')) continue;
+    if (trimmed.startsWith('brands:') || trimmed.startsWith('default:'))
+      continue;
 
     if (trimmed.startsWith('- name:') || trimmed.startsWith('name:')) {
       if (currentEntry != null) brands.add(currentEntry);
- currentEntry = {
- 'name': _extractValue(line),
- 'type': 'child',
- 'inheritsFrom': null,
- 'label': '',
- 'android': <String, dynamic>{},
- 'ios': <String, dynamic>{},
- 'colors': <String, dynamic>{},
- 'urls': <String, dynamic>{},
- 'assets': <String, dynamic>{},
- 'features': <String, dynamic>{},
- };
+      currentEntry = {
+        'name': _extractValue(line),
+        'type': 'child',
+        'inheritsFrom': null,
+        'label': '',
+        'android': <String, dynamic>{},
+        'ios': <String, dynamic>{},
+        'colors': <String, dynamic>{},
+        'urls': <String, dynamic>{},
+        'assets': <String, dynamic>{},
+        'features': <String, dynamic>{},
+      };
       currentSection = '';
       continue;
     }
@@ -199,8 +231,15 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
       continue;
     }
 
- var foundSection = false;
- for (final section in ['android', 'ios', 'colors', 'urls', 'assets', 'features']) {
+    var foundSection = false;
+    for (final section in [
+      'android',
+      'ios',
+      'colors',
+      'urls',
+      'assets',
+      'features',
+    ]) {
       if (trimmed.startsWith('$section:')) {
         currentSection = section;
         foundSection = true;
@@ -213,7 +252,11 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
     final keyMatch = RegExp(r'^(\s*)([^:#]+):\s*(.*)$').firstMatch(line);
     if (keyMatch != null) {
       final key = keyMatch.group(2)!.trim();
-      final value = keyMatch.group(3)!.trim().replaceAll('"', '').replaceAll("'", '');
+      final value = keyMatch
+          .group(3)!
+          .trim()
+          .replaceAll('"', '')
+          .replaceAll("'", '');
       (currentEntry[currentSection] as Map<String, dynamic>)[key] = value;
     }
   }
@@ -223,10 +266,17 @@ List<Map<String, dynamic>> parseYaml(String yaml) {
 }
 
 String _extractValue(String line) {
-  return line.split(':').sublist(1).join(':').trim().replaceAll('"', '').replaceAll("'", '');
+  return line
+      .split(':')
+      .sublist(1)
+      .join(':')
+      .trim()
+      .replaceAll('"', '')
+      .replaceAll("'", '');
 }
 
-String _assetFilename(String fullPath) => fullPath.contains('/') ? fullPath.split('/').last : fullPath;
+String _assetFilename(String fullPath) =>
+    fullPath.contains('/') ? fullPath.split('/').last : fullPath;
 
 String colorToHex(String color) {
   var hex = color.replaceAll('#', '').replaceAll('0x', '').toUpperCase();
@@ -254,11 +304,14 @@ String _brandClassName(String name) {
       .join();
 }
 
-String _dartString(String value) => value.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
+String _dartString(String value) =>
+    value.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
 
 String _envClientName() {
-  final direct = Platform.environment['CLIENT'] ?? Platform.environment['FLAVOR'];
-  if (direct != null && direct.trim().isNotEmpty) return direct.trim().toLowerCase();
+  final direct =
+      Platform.environment['CLIENT'] ?? Platform.environment['FLAVOR'];
+  if (direct != null && direct.trim().isNotEmpty)
+    return direct.trim().toLowerCase();
 
   final define = Platform.environment['DART_DEFINES'];
   if (define == null || define.trim().isEmpty) return '';
@@ -270,7 +323,8 @@ String _envClientName() {
       if (separator <= 0) continue;
       final key = decoded.substring(0, separator);
       final value = decoded.substring(separator + 1).trim().toLowerCase();
-      if ((key == 'CLIENT' || key == 'FLAVOR') && value.isNotEmpty) return value;
+      if ((key == 'CLIENT' || key == 'FLAVOR') && value.isNotEmpty)
+        return value;
     } catch (_) {
       // Ignore non-base64 values.
     }
@@ -286,9 +340,14 @@ List<Map<String, dynamic>> _brandsForCurrentBuild(
   final selected = _envClientName();
   if (selected.isEmpty || selected == 'all') return brands;
 
-  final buildBrand = brands.where((brand) => (brand['name'] as String).toLowerCase() == selected).toList();
+  final buildBrand =
+      brands
+          .where((brand) => (brand['name'] as String).toLowerCase() == selected)
+          .toList();
   if (buildBrand.isEmpty) {
-    print('  ⚠️  CLIENT/FLAVOR=$selected does not match brands.yaml; generating all flavors.');
+    print(
+      '  ⚠️  CLIENT/FLAVOR=$selected does not match brands.yaml; generating all flavors.',
+    );
     return brands;
   }
 
@@ -310,24 +369,28 @@ Future<void> generateBrandConfigs(List<Map<String, dynamic>> brands) async {
     final darkPrimary = colors['darkPrimary'] ?? '#FFFFFF';
     final secondary = colors['secondary'] ?? '#FFFFFF';
     final accent = colors['accent'] ?? primary;
- final api = urls['api'] ?? 'https://example.com/api/';
- final websocket = urls['websocket'] ?? 'wss://example.com/ws';
- final chart = urls['chart'] ?? 'https://example.com';
- final appIcon = assets['appIcon'] ?? 'assets/brands/$name/icon.png';
- final logo = assets['logo'] ?? 'assets/brands/$name/logo.svg';
- final splashLogo = assets['splashLogo'] ?? 'assets/brands/$name/splash_logo.svg';
- final className = _brandClassName(name);
+    final api = urls['api'] ?? 'https://example.com/api/';
+    final websocket = urls['websocket'] ?? 'wss://example.com/ws';
+    final chart = urls['chart'] ?? 'https://example.com';
+    final appIcon = assets['appIcon'] ?? 'assets/brands/$name/icon.png';
+    final logo = assets['logo'] ?? 'assets/brands/$name/logo.svg';
+    final splashLogo =
+        assets['splashLogo'] ?? 'assets/brands/$name/splash_logo.svg';
+    final className = _brandClassName(name);
 
- // Features
- final features = brand['features'] is Map<String, dynamic>
- ? brand['features'] as Map<String, dynamic>
- : <String, dynamic>{};
- final useNewChart = (features['useNewChart']?.toString().toLowerCase() == 'true');
+    // Features
+    final features =
+        brand['features'] is Map<String, dynamic>
+            ? brand['features'] as Map<String, dynamic>
+            : <String, dynamic>{};
+    final useNewChart =
+        (features['useNewChart']?.toString().toLowerCase() == 'true');
 
     final clientDir = Directory('lib/clients/$name');
     if (!clientDir.existsSync()) clientDir.createSync(recursive: true);
 
-    final content = '''// GENERATED — Do not edit manually. Regenerate from brands.yaml.
+    final content =
+        '''// GENERATED — Do not edit manually. Regenerate from brands.yaml.
 // Run: dart run scripts/generate_brand_config.dart
 
 import 'package:flutter/material.dart';
@@ -367,14 +430,15 @@ Future<void> generateLauncherIconYaml(Map<String, dynamic> brand) async {
   final colors = brand['colors'] as Map<String, dynamic>;
   final assets = brand['assets'] as Map<String, dynamic>;
   final primary = colors['primary'] ?? '#5F259E';
-  final launcherBackground = _colorValue(
-    colors,
-    ['launcherBackground', 'icLauncherBackground', 'adaptiveIconBackground'],
-    primary,
-  );
+  final launcherBackground = _colorValue(colors, [
+    'launcherBackground',
+    'icLauncherBackground',
+    'adaptiveIconBackground',
+  ], primary);
   final appIcon = assets['appIcon'] ?? 'assets/brands/$name/icon.png';
 
-  final content = '''# GENERATED — Do not edit manually. Regenerate from brands.yaml.
+  final content =
+      '''# GENERATED — Do not edit manually. Regenerate from brands.yaml.
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
@@ -387,9 +451,14 @@ flutter_launcher_icons:
   File('lib/clients/$name/launcher_icons.yaml').writeAsStringSync(content);
 }
 
-Future<void> generateLegacyBrandsYaml(String defaultBrand, List<Map<String, dynamic>> brands) async {
+Future<void> generateLegacyBrandsYaml(
+  String defaultBrand,
+  List<Map<String, dynamic>> brands,
+) async {
   final buffer = StringBuffer();
-  buffer.writeln('# GENERATED — Do not edit manually when using assets/brands/{brand}/brand.yaml.');
+  buffer.writeln(
+    '# GENERATED — Do not edit manually when using assets/brands/{brand}/brand.yaml.',
+  );
   buffer.writeln('# Source of truth: assets/brands/*/brand.yaml');
   buffer.writeln();
   buffer.writeln('default: $defaultBrand');
@@ -399,43 +468,57 @@ Future<void> generateLegacyBrandsYaml(String defaultBrand, List<Map<String, dyna
   for (final brand in brands) {
     buffer.writeln('  - name: ${brand['name']}');
     buffer.writeln('    type: ${brand['type']}');
-    if (brand['inheritsFrom'] != null) buffer.writeln('    inheritsFrom: ${brand['inheritsFrom']}');
+    if (brand['inheritsFrom'] != null)
+      buffer.writeln('    inheritsFrom: ${brand['inheritsFrom']}');
     buffer.writeln('    label: ${brand['label']}');
     buffer.writeln('    themeMode: ${brand['themeMode'] ?? 'both'}');
- for (final section in ['android', 'ios', 'colors', 'urls', 'assets', 'features']) {
- final values = brand[section] as Map<String, dynamic>;
- buffer.writeln(' $section:');
- values.forEach((key, value) {
- buffer.writeln(' $key: "$value"');
- });
- }
- buffer.writeln();
- }
+    for (final section in [
+      'android',
+      'ios',
+      'colors',
+      'urls',
+      'assets',
+      'features',
+    ]) {
+      final values = brand[section] as Map<String, dynamic>;
+      buffer.writeln(' $section:');
+      values.forEach((key, value) {
+        buffer.writeln(' $key: "$value"');
+      });
+    }
+    buffer.writeln();
+  }
 
   File(yamlPath).writeAsStringSync(buffer.toString());
   print('  Updated: $yamlPath');
 }
 
-Future<void> generateBrandsJson(String defaultBrand, List<Map<String, dynamic>> brands) async {
+Future<void> generateBrandsJson(
+  String defaultBrand,
+  List<Map<String, dynamic>> brands,
+) async {
   print('\n2. Generating brands.json...');
 
   final simpleList = brands.map((b) => b['name'] as String).toList();
- final details = brands.map((brand) {
- final map = <String, dynamic>{
- 'name': brand['name'],
- 'type': brand['type'],
- 'label': brand['label'],
- 'themeMode': brand['themeMode'] ?? 'both',
- 'android': brand['android'],
- 'ios': brand['ios'],
- 'colors': brand['colors'],
- 'urls': brand['urls'],
- 'assets': brand['assets'],
- 'features': brand['features'] ?? <String, dynamic>{'useNewChart': 'false'},
- };
-    if (brand['inheritsFrom'] != null) map['inheritsFrom'] = brand['inheritsFrom'];
-    return map;
-  }).toList();
+  final details =
+      brands.map((brand) {
+        final map = <String, dynamic>{
+          'name': brand['name'],
+          'type': brand['type'],
+          'label': brand['label'],
+          'themeMode': brand['themeMode'] ?? 'both',
+          'android': brand['android'],
+          'ios': brand['ios'],
+          'colors': brand['colors'],
+          'urls': brand['urls'],
+          'assets': brand['assets'],
+          'features':
+              brand['features'] ?? <String, dynamic>{'useNewChart': 'false'},
+        };
+        if (brand['inheritsFrom'] != null)
+          map['inheritsFrom'] = brand['inheritsFrom'];
+        return map;
+      }).toList();
 
   final json = const JsonEncoder.withIndent('  ').convert({
     'default': defaultBrand,
@@ -448,37 +531,52 @@ Future<void> generateBrandsJson(String defaultBrand, List<Map<String, dynamic>> 
   print('  Default brand: $defaultBrand');
 }
 
-Future<void> generateFlavorConfig(String defaultBrand, List<Map<String, dynamic>> brands) async {
+Future<void> generateFlavorConfig(
+  String defaultBrand,
+  List<Map<String, dynamic>> brands,
+) async {
   print('\n3. Generating lib/flavor_config.dart...');
 
   final buildBrands = _brandsForCurrentBuild(defaultBrand, brands);
-  final fallbackBrand = buildBrands.any((brand) => brand['name'] == defaultBrand)
-      ? defaultBrand
-      : buildBrands.first['name'] as String;
+  final fallbackBrand =
+      buildBrands.any((brand) => brand['name'] == defaultBrand)
+          ? defaultBrand
+          : buildBrands.first['name'] as String;
   final imports = buildBrands
       .map((brand) => "import 'clients/${brand['name']}/config.dart';")
       .join('\n');
-  final enumValues = buildBrands.map((brand) => '  ${brand['name']},').join('\n');
+  final enumValues = buildBrands
+      .map((brand) => '  ${brand['name']},')
+      .join('\n');
   final vantageUiBrands = buildBrands
-      .where((brand) => brand['name'] == 'vantage' || brand['inheritsFrom'] == 'vantage')
+      .where(
+        (brand) =>
+            brand['name'] == 'vantage' || brand['inheritsFrom'] == 'vantage',
+      )
       .map((brand) => "'${brand['name']}'")
       .join(', ');
-  final cases = buildBrands.map((brand) {
-    final name = brand['name'] as String;
-    final className = _brandClassName(name);
-    return '''      case Flavor.$name:
+  final cases = buildBrands
+      .map((brand) {
+        final name = brand['name'] as String;
+        final className = _brandClassName(name);
+        return '''      case Flavor.$name:
         const config = ${className}Config();
         return config.toFlavorConfig(Flavor.$name, '$name');''';
-  }).join('\n');
-  final getters = buildBrands.map((brand) {
-    final name = brand['name'] as String;
-    final configGetter = '  static FlavorConfig get $name => activate(Flavor.$name);';
-    if (name == 'vantage') return configGetter;
-    return '''  static bool is${_brandClassName(name)}() => _instance?.flavor == Flavor.$name;
+      })
+      .join('\n');
+  final getters = buildBrands
+      .map((brand) {
+        final name = brand['name'] as String;
+        final configGetter =
+            '  static FlavorConfig get $name => activate(Flavor.$name);';
+        if (name == 'vantage') return configGetter;
+        return '''  static bool is${_brandClassName(name)}() => _instance?.flavor == Flavor.$name;
 $configGetter''';
-  }).join('\n\n');
+      })
+      .join('\n\n');
 
-  final content = '''// GENERATED — Do not edit manually. Regenerate from brands.yaml.
+  final content =
+      '''// GENERATED — Do not edit manually. Regenerate from brands.yaml.
 // Run: dart run scripts/generate_brand_config.dart
 
 import 'package:flutter/material.dart';
@@ -610,7 +708,7 @@ $getters
   static String get svgLogoAsset => instance.svgLogoPath;
   static String? get remoteLogo => instance.remoteLogoUrl;
   static bool get hasRemoteLogo => (instance.remoteLogoUrl ?? '').trim().isNotEmpty;
-  static String get effectiveLogo => remoteLogo ?? svgLogoAsset;
+  static String get effectiveLogo => hasRemoteLogo ? remoteLogo! : svgLogoAsset;
   static Map<String, dynamic>? get brokerData => instance.selectedBrokerData;
   static String get appNameDisplay => instance.appName;
 
@@ -765,7 +863,9 @@ Future<void> generateAndroidFlavors(List<Map<String, dynamic>> brands) async {
 
   final buffer = StringBuffer();
   buffer.writeln('// GENERATED — Do not edit manually.');
-  buffer.writeln('// Regenerate from brands.yaml: dart run scripts/generate_brand_config.dart');
+  buffer.writeln(
+    '// Regenerate from brands.yaml: dart run scripts/generate_brand_config.dart',
+  );
   buffer.writeln();
   buffer.writeln('ext.brandFlavors = [');
 
@@ -784,11 +884,11 @@ Future<void> generateAndroidFlavors(List<Map<String, dynamic>> brands) async {
       _colorValue(colors, ['splashColor', 'splash'], primaryColor),
     );
     final launcherBackground = colorToHex(
-      _colorValue(
-        colors,
-        ['launcherBackground', 'icLauncherBackground', 'adaptiveIconBackground'],
-        primaryColor,
-      ),
+      _colorValue(colors, [
+        'launcherBackground',
+        'icLauncherBackground',
+        'adaptiveIconBackground',
+      ], primaryColor),
     );
 
     buffer.writeln('    [');
@@ -802,14 +902,17 @@ Future<void> generateAndroidFlavors(List<Map<String, dynamic>> brands) async {
     buffer.writeln('        splashColor: "#$splashColor",');
     buffer.writeln('        launcherBackground: "#$launcherBackground",');
     buffer.writeln('        type: "${brand['type']}",');
-    if (brand['inheritsFrom'] != null) buffer.writeln('        inheritsFrom: "${brand['inheritsFrom']}",');
+    if (brand['inheritsFrom'] != null)
+      buffer.writeln('        inheritsFrom: "${brand['inheritsFrom']}",');
     buffer.writeln('    ],');
   }
 
   buffer.writeln(']');
   buffer.writeln();
   buffer.writeln('// Helper to get flavor by name');
-  buffer.writeln('ext.getBrandFlavor = { String name -> brandFlavors.find { it.name == name } }');
+  buffer.writeln(
+    'ext.getBrandFlavor = { String name -> brandFlavors.find { it.name == name } }',
+  );
 
   File('android/brand_flavors.gradle').writeAsStringSync(buffer.toString());
   print('  Created: android/brand_flavors.gradle');
@@ -835,16 +938,17 @@ Future<void> createAndroidFlavorDirs(List<Map<String, dynamic>> brands) async {
       _colorValue(colors, ['splashColor', 'splash'], primaryColor),
     );
     final launcherBackground = colorToHex(
-      _colorValue(
-        colors,
-        ['launcherBackground', 'icLauncherBackground', 'adaptiveIconBackground'],
-        primaryColor,
-      ),
+      _colorValue(colors, [
+        'launcherBackground',
+        'icLauncherBackground',
+        'adaptiveIconBackground',
+      ], primaryColor),
     );
 
     final valuesDir = Directory('${resDir.path}/values');
     valuesDir.createSync(recursive: true);
-    File('${valuesDir.path}/colors.xml').writeAsStringSync('''<?xml version="1.0" encoding="utf-8"?>
+    File('${valuesDir.path}/colors.xml').writeAsStringSync(
+      '''<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="primary_color">#$primary</color>
     <color name="secondary_color">#$secondary</color>
@@ -852,7 +956,8 @@ Future<void> createAndroidFlavorDirs(List<Map<String, dynamic>> brands) async {
     <color name="my_splash_color">#$splashColor</color>
     <color name="ic_launcher_background">#$launcherBackground</color>
 </resources>
-''');
+''',
+    );
 
     final manifestPath = '${flavorDir.path}/AndroidManifest.xml';
     if (!File(manifestPath).existsSync()) {
@@ -862,29 +967,34 @@ Future<void> createAndroidFlavorDirs(List<Map<String, dynamic>> brands) async {
     for (final drawableDir in ['drawable', 'drawable-v21']) {
       final dDir = Directory('${resDir.path}/$drawableDir');
       dDir.createSync(recursive: true);
-      File('${dDir.path}/launch_background.xml').writeAsStringSync('''<?xml version="1.0" encoding="utf-8"?>
+      File('${dDir.path}/launch_background.xml').writeAsStringSync(
+        '''<?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/my_splash_color" />
 </layer-list>
-''');
+''',
+      );
     }
 
     final xmlDir = Directory('${flavorDir.path}/res/xml');
     xmlDir.createSync(recursive: true);
-    File('${xmlDir.path}/file_paths.xml').writeAsStringSync('''<?xml version="1.0" encoding="utf-8"?>
+    File('${xmlDir.path}/file_paths.xml').writeAsStringSync(
+      '''<?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <external-path name="external" path="." />
     <external-files-path name="external_files" path="." />
     <cache-path name="cache" path="." />
     <external-cache-path name="external_cache" path="." />
 </paths>
-''');
+''',
+    );
 
     print('  Ready: android/app/src/$name/ (manifest + resources)');
   }
 }
 
-String _androidManifestTemplate() => '''<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+String _androidManifestTemplate() =>
+    '''<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -954,7 +1064,12 @@ Future<void> updateLaunchJson(List<Map<String, dynamic>> brands) async {
     final name = brand['name'] as String;
     final label = brand['label'] as String;
     for (final mode in ['debug', 'profile', 'release']) {
-      final args = ['--flavor', name, '--dart-define=CLIENT=$name', '--dart-define=FLAVOR=$name'];
+      final args = [
+        '--flavor',
+        name,
+        '--dart-define=CLIENT=$name',
+        '--dart-define=FLAVOR=$name',
+      ];
       if (mode == 'debug') args.add('--no-enable-impeller');
       configs.add({
         'name': '${_getIconEmoji(name, brands.indexOf(brand))} $label ($mode)',
@@ -986,20 +1101,16 @@ Future<void> updateTasksJson(List<Map<String, dynamic>> brands) async {
     'type': 'shell',
     'command': 'bash',
     'args': ['scripts/set_vantage_android_launcher_icon.sh'],
-    'options': {
-      'cwd': '\${workspaceFolder}'
-    },
-    'problemMatcher': []
+    'options': {'cwd': '\${workspaceFolder}'},
+    'problemMatcher': [],
   });
   tasks.add({
     'label': 'Set Android icon (tenax)',
     'type': 'shell',
     'command': 'bash',
     'args': ['scripts/set_tenax_android_launcher_icon.sh'],
-    'options': {
-      'cwd': '\${workspaceFolder}'
-    },
-    'problemMatcher': []
+    'options': {'cwd': '\${workspaceFolder}'},
+    'problemMatcher': [],
   });
 
   // Dynamic prepare tasks for all brands
@@ -1009,24 +1120,24 @@ Future<void> updateTasksJson(List<Map<String, dynamic>> brands) async {
       'label': 'prepare-$name',
       'type': 'shell',
       'command': 'bash',
-      'args': ['-lc', 'dart run scripts/prepare_flavor.dart $name && rm -rf .dart_tool/flutter_build'],
-      'options': {
-        'cwd': '\${workspaceFolder}'
-      },
+      'args': [
+        '-lc',
+        'dart run scripts/prepare_flavor.dart $name && rm -rf .dart_tool/flutter_build',
+      ],
+      'options': {'cwd': '\${workspaceFolder}'},
       'problemMatcher': [],
       'presentation': {
         'reveal': 'always',
         'panel': 'dedicated',
         'focus': false,
-        'clear': true
-      }
+        'clear': true,
+      },
     });
   }
 
-  final jsonStr = const JsonEncoder.withIndent('  ').convert({
-    'version': '2.0.0',
-    'tasks': tasks,
-  });
+  final jsonStr = const JsonEncoder.withIndent(
+    '  ',
+  ).convert({'version': '2.0.0', 'tasks': tasks});
 
   Directory('.vscode').createSync(recursive: true);
   File('.vscode/tasks.json').writeAsStringSync('$jsonStr\n');
@@ -1042,12 +1153,18 @@ String _generateLaunchJson(List<Map<String, dynamic>> configs) {
   for (var i = 0; i < configs.length; i++) {
     final config = configs[i];
     buffer.writeln('        {');
-    buffer.writeln('            "name": "${_escapeJson(config['name'] as String)}",');
+    buffer.writeln(
+      '            "name": "${_escapeJson(config['name'] as String)}",',
+    );
     buffer.writeln('            "request": "${config['request']}",');
     buffer.writeln('            "type": "${config['type']}",');
     buffer.writeln('            "program": "${config['program']}",');
     buffer.write('            "args": [');
-    buffer.write((config['args'] as List<String>).map((a) => '"${_escapeJson(a)}"').join(', '));
+    buffer.write(
+      (config['args'] as List<String>)
+          .map((a) => '"${_escapeJson(a)}"')
+          .join(', '),
+    );
     buffer.writeln('],');
     buffer.writeln('            "flutterMode": "${config['flutterMode']}",');
     buffer.writeln('            "console": "${config['console']}",');
@@ -1062,7 +1179,8 @@ String _generateLaunchJson(List<Map<String, dynamic>> configs) {
   return buffer.toString();
 }
 
-String _escapeJson(String s) => s.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+String _escapeJson(String s) =>
+    s.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
 
 String _getIconEmoji(String name, int index) {
   final emojis = ['🔵', '🟡', '🟢', '🔴', '🟣', '🟠', '🔶', '🩵', '🩷', '🟤'];

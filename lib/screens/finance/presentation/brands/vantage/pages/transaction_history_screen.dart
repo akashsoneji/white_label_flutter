@@ -152,6 +152,11 @@ class _VantageTransactionHistoryScreenState
   /// If the screen was reached via `Get.offAllNamed(...)` (Cregis flow wipes
   /// the stack), `canPop()` is false and we send the user to the dashboard.
   void _handleBack() {
+    final args = Get.arguments;
+    if (args != null && args is Map && args['from'] != null) {
+      Get.offAllNamed(Routes.TRADING, arguments: 4);
+      return;
+    }
     if (Navigator.of(context).canPop()) {
       Get.back();
       return;

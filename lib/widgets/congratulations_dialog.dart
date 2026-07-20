@@ -118,7 +118,10 @@ class CongratulationsDialog extends StatelessWidget {
 
                   // Account Details Card
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 16.h,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.surface, // Will adapt to light/dark mode
                       borderRadius: BorderRadius.circular(12.r),
@@ -158,19 +161,23 @@ class CongratulationsDialog extends StatelessWidget {
                                   GestureDetector(
                                     onTap: () {
                                       Clipboard.setData(
-                                          ClipboardData(text: accountNumber));
+                                        ClipboardData(text: accountNumber),
+                                      );
                                       if (Get.isRegistered<
-                                          AppNotificationController>()) {
+                                        AppNotificationController
+                                      >()) {
                                         Get.find<AppNotificationController>()
                                             .showSuccess(
-                                          message:
-                                              'Account number copied to clipboard',
-                                          title: 'Copied!',
-                                        );
+                                              message:
+                                                  'Account number copied to clipboard',
+                                              title: 'Copied!',
+                                            );
                                       }
                                     },
                                     child: Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 4.w),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 4.w,
+                                      ),
                                       child: Icon(
                                         Icons.copy_rounded,
                                         color: AppColors.primary,
@@ -231,7 +238,7 @@ class CongratulationsDialog extends StatelessWidget {
                     height: 48.h,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: AppColors.primary.withOpacity(0.1),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
@@ -250,7 +257,9 @@ class CongratulationsDialog extends StatelessWidget {
                             if (Get.isRegistered<DashboardController>()) {
                               final dashboardController =
                                   Get.find<DashboardController>();
-                              dashboardController.refreshMT5Accounts(force: true);
+                              dashboardController.refreshMT5Accounts(
+                                force: true,
+                              );
                               dashboardController.ensureWebSocketInitialized();
 
                               if (Get.isRegistered<AccountWebSocketService>()) {
@@ -267,11 +276,15 @@ class CongratulationsDialog extends StatelessWidget {
                         // Navigate to appropriate deposit screen
                         Future.delayed(Duration(milliseconds: 500), () {
                           if (accountType?.toLowerCase() == 'demo') {
-                            Get.to(() => DepositScreen(
-                                accountNumber: accountNumber));
+                            Get.to(
+                              () => DepositScreen(accountNumber: accountNumber),
+                            );
                           } else {
-                            Get.to(() => PaymentMethodsScreen(
-                                accountNumber: accountNumber));
+                            Get.to(
+                              () => PaymentMethodsScreen(
+                                accountNumber: accountNumber,
+                              ),
+                            );
                           }
                         });
                       },
@@ -320,7 +333,7 @@ class CongratulationsDialog extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Close Button (Top Right)
             Positioned(
               top: 16.h,

@@ -1140,26 +1140,38 @@ class DashboardScreen extends StatelessWidget {
               surfaceTintColor: Colors.transparent,
               automaticallyImplyLeading: false,
               titleSpacing: 0,
-              leadingWidth: 180.w,
+              leadingWidth: 220.w,
               leading: Padding(
                 padding: EdgeInsets.only(left: 16.w),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: _buildCelestialWalletHeaderButton(context),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Get.back(),
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 12.w),
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 20.r,
+                          color: CelTheme.headerText(context),
+                        ),
+                      ),
+                    ),
+                    _buildCelestialWalletHeaderButton(context),
+                  ],
                 ),
               ),
               centerTitle: false,
-              title: Padding(
-                padding: EdgeInsets.only(left: 4.w),
-                child: Text(
-                  languageService.tr('dashboard_title'),
-                  style: TextStyle(
-                    color: CelTheme.headerText(context),
-                    fontSize: 17.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+              // title: Padding(
+              //   padding: EdgeInsets.only(left: 4.w),
+              //   child: Text(
+              //     'Trading account',
+              //     style: TextStyle(
+              //       color: CelTheme.headerText(context),
+              //       fontSize: 17.sp,
+              //       fontWeight: FontWeight.w700,
+              //     ),
+              //   ),
+              // ),
               actions: [
                 _buildCelestialHeaderIconButton(
                   context,
@@ -1174,18 +1186,27 @@ class DashboardScreen extends StatelessWidget {
               backgroundColor: AppColors.tradeBackgroundCenterColor,
               elevation: 0,
               automaticallyImplyLeading: false,
-              leadingWidth: 160.w,
+              leadingWidth: 220.w,
               leading: Padding(
                 padding: EdgeInsets.only(left: 16.w),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: _buildWalletHeaderButton(),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Get.back(),
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 12.w),
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 20.r,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    _buildWalletHeaderButton(),
+                  ],
                 ),
               ),
-              title: Text(
-                languageService.tr('dashboard_title'),
-                style: AppTextStyles.screenTitle,
-              ),
+              title: Text('Trading account', style: AppTextStyles.screenTitle),
               centerTitle: true,
               actions: [
                 _buildHeaderIconButton(

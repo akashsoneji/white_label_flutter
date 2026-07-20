@@ -49,9 +49,9 @@ brands:
  splashColor: "#24324D"
  launcherBackground: "#24324D"
  urls:
- api: "https://app.askbidfx.com/api/"
- websocket: "wss://app.askbidfx.com/trade-engine"
- chart: "https://app.askbidfx.com"
+ api: "https://client.celestialtrader.com/api/"
+ websocket: "wss://client.celestialtrader.com/trade-engine"
+ chart: "https://client.celestialtrader.com"
  assets:
  appIcon: "assets/brands/celestial/icon.png"
  logo: "assets/brands/celestial/logo.svg"

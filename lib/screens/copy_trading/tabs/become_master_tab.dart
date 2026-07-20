@@ -75,7 +75,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
               BlendMode.srcIn,
             ),
           ),
-          onPressed: () => Get.offAll(() => const TradingMainScreen()),
+          onPressed: () => Get.offAllNamed(AppPages.TRADING),
         ),
         title: Text(
           'Become a Master Trader',

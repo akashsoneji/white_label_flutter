@@ -17,6 +17,8 @@ import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/theme_service.dart';
+import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
@@ -276,6 +278,10 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
 
               // ── KYC verification card ─────────────────────────────────────
               _buildKycCard(context),
+              SizedBox(height: 16.h),
+
+              // ── Create Account Buttons ────────────────────────────────────
+              const _CreateAccountActionCard(),
               SizedBox(height: 16.h),
 
               // ── Financial quick-action grid ───────────────────────────────
@@ -1190,6 +1196,97 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
     );
   }
 }
+
+class _CreateAccountActionCard extends StatelessWidget {
+  const _CreateAccountActionCard();
+
+  void _openRealAccount() {
+    Get.back(closeOverlays: true);
+    Get.toNamed(Routes.CHOOSE_ACCOUNT);
+  }
+
+  void _openDemoAccount() {
+    Get.back(closeOverlays: true);
+    Get.toNamed(Routes.CHOOSE_ACCOUNT, arguments: {'isDemo': true});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = Get.find<LanguageService>();
+    return Row(
+      children: [
+        Expanded(
+          child: _AccountActionButton(
+            icon: 'wallet',
+            label: lang.tr('create_account_open_real_account'),
+            color: AppColors.quickActionGreen,
+            onTap: _openRealAccount,
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: _AccountActionButton(
+            icon: 'demo-account',
+            label: lang.tr('create_account_open_demo_account'),
+            color: AppColors.quickActionBlue,
+            onTap: _openDemoAccount,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AccountActionButton extends StatelessWidget {
+  final String icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _AccountActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 14.h),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SvgPicture.asset(
+              'assets/svg/more/$icon.svg',
+              width: 18.w,
+              height: 18.w,
+              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Step 11 — Private data model classes
