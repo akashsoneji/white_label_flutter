@@ -1,3 +1,5 @@
+import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
+
 import 'iquote_assets_layout.dart';
 import '../dashboard_screen.dart';
 import 'dart:convert';
@@ -19,7 +21,6 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/screens/home/more/one_click_trading_disclaimer_screen.dart';
-import 'package:crm_app/services/ib_controller.dart' if (dart.library.io) 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';

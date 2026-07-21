@@ -1,5 +1,6 @@
 import 'iquote_home_screen.dart';
 import 'brands/iquote/iquote_market_screen.dart';
+import 'brands/iquote/iquote_position_screen.dart';
 import 'dart:async';
 
 
@@ -102,7 +103,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
           _symbolSelectionService.setSymbol(sym);
           _switchToChartTab(sym);
         })),
-        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _switchToChartTab)), // 2. Position
+        KeepAliveWrapper(child: IQuotePositionScreen(onNavigateToChart: _switchToChartTab)), // 2. Position
         const KeepAliveWrapper(child: MoreScreen()), // 3. Assets
       ];
     } else if (_isVantage) {

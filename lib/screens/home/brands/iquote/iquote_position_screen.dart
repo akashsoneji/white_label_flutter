@@ -4,18 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/services/account_websocket_service.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/utils/date_helper.dart';
 import 'package:crm_app/services/language_service.dart';
-import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/home/close_position_screen.dart';
 import 'package:crm_app/screens/home/edit_order_screen.dart';
 import 'package:crm_app/screens/home/brands/iquote/iquote_order_details_screen.dart';
+import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
+import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
+import 'package:crm_app/models/mt5_account.dart';
 
 class IQuotePositionScreen extends StatefulWidget {
   final Function(String)? onNavigateToChart;
@@ -27,8 +30,13 @@ class IQuotePositionScreen extends StatefulWidget {
 }
 
 class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
-  static const Color _brand = Color(0xFF5F259E);
-  final Set<String> _expandedCardIds = <String>{};
+  static const Color _bgColor = Color(0xFF1A1D2B);
+  static const Color _cardColor = Color(0xFF232739);
+  static const Color _chipBgColor = Color(0xFF333950);
+  static const Color _accent = Color(0xFFE88A4A);
+  static const Color _green = Color(0xFF2EBD6F);
+  static const Color _red = Color(0xFFE53935);
+
   final LanguageService languageService = Get.find<LanguageService>();
 
   late ScrollController _scrollController;
@@ -45,7 +53,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!Get.isRegistered<TradingController>()) return;
       final tradingController = Get.find<TradingController>();
-      if (tradingController.selectedTab == 0) {
+      if (tradingController.selectedTab != 0) {
         tradingController.setSelectedTab(0);
       }
       _initializeTradeScreenWebSockets();
@@ -79,7 +87,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final accountController = Get.find<AccountController>();
       _lastAccountNumber = accountController.activeMT5Account?.metaAccountNumber;
       _accountChangeSubscription?.cancel();
-      _accountChangeSubscription = accountController.activeMT5AccountRx.listen((account) {
+      _accountChangeSubscription =
+          accountController.activeMT5AccountRx.listen((account) {
         if (!mounted) return;
         final newAccountNumber = account?.metaAccountNumber;
         if (newAccountNumber != null && newAccountNumber != _lastAccountNumber) {
@@ -107,7 +116,6 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
   void dispose() {
     _accountChangeSubscription?.cancel();
     _accountChangeSubscription = null;
-    _expandedCardIds.clear();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -141,12 +149,13 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF262A3B), // match dark bg from image
+      backgroundColor: _bgColor,
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(),
-            const SizedBox(height: 16),
+            _buildFromRealStrip(),
+            SizedBox(height: 8.h),
             _buildPillTabs(),
             _buildDateFilter(),
             Expanded(child: _buildBody()),
@@ -157,38 +166,54 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
   }
 
   Widget _buildHeader() {
-    return GetX<AccountController>(
-      builder: (accountController) {
-        final tradingController = Get.find<TradingController>();
+    return GetBuilder<TradingController>(
+      id: 'account_info',
+      builder: (tradingController) {
         final accountInfo = tradingController.accountInfo;
         final balance = accountInfo?.balance ?? 0.00;
         final profit = accountInfo?.profit ?? 0.00;
-        // Let's assume margin percentage for the display
         final marginLevel = accountInfo?.marginLevel ?? 0.00;
+        final isProfitPositive = profit >= 0;
 
         return Container(
           width: double.infinity,
-          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF333950),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Row(
-                      children: [
-                        Text('DEMO', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.sp)),
-                        SizedBox(width: 4.w),
-                        Icon(Icons.arrow_drop_down, color: Colors.white, size: 16.sp),
-                      ],
+                  // DEMO / LIVE chip → opens Switch Account sheet
+                  InkWell(
+                    borderRadius: BorderRadius.circular(6.r),
+                    onTap: _openSwitchAccountSheet,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 7.h),
+                      decoration: BoxDecoration(
+                        color: _chipBgColor,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _activeAccountLabel(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12.sp,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(width: 4.w),
+                          Icon(Icons.arrow_drop_down,
+                              color: Colors.white, size: 18.sp),
+                        ],
+                      ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 14.w),
                   Text(
                     balance.toStringAsFixed(4),
                     style: TextStyle(
@@ -199,37 +224,105 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                   const Spacer(),
                   Text(
-                    '${profit >= 0 ? '' : '-'}${profit.abs().toStringAsFixed(4)}(${marginLevel.toStringAsFixed(2)}%)',
+                    '${isProfitPositive ? '' : '-'}${profit.abs().toStringAsFixed(4)}(${marginLevel.toStringAsFixed(2)}%)',
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
-                      color: profit >= 0 ? const Color(0xFF2EBD6F) : const Color(0xFFE53935),
+                      color: isProfitPositive ? _green : _red,
                     ),
                   ),
                 ],
               ),
               SizedBox(height: 12.h),
-              Row(
-                children: [
-                  Expanded(
-                    flex: 7,
-                    child: Container(height: 3.h, decoration: BoxDecoration(color: const Color(0xFF2EBD6F), borderRadius: BorderRadius.horizontal(left: Radius.circular(2.r)))),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Container(height: 3.h, color: const Color(0xFFE88A4A)),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Container(height: 3.h, decoration: BoxDecoration(color: const Color(0xFFE53935), borderRadius: BorderRadius.horizontal(right: Radius.circular(2.r)))),
-                  ),
-                ],
-              ),
+              _buildMarginBar(),
             ],
           ),
         );
       },
     );
+  }
+
+  Widget _buildMarginBar() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 7,
+          child: Container(
+            height: 3.h,
+            decoration: BoxDecoration(
+              color: _green,
+              borderRadius:
+                  BorderRadius.horizontal(left: Radius.circular(2.r)),
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Container(height: 3.h, color: _accent),
+        ),
+        Expanded(
+          flex: 1,
+          child: Container(
+            height: 3.h,
+            decoration: BoxDecoration(
+              color: _red,
+              borderRadius:
+                  BorderRadius.horizontal(right: Radius.circular(2.r)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// "From Real" ticker strip showing a sample trade / broadcast row.
+  Widget _buildFromRealStrip() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 6.h),
+        child: Row(
+          children: [
+            Text('From Real',
+                style: TextStyle(color: Colors.white, fontSize: 12.sp)),
+            SizedBox(width: 12.w),
+            Text('arie***',
+                style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+            SizedBox(width: 8.w),
+            Text('EUR',
+                style: TextStyle(color: Colors.white, fontSize: 12.sp)),
+            SizedBox(width: 6.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: _green, width: 1),
+              ),
+              child: Text('Buy 1',
+                  style: TextStyle(
+                    color: _green,
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                  )),
+            ),
+            SizedBox(width: 8.w),
+            Text('Profit \$ 0.04',
+                style: TextStyle(color: _green, fontSize: 12.sp)),
+            SizedBox(width: 10.w),
+            Text(_currentTimeHms(),
+                style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+            const Spacer(),
+            Icon(Icons.chevron_right, color: Colors.white54, size: 20.sp),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _currentTimeHms() {
+    final now = DateTime.now();
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${two(now.hour)}:${two(now.minute)}:${two(now.second)}';
   }
 
   Widget _buildPillTabs() {
@@ -240,11 +333,18 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         final selected = tradingController.selectedTab;
         return Row(
           children: [
-            _tabText('Position', selected == 0, () => tradingController.setSelectedTab(0)),
-            SizedBox(width: 24.w),
-            _tabText('Pending', selected == 1, () => tradingController.setSelectedTab(1)),
-            SizedBox(width: 24.w),
-            _tabText('History', selected == 2, () => tradingController.setSelectedTab(2)),
+            _tabText('Position', selected == 0,
+                () => tradingController.setSelectedTab(0)),
+            SizedBox(width: 28.w),
+            _tabText('Pending', selected == 1,
+                () => tradingController.setSelectedTab(1)),
+            SizedBox(width: 28.w),
+            _tabText('History', selected == 2,
+                () => tradingController.setSelectedTab(2)),
+            const Spacer(),
+            Icon(Icons.swap_vert, color: Colors.white70, size: 20.sp),
+            SizedBox(width: 16.w),
+            Icon(Icons.more_horiz, color: Colors.white70, size: 20.sp),
           ],
         );
       }),
@@ -255,21 +355,22 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     return InkWell(
       onTap: onTap,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: active ? FontWeight.bold : FontWeight.w500,
-              color: active ? Colors.white : Colors.white70,
+              color: active ? Colors.white : Colors.white54,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 6.h),
           Container(
             height: 3.h,
-            width: 24.w,
+            width: 22.w,
             decoration: BoxDecoration(
-              color: active ? const Color(0xFFE88A4A) : Colors.transparent,
+              color: active ? _accent : Colors.transparent,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
@@ -282,42 +383,47 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     final tradingController = Get.find<TradingController>();
     return Obx(() {
       if (tradingController.selectedTab != 2) return const SizedBox.shrink();
-      
+
       final now = DateHelper.nowUtc();
-      final startDate = DateHelper.formatUtcDateTime(now.subtract(const Duration(days: 7)));
+      final startDate =
+          DateHelper.formatUtcDateTime(now.subtract(const Duration(days: 7)));
       final endDate = DateHelper.formatUtcDateTime(now);
 
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: Row(
           children: [
-            Text('Start:', style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
+            Text('Start:',
+                style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
             SizedBox(width: 12.w),
             Expanded(
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 8.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E2132),
+                  color: _cardColor,
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Center(
-                  child: Text(startDate, style: TextStyle(color: Colors.white, fontSize: 13.sp)),
+                  child: Text(startDate,
+                      style: TextStyle(color: Colors.white, fontSize: 13.sp)),
                 ),
               ),
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.w),
-              child: Text('—', style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
+              child: Text('—',
+                  style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
             ),
             Expanded(
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 8.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E2132),
+                  color: _cardColor,
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Center(
-                  child: Text(endDate, style: TextStyle(color: Colors.white, fontSize: 13.sp)),
+                  child: Text(endDate,
+                      style: TextStyle(color: Colors.white, fontSize: 13.sp)),
                 ),
               ),
             ),
@@ -337,20 +443,41 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         final selectedTab = controller.selectedTab;
 
         if (selectedTab != 2 && positions.isEmpty) return _buildEmptyState();
-        if (selectedTab == 2 && positions.isEmpty && !isLoadingHistory) return _buildEmptyState();
+        if (selectedTab == 2 && positions.isEmpty && !isLoadingHistory) {
+          return _buildEmptyState();
+        }
 
         return RefreshIndicator(
           onRefresh: () async {
-            if (controller.selectedTab == 2) await controller.refreshTradeHistory();
+            if (controller.selectedTab == 2) {
+              await controller.refreshTradeHistory();
+            }
           },
           child: ListView.separated(
             controller: _scrollController,
             padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 90.h),
-            itemCount: positions.length + (controller.hasMoreHistoryPages && selectedTab == 2 ? 1 : 0),
+            itemCount: positions.length +
+                (controller.hasMoreHistoryPages && selectedTab == 2 ? 1 : 0),
             separatorBuilder: (_, __) => SizedBox(height: 10.h),
             itemBuilder: (context, index) {
               if (index >= positions.length) return _buildPaginationLoader();
-              return _buildPositionCard(controller, positions[index]);
+              final position = positions[index];
+              return RepaintBoundary(
+                child: GetBuilder<TradingController>(
+                  id: 'position_${position.orderId}',
+                  builder: (innerController) {
+                    final TradePosition? fresh = innerController.selectedTab == 0
+                        ? innerController.getMarketPositionById(position.orderId)
+                        : (innerController.selectedTab == 1
+                            ? innerController
+                                .getPendingPositionById(position.orderId)
+                            : innerController
+                                .getClosedPositionById(position.orderId));
+                    return _buildPositionCard(
+                        innerController, fresh ?? position);
+                  },
+                ),
+              );
             },
           ),
         );
@@ -361,81 +488,101 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
   Widget _buildEmptyState() {
     final tradingController = Get.find<TradingController>();
     final tab = tradingController.selectedTab;
-    final message = tab == 1 ? 'No Pending Orders' : tab == 2 ? 'No Trade History' : 'No Open Positions';
+    final message = tab == 1
+        ? 'No Pending Orders'
+        : tab == 2
+            ? 'No Trade History'
+            : 'No Open Positions';
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.inbox_outlined, size: 44.sp, color: Colors.white54),
           SizedBox(height: 16.h),
-          Text(message, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: Colors.white)),
+          Text(message,
+              style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white)),
         ],
       ),
     );
   }
 
   Widget _buildPaginationLoader() {
-    if (!Get.find<TradingController>().isLoadingHistory) return const SizedBox.shrink();
+    if (!Get.find<TradingController>().isLoadingHistory) {
+      return const SizedBox.shrink();
+    }
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16.h),
       alignment: Alignment.center,
-      child: SizedBox(height: 24.w, width: 24.w, child: CircularProgressIndicator(strokeWidth: 2.5, color: _brand)),
+      child: SizedBox(
+        height: 24.w,
+        width: 24.w,
+        child: CircularProgressIndicator(strokeWidth: 2.5, color: _accent),
+      ),
     );
   }
 
-  Widget _buildPositionCard(TradingController tradingController, TradePosition position) {
+  Widget _buildPositionCard(
+      TradingController tradingController, TradePosition position) {
     final isPositive = position.profitLoss >= 0;
     final isHistory = tradingController.selectedTab == 2;
     final isBuy = position.action.toLowerCase() == 'buy';
-    final symbol = _stripSymbol(position.symbol);
+    final symbol = _formatSymbol(position.symbol);
+    final leverage = _leverageLabel(position);
 
     return InkWell(
       borderRadius: BorderRadius.circular(10.r),
       onTap: () {
         if (isHistory) {
           Get.to(() => IQuoteOrderDetailsScreen(
-            data: IQuoteOrderData(
-              orderNo: position.orderId,
-              symbol: symbol,
-              buySell: position.action,
-              lots: position.volume.toString(),
-              contractSize: '—',
-              leverage: '—',
-              profit: PrecisionHelper.formatPnL(position.profitLoss),
-              openTime: position.openTime,
-              openPrice: position.entryPrice,
-              closeTime: position.closeTime,
-              closePrice: position.currentPrice,
-              closingMethod: position.closeTime.isNotEmpty ? 'Closed by Trader' : '',
-              swap: PrecisionHelper.formatPnL(position.swap),
-            ),
-          ));
+                data: IQuoteOrderData(
+                  orderNo: position.orderId,
+                  symbol: symbol,
+                  buySell: position.action,
+                  lots: position.volume.toString(),
+                  contractSize: '—',
+                  leverage: leverage,
+                  profit: PrecisionHelper.formatPnL(position.profitLoss),
+                  openTime: position.openTime,
+                  openPrice: position.entryPrice,
+                  closeTime: position.closeTime,
+                  closePrice: position.currentPrice,
+                  closingMethod:
+                      position.closeTime.isNotEmpty ? 'Closed by Trader' : '',
+                  swap: PrecisionHelper.formatPnL(position.swap),
+                ),
+              ));
         } else {
           _showActionSheet(tradingController, position);
         }
       },
       child: Container(
-        padding: EdgeInsets.all(12.w),
+        padding: EdgeInsets.fromLTRB(12.w, 10.h, 8.w, 10.h),
         decoration: BoxDecoration(
-          color: const Color(0xFF1F2233),
+          color: _cardColor,
           borderRadius: BorderRadius.circular(10.r),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Row 1: side chip + symbol • dismiss/close
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                   decoration: BoxDecoration(
-                    color: isBuy ? const Color(0xFF2EBD6F).withOpacity(0.15) : const Color(0xFFE53935).withOpacity(0.15),
+                    color: (isBuy ? _green : _red).withOpacity(0.15),
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                   child: Text(
-                    position.action.capitalizeFirst ?? position.action,
+                    isBuy ? 'Buy' : 'Sell',
                     style: TextStyle(
-                      color: isBuy ? const Color(0xFF2EBD6F) : const Color(0xFFE53935),
+                      color: isBuy ? _green : _red,
                       fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -444,47 +591,106 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   symbol,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16.sp,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const Spacer(),
+                if (!isHistory)
+                  InkWell(
+                    borderRadius: BorderRadius.circular(20.r),
+                    onTap: () {
+                      Get.to(() => ClosePositionScreen(position: position));
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(4.w),
+                      child: Icon(Icons.cancel,
+                          color: Colors.white54, size: 20.sp),
+                    ),
+                  ),
+              ],
+            ),
+            SizedBox(height: 6.h),
+            // Row 2: lot + leverage • PnL
+            Row(
+              children: [
+                Container(
+                  width: 6.w,
+                  height: 6.w,
+                  margin: EdgeInsets.only(right: 6.w),
+                  decoration: BoxDecoration(
+                    color: _green,
+                    shape: BoxShape.circle,
+                  ),
+                ),
                 Text(
-                  '${isPositive ? '+' : ''}\$${PrecisionHelper.formatPnL(position.profitLoss)}',
+                  '${position.volume}Lot',
                   style: TextStyle(
-                    color: isPositive ? const Color(0xFF2EBD6F) : const Color(0xFFE53935),
+                      color: Colors.white,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600),
+                ),
+                SizedBox(width: 8.w),
+                if (leverage.isNotEmpty)
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                      color: _chipBgColor,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Text(
+                      leverage,
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                const Spacer(),
+                Text(
+                  '${isPositive ? '' : '-'}${position.profitLoss.abs().toStringAsFixed(4)}',
+                  style: TextStyle(
+                    color: isPositive ? _green : _red,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(width: 8.w),
-                Icon(Icons.shortcut, color: const Color(0xFFE88A4A), size: 18.sp),
               ],
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 6.h),
+            // Row 3: VIP badge + swap • prices
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                _buildVipBadge(),
+                SizedBox(width: 6.w),
                 Text(
-                  '${position.volume}Lot',
-                  style: TextStyle(color: Colors.white70, fontSize: 12.sp),
+                  _formatSwap(position.swap),
+                  style: TextStyle(color: Colors.white54, fontSize: 11.sp),
                 ),
+                const Spacer(),
                 Text(
-                  isHistory ? '${position.entryPrice} → ${position.currentPrice}' : '${position.entryPrice}',
+                  position.entryPrice,
+                  style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+                ),
+                SizedBox(width: 6.w),
+                Icon(Icons.arrow_forward,
+                    color: Colors.white54, size: 12.sp),
+                SizedBox(width: 6.w),
+                Text(
+                  position.currentPrice,
                   style: TextStyle(color: Colors.white70, fontSize: 12.sp),
                 ),
               ],
             ),
             if (isHistory && position.closeTime.isNotEmpty) ...[
               SizedBox(height: 4.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    DateHelper.formatIsoStringToUtcHistory(position.closeTime),
-                    style: TextStyle(color: Colors.white54, fontSize: 11.sp),
-                  ),
-                ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  DateHelper.formatIsoStringToUtcHistory(position.closeTime),
+                  style: TextStyle(color: Colors.white38, fontSize: 11.sp),
+                ),
               ),
             ],
           ],
@@ -493,14 +699,73 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     );
   }
 
-  String _stripSymbol(String symbol) {
-    final dot = symbol.indexOf('.');
-    if (dot <= 0) return symbol;
-    return symbol.substring(0, dot);
+  Widget _buildVipBadge() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.r),
+        gradient: LinearGradient(
+          colors: [
+            _accent.withOpacity(0.9),
+            _accent.withOpacity(0.5),
+          ],
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('V',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 11.sp)),
+          SizedBox(width: 3.w),
+          Text('VIP 0',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 9.sp)),
+        ],
+      ),
+    );
   }
 
-  void _showActionSheet(TradingController tradingController, TradePosition position) {
-    // simplified for brevity... (same logic as before)
+  String _formatSymbol(String raw) {
+    final noSuffix = raw.contains('.') ? raw.substring(0, raw.indexOf('.')) : raw;
+    if (noSuffix.length == 6) {
+      return '${noSuffix.substring(0, 3)}/${noSuffix.substring(3)}';
+    }
+    return noSuffix;
+  }
+
+  String _leverageLabel(TradePosition position) {
+    try {
+      final acc = Get.find<AccountController>().activeMT5Account;
+      final lev = acc?.leverageMax ?? 0;
+      if (lev == 0) return '';
+      return '${lev}X';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  String _formatSwap(double swap) {
+    final abs = swap.abs().toStringAsFixed(4);
+    return swap >= 0 ? abs : '-$abs';
+  }
+
+  String _activeAccountLabel() {
+    try {
+      final acc = Get.find<AccountController>().activeMT5Account;
+      if (acc == null) return 'DEMO';
+      return acc.isRealAccount ? 'REAL' : 'DEMO';
+    } catch (_) {
+      return 'DEMO';
+    }
+  }
+
+  void _showActionSheet(
+      TradingController tradingController, TradePosition position) {
     Get.bottomSheet(
       SafeArea(
         child: Container(
@@ -509,14 +774,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: Text('Close Position'),
+                title: const Text('Close Position'),
                 onTap: () {
                   Get.back();
                   Get.to(() => ClosePositionScreen(position: position));
                 },
               ),
               ListTile(
-                title: Text('Edit Order'),
+                title: const Text('Edit Order'),
                 onTap: () {
                   Get.back();
                   Get.to(() => EditOrderScreen(position: position));
@@ -529,7 +794,268 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     );
   }
 
-  Future<void> _confirmCancelPending(TradePosition position) async {
-    // simplified...
+  // ─────────────────────────────────────────────────────────────────────────
+  // Switch-account bottom sheet (REAL / DEMO)
+  // ─────────────────────────────────────────────────────────────────────────
+  void _openSwitchAccountSheet() {
+    Get.bottomSheet(
+      _SwitchAccountSheet(
+        onCancel: () => Get.back(),
+      ),
+      backgroundColor: _bgColor,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet body shown when the DEMO/LIVE chip is tapped.
+/// Lists REAL and DEMO account rows with a Switch action.
+class _SwitchAccountSheet extends StatefulWidget {
+  final VoidCallback onCancel;
+  const _SwitchAccountSheet({required this.onCancel});
+
+  @override
+  State<_SwitchAccountSheet> createState() => _SwitchAccountSheetState();
+}
+
+class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
+  static const Color _accent = Color(0xFFE88A4A);
+
+  String? _selectedAccountNumber;
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      _selectedAccountNumber =
+          Get.find<AccountController>().activeMT5Account?.metaAccountNumber;
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 6.h),
+            Text(
+              'Switch account',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 16.h),
+            GetBuilder<DashboardController>(
+              builder: (dashboard) {
+                final real = dashboard.realMT5Accounts;
+                final demo = dashboard.demoMT5Accounts;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildAccountRow(
+                      label: 'REAL',
+                      account: real.isNotEmpty ? real.first : null,
+                      onDepositTap: (accountNumber) {
+                        Get.back();
+                        Get.to(() =>
+                            PaymentMethodsScreen(accountNumber: accountNumber));
+                      },
+                      emptyActionLabel: 'Sign in/Sign up',
+                      onEmptyAction: () {
+                        Get.back();
+                        Get.toNamed(Routes.CHOOSE_ACCOUNT);
+                      },
+                    ),
+                    Divider(color: Colors.white12, height: 24.h),
+                    _buildAccountRow(
+                      label: 'DEMO',
+                      account: demo.isNotEmpty ? demo.first : null,
+                      onDepositTap: (accountNumber) {
+                        Get.back();
+                        Get.to(() =>
+                            DepositScreen(accountNumber: accountNumber));
+                      },
+                      emptyActionLabel: 'Open Demo',
+                      onEmptyAction: () {
+                        Get.back();
+                        Get.toNamed(Routes.CHOOSE_ACCOUNT,
+                            arguments: {'isDemo': true});
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+            SizedBox(height: 24.h),
+            SizedBox(
+              width: double.infinity,
+              height: 48.h,
+              child: ElevatedButton(
+                onPressed: _selectedAccountNumber == null ? null : _onSwitch,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _accent,
+                  disabledBackgroundColor: _accent.withOpacity(0.4),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24.r),
+                  ),
+                ),
+                child: Text(
+                  'Switch',
+                  style: TextStyle(
+                      fontSize: 15.sp, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAccountRow({
+    required String label,
+    required MT5Account? account,
+    required void Function(String accountNumber) onDepositTap,
+    required String emptyActionLabel,
+    required VoidCallback onEmptyAction,
+  }) {
+    final hasAccount = account != null;
+    final accountNumber = account?.metaAccountNumber;
+    final isSelected =
+        hasAccount && _selectedAccountNumber == accountNumber;
+    final balance = account?.balance ?? '0.00';
+
+    return InkWell(
+      onTap: hasAccount
+          ? () => setState(() => _selectedAccountNumber = accountNumber)
+          : null,
+      borderRadius: BorderRadius.circular(8.r),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 6.h),
+        child: Row(
+          children: [
+            // Selection radio
+            Container(
+              width: 22.w,
+              height: 22.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? _accent : Colors.white54,
+                  width: 2,
+                ),
+                color: isSelected ? _accent : Colors.transparent,
+              ),
+              child: isSelected
+                  ? Icon(Icons.circle, size: 10.sp, color: Colors.white)
+                  : null,
+            ),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(width: 4.w),
+                      Icon(Icons.help_outline,
+                          color: Colors.white54, size: 14.sp),
+                    ],
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    hasAccount ? balance : '---',
+                    style: TextStyle(
+                      color: hasAccount ? _accent : Colors.white38,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            hasAccount
+                ? _actionButton(
+                    label: 'Deposit',
+                    color: const Color(0xFF2EBD6F),
+                    icon: Icons.savings_outlined,
+                    onTap: () => onDepositTap(accountNumber!),
+                  )
+                : _actionButton(
+                    label: emptyActionLabel,
+                    color: const Color(0xFF3A4062),
+                    onTap: onEmptyAction,
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _actionButton({
+    required String label,
+    required Color color,
+    IconData? icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: Colors.white, size: 14.sp),
+              SizedBox(width: 6.w),
+            ],
+            Text(label,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onSwitch() async {
+    final target = _selectedAccountNumber;
+    if (target == null) return;
+    try {
+      final accountController = Get.find<AccountController>();
+      if (accountController.activeMT5Account?.metaAccountNumber == target) {
+        Get.back();
+        return;
+      }
+      Get.back();
+      await accountController.setActiveMT5Account(target);
+    } catch (e) {
+      if (kDebugMode) print('IQuotePosition: switch account error: $e');
+    }
   }
 }
