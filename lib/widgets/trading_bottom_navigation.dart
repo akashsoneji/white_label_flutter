@@ -21,10 +21,43 @@ class TradingBottomNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languageService = Get.find<LanguageService>();
-    // Baazex is a child of Vantage — it must use Vantage's UI tree (4-tab
-    // bottom nav with Prices as the default Chart tab) so the design stays
-    // consistent across the child brands.
+    final isIquote = FlavorConfig.usesIquoteUi();
     final isVantage = FlavorConfig.usesVantageUi();
+
+    if (isIquote) {
+      final isDark = AppColors.isDarkMode;
+      final bgColor = isDark ? const Color(0xFF111625) : AppColors.whiteColor;
+
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.only(
+          left: 16.w,
+          right: 16.w,
+          top: 6.h,
+          bottom: 4.h + MediaQuery.of(context).padding.bottom,
+        ),
+        decoration: BoxDecoration(
+          color: bgColor,
+          boxShadow: [
+            if (!isDark)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 10,
+                offset: const Offset(0, -4),
+              ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildIquoteNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
+            _buildIquoteNavItem(1, Icons.bar_chart_outlined, Icons.bar_chart, 'Markets'),
+            _buildIquoteNavItem(2, Icons.assignment_outlined, Icons.assignment, 'Position', hasBadge: true),
+            _buildIquoteNavItem(3, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Assets'),
+          ],
+        ),
+      );
+    }
 
     if (isVantage) {
       return Container(
@@ -227,7 +260,7 @@ class TradingBottomNavigation extends StatelessWidget {
                         style: AppTextStyles.subheading.copyWith(
                           fontSize: 13.sp,
                           color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -237,6 +270,56 @@ class TradingBottomNavigation extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  
+  Widget _buildIquoteNavItem(int index, IconData icon, IconData activeIcon, String label, {bool hasBadge = false}) {
+    final isSelected = currentIndex == index;
+    final isDark = AppColors.isDarkMode;
+    final activeColor = isDark ? const Color(0xFFFF9538) : AppColors.primary;
+    final inactiveColor = isDark ? const Color(0xFF7A8299) : AppColors.textGrey;
+
+    return InkWell(
+      onTap: () => onTap(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Icon(
+                isSelected ? activeIcon : icon,
+                color: isSelected ? activeColor : inactiveColor,
+                size: 22.r,
+              ),
+              if (hasBadge)
+                Positioned(
+                  top: -2.h,
+                  right: -4.w,
+                  child: Container(
+                    padding: EdgeInsets.all(3.r),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text('1', style: TextStyle(color: Colors.white, fontSize: 8.sp, fontWeight: FontWeight.normal)),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? activeColor : inactiveColor,
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w400, // Regular font weight
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -282,7 +365,7 @@ class TradingBottomNavigation extends StatelessWidget {
                   style: AppTextStyles.subheading.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],

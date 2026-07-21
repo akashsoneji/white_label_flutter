@@ -6,7 +6,7 @@ class AppTextStyles {
   // Screen Title Style
   static TextStyle get screenTitle => TextStyle(
     fontSize: 18.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
   );
 
@@ -21,7 +21,7 @@ class AppTextStyles {
   // Heading Black Style
   static TextStyle get headingblack => TextStyle(
     fontSize: 16.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
     height: 1.55,
   );
@@ -29,7 +29,7 @@ class AppTextStyles {
   // Center Body Heading Style
   static TextStyle get centerbodyHeading => TextStyle(
     fontSize: 22.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
     height: 1.55,
   );
@@ -58,7 +58,7 @@ class AppTextStyles {
   // Link Style
   static TextStyle get link => TextStyle(
     fontSize: 14.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     decoration: TextDecoration.underline,
     color: AppColors.primary,
   );
@@ -66,7 +66,7 @@ class AppTextStyles {
   // Black 14 600 Style
   static TextStyle get black14600 => TextStyle(
     fontSize: 14.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
   );
 
@@ -88,21 +88,21 @@ class AppTextStyles {
   // Text Button Style (for text buttons on light backgrounds)
   static TextStyle get textButton => TextStyle(
     fontSize: 14.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.primary,
   );
 
   // Outlined Button Style
   static TextStyle get outlinedButton => TextStyle(
     fontSize: 14.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.primary,
   );
 
   // Card Title Style
   static TextStyle get cardTitle => TextStyle(
     fontSize: 16.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
   );
 
@@ -193,7 +193,7 @@ class AppTextStyles {
   // Label On Trade Bottom Title Style
   static TextStyle get labelOnTradeBottomTitle => TextStyle(
     fontSize: 14.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
   );
 
@@ -207,7 +207,7 @@ class AppTextStyles {
   // Label On Chart Pending Order Bold Style
   static TextStyle get labelOnChartPendingOrderBold => TextStyle(
     fontSize: 12.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.primary,
   );
 
@@ -258,7 +258,7 @@ class AppTextStyles {
   // Black 16 600 Style
   static TextStyle get black16600 => TextStyle(
     fontSize: 16.sp,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
   );
 
@@ -282,7 +282,7 @@ class AppTextStyles {
   static TextStyle get black14600h1_71 => TextStyle(
     fontSize: 15.sp,
     height: 1.71,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
   );
 
@@ -290,7 +290,7 @@ class AppTextStyles {
   static TextStyle get black24600h1_42 => TextStyle(
     fontSize: 24.sp,
     height: 1.42,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
   );
 

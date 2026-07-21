@@ -28,6 +28,9 @@ class BrandSwitcher {
   /// `true` when the active flavor is `Pipze`.
   static bool get isPipze => _active == 'pipze';
 
+  /// `true` when the active flavor is `iQuote`.
+  static bool get isIquote => _active == 'iquote';
+
   /// `true` when the active flavor is `Tenax`.
   static bool get isTenax => _active == 'tenax';
 

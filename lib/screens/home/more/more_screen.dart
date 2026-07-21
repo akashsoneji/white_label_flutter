@@ -1,3 +1,4 @@
+import '../dashboard_screen.dart';
 import 'dart:convert';
 
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
@@ -697,6 +698,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+
     final AuthController authController = Get.find<AuthController>();
     final languageService = Get.find<LanguageService>();
 
@@ -805,7 +807,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                                 return Text(
                                   name,
                                   style: TextStyle(
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w600,
                                     fontSize: 18.sp,
                                     color: AppColors.textPrimary,
                                   ),
@@ -968,7 +970,17 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 final showPmam = modules?.pmam ?? false;
                 final showPromotional = modulesService.isPromotionalMenuVisible;
 
-                final items = <Widget>[
+                final items = <Widget>[];
+                if (FlavorConfig.usesIquoteUi()) {
+                  items.add(
+                    _MenuItem(
+                      icon: 'wallet',
+                      label: languageService.tr('dashboard_title'),
+                      onTap: () => Get.to(() => DashboardScreen()),
+                    ),
+                  );
+                }
+                items.addAll([
                   _MenuItem(
                     icon: 'dollar-circle',
                     label: languageService.tr('general_finance'),
@@ -982,7 +994,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     label: languageService.tr('more_dashboard'),
                     onTap: () async => await _handleSwitchToIB(),
                   ),
-                ];
+                ]);
 
                 if (showPromotional) {
                   items.insert(
@@ -1524,7 +1536,7 @@ class _SectionHeader extends StatelessWidget {
         title.toUpperCase(),
         style: TextStyle(
           fontSize: 10.5.sp,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           color: AppColors.textGrey.withValues(alpha: 0.75),
           letterSpacing: 1.0,
         ),

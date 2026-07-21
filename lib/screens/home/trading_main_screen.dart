@@ -1,3 +1,4 @@
+import 'iquote_home_screen.dart';
 import 'dart:async';
 
 
@@ -50,7 +51,8 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
   void _switchToTradeTab(int tabIndex) {
     // Vantage 5-tab layout: Trade is at index 2 (Chart shifted in at 1).
-    final tradeIndex = _isVantage ? 2 : 2;
+    final isIquote = FlavorConfig.usesIquoteUi();
+    final tradeIndex = isIquote ? 2 : (_isVantage ? 2 : 2);
     _onTabChanged(tradeIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (Get.isRegistered<TradingController>()) {
@@ -74,13 +76,14 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   void initState() {
     super.initState();
     _isVantage = FlavorConfig.isVantage();
+    final isIquote = FlavorConfig.usesIquoteUi();
     
     // ✅ FIX: Check for initial tab index from navigation arguments
     // This allows navigating directly to a specific tab (e.g., dashboard at index 3)
     final arguments = Get.arguments;
     if (arguments != null && arguments is int) {
       // If argument is a valid tab index, set it (vantage: 0-4, default: 0-4)
-      final maxIndex = _isVantage ? 4 : 4;
+      final maxIndex = isIquote ? 3 : (_isVantage ? 4 : 4);
       if (arguments >= 0 && arguments <= maxIndex) {
         _currentIndex = arguments;
         print('TradingMainScreen: Initial tab set to index $arguments');
@@ -89,7 +92,14 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     
     _pageController = PageController(initialPage: _currentIndex);
 
-    if (_isVantage) {
+    if (isIquote) {
+      _screens = [
+        KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged)), // 1. Home
+        KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _switchToChartTab)), // 2. Markets
+        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _switchToChartTab)), // 3. Position
+        const KeepAliveWrapper(child: MoreScreen()), // 4. Assets
+      ];
+    } else if (_isVantage) {
       // Vantage 5-tab layout (as of 2026-07-09):
       //   0: Prices    → InstrumentsScreen (watchlist)
       //   1: Chart     → ChartTabHost (auto-pushes ChartScreen → VantageChartLayout)
@@ -222,9 +232,10 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     }
 
     // Vantage 5-tab layout: Prices(0), Chart(1), Markets(2), Accounts(3), Settings(4).
-    final tradeIndex = _isVantage ? 2 : 2;
-    final dashboardIndex = _isVantage ? 3 : 3;
-    final moreIndex = _isVantage ? 4 : 4;
+    final isIquote = FlavorConfig.usesIquoteUi();
+    final tradeIndex = isIquote ? 2 : (_isVantage ? 2 : 2);
+    final dashboardIndex = isIquote ? 0 : (_isVantage ? 3 : 3);
+    final moreIndex = isIquote ? 3 : (_isVantage ? 4 : 4);
 
     // Vantage UI brands (pipze, baazex, gtxprime, kantara, skyriss,
     // telifox, tenax, vantage): The Chart tab is now handled directly in the PageView
