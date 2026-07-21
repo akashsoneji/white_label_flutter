@@ -213,11 +213,19 @@ class FlavorConfig {
   static bool isVantage() => usesVantageUi();
 
   static bool usesVantageUi() {
+    final explicitParent = const String.fromEnvironment('PARENT', defaultValue: '').trim().toLowerCase();
+    if (explicitParent == 'vantage') return true;
+    if (explicitParent.isNotEmpty && explicitParent != 'vantage') return false;
+
     final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
     return const <String>{'vantage', 'gtxprime', 'kantara', 'riyadex', 'telifox', 'tenax'}.contains(name);
   }
 
   static bool usesIquoteUi() {
+    final explicitParent = const String.fromEnvironment('PARENT', defaultValue: '').trim().toLowerCase();
+    if (explicitParent == 'iquote') return true;
+    if (explicitParent.isNotEmpty && explicitParent != 'iquote') return false;
+
     final name = (_instance?.flavor.name ?? Flavor.vantage.name).toLowerCase();
     return const <String>{'iquote', 'pipze', 'skyriss', 'baazex'}.contains(name);
   }
