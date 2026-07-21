@@ -1,4 +1,5 @@
 import 'iquote_home_screen.dart';
+import 'brands/iquote/iquote_position_screen.dart';
 import 'dart:async';
 
 
@@ -96,7 +97,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       _screens = [
         KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged)), // 1. Home
         KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _switchToChartTab)), // 2. Markets
-        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _switchToChartTab)), // 3. Position
+        KeepAliveWrapper(child: IQuotePositionScreen(onNavigateToChart: _switchToChartTab)), // 3. Position
         const KeepAliveWrapper(child: MoreScreen()), // 4. Assets
       ];
     } else if (_isVantage) {
