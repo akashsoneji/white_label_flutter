@@ -46,6 +46,9 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
   // ── Controllers ───────────────────────────────────────────────────────────
   late final MoreController _moreController;
 
+  // ── i18n ──────────────────────────────────────────────────────────────────
+  LanguageService get languageService => Get.find<LanguageService>();
+
   // ── Toggle state ──────────────────────────────────────────────────────────
   bool _oneClickEnabled = false;
   bool _biometricEnabled = false;
@@ -269,7 +272,8 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               // ── Header title ──────────────────────────────────────────────
               Padding(
                 padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
-                child: Text('Settings', style: CelTheme.title(context)),
+                child: Text(languageService.tr('settings_title'),
+                    style: CelTheme.title(context)),
               ),
 
               // ── Profile card ──────────────────────────────────────────────
@@ -486,7 +490,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Verify Your Account',
+                          languageService.tr('settings_verify_account'),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -494,7 +498,8 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                           ),
                         ),
                         Text(
-                          'Complete verification to unlock all features',
+                          languageService.tr(
+                              'settings_complete_verification'),
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: CelTheme.subText(c),
@@ -540,7 +545,8 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                   ),
                   SizedBox(width: 10.w),
                   Text(
-                    '$completion%',
+                    languageService
+                        .tr('settings_completion_pct', {'completion': '$completion'}),
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -564,25 +570,25 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
     final items = [
       _CelGridItem(
         icon: Icons.south_west_rounded,
-        label: 'Deposit',
+        label: languageService.tr('settings_deposit'),
         color: const Color(0xFF4CAF50),
         onTap: () => Get.to(() => PaymentMethodsScreen(accountNumber: '')),
       ),
       _CelGridItem(
         icon: Icons.north_east_rounded,
-        label: 'Withdraw',
+        label: languageService.tr('settings_withdraw'),
         color: const Color(0xFFFF9800),
         onTap: () => Get.toNamed(Routes.WITHDRAWAL),
       ),
       _CelGridItem(
         icon: Icons.swap_horiz_rounded,
-        label: 'Transfer',
+        label: languageService.tr('settings_transfer'),
         color: const Color(0xFF2196F3),
         onTap: () => Get.toNamed(Routes.INTERNAL_TRANSFER),
       ),
       _CelGridItem(
         icon: Icons.receipt_long_rounded,
-        label: 'History',
+        label: languageService.tr('settings_history'),
         color: const Color(0xFF9C27B0),
         onTap: () => Get.toNamed(Routes.TRANSACTION_HISTORY),
       ),
@@ -669,7 +675,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
       // ── Trading Account (Celestial-only) ─────────────────────────────────
       _CelMenuItem(
         icon: Icons.manage_accounts_rounded,
-        label: 'Trading Account',
+        label: languageService.tr('settings_trading_account'),
         color: const Color(0xFF1E88E5),
         onTap: () => Get.to(
           () => CelestialTradingAccountScreen(
@@ -938,7 +944,8 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
           return Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Text(
-              'Version ${snap.data!.version}',
+              languageService
+                  .tr('settings_version', {'version': snap.data!.version}),
               style: TextStyle(
                 fontSize: 11.sp,
                 color: CelTheme.subText(c).withValues(alpha: 0.5),
@@ -982,7 +989,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               ),
               SizedBox(height: 16.h),
               Text(
-                'Are you sure you want to logout?',
+                languageService.tr('settings_logout_confirm'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15.sp,
@@ -1049,7 +1056,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               ),
               SizedBox(height: 16.h),
               Text(
-                'Are you sure you want to delete your account?',
+                languageService.tr('settings_delete_account_confirm'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15.sp,

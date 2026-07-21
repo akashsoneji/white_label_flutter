@@ -11,6 +11,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/models/order_types.dart';
@@ -747,14 +748,14 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Fill policy',
+            Get.find<LanguageService>().tr('meta_neworder_fill_policy'),
             style: AppTextStyles.label.copyWith(
               fontSize: 14.sp,
               color: AppColors.textGrey,
             ),
           ),
           Text(
-            'Fill or Kill',
+            Get.find<LanguageService>().tr('meta_neworder_fok'),
             style: AppTextStyles.heading.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
@@ -776,7 +777,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Expiration:',
+              Get.find<LanguageService>().tr('meta_neworder_expiration'),
               style: AppTextStyles.label.copyWith(
                 fontSize: 14.sp,
                 color: AppColors.textGrey,
@@ -863,7 +864,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'SELL',
+                        Get.find<LanguageService>().tr('meta_neworder_sell'),
                         style: AppTextStyles.heading.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
@@ -873,7 +874,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        'BY MARKET',
+                        Get.find<LanguageService>().tr('meta_neworder_by_market'),
                         style: AppTextStyles.label.copyWith(
                           fontSize: 10.sp,
                           color: AppColors.whiteColor.withOpacity(0.85),
@@ -902,7 +903,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'BUY',
+                        Get.find<LanguageService>().tr('meta_neworder_buy'),
                         style: AppTextStyles.heading.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
@@ -912,7 +913,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        'BY MARKET',
+                        Get.find<LanguageService>().tr('meta_neworder_by_market'),
                         style: AppTextStyles.label.copyWith(
                           fontSize: 10.sp,
                           color: AppColors.whiteColor.withOpacity(0.85),
@@ -954,7 +955,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
             ),
           ),
           child: Text(
-            'PLACE',
+            Get.find<LanguageService>().tr('meta_neworder_place'),
             style: AppTextStyles.heading.copyWith(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,

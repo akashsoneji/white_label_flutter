@@ -72,6 +72,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
   late ChartSocketController chartSocketController;
   late AccountController accountController;
   final TradingController tradingController = Get.find<TradingController>();
+  final LanguageService languageService = Get.find<LanguageService>();
 
   double? currentBidPrice;
   double? currentAskPrice;
@@ -421,52 +422,61 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                         ),
                         elevation: 1,
                       ),
-                      child:
-                          widget.isLoading
-                              ? Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 18.w,
-                                    height: 18.h,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppColors.whiteColor,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  Text(
-                                    'Processing...',
-                                    style: AppTextStyles.label.copyWith(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.whiteColor,
-                                    ),
-                                  ),
-                                ],
-                              )
-                              : Text(
-                                isValid
-                                    ? 'Place pending order'
-                                    : 'Fix validation errors',
-                                style: AppTextStyles.label.copyWith(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.whiteColor,
+                                  child: widget.isLoading
+                                      ? Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            SizedBox(
+                                              width: 18.w,
+                                              height: 18.h,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(
+                                                  AppColors.whiteColor,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 10.w),
+                                            Text(
+                                              languageService.tr(
+                                                'pending_order_processing',
+                                              ),
+                                              style:
+                                                  AppTextStyles.label.copyWith(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.whiteColor,
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      : Text(
+                                          isValid
+                                              ? languageService.tr(
+                                                  'pending_order_place_order',
+                                                )
+                                              : languageService.tr(
+                                                  'pending_order_fix_validation',
+                                                ),
+                                          style: AppTextStyles.label.copyWith(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppColors.whiteColor,
+                                          ),
+                                        ),
                                 ),
-                              ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+                  ),
+                );
+              }
 
   Widget _buildTicketPanel() {
     final divider = Divider(
@@ -498,7 +508,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
               // Row 2: Quantity stepper (full width)
               _rowHeader(
                 icon: Icons.tune_rounded,
-                title: 'Quantity',
+                title: languageService.tr('pending_order_quantity_label'),
                 trailing: _quantityPresetsTrailing(maxWidth: presetsMaxWidth),
               ),
               SizedBox(height: 8.h),
@@ -508,7 +518,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
               // Row 3: Trigger price toggle + animated field
               _rowHeader(
                 icon: Icons.show_chart_rounded,
-                title: 'Trigger price',
+                title: languageService.tr('pending_order_trigger_price_label'),
                 trailing: _switchTrailing(widget.whenPriceIsEnabled),
               ),
               ValueListenableBuilder<bool>(
@@ -549,7 +559,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: _summaryPill(
-                                    label: 'Market execution',
+                                    label: languageService.tr('pending_order_market_execution_label'),
                                     value: 'ON',
                                     tint: AppColors.primary,
                                   ),
@@ -564,7 +574,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
               // Row 4: Risk management collapsible
               _rowHeader(
                 icon: Icons.security_rounded,
-                title: 'Risk management',
+                title: languageService.tr('pending_order_risk_management_label'),
                 trailing: ValueListenableBuilder<bool>(
                   valueListenable: _riskExpanded,
                   builder: (context, expanded, _) {
@@ -612,7 +622,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                                   runSpacing: 6.h,
                                   children: [
                                     _summaryPill(
-                                      label: 'Take Profit',
+                                      label: languageService.tr('pending_order_take_profit_label'),
                                       value:
                                           widget.takeProfitEnabled.value
                                               ? 'ON'
@@ -729,7 +739,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                           ),
                           SizedBox(width: 6.w),
                           Text(
-                            'Buy limit',
+                            languageService.tr('pending_order_buy_limit'),
                             style: AppTextStyles.label.copyWith(
                               fontSize: 12.5.sp,
                               fontWeight: FontWeight.w800,
@@ -775,7 +785,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                           ),
                           SizedBox(width: 6.w),
                           Text(
-                            'Sell limit',
+                            languageService.tr('pending_order_sell_limit'),
                             style: AppTextStyles.label.copyWith(
                               fontSize: 12.5.sp,
                               fontWeight: FontWeight.w800,
@@ -803,8 +813,8 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
           child: _stepperTextField(
             controller: volumeController,
             focusNode: volumeFocusNode,
-            hintText: 'Enter lots',
-            labelText: 'Lots',
+            hintText: languageService.tr('pending_order_enter_lots'),
+            labelText: languageService.tr('pending_order_lots_label'),
             onMinus: () {
               setState(() {
                 final next = double.parse((volume - 0.01).toStringAsFixed(2));
@@ -1040,7 +1050,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
       child: Column(
         children: [
           _buildSwitchTile(
-            'Take Profit',
+            languageService.tr('pending_order_take_profit_label'),
             widget.takeProfitEnabled,
             onChanged: (value) {
               widget.takeProfitEnabled.value = value;
@@ -1065,7 +1075,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                           key: const ValueKey('tp_on'),
                           children: [
                             _buildPriceInput(
-                              'Take Profit',
+                              languageService.tr('pending_order_take_profit_label'),
                               widget.takeProfitController,
                               widget.takeProfitPrice.value,
                             ),
@@ -1078,23 +1088,23 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                                   ),
                                   future: _calculateTakeProfitPnL(),
                                   builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return _buildPnLDisplay(
+                                          languageService.tr('pending_order_potential_profit_tp'),
+                                          _lastTPPnL,
+                                          isProfit: true,
+                                        );
+                                      }
+                                      if (snapshot.hasData &&
+                                          snapshot.data != null) {
+                                        _lastTPPnL = snapshot.data;
+                                      }
                                       return _buildPnLDisplay(
-                                        'Potential Profit at TP',
-                                        _lastTPPnL,
+                                        languageService.tr('pending_order_potential_profit_tp'),
+                                        snapshot.data ?? _lastTPPnL,
                                         isProfit: true,
                                       );
-                                    }
-                                    if (snapshot.hasData &&
-                                        snapshot.data != null) {
-                                      _lastTPPnL = snapshot.data;
-                                    }
-                                    return _buildPnLDisplay(
-                                      'Potential Profit at TP',
-                                      snapshot.data ?? _lastTPPnL,
-                                      isProfit: true,
-                                    );
                                   },
                                 );
                               },
@@ -1107,7 +1117,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
           ),
           SizedBox(height: 4.h),
           _buildSwitchTile(
-            'Stop Loss',
+            languageService.tr('pending_order_stop_loss_label'),
             widget.stopLossEnabled,
             onChanged: (value) {
               widget.stopLossEnabled.value = value;
@@ -1132,7 +1142,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                           key: const ValueKey('sl_on'),
                           children: [
                             _buildPriceInput(
-                              'Stop Loss',
+                              languageService.tr('pending_order_stop_loss_label'),
                               widget.stopLossController,
                               widget.stopLossPrice.value,
                             ),
@@ -1145,23 +1155,23 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                                   ),
                                   future: _calculateStopLossPnL(),
                                   builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return _buildPnLDisplay(
+                                          languageService.tr('pending_order_potential_loss_sl'),
+                                          _lastSLPnL,
+                                          isProfit: false,
+                                        );
+                                      }
+                                      if (snapshot.hasData &&
+                                          snapshot.data != null) {
+                                        _lastSLPnL = snapshot.data;
+                                      }
                                       return _buildPnLDisplay(
-                                        'Potential Loss at SL',
-                                        _lastSLPnL,
+                                        languageService.tr('pending_order_potential_loss_sl'),
+                                        snapshot.data ?? _lastSLPnL,
                                         isProfit: false,
                                       );
-                                    }
-                                    if (snapshot.hasData &&
-                                        snapshot.data != null) {
-                                      _lastSLPnL = snapshot.data;
-                                    }
-                                    return _buildPnLDisplay(
-                                      'Potential Loss at SL',
-                                      snapshot.data ?? _lastSLPnL,
-                                      isProfit: false,
-                                    );
                                   },
                                 );
                               },

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import 'package:crm_app/models/trade_history_model.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'celestial_theme.dart';
 
 /// History screen — MT5-style, wired to [TradingController] trade history API.
@@ -97,7 +98,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
       child: Row(
         children: [
-          Text('History', style: CelTheme.title(c)),
+          Text(Get.find<LanguageService>().tr('celestial_history_title'), style: CelTheme.title(c)),
           const Spacer(),
           GestureDetector(
             onTap: () => _pickPeriod(c),
@@ -234,7 +235,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
             children: [
               Icon(Icons.history, size: 56.sp, color: CelTheme.subText(c)),
               SizedBox(height: 8.h),
-              Text('No history for $_periodLabel',
+              Text(Get.find<LanguageService>().tr('celestial_history_no_period', {'period': '$_periodLabel'}),
                   style: TextStyle(
                       color: CelTheme.subText(c),
                       fontSize: 14.sp,
@@ -331,7 +332,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                 ),
                 SizedBox(height: 3.h),
                 // Open → Close price
-                Text('$open  →  $close',
+                Text(Get.find<LanguageService>().tr('celestial_history_open_close', {'open': '$open', 'close': '$close'}),
                     style: TextStyle(
                         color: CelTheme.subText(c),
                         fontSize: 11.sp,

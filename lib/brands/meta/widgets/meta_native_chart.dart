@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:crm_app/services/language_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -154,7 +155,7 @@ class _MetaNativeChartState extends State<MetaNativeChart> {
   Widget _placeholder() {
     return Center(
       child: Text(
-        'Waiting for ticks…',
+        Get.find<LanguageService>().tr('meta_chart_waiting_ticks'),
         style: AppTextStyles.label.copyWith(
           fontSize: 12.sp,
           color: AppColors.textGrey,

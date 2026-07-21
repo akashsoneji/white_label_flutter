@@ -111,11 +111,11 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
         onPressed: () => Get.offAllNamed(AppPages.LOGIN),
         child: Text.rich(
           TextSpan(
-            text: 'You remember your password? ',
+            text: languageService.tr('verify_code_bottom_remember_password'),
             style: TextStyle(color: VantageAuthTheme.muted, fontSize: 13.sp),
             children: [
               TextSpan(
-                text: 'Sign In',
+                text: languageService.tr('login_screen_sign_in'),
                 style: TextStyle(
                   color: VantageAuthTheme.primary,
                   fontWeight: FontWeight.w700,
@@ -129,7 +129,7 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Verify Code',
+            languageService.tr('verify_code_screen_title'),
             style: TextStyle(
               color: VantageAuthTheme.text,
               fontSize: 24.sp,
@@ -138,7 +138,10 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
           ),
           SizedBox(height: 6.h),
           Text(
-            'Please enter the code we just sent to email\n${widget.email}',
+            // Email is appended by interpolation; the base string is translated
+            // via the en.json key and the runtime email is concatenated.
+            languageService.tr('verify_code_screen_subtitle')
+                .replaceFirst('{email}', widget.email),
             style: TextStyle(
               color: VantageAuthTheme.muted,
               fontSize: 13.sp,
@@ -154,7 +157,7 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
           SizedBox(height: 16.h),
           Obx(() {
             return VantagePrimaryButton(
-              text: 'Verify',
+              text: languageService.tr('verify_code_screen_verify'),
               isLoading: authController.isLoading,
               onPressed: authController.isLoading ? null : _verifyCode,
             );
@@ -164,7 +167,7 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
             child: TextButton(
               onPressed: authController.isLoading ? null : _resendCode,
               child: Text(
-                'Resend Code',
+                languageService.tr('verify_code_screen_resend'),
                 style: TextStyle(
                   color: VantageAuthTheme.primary,
                   fontWeight: FontWeight.w700,

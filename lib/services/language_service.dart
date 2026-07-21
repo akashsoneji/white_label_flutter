@@ -13,9 +13,12 @@ class LanguageService extends GetxService {
   static const Map<String, String> supportedLanguages = {
     'en': 'English',
     'ar': 'العربية',
-    'tr': 'Türkçe',
-    'hi': 'हिंदी',
     'es': 'Español',
+    'fr': 'Français',
+    'hi': 'हिंदी',
+    'id': 'Bahasa',
+    'tr': 'Türkçe',
+    'zh': '中文',
   };
 
   /// Supported locales for MaterialApp.supportedLocales. Derived from
@@ -25,9 +28,22 @@ class LanguageService extends GetxService {
   /// TextFields render RTL in Arabic without us having to force
   /// `textDirection` on every field.
   static List<Locale> get supportedLocales =>
-      supportedLanguages.keys.map((code) => Locale(code)).toList(growable: false);
+      supportedLanguages.keys.map(_localeFor).toList(growable: false);
 
-  // RTL languages
+  /// Build a [Locale] for a language code. Chinese needs a region qualifier
+  /// so Flutter's built-in `GlobalMaterialLocalizations` resolves correctly
+  /// (`zh-CN` = Simplified Chinese). All other supported languages use a
+  /// bare `Locale(code)` like before.
+  static Locale _localeFor(String code) {
+    switch (code) {
+      case 'zh':
+        return const Locale('zh', 'CN');
+      default:
+        return Locale(code);
+    }
+  }
+
+  // RTL languages (only Arabic — French, Indonesian, Chinese, etc. are LTR)
   static const List<String> rtlLanguages = ['ar'];
 
   // Default language
@@ -79,10 +95,10 @@ class LanguageService extends GetxService {
           if (localeParts.length == 2) {
             currentLocale.value = Locale(localeParts[0], localeParts[1]);
           } else {
-            currentLocale.value = Locale(savedLanguage);
+            currentLocale.value = _localeFor(savedLanguage);
           }
         } else {
-          currentLocale.value = Locale(savedLanguage);
+          currentLocale.value = _localeFor(savedLanguage);
         }
       }
     } catch (e) {
@@ -161,15 +177,16 @@ class LanguageService extends GetxService {
       // Update current language
       currentLanguage.value = languageCode;
 
-      // Update locale
-      currentLocale.value = Locale(languageCode);
+      // Update locale (use _localeFor so Chinese gets `zh_CN` region tag)
+      currentLocale.value = _localeFor(languageCode);
 
       // Save to secure storage
       await _storage.write(key: _languageKey, value: languageCode);
-      await _storage.write(
-        key: _localeKey,
-        value: '${languageCode}_${languageCode.toUpperCase()}',
-      );
+      final loc = _localeFor(languageCode);
+      final localeTag = loc.countryCode != null
+          ? '${loc.languageCode}_${loc.countryCode}'
+          : '${loc.languageCode}_${loc.languageCode.toUpperCase()}';
+      await _storage.write(key: _localeKey, value: localeTag);
 
       // Update GetX locale
       Get.updateLocale(currentLocale.value);
@@ -273,7 +290,7 @@ class LanguageService extends GetxService {
 
   /// Get all available locales
   List<Locale> getAvailableLocales() {
-    return supportedLanguages.keys.map((code) => Locale(code)).toList();
+    return supportedLanguages.keys.map(_localeFor).toList();
   }
 
   /// Reset to default language
@@ -294,11 +311,12 @@ class LanguageService extends GetxService {
 
   /// Get language info
   Map<String, dynamic> getLanguageInfo(String languageCode) {
+    final loc = _localeFor(languageCode);
     return {
       'code': languageCode,
       'name': supportedLanguages[languageCode] ?? 'Unknown',
       'isRTL': rtlLanguages.contains(languageCode),
-      'locale': Locale(languageCode),
+      'locale': loc,
     };
   }
 

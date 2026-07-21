@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/models/websocket_trading_response.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
@@ -47,7 +48,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
   final TradingController _trading = Get.find<TradingController>();
 
   String? _previousChartSymbol;
-  String _fillPolicy = 'Fill or Kill';
+  String _fillPolicy = Get.find<LanguageService>().tr('meta_close_fok');
   double _closeVolumeValue = 0.01;
 
   late final TextEditingController _volumeController =
@@ -408,7 +409,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
               child: Row(
                 children: [
                   Text(
-                    'Close mode',
+                    Get.find<LanguageService>().tr('meta_close_mode'),
                     style: TextStyle(
                       color: MetaTheme.subText(c),
                       fontSize: 12.sp,
@@ -469,7 +470,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
               Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
                 child: Text(
-                  'Tap a − pill to close part of the position',
+                  Get.find<LanguageService>().tr('meta_close_partial_hint'),
                   style: TextStyle(
                     color: MetaTheme.subText(c).withValues(alpha: 0.7),
                     fontSize: 11.sp,
@@ -536,7 +537,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                 ),
                 child: Row(
                   children: [
-                    Text('Fill policy',
+                    Text(Get.find<LanguageService>().tr('meta_close_fill_policy'),
                         style: TextStyle(
                           color: MetaTheme.mainText(c),
                           fontSize: 14.sp,
@@ -556,18 +557,18 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                           fontWeight: FontWeight.w400,
                         ),
                         dropdownColor: MetaTheme.card(c),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
-                            value: 'Fill or Kill',
-                            child: Text('Fill or Kill'),
+                            value: Get.find<LanguageService>().tr('meta_close_fok'),
+                            child: Text(Get.find<LanguageService>().tr('meta_close_fok')),
                           ),
                           DropdownMenuItem(
-                            value: 'Immediate or Cancel',
-                            child: Text('Immediate or Cancel'),
+                            value: Get.find<LanguageService>().tr('meta_close_ioc'),
+                            child: Text(Get.find<LanguageService>().tr('meta_close_ioc')),
                           ),
                           DropdownMenuItem(
-                            value: 'Book or Cancel',
-                            child: Text('Book or Cancel'),
+                            value: Get.find<LanguageService>().tr('meta_close_boc'),
+                            child: Text(Get.find<LanguageService>().tr('meta_close_boc')),
                           ),
                         ],
                         onChanged: (v) {

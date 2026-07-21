@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/models/websocket_trading_response.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
@@ -417,7 +418,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Modify position #${p.orderId}',
+              Get.find<LanguageService>().tr('meta_modify_position_label', {'id': '$p.orderId'}),
               style: TextStyle(
                 color: MetaTheme.mainText(c),
                 fontSize: 15.sp,
@@ -492,7 +493,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
             //     child: TextButton.icon(
             //       icon: Icon(Icons.calculate_outlined, color: MetaTheme.buy(c)),
             //       label: Text(
-            //         'Auto SL/TP Calculator',
+            //         Get.find<LanguageService>().tr('meta_modify_auto_sl_tp'),
             //         style: TextStyle(
             //           color: MetaTheme.buy(c),
             //           fontSize: 14.sp,
@@ -549,7 +550,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
                             ),
                           )
                           : Text(
-                            'MODIFY',
+                            Get.find<LanguageService>().tr('meta_modify_button'),
                             style: TextStyle(
                               color:
                                   _isModifyEnabled
@@ -713,7 +714,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
       onChanged: onChanged,
       activeColor: Colors.white,
       activeTrackColor:
-          label == 'Stop Loss' ? MetaTheme.sell(c) : MetaTheme.buy(c),
+          label == Get.find<LanguageService>().tr('meta_modify_stop_loss') ? MetaTheme.sell(c) : MetaTheme.buy(c),
     );
   }
 
@@ -731,7 +732,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
   }) {
     final double targetPrice =
         double.tryParse(controller.text.replaceAll(',', '')) ?? 0.0;
-    final pnl = _expectedPnL(targetPrice, label == 'Take Profit');
+    final pnl = _expectedPnL(targetPrice, label == Get.find<LanguageService>().tr('meta_modify_take_profit'));
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
@@ -835,12 +836,12 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
             ),
             SizedBox(height: 8.h),
             Text(
-              label == 'Take Profit'
+              label == Get.find<LanguageService>().tr('meta_modify_take_profit')
                   ? 'Potential Profit: \$${pnl.toStringAsFixed(2)}'
                   : 'Potential Loss: \$${(-pnl.abs()).toStringAsFixed(2)}',
               style: TextStyle(
                 color:
-                    label == 'Take Profit'
+                    label == Get.find<LanguageService>().tr('meta_modify_take_profit')
                         ? MetaTheme.buy(c)
                         : MetaTheme.sell(c),
                 fontSize: 12.sp,
@@ -886,7 +887,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Text(
-              'Auto SL/TP Calculator',
+              Get.find<LanguageService>().tr('meta_modify_auto_sl_tp'),
               style: TextStyle(
                 color: MetaTheme.mainText(c),
                 fontSize: 16.sp,
@@ -896,7 +897,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
           ),
           const Divider(),
 
-          _switchTile(c, 'Stop Loss', _slEnabled, (v) {
+          _switchTile(c, Get.find<LanguageService>().tr('meta_modify_stop_loss'), _slEnabled, (v) {
             setState(() {
               _slEnabled = v;
               if (v) {
@@ -924,7 +925,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
 
           _calculatorCard(
             c,
-            label: 'Stop Loss',
+            label: Get.find<LanguageService>().tr('meta_modify_stop_loss'),
             color: MetaTheme.sell(c),
             enabled: _slEnabled,
             controller: _slController,
@@ -935,7 +936,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
             onChanged: (_) => _calculateTPFromRiskReward(),
           ),
 
-          _switchTile(c, 'Take Profit', _tpEnabled, (v) {
+          _switchTile(c, Get.find<LanguageService>().tr('meta_modify_take_profit'), _tpEnabled, (v) {
             setState(() {
               _tpEnabled = v;
               if (v) {
@@ -966,7 +967,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
 
           _calculatorCard(
             c,
-            label: 'Take Profit',
+            label: Get.find<LanguageService>().tr('meta_modify_take_profit'),
             color: MetaTheme.tpGreen,
             enabled: _tpEnabled,
             controller: _tpController,
@@ -1008,7 +1009,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
                   Navigator.of(c).pop();
                 },
                 child: Text(
-                  'Apply',
+                  Get.find<LanguageService>().tr('meta_modify_apply'),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14.sp,

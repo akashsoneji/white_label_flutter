@@ -18,6 +18,7 @@ import 'widgets/meta_native_chart.dart';
 import 'meta_close_position_screen.dart';
 import 'meta_modify_position_screen.dart';
 import 'meta_new_order_screen.dart';
+import 'package:crm_app/services/language_service.dart';
 
 double _d(String? v) => double.tryParse(v ?? '') ?? 0;
 String _fmt(double v, int d) => v.toStringAsFixed(d);
@@ -178,7 +179,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               SliverToBoxAdapter(
                 child: _sectionHeader(
                   context,
-                  label: 'Positions',
+                  label: Get.find<LanguageService>().tr('meta_trade_positions'),
                   onMenu: () => _showCloseMenu(context),
                 ),
               ),
@@ -258,7 +259,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               SliverToBoxAdapter(
                 child: _sectionHeader(
                   context,
-                  label: 'Orders',
+                  label: Get.find<LanguageService>().tr('meta_trade_orders'),
                   onMenu: () => _showCloseMenu(context),
                 ),
               ),
@@ -304,7 +305,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Trade',
+                Text(Get.find<LanguageService>().tr('meta_trade_trades'),
                     style: TextStyle(
                       color: MetaTheme.mainText(c),
                       fontSize: 14.sp,
@@ -522,9 +523,9 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               () => onAction(_PosAction.close)),
           _actionButton(c, Icons.add_circle_outline, 'Modify',
               () => onAction(_PosAction.modify)),
-          _actionButton(c, Icons.add_box_outlined, 'New order',
+          _actionButton(c, Icons.add_box_outlined, Get.find<LanguageService>().tr('meta_trade_new_order'),
               () => onAction(_PosAction.newOrder)),
-          _actionButton(c, Icons.show_chart, 'Chart',
+          _actionButton(c, Icons.show_chart, Get.find<LanguageService>().tr('meta_trade_chart'),
               () => onAction(_PosAction.chart)),
         ],
       ),
@@ -576,12 +577,15 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('$label:',
-                style: TextStyle(
-                  color: subtleColor,
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w400,
-                )),
+            Text(
+              Get.find<LanguageService>()
+                  .tr('meta_trade_label_colon', {'label': '$label'}),
+              style: TextStyle(
+                color: subtleColor,
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
             const Spacer(),
             Text(value,
                 style: TextStyle(
@@ -924,7 +928,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                       activeAccount.metaAccountNumber.isEmpty) {
                     if (Get.isRegistered<AppNotificationController>()) {
                       Get.find<AppNotificationController>().showError(
-                        title: 'Error',
+                        title: Get.find<LanguageService>().tr('meta_trade_error'),
                         message: 'No active trading account found',
                       );
                     }
@@ -938,12 +942,12 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                   if (Get.isRegistered<AppNotificationController>()) {
                     if (errMsg.isEmpty) {
                       Get.find<AppNotificationController>().showSuccess(
-                        title: 'Success',
+                        title: Get.find<LanguageService>().tr('meta_trade_success'),
                         message: 'Pending order cancelled',
                       );
                     } else {
                       Get.find<AppNotificationController>().showError(
-                        title: 'Error',
+                        title: Get.find<LanguageService>().tr('meta_trade_error'),
                         message: errMsg,
                       );
                     }
@@ -953,7 +957,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   alignment: Alignment.center,
-                  child: Text('Cancel Order',
+                  child: Text(Get.find<LanguageService>().tr('meta_trade_cancel_order'),
                       style: TextStyle(
                           color: MetaTheme.sell(ctx),
                           fontSize: 16.sp,
@@ -967,7 +971,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                   width: double.infinity,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   alignment: Alignment.center,
-                  child: Text('Dismiss',
+                  child: Text(Get.find<LanguageService>().tr('meta_trade_dismiss'),
                       style: TextStyle(color: sub, fontSize: 15.sp)),
                 ),
               ),
@@ -1024,7 +1028,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               activeAccount.metaAccountNumber.isEmpty) {
             if (Get.isRegistered<AppNotificationController>()) {
               Get.find<AppNotificationController>().showError(
-                title: 'Error',
+                title: Get.find<LanguageService>().tr('meta_trade_error'),
                 message: 'No active trading account found',
               );
             }
@@ -1069,7 +1073,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               _actionSheetItem(
                 sheetCtx,
                 icon: Icons.close,
-                label: 'Close position',
+                label: Get.find<LanguageService>().tr('meta_trade_close_position'),
                 onTap: () {
                   Navigator.pop(sheetCtx);
                   _openDetail(p);
@@ -1083,7 +1087,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               _actionSheetItem(
                 sheetCtx,
                 icon: Icons.edit_outlined,
-                label: 'Modify position',
+                label: Get.find<LanguageService>().tr('meta_trade_modify_position'),
                 onTap: () {
                   Navigator.pop(sheetCtx);
                   _openModify(p);
@@ -1097,7 +1101,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               _actionSheetItem(
                 sheetCtx,
                 icon: Icons.add_box_outlined,
-                label: 'New order',
+                label: Get.find<LanguageService>().tr('meta_trade_new_order'),
                 onTap: () {
                   final sym = p.symbol;
                   Navigator.pop(sheetCtx);
@@ -1119,7 +1123,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               _actionSheetItem(
                 sheetCtx,
                 icon: Icons.show_chart,
-                label: 'Chart',
+                label: Get.find<LanguageService>().tr('meta_trade_chart'),
                 onTap: () {
                   final sym = p.symbol;
                   Navigator.pop(sheetCtx);
@@ -1144,7 +1148,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               _actionSheetItem(
                 sheetCtx,
                 icon: Icons.dashboard_customize_outlined,
-                label: 'Bulk Operations…',
+                label: Get.find<LanguageService>().tr('meta_trade_bulk_ops'),
                 onTap: () {
                   Navigator.pop(sheetCtx);
                   _showCloseMenu(c);
@@ -1420,7 +1424,8 @@ class _OrderTicketState extends State<_OrderTicket> {
   late final TradingController _c;
 
   OrderType get _type {
-    switch (_orderIdx) {
+
+  switch (_orderIdx) {
       case 1:
         return _isSell ? OrderType.sellLimit : OrderType.buyLimit;
       case 2:
@@ -1526,7 +1531,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                         decoration: BoxDecoration(
                             color: MetaTheme.card(c),
                             borderRadius: BorderRadius.circular(5.r)),
-                        child: Text('Spread $spread',
+                        child: Text(Get.find<LanguageService>().tr('meta_trade_spread', {'spread': '$spread'}),
                             style: MetaTheme.label(c)
                                 .copyWith(fontSize: 10.sp)),
                       ),
@@ -1571,7 +1576,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                         horizontal: 14.w, vertical: 10.h),
                     child: Row(
                       children: [
-                        Text('PRICE',
+                        Text(Get.find<LanguageService>().tr('meta_trade_column_price'),
                             style:
                                 MetaTheme.label(c).copyWith(fontSize: 12.sp)),
                         const Spacer(),
@@ -1627,7 +1632,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                         horizontal: 14.w, vertical: 10.h),
                     child: Row(
                       children: [
-                        Text('VOLUME',
+                        Text(Get.find<LanguageService>().tr('meta_trade_column_volume'),
                             style:
                                 MetaTheme.label(c).copyWith(fontSize: 12.sp)),
                         const Spacer(),
@@ -1738,7 +1743,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                           final errMsg = _c.errorMessage;
                           if (Get.isRegistered<AppNotificationController>()) {
                             Get.find<AppNotificationController>().showError(
-                              title: 'Error',
+                              title: Get.find<LanguageService>().tr('meta_trade_error'),
                               message: errMsg.isNotEmpty
                                   ? errMsg
                                   : 'Failed to place order',

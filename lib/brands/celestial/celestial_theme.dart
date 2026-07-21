@@ -3,6 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+
+import 'package:crm_app/services/language_service.dart';
 
 /// Global bus used to toggle light/dark theme from the Celestial settings
 /// screen. The app shell wires this to its `MaterialApp.themeMode` so the
@@ -129,11 +132,26 @@ class CelBottomBar extends StatelessWidget {
     final inactive = CelTheme.tabInactive;
 
     final items = <_BarItem>[
-      _BarItem(icon: Icons.grid_view_rounded, label: 'WatchList'),
-      _BarItem(icon: Icons.candlestick_chart, label: 'Chart'),
-      _BarItem(icon: Icons.show_chart, label: 'Trade'),
-      _BarItem(icon: Icons.history, label: 'History'),
-      _BarItem(icon: Icons.settings, label: 'Settings'),
+      _BarItem(
+        icon: Icons.grid_view_rounded,
+        label: Get.find<LanguageService>().tr('nav_tab_watchlist'),
+      ),
+      _BarItem(
+        icon: Icons.candlestick_chart,
+        label: Get.find<LanguageService>().tr('nav_tab_charts'),
+      ),
+      _BarItem(
+        icon: Icons.show_chart,
+        label: Get.find<LanguageService>().tr('nav_tab_trade'),
+      ),
+      _BarItem(
+        icon: Icons.history,
+        label: Get.find<LanguageService>().tr('nav_tab_history'),
+      ),
+      _BarItem(
+        icon: Icons.settings,
+        label: Get.find<LanguageService>().tr('nav_tab_settings'),
+      ),
     ];
 
     return SafeArea(

@@ -8,6 +8,7 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/search_instruments_controller.dart';
 import 'celestial_theme.dart';
+import 'package:crm_app/services/language_service.dart';
 
 // SearchInstrumentsController is lazily registered here so the search sheet
 // can always find it via Get.find(), regardless of which route opened this screen.
@@ -69,7 +70,7 @@ class _CelestialWatchlistScreenState
         children: [
           Expanded(
             child: Text(
-              'WatchList',
+              Get.find<LanguageService>().tr('celestial_watchlist_title'),
               style: TextStyle(
                 color: CelTheme.headerText(c),
                 fontSize: 22.sp,
@@ -107,13 +108,13 @@ class _CelestialWatchlistScreenState
           Icon(Icons.star_outline_rounded,
               size: 52.sp, color: CelTheme.subText(c)),
           SizedBox(height: 10.h),
-          Text('No favorites yet',
+          Text(Get.find<LanguageService>().tr('celestial_watchlist_no_favorites'),
               style: TextStyle(
                   color: CelTheme.mainText(c),
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700)),
           SizedBox(height: 6.h),
-          Text('Tap  🔍  to search and add symbols',
+          Text(Get.find<LanguageService>().tr('celestial_watchlist_search_hint'),
               style: TextStyle(
                   color: CelTheme.subText(c), fontSize: 12.sp)),
         ],
@@ -301,8 +302,9 @@ class _SearchSheet extends StatefulWidget {
 
 class _SearchSheetState extends State<_SearchSheet> {
   final _ctrl = TextEditingController();
-  SearchInstrumentsController get _sic =>
-      Get.find<SearchInstrumentsController>();
+  SearchInstrumentsController get _sic => Get.find<SearchInstrumentsController>();
+
+  LanguageService get languageService => Get.find<LanguageService>();
 
   @override
   void initState() {
@@ -341,7 +343,7 @@ class _SearchSheetState extends State<_SearchSheet> {
                       style: TextStyle(
                           color: CelTheme.mainText(c), fontSize: 14.sp),
                       decoration: InputDecoration(
-                        hintText: 'Search',
+                        hintText: Get.find<LanguageService>().tr('celestial_watchlist_search_btn'),
                         hintStyle: TextStyle(
                             color: CelTheme.subText(c), fontSize: 14.sp),
                         prefixIcon: Icon(Icons.search,
@@ -397,7 +399,7 @@ class _SearchSheetState extends State<_SearchSheet> {
                   return Center(
                     child: Padding(
                       padding: EdgeInsets.all(24.h),
-                      child: Text('No results',
+                      child: Text(Get.find<LanguageService>().tr('celestial_watchlist_no_results'),
                           style: TextStyle(
                               color: CelTheme.subText(c), fontSize: 13.sp)),
                     ),

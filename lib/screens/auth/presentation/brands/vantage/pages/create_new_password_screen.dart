@@ -65,7 +65,7 @@ class _VantageCreateNewPasswordScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Create new Password',
+              languageService.tr('create_new_password_title'),
               style: TextStyle(
                 color: VantageAuthTheme.text,
                 fontSize: 24.sp,
@@ -74,7 +74,7 @@ class _VantageCreateNewPasswordScreenState
             ),
             SizedBox(height: 6.h),
             Text(
-              'Your new password must be different from\nprevious password.',
+              languageService.tr('create_new_password_instruction'),
               style: TextStyle(
                 color: VantageAuthTheme.muted,
                 fontSize: 13.sp,
@@ -84,7 +84,7 @@ class _VantageCreateNewPasswordScreenState
             SizedBox(height: 18.h),
             VantagePillTextField(
               controller: passwordController,
-              hintText: 'Password',
+              hintText: languageService.tr('create_account_screen_password'),
               obscureText: obscurePassword,
               suffixIcon: IconButton(
                 onPressed: () => setState(() => obscurePassword = !obscurePassword),
@@ -100,7 +100,7 @@ class _VantageCreateNewPasswordScreenState
                   return languageService.tr('validation_required');
                 }
                 if (value.length < 8) {
-                  return 'Password must be at least 8 characters';
+                  return languageService.tr('create_new_password_validation_length');
                 }
                 return null;
               },
@@ -108,7 +108,7 @@ class _VantageCreateNewPasswordScreenState
             SizedBox(height: 12.h),
             VantagePillTextField(
               controller: confirmPasswordController,
-              hintText: 'Confirm Password',
+              hintText: languageService.tr('create_new_password_confirm_password'),
               obscureText: obscureConfirmPassword,
               suffixIcon: IconButton(
                 onPressed: () => setState(
@@ -123,10 +123,10 @@ class _VantageCreateNewPasswordScreenState
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please confirm your password';
+                  return languageService.tr('create_new_password_validation_confirm');
                 }
                 if (value != passwordController.text) {
-                  return 'Passwords do not match';
+                  return languageService.tr('create_new_password_validation_mismatch');
                 }
                 return null;
               },

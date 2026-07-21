@@ -9,6 +9,7 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/search_instruments_controller.dart';
 import 'meta_theme.dart';
+import 'package:crm_app/services/language_service.dart';
 
 /// Meta — WatchList screen (screenshot-faithful).
 ///
@@ -154,7 +155,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
           SizedBox(width: 4.w),
           Expanded(
             child: Text(
-              'Quotes',
+              Get.find<LanguageService>().tr('meta_watchlist_quotes'),
               style: TextStyle(
                 color: MetaTheme.headerText(c),
                 fontSize: 22.sp,
@@ -206,7 +207,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                 Expanded(
                   flex: 4,
                   child: Text(
-                    'Symbol',
+                    Get.find<LanguageService>().tr('meta_watchlist_symbol'),
                     style: TextStyle(
                         color: MetaTheme.headerText(c),
                         fontSize: 14.sp,
@@ -216,7 +217,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    'Bid',
+                    Get.find<LanguageService>().tr('meta_watchlist_bid'),
                     textAlign: TextAlign.right,
                     style: TextStyle(
                         color: MetaTheme.headerText(c),
@@ -228,7 +229,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    'Ask',
+                    Get.find<LanguageService>().tr('meta_watchlist_ask'),
                     textAlign: TextAlign.right,
                     style: TextStyle(
                         color: MetaTheme.headerText(c),
@@ -307,7 +308,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
           Icon(Icons.star_outline_rounded,
               size: 52.sp, color: MetaTheme.subText(c)),
           SizedBox(height: 10.h),
-          Text('No favorites yet',
+          Text(Get.find<LanguageService>().tr('meta_watchlist_no_favorites'),
               style: TextStyle(
                   color: MetaTheme.mainText(c),
                   fontSize: 15.sp,
@@ -542,8 +543,9 @@ class _AddSymbolSheet extends StatefulWidget {
 
 class _AddSymbolSheetState extends State<_AddSymbolSheet> {
   final _ctrl = TextEditingController();
-  SearchInstrumentsController get _sic =>
-      Get.find<SearchInstrumentsController>();
+  SearchInstrumentsController get _sic => Get.find<SearchInstrumentsController>();
+
+  LanguageService get languageService => Get.find<LanguageService>();
 
   /// null → at the root folder list (Currency, Metals, Crypto, …)
   /// non-null → inside the named folder, with sub-folders shown
@@ -585,7 +587,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
           },
         ),
         title: Text(
-          'Add symbol',
+          Get.find<LanguageService>().tr('meta_watchlist_add_symbol'),
           style: TextStyle(color: MetaTheme.mainText(c), fontSize: 17.sp),
         ),
       ),
@@ -614,7 +616,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
               onChanged: (v) => _sic.searchInstruments(v),
               style: TextStyle(color: MetaTheme.mainText(c), fontSize: 14.sp),
               decoration: InputDecoration(
-                hintText: 'Find symbols',
+                hintText: Get.find<LanguageService>().tr('meta_watchlist_find_symbols'),
                 hintStyle: TextStyle(
                     color: MetaTheme.subText(c), fontSize: 14.sp),
                 isDense: true,
@@ -688,7 +690,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
         return Center(
           child: Padding(
             padding: EdgeInsets.all(24.h),
-            child: Text('No results',
+            child: Text(Get.find<LanguageService>().tr('meta_watchlist_no_results'),
                 style: TextStyle(
                     color: MetaTheme.subText(c), fontSize: 13.sp)),
           ),
@@ -728,7 +730,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
       return Center(
         child: Padding(
           padding: EdgeInsets.all(24.h),
-          child: Text('No symbols in this folder',
+          child: Text(Get.find<LanguageService>().tr('meta_watchlist_no_symbols_folder'),
               style: TextStyle(
                   color: MetaTheme.subText(c), fontSize: 13.sp)),
         ),
@@ -817,7 +819,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
             ),
             if (totalCount > 0 || selectedCount > 0)
               Text(
-                '$selectedCount/$totalCount',
+                Get.find<LanguageService>().tr('meta_watchlist_selected_count', {'sel': '$selectedCount', 'total': '$totalCount'}),
                 style: TextStyle(
                     color: MetaTheme.subText(c), fontSize: 14.sp),
               ),
@@ -957,7 +959,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+              child:  Text(Get.find<LanguageService>().tr('meta_watchlist_cancel'))),
           TextButton(
               onPressed: () {
                 final toRemove = _checked.toList();
@@ -970,8 +972,8 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
                   _deleteMode = false;
                 });
               },
-              child: const Text('Delete',
-                  style: TextStyle(color: Colors.red))),
+              child: Text(Get.find<LanguageService>().tr('meta_watchlist_delete'),
+                  style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -989,7 +991,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
           icon: Icon(Icons.arrow_back, color: MetaTheme.mainText(c)),
           onPressed: () => Navigator.of(c).pop(),
         ),
-        title: Text('Selected symbols',
+        title: Text(Get.find<LanguageService>().tr('meta_watchlist_selected_symbols'),
             style: TextStyle(color: MetaTheme.mainText(c), fontSize: 17.sp)),
         actions: _deleteMode
             ? [
@@ -997,13 +999,13 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
                 IconButton(
                   icon: Icon(Icons.check,
                       color: MetaTheme.buyBlue, size: 24.sp),
-                  tooltip: 'Done',
+                  tooltip: Get.find<LanguageService>().tr('meta_watchlist_done'),
                   onPressed: _toggleDeleteMode,
                 ),
                 IconButton(
                   icon: Icon(Icons.folder_outlined,
                       color: MetaTheme.buyBlue, size: 22.sp),
-                  tooltip: 'Select all',
+                  tooltip: Get.find<LanguageService>().tr('meta_watchlist_select_all'),
                   onPressed: () {
                     setState(() {
                       if (_checked.length ==
@@ -1021,7 +1023,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
                 IconButton(
                   icon: Icon(Icons.delete_outline,
                       color: MetaTheme.buyBlue, size: 24.sp),
-                  tooltip: 'Delete',
+                  tooltip: Get.find<LanguageService>().tr('meta_watchlist_delete'),
                   onPressed: _confirmDelete,
                 ),
               ]
@@ -1051,7 +1053,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
             return Center(
               child: Padding(
                 padding: EdgeInsets.all(24.h),
-                child: Text('No symbols selected',
+                child: Text(Get.find<LanguageService>().tr('meta_watchlist_no_selection'),
                     style: TextStyle(
                         color: MetaTheme.subText(c), fontSize: 14.sp)),
               ),

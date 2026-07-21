@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+
+import 'package:crm_app/services/language_service.dart';
 
 import 'celestial_chart_screen.dart';
 import 'celestial_history_screen.dart';
@@ -33,12 +36,12 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
     ),
   ];
 
-  static const List<_NavTab> _tabs = <_NavTab>[
-    _NavTab(icon: Icons.grid_view_outlined, activeIcon: Icons.grid_view, label: 'WatchList'),
-    _NavTab(icon: Icons.candlestick_chart_outlined, activeIcon: Icons.candlestick_chart, label: 'Chart'),
-    _NavTab(icon: Icons.show_chart, activeIcon: Icons.trending_up, label: 'Trade'),
-    _NavTab(icon: Icons.history, activeIcon: Icons.history, label: 'History'),
-    _NavTab(icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings'),
+  List<_NavTab> get _tabs => <_NavTab>[
+    _NavTab(icon: Icons.grid_view_outlined, activeIcon: Icons.grid_view, label: Get.find<LanguageService>().tr('nav_tab_watchlist')),
+    _NavTab(icon: Icons.candlestick_chart_outlined, activeIcon: Icons.candlestick_chart, label: Get.find<LanguageService>().tr('nav_tab_charts')),
+    _NavTab(icon: Icons.show_chart, activeIcon: Icons.trending_up, label: Get.find<LanguageService>().tr('nav_tab_trade')),
+    _NavTab(icon: Icons.history, activeIcon: Icons.history, label: Get.find<LanguageService>().tr('nav_tab_history')),
+    _NavTab(icon: Icons.settings_outlined, activeIcon: Icons.settings, label: Get.find<LanguageService>().tr('nav_tab_settings')),
   ];
 
   @override

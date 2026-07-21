@@ -26,6 +26,7 @@ import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'meta_theme.dart';
 
 // ── Resolution map ─────────────────────────────────────────────────────────
@@ -51,6 +52,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
   ChartSocketController get _chart => Get.find<ChartSocketController>();
   InstrumentsController get _inst  => Get.find<InstrumentsController>();
   TradingController     get _trade => Get.find<TradingController>();
+  LanguageService       get languageService => Get.find<LanguageService>();
 
   // ── WebView ────────────────────────────────────────────────────────────
   late final WebViewController _wvc;
@@ -372,7 +374,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
         child: Row(children: [
           Expanded(child: _tradeBtn(
-            label: 'Sell',
+            label: Get.find<LanguageService>().tr('meta_chart_sell'),
             sub:   price.bid.toStringAsFixed(dig),
             color: MetaTheme.sell(c),
             onTap: () => _placeOrder('sell'),
@@ -381,7 +383,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
           _lotStepper(c),
           SizedBox(width: 6.w),
           Expanded(child: _tradeBtn(
-            label: 'Buy',
+            label: Get.find<LanguageService>().tr('meta_chart_buy'),
             sub:   price.ask.toStringAsFixed(dig),
             color: MetaTheme.buy(c),
             onTap: () => _placeOrder('buy'),
@@ -485,7 +487,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
       context: c,
       builder: (_) => AlertDialog(
         backgroundColor: MetaTheme.card(c),
-        title: Text('Enter Lot Size',
+        title: Text(Get.find<LanguageService>().tr('meta_chart_enter_lot_size'),
             style: TextStyle(color: MetaTheme.mainText(c), fontSize: 15.sp,
                 fontWeight: FontWeight.w700)),
         content: TextField(
@@ -506,7 +508,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c),
-            child: Text('Cancel',
+            child: Text(Get.find<LanguageService>().tr('meta_chart_cancel'),
                 style: TextStyle(color: MetaTheme.subText(c))),
           ),
           TextButton(
@@ -623,7 +625,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Select Symbol',
+          Text(Get.find<LanguageService>().tr('meta_chart_select_symbol'),
               style: TextStyle(
                   color: MetaTheme.headerText(c),
                   fontSize: 16.sp,
@@ -631,7 +633,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
           SizedBox(height: 8.h),
           TextField(
             decoration: InputDecoration(
-              hintText: 'Search...',
+              hintText: Get.find<LanguageService>().tr('meta_chart_search_hint'),
               prefixIcon: const Icon(Icons.search, size: 18),
               filled: true,
               fillColor: MetaTheme.softBg(c),

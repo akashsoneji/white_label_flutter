@@ -102,11 +102,11 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
         onPressed: () => Get.toNamed(AppPages.CREATE_ACCOUNT),
         child: Text.rich(
           TextSpan(
-            text: "Don’t have an account? ",
+            text: languageService.tr('login_screen_dont_have_account'),
             style: TextStyle(color: VantageAuthTheme.muted, fontSize: 13.sp),
             children: [
               TextSpan(
-                text: 'Sign Up',
+                text: languageService.tr('create_account_screen_sign_up'),
                 style: TextStyle(
                   color: VantageAuthTheme.primary,
                   fontWeight: FontWeight.w700,
@@ -120,7 +120,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Sign In',
+            languageService.tr('login_screen_sign_in'),
             style: TextStyle(
               color: VantageAuthTheme.text,
               fontSize: 24.sp,
@@ -139,7 +139,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
           SizedBox(height: 18.h),
           VantagePillTextField(
             controller: emailController,
-            hintText: 'Email / Username',
+            hintText: languageService.tr('login_screen_email_username_hint'),
             keyboardType: TextInputType.emailAddress,
             prefixIcon: const Icon(
               Icons.mail_outline_rounded,
@@ -169,17 +169,17 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
                 languageService.isRTL()
                     ? Alignment.centerLeft
                     : Alignment.centerRight,
-            child: TextButton(
-              onPressed: () => Get.toNamed(AppPages.FORGOT_PASSWORD),
-              child: Text(
-                'Forgot Password?',
-                style: TextStyle(
-                  color: VantageAuthTheme.primary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12.sp,
+              child: TextButton(
+                onPressed: () => Get.toNamed(AppPages.FORGOT_PASSWORD),
+                child: Text(
+                  languageService.tr('login_forgot_password'),
+                  style: TextStyle(
+                    color: VantageAuthTheme.primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12.sp,
+                  ),
                 ),
               ),
-            ),
           ),
           Row(
             children: [
@@ -225,7 +225,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
           SizedBox(height: 8.h),
           Obx(() {
             return VantagePrimaryButton(
-              text: 'Sign In',
+              text: languageService.tr('login_screen_sign_in'),
               isLoading: authController.isLoading,
               onPressed: authController.isLoading ? null : _handleLogin,
             );

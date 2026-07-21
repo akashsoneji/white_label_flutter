@@ -16,6 +16,7 @@ import 'package:crm_app/widgets/AppTextField.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'celestial_theme.dart';
+import 'package:crm_app/services/language_service.dart';
 
 double _d(String? v) => double.tryParse(v ?? '') ?? 0;
 String _fmt(double v, int d) => v.toStringAsFixed(d);
@@ -175,7 +176,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Trades', style: CelTheme.title(c)),
+          Text(Get.find<LanguageService>().tr('celestial_trade_trades'), style: CelTheme.title(c)),
           const Spacer(),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -188,7 +189,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              Text('Net P/L', style: CelTheme.label(c)),
+              Text(Get.find<LanguageService>().tr('celestial_trade_net_pl'), style: CelTheme.label(c)),
             ],
           ),
         ],
@@ -767,7 +768,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   alignment: Alignment.center,
                   child: Text(
-                    'Cancel Order',
+                    Get.find<LanguageService>().tr('celestial_trade_cancel_order'),
                     style: TextStyle(
                       color: CelTheme.sell(ctx),
                       fontSize: 16.sp,
@@ -784,7 +785,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   alignment: Alignment.center,
                   child: Text(
-                    'Dismiss',
+                    Get.find<LanguageService>().tr('celestial_trade_dismiss'),
                     style: TextStyle(color: sub, fontSize: 15.sp),
                   ),
                 ),
@@ -1022,7 +1023,7 @@ class _DetailSheetState extends State<_DetailSheet> {
             Row(
               children: [
                 Text(
-                  'Risk Management',
+                  Get.find<LanguageService>().tr('celestial_trade_risk_management'),
                   style: TextStyle(
                     color: CelTheme.mainText(c),
                     fontSize: 14.sp,
@@ -1051,7 +1052,7 @@ class _DetailSheetState extends State<_DetailSheet> {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          'Modify',
+                          Get.find<LanguageService>().tr('celestial_trade_modify'),
                           style: TextStyle(
                             color: CelTheme.buy(c),
                             fontSize: 13.sp,
@@ -1095,7 +1096,7 @@ class _DetailSheetState extends State<_DetailSheet> {
               child: Row(
                 children: [
                   Text(
-                    'Volume',
+                    Get.find<LanguageService>().tr('celestial_trade_volume'),
                     style: TextStyle(
                       color: CelTheme.subText(c),
                       fontSize: 13.sp,
@@ -1404,7 +1405,7 @@ class _ModifySheetState extends State<_ModifySheet> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'CURRENT',
+                        Get.find<LanguageService>().tr('celestial_trade_current'),
                         style: CelTheme.label(c).copyWith(fontSize: 10.sp),
                       ),
                       Text(
@@ -1476,7 +1477,7 @@ class _ModifySheetState extends State<_ModifySheet> {
               ],
             ),
             SizedBox(height: 18.h),
-            _btn(c, 'Modify', CelTheme.buy(c), () async {
+            _btn(c, Get.find<LanguageService>().tr('celestial_trade_modify'), CelTheme.buy(c), () async {
               final double takeProfit =
                   _tpOn && _tpController.text.isNotEmpty
                       ? (double.tryParse(
@@ -1752,6 +1753,8 @@ class _OrderTicketState extends State<_OrderTicket> {
     }
   }
 
+  LanguageService get languageService => Get.find<LanguageService>();
+
   @override
   void initState() {
     super.initState();
@@ -1928,7 +1931,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                     child: Row(
                       children: [
                         Text(
-                          'PRICE',
+                          Get.find<LanguageService>().tr('celestial_trade_column_price'),
                           style: CelTheme.label(c).copyWith(fontSize: 12.sp),
                         ),
                         const Spacer(),
@@ -1997,7 +2000,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                     child: Row(
                       children: [
                         Text(
-                          'VOLUME',
+                          Get.find<LanguageService>().tr('celestial_trade_column_volume'),
                           style: CelTheme.label(c).copyWith(fontSize: 12.sp),
                         ),
                         const Spacer(),

@@ -261,7 +261,7 @@ class _VantageCreateAccountScreenState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Create Account',
+              _languageService.tr('create_account_screen_title'),
               style: TextStyle(
                 color: VantageAuthTheme.text,
                 fontSize: 24.sp,
@@ -271,13 +271,13 @@ class _VantageCreateAccountScreenState
             SizedBox(height: 18.h),
             VantagePillTextField(
               controller: _firstNameController,
-              hintText: 'First Name',
+              hintText: _languageService.tr('create_account_screen_first_name'),
               prefixIcon: const Icon(Icons.person_outline_rounded),
             ),
             SizedBox(height: 10.h),
             VantagePillTextField(
               controller: _lastNameController,
-              hintText: 'Last Name',
+              hintText: _languageService.tr('create_account_screen_last_name'),
               prefixIcon: const Icon(Icons.person_outline_rounded),
             ),
             SizedBox(height: 10.h),
@@ -313,7 +313,9 @@ class _VantageCreateAccountScreenState
                     inputFormatters: [LengthLimitingTextInputFormatter(20)],
                     onChanged: (_) => _validateForm(),
                     decoration: VantageAuthTheme.pillDecoration(
-                      hintText: 'Phone number',
+                      hintText: _languageService.tr(
+                        'create_account_screen_phone_number',
+                      ),
                     ),
                   ),
                 ),
@@ -322,7 +324,7 @@ class _VantageCreateAccountScreenState
             SizedBox(height: 10.h),
             VantagePillTextField(
               controller: _emailController,
-              hintText: 'Email',
+              hintText: _languageService.tr('create_account_screen_email'),
               keyboardType: TextInputType.emailAddress,
               prefixIcon: const Icon(Icons.mail_outline_rounded),
               onChanged: (_) => _validateForm(),
@@ -330,7 +332,7 @@ class _VantageCreateAccountScreenState
             SizedBox(height: 10.h),
             VantagePillTextField(
               controller: _passwordController,
-              hintText: 'Password',
+              hintText: _languageService.tr('create_account_screen_password'),
               obscureText: !_passwordVisible,
               prefixIcon: const Icon(Icons.lock_outline_rounded),
               suffixIcon: IconButton(
@@ -391,7 +393,7 @@ class _VantageCreateAccountScreenState
             SizedBox(height: 6.h),
             Obx(() {
               return VantagePrimaryButton(
-                text: 'Sign Up',
+                text: _languageService.tr('create_account_screen_sign_up'),
                 isLoading: _authController.isLoading,
                 onPressed:
                     !_isFormValid || _authController.isLoading
@@ -404,14 +406,14 @@ class _VantageCreateAccountScreenState
               onPressed: () => Get.offAllNamed(AppPages.LOGIN),
               child: Text.rich(
                 TextSpan(
-                  text: 'Already have an account? ',
+                  text: _languageService.tr('create_account_screen_already_have_account'),
                   style: TextStyle(
                     color: VantageAuthTheme.muted,
                     fontSize: 13.sp,
                   ),
                   children: [
                     TextSpan(
-                      text: 'Sign In',
+                      text: _languageService.tr('login_screen_sign_in'),
                       style: TextStyle(
                         color: VantageAuthTheme.primary,
                         fontWeight: FontWeight.w700,
@@ -423,7 +425,7 @@ class _VantageCreateAccountScreenState
             ),
             SizedBox(height: 6.h),
             Text(
-              'By signing up you agree to Terms & Conditions and Privacy Policy.',
+              _languageService.tr('create_account_screen_agree_terms'),
               textAlign: TextAlign.center,
               style: TextStyle(color: VantageAuthTheme.muted, fontSize: 11.sp),
             ),

@@ -174,10 +174,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
         if (widget.managerCode != null) {
           return _buildMyInvestmentsTab();
         }
-        return TabBarView(
-          controller: _tabCtrl,
-          children: [_buildFundManagersTab(), _buildMyInvestmentsTab()],
-        );
+        return _buildMyInvestmentsTab();
       }),
     );
   }

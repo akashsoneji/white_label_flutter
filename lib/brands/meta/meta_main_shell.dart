@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+
+import 'package:crm_app/services/language_service.dart';
 
 import 'meta_chart_screen.dart';
 import 'meta_history_screen.dart';
@@ -59,12 +62,12 @@ class _MetaMainShellState extends State<MetaMainShell> {
     ),
   ];
 
-  static const List<_NavTab> _tabs = <_NavTab>[
-    _NavTab(icon: Icons.swap_vert, activeIcon: Icons.swap_vert, label: 'Quotes'),
-    _NavTab(icon: Icons.bar_chart_outlined, activeIcon: Icons.bar_chart, label: 'Charts'),
-    _NavTab(icon: Icons.show_chart, activeIcon: Icons.trending_up, label: 'Trade'),
-    _NavTab(icon: Icons.history, activeIcon: Icons.history, label: 'History'),
-    _NavTab(icon: Icons.settings_outlined, activeIcon: Icons.settings, label: 'Settings'),
+  List<_NavTab> get _tabs => <_NavTab>[
+    _NavTab(icon: Icons.swap_vert, activeIcon: Icons.swap_vert, label: Get.find<LanguageService>().tr('nav_tab_quotes')),
+    _NavTab(icon: Icons.bar_chart_outlined, activeIcon: Icons.bar_chart, label: Get.find<LanguageService>().tr('nav_tab_charts')),
+    _NavTab(icon: Icons.show_chart, activeIcon: Icons.trending_up, label: Get.find<LanguageService>().tr('nav_tab_trade')),
+    _NavTab(icon: Icons.history, activeIcon: Icons.history, label: Get.find<LanguageService>().tr('nav_tab_history')),
+    _NavTab(icon: Icons.settings_outlined, activeIcon: Icons.settings, label: Get.find<LanguageService>().tr('nav_tab_settings')),
   ];
 
   @override

@@ -53,7 +53,7 @@ class VantageGetStartedScreen extends StatelessWidget {
                 // ),
                 // SizedBox(height: 10.h),
                 Text(
-                  'Every trader managed. One secure window.',
+                  languageService.tr('get_started_tagline'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),

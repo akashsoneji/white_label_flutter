@@ -14,6 +14,7 @@ import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/theme_service.dart';
@@ -43,6 +44,9 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
     with WidgetsBindingObserver {
   // ── Controllers ───────────────────────────────────────────────────────────
   late final MoreController _moreController;
+
+  // ── i18n ──────────────────────────────────────────────────────────────────
+  LanguageService get languageService => Get.find<LanguageService>();
 
   // ── Toggle state ──────────────────────────────────────────────────────────
   bool _oneClickEnabled = false;
@@ -267,7 +271,8 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               // ── Header title ──────────────────────────────────────────────
               Padding(
                 padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
-                child: Text('Settings', style: MetaTheme.title(context)),
+                child: Text(languageService.tr('settings_title'),
+                    style: MetaTheme.title(context)),
               ),
 
               // ── Profile card ──────────────────────────────────────────────
@@ -480,7 +485,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Verify Your Account',
+                          languageService.tr('settings_verify_account'),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -488,7 +493,8 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                           ),
                         ),
                         Text(
-                          'Complete verification to unlock all features',
+                          languageService.tr(
+                              'settings_complete_verification'),
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: MetaTheme.subText(c),
@@ -534,7 +540,8 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                   ),
                   SizedBox(width: 10.w),
                   Text(
-                    '$completion%',
+                    languageService
+                        .tr('settings_completion_pct', {'completion': '$completion'}),
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -558,25 +565,25 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
     final items = [
       _CelGridItem(
         icon: Icons.south_west_rounded,
-        label: 'Deposit',
+        label: languageService.tr('settings_deposit'),
         color: const Color(0xFF4CAF50),
         onTap: () => Get.to(() => PaymentMethodsScreen(accountNumber: '')),
       ),
       _CelGridItem(
         icon: Icons.north_east_rounded,
-        label: 'Withdraw',
+        label: languageService.tr('settings_withdraw'),
         color: const Color(0xFFFF9800),
         onTap: () => Get.toNamed(Routes.WITHDRAWAL),
       ),
       _CelGridItem(
         icon: Icons.swap_horiz_rounded,
-        label: 'Transfer',
+        label: languageService.tr('settings_transfer'),
         color: const Color(0xFF2196F3),
         onTap: () => Get.toNamed(Routes.INTERNAL_TRANSFER),
       ),
       _CelGridItem(
         icon: Icons.receipt_long_rounded,
-        label: 'History',
+        label: languageService.tr('settings_history'),
         color: const Color(0xFF9C27B0),
         onTap: () => Get.toNamed(Routes.TRANSACTION_HISTORY),
       ),
@@ -663,7 +670,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
       // ── Trading Account (Meta-only) ─────────────────────────────────
       _CelMenuItem(
         icon: Icons.manage_accounts_rounded,
-        label: 'Trading Account',
+        label: languageService.tr('settings_trading_account'),
         color: const Color(0xFF1E88E5),
         onTap: () => Get.to(
           () => MetaTradingAccountScreen(
@@ -674,7 +681,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
       ),
       _CelMenuItem(
         icon: Icons.account_balance_rounded,
-        label: 'Finance',
+        label: languageService.tr('settings_finance'),
         color: const Color(0xFF009688),
         onTap: () async {
           await Get.toNamed(AppPages.FINANCE);
@@ -686,7 +693,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
     if (showPromotional) {
       items.add(_CelMenuItem(
         icon: Icons.campaign_rounded,
-        label: 'Promotional',
+        label: languageService.tr('settings_promotional'),
         color: const Color(0xFFFF9800),
         onTap: () => Get.to(
           () => const PromotionalScreen(),
@@ -697,7 +704,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
 
     items.add(_CelMenuItem(
       icon: Icons.dashboard_rounded,
-      label: 'IB Dashboard',
+      label: languageService.tr('settings_ib_dashboard'),
       color: MetaTheme.buy(c),
       onTap: () async => await _handleSwitchToIB(),
     ));
@@ -705,7 +712,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
     if (showCopyTrading) {
       items.add(_CelMenuItem(
         icon: Icons.content_copy_rounded,
-        label: 'Copy Trading',
+        label: languageService.tr('settings_copy_trading'),
         color: const Color(0xFF2196F3),
         onTap: () => Get.toNamed(Routes.COPY_TRADING_MAIN),
       ));
@@ -733,25 +740,25 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
       if (themeService.canUserChangeTheme)
         _CelMenuItem(
           icon: Icons.color_lens_rounded,
-          label: 'Theme',
+        label: languageService.tr('settings_theme'),
           color: const Color(0xFF9C27B0),
           onTap: () => showThemeBottomSheet(context),
         ),
       _CelMenuItem(
         icon: Icons.lock_outline_rounded,
-        label: 'Change Password',
+        label: languageService.tr('settings_change_password'),
         color: const Color(0xFFF44336),
         onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
       ),
       _CelMenuItem(
         icon: Icons.security_rounded,
-        label: 'Two-Factor Authentication',
+        label: languageService.tr('settings_two_factor_auth'),
         color: const Color(0xFF673AB7),
         onTap: () => Get.toNamed(Routes.TWO_FACTOR_AUTH),
       ),
       _CelMenuItem(
         icon: Icons.touch_app_rounded,
-        label: 'One Click Trading',
+        label: languageService.tr('settings_one_click_trading'),
         color: const Color(0xFF00BCD4),
         isToggle: true,
         toggleValue: _oneClickEnabled,
@@ -759,7 +766,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
       ),
       _CelMenuItem(
         icon: Icons.fingerprint_rounded,
-        label: 'Biometric Login',
+        label: languageService.tr('settings_biometric_login'),
         color: const Color(0xFF3F51B5),
         isToggle: true,
         toggleValue: _biometricEnabled,
@@ -776,19 +783,19 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
     return [
       _CelMenuItem(
         icon: Icons.support_agent_rounded,
-        label: 'Support Tickets',
+        label: languageService.tr('settings_support_tickets'),
         color: const Color(0xFFE91E63),
         onTap: () => Get.toNamed(Routes.TICKET_LIST),
       ),
       _CelMenuItem(
         icon: Icons.delete_forever_rounded,
-        label: 'Delete Account',
+        label: languageService.tr('settings_delete_account'),
         color: const Color(0xFFE91E63),
         onTap: () => _showDeleteAccountDialog(c, auth),
       ),
       _CelMenuItem(
         icon: Icons.logout_rounded,
-        label: 'Logout',
+        label: languageService.tr('settings_logout'),
         color: MetaTheme.sell(c),
         showArrow: false,
         onTap: () => _showLogoutDialog(c, auth),
@@ -932,7 +939,8 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
           return Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Text(
-              'Version ${snap.data!.version}',
+              languageService
+                  .tr('settings_version', {'version': snap.data!.version}),
               style: TextStyle(
                 fontSize: 11.sp,
                 color: MetaTheme.subText(c).withValues(alpha: 0.5),
@@ -976,7 +984,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               ),
               SizedBox(height: 16.h),
               Text(
-                'Are you sure you want to logout?',
+                languageService.tr('settings_logout_confirm'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15.sp,
@@ -991,7 +999,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                     child: Obx(
                       () => _dialogButton(
                         c,
-                        label: 'Yes',
+                        label: languageService.tr('settings_yes'),
                         isPrimary: true,
                         onTap: auth.isLoading
                             ? null
@@ -1003,7 +1011,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                   Expanded(
                     child: _dialogButton(
                       c,
-                      label: 'No',
+                      label: languageService.tr('settings_no'),
                       isPrimary: false,
                       onTap: () => Get.back(closeOverlays: true),
                     ),
@@ -1043,7 +1051,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               ),
               SizedBox(height: 16.h),
               Text(
-                'Are you sure you want to delete your account?',
+                languageService.tr('settings_delete_account_confirm'),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15.sp,
@@ -1058,7 +1066,8 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                     style: TextStyle(
                         fontSize: 14.sp, color: MetaTheme.mainText(c)),
                     decoration: InputDecoration(
-                      hintText: 'Enter your password',
+                      hintText:
+                          languageService.tr('settings_enter_password'),
                       hintStyle: TextStyle(color: MetaTheme.subText(c)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.r),
@@ -1094,7 +1103,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                   Expanded(
                     child: Obx(() => _dialogButton(
                           c,
-                          label: 'Yes',
+                        label: languageService.tr('settings_yes'),
                           isPrimary: true,
                           isDanger: true,
                           onTap: auth.isLoading
@@ -1119,7 +1128,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                   Expanded(
                     child: _dialogButton(
                       c,
-                      label: 'No',
+                      label: languageService.tr('settings_no'),
                       isPrimary: false,
                       onTap: () => Get.back(closeOverlays: true),
                     ),

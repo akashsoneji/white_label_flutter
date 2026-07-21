@@ -47,11 +47,11 @@ class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScree
         onPressed: () => Get.offAllNamed(AppPages.LOGIN),
         child: Text.rich(
           TextSpan(
-            text: 'You remember your password? ',
+            text: languageService.tr('forgot_password_screen_remember_password'),
             style: TextStyle(color: VantageAuthTheme.muted, fontSize: 13.sp),
             children: [
               TextSpan(
-                text: 'Sign In',
+                text: languageService.tr('login_screen_sign_in'),
                 style: TextStyle(
                   color: VantageAuthTheme.primary,
                   fontWeight: FontWeight.w700,
@@ -65,7 +65,7 @@ class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScree
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Forgot password',
+              languageService.tr('forgot_password_screen_title'),
               style: TextStyle(
                 color: VantageAuthTheme.text,
                 fontSize: 24.sp,
@@ -75,13 +75,13 @@ class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScree
             SizedBox(height: 18.h),
             VantagePillTextField(
               controller: _emailController,
-              hintText: 'Email',
+              hintText: languageService.tr('forgot_password_screen_email'),
               keyboardType: TextInputType.emailAddress,
             ),
             SizedBox(height: 14.h),
             Obx(() {
               return VantagePrimaryButton(
-                text: 'Send OTP',
+                text: languageService.tr('forgot_password_screen_send_otp'),
                 isLoading: authController.isLoading,
                 onPressed: authController.isLoading ? null : _sendOtp,
               );

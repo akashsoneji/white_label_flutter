@@ -27,6 +27,7 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'celestial_theme.dart';
+import 'package:crm_app/services/language_service.dart';
 
 // ── Resolution map ─────────────────────────────────────────────────────────
 const _tfMap = {
@@ -50,7 +51,8 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   // ── Controllers ────────────────────────────────────────────────────────
   ChartSocketController get _chart => Get.find<ChartSocketController>();
   InstrumentsController get _inst  => Get.find<InstrumentsController>();
-  TradingController     get _trade => Get.find<TradingController>();
+
+  LanguageService get languageService => Get.find<LanguageService>();  TradingController     get _trade => Get.find<TradingController>();
 
   // ── WebView ────────────────────────────────────────────────────────────
   late final WebViewController _wvc;
@@ -303,7 +305,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
                 color:   CelTheme.buyBlue ,
                 borderRadius: BorderRadius.circular(6.r),
               ),
-              child: Text('Trade', style: TextStyle(
+              child: Text(Get.find<LanguageService>().tr('celestial_chart_trade'), style: TextStyle(
                   color: Colors.white,
                   fontSize: 12.sp, fontWeight: FontWeight.w700)),
             ),
@@ -324,7 +326,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
         child: Row(children: [
           Expanded(child: _tradeBtn(
-            label: 'Sell',
+            label: Get.find<LanguageService>().tr('celestial_chart_sell'),
             sub:   price.bid.toStringAsFixed(dig),
             color: CelTheme.sell(c),
             onTap: () => _placeOrder('sell'),
@@ -333,7 +335,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
           _lotStepper(c),
           SizedBox(width: 6.w),
           Expanded(child: _tradeBtn(
-            label: 'Buy',
+            label: Get.find<LanguageService>().tr('celestial_chart_buy'),
             sub:   price.ask.toStringAsFixed(dig),
             color: CelTheme.buy(c),
             onTap: () => _placeOrder('buy'),
@@ -437,7 +439,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
       context: c,
       builder: (_) => AlertDialog(
         backgroundColor: CelTheme.card(c),
-        title: Text('Enter Lot Size',
+        title: Text(Get.find<LanguageService>().tr('celestial_chart_enter_lot_size'),
             style: TextStyle(color: CelTheme.mainText(c), fontSize: 15.sp,
                 fontWeight: FontWeight.w700)),
         content: TextField(
@@ -458,7 +460,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c),
-            child: Text('Cancel',
+            child: Text(Get.find<LanguageService>().tr('celestial_chart_cancel'),
                 style: TextStyle(color: CelTheme.subText(c))),
           ),
           TextButton(
@@ -575,7 +577,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Select Symbol',
+          Text(Get.find<LanguageService>().tr('celestial_chart_select_symbol'),
               style: TextStyle(
                   color: CelTheme.headerText(c),
                   fontSize: 16.sp,
@@ -583,7 +585,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
           SizedBox(height: 8.h),
           TextField(
             decoration: InputDecoration(
-              hintText: 'Search...',
+              hintText: Get.find<LanguageService>().tr('celestial_chart_search_hint'),
               prefixIcon: const Icon(Icons.search, size: 18),
               filled: true,
               fillColor: CelTheme.softBg(c),

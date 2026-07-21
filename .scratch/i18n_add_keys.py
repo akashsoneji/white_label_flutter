@@ -1,0 +1,161 @@
+"""Add all remaining i18n keys to en.json."""
+import json
+
+en_path = 'assets/translations/en.json'
+en = json.load(open(en_path))
+
+new_keys = {
+    # ── meta_chart_screen.dart ──
+    'meta_chart_enter_lot_size': 'Enter Lot Size',
+    'meta_chart_cancel': 'Cancel',
+    'meta_chart_select_symbol': 'Select Symbol',
+    'meta_chart_search_hint': 'Search...',
+    'meta_chart_sell': 'Sell',
+    'meta_chart_buy': 'Buy',
+    'meta_chart_day_high': 'H: ${price.dayHigh.toStringAsFixed(digits)}',
+    'meta_chart_day_low': 'L: ${price.dayLow.toStringAsFixed(digits)}',
+    # ── meta_trade_screen.dart ──
+    'meta_trade_trades': 'Trades',
+    'meta_trade_net_pl': 'Net P/L',
+    'meta_trade_positions': 'Positions',
+    'meta_trade_orders': 'Orders',
+    'meta_trade_close_position': 'Close position',
+    'meta_trade_modify_position': 'Modify position',
+    'meta_trade_new_order': 'New order',
+    'meta_trade_chart': 'Chart',
+    'meta_trade_bulk_ops': 'Bulk Operations\u2026',
+    'meta_trade_error': 'Error',
+    'meta_trade_success': 'Success',
+    'meta_trade_dismiss': 'Dismiss',
+    'meta_trade_cancel_order': 'Cancel Order',
+    'meta_trade_modify': 'Modify',
+    'meta_trade_volume': 'Volume',
+    'meta_trade_risk_management': 'Risk Management',
+    'meta_trade_spread': 'Spread $spread',
+    'meta_trade_label_colon': '$label:',
+    'meta_trade_column_price': 'PRICE',
+    'meta_trade_column_volume': 'VOLUME',
+    # ── meta_watchlist_screen.dart ──
+    'meta_watchlist_quotes': 'Quotes',
+    'meta_watchlist_symbol': 'Symbol',
+    'meta_watchlist_bid': 'Bid',
+    'meta_watchlist_ask': 'Ask',
+    'meta_watchlist_no_favorites': 'No favorites yet',
+    'meta_watchlist_search_hint': 'Tap  \U0001f50d  to search and add symbols',
+    'meta_watchlist_day_low': 'L: ${price.dayLow.toStringAsFixed(digits)}',
+    'meta_watchlist_day_high': 'H: ${price.dayHigh.toStringAsFixed(digits)}',
+    'meta_watchlist_add_symbol': 'Add symbol',
+    'meta_watchlist_no_results': 'No results',
+    'meta_watchlist_no_symbols_folder': 'No symbols in this folder',
+    'meta_watchlist_selected_count': '$selectedCount/$totalCount',
+    'meta_watchlist_remove_symbols': 'Remove symbols',
+    'meta_watchlist_cancel': 'Cancel',
+    'meta_watchlist_delete': 'Delete',
+    'meta_watchlist_selected_symbols': 'Selected symbols',
+    'meta_watchlist_no_selection': 'No symbols selected',
+    'meta_watchlist_symbol_category': '${symbol.symbol}: ${symbol.category}',
+    'meta_watchlist_find_symbols': 'Find symbols',
+    'meta_watchlist_done': 'Done',
+    'meta_watchlist_select_all': 'Select all',
+    'meta_watchlist_search_btn': 'Search',
+    'meta_watchlist_start_typing': 'Start typing to search',
+    'meta_watchlist_add_symbols_hint': 'Tap  \U0001f50d  to add symbols',
+    # ── meta_history_screen.dart ──
+    'meta_history_title': 'History',
+    'meta_history_empty': 'Empty history',
+    'meta_history_retry': 'Retry',
+    'meta_history_balance': 'Balance',
+    'meta_history_deposit': 'Deposit',
+    'meta_history_sl': 'S / L:',
+    'meta_history_tp': 'T / P:',
+    'meta_history_open': 'Open:',
+    'meta_history_swap': 'Swap:',
+    'meta_history_commission': 'Commission:',
+    'meta_history_loading_more': 'Loading more\u2026',
+    'meta_history_select_period': 'SELECT PERIOD',
+    'meta_history_sort_columns': 'SORT COLUMNS',
+    'meta_history_select_symbol_filter': 'SELECT SYMBOL',
+    'meta_history_select_symbol_hint': 'Select symbol',
+    'meta_history_sort_columns_hint': 'Sort columns',
+    'meta_history_row_symbol': '${row.tradeSymbol}, ',
+    # ── meta_new_order_screen.dart ──
+    'meta_neworder_price_label': 'Price: ',
+    'meta_neworder_stop_limit_price': 'Stop Limit price: ',
+    'meta_neworder_fill_policy': 'Fill policy',
+    'meta_neworder_fok': 'Fill or Kill',
+    'meta_neworder_expiration': 'Expiration:',
+    'meta_neworder_by_market': 'BY MARKET',
+    'meta_neworder_no_active_account': 'No active account',
+    'meta_neworder_order_failed': 'Order failed',
+    'meta_neworder_sell': 'SELL',
+    'meta_neworder_buy': 'BUY',
+    'meta_neworder_place': 'PLACE',
+    # ── meta_close_position_screen.dart ──
+    'meta_close_position_label': 'Close position #${id}',
+    'meta_close_mode': 'Close mode',
+    'meta_close_partial_hint': 'Tap a − pill to close part of the position',
+    'meta_close_fill_policy': 'Fill policy',
+    'meta_close_fok': 'Fill or Kill',
+    'meta_close_ioc': 'Immediate or Cancel',
+    'meta_close_boc': 'Book or Cancel',
+    # ── meta_modify_position_screen.dart ──
+    'meta_modify_position_label': 'Modify position #${id}',
+    'meta_modify_auto_sl_tp': 'Auto SL/TP Calculator',
+    'meta_modify_apply': 'Apply',
+    'meta_modify_stop_loss': 'Stop Loss',
+    'meta_modify_take_profit': 'Take Profit',
+    'meta_modify_validation': 'Stop Loss or Take Profit you set must differ from market price by at least 20 points. Stops processing is performed on the broker side.',
+    'meta_modify_button': 'MODIFY',
+    # ── widgets/meta_native_chart.dart ──
+    'meta_chart_waiting_ticks': 'Waiting for ticks\u2026',
+    # ── celestial_chart_screen.dart ──
+    'celestial_chart_trade': 'Trade',
+    'celestial_chart_enter_lot_size': 'Enter Lot Size',
+    'celestial_chart_cancel': 'Cancel',
+    'celestial_chart_select_symbol': 'Select Symbol',
+    'celestial_chart_search_hint': 'Search...',
+    'celestial_chart_sell': 'Sell',
+    'celestial_chart_buy': 'Buy',
+    # ── celestial_trade_screen.dart ──
+    'celestial_trade_trades': 'Trades',
+    'celestial_trade_net_pl': 'Net P/L',
+    'celestial_trade_cancel_order': 'Cancel Order',
+    'celestial_trade_dismiss': 'Dismiss',
+    'celestial_trade_error': 'Error',
+    'celestial_trade_success': 'Success',
+    'celestial_trade_risk_management': 'Risk Management',
+    'celestial_trade_modify': 'Modify',
+    'celestial_trade_volume': 'Volume',
+    'celestial_trade_current': 'CURRENT',
+    'celestial_trade_column_price': 'PRICE',
+    'celestial_trade_column_volume': 'VOLUME',
+    # ── celestial_watchlist_screen.dart ──
+    'celestial_watchlist_title': 'WatchList',
+    'celestial_watchlist_no_favorites': 'No favorites yet',
+    'celestial_watchlist_search_hint': 'Tap  \U0001f50d  to search and add symbols',
+    'celestial_watchlist_day_low': 'L: ${price.dayLow.toStringAsFixed(digits)}',
+    'celestial_watchlist_day_high': 'H: ${price.dayHigh.toStringAsFixed(digits)}',
+    'celestial_watchlist_no_results': 'No results',
+    'celestial_watchlist_search_btn': 'Search',
+    # ── celestial_history_screen.dart ──
+    'celestial_history_title': 'History',
+    'celestial_history_no_period': 'No history for $_periodLabel',
+    'celestial_history_open_close': '$open  \u2192  $close',
+    # ── nav tab keys ──
+    'nav_tab_watchlist': 'WatchList',
+    'nav_tab_charts': 'Chart',
+    'nav_tab_trade': 'Trade',
+    'nav_tab_history': 'History',
+    'nav_tab_settings': 'Settings',
+    'nav_tab_quotes': 'Quotes',
+}
+
+added = 0
+for key, value in new_keys.items():
+    if key not in en:
+        en[key] = value
+        added += 1
+
+with open(en_path, 'w', encoding='utf-8') as f:
+    json.dump(en, f, ensure_ascii=False, indent=2)
+print(f'en.json: added {added} new keys, total = {len(en)}')

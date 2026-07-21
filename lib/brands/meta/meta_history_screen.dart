@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../../models/trade_history_model.dart';
 import '../../screens/trading/view_models/trading_controller.dart';
 import 'meta_theme.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class MetaHistoryScreen extends StatefulWidget {
   const MetaHistoryScreen({super.key});
@@ -262,14 +263,14 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('History', style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.1)),
+                Text(Get.find<LanguageService>().tr('meta_history_title'), style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.1)),
                 const SizedBox(height: 1),
                 Text(_selectedSymbol, style: TextStyle(color: MetaTheme.subText(context), fontSize: 13, height: 1.1)),
               ],
             ),
           ),
-          _HeaderIcon(icon: Icons.sync, tooltip: 'Select symbol', onTap: () => _openSymbolSheet(context)),
-          _HeaderIcon(icon: Icons.swap_vert, tooltip: 'Sort columns', onTap: () => _openSortSheet(context)),
+          _HeaderIcon(icon: Icons.sync, tooltip: Get.find<LanguageService>().tr('meta_history_select_symbol_hint'), onTap: () => _openSymbolSheet(context)),
+          _HeaderIcon(icon: Icons.swap_vert, tooltip: Get.find<LanguageService>().tr('meta_history_sort_columns_hint'), onTap: () => _openSortSheet(context)),
           InkResponse(
             onTap: () => _openPeriodSheet(context),
             radius: 26,
@@ -351,9 +352,9 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           row('Profit:', _format(t.profit), valueColor: profitColor),
-          row('Deposit', _format(t.deposit)),
-          row('Swap:', _format(t.swap)),
-          row('Commission:', _format(t.commission)),
+          row(Get.find<LanguageService>().tr('meta_history_deposit'), _format(t.deposit)),
+          row(Get.find<LanguageService>().tr('meta_history_swap'), _format(t.swap)),
+          row(Get.find<LanguageService>().tr('meta_history_commission'), _format(t.commission)),
           row('Balance:', _format(t.balance)),
           const SizedBox(height: 8),
           Divider(height: 1, thickness: 0.5, color: MetaTheme.divider(context)),
@@ -384,7 +385,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
         children: [
           Icon(Icons.inbox_outlined, color: MetaTheme.subText(context).withOpacity(0.4), size: 80),
           const SizedBox(height: 16),
-          Text('Empty history', style: TextStyle(color: MetaTheme.subText(context), fontSize: 14, fontWeight: FontWeight.w400)),
+          Text(Get.find<LanguageService>().tr('meta_history_empty'), style: TextStyle(color: MetaTheme.subText(context), fontSize: 14, fontWeight: FontWeight.w400)),
         ],
       ),
     );
@@ -398,7 +399,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
         const SizedBox(height: 12),
         Text(message, textAlign: TextAlign.center, style: TextStyle(color: MetaTheme.subText(context), fontSize: 13)),
         const SizedBox(height: 16),
-        TextButton(onPressed: _refresh, child: Text('Retry', style: TextStyle(color: MetaTheme.buyBlue))),
+        TextButton(onPressed: _refresh, child: Text(Get.find<LanguageService>().tr('meta_history_retry'), style: TextStyle(color: MetaTheme.buyBlue))),
       ]),
     );
   }
@@ -432,7 +433,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
       backgroundColor: MetaTheme.bg(context),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(14))),
       builder: (ctx) => _MetaSheetWrapper(
-        title: 'SELECT PERIOD',
+        title: Get.find<LanguageService>().tr('meta_history_select_period'),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           for (final p in periods) ...[
             _SheetRow(icon: _iconForPeriod(p), leading: p, trailingSub: _rangeLabelForPeriod(p), selected: p == _selectedPeriodLabel,
@@ -461,7 +462,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
       backgroundColor: MetaTheme.bg(context),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(14))),
       builder: (ctx) => _MetaSheetWrapper(
-        title: 'SORT COLUMNS',
+        title: Get.find<LanguageService>().tr('meta_history_sort_columns'),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           for (final o in options) ...[
             _SheetRow(icon: null, leading: o, showArrow: o == _sortKey, arrowAscending: o == _sortKey ? _sortAscending : !_sortAscending,
@@ -479,7 +480,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
       backgroundColor: MetaTheme.bg(context),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(14))),
       builder: (ctx) => _MetaSheetWrapper(
-        title: 'SELECT SYMBOL',
+        title: Get.find<LanguageService>().tr('meta_history_select_symbol_filter'),
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.6),
           child: SingleChildScrollView(
@@ -585,12 +586,12 @@ class _PositionCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Balance',
+                    Get.find<LanguageService>().tr('meta_history_balance'),
                     style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Deposit',
+                    Get.find<LanguageService>().tr('meta_history_deposit'),
                     style: TextStyle(color: MetaTheme.subText(context), fontSize: 13, height: 1.2),
                   ),
                 ],
@@ -706,7 +707,7 @@ class _ExpandedDetail extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text('S / L:', style: labelStyle),
+                    Text(Get.find<LanguageService>().tr('meta_history_sl'), style: labelStyle),
                     const Spacer(),
                     Text(sl == 0 ? '—' : fmt.format(sl), style: valueStyle),
                     const SizedBox(width: 8),
@@ -715,7 +716,7 @@ class _ExpandedDetail extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text('T / P:', style: labelStyle),
+                    Text(Get.find<LanguageService>().tr('meta_history_tp'), style: labelStyle),
                     const Spacer(),
                     Text(tp == 0 ? '—' : fmt.format(tp), style: valueStyle),
                     const SizedBox(width: 8),
@@ -731,7 +732,7 @@ class _ExpandedDetail extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text('Open:', style: labelStyle),
+                    Text(Get.find<LanguageService>().tr('meta_history_open'), style: labelStyle),
                     const Spacer(),
                     Text(openTimeStr, style: valueStyle),
                   ],
@@ -739,7 +740,7 @@ class _ExpandedDetail extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text('Swap:', style: labelStyle),
+                    Text(Get.find<LanguageService>().tr('meta_history_swap'), style: labelStyle),
                     const Spacer(),
                     Text(fmt.format(row.swap), style: valueStyle),
                   ],
@@ -747,7 +748,7 @@ class _ExpandedDetail extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Text('Commission:', style: labelStyle),
+                    Text(Get.find<LanguageService>().tr('meta_history_commission'), style: labelStyle),
                     const Spacer(),
                     Text(fmt.format(comm), style: valueStyle),
                   ],
@@ -862,7 +863,7 @@ class _PaginationSentinel extends StatelessWidget {
         child: loading
             ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: MetaTheme.buyBlue))
             : hasMore
-                ? Text('Loading more…', style: TextStyle(color: MetaTheme.subText(context), fontSize: 12))
+                ? Text(Get.find<LanguageService>().tr('meta_history_loading_more'), style: TextStyle(color: MetaTheme.subText(context), fontSize: 12))
                 : const SizedBox.shrink(),
       ),
     );

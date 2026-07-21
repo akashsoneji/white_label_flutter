@@ -1042,6 +1042,12 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     label: languageService.tr('ticket_title'),
                     onTap: () => Get.toNamed(AppPages.TICKET_LIST),
                   ),
+                  _MenuItem(
+                    icon: 'language',
+                    label: languageService.tr('language_selector_title'),
+                    onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
+                    iconData: Icons.language,
+                  ),
                   _ThemeMenuItem(),
                   const _BiometricLoginMenuItem(),
                   _MenuItem(
@@ -1569,6 +1575,7 @@ class _MenuItem extends StatelessWidget {
   final VoidCallback onTap;
   final Color? color;
   final bool showArrow;
+  final IconData? iconData;
 
   const _MenuItem({
     required this.icon,
@@ -1576,6 +1583,7 @@ class _MenuItem extends StatelessWidget {
     required this.onTap,
     this.color,
     this.showArrow = true,
+    this.iconData,
   });
 
   @override
@@ -1597,12 +1605,18 @@ class _MenuItem extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: SvgPicture.asset(
-                    'assets/svg/more/$icon.svg',
-                    height: 18.h,
-                    width: 18.w,
-                    color: AppColors.primary,
-                  ),
+                  child: iconData != null
+                      ? Icon(
+                        iconData,
+                        size: 20.sp,
+                        color: AppColors.primary,
+                      )
+                      : SvgPicture.asset(
+                        'assets/svg/more/$icon.svg',
+                        height: 18.h,
+                        width: 18.w,
+                        color: AppColors.primary,
+                      ),
                 ),
               ),
               SizedBox(width: 14.w),
