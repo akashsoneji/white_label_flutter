@@ -1206,8 +1206,8 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              title: Text('Trading account', style: AppTextStyles.screenTitle),
-              centerTitle: true,
+              // title: Text('', style: AppTextStyles.screenTitle),
+              // centerTitle: true,
               actions: [
                 _buildHeaderIconButton(
                   assetPath: 'assets/svg/deshboard/add-square.svg',

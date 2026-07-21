@@ -1,3 +1,4 @@
+import 'iquote_assets_layout.dart';
 import '../dashboard_screen.dart';
 import 'dart:convert';
 
@@ -18,7 +19,7 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/screens/home/more/one_click_trading_disclaimer_screen.dart';
-import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
+import 'package:crm_app/services/ib_controller.dart' if (dart.library.io) 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
@@ -698,6 +699,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (FlavorConfig.usesIquoteUi()) {
+      return const IquoteAssetsLayout();
+    }
 
     final AuthController authController = Get.find<AuthController>();
     final languageService = Get.find<LanguageService>();
@@ -1807,41 +1811,114 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
     await showDialog<void>(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          backgroundColor: AppColors.cardBackground,
+        return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(20.r),
           ),
-          title: Text(
-            _languageService.tr('biometric_not_enrolled_title'),
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
+          backgroundColor: AppColors.cardBackground,
+          child: Container(
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20.r),
+              color: AppColors.cardBackground,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 8.h),
+                Container(
+                  width: 52.w,
+                  height: 52.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.fingerprint_rounded,
+                      size: 28.sp,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  _languageService.tr('biometric_not_enrolled_title'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  _languageService.tr('biometric_not_enrolled_message'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12.r),
+                        onTap: () => Navigator.of(ctx).pop(),
+                        child: Container(
+                          height: 44.h,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            _languageService.tr('common_close'),
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 14.5.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12.r),
+                        onTap: () async {
+                          Navigator.of(ctx).pop();
+                          await BiometricService.instance
+                              .openDeviceSecuritySettings();
+                        },
+                        child: Container(
+                          height: 44.h,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            _languageService.tr('biometric_open_settings'),
+                            style: TextStyle(
+                              color: AppColors.pureWhite,
+                              fontSize: 14.5.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          content: Text(
-            _languageService.tr('biometric_not_enrolled_message'),
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(
-                _languageService.tr('common_close'),
-                style: TextStyle(color: AppColors.primary),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(ctx).pop();
-                await BiometricService.instance.openDeviceSecuritySettings();
-              },
-              child: Text(
-                _languageService.tr('biometric_open_settings'),
-                style: TextStyle(color: AppColors.primary),
-              ),
-            ),
-          ],
         );
       },
     );

@@ -21,6 +21,7 @@ import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
 const _kHomeSparklinePoints = 50;
 
@@ -187,15 +188,15 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                   ),
                 ),
               ),
-              // SizedBox(height: 14.h),
+              SizedBox(height: 14.h),
 
-              // // 2. Active Account Card with Switch Account Bottom Sheet
-              // _ActiveAccountBar(
-              //   cardBg: cardBg,
-              //   textPrimary: textPrimary,
-              //   textSecondary: textSecondary,
-              //   isDark: isDark,
-              // ),
+              // 2. Active Account Card with Switch Account Bottom Sheet
+              _ActiveAccountBar(
+                cardBg: cardBg,
+                textPrimary: textPrimary,
+                textSecondary: textSecondary,
+                isDark: isDark,
+              ),
               SizedBox(height: 14.h),
 
               // 3. Banner: Profit & Bonus Ranking
@@ -742,17 +743,7 @@ class _ActiveAccountBar extends StatelessWidget {
   });
 
   void _showAccountBottomSheet(BuildContext context) {
-    if (Get.isRegistered<AccountController>()) {
-      final accountController = Get.find<AccountController>();
-      showModalBottomSheet(
-        context: context,
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        builder:
-            (ctx) =>
-                _AccountSelectionSheet(accountController: accountController),
-      );
-    }
+    showDashboardBottomSheet(context);
   }
 
   @override
@@ -868,111 +859,5 @@ class _ActiveAccountBar extends StatelessWidget {
         ),
       );
     });
-  }
-}
-
-class _AccountSelectionSheet extends StatelessWidget {
-  final AccountController accountController;
-
-  const _AccountSelectionSheet({required this.accountController});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.r),
-          topRight: Radius.circular(20.r),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Switch Account',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-          const Divider(),
-          Flexible(
-            child: Obx(() {
-              final mt5Accounts = accountController.mt5Accounts;
-              if (mt5Accounts.isEmpty) {
-                return Padding(
-                  padding: EdgeInsets.all(20.w),
-                  child: const Center(
-                    child: Text(
-                      'No accounts found',
-                      style: TextStyle(fontWeight: FontWeight.w400),
-                    ),
-                  ),
-                );
-              }
-              return ListView.builder(
-                shrinkWrap: true,
-                itemCount: mt5Accounts.length,
-                itemBuilder: (ctx, idx) {
-                  final acc = mt5Accounts[idx];
-                  final isSelected =
-                      accountController.activeMT5Account?.metaAccountNumber ==
-                      acc.metaAccountNumber;
-
-                  return ListTile(
-                    leading: Icon(
-                      acc.accountType.toLowerCase() == 'demo'
-                          ? Icons.play_circle_outline
-                          : Icons.verified_user_outlined,
-                      color:
-                          isSelected ? AppColors.primary : AppColors.textGrey,
-                    ),
-                    title: Text(
-                      'Account: #${acc.metaAccountNumber}',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Type: ${acc.accountType.toUpperCase()} | Equity: \$${acc.equity}',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textGrey,
-                      ),
-                    ),
-                    trailing:
-                        isSelected
-                            ? Icon(Icons.check_circle, color: AppColors.primary)
-                            : null,
-                    onTap: () async {
-                      await accountController.setActiveMT5Account(
-                        acc.metaAccountNumber,
-                      );
-                      Navigator.of(context).pop();
-                    },
-                  );
-                },
-              );
-            }),
-          ),
-        ],
-      ),
-    );
   }
 }

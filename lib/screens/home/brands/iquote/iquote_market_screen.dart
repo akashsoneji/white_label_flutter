@@ -16,6 +16,7 @@ import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
 const _kSparklinePoints = 60;
 
@@ -92,17 +93,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
   ];
 
   void _showAccountBottomSheet(BuildContext context) {
-    if (Get.isRegistered<AccountController>()) {
-      final accountController = Get.find<AccountController>();
-      showModalBottomSheet(
-        context: context,
-        backgroundColor: Colors.transparent,
-        isScrollControlled: true,
-        builder:
-            (ctx) =>
-                _AccountSelectionSheet(accountController: accountController),
-      );
-    }
+    showDashboardBottomSheet(context);
   }
 
   void _openSearchSheet() {
@@ -139,76 +130,102 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Left: Markets Title & Search Icon
+          Row(
+            children: [
+              Text(
+                _ls.tr('markets_title'),
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                  color: IquoteThemeColors.textPrimary,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              IconButton(
+                onPressed: _openSearchSheet,
+                icon: Icon(
+                  Icons.search_rounded,
+                  size: 22.r,
+                  color: IquoteThemeColors.textSecondary,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+
+          // Right: Active Account Selector (Account Number + LIVE/DEMO Badge)
           GestureDetector(
             onTap: () => _showAccountBottomSheet(context),
             child: Obx(() {
               final active = _accountCtrl.activeMT5Account;
-              final accType = (active?.accountType ?? 'REAL').toUpperCase();
+              final accNumber = active?.metaAccountNumber ?? '------';
+              final rawType = (active?.accountType ?? 'REAL').toUpperCase();
+              final isDemo = rawType == 'DEMO';
+              final badgeLabel = isDemo ? 'DEMO' : 'LIVE';
+
               return Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color:
                       isDark
                           ? const Color(0xFF252C41)
-                          : AppColors.primary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8.r),
+                          : AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10.r),
                   border: Border.all(
                     color:
                         isDark
                             ? Colors.white12
-                            : AppColors.primary.withOpacity(0.2),
+                            : AppColors.primary.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      accType,
+                      '#$accNumber',
                       style: TextStyle(
-                        color: isDark ? Colors.white : AppColors.primary,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
+                        color: IquoteThemeColors.textPrimary,
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.w,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            isDemo
+                                ? Colors.orange.withValues(alpha: 0.18)
+                                : Colors.green.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        badgeLabel,
+                        style: TextStyle(
+                          color: isDemo ? Colors.orange : Colors.green,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     SizedBox(width: 4.w),
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 18.r,
-                      color: isDark ? Colors.white : AppColors.primary,
+                      color: IquoteThemeColors.textSecondary,
                     ),
                   ],
                 ),
               );
             }),
           ),
-          const Spacer(),
-          Obx(() {
-            final active = _accountCtrl.activeMT5Account;
-            final equity = active?.equity ?? active?.balance ?? '0.00';
-            return Row(
-              children: [
-                Text(
-                  equity,
-                  style: TextStyle(
-                    fontSize: 17.sp,
-                    fontWeight: FontWeight.w400,
-                    color: IquoteThemeColors.textPrimary,
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                IconButton(
-                  onPressed: _openSearchSheet,
-                  icon: Icon(
-                    Icons.add_circle_outline_rounded,
-                    size: 22.r,
-                    color: IquoteThemeColors.textPrimary,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            );
-          }),
         ],
       ),
     );
@@ -728,112 +745,6 @@ class _IquoteSparkline extends StatelessWidget {
         ],
       ),
       duration: const Duration(milliseconds: 150),
-    );
-  }
-}
-
-class _AccountSelectionSheet extends StatelessWidget {
-  final AccountController accountController;
-
-  const _AccountSelectionSheet({required this.accountController});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.r),
-          topRight: Radius.circular(20.r),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Switch Account',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-          const Divider(),
-          Flexible(
-            child: Obx(() {
-              final mt5Accounts = accountController.mt5Accounts;
-              if (mt5Accounts.isEmpty) {
-                return Padding(
-                  padding: EdgeInsets.all(20.w),
-                  child: const Center(
-                    child: Text(
-                      'No accounts found',
-                      style: TextStyle(fontWeight: FontWeight.w400),
-                    ),
-                  ),
-                );
-              }
-              return ListView.builder(
-                shrinkWrap: true,
-                itemCount: mt5Accounts.length,
-                itemBuilder: (ctx, idx) {
-                  final acc = mt5Accounts[idx];
-                  final isSelected =
-                      accountController.activeMT5Account?.metaAccountNumber ==
-                      acc.metaAccountNumber;
-
-                  return ListTile(
-                    leading: Icon(
-                      acc.accountType.toLowerCase() == 'demo'
-                          ? Icons.play_circle_outline
-                          : Icons.verified_user_outlined,
-                      color:
-                          isSelected ? AppColors.primary : AppColors.textGrey,
-                    ),
-                    title: Text(
-                      'Account: #${acc.metaAccountNumber}',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Type: ${acc.accountType.toUpperCase()} | Equity: \$${acc.equity}',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textGrey,
-                      ),
-                    ),
-                    trailing:
-                        isSelected
-                            ? Icon(Icons.check_circle, color: AppColors.primary)
-                            : null,
-                    onTap: () async {
-                      await accountController.setActiveMT5Account(
-                        acc.metaAccountNumber,
-                      );
-                      Navigator.of(context).pop();
-                    },
-                  );
-                },
-              );
-            }),
-          ),
-        ],
-      ),
     );
   }
 }
