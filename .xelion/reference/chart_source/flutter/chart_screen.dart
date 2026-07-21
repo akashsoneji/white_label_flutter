@@ -37,16 +37,17 @@ class SymbolInfo {
   });
 
   factory SymbolInfo.fromJson(Map<String, dynamic> j) => SymbolInfo(
-        symbol: j['symbol'] ?? '',
-        volumeMin: (j['volume_min'] ?? 0.01).toDouble(),
-        volumeMax: (j['volume_max'] ?? 100.0).toDouble(),
-        volumeStep: (j['volume_step'] ?? 0.01).toDouble(),
-        point: (j['point'] ?? 0.00001).toDouble(),
-        description: j['description'],
-        tradeSessions: (j['trade_sessions'] as List<dynamic>? ?? [])
+    symbol: j['symbol'] ?? '',
+    volumeMin: (j['volume_min'] ?? 0.01).toDouble(),
+    volumeMax: (j['volume_max'] ?? 100.0).toDouble(),
+    volumeStep: (j['volume_step'] ?? 0.01).toDouble(),
+    point: (j['point'] ?? 0.00001).toDouble(),
+    description: j['description'],
+    tradeSessions:
+        (j['trade_sessions'] as List<dynamic>? ?? [])
             .map((e) => TradeSession.fromJson(e))
             .toList(),
-      );
+  );
 }
 
 class TradeSession {
@@ -55,11 +56,12 @@ class TradeSession {
   const TradeSession({required this.day, required this.sessions});
 
   factory TradeSession.fromJson(Map<String, dynamic> j) => TradeSession(
-        day: j['day'] ?? '',
-        sessions: (j['sessions'] as List<dynamic>? ?? [])
+    day: j['day'] ?? '',
+    sessions:
+        (j['sessions'] as List<dynamic>? ?? [])
             .map((e) => SessionTime.fromJson(e))
             .toList(),
-      );
+  );
 }
 
 class SessionTime {
@@ -90,7 +92,7 @@ class AppTheme {
     this.colorBackground = const Color(0xFF121212),
     this.colorText = const Color(0xFFFFFFFF),
     this.colorSuccess = const Color(0xFF4CAF50),
-    this.colorBackgroundPrimary = const Color(0xFF1E1E1E),
+    this.colorBackgroundPrimary = const Color(0xFF000000),
   });
 
   String toHex(Color c) =>
@@ -114,8 +116,12 @@ class NotificationData {
 
 const _positionActions = {0: 'Buy', 1: 'Sell'};
 const _orderTypes = {
-  0: 'Buy', 1: 'Sell', 2: 'Buy Limit',
-  3: 'Sell Limit', 4: 'Buy Stop', 5: 'Sell Stop'
+  0: 'Buy',
+  1: 'Sell',
+  2: 'Buy Limit',
+  3: 'Sell Limit',
+  4: 'Buy Stop',
+  5: 'Sell Stop',
 };
 const _returnCodes = {
   10009: 'Order placed',
@@ -124,10 +130,20 @@ const _returnCodes = {
   10008: 'Order modified',
 };
 const _langTvMap = {
-  'en': 'en', 'ar': 'ar', 'ch': 'zh', 'es': 'es',
-  'hi': 'en', 'fr': 'fr', 'id': 'id_ID', 'de': 'de',
-  'th': 'th', 'ms': 'ms_MY', 'ja': 'ja', 'ko': 'ko',
-  'tr': 'tr', 'ru': 'ru',
+  'en': 'en',
+  'ar': 'ar',
+  'ch': 'zh',
+  'es': 'es',
+  'hi': 'en',
+  'fr': 'fr',
+  'id': 'id_ID',
+  'de': 'de',
+  'th': 'th',
+  'ms': 'ms_MY',
+  'ja': 'ja',
+  'ko': 'ko',
+  'tr': 'tr',
+  'ru': 'ru',
 };
 
 // ─── ChartScreen Widget ─────────────────────────────────────────────────────
@@ -138,9 +154,11 @@ class ChartScreen extends StatefulWidget {
   final List<SymbolInfo> symbols;
   final IO.Socket? socket;
   final UserInfo? user;
-  final Map<String, dynamic> positions; // { data: {id: pos}, posObj: {sym: [ids]} }
-  final Map<String, dynamic> orders;   // { data: {id: ord}, ordersObj: {sym: [ids]} }
-  final Map<String, dynamic> ticks;    // { symbol: { bid, ask, time } }
+  final Map<String, dynamic>
+  positions; // { data: {id: pos}, posObj: {sym: [ids]} }
+  final Map<String, dynamic>
+  orders; // { data: {id: ord}, ordersObj: {sym: [ids]} }
+  final Map<String, dynamic> ticks; // { symbol: { bid, ask, time } }
   final bool isDark;
   final String language;
   final AppTheme theme;
@@ -315,25 +333,24 @@ class _ChartScreenState extends State<ChartScreen> {
     final sym = widget.symbol?.symbol ?? '';
     final ids = (posObj[sym] as List? ?? []);
 
-    final lines = ids
-        .where((id) => posData.containsKey(id.toString()))
-        .map((id) {
+    final lines =
+        ids.where((id) => posData.containsKey(id.toString())).map((id) {
           final pos = posData[id.toString()] as Map;
           final profit = (pos['profit'] ?? 0).toDouble();
           final action = _positionActions[pos['action']] ?? 'Buy';
           final vol = pos['volume'];
           final price = (pos['open_price'] ?? 0).toDouble();
-          final color = profit >= 0
-              ? widget.theme.toHex(widget.theme.colorSuccess)
-              : widget.theme.toHex(widget.theme.colorError);
+          final color =
+              profit >= 0
+                  ? widget.theme.toHex(widget.theme.colorSuccess)
+                  : widget.theme.toHex(widget.theme.colorError);
           return {
             'price': price,
             'text': 'Profit: ${profit.toStringAsFixed(2)}',
             'quantity': '$action: $vol',
             'color': color,
           };
-        })
-        .toList();
+        }).toList();
 
     _callJS('window.__renderPositionLines(${jsonEncode(lines)})');
   }
@@ -346,9 +363,8 @@ class _ChartScreenState extends State<ChartScreen> {
     final sym = widget.symbol?.symbol ?? '';
     final ids = (ordObj[sym] as List? ?? []);
 
-    final lines = ids
-        .where((id) => ordData.containsKey(id.toString()))
-        .map((id) {
+    final lines =
+        ids.where((id) => ordData.containsKey(id.toString())).map((id) {
           final ord = ordData[id.toString()] as Map;
           final type = _orderTypes[ord['type']] ?? 'Order';
           final vol = ord['volume'];
@@ -358,8 +374,7 @@ class _ChartScreenState extends State<ChartScreen> {
             'price': price,
             'quantity': '$type: $vol',
           };
-        })
-        .toList();
+        }).toList();
 
     _callJS('window.__renderOrderLines(${jsonEncode(lines)})');
   }
@@ -378,26 +393,31 @@ class _ChartScreenState extends State<ChartScreen> {
       final r = res is Map ? res : {};
       if (r['result'] != null || r['success'] == true) {
         HapticFeedback.mediumImpact();
-        widget.onNotification?.call(NotificationData(
-          title: 'Order cancelled',
-          content: '#${order['order_id']}\n'
-              '${_orderTypes[order['type']]} '
-              '${order['volume']} ${order['symbol']}',
-          visible: true,
-          icon: 'success',
-        ));
+        widget.onNotification?.call(
+          NotificationData(
+            title: 'Order cancelled',
+            content:
+                '#${order['order_id']}\n'
+                '${_orderTypes[order['type']]} '
+                '${order['volume']} ${order['symbol']}',
+            visible: true,
+            icon: 'success',
+          ),
+        );
       } else {
         HapticFeedback.vibrate();
-        widget.onNotification?.call(NotificationData(
-          title: '${r['error'] ?? 'Error'}',
-          visible: true,
-          icon: 'fail',
-        ));
+        widget.onNotification?.call(
+          NotificationData(
+            title: '${r['error'] ?? 'Error'}',
+            visible: true,
+            icon: 'fail',
+          ),
+        );
       }
       Future.delayed(const Duration(seconds: 2), () {
-        widget.onNotification?.call(const NotificationData(
-          title: '', visible: false,
-        ));
+        widget.onNotification?.call(
+          const NotificationData(title: '', visible: false),
+        );
       });
     }
 
@@ -409,13 +429,17 @@ class _ChartScreenState extends State<ChartScreen> {
         resolved = true;
         s.off('order-response');
         HapticFeedback.vibrate();
-        widget.onNotification?.call(const NotificationData(
-          title: 'Request timeout', visible: true, icon: 'fail',
-        ));
+        widget.onNotification?.call(
+          const NotificationData(
+            title: 'Request timeout',
+            visible: true,
+            icon: 'fail',
+          ),
+        );
         Future.delayed(const Duration(seconds: 2), () {
-          widget.onNotification?.call(const NotificationData(
-            title: '', visible: false,
-          ));
+          widget.onNotification?.call(
+            const NotificationData(title: '', visible: false),
+          );
         });
       }
     });
@@ -435,8 +459,7 @@ class _ChartScreenState extends State<ChartScreen> {
     final type = side == 'sell' ? 1 : 0;
     bool resolved = false;
 
-    void resetBuying() =>
-        setState(() => _isBuyingBuy = _isBuyingSell = false);
+    void resetBuying() => setState(() => _isBuyingBuy = _isBuyingSell = false);
 
     void handler(dynamic res) {
       if (resolved) return;
@@ -448,33 +471,39 @@ class _ChartScreenState extends State<ChartScreen> {
         final success = [10009, 10002, 10003, 10008].contains(code);
         if (success) {
           HapticFeedback.mediumImpact();
-          widget.onNotification?.call(NotificationData(
-            title: _returnCodes[code] ?? 'Order placed',
-            content: '${_orderTypes[type]} $_volume ${widget.symbol?.symbol} at market',
-            visible: true,
-            icon: 'success',
-          ));
+          widget.onNotification?.call(
+            NotificationData(
+              title: _returnCodes[code] ?? 'Order placed',
+              content:
+                  '${_orderTypes[type]} $_volume ${widget.symbol?.symbol} at market',
+              visible: true,
+              icon: 'success',
+            ),
+          );
         } else {
           HapticFeedback.vibrate();
           final ticket = r['ticket'] ?? 0;
-          widget.onNotification?.call(NotificationData(
-            title: ticket > 0
-                ? '${_returnCodes[code] ?? 'Error'} #$ticket'
-                : '${_returnCodes[code] ?? 'Error'}',
-            visible: true,
-            icon: 'fail',
-          ));
+          widget.onNotification?.call(
+            NotificationData(
+              title:
+                  ticket > 0
+                      ? '${_returnCodes[code] ?? 'Error'} #$ticket'
+                      : '${_returnCodes[code] ?? 'Error'}',
+              visible: true,
+              icon: 'fail',
+            ),
+          );
         }
       } else if (r['error'] != null) {
         HapticFeedback.vibrate();
-        widget.onNotification?.call(NotificationData(
-          title: '${r['error']}', visible: true, icon: 'fail',
-        ));
+        widget.onNotification?.call(
+          NotificationData(title: '${r['error']}', visible: true, icon: 'fail'),
+        );
       }
       Future.delayed(const Duration(seconds: 2), () {
-        widget.onNotification?.call(const NotificationData(
-          title: '', visible: false,
-        ));
+        widget.onNotification?.call(
+          const NotificationData(title: '', visible: false),
+        );
       });
       resetBuying();
     }
@@ -497,13 +526,17 @@ class _ChartScreenState extends State<ChartScreen> {
         s.off('order-response');
         resetBuying();
         HapticFeedback.vibrate();
-        widget.onNotification?.call(const NotificationData(
-          title: 'Request timeout', visible: true, icon: 'fail',
-        ));
+        widget.onNotification?.call(
+          const NotificationData(
+            title: 'Request timeout',
+            visible: true,
+            icon: 'fail',
+          ),
+        );
         Future.delayed(const Duration(seconds: 2), () {
-          widget.onNotification?.call(const NotificationData(
-            title: '', visible: false,
-          ));
+          widget.onNotification?.call(
+            const NotificationData(title: '', visible: false),
+          );
         });
       }
     });
@@ -661,20 +694,23 @@ class _ChartScreenState extends State<ChartScreen> {
     final sym = widget.symbol;
     if (sym == null) return;
     final next = _volume + sym.volumeStep;
-    if (next <= sym.volumeMax) setState(() => _volume = _round(next, sym.volumeStep));
+    if (next <= sym.volumeMax)
+      setState(() => _volume = _round(next, sym.volumeStep));
   }
 
   void _decrementVolume() {
     final sym = widget.symbol;
     if (sym == null) return;
     final next = _volume - sym.volumeStep;
-    if (next >= sym.volumeMin) setState(() => _volume = _round(next, sym.volumeStep));
+    if (next >= sym.volumeMin)
+      setState(() => _volume = _round(next, sym.volumeStep));
   }
 
   double _round(double value, double step) {
-    final decimals = step.toString().contains('.')
-        ? step.toString().split('.').last.length
-        : 0;
+    final decimals =
+        step.toString().contains('.')
+            ? step.toString().split('.').last.length
+            : 0;
     final factor = 10.0 * decimals;
     return factor == 0 ? value : (value * factor).round() / factor;
   }
@@ -691,22 +727,23 @@ class _ChartScreenState extends State<ChartScreen> {
       children: [
         // ── TradingView WebView ─────────────────────────────────────────
         WebViewWidget(
-          controller: WebViewController()
-            ..setJavaScriptMode(JavaScriptMode.unrestricted)
-            ..addJavaScriptChannel(
-              'FlutterBridge',
-              onMessageReceived: (msg) {
-                try {
-                  final data = jsonDecode(msg.message) as Map;
-                  if (data['type'] == 'widgetReady') {
-                    setState(() => _widgetReady = true);
-                    _renderPositionLines();
-                    _renderOrderLines();
-                  }
-                } catch (_) {}
-              },
-            )
-            ..loadHtmlString(_buildChartHtml()),
+          controller:
+              WebViewController()
+                ..setJavaScriptMode(JavaScriptMode.unrestricted)
+                ..addJavaScriptChannel(
+                  'FlutterBridge',
+                  onMessageReceived: (msg) {
+                    try {
+                      final data = jsonDecode(msg.message) as Map;
+                      if (data['type'] == 'widgetReady') {
+                        setState(() => _widgetReady = true);
+                        _renderPositionLines();
+                        _renderOrderLines();
+                      }
+                    } catch (_) {}
+                  },
+                )
+                ..loadHtmlString(_buildChartHtml()),
         ),
 
         // ── Quick Trade Panel ───────────────────────────────────────────
@@ -720,8 +757,7 @@ class _ChartScreenState extends State<ChartScreen> {
               borderRadius: BorderRadius.circular(8),
               elevation: 4,
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                 child: Row(
                   children: [
                     // SELL
@@ -752,13 +788,19 @@ class _ChartScreenState extends State<ChartScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.remove,
-                                    color: widget.theme.colorText, size: 18),
+                                icon: Icon(
+                                  Icons.remove,
+                                  color: widget.theme.colorText,
+                                  size: 18,
+                                ),
                                 onPressed: _decrementVolume,
                               ),
                               IconButton(
-                                icon: Icon(Icons.add,
-                                    color: widget.theme.colorText, size: 18),
+                                icon: Icon(
+                                  Icons.add,
+                                  color: widget.theme.colorText,
+                                  size: 18,
+                                ),
                                 onPressed: _incrementVolume,
                               ),
                             ],
@@ -791,8 +833,10 @@ class _ChartScreenState extends State<ChartScreen> {
             right: 0,
             child: Center(
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: widget.theme.colorBackground,
                   borderRadius: BorderRadius.circular(8),
@@ -800,9 +844,7 @@ class _ChartScreenState extends State<ChartScreen> {
                 ),
                 child: Text(
                   'Market closed',
-                  style: TextStyle(
-                    color: widget.theme.colorText, fontSize: 12,
-                  ),
+                  style: TextStyle(color: widget.theme.colorText, fontSize: 12),
                 ),
               ),
             ),
@@ -816,8 +858,10 @@ class _ChartScreenState extends State<ChartScreen> {
             child: GestureDetector(
               onTap: () => setState(() => _tradeOpen = !_tradeOpen),
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: widget.theme.colorBackgroundPrimary,
                   borderRadius: BorderRadius.circular(4),
@@ -867,24 +911,25 @@ class _TradeButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           alignment: Alignment.center,
-          child: loading
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
+          child:
+              loading
+                  ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                  : Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
-                )
-              : Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'iquote_home_screen.dart';
+import 'brands/iquote/iquote_market_screen.dart';
 import 'dart:async';
 
 
@@ -42,6 +43,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   late List<Widget> _screens;
   late final bool _isVantage;
   late PageController _pageController;
+  final SymbolSelectionService _symbolSelectionService = Get.put(SymbolSelectionService(), permanent: true);
 
   // Get the instruments controller
   final InstrumentsController instrumentsController =
@@ -94,10 +96,14 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
     if (isIquote) {
       _screens = [
-        KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged)), // 1. Home
-        KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _switchToChartTab)), // 2. Markets
-        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _switchToChartTab)), // 3. Position
-        const KeepAliveWrapper(child: MoreScreen()), // 4. Assets
+        KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged)), // 0. Home
+        // 1. Markets — redesigned Iquote-style market screen
+        KeepAliveWrapper(child: IquoteMarketScreen(onNavigateToChart: (sym) {
+          _symbolSelectionService.setSymbol(sym);
+          _switchToChartTab(sym);
+        })),
+        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _switchToChartTab)), // 2. Position
+        const KeepAliveWrapper(child: MoreScreen()), // 3. Assets
       ];
     } else if (_isVantage) {
       // Vantage 5-tab layout (as of 2026-07-09):
@@ -291,12 +297,12 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isIquote = FlavorConfig.usesIquoteUi();
     return ExitConfirmationWrapper(
       forceExitDialog: true,
       child: RTLWrapper(
         child: Scaffold(
-          backgroundColor: AppColors.tradeBackgroundCenterColor,
-          // drawer: const GlobalDrawer(),
+          backgroundColor: isIquote ? IquoteThemeColors.background : AppColors.tradeBackgroundCenterColor,
           body: SafeArea(
             child: PageView(
               controller: _pageController,
@@ -305,16 +311,24 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
               children: _screens,
             ),
           ),
-
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
-          floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
-          floatingActionButton: TradingBottomNavigation(
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              _onTabChanged(index);
-            },
-          ),
+          bottomNavigationBar: isIquote
+              ? TradingBottomNavigation(
+                  currentIndex: _currentIndex,
+                  onTap: (index) {
+                    _onTabChanged(index);
+                  },
+                )
+              : null,
+          floatingActionButtonLocation: isIquote ? null : FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonAnimator: isIquote ? null : FloatingActionButtonAnimator.scaling,
+          floatingActionButton: isIquote
+              ? null
+              : TradingBottomNavigation(
+                  currentIndex: _currentIndex,
+                  onTap: (index) {
+                    _onTabChanged(index);
+                  },
+                ),
         ),
       ),
     );
@@ -354,6 +368,7 @@ class PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isIquote = FlavorConfig.usesIquoteUi();
     return RTLWrapper(
       child: Scaffold(
         backgroundColor: AppColors.backgroundLight,
@@ -399,6 +414,7 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
     with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
+    final isIquote = FlavorConfig.usesIquoteUi();
     super.build(context);
     return widget.child;
   }
