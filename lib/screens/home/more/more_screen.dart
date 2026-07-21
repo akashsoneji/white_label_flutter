@@ -1042,12 +1042,12 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     label: languageService.tr('ticket_title'),
                     onTap: () => Get.toNamed(AppPages.TICKET_LIST),
                   ),
-                  _MenuItem(
-                    icon: 'language',
-                    label: languageService.tr('language_selector_title'),
-                    onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
-                    iconData: Icons.language,
-                  ),
+                  // _MenuItem(
+                  //   icon: 'language',
+                  //   label: languageService.tr('language_selector_title'),
+                  //   onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
+                  //   iconData: Icons.language,
+                  // ),
                   _ThemeMenuItem(),
                   const _BiometricLoginMenuItem(),
                   _MenuItem(
