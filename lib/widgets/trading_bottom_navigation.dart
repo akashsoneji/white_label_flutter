@@ -26,7 +26,7 @@ class TradingBottomNavigation extends StatelessWidget {
 
     if (isIquote) {
       final isDark = AppColors.isDarkMode;
-      final bgColor = isDark ? const Color(0xFF111625) : AppColors.whiteColor;
+      final bgColor = IquoteThemeColors.navBackground;
 
       return Container(
         width: double.infinity,
@@ -277,9 +277,8 @@ class TradingBottomNavigation extends StatelessWidget {
   
   Widget _buildIquoteNavItem(int index, IconData icon, IconData activeIcon, String label, {bool hasBadge = false}) {
     final isSelected = currentIndex == index;
-    final isDark = AppColors.isDarkMode;
-    final activeColor = isDark ? const Color(0xFFFF9538) : AppColors.primary;
-    final inactiveColor = isDark ? const Color(0xFF7A8299) : AppColors.textGrey;
+    final activeColor = IquoteThemeColors.selectedTabColor;
+    final inactiveColor = IquoteThemeColors.textSecondary;
 
     return InkWell(
       onTap: () => onTap(index),

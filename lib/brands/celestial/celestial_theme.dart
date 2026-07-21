@@ -41,7 +41,7 @@ class CelTheme {
   static const Color _lightPinkBg = Color(0xFFFCE7E7); // trade pill bg
 
   // ── Dark palette (MT5 dark) ────────────────────────────────────────────────
-  static const Color _darkBg = Color(0xFF1E1E1E);
+  static const Color _darkBg = Color(0xFF000000);
   static const Color _darkCard = Color(0xFF252525);
   static const Color _darkSoftBg = Color(0xFF121212);
   static const Color _darkDivider = Color(0xFF2C2C2C);
@@ -62,52 +62,59 @@ class CelTheme {
   static const Color tabInactive = Color(0xFF9CA3AF);
 
   // ── Public, theme-aware getters ────────────────────────────────────────────
-  static bool _isDark(BuildContext c) => Theme.of(c).brightness == Brightness.dark;
+  static bool _isDark(BuildContext c) =>
+      Theme.of(c).brightness == Brightness.dark;
 
   static Color bg(BuildContext c) => _isDark(c) ? _darkBg : _lightBg;
-  static Color headerText(BuildContext c) => _isDark(c) ? _darkMainText : _lightHeader;
+  static Color headerText(BuildContext c) =>
+      _isDark(c) ? _darkMainText : _lightHeader;
   static Color card(BuildContext c) => _isDark(c) ? _darkCard : _lightCard;
-  static Color softBg(BuildContext c) => _isDark(c) ? _darkSoftBg : _lightSoftBg;
-  static Color divider(BuildContext c) => _isDark(c) ? _darkDivider : _lightDivider;
-  static Color subText(BuildContext c) => _isDark(c) ? _darkSubText : _lightSubText;
-  static Color mainText(BuildContext c) => _isDark(c) ? _darkMainText : _lightMainText;
+  static Color softBg(BuildContext c) =>
+      _isDark(c) ? _darkSoftBg : _lightSoftBg;
+  static Color divider(BuildContext c) =>
+      _isDark(c) ? _darkDivider : _lightDivider;
+  static Color subText(BuildContext c) =>
+      _isDark(c) ? _darkSubText : _lightSubText;
+  static Color mainText(BuildContext c) =>
+      _isDark(c) ? _darkMainText : _lightMainText;
   static Color sell(BuildContext c) => _isDark(c) ? _darkSell : _lightSell;
   static Color buy(BuildContext c) => _isDark(c) ? _darkBuy : _lightBuy;
-  static Color pillBg(BuildContext c) => _isDark(c) ? _darkPinkBg : _lightPinkBg;
+  static Color pillBg(BuildContext c) =>
+      _isDark(c) ? _darkPinkBg : _lightPinkBg;
   static Color buyTint(BuildContext c) =>
       _isDark(c) ? const Color(0xFF15243A) : const Color(0xFFEAF3FF);
 
   // ── Typography ─────────────────────────────────────────────────────────────
   static TextStyle title(BuildContext c) => TextStyle(
-        color: headerText(c),
-        fontSize: 22.sp,
-        fontWeight: FontWeight.w800,
-      );
+    color: headerText(c),
+    fontSize: 22.sp,
+    fontWeight: FontWeight.w800,
+  );
 
   static TextStyle sectionLabel(BuildContext c) => TextStyle(
-        color: subText(c),
-        fontSize: 12.sp,
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.3,
-      );
+    color: subText(c),
+    fontSize: 12.sp,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0.3,
+  );
 
   static TextStyle bigPrice(BuildContext c, {Color? color}) => TextStyle(
-        color: color ?? mainText(c),
-        fontSize: 18.sp,
-        fontWeight: FontWeight.w800,
-      );
+    color: color ?? mainText(c),
+    fontSize: 18.sp,
+    fontWeight: FontWeight.w800,
+  );
 
   static TextStyle label(BuildContext c) => TextStyle(
-        color: subText(c),
-        fontSize: 11.sp,
-        fontWeight: FontWeight.w600,
-      );
+    color: subText(c),
+    fontSize: 11.sp,
+    fontWeight: FontWeight.w600,
+  );
 
   static TextStyle value(BuildContext c, {Color? color}) => TextStyle(
-        color: color ?? mainText(c),
-        fontSize: 12.sp,
-        fontWeight: FontWeight.w700,
-      );
+    color: color ?? mainText(c),
+    fontSize: 12.sp,
+    fontWeight: FontWeight.w700,
+  );
 }
 
 /// Bottom navigation bar shared by all 5 screens.
@@ -179,7 +186,8 @@ class CelBottomBar extends StatelessWidget {
                       style: TextStyle(
                         color: color,
                         fontSize: 10.sp,
-                        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight:
+                            isActive ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
                   ],

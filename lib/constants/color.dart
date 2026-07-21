@@ -22,7 +22,9 @@ class AppColors {
   // ── Brand Colors (flavor-driven) ──────────────────────────────────────────
   // Primary color - brand-specific in both modes, with darkPrimaryColor for dark mode.
   static Color get primary =>
-      isDarkMode ? FlavorConfig.instance.darkPrimaryColor : FlavorConfig.instance.primaryColor;
+      isDarkMode
+          ? FlavorConfig.instance.darkPrimaryColor
+          : FlavorConfig.instance.primaryColor;
   static Color get secondary => FlavorConfig.instance.secondaryColor;
   static Color get accent => FlavorConfig.instance.accentColor;
   static const Color _pureBlack = Color(0xFF000000);
@@ -58,18 +60,18 @@ class AppColors {
   // Card background — #FFFFFF in light, #2C2C2C in dark
   static Color get card =>
       isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFFFFFFF);
-  // Surface / divider — #F5F5F5 in light, #1E1E1E in dark
+  // Surface / divider — #F5F5F5 in light, #000000 in dark
   static Color get surface =>
-      isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF5F5F5);
+      isDarkMode ? const Color(0xFF000000) : const Color(0xFFF5F5F5);
   // Background alias for scaffold
   static Color get background => scaffold;
   // Card background alias
   static Color get cardBackground => card;
 
   // ── Trade Background ──────────────────────────────────────────────────────
-  // Main scaffold bg for feature screens — #F7F7F7 in light, #1E1E1E in dark
+  // Main scaffold bg for feature screens — #F7F7F7 in light, #000000 in dark
   static Color get tradeBackground =>
-      isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF7F7F7);
+      isDarkMode ? const Color(0xFF000000) : const Color(0xFFF7F7F7);
 
   // Text field/input background — slightly lighter than card in dark mode for visibility
   static Color get textFieldBg =>
@@ -256,7 +258,7 @@ class AppColors {
   static Color get backgroundDarkTheme => const Color(0xFF121212);
 
   /// @deprecated Use `surface` instead
-  static Color get surfaceDarkTheme => const Color(0xFF1E1E1E);
+  static Color get surfaceDarkTheme => const Color(0xFF000000);
 
   /// @deprecated Use `surface` instead
   static Color get surfaceLightTheme => const Color(0xFFF5F5F5);
@@ -366,9 +368,12 @@ class AppColors {
 
   // Copy Trading compatibility properties
   static const Color quickActionPurple = Color(0xFF9C27B0);
-  static Color get errorText => isDarkMode ? const Color(0xFFEF9999) : const Color(0xFFD32F2F);
-  static Color shadowAlpha(double alpha) => textPrimary.withValues(alpha: alpha);
-  static Color get switchTrackOff => isDarkMode ? const Color(0xFF505050) : const Color(0xFFDCDCDC);
+  static Color get errorText =>
+      isDarkMode ? const Color(0xFFEF9999) : const Color(0xFFD32F2F);
+  static Color shadowAlpha(double alpha) =>
+      textPrimary.withValues(alpha: alpha);
+  static Color get switchTrackOff =>
+      isDarkMode ? const Color(0xFF505050) : const Color(0xFFDCDCDC);
 
   // CRM compatibility aliases (for migrated screens)
   static Color get selectedChipBackground => chipSelected;
@@ -376,6 +381,37 @@ class AppColors {
   static String get chartTheme => isDarkMode ? 'dark' : 'light';
 
   // PMAM compatibility aliases (from crmapp merge)
-  static Color get neutralTrackMuted => isDarkMode ? const Color(0xFF3A3A4A) : const Color(0xFFE0E0E0);
-  static Color get neutralTrackSoft => isDarkMode ? const Color(0xFF4A4A5A) : const Color(0xFFEEEEEE);
+  static Color get neutralTrackMuted =>
+      isDarkMode ? const Color(0xFF3A3A4A) : const Color(0xFFE0E0E0);
+  static Color get neutralTrackSoft =>
+      isDarkMode ? const Color(0xFF4A4A5A) : const Color(0xFFEEEEEE);
+}
+
+
+/// ─────────────────────────────────────────────────────────────────────────────
+/// iQuote Flavor Theme Colors (Common Color Class for iQuote UI tree)
+/// ─────────────────────────────────────────────────────────────────────────────
+class IquoteThemeColors {
+  // ── Dark Mode Colors (Black background in Dark mode) ────────────────────
+  static const Color darkBackground = Color(0xFF000000);
+  static const Color darkCardBackground = Color(0xFF1C1C1E);
+  static const Color darkNavBackground = Color(0xFF000000);
+  static const Color darkTextPrimary = Colors.white;
+  static const Color darkTextSecondary = Colors.white70;
+  static const Color darkActiveTab = Colors.white;
+
+  // ── Light Mode Colors ─────────────────────────────────────────────────────
+  static const Color lightBackground = Color(0xFFF7F8FA);
+  static const Color lightCardBackground = Colors.white;
+  static const Color lightNavBackground = Colors.white;
+  static const Color lightTextPrimary = Color(0xFF1F2937);
+  static const Color lightTextSecondary = Color(0xFF6B7280);
+
+  // ── Dynamic Theme Getters ──────────────────────────────────────────────────
+  static Color get background => AppColors.isDarkMode ? darkBackground : lightBackground;
+  static Color get cardBackground => AppColors.isDarkMode ? darkCardBackground : lightCardBackground;
+  static Color get navBackground => AppColors.isDarkMode ? darkNavBackground : lightNavBackground;
+  static Color get textPrimary => AppColors.isDarkMode ? darkTextPrimary : lightTextPrimary;
+  static Color get textSecondary => AppColors.isDarkMode ? darkTextSecondary : lightTextSecondary;
+  static Color get selectedTabColor => AppColors.isDarkMode ? darkActiveTab : AppColors.primary;
 }

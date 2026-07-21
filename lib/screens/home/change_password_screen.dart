@@ -85,7 +85,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           obscureText: obscureText,
           controller: controller,
           validator: validator,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400, color: AppColors.textPrimary),
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textPrimary,
+          ),
           decoration: InputDecoration(
             labelText: label,
             fillColor: AppColors.pureWhite,
@@ -136,8 +140,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           languageService.tr('change_password'),
           style: AppTextStyles.screenTitle,
         ),
-        leading: AppBackButton(onPressed: ()=> Navigator.of(context).pop(),
-        ),
+        leading: AppBackButton(onPressed: () => Navigator.of(context).pop()),
         centerTitle: true,
       ),
       backgroundColor: AppColors.backgroundLight,
@@ -199,32 +202,33 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         child: ElevatedButton(
           onPressed: isLoading ? null : _changePassword,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.pureWhite,
-            foregroundColor: Colors.black,
+            backgroundColor: AppColors.primary,
+            // foregroundColor: AppColors.textPrimaryLight,
             disabledBackgroundColor: AppColors.border,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
             elevation: 0,
           ),
-          child: isLoading
-              ? SizedBox(
-                  width: 20.w,
-                  height: 20.h,
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+          child:
+              isLoading
+                  ? SizedBox(
+                    width: 20.w,
+                    height: 20.h,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    ),
+                  )
+                  : Text(
+                    languageService.tr('change_password'),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      height: 1.71,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textPrimaryDark,
+                    ),
                   ),
-                )
-              : Text(
-                  languageService.tr('change_password'),
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    height: 1.71,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
         ),
       );
     });
