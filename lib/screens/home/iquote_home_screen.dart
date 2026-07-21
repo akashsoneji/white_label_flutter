@@ -40,10 +40,7 @@ class IquoteHomeScreen extends StatefulWidget {
 
       Get.dialog(
         Center(
-          child: CommonLoadingWidget(
-            size: 50.0,
-            color: AppColors.primary,
-          ),
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
         ),
         barrierDismissible: false,
       );
@@ -59,7 +56,8 @@ class IquoteHomeScreen extends StatefulWidget {
 
         if (ibStatus == 'rejected') {
           CustomToastService.showError(
-            message: 'Your IB application has been rejected. Please contact support for more information.',
+            message:
+                'Your IB application has been rejected. Please contact support for more information.',
           );
           return;
         }
@@ -72,12 +70,16 @@ class IquoteHomeScreen extends StatefulWidget {
         } else {
           CustomToastService.showError(
             duration: const Duration(seconds: 2),
-            message: ibStatusResponse.message ?? 'Profile is not complete. Please complete your profile first.',
+            message:
+                ibStatusResponse.message ??
+                'Profile is not complete. Please complete your profile first.',
           );
         }
       } else {
-        String errorMsg = ibStatusResponse?.message ?? ibController.errorMessage.value;
-        if (errorMsg.isEmpty) errorMsg = 'Failed to check IB status. Please try again.';
+        String errorMsg =
+            ibStatusResponse?.message ?? ibController.errorMessage.value;
+        if (errorMsg.isEmpty)
+          errorMsg = 'Failed to check IB status. Please try again.';
         CustomToastService.showError(message: errorMsg);
       }
     } catch (e) {
@@ -160,9 +162,10 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
     final textSecondary = IquoteThemeColors.textSecondary;
     final isDark = AppColors.isDarkMode;
 
-    final appTitle = FlavorConfig.instance.appTitle.isNotEmpty
-        ? FlavorConfig.instance.appTitle
-        : FlavorConfig.instance.appName;
+    final appTitle =
+        FlavorConfig.instance.appTitle.isNotEmpty
+            ? FlavorConfig.instance.appTitle
+            : FlavorConfig.instance.appName;
 
     return Scaffold(
       backgroundColor: bgDark,
@@ -184,15 +187,15 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 14.h),
+              // SizedBox(height: 14.h),
 
-              // 2. Active Account Card with Switch Account Bottom Sheet
-              _ActiveAccountBar(
-                cardBg: cardBg,
-                textPrimary: textPrimary,
-                textSecondary: textSecondary,
-                isDark: isDark,
-              ),
+              // // 2. Active Account Card with Switch Account Bottom Sheet
+              // _ActiveAccountBar(
+              //   cardBg: cardBg,
+              //   textPrimary: textPrimary,
+              //   textSecondary: textSecondary,
+              //   isDark: isDark,
+              // ),
               SizedBox(height: 14.h),
 
               // 3. Banner: Profit & Bonus Ranking
@@ -201,12 +204,21 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: isDark
-                        ? [const Color(0xFFC3F3A0), const Color(0xFFD6F6B8)]
-                        : [AppColors.primary.withOpacity(0.15), AppColors.primary.withOpacity(0.05)],
+                    colors:
+                        isDark
+                            ? [const Color(0xFFC3F3A0), const Color(0xFFD6F6B8)]
+                            : [
+                              AppColors.primary.withOpacity(0.15),
+                              AppColors.primary.withOpacity(0.05),
+                            ],
                   ),
                   borderRadius: BorderRadius.circular(16.r),
-                  border: isDark ? null : Border.all(color: AppColors.primary.withOpacity(0.2)),
+                  border:
+                      isDark
+                          ? null
+                          : Border.all(
+                            color: AppColors.primary.withOpacity(0.2),
+                          ),
                 ),
                 child: Row(
                   children: [
@@ -233,7 +245,10 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                           ),
                           SizedBox(height: 10.h),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 6.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 18.w,
+                              vertical: 6.h,
+                            ),
                             decoration: BoxDecoration(
                               color: isDark ? Colors.black : AppColors.primary,
                               borderRadius: BorderRadius.circular(20.r),
@@ -270,10 +285,11 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                     label: 'Demo',
                     color: Colors.orangeAccent,
                     textColor: textPrimary,
-                    onTap: () => Get.toNamed(
-                      AppPages.CHOOSE_ACCOUNT,
-                      arguments: {'isDemo': true},
-                    ),
+                    onTap:
+                        () => Get.toNamed(
+                          AppPages.CHOOSE_ACCOUNT,
+                          arguments: {'isDemo': true},
+                        ),
                   ),
                   // 2. Real
                   _buildShortcutItem(
@@ -323,9 +339,10 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                     label: 'Deposit',
                     color: Colors.blueAccent,
                     textColor: textPrimary,
-                    onTap: () => Get.to(
-                      () => PaymentMethodsScreen(accountNumber: ''),
-                    ),
+                    onTap:
+                        () => Get.to(
+                          () => PaymentMethodsScreen(accountNumber: ''),
+                        ),
                   ),
                   // 8. Withdrawal
                   _buildShortcutItem(
@@ -337,53 +354,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 16.h),
-
-              // 5. Banner: For Beginner
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2CBBE8), Color(0xFF2879D9)],
-                  ),
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.card_giftcard, color: Colors.amber, size: 32.r),
-                        SizedBox(width: 10.w),
-                        Text(
-                          'For Beginner',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0F1B38),
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Text(
-                        'GO',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 16.h),
+              // SizedBox(height: 16.h),
 
               // 6. Favourites Section Header + Add Button
               Row(
@@ -412,7 +383,12 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
               SizedBox(height: 10.h),
 
               // Live Favourites Grid with Mini Sparkline Charts
-              _buildLiveFavouritesGrid(cardBg, textPrimary, textSecondary, isDark),
+              _buildLiveFavouritesGrid(
+                cardBg,
+                textPrimary,
+                textSecondary,
+                isDark,
+              ),
               SizedBox(height: 16.h),
             ],
           ),
@@ -431,8 +407,10 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
       final instruments = _ic.instruments;
 
       // Get user favorited instruments or fallback to top market instruments
-      final favList = instruments.where((e) => _ic.isFavorite(e.symbol)).toList();
-      final displayList = favList.isNotEmpty ? favList : instruments.take(6).toList();
+      final favList =
+          instruments.where((e) => _ic.isFavorite(e.symbol)).toList();
+      final displayList =
+          favList.isNotEmpty ? favList : instruments.take(6).toList();
 
       if (displayList.isEmpty) {
         return Center(
@@ -440,7 +418,11 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
             padding: EdgeInsets.all(20.h),
             child: Text(
               'No instruments available',
-              style: TextStyle(color: textSecondary, fontSize: 12.sp, fontWeight: FontWeight.w400),
+              style: TextStyle(
+                color: textSecondary,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ),
         );
@@ -453,7 +435,8 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
           crossAxisCount: 2,
           mainAxisSpacing: 10.h,
           crossAxisSpacing: 10.w,
-          childAspectRatio: 1.6, // Fits Symbol, % Change, Price, AND mini sparkline chart!
+          childAspectRatio:
+              1.6, // Fits Symbol, % Change, Price, AND mini sparkline chart!
         ),
         itemCount: displayList.length,
         itemBuilder: (context, index) {
@@ -502,7 +485,10 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                   top: -4.h,
                   right: -4.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 4.w,
+                      vertical: 1.h,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(8.r),
@@ -524,7 +510,11 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: textColor, fontSize: 11.sp, fontWeight: FontWeight.w400),
+            style: TextStyle(
+              color: textColor,
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ],
       ),
@@ -554,26 +544,38 @@ class _LiveTickerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sym = instrument.symbol;
-    final displaySym = sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
+    final displaySym =
+        sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
     final digits = instrument.digits;
-    final key = sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
+    final key =
+        sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
 
     return Obx(() {
       final livePrice = controller.priceRx(sym).value;
       final hist = bidHistory[key] ?? const <double>[];
 
-      double currentBid = livePrice.bid > 0 ? livePrice.bid : (hist.isNotEmpty ? hist.last : instrument.bid);
+      double currentBid =
+          livePrice.bid > 0
+              ? livePrice.bid
+              : (hist.isNotEmpty ? hist.last : instrument.bid);
       if (currentBid <= 0) {
-        currentBid = (instrument.dayLow != null && instrument.dayLow! > 0) ? instrument.dayLow! : 1.0;
+        currentBid =
+            (instrument.dayLow != null && instrument.dayLow! > 0)
+                ? instrument.dayLow!
+                : 1.0;
       }
 
-      final dayLow = livePrice.dayLow > 0 ? livePrice.dayLow : (instrument.dayLow ?? 0.0);
-      final changePct = dayLow > 0 ? ((currentBid - dayLow) / dayLow * 100) : 0.0;
+      final dayLow =
+          livePrice.dayLow > 0 ? livePrice.dayLow : (instrument.dayLow ?? 0.0);
+      final changePct =
+          dayLow > 0 ? ((currentBid - dayLow) / dayLow * 100) : 0.0;
       final isUp = changePct >= 0;
       final sign = isUp ? '+' : '';
 
-      final lineColor = isUp ? const Color(0xFF2ED573) : const Color(0xFFFF4757);
-      final changeColor = isUp ? const Color(0xFF2ED573) : const Color(0xFFFF4757);
+      final lineColor =
+          isUp ? const Color(0xFF2ED573) : const Color(0xFFFF4757);
+      final changeColor =
+          isUp ? const Color(0xFF2ED573) : const Color(0xFFFF4757);
       final changeStr = '$sign${changePct.abs().toStringAsFixed(2)}%';
 
       return InkWell(
@@ -746,7 +748,9 @@ class _ActiveAccountBar extends StatelessWidget {
         context: context,
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
-        builder: (ctx) => _AccountSelectionSheet(accountController: accountController),
+        builder:
+            (ctx) =>
+                _AccountSelectionSheet(accountController: accountController),
       );
     }
   }
@@ -816,15 +820,24 @@ class _ActiveAccountBar extends StatelessWidget {
                           ),
                           SizedBox(width: 6.w),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 1.h,
+                            ),
                             decoration: BoxDecoration(
-                              color: accType == 'DEMO' ? Colors.orange.withOpacity(0.2) : Colors.green.withOpacity(0.2),
+                              color:
+                                  accType == 'DEMO'
+                                      ? Colors.orange.withOpacity(0.2)
+                                      : Colors.green.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: Text(
                               accType,
                               style: TextStyle(
-                                color: accType == 'DEMO' ? Colors.orange : Colors.green,
+                                color:
+                                    accType == 'DEMO'
+                                        ? Colors.orange
+                                        : Colors.green,
                                 fontSize: 9.sp,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -902,7 +915,12 @@ class _AccountSelectionSheet extends StatelessWidget {
               if (mt5Accounts.isEmpty) {
                 return Padding(
                   padding: EdgeInsets.all(20.w),
-                  child: const Center(child: Text('No accounts found', style: TextStyle(fontWeight: FontWeight.w400))),
+                  child: const Center(
+                    child: Text(
+                      'No accounts found',
+                      style: TextStyle(fontWeight: FontWeight.w400),
+                    ),
+                  ),
                 );
               }
               return ListView.builder(
@@ -910,12 +928,17 @@ class _AccountSelectionSheet extends StatelessWidget {
                 itemCount: mt5Accounts.length,
                 itemBuilder: (ctx, idx) {
                   final acc = mt5Accounts[idx];
-                  final isSelected = accountController.activeMT5Account?.metaAccountNumber == acc.metaAccountNumber;
+                  final isSelected =
+                      accountController.activeMT5Account?.metaAccountNumber ==
+                      acc.metaAccountNumber;
 
                   return ListTile(
                     leading: Icon(
-                      acc.accountType.toLowerCase() == 'demo' ? Icons.play_circle_outline : Icons.verified_user_outlined,
-                      color: isSelected ? AppColors.primary : AppColors.textGrey,
+                      acc.accountType.toLowerCase() == 'demo'
+                          ? Icons.play_circle_outline
+                          : Icons.verified_user_outlined,
+                      color:
+                          isSelected ? AppColors.primary : AppColors.textGrey,
                     ),
                     title: Text(
                       'Account: #${acc.metaAccountNumber}',
@@ -933,9 +956,14 @@ class _AccountSelectionSheet extends StatelessWidget {
                         color: AppColors.textGrey,
                       ),
                     ),
-                    trailing: isSelected ? Icon(Icons.check_circle, color: AppColors.primary) : null,
+                    trailing:
+                        isSelected
+                            ? Icon(Icons.check_circle, color: AppColors.primary)
+                            : null,
                     onTap: () async {
-                      await accountController.setActiveMT5Account(acc.metaAccountNumber);
+                      await accountController.setActiveMT5Account(
+                        acc.metaAccountNumber,
+                      );
                       Navigator.of(context).pop();
                     },
                   );
