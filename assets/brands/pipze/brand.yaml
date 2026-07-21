@@ -1,6 +1,9 @@
 name: pipze
 type: child
-inheritsFrom: vantage
+inheritsFrom: iquote
+parents:
+  - iquote
+  - vantage
 label: Pipze
 themeMode: both
 
