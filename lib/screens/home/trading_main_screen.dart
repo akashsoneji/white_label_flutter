@@ -303,7 +303,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       forceExitDialog: true,
       child: RTLWrapper(
         child: Scaffold(
-          backgroundColor: isIquote ? IquoteThemeColors.background : AppColors.tradeBackgroundCenterColor,
+          backgroundColor: isIquote ? AppColors.background : AppColors.tradeBackgroundCenterColor,
           body: SafeArea(
             child: PageView(
               controller: _pageController,

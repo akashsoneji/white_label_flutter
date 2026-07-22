@@ -107,7 +107,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bgDark = IquoteThemeColors.background;
+    final bgDark = AppColors.background;
 
     return Scaffold(
       backgroundColor: bgDark,
@@ -140,7 +140,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
-                  color: IquoteThemeColors.textPrimary,
+                  color: AppColors.textPrimary,
                 ),
               ),
               SizedBox(width: 8.w),
@@ -149,7 +149,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                 icon: Icon(
                   Icons.search_rounded,
                   size: 22.r,
-                  color: IquoteThemeColors.textSecondary,
+                  color: AppColors.textSecondary,
                 ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
@@ -188,7 +188,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                     Text(
                       '#$accNumber',
                       style: TextStyle(
-                        color: IquoteThemeColors.textPrimary,
+                        color: AppColors.textPrimary,
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -219,7 +219,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 18.r,
-                      color: IquoteThemeColors.textSecondary,
+                      color: AppColors.textSecondary,
                     ),
                   ],
                 ),
@@ -243,8 +243,8 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
   }
 
   Widget _buildTabBar() {
-    final activeColor = IquoteThemeColors.selectedTabColor;
-    final textSecondary = IquoteThemeColors.textSecondary;
+    final activeColor = AppColors.primary;
+    final textSecondary = AppColors.textSecondary;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -490,16 +490,16 @@ class _IquoteInstrumentRow extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w400,
-                              color: IquoteThemeColors.textPrimary,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           if (instrument.category != null &&
                               instrument.category!.isNotEmpty)
                             Text(
                               instrument.category!,
-                              style: TextStyle(
+                            style: TextStyle(
                                 fontSize: 10.sp,
-                                color: IquoteThemeColors.textSecondary,
+                                color: AppColors.textSecondary,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),

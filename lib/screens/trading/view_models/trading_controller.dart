@@ -175,7 +175,25 @@ class TradingController extends GetxController {
   final _pendingPositions = <TradePosition>[].obs;
   final _closedPositions = <TradePosition>[].obs;
   final _historyEntries = <HistoryEntry>[].obs;
-  final Map<String, TradePosition> _marketPositionsById = {};
+  final _marketPositionsById = <String, TradePosition>{};
+
+  // ---- History filter state ----
+  /// One of 'today', 'week', 'month', 'threeMonth'.
+  /// Defaults to 'today' so the History tab is pre-filtered on first open.
+  String _historyFilterPeriod = 'today';
+  String get historyFilterPeriod => _historyFilterPeriod;
+
+  /// Populated by _applyHistoryFilter() once the user has confirmed.
+  DateTime? _historyStartDate;
+  DateTime? get historyStartDate => _historyStartDate;
+
+  DateTime? _historyEndDate;
+  DateTime? get historyEndDate => _historyEndDate;
+
+  /// Whether _applyHistoryFilter has ever been called (used to apply
+  /// today's default the first time the History tab is opened).
+  bool _historyFilterInitialized = false;
+  bool get historyFilterInitialized => _historyFilterInitialized;
   final Map<String, TradePosition> _pendingPositionsById = {};
   final Map<String, TradePosition> _closedPositionsById = {};
 
@@ -983,14 +1001,6 @@ class TradingController extends GetxController {
     _activeFilterType.value = null;
     // Also clear instrument filter when date filter is cleared
     clearInstruments();
-  }
-
-  /// Reset all history filters and reload trade history without any date filter
-  Future<void> resetHistoryFilter() async {
-    _hasDateFilter.value = false;
-    _currentFilterParams = null;
-    _activeFilterType.value = null;
-    await loadTradeHistory(page: 1, refresh: true);
   }
 
   /// Reset ALL filters (direction + instrument + date) and reload with today as default
@@ -2214,6 +2224,53 @@ class TradingController extends GetxController {
       refresh: refresh,
       additionalParams: additionalParams,
     );
+  }
+
+  /// High-level filter entry-point used by the History tab Filter dialog.
+  /// Maps [period] ('today' / 'week' / 'month' / 'threeMonth') to a
+  /// start/end DateTime pair, caches them in [_historyStartDate] /
+  /// [_historyEndDate] so the date row stays in sync, and forwards to
+  /// [loadTradeHistoryWithTimestamps] with the appropriate filterType
+  /// so the API matches the existing 'today' / 'thisWeek' / etc. labels.
+  Future<void> applyHistoryFilter({String? period}) async {
+    period ??= _historyFilterPeriod;
+    _historyFilterPeriod = period;
+    final now = DateTime.now();
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+    DateTime start;
+    String filterType;
+    switch (period) {
+      case 'week':
+        start = end.subtract(const Duration(days: 7));
+        filterType = 'thisWeek';
+        break;
+      case 'month':
+        start = DateTime(now.year, now.month - 1, now.day);
+        filterType = 'thisMonth';
+        break;
+      case 'threeMonth':
+        start = DateTime(now.year, now.month - 3, now.day);
+        filterType = 'last3Months';
+        break;
+      case 'today':
+      default:
+        start = DateTime(now.year, now.month, now.day);
+        filterType = 'today';
+        break;
+    }
+    _historyStartDate = DateTime(start.year, start.month, start.day);
+    _historyEndDate = DateTime(now.year, now.month, now.day);
+    _historyFilterInitialized = true;
+    await loadTradeHistoryWithTimestamps(
+      fromTimestamp: _historyStartDate!.millisecondsSinceEpoch ~/ 1000,
+      toTimestamp: now.millisecondsSinceEpoch ~/ 1000,
+      filterType: filterType,
+    );
+  }
+
+  /// Reset to today and reload.
+  Future<void> resetHistoryFilter() async {
+    await applyHistoryFilter(period: 'today');
   }
 
   /// Refresh trade history (load first page)

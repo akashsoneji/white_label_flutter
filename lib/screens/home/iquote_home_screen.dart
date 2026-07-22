@@ -157,10 +157,10 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bgDark = IquoteThemeColors.background;
-    final cardBg = IquoteThemeColors.cardBackground;
-    final textPrimary = IquoteThemeColors.textPrimary;
-    final textSecondary = IquoteThemeColors.textSecondary;
+    final bgDark = AppColors.background;
+    final cardBg = AppColors.card;
+    final textPrimary = AppColors.textPrimary;
+    final textSecondary = AppColors.textSecondary;
     final isDark = AppColors.isDarkMode;
 
     final appTitle =

@@ -19,6 +19,8 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
 import 'package:crm_app/models/mt5_account.dart';
+import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/screens/home/brands/iquote/history_filter_sheet.dart';
 
 class IQuotePositionScreen extends StatefulWidget {
   final Function(String)? onNavigateToChart;
@@ -30,12 +32,13 @@ class IQuotePositionScreen extends StatefulWidget {
 }
 
 class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
-  static const Color _bgColor = Color(0xFF1A1D2B);
-  static const Color _cardColor = Color(0xFF232739);
-  static const Color _chipBgColor = Color(0xFF333950);
-  static const Color _accent = Color(0xFFE88A4A);
-  static const Color _green = Color(0xFF2EBD6F);
-  static const Color _red = Color(0xFFE53935);
+  // Theme-aware tokens — values flip with AppColors.isDarkMode.
+  static Color get _bgColor => AppColors.background;
+  static Color get _cardColor => AppColors.card;
+  static Color get _chipBgColor => AppColors.iconBgTertiary;
+  static Color get _accent => AppColors.primary;
+  static Color get _green => AppColors.statusGreen;
+  static Color get _red => AppColors.statusRed;
 
   final LanguageService languageService = Get.find<LanguageService>();
 
@@ -200,7 +203,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                           Text(
                             _activeAccountLabel(),
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 12.sp,
                               letterSpacing: 0.5,
@@ -208,7 +211,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                           ),
                           SizedBox(width: 4.w),
                           Icon(Icons.arrow_drop_down,
-                              color: Colors.white, size: 18.sp),
+                              color: AppColors.textPrimary, size: 18.sp),
                         ],
                       ),
                     ),
@@ -219,7 +222,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     style: TextStyle(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const Spacer(),
@@ -284,13 +287,16 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         child: Row(
           children: [
             Text('From Real',
-                style: TextStyle(color: Colors.white, fontSize: 12.sp)),
+                style: TextStyle(
+                    color: AppColors.textPrimary, fontSize: 12.sp)),
             SizedBox(width: 12.w),
             Text('arie***',
-                style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 12.sp)),
             SizedBox(width: 8.w),
             Text('EUR',
-                style: TextStyle(color: Colors.white, fontSize: 12.sp)),
+                style: TextStyle(
+                    color: AppColors.textPrimary, fontSize: 12.sp)),
             SizedBox(width: 6.w),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
@@ -310,9 +316,11 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 style: TextStyle(color: _green, fontSize: 12.sp)),
             SizedBox(width: 10.w),
             Text(_currentTimeHms(),
-                style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 12.sp)),
             const Spacer(),
-            Icon(Icons.chevron_right, color: Colors.white54, size: 20.sp),
+            Icon(Icons.chevron_right,
+                color: AppColors.textSecondary, size: 20.sp),
           ],
         ),
       ),
@@ -342,9 +350,11 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             _tabText('History', selected == 2,
                 () => tradingController.setSelectedTab(2)),
             const Spacer(),
-            Icon(Icons.swap_vert, color: Colors.white70, size: 20.sp),
+            Icon(Icons.swap_vert,
+                color: AppColors.textSecondary, size: 20.sp),
             SizedBox(width: 16.w),
-            Icon(Icons.more_horiz, color: Colors.white70, size: 20.sp),
+            Icon(Icons.more_horiz,
+                color: AppColors.textSecondary, size: 20.sp),
           ],
         );
       }),
@@ -362,7 +372,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: active ? FontWeight.bold : FontWeight.w500,
-              color: active ? Colors.white : Colors.white54,
+              color: active
+                  ? AppColors.textPrimary
+                  : AppColors.textSecondary,
             ),
           ),
           SizedBox(height: 6.h),
@@ -384,55 +396,96 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     return Obx(() {
       if (tradingController.selectedTab != 2) return const SizedBox.shrink();
 
+      // Lazy-init: the first time the History tab is rendered after the user
+      // taps into it, apply the default 'today' filter so the list shows
+      // today's trades without requiring the user to open the dialog.
+      if (!tradingController.historyFilterInitialized) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (Get.find<TradingController>().historyFilterInitialized) return;
+          Get.find<TradingController>().applyHistoryFilter();
+        });
+      }
+
       final now = DateHelper.nowUtc();
-      final startDate =
-          DateHelper.formatUtcDateTime(now.subtract(const Duration(days: 7)));
-      final endDate = DateHelper.formatUtcDateTime(now);
+      final start = tradingController.historyStartDate ??
+          DateTime(now.year, now.month, now.day);
+      final end = tradingController.historyEndDate ?? now;
+      final startDate = DateHelper.formatUtcDateTime(start);
+      final endDate = DateHelper.formatUtcDateTime(end);
 
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        child: Row(
-          children: [
-            Text('Start:',
-                style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: _cardColor,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Center(
-                  child: Text(startDate,
-                      style: TextStyle(color: Colors.white, fontSize: 13.sp)),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.w),
-              child: Text('—',
-                  style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
-            ),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: _cardColor,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Center(
-                  child: Text(endDate,
-                      style: TextStyle(color: Colors.white, fontSize: 13.sp)),
+        child: InkWell(
+          onTap: _openHistoryFilterSheet,
+          borderRadius: BorderRadius.circular(6.r),
+          child: Row(
+            children: [
+              Text('Start:',
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 13.sp)),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: _cardColor,
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Center(
+                    child: Text(startDate,
+                        style: TextStyle(
+                            color: AppColors.textPrimary, fontSize: 13.sp)),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: 12.w),
-            Icon(Icons.history, color: Colors.white70, size: 24.sp),
-          ],
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                child: Text('—',
+                    style: TextStyle(
+                        color: AppColors.textSecondary, fontSize: 13.sp)),
+              ),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: _cardColor,
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Center(
+                    child: Text(endDate,
+                        style: TextStyle(
+                            color: AppColors.textPrimary, fontSize: 13.sp)),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Icon(Icons.history,
+                  color: AppColors.textSecondary, size: 24.sp),
+            ],
+          ),
         ),
       );
     });
+  }
+
+  void _openHistoryFilterSheet() {
+    final controller = Get.find<TradingController>();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => HistoryFilterScreen(
+        initialPeriod: controller.historyFilterPeriod,
+        onConfirm: (period) async {
+          await controller.applyHistoryFilter(period: period);
+        },
+        onReset: () async {
+          await controller.resetHistoryFilter();
+        },
+      ),
+    );
   }
 
   Widget _buildBody() {
@@ -497,13 +550,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_outlined, size: 44.sp, color: Colors.white54),
+          Icon(Icons.inbox_outlined,
+              size: 44.sp, color: AppColors.textSecondary),
           SizedBox(height: 16.h),
           Text(message,
               style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white)),
+                  color: AppColors.textPrimary)),
         ],
       ),
     );
@@ -590,7 +644,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 Text(
                   symbol,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -605,7 +659,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     child: Container(
                       padding: EdgeInsets.all(4.w),
                       child: Icon(Icons.cancel,
-                          color: Colors.white54, size: 20.sp),
+                          color: AppColors.textSecondary,
+                          size: 20.sp),
                     ),
                   ),
               ],
@@ -626,7 +681,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 Text(
                   '${position.volume}Lot',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600),
                 ),
@@ -642,7 +697,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     child: Text(
                       leverage,
                       style: TextStyle(
-                          color: Colors.white70,
+                          color: AppColors.textPrimary,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w600),
                     ),
@@ -666,20 +721,23 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 SizedBox(width: 6.w),
                 Text(
                   _formatSwap(position.swap),
-                  style: TextStyle(color: Colors.white54, fontSize: 11.sp),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 11.sp),
                 ),
                 const Spacer(),
                 Text(
                   position.entryPrice,
-                  style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 12.sp),
                 ),
                 SizedBox(width: 6.w),
                 Icon(Icons.arrow_forward,
-                    color: Colors.white54, size: 12.sp),
+                    color: AppColors.textSecondary, size: 12.sp),
                 SizedBox(width: 6.w),
                 Text(
                   position.currentPrice,
-                  style: TextStyle(color: Colors.white70, fontSize: 12.sp),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -689,7 +747,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 alignment: Alignment.centerRight,
                 child: Text(
                   DateHelper.formatIsoStringToUtcHistory(position.closeTime),
-                  style: TextStyle(color: Colors.white38, fontSize: 11.sp),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 11.sp),
                 ),
               ),
             ],
@@ -716,13 +775,13 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         children: [
           Text('V',
               style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w900,
                   fontSize: 11.sp)),
           SizedBox(width: 3.w),
           Text('VIP 0',
               style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
                   fontSize: 9.sp)),
         ],
@@ -769,7 +828,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     Get.bottomSheet(
       SafeArea(
         child: Container(
-          color: Colors.white,
+          color: AppColors.card,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -822,7 +881,7 @@ class _SwitchAccountSheet extends StatefulWidget {
 }
 
 class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
-  static const Color _accent = Color(0xFFE88A4A);
+  static Color get _accent => AppColors.primary;
 
   String? _selectedAccountNumber;
 
@@ -848,7 +907,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
             Text(
               'Switch account',
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.textPrimary,
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w600,
               ),
@@ -875,7 +934,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                         Get.toNamed(Routes.CHOOSE_ACCOUNT);
                       },
                     ),
-                    Divider(color: Colors.white12, height: 24.h),
+                    Divider(color: AppColors.divider, height: 24.h),
                     _buildAccountRow(
                       label: 'DEMO',
                       account: demo.isNotEmpty ? demo.first : null,
@@ -904,7 +963,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _accent,
                   disabledBackgroundColor: _accent.withOpacity(0.4),
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.textPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24.r),
                   ),
@@ -951,13 +1010,14 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? _accent : Colors.white54,
+                  color: isSelected ? _accent : AppColors.textSecondary,
                   width: 2,
                 ),
                 color: isSelected ? _accent : Colors.transparent,
               ),
               child: isSelected
-                  ? Icon(Icons.circle, size: 10.sp, color: Colors.white)
+                  ? Icon(Icons.circle,
+                      size: 10.sp, color: AppColors.textPrimary)
                   : null,
             ),
             SizedBox(width: 14.w),
@@ -970,21 +1030,24 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                       Text(
                         label,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       SizedBox(width: 4.w),
                       Icon(Icons.help_outline,
-                          color: Colors.white54, size: 14.sp),
+                          color: AppColors.textSecondary,
+                          size: 14.sp),
                     ],
                   ),
                   SizedBox(height: 2.h),
                   Text(
                     hasAccount ? balance : '---',
                     style: TextStyle(
-                      color: hasAccount ? _accent : Colors.white38,
+                      color: hasAccount
+                          ? _accent
+                          : AppColors.textSecondary,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
                     ),
@@ -995,13 +1058,13 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
             hasAccount
                 ? _actionButton(
                     label: 'Deposit',
-                    color: const Color(0xFF2EBD6F),
+                    color: AppColors.statusGreen,
                     icon: Icons.savings_outlined,
                     onTap: () => onDepositTap(accountNumber!),
                   )
                 : _actionButton(
                     label: emptyActionLabel,
-                    color: const Color(0xFF3A4062),
+                    color: AppColors.iconBgTertiary,
                     onTap: onEmptyAction,
                   ),
           ],
