@@ -295,7 +295,7 @@ class _SummaryCard extends StatelessWidget {
                 child: Text(
                   label,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w500,
@@ -309,7 +309,7 @@ class _SummaryCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
                 color: valueColor ?? AppColors.textPrimary,
@@ -324,7 +324,7 @@ class _SummaryCard extends StatelessWidget {
             ),
             child: Text(
               tag,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 9.sp,
                 color: AppColors.textGrey,
                 fontWeight: FontWeight.w600,
@@ -395,7 +395,7 @@ class _FilterTabs extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color:
@@ -416,7 +416,7 @@ class _FilterTabs extends StatelessWidget {
               ),
               child: Text(
                 '$count',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w700,
                   color:
@@ -499,7 +499,7 @@ class _FilterChips extends StatelessWidget {
             SizedBox(width: 4.w),
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
@@ -521,7 +521,7 @@ class _FilterChips extends StatelessWidget {
     _showOptionsSheet(
       context: context,
       title: 'Filter by Risk',
-      options: const ['All Risks', 'Low (1-2)', 'Medium (3)', 'High (4-5)'],
+      options: ['All Risks', 'Low (1-2)', 'Medium (3)', 'High (4-5)'],
       current: c.riskFilter.value,
       onSelect: (v) => c.riskFilter.value = v,
     );
@@ -531,7 +531,7 @@ class _FilterChips extends StatelessWidget {
     _showOptionsSheet(
       context: context,
       title: 'Filter by Time',
-      options: const [
+      options: [
         'All Time',
         'Last 7 Days',
         'Last 30 Days',
@@ -547,7 +547,7 @@ class _FilterChips extends StatelessWidget {
     _showOptionsSheet(
       context: context,
       title: 'Sort Masters',
-      options: const ['Gain %', 'AUM', 'Copiers', 'Active Days'],
+      options: ['Gain %', 'AUM', 'Copiers', 'Active Days'],
       current: 'Sort: ${c.sortBy.value}'.replaceFirst('Sort: ', ''),
       onSelect: (v) => c.sortBy.value = v,
     );
@@ -578,7 +578,7 @@ class _FilterChips extends StatelessWidget {
                   autofocus: true,
                   decoration: InputDecoration(
                     hintText: 'Nickname, name or code',
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.r),
                     ),
@@ -590,7 +590,7 @@ class _FilterChips extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Done'),
+                    child: Text('Done'),
                   ),
                 ),
               ],
@@ -712,7 +712,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       _initials(displayName),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.whiteColor,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -740,7 +740,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                               child: Text(
                                 'Active ${activeDays}D',
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.textGrey,
                                 ),
@@ -749,7 +749,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                             SizedBox(width: 6.w),
                             Text(
                               '•',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
                               ),
@@ -761,7 +761,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                                     ? 'SELFHOSTED'
                                     : serverType.toUpperCase(),
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w700,
                                   color:
@@ -787,7 +787,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                     ),
                     child: Text(
                       'RISK $riskScore',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
                         color: _riskColor(riskScore),
@@ -839,7 +839,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                     child: Text(
                       'Fee: $commissionPct',
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
                         fontWeight: FontWeight.w600,
@@ -855,7 +855,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                   SizedBox(width: 4.w),
                   Text(
                     '$totalCopiers',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w500,
@@ -879,7 +879,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                     ),
                     child: Text(
                       hasPlan ? 'Copy' : 'No Plan',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -900,7 +900,7 @@ class _MasterCardHorizontal extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 9.sp,
             color: AppColors.textGrey,
             fontWeight: FontWeight.w600,
@@ -910,7 +910,7 @@ class _MasterCardHorizontal extends StatelessWidget {
         Text(
           value,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             color: valueColor,
             fontWeight: FontWeight.w700,
@@ -1062,7 +1062,7 @@ class _ErrorState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
             ),
             SizedBox(height: 12.h),
             ElevatedButton(
@@ -1070,7 +1070,7 @@ class _ErrorState extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
               ),
-              child: const Text('Retry'),
+              child: Text('Retry'),
             ),
           ],
         ),

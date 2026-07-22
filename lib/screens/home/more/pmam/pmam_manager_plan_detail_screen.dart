@@ -80,7 +80,7 @@ class _PmamManagerPlanDetailScreenState
                 alignment: Alignment.centerLeft,
                 child: Text(
                   plan['plan_name'] ?? '',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -116,7 +116,7 @@ class _PmamManagerPlanDetailScreenState
                           children: [
                             Text(
                               'Your Stats',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
@@ -178,7 +178,7 @@ class _PmamManagerPlanDetailScreenState
                 children: [
                   Text(
                     'Investor Requests',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -199,7 +199,7 @@ class _PmamManagerPlanDetailScreenState
                       ),
                       child: Text(
                         '$count',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: AppColors.onColoredBackground,
                           fontWeight: FontWeight.w700,
@@ -238,7 +238,7 @@ class _PmamManagerPlanDetailScreenState
               Center(
                 child: Text(
                   'No pending investor requests.',
-                  style: TextStyle(color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                 ),
               ),
             ],
@@ -303,7 +303,7 @@ class _PmamManagerPlanDetailScreenState
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             color: AppColors.textGrey,
             fontWeight: FontWeight.w500,
@@ -323,7 +323,7 @@ class _PmamManagerPlanDetailScreenState
         SizedBox(width: 8.w),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w700,
@@ -436,7 +436,7 @@ class _RequestCard extends StatelessWidget {
                   displayName.isNotEmpty
                       ? displayName[0].toUpperCase()
                       : '?',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w800,
                     fontSize: 14.sp,
@@ -450,7 +450,7 @@ class _RequestCard extends StatelessWidget {
                   children: [
                     Text(
                       displayName,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w700,
                         fontSize: 13.sp,
@@ -462,7 +462,7 @@ class _RequestCard extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         email,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.textGrey,
                           fontSize: 11.sp,
                         ),
@@ -482,7 +482,7 @@ class _RequestCard extends StatelessWidget {
                 ),
                 child: Text(
                   status[0].toUpperCase() + status.substring(1),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: _statusColor(status),
                     fontWeight: FontWeight.w700,
                     fontSize: 11.sp,
@@ -535,7 +535,7 @@ class _RequestCard extends StatelessWidget {
                         : Icon(Icons.check, size: 16.sp),
                     label: Text(
                       'Approve',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -558,7 +558,7 @@ class _RequestCard extends StatelessWidget {
                     icon: Icon(Icons.close, size: 16.sp),
                     label: Text(
                       'Reject',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -593,7 +593,7 @@ class _RequestCard extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textGrey,
             fontSize: 10.sp,
             fontWeight: FontWeight.w600,
@@ -603,7 +603,7 @@ class _RequestCard extends StatelessWidget {
         SizedBox(height: 4.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: valueColor ?? AppColors.textPrimary,
             fontSize: 13.sp,
             fontWeight: bold ? FontWeight.w800 : FontWeight.w600,

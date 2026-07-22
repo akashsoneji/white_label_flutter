@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -213,7 +214,7 @@ class _VantageTransactionHistoryScreenState
       ),
       title: Text(
         languageService.tr('transaction_history'),
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 18.sp,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
@@ -323,7 +324,7 @@ class _VantageTransactionHistoryScreenState
               SizedBox(width: 6.w),
               Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w500,
                   color: color,
@@ -334,7 +335,7 @@ class _VantageTransactionHistoryScreenState
           SizedBox(height: 8.h),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -343,7 +344,7 @@ class _VantageTransactionHistoryScreenState
           SizedBox(height: 2.h),
           Text(
             '$count transactions',
-            style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -411,7 +412,7 @@ class _VantageTransactionHistoryScreenState
                     ),
                     child: Text(
                       period,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                         color:
@@ -486,14 +487,14 @@ class _VantageTransactionHistoryScreenState
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     color: AppColors.textSecondary,
                   ),
                 ),
                 Text(
                   date != null ? _formatDate(date) : 'Select',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -515,7 +516,7 @@ class _VantageTransactionHistoryScreenState
         children: [
           Text(
             'Type:',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,
               color: AppColors.textSecondary,
@@ -558,7 +559,7 @@ class _VantageTransactionHistoryScreenState
                           ),
                           child: Text(
                             type,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
                               color:
@@ -583,7 +584,7 @@ class _VantageTransactionHistoryScreenState
       if (controller.isLoading) {
         return Padding(
           padding: EdgeInsets.symmetric(vertical: 60.h),
-          child: const Center(child: CommonLoadingWidget(isFullScreen: false)),
+          child: Center(child: CommonLoadingWidget(isFullScreen: false)),
         );
       }
 
@@ -613,7 +614,7 @@ class _VantageTransactionHistoryScreenState
                   SizedBox(width: 8.w),
                   Text(
                     'Recent Transactions',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textSecondary,
@@ -703,7 +704,7 @@ class _VantageTransactionHistoryScreenState
               SizedBox(width: 10.w),
               Text(
                 dateLabel,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -718,7 +719,7 @@ class _VantageTransactionHistoryScreenState
                 ),
                 child: Text(
                   '${transactions.length}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,
@@ -808,7 +809,7 @@ class _VantageTransactionHistoryScreenState
                   children: [
                     Text(
                       transaction.transactionType ?? 'N/A',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -819,7 +820,7 @@ class _VantageTransactionHistoryScreenState
                     SizedBox(height: 2.h),
                     Text(
                       _formatDateTime(transaction.createdAt ?? ''),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textSecondary,
                       ),
@@ -830,7 +831,7 @@ class _VantageTransactionHistoryScreenState
               // Amount
               Text(
                 '$amountPrefix${transaction.amount ?? '0.00'}',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
                   color: amountColor,
@@ -872,7 +873,7 @@ class _VantageTransactionHistoryScreenState
                     Flexible(
                       child: Text(
                         transaction.referenceNumber ?? 'N/A',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: AppColors.textSecondary,
                         ),
@@ -893,7 +894,7 @@ class _VantageTransactionHistoryScreenState
                         ),
                         child: Text(
                           transaction.mt5AccountId!,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.indigo,
@@ -912,7 +913,7 @@ class _VantageTransactionHistoryScreenState
                 ),
                 child: Text(
                   transaction.status ?? '',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
                     color: statusColor(),
@@ -950,7 +951,7 @@ class _VantageTransactionHistoryScreenState
           SizedBox(height: 20.h),
           Text(
             'No Transactions Found',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -960,7 +961,7 @@ class _VantageTransactionHistoryScreenState
           Text(
             'Try adjusting your filters to find more transactions',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textSecondary),
           ),
           SizedBox(height: 24.h),
           TextButton.icon(
@@ -973,7 +974,7 @@ class _VantageTransactionHistoryScreenState
               });
             },
             icon: Icon(Icons.refresh_rounded, size: 16.sp),
-            label: Text('Reset Filters', style: TextStyle(fontSize: 13.sp)),
+            label: Text('Reset Filters', style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp)),
             style: TextButton.styleFrom(foregroundColor: AppColors.primary),
           ),
         ],

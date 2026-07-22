@@ -373,7 +373,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       countryListTheme: CountryListThemeData(
         flagSize: 25,
         backgroundColor: AppColors.whiteColor,
-        textStyle: TextStyle(fontSize: 16, color: AppColors.textPrimary),
+        textStyle: AppTextStyles.bodyText.copyWith(fontSize: 16, color: AppColors.textPrimary),
         bottomSheetHeight: 500,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20.0),
@@ -530,7 +530,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             Expanded(
               child: Text(
                 _languageService.tr('biometric_enable_checkbox'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textGrey,
@@ -605,7 +605,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               child: Text(
                 _selectedCountryFlag.isNotEmpty ? _selectedCountryFlag : "🌐 +--",
-                style: TextStyle(fontSize: 16.sp),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp),
               ),
             ),
           ),
@@ -660,7 +660,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       child: RichText(
         text: TextSpan(
           text: "${_languageService.tr("register_already_have_account")} ",
-          style: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
+          style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
           children: [
             TextSpan(
               text: _languageService.tr("register_log_in"),

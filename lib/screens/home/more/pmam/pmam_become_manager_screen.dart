@@ -116,7 +116,7 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                 SizedBox(height: 12.h),
                 Text(
                   'PAMM Manager Application',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -126,7 +126,7 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                 SizedBox(height: 6.h),
                 Text(
                   'Complete all steps to become a PAMM Manager',
-                  style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 24.h),
@@ -186,20 +186,20 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                     Expanded(
                       child: RichText(
                         text: TextSpan(
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
                           ),
                           children: [
-                            const TextSpan(text: 'I accept the '),
+                            TextSpan(text: 'I accept the '),
                             TextSpan(
                               text: 'PAMM Manager Terms and Conditions',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const TextSpan(
+                            TextSpan(
                               text:
                                   ' and confirm that all information provided is accurate.',
                             ),
@@ -250,7 +250,7 @@ class _PmamBecomeManagerScreenState extends State<PmamBecomeManagerScreen> {
                             )
                           : Text(
                               'Submit Application',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.onColoredBackground,
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w600,
@@ -325,7 +325,7 @@ class _StepCard extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                   color: done ? AppColors.primary : AppColors.textPrimary,
@@ -340,7 +340,7 @@ class _StepCard extends StatelessWidget {
                 ),
                 child: Text(
                   done ? 'Completed' : (notApplied ? 'Not Applied' : 'Pending'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     color: AppColors.isDarkMode
                         ? AppColors.pureBlack

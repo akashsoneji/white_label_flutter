@@ -271,7 +271,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: RTLHelper.rtlTextField(
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 16.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
@@ -294,8 +294,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                 ),
         decoration: InputDecoration(
           labelText: 'Transfer From',
-          labelStyle: TextStyle(color: AppColors.textGrey),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -325,7 +325,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: RTLHelper.rtlTextField(
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 16.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
@@ -348,8 +348,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                 ),
         decoration: InputDecoration(
           labelText: 'Transfer to',
-          labelStyle: TextStyle(color: AppColors.textGrey),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -379,7 +379,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: RTLHelper.rtlTextField(
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 16.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
@@ -398,8 +398,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         ),
         decoration: InputDecoration(
           labelText: 'Amount',
-          labelStyle: TextStyle(color: AppColors.textGrey),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -429,7 +429,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: RTLHelper.rtlTextField(
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 16.sp,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
@@ -439,8 +439,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         maxLines: 3,
         decoration: InputDecoration(
           labelText: 'Comment',
-          labelStyle: TextStyle(color: AppColors.textGrey),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -515,7 +515,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                     SizedBox(width: 10.w),
                     Text(
                       _showOtpSection ? 'Submitting...' : 'Sending OTP...',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.pureWhite,
@@ -525,7 +525,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                 )
                 : Text(
                   _showOtpSection ? 'Submit OTP' : 'Transfer Now',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.pureWhite,
@@ -590,13 +590,13 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
 
           if (accountItems.isEmpty) {
             return Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(24.0),
               child: Center(
                 child: Text(
                   controller.isLoading.value
                       ? languageService.tr('common_loading')
                       : languageService.tr('common_no_accounts'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
@@ -691,7 +691,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                               ? FlavorConfig.instance.appName
                               : (item['account'] as UserMT5Account)
                                   .masterGroupId,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
                             color: AppColors.primary,
@@ -706,7 +706,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                               ? (item['wallet'] as Wallet).walletId
                               : (item['account'] as UserMT5Account)
                                   .metaAccountNumber,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color:
@@ -719,7 +719,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                         accountType == 'wallet'
                             ? '\$ ${(item['wallet'] as Wallet).walletBalance}'
                             : '\$ ${(item['account'] as UserMT5Account).balance}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                           color:
@@ -803,13 +803,13 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
 
           if (accountItems.isEmpty) {
             return Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(24.0),
               child: Center(
                 child: Text(
                   controller.isLoading.value
                       ? languageService.tr('common_loading')
                       : languageService.tr('common_no_accounts'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
@@ -899,7 +899,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                               ? FlavorConfig.instance.appName
                               : (item['account'] as UserMT5Account)
                                   .masterGroupId,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
                             color: AppColors.primary,
@@ -914,7 +914,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                               ? (item['wallet'] as Wallet).walletId
                               : (item['account'] as UserMT5Account)
                                   .metaAccountNumber,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color:
@@ -927,7 +927,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                         accountType == 'wallet'
                             ? '\$ ${(item['wallet'] as Wallet).walletBalance}'
                             : '\$ ${(item['account'] as UserMT5Account).balance}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                           color:
@@ -963,7 +963,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(index == 0 ? 6 : 1),
       ],
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 20.sp,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
@@ -1044,7 +1044,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(6),
           ],
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -1116,7 +1116,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(1),
             ],
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,

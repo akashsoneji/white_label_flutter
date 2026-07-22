@@ -85,7 +85,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           obscureText: obscureText,
           controller: controller,
           validator: validator,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w400,
             color: AppColors.textPrimary,
@@ -94,8 +94,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             labelText: label,
             fillColor: AppColors.pureWhite,
             filled: true,
-            hintStyle: TextStyle(color: AppColors.hint),
-            labelStyle: TextStyle(color: AppColors.hint),
+            hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
+            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
             suffixIcon: IconButton(
               icon: Icon(
                 obscureText ? Icons.visibility : Icons.visibility_off,
@@ -222,7 +222,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   )
                   : Text(
                     languageService.tr('change_password'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       height: 1.71,
                       fontWeight: FontWeight.w400,

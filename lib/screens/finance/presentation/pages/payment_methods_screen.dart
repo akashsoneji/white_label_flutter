@@ -66,7 +66,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
             SizedBox(height: 2.h),
             // Text(
             //   'MT5 ${widget.accountNumber}',
-            //   style: TextStyle(
+            //   style: AppTextStyles.bodyText.copyWith(
             //     fontSize: 12.sp,
             //     color: Colors.grey[600],
             //     fontWeight: FontWeight.normal,
@@ -185,7 +185,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                                       FlavorConfig.instance.primaryColor,
                                   child: Text(
                                     name.isNotEmpty ? name[0] : "?",
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       color: AppColors.pureWhite,
                                     ),
                                   ),
@@ -197,7 +197,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                                   FlavorConfig.instance.primaryColor,
                               child: Text(
                                 name.isNotEmpty ? name[0] : "?",
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.pureWhite,
                                 ),
                               ),
@@ -205,7 +205,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                   ),
                   title: Text(
                     name,
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                   ),
                   // subtitle: Text("Instant up to 1 hour"),
                   trailing: Icon(

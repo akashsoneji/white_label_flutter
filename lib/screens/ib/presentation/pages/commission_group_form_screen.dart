@@ -1,4 +1,5 @@
 import 'package:crm_app/widgets/app_svg_back_button.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
@@ -223,7 +224,7 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
         ),
         title: Text(
           widget.group != null ? 'Edit Commission Group' : 'Add Commission Group',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -273,7 +274,7 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                       children: [
                         Text(
                           'Standard Group Structure',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -282,7 +283,7 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                         SizedBox(height: 8.h),
                         Text(
                           'Standard Group Structure: Create commission groups for Sub-IBs. Commission rates cannot exceed your own rates.',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
                             height: 1.4,
@@ -303,7 +304,7 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                       children: [
                         Text(
                           'Group Name',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -314,7 +315,7 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                           controller: _groupNameController,
                           decoration: InputDecoration(
                             hintText: 'Enter group name',
-                            hintStyle: TextStyle(
+                            hintStyle: AppTextStyles.bodyText.copyWith(
                               color: AppColors.textGrey,
                               fontSize: 14.sp,
                             ),
@@ -356,7 +357,7 @@ class _CommissionGroupFormScreenState extends State<CommissionGroupFormScreen> {
                       children: [
                         Text(
                           'Set Commission Rates (Category-wise)',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -404,7 +405,7 @@ style: OutlinedButton.styleFrom(
                   ),
                   child: Text(
                     'Cancel',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -438,7 +439,7 @@ style: OutlinedButton.styleFrom(
                           )
                           : Text(
                             'Save Commission Group',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.whiteColor,
@@ -468,7 +469,7 @@ style: OutlinedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 32.w),
             child: Text(
               message,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 color: AppColors.textGrey,
               ),
@@ -491,7 +492,7 @@ style: OutlinedButton.styleFrom(
                 ),
                 child: Text(
                   'Retry',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.whiteColor,
@@ -570,7 +571,7 @@ style: OutlinedButton.styleFrom(
                 children: [
                   Text(
                     groupName.toUpperCase(),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
                       color:
@@ -614,7 +615,7 @@ style: OutlinedButton.styleFrom(
                         child: Center(
                           child: Text(
                             'No categories available',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               color: AppColors.textGrey,
                             ),
@@ -661,7 +662,7 @@ style: OutlinedButton.styleFrom(
             Expanded(
               child: Text(
                 category.categoryName ?? 'N/A',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textPrimary,
@@ -681,7 +682,7 @@ style: OutlinedButton.styleFrom(
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
                   _MaxValueInputFormatter(maxValue),
                 ],
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color:
@@ -692,7 +693,7 @@ style: OutlinedButton.styleFrom(
                 textAlign: TextAlign.right,
                 decoration: InputDecoration(
                   prefixText: '\$ ',
-                  prefixStyle: TextStyle(
+                  prefixStyle: AppTextStyles.bodyText.copyWith(
                     color:
                         (maxValue != null && maxValue == 0)
                             ? AppColors.textGrey
@@ -738,7 +739,7 @@ style: OutlinedButton.styleFrom(
             maxValue != null
                 ? 'Max: \$${maxValue.toStringAsFixed(2)}'
                 : 'Max: \$0.00',
-            style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
           ),
         ),
       ],

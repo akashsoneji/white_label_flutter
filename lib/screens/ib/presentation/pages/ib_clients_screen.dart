@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -157,7 +158,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         elevation: 0,
         title: Text(
           'My Clients',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -289,7 +290,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                           ibController.clientsHierarchy.length > 1
                               ? 'Back to Sub IB'
                               : 'Back to Master IB',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
@@ -302,7 +303,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                 const Spacer(),
                 Text(
                   '${ibController.ibClients.length} clients',
-                  style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
                 ),
               ],
             ),
@@ -337,7 +338,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
             constraints: BoxConstraints(maxWidth: 100.w),
             child: Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w600,
                 color: isActive ? AppColors.whiteColor : AppColors.primary,
@@ -431,14 +432,14 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               SizedBox(height: 4.h),
               Text(
                 value,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -474,7 +475,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         },
         decoration: InputDecoration(
           hintText: 'Search clients, sub-IBs, trades...',
-          hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+          hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
           border: InputBorder.none,
           prefixIcon: Icon(
             Icons.search,
@@ -553,7 +554,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
             SizedBox(width: 4.w),
             Text(
               text,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected ? AppColors.whiteColor : AppColors.textGrey,
@@ -678,7 +679,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
           SizedBox(height: 16.h),
           Text(
             message,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textGrey,
@@ -733,7 +734,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                     child: Center(
                       child: Text(
                         _getInitials(client.name),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.whiteColor,
@@ -753,7 +754,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                             Flexible(
                               child: Text(
                                 client.name ?? 'N/A',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.textPrimary,
@@ -774,7 +775,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                                 ),
                                 child: Text(
                                   'Sub-IB',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 9.sp,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.primary,
@@ -787,7 +788,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                         SizedBox(height: 4.h),
                         Text(
                           client.email ?? '',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                           ),
@@ -916,7 +917,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                         child: Center(
                           child: Text(
                             _getInitials(subIB.name),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.whiteColor,
@@ -952,7 +953,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                       children: [
                         Text(
                           subIB.name ?? 'N/A',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -962,7 +963,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                         SizedBox(height: 4.h),
                         Text(
                           subIB.email ?? '',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                           ),
@@ -979,7 +980,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                             SizedBox(width: 4.w),
                             Text(
                               '${subIB.totalClients ?? 0} clients',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
                               ),
@@ -993,7 +994,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                             SizedBox(width: 4.w),
                             Text(
                               '${subIB.totalSubIBs ?? 0} sub-IBs',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
                               ),
@@ -1098,7 +1099,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                     child: Center(
                       child: Text(
                         _getInitials(trade.clientName),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
                           color: isProfit ? AppColors.green : AppColors.error,
@@ -1115,7 +1116,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                       children: [
                         Text(
                           trade.clientName ?? 'N/A',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -1125,7 +1126,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                         SizedBox(height: 4.h),
                         Text(
                           '${trade.symbol ?? ''} • ${trade.type ?? ''}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                           ),
@@ -1141,7 +1142,7 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
                     children: [
                       Text(
                         '\$${trade.profit?.toStringAsFixed(2) ?? '0.00'}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
                           color: isProfit ? AppColors.green : AppColors.error,
@@ -1200,11 +1201,11 @@ class _IBClientsScreenState extends State<IBClientsScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,

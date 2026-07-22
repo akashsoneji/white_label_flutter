@@ -252,7 +252,7 @@ class ExampleRTLComponentsScreen extends StatelessWidget {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 18.sp,
         fontWeight: FontWeight.bold,
         color: AppColors.primary,

@@ -379,7 +379,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
               SizedBox(height: 16),
               Text(
                 languageService.tr('kyc_error_loading'),
-                style: TextStyle(fontSize: 16),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 16),
               ),
               SizedBox(height: 16),
               ElevatedButton(
@@ -408,7 +408,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
           suffixIcon: InkWell(
             onTap: _showAccountTypeOptions,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
+              padding: EdgeInsets.symmetric(horizontal: 14),
               child: RTLHelper.rtlIcon(
                 Icons.keyboard_arrow_down,
                 color: AppColors.icongrey,
@@ -417,8 +417,8 @@ class _KycBankScreenState extends State<KycBankScreen> {
           ),
           decoration: InputDecoration(
             labelText: 'Account Type *',
-            labelStyle: TextStyle(color: AppColors.textGrey),
-            floatingLabelStyle: TextStyle(color: AppColors.primary),
+            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+            floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           ),
         ),
       );
@@ -434,7 +434,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
         child: Center(
           child: Text(
             'Error loading account type field',
-            style: TextStyle(color: Colors.red),
+            style: AppTextStyles.bodyText.copyWith(color: Colors.red),
           ),
         ),
       );
@@ -456,7 +456,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
           suffixIcon: InkWell(
             onTap: _showCurrencyOptions,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
+              padding: EdgeInsets.symmetric(horizontal: 14),
               child: RTLHelper.rtlIcon(
                 Icons.keyboard_arrow_down,
                 color: AppColors.icongrey,
@@ -465,8 +465,8 @@ class _KycBankScreenState extends State<KycBankScreen> {
           ),
           decoration: InputDecoration(
             labelText: 'Currency *',
-            labelStyle: TextStyle(color: AppColors.textGrey),
-            floatingLabelStyle: TextStyle(color: AppColors.primary),
+            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+            floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           ),
         ),
       );
@@ -482,7 +482,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
         child: Center(
           child: Text(
             'Error loading currency field',
-            style: TextStyle(color: Colors.red),
+            style: AppTextStyles.bodyText.copyWith(color: Colors.red),
           ),
         ),
       );
@@ -515,7 +515,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 suffixIcon: InkWell(
                   onTap: _showCryptoNetworkBottomSheet,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    padding: EdgeInsets.symmetric(horizontal: 14),
                     child: RTLHelper.rtlIcon(
                       Icons.keyboard_arrow_down,
                       color: AppColors.icongrey,
@@ -525,14 +525,14 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 decoration: InputDecoration(
                   labelText: languageService.tr('kyc_crypto_network'),
                   hintText: languageService.tr('kyc_crypto_network_hint'),
-                  labelStyle: TextStyle(color: AppColors.textGrey),
-                  floatingLabelStyle: TextStyle(color: AppColors.primary),
+                  labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                  floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
                 ),
               ),
               SizedBox(height: 4.h),
               Text(
                 languageService.tr('kyc_crypto_network_help'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textGrey,
                   fontStyle: FontStyle.italic,
@@ -554,7 +554,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
         child: Center(
           child: Text(
             'Error loading network field',
-            style: TextStyle(color: Colors.red),
+            style: AppTextStyles.bodyText.copyWith(color: Colors.red),
           ),
         ),
       );
@@ -579,7 +579,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
           padding: EdgeInsets.all(20.w),
           child: Text(
             'Error loading form fields',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               color: Colors.red,
               fontStyle: FontStyle.italic,
@@ -606,7 +606,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
             padding: EdgeInsets.all(20.w),
             child: Text(
               'Please select an account type to see relevant fields',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 color: AppColors.textSecondary,
                 fontStyle: FontStyle.italic,
@@ -691,7 +691,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
       children: [
         Text(
           languageService.tr('kyc_add_proof'),
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 8.h),
         GestureDetector(
@@ -773,7 +773,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
               Expanded(
                 child: Text(
                   languageService.tr('kyc_otp_sent_message'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w500,
@@ -804,7 +804,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                     : controller.isOtpCountdownActive.value
                     ? 'Resend OTP in ${controller.getFormattedCountdown()}'
                     : 'Resend OTP',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   color:
                       controller.canResendOtp
@@ -836,7 +836,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(index == 0 ? 6 : 1),
       ],
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 20.sp,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
@@ -924,7 +924,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(6),
           ],
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -998,7 +998,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(1),
             ],
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -1099,7 +1099,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
                 : Text(
                   controller.isOtpSent.value ? 'Submit' : 'Send OTP',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.whiteColor,
@@ -1126,7 +1126,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 padding: EdgeInsets.all(16.w),
                 child: Text(
                   'Select Account Type',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -1137,7 +1137,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 return ListTile(
                   title: Text(
                     type,
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                   ),
                   trailing:
                       controller.selectedAccountType.value == type
@@ -1170,7 +1170,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
           suffixIcon: InkWell(
             onTap: _showRelationShipBottomSheet,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
+              padding: EdgeInsets.symmetric(horizontal: 14),
               child: RTLHelper.rtlIcon(
                 Icons.keyboard_arrow_down,
                 color: AppColors.icongrey,
@@ -1179,8 +1179,8 @@ class _KycBankScreenState extends State<KycBankScreen> {
           ),
           decoration: InputDecoration(
             labelText: 'Relationship *',
-            labelStyle: TextStyle(color: AppColors.textGrey),
-            floatingLabelStyle: TextStyle(color: AppColors.primary),
+            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+            floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           ),
         ),
       );
@@ -1196,7 +1196,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
         child: Center(
           child: Text(
             'Error loading fields',
-            style: TextStyle(color: Colors.red),
+            style: AppTextStyles.bodyText.copyWith(color: Colors.red),
           ),
         ),
       );
@@ -1219,7 +1219,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 padding: EdgeInsets.all(16.w),
                 child: Text(
                   'Select RelationShip',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -1230,7 +1230,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 return ListTile(
                   title: Text(
                     type,
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                   ),
                   trailing:
                       controller.selectedRelationship.value == type
@@ -1282,7 +1282,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 padding: EdgeInsets.all(16.w),
                 child: Text(
                   languageService.tr('kyc_crypto_network_hint'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -1297,7 +1297,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                           padding: EdgeInsets.all(24.w),
                           child: Text(
                             'No networks available',
-                            style: TextStyle(color: AppColors.textSecondary),
+                            style: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary),
                           ),
                         )
                       ]
@@ -1305,7 +1305,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                         return ListTile(
                           title: Text(
                             network.label ?? '',
-                            style: TextStyle(color: AppColors.textPrimary),
+                            style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                           ),
                           trailing:
                               controller.selectedCryptoNetwork.value == network.slug
@@ -1343,7 +1343,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
               children: [
                 Text(
                   'Select Code Type',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -1355,7 +1355,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 ListTile(
                   title: Text(
                     'IBAN',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
@@ -1372,7 +1372,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 ListTile(
                   title: Text(
                     'IFSC',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
@@ -1436,7 +1436,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 leading: Icon(Icons.camera_alt, color: AppColors.textPrimary),
                 title: Text(
                   languageService.tr('kyc_take_photo'),
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                 ),
                 onTap: () async {
                   Navigator.pop(context);
@@ -1447,7 +1447,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 leading: Icon(Icons.photo_library, color: AppColors.textPrimary),
                 title: Text(
                   languageService.tr('kyc_select_from_gallery'),
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                 ),
                 onTap: () async {
                   Navigator.pop(context);
@@ -1458,7 +1458,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 leading: Icon(Icons.attach_file, color: AppColors.textPrimary),
                 title: Text(
                   languageService.tr('kyc_attach_from_documents'),
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                 ),
                 onTap: () async {
                   final result = await FilePicker.platform.pickFiles(
@@ -1500,7 +1500,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
               suffixIcon: InkWell(
                 onTap: _showIfscIbanTypeSelection,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: EdgeInsets.symmetric(horizontal: 14),
                   child: RTLHelper.rtlIcon(
                     Icons.keyboard_arrow_down,
                     color: AppColors.icongrey,
@@ -1509,8 +1509,8 @@ class _KycBankScreenState extends State<KycBankScreen> {
               ),
               decoration: InputDecoration(
                 labelText: 'IBAN/IFSC',
-                labelStyle: TextStyle(color: AppColors.textGrey),
-                floatingLabelStyle: TextStyle(color: AppColors.primary),
+                labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
               ),
             ),
           ),
@@ -1526,9 +1526,9 @@ class _KycBankScreenState extends State<KycBankScreen> {
                     : 'Enter IBAN code',
             decoration: InputDecoration(
               labelText: 'Code',
-              labelStyle: TextStyle(color: AppColors.textGrey),
-              floatingLabelStyle: TextStyle(color: AppColors.primary),
-              hintStyle: TextStyle(color: AppColors.textGrey),
+              labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+              floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
+              hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
             ),
           ),
         ],
@@ -1562,8 +1562,8 @@ class _KycBankScreenState extends State<KycBankScreen> {
                 : null,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: AppColors.textGrey),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
         ),
       ),
     );
@@ -1607,8 +1607,8 @@ class _KycBankScreenState extends State<KycBankScreen> {
           ),
           decoration: InputDecoration(
             labelText: label,
-            labelStyle: TextStyle(color: AppColors.textGrey),
-            floatingLabelStyle: TextStyle(
+            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+            floatingLabelStyle: AppTextStyles.bodyText.copyWith(
               color:
                   _showValidationError.value ? Colors.red : AppColors.primary,
             ),
@@ -1744,7 +1744,7 @@ class _CurrencySelectionBottomSheetState
               padding: EdgeInsets.all(16.w),
               child: Text(
                 'Select Currency',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -1801,7 +1801,7 @@ class _CurrencySelectionBottomSheetState
                         return ListTile(
                           title: Text(
                             currency,
-                            style: TextStyle(color: AppColors.textPrimary),
+                            style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                           ),
                           trailing:
                               widget.controller.selectedCurrency.value ==

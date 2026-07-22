@@ -1071,7 +1071,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
               padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
               child: Text(
                 _orderTypeLabel(t),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -1274,7 +1274,7 @@ class _SlTpInnerState extends State<_SlTpInner> {
                   color: widget.accent,
                 ),
                 hintText: _format(widget.defaultValue, widget.pipValue),
-                hintStyle: TextStyle(
+                hintStyle: AppTextStyles.bodyText.copyWith(
                   color: widget.accent.withOpacity(0.5),
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,

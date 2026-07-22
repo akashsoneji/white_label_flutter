@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -121,8 +122,7 @@ class MoreMenuTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                    fontFamily: 'Roboto',
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                     color: textColor ?? AppColors.textPrimary,

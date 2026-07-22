@@ -64,7 +64,7 @@ class _ContestDetailsScreenState extends State<ContestDetailsScreen> {
               child: Text(
                 languageService.tr('dc_contest_not_found'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   color: AppColors.textGrey,
                 ),
@@ -177,7 +177,7 @@ class _ContestDetailsScreenState extends State<ContestDetailsScreen> {
                           activeColor: AppColors.primary,
                           title: Text(
                             languageService.tr('dc_accept_terms'),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w500,
                               color: AppColors.textPrimary,
@@ -230,7 +230,7 @@ class _ContestDetailsScreenState extends State<ContestDetailsScreen> {
                                 : upcoming
                                     ? languageService.tr('dc_register_now')
                                     : languageService.tr('dc_join_now'),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w700,
                             ),
@@ -322,7 +322,7 @@ class _HeroCard extends StatelessWidget {
                 ),
                 child: Text(
                   statusLabel,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w700,
@@ -334,7 +334,7 @@ class _HeroCard extends StatelessWidget {
               Flexible(
                 child: Text(
                   contest.subtitle,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor.withValues(alpha: 0.85),
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w500,
@@ -350,13 +350,13 @@ class _HeroCard extends StatelessWidget {
             children: [
               Text(
                 contest.bannerEmoji,
-                style: TextStyle(fontSize: 32.sp),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 32.sp),
               ),
               SizedBox(width: 12.w),
               Expanded(
                 child: Text(
                   contest.title,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.whiteColor,
@@ -368,7 +368,7 @@ class _HeroCard extends StatelessWidget {
           SizedBox(height: 8.h),
           Text(
             contest.description,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.whiteColor.withValues(alpha: 0.85),
               fontSize: 12.sp,
               height: 1.45,
@@ -429,7 +429,7 @@ class _HeroCard extends StatelessWidget {
             Center(
               child: ContestCountdownTimer(
                 endsAt: contest.isLive ? contest.endsAt : contest.startsAt,
-                textStyle: TextStyle(
+                textStyle: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.whiteColor,
@@ -449,7 +449,7 @@ class _HeroCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   '${contest.joinedParticipants} / ${contest.maxParticipants} ${languageService.tr('dc_participants_joined')}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.whiteColor.withValues(alpha: 0.9),
                   ),
@@ -495,7 +495,7 @@ class _StatBlock extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 9.sp,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.6,
@@ -505,7 +505,7 @@ class _StatBlock extends StatelessWidget {
         SizedBox(height: 4.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w800,
             color: color,
@@ -549,7 +549,7 @@ class _MyEntryCard extends StatelessWidget {
               SizedBox(width: 8.w),
               Text(
                 languageService.tr('dc_your_entry'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primary,
@@ -604,7 +604,7 @@ class _SmallStat extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 10.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textGrey,
@@ -613,7 +613,7 @@ class _SmallStat extends StatelessWidget {
         SizedBox(height: 4.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w700,
             color: color ?? AppColors.textPrimary,
@@ -633,7 +633,7 @@ class _SectionTitle extends StatelessWidget {
       padding: EdgeInsets.only(left: 4.w),
       child: Text(
         text.toUpperCase(),
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 11.sp,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.0,
@@ -685,7 +685,7 @@ class _PrizeList extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(
                     '🏅',
-                    style: TextStyle(fontSize: 16.sp),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp),
                   ),
                 ),
                 SizedBox(width: 12.w),
@@ -695,7 +695,7 @@ class _PrizeList extends StatelessWidget {
                     children: [
                       Text(
                         prize.label,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -705,7 +705,7 @@ class _PrizeList extends StatelessWidget {
                         SizedBox(height: 2.h),
                         Text(
                           prize.extra,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
                           ),
@@ -716,7 +716,7 @@ class _PrizeList extends StatelessWidget {
                 ),
                 Text(
                   '\$${prize.amount.toStringAsFixed(0)}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.warning,
@@ -770,7 +770,7 @@ class _RulesList extends StatelessWidget {
                     children: [
                       Text(
                         rule.title,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -779,7 +779,7 @@ class _RulesList extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         rule.description,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: AppColors.textGrey,
                           height: 1.4,
@@ -832,7 +832,7 @@ class _RequirementsList extends StatelessWidget {
                 Expanded(
                   child: Text(
                     req,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: AppColors.textPrimary,
                       height: 1.4,

@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/demo_contest/leaderboard_entry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -83,7 +84,7 @@ class _PodiumColumn extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(medal, style: TextStyle(fontSize: 22.sp)),
+        Text(medal, style: AppTextStyles.bodyText.copyWith(fontSize: 22.sp)),
         SizedBox(height: 4.h),
         Container(
           width: 56.w,
@@ -99,7 +100,7 @@ class _PodiumColumn extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             hasEntry ? name.substring(0, name.length.clamp(0, 1)).toUpperCase() : '·',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
               color: hasEntry ? AppColors.textPrimary : AppColors.textGrey,
@@ -114,7 +115,7 @@ class _PodiumColumn extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -123,7 +124,7 @@ class _PodiumColumn extends StatelessWidget {
         ),
         Text(
           pnlText,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 11.sp,
             fontWeight: FontWeight.w600,
             color: pnlColor,
@@ -150,7 +151,7 @@ class _PodiumColumn extends StatelessWidget {
             padding: EdgeInsets.only(top: 12.h),
             child: Text(
               '${entry?.rank ?? 0}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w900,
                 color: AppColors.whiteColor,

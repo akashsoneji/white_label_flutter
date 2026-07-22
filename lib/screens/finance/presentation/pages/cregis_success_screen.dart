@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart';
@@ -175,19 +176,19 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel payment?'),
-        content: const Text(
+        title: Text('Cancel payment?'),
+        content: Text(
           'Are you sure you want to cancel this payment? The transaction '
           'will not be processed and you will be returned to the home screen.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('No, keep waiting'),
+            child: Text('No, keep waiting'),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Yes, cancel'),
+            child: Text('Yes, cancel'),
           ),
         ],
       ),
@@ -227,18 +228,18 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
           leading: AppSvgBackButton(onPressed: _confirmCancel),
           title: Text(
             'Cregis Payment',
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 16.sp),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 16.sp),
           ),
           centerTitle: true,
         ),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
@@ -252,7 +253,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                 SizedBox(height: 32.h),
                 Text(
                   'Payment Request Submitted',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -262,23 +263,19 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                 SizedBox(height: 12.h),
                 Text(
                   'Amount: ${widget.amount} USD',
-                  style: TextStyle(fontSize: 16.sp, color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, color: AppColors.textGrey),
                 ),
                 SizedBox(height: 8.h),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     'Ref: ${widget.referenceNumber}',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColors.textGrey,
-                      fontFamily: 'monospace',
-                    ),
+                    style: AppTextStyles.caption,
                   ),
                 ),
                 SizedBox(height: 32.h),
@@ -296,7 +293,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                       SizedBox(height: 16.h),
                       Text(
                         _statusText,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.textGrey,
                         ),
@@ -307,7 +304,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                 else
                   Column(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.info_outline,
                         size: 40,
                         color: Colors.orange,
@@ -315,7 +312,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                       SizedBox(height: 12.h),
                       Text(
                         _statusText,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: Colors.orange.shade800,
                         ),
@@ -340,11 +337,11 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.open_in_browser, size: 20),
+                        Icon(Icons.open_in_browser, size: 20),
                         SizedBox(width: 8.w),
                         Text(
                           'Open Payment Link',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                           ),
@@ -360,7 +357,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                     onPressed: _goToHistory,
                     child: Text(
                       'Go to Transaction History',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
                       ),
@@ -373,7 +370,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                 SizedBox(height: 16.h),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(10),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.04),
                     borderRadius: BorderRadius.circular(8),
@@ -386,7 +383,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                     children: [
                       Text(
                         'Debug — last poll',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w700,
                           color: Colors.black54,
@@ -395,7 +392,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                       SizedBox(height: 4.h),
                       Text(
                         _debugLastCall,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: Colors.black87,
                         ),
@@ -403,7 +400,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                       SizedBox(height: 2.h),
                       Text(
                         _debugLastResponse,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: Colors.black87,
                         ),
@@ -412,7 +409,7 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
                         SizedBox(height: 2.h),
                         Text(
                           'at ${_debugLastAt!.toIso8601String()}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 9.sp,
                             color: Colors.black45,
                           ),

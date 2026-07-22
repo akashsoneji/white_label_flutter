@@ -304,7 +304,7 @@ class TradingBottomNavigation extends StatelessWidget {
                       color: Colors.red,
                       shape: BoxShape.circle,
                     ),
-                    child: Text('1', style: TextStyle(color: Colors.white, fontSize: 8.sp, fontWeight: FontWeight.normal)),
+                    child: Text('1', style: AppTextStyles.bodyText.copyWith(color: Colors.white, fontSize: 8.sp, fontWeight: FontWeight.normal)),
                   ),
                 ),
             ],
@@ -312,7 +312,7 @@ class TradingBottomNavigation extends StatelessWidget {
           SizedBox(height: 2.h),
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: isSelected ? activeColor : inactiveColor,
               fontSize: 10.sp,
               fontWeight: FontWeight.w400, // Regular font weight

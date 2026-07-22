@@ -75,7 +75,7 @@ class ContestJoinCard extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       contest.bannerEmoji,
-                      style: TextStyle(fontSize: 26.sp),
+                      style: AppTextStyles.bodyText.copyWith(fontSize: 26.sp),
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -96,7 +96,7 @@ class ContestJoinCard extends StatelessWidget {
                               ),
                               child: Text(
                                 tagLabel,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: tagColor,
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w700,
@@ -109,7 +109,7 @@ class ContestJoinCard extends StatelessWidget {
                               child: Text(
                                 contest.subtitle,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.textGrey,
                                   fontWeight: FontWeight.w500,
@@ -179,7 +179,7 @@ class ContestJoinCard extends StatelessWidget {
                         : live
                             ? 'Ends in'
                             : 'Starts in',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w500,
@@ -214,7 +214,7 @@ class ContestJoinCard extends StatelessWidget {
                         : ended
                             ? 'View Results'
                             : 'View Details',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 14.sp,
                     ),
@@ -260,7 +260,7 @@ class _Metric extends StatelessWidget {
         SizedBox(height: 2.h),
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,

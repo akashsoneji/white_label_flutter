@@ -3,6 +3,7 @@
 // Meta-branded History screen — MT5-style UI.
 
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -251,7 +252,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       color: MetaTheme.bg(context),
-      padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+      padding: EdgeInsets.fromLTRB(4, 4, 4, 8),
       child: Row(
         children: [
           IconButton(
@@ -263,9 +264,9 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(Get.find<LanguageService>().tr('meta_history_title'), style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.1)),
-                const SizedBox(height: 1),
-                Text(_selectedSymbol, style: TextStyle(color: MetaTheme.subText(context), fontSize: 13, height: 1.1)),
+                Text(Get.find<LanguageService>().tr('meta_history_title'), style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.1)),
+                SizedBox(height: 1),
+                Text(_selectedSymbol, style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 13, height: 1.1)),
               ],
             ),
           ),
@@ -300,13 +301,13 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
         child: ListView(
           controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 24),
+          padding: EdgeInsets.only(bottom: 24),
           children: [
             _buildSummary(context),
             if (loading)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 48),
-                child: const Center(
+                padding: EdgeInsets.symmetric(vertical: 48),
+                child: Center(
                   child: SizedBox(width: 28, height: 28, child: CircularProgressIndicator(strokeWidth: 2.5)),
                 ),
               )
@@ -332,22 +333,22 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
     final profitColor = _moneyColor(t.profit, context);
     Widget row(String label, String value, {Color? valueColor}) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: EdgeInsets.symmetric(vertical: 4),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(label, style: TextStyle(color: MetaTheme.mainText(context), fontSize: 14, height: 1.2)),
-            const SizedBox(width: 4),
+            Text(label, style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(context), fontSize: 14, height: 1.2)),
+            SizedBox(width: 4),
             Expanded(child: CustomPaint(size: const Size(double.infinity, 1), painter: _DottedLeaderPainter(color: MetaTheme.subText(context).withOpacity(0.35)))),
-            const SizedBox(width: 4),
-            Text(value, style: TextStyle(color: valueColor ?? MetaTheme.mainText(context), fontSize: 14, fontWeight: FontWeight.w400, height: 1.2)),
+            SizedBox(width: 4),
+            Text(value, style: AppTextStyles.bodyText.copyWith(color: valueColor ?? MetaTheme.mainText(context), fontSize: 14, fontWeight: FontWeight.w400, height: 1.2)),
           ],
         ),
       );
     }
     return Container(
       color: MetaTheme.bg(context),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -356,7 +357,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
           row(Get.find<LanguageService>().tr('meta_history_swap'), _format(t.swap)),
           row(Get.find<LanguageService>().tr('meta_history_commission'), _format(t.commission)),
           row('Balance:', _format(t.balance)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Divider(height: 1, thickness: 0.5, color: MetaTheme.divider(context)),
         ],
       ),
@@ -379,13 +380,13 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
 
   Widget _buildEmptyState(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 120),
+      padding: EdgeInsets.only(top: 120),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.inbox_outlined, color: MetaTheme.subText(context).withOpacity(0.4), size: 80),
-          const SizedBox(height: 16),
-          Text(Get.find<LanguageService>().tr('meta_history_empty'), style: TextStyle(color: MetaTheme.subText(context), fontSize: 14, fontWeight: FontWeight.w400)),
+          SizedBox(height: 16),
+          Text(Get.find<LanguageService>().tr('meta_history_empty'), style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 14, fontWeight: FontWeight.w400)),
         ],
       ),
     );
@@ -393,13 +394,13 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
 
   Widget _buildErrorState(BuildContext context, String message) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 60, 24, 0),
+      padding: EdgeInsets.fromLTRB(24, 60, 24, 0),
       child: Column(children: [
         Icon(Icons.error_outline, color: MetaTheme.sell(context), size: 48),
-        const SizedBox(height: 12),
-        Text(message, textAlign: TextAlign.center, style: TextStyle(color: MetaTheme.subText(context), fontSize: 13)),
-        const SizedBox(height: 16),
-        TextButton(onPressed: _refresh, child: Text(Get.find<LanguageService>().tr('meta_history_retry'), style: TextStyle(color: MetaTheme.buyBlue))),
+        SizedBox(height: 12),
+        Text(message, textAlign: TextAlign.center, style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 13)),
+        SizedBox(height: 16),
+        TextButton(onPressed: _refresh, child: Text(Get.find<LanguageService>().tr('meta_history_retry'), style: AppTextStyles.bodyText.copyWith(color: MetaTheme.buyBlue))),
       ]),
     );
   }
@@ -577,7 +578,7 @@ class _PositionCard extends StatelessWidget {
       final depositColor = MetaTheme.buy(context);
 
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -587,29 +588,29 @@ class _PositionCard extends StatelessWidget {
                 children: [
                   Text(
                     Get.find<LanguageService>().tr('meta_history_balance'),
-                    style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
+                    style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.2),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
                     Get.find<LanguageService>().tr('meta_history_deposit'),
-                    style: TextStyle(color: MetaTheme.subText(context), fontSize: 13, height: 1.2),
+                    style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 13, height: 1.2),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (row.tradeCloseTime.isNotEmpty)
                   Text(
                     DateFormat('yyyy.MM.dd HH:mm:ss').format(_parseDate(row.tradeCloseTime).toLocal()),
-                    style: TextStyle(color: MetaTheme.subText(context), fontSize: 12),
+                    style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 12),
                   ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   priceFmt.format(depositAmount),
-                  style: TextStyle(color: depositColor, fontSize: 14, fontWeight: FontWeight.w700),
+                  style: AppTextStyles.bodyText.copyWith(color: depositColor, fontSize: 14, fontWeight: FontWeight.w700),
                 ),
               ],
             ),
@@ -629,25 +630,25 @@ class _PositionCard extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              RichText(text: TextSpan(style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.2), children: [
+              RichText(text: TextSpan(style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w600, height: 1.2), children: [
                 TextSpan(text: '${row.tradeSymbol}, '),
-                TextSpan(text: '$sideLabel ${volFmt.format(row.volume)}', style: TextStyle(color: sideColor)),
+                TextSpan(text: '$sideLabel ${volFmt.format(row.volume)}', style: AppTextStyles.bodyText.copyWith(color: sideColor)),
               ])),
-              const SizedBox(height: 2),
-              Text('${_formatPrice(openPrice, row.tradeSymbol)} → ${_formatPrice(closePrice, row.tradeSymbol)}', style: TextStyle(color: MetaTheme.subText(context), fontSize: 13, height: 1.2)),
+              SizedBox(height: 2),
+              Text('${_formatPrice(openPrice, row.tradeSymbol)} → ${_formatPrice(closePrice, row.tradeSymbol)}', style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 13, height: 1.2)),
             ])),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text(DateFormat('yyyy.MM.dd HH:mm:ss').format(_parseDate(row.tradeCloseTime).toLocal()), style: TextStyle(color: MetaTheme.subText(context), fontSize: 12)),
-              const SizedBox(height: 2),
-              Text(_formatProfit(profit), style: TextStyle(color: profitColor, fontSize: 14, fontWeight: FontWeight.w700)),
+              Text(DateFormat('yyyy.MM.dd HH:mm:ss').format(_parseDate(row.tradeCloseTime).toLocal()), style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 12)),
+              SizedBox(height: 2),
+              Text(_formatProfit(profit), style: AppTextStyles.bodyText.copyWith(color: profitColor, fontSize: 14, fontWeight: FontWeight.w700)),
             ]),
           ]),
-          if (expanded) ...[const SizedBox(height: 8), _ExpandedDetail(row: row)],
+          if (expanded) ...[SizedBox(height: 8), _ExpandedDetail(row: row)],
         ]),
       ),
     );
@@ -678,9 +679,9 @@ class _ExpandedDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double fontSize = 13;
-    final labelStyle = TextStyle(color: MetaTheme.subText(context), fontSize: fontSize);
-    final valueStyle = TextStyle(color: MetaTheme.mainText(context), fontSize: fontSize);
-    final ticketStyle = TextStyle(color: MetaTheme.subText(context), fontSize: fontSize);
+    final labelStyle = AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: fontSize);
+    final valueStyle = AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(context), fontSize: fontSize);
+    final ticketStyle = AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: fontSize);
 
     final fmt = NumberFormat('0.00');
     final dateFmt = DateFormat('yyyy.MM.dd HH:mm:ss');
@@ -693,7 +694,7 @@ class _ExpandedDetail extends StatelessWidget {
     final comm = _parseVal(row.tradeCommission);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: EdgeInsets.only(top: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -704,22 +705,22 @@ class _ExpandedDetail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(ticket, style: ticketStyle),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Row(
                   children: [
                     Text(Get.find<LanguageService>().tr('meta_history_sl'), style: labelStyle),
                     const Spacer(),
                     Text(sl == 0 ? '—' : fmt.format(sl), style: valueStyle),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                   ],
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Row(
                   children: [
                     Text(Get.find<LanguageService>().tr('meta_history_tp'), style: labelStyle),
                     const Spacer(),
                     Text(tp == 0 ? '—' : fmt.format(tp), style: valueStyle),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                   ],
                 ),
               ],
@@ -737,7 +738,7 @@ class _ExpandedDetail extends StatelessWidget {
                     Text(openTimeStr, style: valueStyle),
                   ],
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Row(
                   children: [
                     Text(Get.find<LanguageService>().tr('meta_history_swap'), style: labelStyle),
@@ -745,7 +746,7 @@ class _ExpandedDetail extends StatelessWidget {
                     Text(fmt.format(row.swap), style: valueStyle),
                   ],
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 Row(
                   children: [
                     Text(Get.find<LanguageService>().tr('meta_history_commission'), style: labelStyle),
@@ -796,12 +797,12 @@ class _MetaSheetWrapper extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 4),
+        padding: EdgeInsets.only(top: 8, bottom: 4),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Container(width: 40, height: 4, decoration: BoxDecoration(color: MetaTheme.subText(context).withOpacity(0.35), borderRadius: BorderRadius.circular(2))),
-          const SizedBox(height: 10),
-          Text(title, style: TextStyle(color: MetaTheme.subText(context), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
-          const SizedBox(height: 6),
+          SizedBox(height: 10),
+          Text(title, style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.8)),
+          SizedBox(height: 6),
           const Divider(height: 1, thickness: 0.5),
           child,
         ]),
@@ -824,12 +825,12 @@ class _SheetRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(children: [
           SizedBox(width: 32, child: icon == null ? const SizedBox.shrink() : Icon(icon, size: 22, color: MetaTheme.mainText(context))),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(leading ?? '', style: TextStyle(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w500)),
-            if (trailingSub != null && trailingSub!.isNotEmpty) ...[const SizedBox(height: 2), Text(trailingSub!, style: TextStyle(color: MetaTheme.subText(context), fontSize: 12))],
+            Text(leading ?? '', style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(context), fontSize: 15, fontWeight: FontWeight.w500)),
+            if (trailingSub != null && trailingSub!.isNotEmpty) ...[SizedBox(height: 2), Text(trailingSub!, style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 12))],
           ])),
           if (showArrow) Icon(arrowAscending ? Icons.arrow_upward : Icons.arrow_downward, size: 18, color: MetaTheme.buyBlue)
           else if (selected) Icon(Icons.check, size: 18, color: MetaTheme.buyBlue),
@@ -863,7 +864,7 @@ class _PaginationSentinel extends StatelessWidget {
         child: loading
             ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: MetaTheme.buyBlue))
             : hasMore
-                ? Text(Get.find<LanguageService>().tr('meta_history_loading_more'), style: TextStyle(color: MetaTheme.subText(context), fontSize: 12))
+                ? Text(Get.find<LanguageService>().tr('meta_history_loading_more'), style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(context), fontSize: 12))
                 : const SizedBox.shrink(),
       ),
     );
@@ -898,7 +899,7 @@ class CalendarIcon extends StatelessWidget {
             child: Center(
               child: Text(
                 '3',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: color,
                   fontSize: 10,
                   fontWeight: FontWeight.w900,

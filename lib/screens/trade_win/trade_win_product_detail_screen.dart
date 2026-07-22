@@ -152,7 +152,7 @@ class _TradeWinProductDetailScreenState
                   ),
                   child: Text(
                     TradeWinFormat.categoryTag(product.category),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.green,
@@ -316,7 +316,7 @@ class _TradeWinProductDetailScreenState
                 ),
                 child: Text(
                   _redeemButtonLabel(languageService),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 14.sp,
                   ),
@@ -414,7 +414,7 @@ class _MetaLine extends StatelessWidget {
           TextSpan(text: label),
           TextSpan(
             text: ' $value',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
               color: valueColor ?? AppColors.textPrimary,

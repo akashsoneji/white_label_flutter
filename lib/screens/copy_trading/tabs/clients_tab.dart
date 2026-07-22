@@ -150,7 +150,7 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
         },
         borderRadius: BorderRadius.circular(12.r),
         child: Padding(
-          padding: const EdgeInsets.all(14.0),
+          padding: EdgeInsets.all(14.0),
           child: Column(
             children: [
               Row(
@@ -162,7 +162,7 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                               horizontal: 6,
                               vertical: 2,
                             ),
@@ -175,17 +175,17 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
                             ),
                             child: Text(
                               data.type,
-                              style:   TextStyle(
+                              style:   AppTextStyles.bodyText.copyWith(
                                 color: AppColors.whiteColor,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text(
                             data.volume,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.icongrey,
                               fontSize: 10,
                               fontWeight: FontWeight.w400,
@@ -193,10 +193,10 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Text(
                         data.symbol,
-                        style: const TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -212,20 +212,20 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
                           SvgPicture.asset(
                             'assets/svg/copy_trading/calendar.svg',
                           ),
-                          const SizedBox(width: 4),
+                          SizedBox(width: 4),
                           Text(
                             data.status,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.icongrey,
                               fontSize: 12,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Text(
                         data.profit,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.primary,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -233,7 +233,7 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
                       ),
                     ],
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16),
                   Icon(
                     _isExpanded
                         ? Icons.keyboard_arrow_up

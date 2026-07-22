@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -103,11 +104,11 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
         child: Text.rich(
           TextSpan(
             text: languageService.tr('login_screen_dont_have_account'),
-            style: TextStyle(color: VantageAuthTheme.muted, fontSize: 13.sp),
+            style: AppTextStyles.bodyText.copyWith(color: VantageAuthTheme.muted, fontSize: 13.sp),
             children: [
               TextSpan(
                 text: languageService.tr('create_account_screen_sign_up'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: VantageAuthTheme.primary,
                   fontWeight: FontWeight.w700,
                 ),
@@ -121,7 +122,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
         children: [
           Text(
             languageService.tr('login_screen_sign_in'),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: VantageAuthTheme.text,
               fontSize: 24.sp,
               fontWeight: FontWeight.w800,
@@ -130,7 +131,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
           SizedBox(height: 4.h),
           Text(
             languageService.tr('welcome_title'),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: VantageAuthTheme.muted,
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,
@@ -141,7 +142,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
             controller: emailController,
             hintText: languageService.tr('login_screen_email_username_hint'),
             keyboardType: TextInputType.emailAddress,
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.mail_outline_rounded,
             ),
           ),
@@ -150,7 +151,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
             controller: passwordController,
             hintText: 'Password',
             obscureText: obscureText,
-            prefixIcon: const Icon(
+            prefixIcon: Icon(
               Icons.lock_outline_rounded,
             ),
             suffixIcon: IconButton(
@@ -173,7 +174,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
                 onPressed: () => Get.toNamed(AppPages.FORGOT_PASSWORD),
                 child: Text(
                   languageService.tr('login_forgot_password'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: VantageAuthTheme.primary,
                     fontWeight: FontWeight.w700,
                     fontSize: 12.sp,
@@ -213,7 +214,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
               Expanded(
                 child: Text(
                   languageService.tr('biometric_enable_checkbox'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: VantageAuthTheme.muted,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/text_styles.dart';
 import 'package:get/get.dart';
 
 import '../../constants/color.dart';
@@ -27,25 +28,25 @@ class FeatureUnavailableScreen extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.lock_outline, size: 48, color: AppColors.textGrey),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Text(
                 languageService.tr('general_feature_not_available'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
               ),
               if (featureKey.isNotEmpty) ...[
-                const SizedBox(height: 6),
+                SizedBox(height: 6),
                 Text(
                   featureKey,
-                  style: TextStyle(color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                 ),
               ],
-              const SizedBox(height: 18),
+              SizedBox(height: 18),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

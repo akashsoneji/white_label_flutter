@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
@@ -41,9 +42,9 @@ class AppTextField extends StatelessWidget {
         if (label != null) ...[
           Text(
             label!,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w400,
               color: AppColors.textPrimary,
             ),
           ),
@@ -60,13 +61,13 @@ class AppTextField extends StatelessWidget {
           maxLines: maxLines,
           enabled: enabled,
           focusNode: focusNode,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 14.sp,
           ),
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
+            hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
             suffixIcon: suffixIcon,
             prefixIcon: prefixIcon,
             border: OutlineInputBorder(
@@ -167,14 +168,14 @@ class AppTextFormField extends StatelessWidget {
       inputFormatters: inputFormatters,
       readOnly: readOnly,
       onTap: onTap,
-      style: style ?? TextStyle(
+      style: style ?? AppTextStyles.bodyText.copyWith(
         color: AppColors.textPrimary,
         fontSize: 14.sp,
       ),
       decoration: decoration ?? InputDecoration(
         hintText: hintText,
         hintStyle: hintStyle ??
-            TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
+            AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
         suffixIcon: suffixIcon,
         prefixIcon: prefixIcon,
         border: InputBorder.none,
@@ -199,9 +200,9 @@ class AppTextFormField extends StatelessWidget {
       children: [
         Text(
           label!,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w400,
             color: AppColors.textPrimary,
           ),
         ),

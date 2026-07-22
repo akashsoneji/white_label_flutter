@@ -29,6 +29,7 @@
 // ============================================================
 
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 
 import 'package:crm_app/widgets/app_svg_icon.dart';
 import 'package:flutter/material.dart';
@@ -400,7 +401,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                               Expanded(
                                 child: Text(
                                   sym,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 15.sp,
                                     fontWeight:
                                         isActive
@@ -594,7 +595,7 @@ class _Header extends StatelessWidget {
                   // Slightly bolder font for the symbol, like the reference
                   Text(
                     symbol,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: fg,
@@ -719,7 +720,7 @@ class _BottomDock extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0F0F12) : Colors.white,
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: Color(0x0F000000),
             blurRadius: 12,
@@ -802,7 +803,7 @@ class _BottomDock extends StatelessWidget {
                     ),
                     child: Text(
                       spreadStr,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                         color: isDark ? Colors.white : Colors.black87,
@@ -877,7 +878,7 @@ class _QuantityBar extends StatelessWidget {
                 children: [
                   Text(
                     'Quantity (lots)',
-                    style: TextStyle(fontSize: 10.sp, color: muted),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: muted),
                   ),
                   // Editable TextField in place of the static Text widget.
                   // Same footprint as the previous Text so the +/- icons
@@ -898,7 +899,7 @@ class _QuantityBar extends StatelessWidget {
                       onChanged: onVolumeChanged,
                       onEditingComplete: onVolumeSubmitted,
                       onSubmitted: (_) => onVolumeSubmitted(),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
                         // color: fg,
@@ -986,7 +987,7 @@ class _SideButton extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.whiteColor,
@@ -996,7 +997,7 @@ class _SideButton extends StatelessWidget {
             SizedBox(height: 2.h),
             Text(
               sub,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.whiteColor,

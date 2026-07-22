@@ -49,7 +49,7 @@ class KycIntroScreen extends StatelessWidget {
                           Text(
                             'To open your trading account, we first need to verify your identity',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w400,
                               color: AppColors.icongrey,
@@ -234,7 +234,7 @@ class KycIntroScreen extends StatelessWidget {
                   ),
                   child: Text(
                     'Start Verification',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.whiteColor,
@@ -330,7 +330,7 @@ class KycIntroScreen extends StatelessWidget {
                       // Status on the right
                       Text(
                         status,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: textColor,
                           fontWeight: FontWeight.w600,

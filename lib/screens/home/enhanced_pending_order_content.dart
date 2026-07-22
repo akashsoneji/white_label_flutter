@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import '../../constants/color.dart';
@@ -220,7 +221,7 @@ class _EnhancedPendingOrderContentState
             children: [
               Text(
                 orderType.displayName,
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w500),
               ),
               Icon(Icons.keyboard_arrow_down, color: Colors.grey[600]),
             ],
@@ -240,7 +241,7 @@ class _EnhancedPendingOrderContentState
         children: [
           Text(
             'Price',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w500),
           ),
           SizedBox(height: 8.h),
           Row(
@@ -280,7 +281,7 @@ class _EnhancedPendingOrderContentState
       children: [
         Text(
           'Volume',
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 8.h),
         Row(
@@ -315,7 +316,7 @@ class _EnhancedPendingOrderContentState
       children: [
         Text(
           'Stop Loss & Take Profit',
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 12.h),
         Row(
@@ -326,7 +327,7 @@ class _EnhancedPendingOrderContentState
                 children: [
                   Text(
                     'Stop Loss',
-                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: Colors.grey[600]),
                   ),
                   SizedBox(height: 4.h),
                   Row(
@@ -366,7 +367,7 @@ class _EnhancedPendingOrderContentState
                 children: [
                   Text(
                     'Take Profit',
-                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: Colors.grey[600]),
                   ),
                   SizedBox(height: 4.h),
                   Row(
@@ -457,7 +458,7 @@ class _EnhancedPendingOrderContentState
                 ),
                 child: Text(
                   'BUY',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -480,7 +481,7 @@ class _EnhancedPendingOrderContentState
                 ),
                 child: Text(
                   'SELL',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -508,7 +509,7 @@ class _EnhancedPendingOrderContentState
               children: [
                 Text(
                   'Select Order Type',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -519,7 +520,7 @@ class _EnhancedPendingOrderContentState
                   (orderType) => ListTile(
                     title: Text(
                       orderType.displayName,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         color: AppColors.textPrimary,
                       ),

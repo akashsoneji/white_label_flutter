@@ -1,4 +1,5 @@
 import 'package:crm_app/utils/trl_helper.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -33,7 +34,7 @@ class LabeledAppTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RTLHelper.rtlTextField(
-      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400),
+      style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w400),
       controller: controller!,
       
       onChanged: onChanged,
@@ -50,12 +51,12 @@ class LabeledAppTextField extends StatelessWidget {
       // ],
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(color: AppColors.hint),
+        hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
         prefix: prefixIcon,
         suffix: suffixIcon,
         labelText: label,
-        labelStyle: TextStyle(color: AppColors.hint),
-        floatingLabelStyle: TextStyle(color: AppColors.primary),
+        labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
+        floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
         fillColor: AppColors.pureWhite,
         filled: true,
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),

@@ -53,7 +53,7 @@ class MaintenanceScreen extends StatelessWidget {
               // Message
               Text(
                 'App is under maintenance please try again later',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   color: AppColors.textSecondary,
                   height: 1.5,
@@ -93,7 +93,7 @@ class MaintenanceScreen extends StatelessWidget {
                           )
                         : Text(
                             'Retry',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.whiteColor,

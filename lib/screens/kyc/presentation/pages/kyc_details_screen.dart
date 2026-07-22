@@ -296,7 +296,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
       countryListTheme: CountryListThemeData(
         flagSize: 25,
         backgroundColor: AppColors.whiteColor,
-        textStyle: TextStyle(fontSize: 16, color: AppColors.textPrimary),
+        textStyle: AppTextStyles.bodyText.copyWith(fontSize: 16, color: AppColors.textPrimary),
         bottomSheetHeight: 500,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20.0),
@@ -415,7 +415,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
               // Section Title
               Text(
                 'Personal Details',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textPrimary,
@@ -511,7 +511,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                         ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
                         : Text(
                           'Save',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.whiteColor,
@@ -544,10 +544,10 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         style: AppTextStyles.black16400h1_5,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(
+          labelStyle: AppTextStyles.bodyText.copyWith(
             color: hasError ? AppColors.error : AppColors.textGrey,
           ),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -573,7 +573,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
             borderSide: BorderSide(color: AppColors.error),
           ),
           errorText: errorText,
-          helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
+          helperStyle: AppTextStyles.bodyText.copyWith(color: AppColors.error, fontSize: 10.sp),
         ),
       ),
     );
@@ -590,10 +590,10 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         style: AppTextStyles.black16400h1_5,
         decoration: InputDecoration(
           labelText: 'Date of Birth (yyyy-MM-dd)',
-          labelStyle: TextStyle(
+          labelStyle: AppTextStyles.bodyText.copyWith(
             color: hasError ? AppColors.error : AppColors.textGrey,
           ),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -624,7 +624,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
             ),
           ),
           errorText: _dobError,
-          helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
+          helperStyle: AppTextStyles.bodyText.copyWith(color: AppColors.error, fontSize: 10.sp),
         ),
       ),
     );
@@ -652,7 +652,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                 _selectedCountryFlag.isNotEmpty
                     ? _selectedCountryFlag
                     : "🌐 +--",
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   color: AppColors.textPrimary,
                 ),
@@ -670,13 +670,13 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                 _PhoneDigitsLimitFormatter(() => _maxPhoneDigits),
               ],
               onChanged: (_) => _formatPhoneInput(),
-              style: TextStyle(color: AppColors.textPrimary),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 labelText: 'Phone Number',
-                labelStyle: TextStyle(
+                labelStyle: AppTextStyles.bodyText.copyWith(
                   color: hasError ? AppColors.error : AppColors.textGrey,
                 ),
-                floatingLabelStyle: TextStyle(color: AppColors.primary),
+                floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
                 counterText: '',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -703,7 +703,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                   vertical: 16.h,
                 ),
                 errorText: _phoneError,
-                helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
+                helperStyle: AppTextStyles.bodyText.copyWith(color: AppColors.error, fontSize: 10.sp),
               ),
               validator: (value) {
                 final digits = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
@@ -733,10 +733,10 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           onTap: () => _showCountryOptions(),
           decoration: InputDecoration(
             labelText: 'Country',
-            labelStyle: TextStyle(
+            labelStyle: AppTextStyles.bodyText.copyWith(
               color: hasError ? AppColors.error : AppColors.textGrey,
             ),
-            floatingLabelStyle: TextStyle(color: AppColors.primary),
+            floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16.w,
               vertical: 16.h,
@@ -785,7 +785,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
               ),
             ),
             errorText: _countryError,
-            helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
+            helperStyle: AppTextStyles.bodyText.copyWith(color: AppColors.error, fontSize: 10.sp),
           ),
         ),
       ),
@@ -812,10 +812,10 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                           : null,
                   decoration: InputDecoration(
                     labelText: 'State',
-                    labelStyle: TextStyle(
+                    labelStyle: AppTextStyles.bodyText.copyWith(
                       color: hasError ? AppColors.error : AppColors.textGrey,
                     ),
-                    floatingLabelStyle: TextStyle(color: AppColors.primary),
+                    floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 16.w,
                       vertical: 16.h,
@@ -871,7 +871,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                       ),
                     ),
                     errorText: _stateError,
-                    helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
+                    helperStyle: AppTextStyles.bodyText.copyWith(color: AppColors.error, fontSize: 10.sp),
                   ),
                 ),
       ),
@@ -897,10 +897,10 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         onTap: () => _showTitleOptions(),
         decoration: InputDecoration(
           labelText: languageService.tr('kyc_details_title'),
-          labelStyle: TextStyle(
+          labelStyle: AppTextStyles.bodyText.copyWith(
             color: hasError ? AppColors.error : AppColors.textGrey,
           ),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -933,7 +933,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
             ),
           ),
           errorText: _titleError,
-          helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
+          helperStyle: AppTextStyles.bodyText.copyWith(color: AppColors.error, fontSize: 10.sp),
         ),
       ),
     );
@@ -964,7 +964,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                 SizedBox(height: 24.h),
                 Text(
                   'Select Title',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -1002,7 +1002,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                                 Expanded(
                                   child: Text(
                                     title,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 16.sp,
                                       color:
                                           isSelected
@@ -1046,10 +1046,10 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
         onTap: () => _showGenderOptions(),
         decoration: InputDecoration(
           labelText: 'Gender',
-          labelStyle: TextStyle(
+          labelStyle: AppTextStyles.bodyText.copyWith(
             color: hasError ? AppColors.error : AppColors.textGrey,
           ),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -1082,7 +1082,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
             ),
           ),
           errorText: _genderError,
-          helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
+          helperStyle: AppTextStyles.bodyText.copyWith(color: AppColors.error, fontSize: 10.sp),
         ),
       ),
     );
@@ -1113,7 +1113,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                 SizedBox(height: 24.h),
                 Text(
                   'Select Gender',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -1151,7 +1151,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                                 Expanded(
                                   child: Text(
                                     gender,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 16.sp,
                                       color:
                                           isSelected
@@ -1202,10 +1202,10 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                           : null,
                   decoration: InputDecoration(
                     labelText: 'City',
-                    labelStyle: TextStyle(
+                    labelStyle: AppTextStyles.bodyText.copyWith(
                       color: hasError ? AppColors.error : AppColors.textGrey,
                     ),
-                    floatingLabelStyle: TextStyle(color: AppColors.primary),
+                    floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 16.w,
                       vertical: 16.h,
@@ -1261,7 +1261,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                       ),
                     ),
                     errorText: _cityError,
-                    helperStyle: TextStyle(color: AppColors.error, fontSize: 10.sp),
+                    helperStyle: AppTextStyles.bodyText.copyWith(color: AppColors.error, fontSize: 10.sp),
                   ),
                 ),
       ),
@@ -1304,7 +1304,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                   SizedBox(height: 10.h),
                   Text(
                     'Select Country',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -1379,7 +1379,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                               SizedBox(height: 16.h),
                               Text(
                                 'No countries found',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16.sp,
                                   color: AppColors.textGrey,
                                 ),
@@ -1420,7 +1420,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                                   Expanded(
                                     child: Text(
                                       country.name!,
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 16.sp,
                                         color:
                                             isSelected
@@ -1490,7 +1490,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                   SizedBox(height: 24.h),
                   Text(
                     'Select State',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -1561,7 +1561,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                               SizedBox(height: 16.h),
                               Text(
                                 'No states found',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16.sp,
                                   color: AppColors.textGrey,
                                 ),
@@ -1602,7 +1602,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                                   Expanded(
                                     child: Text(
                                       state.name,
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 16.sp,
                                         color:
                                             isSelected
@@ -1672,7 +1672,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                   SizedBox(height: 24.h),
                   Text(
                     'Select City',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -1743,7 +1743,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                               SizedBox(height: 16.h),
                               Text(
                                 'No cities found',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16.sp,
                                   color: AppColors.textGrey,
                                 ),
@@ -1783,7 +1783,7 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
                                   Expanded(
                                     child: Text(
                                       city.name,
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 16.sp,
                                         color:
                                             isSelected

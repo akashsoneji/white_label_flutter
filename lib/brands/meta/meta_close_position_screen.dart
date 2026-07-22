@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -213,7 +214,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(parts.big,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: color,
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w700,
@@ -224,7 +225,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
               Transform.translate(
                 offset: Offset(0, -4.h),
                 child: Text(parts.small,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: color,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
@@ -297,7 +298,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                     FilteringTextInputFormatter.allow(
                         RegExp(r'^\d*\.?\d{0,3}')),
                   ],
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: color,
                     fontSize: 14.sp,
                     fontWeight:
@@ -323,7 +324,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                 )
               : Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: color,
                     fontSize: 14.sp,
                     fontWeight:
@@ -382,7 +383,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
           children: [
             Text(
               'Close position #${p.orderId}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.mainText(c),
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
@@ -391,7 +392,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
             SizedBox(height: 2.h),
             Text(
               '${isBuy ? 'buy' : 'sell'} ${p.volume.toStringAsFixed(2)} ${p.symbol} at ${p.entryPrice}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.subText(c),
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w400,
@@ -410,7 +411,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                 children: [
                   Text(
                     Get.find<LanguageService>().tr('meta_close_mode'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: MetaTheme.subText(c),
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
@@ -430,7 +431,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                     ),
                     child: Text(
                       isPartial ? 'PARTIAL' : 'FULL',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: isPartial
                             ? MetaTheme.buy(c)
                             : MetaTheme.subText(c),
@@ -471,7 +472,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                 padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
                 child: Text(
                   Get.find<LanguageService>().tr('meta_close_partial_hint'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: MetaTheme.subText(c).withValues(alpha: 0.7),
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w400,
@@ -538,7 +539,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                 child: Row(
                   children: [
                     Text(Get.find<LanguageService>().tr('meta_close_fill_policy'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.mainText(c),
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -551,7 +552,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                         icon: Icon(Icons.expand_more,
                             color: MetaTheme.subText(c), size: 18.sp),
                         iconSize: 18,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c),
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
@@ -596,7 +597,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
               child: Text(
                 'Attention! The trade will be executed at market conditions, '
                 'difference with requested price may be significant!',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
@@ -648,7 +649,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                                 : (isLoss
                                     ? 'CLOSE WITH LOSS'
                                     : 'CLOSE WITH PROFIT'),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: btnColor,
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -658,7 +659,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                           SizedBox(width: 6.w),
                           Text(
                             _fmtUSD(profit),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: btnColor,
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w700,
@@ -706,7 +707,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
             Expanded(
               child: Center(
                 child: Text(label,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: MetaTheme.mainText(c),
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,

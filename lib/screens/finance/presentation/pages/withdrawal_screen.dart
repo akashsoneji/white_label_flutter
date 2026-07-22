@@ -320,8 +320,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         ),
         decoration: InputDecoration(
           labelText: 'Withdrawal Method',
-          labelStyle: TextStyle(color: AppColors.textGrey),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -368,8 +368,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         ),
         decoration: InputDecoration(
           labelText: 'Withdraw From',
-          labelStyle: TextStyle(color: AppColors.textGrey),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -442,8 +442,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         ),
         decoration: InputDecoration(
           labelText: 'Bank Account',
-          labelStyle: TextStyle(color: AppColors.textGrey),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -502,7 +502,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   Expanded(
                     child: Text(
                       'No crypto withdrawal methods available',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
                       ),
@@ -536,7 +536,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   SizedBox(width: 8.w),
                   Text(
                     'Add Method',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                     ),
@@ -597,8 +597,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         ),
         decoration: InputDecoration(
           labelText: 'Crypto Type',
-          labelStyle: TextStyle(color: AppColors.textGrey),
-          floatingLabelStyle: TextStyle(color: AppColors.primary),
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -626,7 +626,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
 
   Widget _buildAmountField() {
     return RTLHelper.rtlTextField(
-      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400),
+      style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w400),
       controller: amountController,
       focusNode: amountFocusNode,
       keyboardType: TextInputType.numberWithOptions(
@@ -639,8 +639,8 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
       ],
       decoration: InputDecoration(
         labelText: 'Amount',
-        labelStyle: TextStyle(color: AppColors.textGrey),
-        floatingLabelStyle: TextStyle(color: AppColors.primary),
+        labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+        floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -697,7 +697,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
               children: [
                 TextSpan(
                   text: 'I confirm the amount is correct. ',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w400,
@@ -705,7 +705,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                 ),
                 TextSpan(
                   text: 'Term & Condition.',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.primary,
                     fontWeight: FontWeight.w500,
@@ -763,7 +763,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
               Expanded(
                 child: Text(
                   languageService.tr('withdrawal_otp_sent'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w500,
@@ -792,7 +792,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(index == 0 ? 6 : 1),
       ],
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 20.sp,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
@@ -875,7 +875,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(6),
           ],
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -950,7 +950,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(1),
             ],
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -1101,7 +1101,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             Expanded(
               child: Text(
                 _validationMessage.value,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: Colors.red,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
@@ -1162,7 +1162,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                     controller.isOtpSent.value
                         ? 'Submit Withdrawal'
                         : 'Send OTP',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.whiteColor,
@@ -1197,7 +1197,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                 SizedBox(height: 24.h),
                 Text(
                   'Select Withdrawal Method',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -1246,7 +1246,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                                 Expanded(
                                   child: Text(
                                     method.methodName!.camelCase ?? '',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 16.sp,
                                       color:
                                           isSelected
@@ -1301,11 +1301,11 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
 
           if (!hasMT5Accounts && !hasWallet) {
             return Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(24.0),
               child: Center(
                 child: Text(
                   languageService.tr('common_no_accounts'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1361,7 +1361,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                           ),
                           child: Text(
                             'Wallet',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
                               color: AppColors.primary,
@@ -1373,7 +1373,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                         Expanded(
                           child: Text(
                             wallet.walletId ?? "-",
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w600,
                               color:
@@ -1386,7 +1386,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                         // Wallet Balance
                         Text(
                           "\$ ${wallet.walletBalance ?? '0.00'}",
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                             color:
@@ -1441,7 +1441,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                           ),
                           child: Text(
                             account.masterGroupId,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
                               color: AppColors.primary,
@@ -1455,7 +1455,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                         Expanded(
                           child: Text(
                             account.metaAccountNumber,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w600,
                               color:
@@ -1469,7 +1469,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                         // Balance
                         Text(
                           "\$ ${account.freeMargin}",
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                             color:
@@ -1530,7 +1530,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   // Title
                   Text(
                     'Select Bank Account',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -1548,7 +1548,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                     SizedBox(height: 12.h),
                     Text(
                       'No bank account found',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -1557,7 +1557,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                     SizedBox(height: 6.h),
                     Text(
                       'Please add a bank account to proceed with withdrawal.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         color: AppColors.textGrey,
                         height: 1.4,
@@ -1585,7 +1585,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                         icon: Icon(Icons.add, size: 20.sp),
                         label: Text(
                           'Add Bank Account',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1639,7 +1639,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                                         if (displayLabel.isNotEmpty)
                                           Text(
                                             displayLabel,
-                                            style: TextStyle(
+                                            style: AppTextStyles.bodyText.copyWith(
                                               fontSize: 15.sp,
                                               fontWeight:
                                                   isSelected
@@ -1654,7 +1654,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                                         if (accountNumber.isNotEmpty)
                                           Text(
                                             accountNumber,
-                                            style: TextStyle(
+                                            style: AppTextStyles.bodyText.copyWith(
                                               fontSize: 13.sp,
                                               color:
                                                   isSelected
@@ -1703,7 +1703,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
               controller.noDataMessage.value.isNotEmpty
                   ? controller.noDataMessage.value
                   : 'No data available',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -1713,7 +1713,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             SizedBox(height: 16.h),
             Text(
               'Please complete the required verification or contact support for assistance.',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 color: AppColors.icongrey,
                 height: 1.5,
@@ -1739,7 +1739,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                 ),
                 child: Text(
                   'Complete Verification',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.whiteColor,
@@ -1793,7 +1793,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                     SizedBox(height: 16.h),
                     Text(
                       'No crypto withdrawal methods available',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -1803,7 +1803,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                     SizedBox(height: 8.h),
                     Text(
                       'Please add a withdrawal method to continue',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
                       ),
@@ -1835,7 +1835,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                           SizedBox(width: 8.w),
                           Text(
                             'Add Method',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                             ),
@@ -1865,7 +1865,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   SizedBox(height: 16.h),
                   Text(
                     'Select Crypto Type',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -1932,7 +1932,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                                     children: [
                                       Text(
                                         displayText,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 16.sp,
                                           color:
                                               isSelected

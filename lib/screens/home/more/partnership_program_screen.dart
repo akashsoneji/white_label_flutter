@@ -143,7 +143,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
     return Container(
       width: 163.5,
       height: 98,
-      padding: const EdgeInsets.fromLTRB(14, 16, 14, 16),
+      padding: EdgeInsets.fromLTRB(14, 16, 14, 16),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(10),
@@ -317,7 +317,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                           child: Center(
                             child: Text(
                               'IB Application',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w500,
                                 height: 1.4,
@@ -358,7 +358,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                     // Content
                     Text(
                       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w400,
                         color: AppColors.textSecondary,
@@ -400,7 +400,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                         Expanded(
                           child: Text(
                             'I agree to the IB Terms',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w400,
                               height: 1.58,
@@ -438,7 +438,7 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                         ),
                         child: Text(
                           'Submit',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.whiteColor,

@@ -475,7 +475,7 @@ class BonusScreen extends StatelessWidget {
               SizedBox(height: 6.h),
               Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                   color: isActive
@@ -593,7 +593,7 @@ class BonusScreen extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Deposit of \$${dep.amount}',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textPrimary,
@@ -602,7 +602,7 @@ class BonusScreen extends StatelessWidget {
                                   SizedBox(height: 2.h),
                                   Text(
                                     'Ref: ${dep.referenceNumber}  •  Account: ${dep.mt5AccountId}',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w400,
                                       color: AppColors.textSecondary,
@@ -629,7 +629,7 @@ class BonusScreen extends StatelessWidget {
                                   SizedBox(width: 4.w),
                                   Text(
                                     '${eligibleList.length} ${eligibleList.length == 1 ? "Bonus" : "Bonuses"}',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 11.sp,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.primary,
@@ -681,7 +681,7 @@ class BonusScreen extends StatelessWidget {
                                           children: [
                                             Text(
                                               '${bonus.bonusPercentage}%',
-                                              style: TextStyle(
+                                              style: AppTextStyles.bodyText.copyWith(
                                                 fontSize: 26.sp,
                                                 fontWeight: FontWeight.bold,
                                                 color: const Color(0xFF10B981),
@@ -691,7 +691,7 @@ class BonusScreen extends StatelessWidget {
                                             SizedBox(height: 2.h),
                                             Text(
                                               '${bonus.bonusType.capitalizeFirst} Bonus',
-                                              style: TextStyle(
+                                              style: AppTextStyles.bodyText.copyWith(
                                                 fontSize: 14.sp,
                                                 fontWeight: FontWeight.w600,
                                                 color: AppColors.textPrimary,
@@ -700,7 +700,7 @@ class BonusScreen extends StatelessWidget {
                                             SizedBox(height: 2.h),
                                             Text(
                                               'Deposit Bonus available.',
-                                              style: TextStyle(
+                                              style: AppTextStyles.bodyText.copyWith(
                                                 fontSize: 12.sp,
                                                 color: AppColors.textSecondary,
                                               ),
@@ -717,7 +717,7 @@ class BonusScreen extends StatelessWidget {
                                         ),
                                         child: Text(
                                           'REQUEST',
-                                          style: TextStyle(
+                                          style: AppTextStyles.bodyText.copyWith(
                                             fontSize: 10.sp,
                                             fontWeight: FontWeight.w600,
                                             color: AppColors.textSecondary,
@@ -731,7 +731,7 @@ class BonusScreen extends StatelessWidget {
                                   // Allowed groups
                                   Text(
                                     'ALLOWED GROUPS',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textSecondary,
@@ -747,7 +747,7 @@ class BonusScreen extends StatelessWidget {
                                   ),
                                   child: Text(
                                     'All Groups',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 11.sp,
                                       fontWeight: FontWeight.w600,
                                       color: const Color(0xFF10B981),
@@ -802,7 +802,7 @@ class BonusScreen extends StatelessWidget {
                                     ),
                                     child: Text(
                                       'Claim Reward',
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.isDarkMode ? Colors.black : Colors.white,
@@ -833,7 +833,7 @@ class BonusScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 9.sp,
             fontWeight: FontWeight.bold,
             color: AppColors.textSecondary,
@@ -843,7 +843,7 @@ class BonusScreen extends StatelessWidget {
         SizedBox(height: 2.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -943,7 +943,7 @@ class BonusScreen extends StatelessWidget {
                             children: [
                               Text(
                                 claim.bonusAmount,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 22.sp,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.textPrimary,
@@ -952,7 +952,7 @@ class BonusScreen extends StatelessWidget {
                               SizedBox(height: 2.h),
                               Text(
                                 '${claim.bonusPercentage} ${claim.bonusType.capitalizeFirst} Bonus',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primary,
@@ -968,7 +968,7 @@ class BonusScreen extends StatelessWidget {
                             SizedBox(height: 4.h),
                             Text(
                               _formatDateTime(claim.claimDate),
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.textSecondary,
                               ),
@@ -1011,7 +1011,7 @@ class BonusScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Trading Progress',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
@@ -1019,7 +1019,7 @@ class BonusScreen extends StatelessWidget {
                           ),
                           Text(
                             '${(progressPercent * 100).toStringAsFixed(1)}%',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
@@ -1049,7 +1049,7 @@ class BonusScreen extends StatelessWidget {
                         children: [
                           Text(
                             '${claim.currentLots} / ${claim.lotSize} Lots',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
@@ -1069,7 +1069,7 @@ class BonusScreen extends StatelessWidget {
                                 claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
                                     ? 'Expired'
                                     : '${claim.remainingDays} left',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.w700,
                                   color: claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
@@ -1087,7 +1087,7 @@ class BonusScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Remaining Time',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
@@ -1107,7 +1107,7 @@ class BonusScreen extends StatelessWidget {
                                 claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
                                     ? 'Expired'
                                     : claim.remainingDays,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.w700,
                                   color: claim.remainingDays.isEmpty || claim.remainingDays.toLowerCase().contains('expired')
@@ -1180,7 +1180,7 @@ class BonusScreen extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 11.sp,
           fontWeight: FontWeight.w600,
           color: fg,
@@ -1214,7 +1214,7 @@ class BonusScreen extends StatelessWidget {
             SizedBox(height: 16.h),
             Text(
               message,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
@@ -1262,7 +1262,7 @@ class BonusScreen extends StatelessWidget {
           SizedBox(height: 20.h),
           Text(
             'No Eligible Deposits Found',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -1272,7 +1272,7 @@ class BonusScreen extends StatelessWidget {
           SizedBox(height: 8.h),
           Text(
             'You have no recent deposits that are eligible for a bonus claim right now.',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w400,
               color: AppColors.textSecondary,
@@ -1312,7 +1312,7 @@ class BonusScreen extends StatelessWidget {
               ),
               child: Text(
                 'Make a Deposit',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1388,7 +1388,7 @@ class BonusScreen extends StatelessWidget {
                           SizedBox(width: 10.w),
                           Text(
                             'Bonus Confirmation',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
@@ -1411,18 +1411,18 @@ class BonusScreen extends StatelessWidget {
                   // Paragraph text
                   RichText(
                     text: TextSpan(
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textPrimary,
                         height: 1.4,
                       ),
                       children: [
-                        const TextSpan(text: 'You are about to claim the '),
+                        TextSpan(text: 'You are about to claim the '),
                         TextSpan(
                           text: '${bonus.bonusPercentage}% ${bonus.bonusType}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
                         ),
-                        const TextSpan(text: ' bonus.'),
+                        TextSpan(text: ' bonus.'),
                       ],
                     ),
                   ),
@@ -1464,7 +1464,7 @@ class BonusScreen extends StatelessWidget {
                   // Allowed accounts / groups
                   Text(
                     'ALLOWED ACCOUNTS / GROUPS',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textSecondary,
@@ -1491,7 +1491,7 @@ class BonusScreen extends StatelessWidget {
                       ),
                       child: Text(
                         'All Groups',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF10B981),
@@ -1525,7 +1525,7 @@ class BonusScreen extends StatelessWidget {
                                 child: Text(
                                   'Cancel',
                                   maxLines: 1,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
@@ -1579,7 +1579,7 @@ class BonusScreen extends StatelessWidget {
                                       child: Text(
                                         'Confirm & Claim',
                                         maxLines: 1,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.isDarkMode ? Colors.black : Colors.white,
@@ -1622,7 +1622,7 @@ class BonusScreen extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 8.sp,
               fontWeight: FontWeight.bold,
               color: AppColors.textSecondary,
@@ -1633,7 +1633,7 @@ class BonusScreen extends StatelessWidget {
           SizedBox(height: 4.h),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,

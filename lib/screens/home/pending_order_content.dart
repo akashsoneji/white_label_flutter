@@ -1740,7 +1740,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                     // Title
                     Text(
                       'Select Order Type',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -1779,7 +1779,7 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                                 child: Center(
                                   child: Text(
                                     option,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w500,
                                       color:

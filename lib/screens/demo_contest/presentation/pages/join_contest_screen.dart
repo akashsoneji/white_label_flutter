@@ -56,7 +56,7 @@ class _JoinContestScreenState extends State<JoinContestScreen>
           unselectedLabelColor: AppColors.textGrey,
           indicatorColor: AppColors.primary,
           indicatorWeight: 3,
-          labelStyle: TextStyle(
+          labelStyle: AppTextStyles.bodyText.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 13.sp,
           ),
@@ -179,12 +179,12 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('🎯', style: TextStyle(fontSize: 60.sp)),
+            Text('🎯', style: AppTextStyles.bodyText.copyWith(fontSize: 60.sp)),
             SizedBox(height: 14.h),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
@@ -194,7 +194,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               desc,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 color: AppColors.textGrey,
                 height: 1.4,

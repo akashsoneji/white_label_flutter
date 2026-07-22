@@ -119,13 +119,13 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                           ),
                           child: TextField(
                             controller: _searchController,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               color: AppColors.textPrimary,
                             ),
                             decoration: InputDecoration(
                               hintText: 'Search copier...',
-                              hintStyle: TextStyle(
+                              hintStyle: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 color: AppColors.textGrey,
                               ),
@@ -160,7 +160,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                               value: controller.planFilter.value,
                               hint: Text(
                                 'All plans',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: AppColors.textGrey,
                                 ),
@@ -170,7 +170,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                                 size: 16.r,
                                 color: AppColors.textGrey,
                               ),
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
@@ -185,7 +185,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                                   value: null,
                                   child: Text(
                                     'All plans',
-                                    style: TextStyle(fontSize: 12.sp),
+                                    style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp),
                                   ),
                                 ),
                                 ...plans.map(
@@ -193,7 +193,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                                     value: p.id,
                                     child: Text(
                                       p.planName,
-                                      style: TextStyle(fontSize: 12.sp),
+                                      style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp),
                                     ),
                                   ),
                                 ),
@@ -215,7 +215,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                 final allCopiers = controller.copiers;
 
                 if (loading && allCopiers.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 }
 
                 Widget listChild;
@@ -240,7 +240,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                             Text(
                               err,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 color: AppColors.textPrimary,
                               ),
@@ -254,7 +254,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                               ),
                               child: Text(
                                 'Retry',
-                                style: TextStyle(color: AppColors.onColoredBackground),
+                                style: AppTextStyles.bodyText.copyWith(color: AppColors.onColoredBackground),
                               ),
                             ),
                           ],
@@ -271,7 +271,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
                         alignment: Alignment.center,
                         child: Text(
                           'No copiers found matching filters.',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
                           ),
@@ -392,7 +392,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 9.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.textGrey,
@@ -402,7 +402,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
           SizedBox(height: 4.h),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.bold,
               color: valueColor ?? AppColors.textPrimary,
@@ -411,7 +411,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
           SizedBox(height: 2.h),
           Text(
             desc,
-            style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey),
           ),
         ],
       ),
@@ -499,7 +499,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                 color: isSelected ? AppColors.primary : AppColors.textPrimary,
@@ -517,7 +517,7 @@ class _MyCopiesScreenState extends State<MyCopiesScreen> {
               ),
               child: Text(
                 count.toString(),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 9.sp,
                   fontWeight: FontWeight.bold,
                   color: isSelected ? AppColors.onColoredBackground : AppColors.textGrey,
@@ -610,7 +610,7 @@ class _CopierCardItem extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.userName,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
@@ -627,7 +627,7 @@ class _CopierCardItem extends StatelessWidget {
                   ),
                   child: Text(
                     status.toUpperCase(),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.w800,
                       color: _getStatusColor(status),
@@ -643,7 +643,7 @@ class _CopierCardItem extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 2.h),
             child: Text(
               '${item.planName}  •  ${item.commissionDisplay}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 color: AppColors.textGrey,
                 fontWeight: FontWeight.w600,
@@ -738,7 +738,7 @@ class _CopierCardItem extends StatelessWidget {
                   ),
                   child: Text(
                     'Edit Settings',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primary,
@@ -757,7 +757,7 @@ class _CopierCardItem extends StatelessWidget {
                     ),
                     child: Text(
                       isPaused ? 'Resume' : 'Pause',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
                         color: isPaused ? AppColors.green : AppColors.warning,
@@ -783,7 +783,7 @@ class _CopierCardItem extends StatelessWidget {
                     ),
                     child: Text(
                       'Stop Copy',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -817,7 +817,7 @@ class _CopierCardItem extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 8.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.textGrey,
@@ -827,7 +827,7 @@ class _CopierCardItem extends StatelessWidget {
           SizedBox(height: 3.h),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
               color: valueColor ?? AppColors.textPrimary,
@@ -859,7 +859,7 @@ class _CopierCardItem extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
               TextButton(
                 onPressed: () async {
@@ -884,7 +884,7 @@ class _CopierCardItem extends StatelessWidget {
                 },
                 child: Text(
                   item.status.toLowerCase() == 'paused' ? 'Resume' : 'Pause',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color:
                         item.status.toLowerCase() == 'paused'
                             ? AppColors.green
@@ -902,14 +902,14 @@ class _CopierCardItem extends StatelessWidget {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: const Text('Stop Copy'),
-            content: const Text(
+            title: Text('Stop Copy'),
+            content: Text(
               'Are you sure you want to permanently stop copying for this investor? This action cannot be undone.',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
               TextButton(
                 onPressed: () async {
@@ -927,7 +927,7 @@ class _CopierCardItem extends StatelessWidget {
                     );
                   }
                 },
-                child: Text('Stop', style: TextStyle(color: AppColors.error)),
+                child: Text('Stop', style: AppTextStyles.bodyText.copyWith(color: AppColors.error)),
               ),
             ],
           ),

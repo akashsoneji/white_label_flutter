@@ -68,7 +68,7 @@ class _GoogleLoginOtpScreenState extends State<GoogleLoginOtpScreen> {
                   SizedBox(height: 12.h),
                   Text(
                     '${_languageService.tr('two_factor_login_description')} $_email',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       color: AppColors.textGrey,
                       height: 1.5,
@@ -100,7 +100,7 @@ class _GoogleLoginOtpScreenState extends State<GoogleLoginOtpScreen> {
             ),
             Obx(() {
               if (_authController.isLoading) {
-                return const Center(
+                return Center(
                   child: CommonLoadingWidget(isFullScreen: true),
                 );
               }

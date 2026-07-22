@@ -220,7 +220,7 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
     return [
       TextSpan(
         text: firstPart,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 12.sp,
           color: color,
           fontWeight: FontWeight.normal,
@@ -229,7 +229,7 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       if (secondPart.isNotEmpty)
         TextSpan(
           text: secondPart,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             color: color,
             fontWeight: FontWeight.bold,
@@ -255,7 +255,7 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
   //   return [
   //     TextSpan(
   //       text: firstPart,
-  //       style: TextStyle(
+  //       style: AppTextStyles.bodyText.copyWith(
   //         fontSize: 14,
   //         color: color,
   //         fontWeight: FontWeight.normal,
@@ -264,7 +264,7 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
   //     if (secondPart.isNotEmpty)
   //       TextSpan(
   //         text: secondPart,
-  //         style: TextStyle(
+  //         style: AppTextStyles.bodyText.copyWith(
   //           fontSize: 20,
   //           color: color,
   //           fontWeight: FontWeight.bold,
@@ -1080,7 +1080,7 @@ Placing Order:
                   children: [
                     Text(
                       'Symbol: $selectedSymbol',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8),
                     Text(
@@ -1091,7 +1091,7 @@ Placing Order:
                     ),
                     Text(
                       'Market Price (Alert): ${PrecisionHelper.formatPrice(marketPrice, decimals: _getCurrentDigits())}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.blue,
                       ),
@@ -1099,7 +1099,7 @@ Placing Order:
                     SizedBox(height: 16),
                     Text(
                       'Monitoring Status:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
                     ),
                     Text('Active: ${status['isMonitoring']}'),
                     Text('Active Alerts: ${status['activeAlertsCount']}'),
@@ -1108,7 +1108,7 @@ Placing Order:
                         (status['alerts'] as List).isNotEmpty) ...[
                       Text(
                         'Active Alerts:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
                       ),
                       ...(status['alerts'] as List).map(
                         (alert) => Padding(
@@ -1121,12 +1121,12 @@ Placing Order:
                     ] else
                       Text(
                         'No active alerts',
-                        style: TextStyle(color: AppColors.textGrey),
+                        style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                       ),
                     SizedBox(height: 16),
                     Text(
                       'Test Actions:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 8),
                     Row(
@@ -1156,7 +1156,7 @@ Placing Order:
                             ),
                             child: Text(
                               'Add Test Alert\n(1.80950 above)',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 10,
                                 color: AppColors.whiteColor,
                               ),
@@ -1180,7 +1180,7 @@ Placing Order:
                             ),
                             child: Text(
                               'Test Trigger\nNow',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 10,
                                 color: AppColors.whiteColor,
                               ),
@@ -1209,7 +1209,7 @@ Placing Order:
                             ),
                             child: Text(
                               'Test Notification\nSystem',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 9,
                                 color: AppColors.whiteColor,
                               ),
@@ -1243,7 +1243,7 @@ Placing Order:
                             ),
                             child: Text(
                               'Fix WebSocket\nConnection',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 9,
                                 color: AppColors.whiteColor,
                               ),
@@ -3030,7 +3030,7 @@ Placing Order:
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   vertical: 8.0,
                   horizontal: 14,
                 ),
@@ -3056,7 +3056,7 @@ Placing Order:
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   vertical: 8.0,
                   horizontal: 14,
                 ),
@@ -3117,7 +3117,7 @@ Placing Order:
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(left: 17.0),
+                            padding: EdgeInsets.only(left: 17.0),
                             child: Container(
                               width: 22.w,
                               height: 22.h,
@@ -3257,7 +3257,7 @@ Placing Order:
                           ),
                           SizedBox(width: 8.w),
                           Padding(
-                            padding: const EdgeInsets.only(right: 14.0),
+                            padding: EdgeInsets.only(right: 14.0),
                             child: Container(
                               width: 22.w,
                               height: 22.h,
@@ -3372,7 +3372,7 @@ Placing Order:
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(left: 17.0),
+                            padding: EdgeInsets.only(left: 17.0),
                             child: Container(
                               width: 22.w,
                               height: 22.h,
@@ -3463,7 +3463,7 @@ Placing Order:
                           ),
                           SizedBox(width: 8.w),
                           Padding(
-                            padding: const EdgeInsets.only(right: 14.0),
+                            padding: EdgeInsets.only(right: 14.0),
                             child: Container(
                               width: 22.w,
                               height: 22.h,
@@ -3696,7 +3696,7 @@ Placing Order:
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: const EdgeInsets.only(left: 17.0),
+                padding: EdgeInsets.only(left: 17.0),
                 child: Container(
                   width: 22.w,
                   height: 22.h,
@@ -3786,7 +3786,7 @@ Placing Order:
               ),
               SizedBox(width: 8.w),
               Padding(
-                padding: const EdgeInsets.only(right: 14.0),
+                padding: EdgeInsets.only(right: 14.0),
                 child: Container(
                   width: 22.w,
                   height: 22.h,
@@ -4028,7 +4028,7 @@ Placing Order:
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 17.0),
+            padding: EdgeInsets.only(left: 17.0),
             child: Container(
               width: 22.w,
               height: 22.h,
@@ -4102,7 +4102,7 @@ Placing Order:
           ),
           SizedBox(width: 8.w),
           Padding(
-            padding: const EdgeInsets.only(right: 14.0),
+            padding: EdgeInsets.only(right: 14.0),
             child: Container(
               width: 22.w,
               height: 22.h,
@@ -4528,7 +4528,7 @@ Placing Order:
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 17.0),
+                        padding: EdgeInsets.only(left: 17.0),
                         child: Container(
                           width: 22.w,
                           height: 22.h,
@@ -4615,7 +4615,7 @@ Placing Order:
                       ),
                       SizedBox(width: 8.w),
                       Padding(
-                        padding: const EdgeInsets.only(right: 14.0),
+                        padding: EdgeInsets.only(right: 14.0),
                         child: Container(
                           width: 22.w,
                           height: 22.h,

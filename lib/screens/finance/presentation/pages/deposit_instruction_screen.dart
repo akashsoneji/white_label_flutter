@@ -154,7 +154,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Center(child: CircularProgressIndicator()),
+            child: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -166,14 +166,14 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Center(
+            child: Center(
               child: Icon(Icons.error_outline, color: Colors.grey),
             ),
           );
         }
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.whiteColor,
             borderRadius: BorderRadius.circular(8),
@@ -192,7 +192,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   color: Colors.grey[200],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Center(
+                child: Center(
                   child: Icon(Icons.error_outline, color: Colors.grey),
                 ),
               );
@@ -279,7 +279,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 leading: Icon(Icons.camera_alt, color: AppColors.textPrimary),
                 title: Text(
                   languageService.tr('deposit_instruction_take_photo'),
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -290,7 +290,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 leading: Icon(Icons.photo_library, color: AppColors.textPrimary),
                 title: Text(
                   languageService.tr('deposit_instruction_choose_from_gallery'),
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                 ),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -364,7 +364,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
 
   Widget _buildBankUI() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -393,40 +393,40 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
               title: Text(
                 'Instruction',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                 ),
               ),
-              childrenPadding: const EdgeInsets.all(16),
+              childrenPadding: EdgeInsets.all(16),
               children: [
                 _buildInstructionItem(
                   'Use Given bank details to make payment.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'You need to take a screenshot of successful payment.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Where UTR / transaction Number is clearly visible.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Upload screenshot in given upload field.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Press submit button to submit your deposit request.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Your payment will be credited into respective account.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem('Once reflected in our bank account.'),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Transaction limit may vary as per your bank.',
                 ),
@@ -434,13 +434,13 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // Bank Name
           if (bankDetail?['bank_name'] != null &&
               bankDetail!['bank_name'].toString().isNotEmpty) ...[
             _buildBankDetailRow('Bank Name', bankDetail!['bank_name']),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
 
           // Bank Holder Name
@@ -450,7 +450,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               'Bank Holder Name',
               bankDetail!['holder_name'].toString(),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
 
           // Account Number
@@ -460,7 +460,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               'Account Number',
               bankDetail!['bank_account_no'].toString(),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
 
           // IFSC Code
@@ -470,7 +470,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               'IFSC Code',
               bankDetail!['ifsc_iban'].toString(),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
           ],
 
           _buildUTRField(),
@@ -481,7 +481,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           //   child: Center(
           //     child: Container(
           //       width: double.infinity,
-          //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+          //       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
           //       decoration: BoxDecoration(
           //         color: Colors.grey[100],
           //         borderRadius: BorderRadius.circular(8),
@@ -501,10 +501,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           //           return Column(
           //             children: [
           //               Icon(Icons.cloud_upload_outlined, size: 32, color: Colors.grey[600]),
-          //               const SizedBox(height: 12),
+          //               SizedBox(height: 12),
           //               Text(
           //                 'Upload file',
-          //                 style: TextStyle(fontSize: 16, color: Colors.grey[600], fontWeight: FontWeight.w500),
+          //                 style: AppTextStyles.bodyText.copyWith(fontSize: 16, color: Colors.grey[600], fontWeight: FontWeight.w500),
           //               ),
           //             ],
           //           );
@@ -518,7 +518,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             child: Center(
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 24,
                 ),
@@ -541,7 +541,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     return Column(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.grey[100],
                             shape: BoxShape.circle,
@@ -552,10 +552,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                             color: Colors.grey[600],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         Text(
                           'Upload file',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16,
                             color: Colors.grey[600],
                             fontWeight: FontWeight.w500,
@@ -568,7 +568,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
 
           // Submit Button
           _buildContinueButton(),
@@ -595,7 +595,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
           children: [
             Text(
               'Transaction ID / UTR',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
@@ -603,7 +603,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             ),
             Text(
               ' *',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.error,
@@ -611,16 +611,16 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         TextField(
           controller: transactionNumberController,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             color: AppColors.textPrimary,
           ),
           decoration: InputDecoration(
             hintText: 'Enter UTR or transaction reference',
-            hintStyle: TextStyle(
+            hintStyle: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               color: Colors.grey,
             ),
@@ -640,21 +640,21 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: AppColors.primary, width: 1.5),
             ),
-            contentPadding: const EdgeInsets.symmetric(
+            contentPadding: EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Text(
           'Transaction ID is filled automatically when you upload your payment screenshot.',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 11.sp,
             color: Colors.grey,
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24),
       ],
     );
   }
@@ -666,13 +666,13 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14,
             color: Colors.grey,
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Row(
           children: [
             Expanded(child: Text(value, style: AppTextStyles.label)),
@@ -686,7 +686,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.all(4),
+                padding: EdgeInsets.all(4),
                 child: SvgPicture.asset(
                   "assets/svg/more/copy.svg",
                   color: AppColors.primary,
@@ -701,7 +701,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
 
   Widget _buildCryptoUI() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -730,30 +730,30 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
               title: Text(
                 'Instruction',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                 ),
               ),
-              childrenPadding: const EdgeInsets.all(16),
+              childrenPadding: EdgeInsets.all(16),
               children: [
                 _buildInstructionItem(
                   'Use Below Give QR Code to make payment via UPI.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Alternatively, enter your UPI ID to make payment.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Enter Amount that you want to transfer and make payment.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Press submit button to submit your deposit request.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Your payment will be credited into respective account once reflected in company\'s account.',
                 ),
@@ -761,21 +761,21 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // QR Code Section (if available)
           if (qrCodePath != null && qrCodePath!.isNotEmpty) ...[
             Text(
               'QR Code',
-              style: const TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 color: Colors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Center(child: _buildQRCodeImage()),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
           ],
 
           // Address Section
@@ -783,15 +783,15 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               bankDetail!['crypto_address'].toString().isNotEmpty) ...[
             Text(
               'Deposit Address',
-              style: const TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 color: Colors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: AppColors.whiteColor,
                 borderRadius: BorderRadius.circular(8),
@@ -802,13 +802,13 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   Expanded(
                     child: Text(
                       bankDetail!['crypto_address'].toString(),
-                      style: const TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   GestureDetector(
                     onTap: () {
                       Clipboard.setData(
@@ -821,7 +821,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                       );
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(4),
+                      padding: EdgeInsets.all(4),
                       child: SvgPicture.asset(
                         "assets/svg/more/copy.svg",
                         color: AppColors.primary,
@@ -831,7 +831,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
           ],
 
           _buildUTRField(),
@@ -842,7 +842,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             child: Center(
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 24,
                 ),
@@ -865,7 +865,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     return Column(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.grey[100],
                             shape: BoxShape.circle,
@@ -876,10 +876,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                             color: Colors.grey[600],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         Text(
                           'Upload file',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16,
                             color: Colors.grey[600],
                             fontWeight: FontWeight.w500,
@@ -893,7 +893,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             ),
           ),
 
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
 
           // Submit Button
           _buildContinueButton(),
@@ -911,7 +911,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
 
   Widget _buildUPI() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -940,30 +940,30 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
               title: Text(
                 'Instruction',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                 ),
               ),
-              childrenPadding: const EdgeInsets.all(16),
+              childrenPadding: EdgeInsets.all(16),
               children: [
                 _buildInstructionItem(
                   'Use Below Give QR Code to make payment via UPI.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Alternatively, enter your UPI ID to make payment.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Enter Amount that you want to transfer and make payment.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Press submit button to submit your deposit request.',
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'Your payment will be credited into respective account once reflected in company\'s account.',
                 ),
@@ -971,21 +971,21 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
 
           // QR Code Section (if available)
           if (qrCodePath != null && qrCodePath!.isNotEmpty) ...[
             Text(
               'QR Code',
-              style: const TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 color: Colors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Center(child: _buildQRCodeImage()),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
           ],
 
           // UPI ID Section
@@ -995,7 +995,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               'Scan UPI',
               bankDetail!['upi_address'].toString(),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
           ],
 
           _buildUTRField(),
@@ -1006,7 +1006,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             child: Center(
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 24,
                 ),
@@ -1029,7 +1029,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     return Column(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.grey[100],
                             shape: BoxShape.circle,
@@ -1040,10 +1040,10 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                             color: Colors.grey[600],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         Text(
                           'Upload file',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16,
                             color: Colors.grey[600],
                             fontWeight: FontWeight.w500,
@@ -1056,7 +1056,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
 
           // Submit Button
           _buildContinueButton(),
@@ -1128,7 +1128,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                   ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
                   : Text(
                     languageService.tr("deposit_confirm_deposit"),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       height: 1.71,
                       fontWeight: FontWeight.w600,
@@ -1142,7 +1142,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
 
   Widget _buildCregisUI() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1168,37 +1168,37 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
               title: Text(
                 'Crypto deposit',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                 ),
               ),
-              childrenPadding: const EdgeInsets.all(16),
+              childrenPadding: EdgeInsets.all(16),
               children: [
                 _buildInstructionItem('Choose a network and amount.'),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 _buildInstructionItem(
                   'We will generate a unique deposit address for this payment.',
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           Text(
             'Network',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14,
               color: AppColors.textGrey,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Obx(() {
             final networks = controller.cregisNetworks;
             if (networks.isEmpty) {
               return Container(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
@@ -1209,14 +1209,14 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 ),
                 child: Text(
                   'Loading networks...',
-                  style: TextStyle(color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                 ),
               );
             }
             return GestureDetector(
               onTap: () => _showCregisNetworkDropdown(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
@@ -1234,7 +1234,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                             : _formatNetworkName(
                               controller.selectedCregisNetwork.value,
                             ),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16,
                           color:
                               controller.selectedCregisNetwork.value.isEmpty
@@ -1249,15 +1249,15 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
             );
           }),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           Obx(() {
             if (controller.cregisDepositAddress.value.isEmpty) {
               return const SizedBox.shrink();
             }
             return Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.only(bottom: 24),
+              padding: EdgeInsets.all(12),
+              margin: EdgeInsets.only(bottom: 24),
               decoration: BoxDecoration(
                 color: Colors.red.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(8),
@@ -1265,16 +1265,16 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.warning_amber_rounded,
                     color: Colors.red,
                     size: 20,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Only send ${_getNetworkCurrency(controller.selectedCregisNetwork.value)} on ${_formatNetworkName(controller.selectedCregisNetwork.value)}. Sending other assets may result in loss.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12,
                         color: Colors.red.shade700,
                         height: 1.4,
@@ -1292,7 +1292,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -1303,16 +1303,16 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                       children: [
                         Text(
                           'Payment page ready',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
                           'Tap Confirm to open the payment page in your browser.',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12,
                             color: AppColors.textGrey,
                           ),
@@ -1320,7 +1320,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                 ],
               );
             }
@@ -1334,19 +1334,19 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
               children: [
                 if (controller.cregisQrPath.value.isNotEmpty) ...[
                   Center(child: _buildQRCodeImage()),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                 ],
                 Text(
                   'Deposit Address',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
                   ),
@@ -1360,14 +1360,14 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                       Expanded(
                         child: Text(
                           controller.cregisDepositAddress.value,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8),
                       GestureDetector(
                         onTap: () {
                           Clipboard.setData(
@@ -1380,7 +1380,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: EdgeInsets.all(4),
                           child: SvgPicture.asset(
                             'assets/svg/more/copy.svg',
                             colorFilter: ColorFilter.mode(
@@ -1393,7 +1393,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
               ],
             );
           }),
@@ -1403,23 +1403,23 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             if (status == 'timeout') {
               return Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
+                padding: EdgeInsets.all(12),
+                margin: EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   'Payment verification timed out. Check Transaction History.',
-                  style: TextStyle(fontSize: 13, color: Colors.orange.shade800),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 13, color: Colors.orange.shade800),
                 ),
               );
             }
             if (status == 'pending') {
               return Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
+                padding: EdgeInsets.all(12),
+                margin: EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: Colors.blue.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
@@ -1434,11 +1434,11 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         color: AppColors.primary,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Waiting for payment... polling…',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13,
                           color: Colors.blue.shade800,
                         ),
@@ -1450,7 +1450,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             }
             return const SizedBox.shrink();
           }),
-          const SizedBox(height: 32),
+          SizedBox(height: 32),
           _buildCregisContinueButton(),
         ],
       ),
@@ -1494,7 +1494,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                       Expanded(
                         child: Text(
                           _formatNetworkName(network),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -1562,7 +1562,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
                         : hasAddress
                         ? languageService.tr('deposit_confirm_deposit')
                         : 'Generate Address',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       height: 1.71,
                       fontWeight: FontWeight.w600,
@@ -1579,7 +1579,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          margin: const EdgeInsets.only(top: 8, right: 8),
+          margin: EdgeInsets.only(top: 8, right: 8),
           width: 4,
           height: 4,
           decoration: BoxDecoration(
@@ -1590,7 +1590,7 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14,
               height: 1.4,
               color: AppColors.textPrimary,

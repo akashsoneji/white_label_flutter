@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -85,7 +86,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
       appBar: AppBar(
         title: Text(
           "Master's Performance",
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -155,7 +156,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           ),
           child:   Text(
             'Set Up Copying',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: AppColors.whiteColor,
@@ -181,7 +182,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
             SizedBox(width: 12),
             Text(
               'Prime_traders',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -209,7 +210,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
               child: Center(
                 child: Text(
                   'Summary',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: _tabIndex == 0 ? AppColors.whiteColor : AppColors.primary,
                     fontWeight: FontWeight.bold,
                   ),
@@ -236,7 +237,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
               child: Center(
                 child: Text(
                   'Trades',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: _tabIndex == 1 ? AppColors.whiteColor : AppColors.primary,
                     fontWeight: FontWeight.bold,
                   ),
@@ -297,7 +298,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                                 ),
                                 child: Text(
                                   trade.type,
-                                  style:   TextStyle(
+                                  style:   AppTextStyles.bodyText.copyWith(
                                     color: AppColors.whiteColor,
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,
@@ -307,7 +308,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                               SizedBox(width: 8),
                               Text(
                                 trade.volume,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.icongrey,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w400,
@@ -318,7 +319,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                           SizedBox(height: 8),
                           Text(
                             trade.symbol,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
@@ -337,7 +338,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                               SizedBox(width: 4),
                               Text(
                                 trade.status,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.icongrey,
                                   fontSize: 12,
                                 ),
@@ -347,7 +348,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                           SizedBox(height: 8),
                           Text(
                             trade.profit,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
@@ -395,7 +396,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 13.5, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 13.5, color: AppColors.textGrey),
           ),
           Expanded(
             child: Padding(
@@ -405,7 +406,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.5,
               fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
@@ -419,19 +420,19 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
   Widget _buildTradeDetailRow(String label, String value) {
     return Row(
       children: [
-        Text(label, style: TextStyle(color: AppColors.textGrey, fontSize: 12)),
+        Text(label, style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 12)),
         SizedBox(width: 4),
         Expanded(
           child: Text(
             ' . ' * 20,
             maxLines: 1,
             overflow: TextOverflow.clip,
-            style: TextStyle(color: AppColors.border, fontSize: 13),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.border, fontSize: 13),
             textAlign: TextAlign.center,
           ),
         ),
         SizedBox(width: 4),
-        Text(value, style: TextStyle(color: AppColors.textGrey, fontSize: 13)),
+        Text(value, style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 13)),
       ],
     );
   }
@@ -478,7 +479,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
   Widget _buildChartYAxisRow(String label) {
     return Row(
       children: [
-        Text(label, style: TextStyle(color: AppColors.textGrey, fontSize: 12)),
+        Text(label, style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 12)),
         SizedBox(width: 8),
         Expanded(child: Container(height: 1, color: AppColors.border)),
       ],
@@ -490,7 +491,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
       title: 'Minimum Investment',
       titleTrailing: Text(
         r'$25',
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+        style: AppTextStyles.bodyText.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -506,7 +507,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                 ),
                 child: Text(
                   '1 RISK',
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ),
               Icon(Icons.info_outline, color: AppColors.textGrey, size: 16),
@@ -524,7 +525,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                   SizedBox(width: 8),
                   Text(
                     'High Achiever',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.icongrey,
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
@@ -551,7 +552,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           SizedBox(height: 16),
           Text(
             'Strategy Description',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w400,
@@ -560,7 +561,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           SizedBox(height: 8),
           Text(
             'welcome to Pipze (A group expert traders.) We are providing safe and secure trading strategies to make profit for our copiers, stay with us and make safe profit.',
-            style: TextStyle(color: AppColors.textGrey, fontSize: 12, height: 1.4),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 12, height: 1.4),
           ),
         ],
       ),
@@ -582,7 +583,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                 children: [
                   Text(
                     'Copiers',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.icongrey,
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
@@ -593,14 +594,14 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                     children: [
                       Text(
                         '138',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
                         ),
                       ),
                       SizedBox(width: 8),
-                      const Row(
+                      Row(
                         children: [
                           Icon(
                             Icons.arrow_upward,
@@ -609,7 +610,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                           ),
                           Text(
                             '35',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.green,
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
@@ -626,7 +627,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           SizedBox(height: 16),
           Text(
             'Profit and Loss',
-            style: TextStyle(color: AppColors.icongrey, fontSize: 10),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.icongrey, fontSize: 10),
           ),
           SizedBox(height: 4),
           Row(
@@ -634,7 +635,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
             children: [
               Text(
                 r'$123.45',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
@@ -642,7 +643,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
               ),
               Text(
                 r'$0.00',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
@@ -686,7 +687,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           color: isSelected ? AppColors.whiteColor : AppColors.textPrimary,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           fontSize: 12,
@@ -705,7 +706,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.icongrey,
             fontSize: 12,
             fontWeight: FontWeight.w400,
@@ -714,7 +715,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
         SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: isPrimaryValue ? AppColors.primary : AppColors.textPrimary,
             fontWeight: FontWeight.w600,
             fontSize: 16,
@@ -745,7 +746,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -772,7 +773,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           children: [
             Text(
               title,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.icongrey,
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -784,7 +785,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
         SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 16, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -819,7 +820,7 @@ class SteppedActivityChart extends StatelessWidget {
           padding: EdgeInsets.only(left: 16, top: 16, bottom: 8),
           child: Text(
             'Activity',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -870,7 +871,7 @@ class SteppedActivityChart extends StatelessWidget {
                         padding: EdgeInsets.only(right: 8),
                         child: Text(
                           '\$${value.toStringAsFixed(0)}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13,
                             color: AppColors.textGrey,
                           ),

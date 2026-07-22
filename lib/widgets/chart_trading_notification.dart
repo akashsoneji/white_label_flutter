@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:crm_app/constants/color.dart';
@@ -52,7 +53,7 @@ class ChartTradingNotification extends StatelessWidget {
           // Notification text
           Text(
             '${notification.symbol} $typeText ${PrecisionHelper.formatVolume(notification.volume)}',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 11.sp,
               fontWeight: FontWeight.w500,
               color: AppColors.whiteColor,
@@ -72,7 +73,7 @@ class ChartTradingNotification extends StatelessWidget {
           else
             Text(
               statusText,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w600,
                 color: leftBorderColor,

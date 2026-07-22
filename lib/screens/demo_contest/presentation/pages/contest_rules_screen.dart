@@ -105,7 +105,7 @@ class ContestRulesScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Text('📜', style: TextStyle(fontSize: 30.sp)),
+                  Text('📜', style: AppTextStyles.bodyText.copyWith(fontSize: 30.sp)),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
@@ -113,7 +113,7 @@ class ContestRulesScreen extends StatelessWidget {
                       children: [
                         Text(
                           languageService.tr('dc_rules_title'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -122,7 +122,7 @@ class ContestRulesScreen extends StatelessWidget {
                         SizedBox(height: 4.h),
                         Text(
                           languageService.tr('dc_rules_subtitle'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                             height: 1.4,
@@ -137,7 +137,7 @@ class ContestRulesScreen extends StatelessWidget {
             SizedBox(height: 18.h),
             Text(
               languageService.tr('dc_universal_rules').toUpperCase(),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w800,
                 color: AppColors.textGrey.withValues(alpha: 0.85),
@@ -149,7 +149,7 @@ class ContestRulesScreen extends StatelessWidget {
             SizedBox(height: 22.h),
             Text(
               languageService.tr('dc_faq').toUpperCase(),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w800,
                 color: AppColors.textGrey.withValues(alpha: 0.85),
@@ -172,7 +172,7 @@ class ContestRulesScreen extends StatelessWidget {
                 child: Text(
                   languageService.tr('dc_rules_footer'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     color: AppColors.textGrey,
                     height: 1.4,
@@ -232,7 +232,7 @@ class _RuleCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10.r),
             ),
             alignment: Alignment.center,
-            child: Text(rule.emoji, style: TextStyle(fontSize: 18.sp)),
+            child: Text(rule.emoji, style: AppTextStyles.bodyText.copyWith(fontSize: 18.sp)),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -241,7 +241,7 @@ class _RuleCard extends StatelessWidget {
               children: [
                 Text(
                   rule.title,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -250,7 +250,7 @@ class _RuleCard extends StatelessWidget {
                 SizedBox(height: 4.h),
                 Text(
                   rule.body,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.textGrey,
                     height: 1.45,

@@ -128,7 +128,7 @@ class KycScaffold extends StatelessWidget {
                     ),
                     child: Text(
                       'Verify\nLater',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -151,7 +151,7 @@ class KycScaffold extends StatelessWidget {
                     child: Text(
                       textAlign: TextAlign.center,
                       'Continue Verification',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                       ),

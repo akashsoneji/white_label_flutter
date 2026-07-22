@@ -1,4 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
@@ -48,11 +49,11 @@ class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScree
         child: Text.rich(
           TextSpan(
             text: languageService.tr('forgot_password_screen_remember_password'),
-            style: TextStyle(color: VantageAuthTheme.muted, fontSize: 13.sp),
+            style: AppTextStyles.bodyText.copyWith(color: VantageAuthTheme.muted, fontSize: 13.sp),
             children: [
               TextSpan(
                 text: languageService.tr('login_screen_sign_in'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: VantageAuthTheme.primary,
                   fontWeight: FontWeight.w700,
                 ),
@@ -66,7 +67,7 @@ class _VantageForgotPasswordScreenState extends State<VantageForgotPasswordScree
           children: [
             Text(
               languageService.tr('forgot_password_screen_title'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: VantageAuthTheme.text,
                 fontSize: 24.sp,
                 fontWeight: FontWeight.w800,

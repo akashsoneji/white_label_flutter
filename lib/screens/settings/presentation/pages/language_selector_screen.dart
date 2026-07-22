@@ -49,7 +49,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
             // Language list
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: 20),
                 children: [
                   // System default option
                   _buildLanguageOption(
@@ -61,12 +61,12 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
                     onTap: () => _selectLanguage('system'),
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // Divider
                   Container(height: 1, color: AppColors.border),
 
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // Supported languages
                   ..._languageService.getSupportedLanguages().entries.map(
@@ -85,14 +85,14 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
 
             // Bottom section with info
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(20),
               child: Column(
                 children: [
                   // RTL info if current language is RTL
                   if (_languageService.isRTL())
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -107,7 +107,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
                             color: AppColors.primary,
                             size: 20,
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               'RTL (Right-to-Left) layout is enabled for this language. The interface will automatically adjust for better readability.',
@@ -120,7 +120,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
                       ),
                     ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
 
                   // Apply button
                   Padding(
@@ -167,7 +167,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
     bool isRTL = false,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color:
             isSelected
@@ -185,7 +185,7 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             child: Row(
               children: [
                 // Language flag/icon
@@ -199,12 +199,12 @@ class _LanguageSelectorScreenState extends State<LanguageSelectorScreen> {
                   child: Center(
                     child: Text(
                       _getLanguageFlag(languageCode),
-                      style: const TextStyle(fontSize: 20),
+                      style: AppTextStyles.bodyText.copyWith(fontSize: 20),
                     ),
                   ),
                 ),
 
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
 
                 // Language info
                 Expanded(
@@ -359,7 +359,7 @@ class LanguageInfoWidget extends StatelessWidget {
     final languageInfo = languageService.getLanguageInfo(languageCode);
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.textGrey,
         borderRadius: BorderRadius.circular(8),
@@ -374,7 +374,7 @@ class LanguageInfoWidget extends StatelessWidget {
             color: AppColors.textSecondary,
             size: 16,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text(
             languageInfo['isRTL'] ? 'RTL Layout' : 'LTR Layout',
             style: AppTextStyles.input.copyWith(color: AppColors.textSecondary),

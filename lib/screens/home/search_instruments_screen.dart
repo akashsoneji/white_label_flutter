@@ -111,7 +111,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
 
       if (_instrumentsController.isLoadingFavorites.value &&
           allInstruments.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
+        return Center(child: CircularProgressIndicator());
       }
 
       if (filtered.isEmpty) {
@@ -167,7 +167,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
   Widget _buildNormalList() {
     return Obx(() {
       if (_searchController2.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return Center(child: CircularProgressIndicator());
       }
       if (_searchController2.filteredSymbols.isEmpty) {
         return _buildNoData();

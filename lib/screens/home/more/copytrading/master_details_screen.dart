@@ -55,7 +55,7 @@ class MasterDetailsScreen extends StatelessWidget {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
         if (controller.errorMessage.value.isNotEmpty) {
           return _ErrorState(
@@ -66,7 +66,7 @@ class MasterDetailsScreen extends StatelessWidget {
 
         final profile = controller.profile.value;
         if (profile == null) {
-          return const Center(child: Text('No data'));
+          return Center(child: Text('No data'));
         }
 
         return RefreshIndicator(
@@ -151,7 +151,7 @@ class _MasterHeroCard extends StatelessWidget {
                       .toUpperCase()
                       .padRight(1)
                       .substring(0, 1),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,
@@ -169,7 +169,7 @@ class _MasterHeroCard extends StatelessWidget {
                           : profile.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -189,7 +189,7 @@ class _MasterHeroCard extends StatelessWidget {
                         SizedBox(width: 8.w),
                         Text(
                           'Expert',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                             fontWeight: FontWeight.w600,
@@ -266,7 +266,7 @@ class _MasterHeroCard extends StatelessWidget {
               ),
               child: Text(
                 'Subscribe',
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, fontWeight: FontWeight.w400),
               ),
             ),
           ),
@@ -274,7 +274,7 @@ class _MasterHeroCard extends StatelessWidget {
           if (minInvestment > 0)
             Text(
               'Minimum investment \$${minInvestment.toString()}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: AppColors.textGrey,
                 fontWeight: FontWeight.w600,
@@ -294,7 +294,7 @@ class _MasterHeroCard extends StatelessWidget {
               children: [
                 Text(
                   'Strategy Description',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
@@ -305,7 +305,7 @@ class _MasterHeroCard extends StatelessWidget {
                   profile.strategyDescription.trim().isEmpty
                       ? 'No strategy description provided.'
                       : profile.strategyDescription,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w600,
@@ -342,7 +342,7 @@ class _HeroStat extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 10.sp,
               color: AppColors.textGrey,
               fontWeight: FontWeight.w700,
@@ -353,7 +353,7 @@ class _HeroStat extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -387,7 +387,7 @@ class _ViewByPlanCard extends StatelessWidget {
         children: [
           Text(
             'View by plan',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -452,7 +452,7 @@ class _PlanChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: selected ? AppColors.onColoredBackground : AppColors.textPrimary,
@@ -506,7 +506,7 @@ class _PerformanceCard extends StatelessWidget {
           children: [
             Text(
               'Performance',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -635,7 +635,7 @@ class _PerfStat extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 11.sp,
               color: AppColors.textGrey,
               fontWeight: FontWeight.w700,
@@ -650,7 +650,7 @@ class _PerfStat extends StatelessWidget {
           SizedBox(height: 8.h),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: valueColor ?? AppColors.textPrimary,
@@ -684,7 +684,7 @@ class _TimeChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 11.sp,
             fontWeight: FontWeight.w600,
             color: selected ? AppColors.onColoredBackground : AppColors.textPrimary,
@@ -744,7 +744,7 @@ class _PerformanceChart extends StatelessWidget {
       children: [
         Text(
           'From master account closed trades (user trade history), not copier copies.',
-          style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 6.h),
         Row(
@@ -777,7 +777,7 @@ class _PerformanceChart extends StatelessWidget {
                 rightTitles: AxisTitles(
                   axisNameWidget: Padding(
                     padding: EdgeInsets.only(bottom: 4.h),
-                    child: Text('Per trade', style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600)),
+                    child: Text('Per trade', style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600)),
                   ),
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -788,7 +788,7 @@ class _PerformanceChart extends StatelessWidget {
                         padding: EdgeInsets.only(left: 4.w),
                         child: Text(
                           '\$${value.toStringAsFixed(1)}',
-                          style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
+                          style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey),
                         ),
                       );
                     },
@@ -798,7 +798,7 @@ class _PerformanceChart extends StatelessWidget {
                 bottomTitles: AxisTitles(
                   axisNameWidget: Padding(
                     padding: EdgeInsets.only(top: 4.h),
-                    child: Text('Cumulative P&L', style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600)),
+                    child: Text('Cumulative P&L', style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600)),
                   ),
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -806,7 +806,7 @@ class _PerformanceChart extends StatelessWidget {
                     getTitlesWidget: (value, meta) {
                       return Padding(
                         padding: EdgeInsets.only(top: 4.h),
-                        child: Text(dateLabel, style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey)),
+                        child: Text(dateLabel, style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey)),
                       );
                     },
                   ),
@@ -821,7 +821,7 @@ class _PerformanceChart extends StatelessWidget {
                         padding: EdgeInsets.only(right: 4.w),
                         child: Text(
                           '\$${value.toStringAsFixed(1)}',
-                          style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
+                          style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey),
                         ),
                       );
                     },
@@ -843,7 +843,7 @@ class _PerformanceChart extends StatelessWidget {
                     }
                     return BarTooltipItem(
                       '$t\nTrade: \$${point.profit.toStringAsFixed(2)}\nCumulative: \$${point.cumulativeProfit.toStringAsFixed(2)}',
-                      TextStyle(fontSize: 10.sp, color: AppColors.onColoredBackground, fontWeight: FontWeight.w600),
+                      AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.onColoredBackground, fontWeight: FontWeight.w600),
                     );
                   },
                 ),
@@ -893,7 +893,7 @@ class _LegendItem extends StatelessWidget {
           ),
         ),
         SizedBox(width: 4.w),
-        Text(label, style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
+        Text(label, style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -1008,7 +1008,7 @@ class _OrdersTableState extends State<_OrdersTable> {
       return Center(
         child: Text(
           'No orders',
-          style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp),
+          style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 12.sp),
         ),
       );
     }
@@ -1084,7 +1084,7 @@ class _OrderCardState extends State<_OrderCard> {
                         children: [
                           Text(
                             item.symbol,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
@@ -1093,7 +1093,7 @@ class _OrderCardState extends State<_OrderCard> {
                           SizedBox(width: 5.w),
                           Text(
                             '\u2013',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textGrey,
@@ -1102,7 +1102,7 @@ class _OrderCardState extends State<_OrderCard> {
                           SizedBox(width: 5.w),
                           Text(
                             item.volume.toStringAsFixed(2),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
@@ -1120,7 +1120,7 @@ class _OrderCardState extends State<_OrderCard> {
                             ),
                             child: Text(
                               item.side.toUpperCase(),
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w700,
                                 color: sideColor,
@@ -1137,7 +1137,7 @@ class _OrderCardState extends State<_OrderCard> {
                   children: [
                     Text(
                       '${isProfit ? '+' : ''}\$${item.profit.toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
                         color: isProfit ? AppColors.green : AppColors.error,
@@ -1269,7 +1269,7 @@ class _TField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 10.sp,
             color: AppColors.textGrey,
             fontWeight: FontWeight.w500,
@@ -1278,7 +1278,7 @@ class _TField extends StatelessWidget {
         SizedBox(height: 2.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: valueColor ?? AppColors.textPrimary,
@@ -1307,7 +1307,7 @@ class _ErrorState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
             ),
             SizedBox(height: 12.h),
             ElevatedButton(
@@ -1315,7 +1315,7 @@ class _ErrorState extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.brandPrimary,
               ),
-              child: const Text('Retry'),
+              child: Text('Retry'),
             ),
           ],
         ),

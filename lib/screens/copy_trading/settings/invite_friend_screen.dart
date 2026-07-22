@@ -67,7 +67,7 @@ class CopyTradingInviteFriendScreen extends StatelessWidget {
                 ),
                 child: Text(
                   'Share Link',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,

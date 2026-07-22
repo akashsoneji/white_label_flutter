@@ -461,53 +461,34 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         return;
       }
 
-      final incoming = <ListElement>[];
+      final incomingAll = <ListElement>[];
+      final incomingFavs = <ListElement>[];
       for (final s in symbols) {
-        if (!isFavorite(s.displaySymbol)) continue;
         final current = priceRx(s.displaySymbol).value;
-        incoming.add(
-          ListElement(
-            symbol: s.displaySymbol,
-            digits: s.digits,
-            bid: current.bid,
-            ask: current.ask,
-            spreadDiff: current.spreadDiff,
-            last: 0,
-            volume: 0,
-            volumeReal: 0,
-            logo: '',
-            category: s.categoryName,
-            dayLow: current.dayLow > 0 ? current.dayLow : null,
-            dayHigh: current.dayHigh > 0 ? current.dayHigh : null,
-          ),
+        final elem = ListElement(
+          symbol: s.displaySymbol,
+          digits: s.digits,
+          bid: current.bid,
+          ask: current.ask,
+          spreadDiff: current.spreadDiff,
+          last: 0,
+          volume: 0,
+          volumeReal: 0,
+          logo: '',
+          category: s.categoryName,
+          dayLow: current.dayLow > 0 ? current.dayLow : null,
+          dayHigh: current.dayHigh > 0 ? current.dayHigh : null,
         );
-      }
-
-      final existingBySymbol = {
-        for (final item in allInstruments) item.symbol: item,
-      };
-      final merged = <ListElement>[];
-      for (final it in incoming) {
-        final existing = existingBySymbol[it.symbol];
-        if (existing != null) {
-          merged.add(
-            existing.copyWith(
-              digits: it.digits,
-              category: it.category,
-              bid: it.bid,
-              ask: it.ask,
-              spreadDiff: it.spreadDiff,
-              dayLow: it.dayLow,
-              dayHigh: it.dayHigh,
-            ),
-          );
-        } else {
-          merged.add(it);
+        incomingAll.add(elem);
+        if (isFavorite(s.displaySymbol)) {
+          incomingFavs.add(elem);
         }
       }
 
-      allInstruments.assignAll(merged);
-      for (final it in incoming) {
+      allInstruments.assignAll(incomingAll);
+      instruments.assignAll(incomingFavs.isNotEmpty ? incomingFavs : incomingAll.take(20).toList());
+      
+      for (final it in incomingAll) {
         _applyPriceUpdate(it);
       }
 

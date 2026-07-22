@@ -274,7 +274,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                             shape: BoxShape.circle,
                             color: AppColors.border,
                           ),
-                          child: const Icon(Icons.close, size: 18),
+                          child: Icon(Icons.close, size: 18),
                         ),
                       ),
                     ],
@@ -285,7 +285,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                       padding: EdgeInsets.symmetric(vertical: 20.h),
                       child: Text(
                         languageService.tr('switch_account_no_accounts'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.textGrey,
                           fontSize: 14.sp,
                         ),
@@ -311,7 +311,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                         ),
                         child: Text(
                           'Add New Broker +',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.whiteColor,
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -355,7 +355,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 children: [
                   Text(
                     (profile['user_name'] ?? '').toString(),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -364,7 +364,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   SizedBox(height: 2.h),
                   Text(
                     (profile['user_email'] ?? '').toString(),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w400,
@@ -373,7 +373,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   SizedBox(height: 1.h),
                   Text(
                     'Broker: ${(profile['broker_name'] ?? '').toString()}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: AppColors.textGrey.withValues(alpha: 0.9),
                       fontWeight: FontWeight.w500,
@@ -509,7 +509,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   SizedBox(height: 12.h),
                   Text(
                     'Current broker: $selectedBrokerName',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textGrey,
@@ -539,7 +539,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                         ),
                         child: Text(
                           'Choose Broker',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.whiteColor,
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -716,7 +716,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         centerTitle: true,
         title: Text(
           'Dashboard',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -811,7 +811,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                                 final name = authController.userFullName ?? '';
                                 return Text(
                                   name,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontWeight: FontWeight.w600,
                                     fontSize: 18.sp,
                                     color: AppColors.textPrimary,
@@ -845,7 +845,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                             final email = authController.userEmail ?? '';
                             return Text(
                               email,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.textGrey,
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w400,
@@ -866,7 +866,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                                 Flexible(
                                   child: Text(
                                     _currentBrokerName!,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       color: AppColors.textGrey,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w500,
@@ -1105,7 +1105,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   return Center(
                     child: Text(
                       '${languageService.tr('version_label')} $version',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.textGrey.withValues(alpha: 0.6),
                         fontWeight: FontWeight.w500,
@@ -1150,7 +1150,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
               Text(
                 languageService.tr('logout_confirm_message'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -1179,7 +1179,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           alignment: Alignment.center,
                           child: Text(
                             languageService.tr('navigation_yes'),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.whiteColor,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -1205,7 +1205,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                         alignment: Alignment.center,
                         child: Text(
                           languageService.tr('navigation_no'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -1253,7 +1253,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
               Text(
                 languageService.tr('delete_account_confirm_message'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -1334,7 +1334,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           alignment: Alignment.center,
                           child: Text(
                             languageService.tr('navigation_yes'),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.whiteColor,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -1360,7 +1360,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                         alignment: Alignment.center,
                         child: Text(
                           languageService.tr('navigation_no'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -1456,7 +1456,7 @@ class _AccountActionButton extends StatelessWidget {
             SizedBox(width: 8.w),
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -1513,7 +1513,7 @@ class _QuickActionButton extends StatelessWidget {
             SizedBox(height: 8.h),
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary.withValues(alpha: 0.8),
@@ -1539,7 +1539,7 @@ class _SectionHeader extends StatelessWidget {
       padding: EdgeInsets.only(left: 4.w, bottom: 10.h, top: 2.h),
       child: Text(
         title.toUpperCase(),
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 10.5.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.textGrey.withValues(alpha: 0.75),
@@ -1640,8 +1640,7 @@ class _MenuItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                    fontFamily: 'Roboto',
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                     color: color ?? AppColors.textPrimary,
@@ -1715,8 +1714,7 @@ class _OneClickTradingMenuItemState extends State<_OneClickTradingMenuItem> {
           Expanded(
             child: Text(
               'One Click Trading',
-              style: TextStyle(
-                fontFamily: 'Roboto',
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textPrimary,
@@ -1846,7 +1844,7 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
                 Text(
                   _languageService.tr('biometric_not_enrolled_title'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 17.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -1856,7 +1854,7 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
                 Text(
                   _languageService.tr('biometric_not_enrolled_message'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w400,
                     color: AppColors.textSecondary,
@@ -1879,7 +1877,7 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
                           alignment: Alignment.center,
                           child: Text(
                             _languageService.tr('common_close'),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                               fontSize: 14.5.sp,
                               fontWeight: FontWeight.w600,
@@ -1906,7 +1904,7 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
                           alignment: Alignment.center,
                           child: Text(
                             _languageService.tr('biometric_open_settings'),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.pureWhite,
                               fontSize: 14.5.sp,
                               fontWeight: FontWeight.w600,
@@ -2002,8 +2000,7 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
           Expanded(
             child: Text(
               _languageService.tr('biometric_login_toggle'),
-              style: TextStyle(
-                fontFamily: 'Roboto',
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textPrimary,
@@ -2092,8 +2089,7 @@ class _ThemeMenuItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   languageService.tr('settings_theme'),
-                  style: TextStyle(
-                    fontFamily: 'Roboto',
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w400,
                     color: AppColors.textPrimary,
@@ -2215,7 +2211,7 @@ class VerifyAccountCard extends StatelessWidget {
             },
             borderRadius: BorderRadius.circular(12),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -2234,12 +2230,12 @@ class VerifyAccountCard extends StatelessWidget {
                     ],
                   ),
 
-                  // const SizedBox(height: 6),
+                  // SizedBox(height: 6),
 
                   // Subtitle
                   Text(subTitle, style: AppTextStyles.labelOnChartPendingOrder),
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
 
                   // Progress row with percentage
                   Column(
@@ -2247,13 +2243,13 @@ class VerifyAccountCard extends StatelessWidget {
                     children: [
                       Text(
                         "$completion% ${languageService.tr('completed')}",
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                           color: AppColors.primary,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(2),
                         child: LinearProgressIndicator(

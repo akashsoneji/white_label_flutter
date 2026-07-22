@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -183,7 +184,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
             children: [
               Text(
                 _fmtPL(netPL),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: col,
                   fontSize: 22.sp,
                   fontWeight: FontWeight.w800,
@@ -207,7 +208,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
         ),
         Text(
           val,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: CelTheme.mainText(c),
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
@@ -264,7 +265,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: active ? CelTheme.mainText(c) : CelTheme.subText(c),
                   fontSize: 13.sp,
                   fontWeight: active ? FontWeight.w700 : FontWeight.w500,
@@ -280,7 +281,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   ),
                   child: Text(
                     '$count',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: active ? Colors.white : CelTheme.subText(c),
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w700,
@@ -337,7 +338,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
             SizedBox(height: 8.h),
             Text(
               _tab == 0 ? 'No open positions' : 'No pending orders',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: CelTheme.subText(c),
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -382,7 +383,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
               children: [
                 Text(
                   p.symbol,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: CelTheme.mainText(c),
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w800,
@@ -397,7 +398,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   ),
                   child: Text(
                     '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: sideColor,
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w700,
@@ -407,7 +408,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                 const Spacer(),
                 Text(
                   _fmtPL(p.profitLoss),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: plColor,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
@@ -423,7 +424,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                 // SizedBox(width: 4.w),
                 Text(
                   '${_fmt(entry, p.digits)}  →  ${_fmt(cur, p.digits)}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: CelTheme.subText(c),
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
@@ -432,7 +433,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                 const Spacer(),
                 Text(
                   p.time,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: CelTheme.subText(c),
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w500,
@@ -477,7 +478,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       ),
       child: Text(
         '$label $value',
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           color: color,
           fontSize: 10.sp,
           fontWeight: FontWeight.w700,
@@ -492,7 +493,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
         children: [
           TextSpan(
             text: '$label ',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: CelTheme.subText(c),
               fontSize: 10.sp,
               fontWeight: FontWeight.w500,
@@ -500,7 +501,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
           ),
           TextSpan(
             text: value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: CelTheme.mainText(c),
               fontSize: 10.sp,
               fontWeight: FontWeight.w700,
@@ -560,7 +561,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
               alignment: Alignment.center,
               child: Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color:
                       isHeader
                           ? sub
@@ -689,7 +690,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   children: [
                     Text(
                       p.symbol,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: text,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -698,12 +699,12 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                     SizedBox(width: 8.w),
                     Text(
                       p.action,
-                      style: TextStyle(color: sub, fontSize: 13.sp),
+                      style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 13.sp),
                     ),
                     const Spacer(),
                     Text(
                       '${p.volume.toStringAsFixed(2)} lot',
-                      style: TextStyle(color: sub, fontSize: 13.sp),
+                      style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 13.sp),
                     ),
                   ],
                 ),
@@ -715,12 +716,12 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   children: [
                     Text(
                       'Price: ${_fmt(_d(p.entryPrice), p.digits)}',
-                      style: TextStyle(color: sub, fontSize: 12.sp),
+                      style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 12.sp),
                     ),
                     if (_d(p.currentPrice) > 0) ...[
                       Text(
                         '  →  ${_fmt(_d(p.currentPrice), p.digits)}',
-                        style: TextStyle(color: sub, fontSize: 12.sp),
+                        style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 12.sp),
                       ),
                     ],
                   ],
@@ -769,7 +770,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   alignment: Alignment.center,
                   child: Text(
                     Get.find<LanguageService>().tr('celestial_trade_cancel_order'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: CelTheme.sell(ctx),
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -786,7 +787,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   alignment: Alignment.center,
                   child: Text(
                     Get.find<LanguageService>().tr('celestial_trade_dismiss'),
-                    style: TextStyle(color: sub, fontSize: 15.sp),
+                    style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 15.sp),
                   ),
                 ),
               ),
@@ -932,7 +933,7 @@ class _DetailSheetState extends State<_DetailSheet> {
                     children: [
                       Text(
                         p.symbol,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.mainText(c),
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w800,
@@ -950,7 +951,7 @@ class _DetailSheetState extends State<_DetailSheet> {
                         ),
                         child: Text(
                           '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: Colors.white,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -964,7 +965,7 @@ class _DetailSheetState extends State<_DetailSheet> {
                     children: [
                       Text(
                         '${_fmt(entry, p.digits)}  →  ${_fmt(cur, p.digits)}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.mainText(c),
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
@@ -973,7 +974,7 @@ class _DetailSheetState extends State<_DetailSheet> {
                       SizedBox(width: 8.w),
                       Text(
                         '${pct >= 0 ? '+' : ''}${pct.toStringAsFixed(2)}%',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: plCol,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700,
@@ -990,7 +991,7 @@ class _DetailSheetState extends State<_DetailSheet> {
                       SizedBox(width: 4.w),
                       Text(
                         _fmtPL(p.profitLoss),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: plCol,
                           fontSize: 22.sp,
                           fontWeight: FontWeight.w800,
@@ -1024,7 +1025,7 @@ class _DetailSheetState extends State<_DetailSheet> {
               children: [
                 Text(
                   Get.find<LanguageService>().tr('celestial_trade_risk_management'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: CelTheme.mainText(c),
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w800,
@@ -1053,7 +1054,7 @@ class _DetailSheetState extends State<_DetailSheet> {
                         SizedBox(width: 4.w),
                         Text(
                           Get.find<LanguageService>().tr('celestial_trade_modify'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: CelTheme.buy(c),
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w700,
@@ -1097,7 +1098,7 @@ class _DetailSheetState extends State<_DetailSheet> {
                 children: [
                   Text(
                     Get.find<LanguageService>().tr('celestial_trade_volume'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: CelTheme.subText(c),
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -1128,7 +1129,7 @@ class _DetailSheetState extends State<_DetailSheet> {
                         decimal: true,
                       ),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: CelTheme.mainText(c),
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
@@ -1375,7 +1376,7 @@ class _ModifySheetState extends State<_ModifySheet> {
                 children: [
                   Text(
                     p.symbol,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: CelTheme.mainText(c),
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w800,
@@ -1393,7 +1394,7 @@ class _ModifySheetState extends State<_ModifySheet> {
                     ),
                     child: Text(
                       '${isBuy ? 'BUY' : 'SELL'} ${p.volume.toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: Colors.white,
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w700,
@@ -1410,7 +1411,7 @@ class _ModifySheetState extends State<_ModifySheet> {
                       ),
                       Text(
                         _fmt(_d(p.currentPrice), p.digits),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.mainText(c),
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w800,
@@ -1552,7 +1553,7 @@ class _ModifySheetState extends State<_ModifySheet> {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: on ? color : CelTheme.subText(c),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
@@ -1644,7 +1645,7 @@ class _ModifySheetState extends State<_ModifySheet> {
                       decimal: true,
                     ),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: on ? CelTheme.mainText(c) : CelTheme.subText(c),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
@@ -1851,7 +1852,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                     children: [
                       Text(
                         widget.symbol,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.mainText(c),
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w800,
@@ -1938,7 +1939,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                         if (_orderIdx == 0)
                           Text(
                             price.toStringAsFixed(widget.digits),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: color,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w800,
@@ -1954,7 +1955,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                     decimal: true,
                                   ),
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: color,
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w800,
@@ -2015,7 +2016,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                         SizedBox(width: 18.w),
                         Text(
                           _vol.toStringAsFixed(2),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: CelTheme.mainText(c),
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w800,
@@ -2171,7 +2172,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                         children: [
                           Text(
                             _isSell ? 'Sell' : 'Buy',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: Colors.white,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w800,
@@ -2179,7 +2180,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                           ),
                           Text(
                             '${_vol.toStringAsFixed(2)} ${widget.symbol} @ ${['Market', 'Limit', 'Stop', 'Stop Limit'][_orderIdx]}',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: Colors.white.withValues(alpha: 0.85),
                               fontSize: 11.sp,
                             ),
@@ -2209,7 +2210,7 @@ class _OrderTicketState extends State<_OrderTicket> {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: selected ? color : CelTheme.subText(c),
             fontSize: 15.sp,
             fontWeight: FontWeight.w700,
@@ -2242,7 +2243,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                 ),
                 child: Text(
                   labels[i],
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: active ? CelTheme.mainText(c) : CelTheme.subText(c),
                     fontSize: 13.sp,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
@@ -2285,7 +2286,7 @@ class _OrderTicketState extends State<_OrderTicket> {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: on ? color : CelTheme.subText(c),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w700,
@@ -2348,7 +2349,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                       decimal: true,
                     ),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: on ? CelTheme.mainText(c) : CelTheme.subText(c),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
@@ -2433,7 +2434,7 @@ Widget _kv(BuildContext c, String label, String value) {
       SizedBox(height: 2.h),
       Text(
         value,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           color: CelTheme.mainText(c),
           fontSize: 14.sp,
           fontWeight: FontWeight.w700,
@@ -2457,7 +2458,7 @@ Widget _riskBox(BuildContext c, String label, String value) {
         SizedBox(height: 4.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: CelTheme.mainText(c),
             fontSize: 14.sp,
             fontWeight: FontWeight.w800,
@@ -2476,7 +2477,7 @@ Widget _bidAsk(BuildContext c, String label, String value, Color color) {
       SizedBox(height: 2.h),
       Text(
         value,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           color: color,
           fontSize: 20.sp,
           fontWeight: FontWeight.w800,
@@ -2507,7 +2508,7 @@ Widget _btn(
           customChild ??
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: Colors.white,
               fontSize: 16.sp,
               fontWeight: FontWeight.w800,

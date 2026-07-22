@@ -63,7 +63,7 @@ class MasterDashboardScreen extends StatelessWidget {
             controller.stats.value == null &&
             controller.profile.value == null &&
             controller.plans.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
 
         // MasterDashboardOverviewTab renders a non-scrolling Column, so

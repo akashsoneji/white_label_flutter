@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -63,10 +64,10 @@ class VantageAuthTheme {
     return InputDecoration(
       hintText: hintText,
       counterText: counterText,
-      hintStyle: TextStyle(
+      hintStyle: AppTextStyles.bodyText.copyWith(
         color: muted.withValues(alpha: 0.8),
         fontSize: 14.sp,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.w400,
       ),
       filled: true,
       fillColor: fieldFill,
@@ -95,7 +96,7 @@ class VantageAuthTheme {
         borderRadius: radius,
         borderSide: BorderSide(color: primary, width: 1.5),
       ),
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
+      errorStyle: AppTextStyles.bodyText.copyWith(fontSize: 0, height: 0),
       disabledBorder: OutlineInputBorder(
         borderRadius: radius,
         borderSide: BorderSide(color: fieldBorder),
@@ -131,7 +132,7 @@ class VantageAuthTheme {
         borderRadius: radius,
         borderSide: BorderSide(color: primary, width: 1.5),
       ),
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
+      errorStyle: AppTextStyles.bodyText.copyWith(fontSize: 0, height: 0),
       disabledBorder: OutlineInputBorder(
         borderRadius: radius,
         borderSide: BorderSide(color: fieldBorder),

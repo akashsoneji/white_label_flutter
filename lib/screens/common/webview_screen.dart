@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/text_styles.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../constants/color.dart';
 import '../../services/secure_storage_service.dart';
@@ -77,7 +78,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: const AppBackButton(),
-        title: Text(widget.title, style: TextStyle(color: AppColors.textPrimary)),
+        title: Text(widget.title, style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary)),
         backgroundColor: AppColors.whiteColor,
         elevation: 0,
         iconTheme: IconThemeData(color: AppColors.textPrimary),

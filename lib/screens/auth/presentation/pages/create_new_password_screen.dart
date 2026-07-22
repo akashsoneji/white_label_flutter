@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -41,7 +42,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
       backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -49,17 +50,17 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
               children: [
                 AppBackButton(onPressed: () => Navigator.pop(context)),
                 SizedBox(height: 24.h),
-                const Text(
+                Text(
                   'Create New Password',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                SizedBox(height: 16),
+                Text(
                   'Your new password must be different from previously used passwords.',
-                  style: TextStyle(fontSize: 16),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 16),
                   textAlign: TextAlign.start,
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: 40),
                 RTLHelper.rtlTextField(
                   controller: passwordController,
                   labelText: 'New Password',
@@ -85,7 +86,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16),
                 RTLHelper.rtlTextField(
                   controller: confirmPasswordController,
                   labelText: 'Confirm Password',
@@ -113,7 +114,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 40),
+                SizedBox(height: 40),
                 Obx(() {
                   final isLoading = authController.isLoading;
                   return SizedBox(

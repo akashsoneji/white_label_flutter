@@ -62,7 +62,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
         ),
         title: Text(
           'My Structure',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -103,7 +103,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                       SizedBox(height: 16.h),
                       Text(
                         controller.errorMessage.value,
-                        style: TextStyle(fontSize: 16.sp, color: AppColors.error),
+                        style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, color: AppColors.error),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 16.h),
@@ -134,7 +134,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                       SizedBox(height: 16.h),
                       Text(
                         'No structure data found',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           color: AppColors.textGrey,
                         ),
@@ -142,7 +142,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                       SizedBox(height: 8.h),
                       Text(
                         'Please check your IB status or contact support',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: AppColors.textGrey,
                         ),
@@ -173,7 +173,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                     ),
                     child: Text(
                       'Standard Groups',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,
@@ -209,7 +209,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                         Expanded(
                           child: Text(
                             'These commission rates are used for your direct clients. Commission flows up the hierarchy: Your Rate - Sub-IB Rate = Your Profit.',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               color: AppColors.textPrimary,
                               height: 1.4,
@@ -300,7 +300,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                 children: [
                   Text(
                     groupName.toUpperCase(),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
                       color:
@@ -344,7 +344,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                         child: Center(
                           child: Text(
                             'No categories available',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               color: AppColors.textGrey,
                             ),
@@ -375,7 +375,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                                     Expanded(
                                       child: Text(
                                         categoryName,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 15.sp,
                                           fontWeight: FontWeight.w500,
                                           color: AppColors.textPrimary,
@@ -406,7 +406,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                                       child: Text(
                                         '\$$commissionValue',
                                         textAlign: TextAlign.right,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 15.sp,
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.primary,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 
@@ -98,7 +99,7 @@ extension TextStyleExtensions on Text {
       data ?? '',
       style:
           style?.copyWith(fontFamily: fontFamily) ??
-          TextStyle(fontFamily: fontFamily),
+          AppTextStyles.bodyText.copyWith(fontFamily: fontFamily),
       textAlign: textAlign,
       textDirection: textDirection,
       locale: locale,

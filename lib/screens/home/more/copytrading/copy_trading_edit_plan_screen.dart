@@ -124,7 +124,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                     // Trading Account (Read-only)
                     Text(
                       'Trading Account',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: _mutedText,
                         fontWeight: FontWeight.w600,
@@ -145,7 +145,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                           Expanded(
                             child: Text(
                               '${widget.plan.tradingAccountNumber} (${widget.plan.lpProviderName})',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
@@ -158,7 +158,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                     SizedBox(height: 4.h),
                     Text(
                       'Trading account cannot be changed after plan creation.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: _mutedText,
                         height: 1.3,
@@ -169,7 +169,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                     // Plan Name
                     Text(
                       'Plan Name *',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: _mutedText,
                         fontWeight: FontWeight.w600,
@@ -181,7 +181,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                       validator: (v) => (v == null || v.trim().isEmpty) ? 'Enter plan name' : null,
                       decoration: InputDecoration(
                         hintText: 'e.g. Conservative Growth Plan',
-                        hintStyle: TextStyle(
+                        hintStyle: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
                           fontWeight: FontWeight.w400,
@@ -196,7 +196,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                       SizedBox(height: 14.h),
                       Text(
                         'Billing Period *',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
                           fontWeight: FontWeight.w600,
@@ -207,7 +207,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                         value: _subscriptionPeriod ?? 'monthly',
                         hint: 'Select billing period',
                         sheetTitle: 'Billing Period',
-                        options: const [
+                        options: [
                           AppSelectOption(value: 'weekly', title: 'Weekly'),
                           AppSelectOption(value: 'monthly', title: 'Monthly'),
                           AppSelectOption(value: 'quarterly', title: 'Quarterly'),
@@ -224,7 +224,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                     // Strategy description
                     Text(
                       'Strategy Description',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: _mutedText,
                         fontWeight: FontWeight.w600,
@@ -236,7 +236,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                       maxLines: 3,
                       decoration: InputDecoration(
                         hintText: 'Describe your trading strategy and risk approach.',
-                        hintStyle: TextStyle(
+                        hintStyle: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
                         ),
@@ -247,7 +247,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                     // Risk information
                     Text(
                       'Risk Information',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: _mutedText,
                         fontWeight: FontWeight.w600,
@@ -259,7 +259,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
                       maxLines: 3,
                       decoration: InputDecoration(
                         hintText: 'Describe potential drawdowns and risk level.',
-                        hintStyle: TextStyle(
+                        hintStyle: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
                         ),
@@ -291,7 +291,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
           children: [
             Text(
               'Commission Type *',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -302,7 +302,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
               value: _commissionType,
               hint: 'Select commission type',
               sheetTitle: 'Commission Type',
-              options: const [
+              options: [
                 AppSelectOption(
                   value: 'per_trade',
                   title: 'Per Trade (% commission)',
@@ -332,7 +332,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
               _commissionType == 'per_trade'
                   ? 'Commission (%) *'
                   : 'Subscription Fee (USD) *',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -345,7 +345,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
               validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
               decoration: InputDecoration(
                 hintText: _commissionType == 'per_trade' ? 'e.g. 30' : 'e.g. 50',
-                hintStyle: TextStyle(fontSize: 12.sp, color: _mutedText),
+                hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
           ],
@@ -375,7 +375,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
           children: [
             Text(
               'No-Fee Grace Period (days)',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -390,7 +390,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
             SizedBox(height: 4.h),
             Text(
               'Copiers won\'t pay commission on trades within this grace period.',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 10.sp,
                 color: _mutedText,
                 height: 1.3,
@@ -404,7 +404,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
           children: [
             Text(
               'Min. Capital (USD) *',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -417,7 +417,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
               validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
               decoration: InputDecoration(
                 hintText: 'e.g. 100',
-                hintStyle: TextStyle(fontSize: 12.sp, color: _mutedText),
+                hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
           ],
@@ -447,7 +447,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
           children: [
             Text(
               'Copy ratio',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -464,7 +464,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
             SizedBox(height: 4.h),
             Text(
               'Default 1 — copier volume scales from this ratio.',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 10.sp,
                 color: _mutedText,
               ),
@@ -477,7 +477,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
           children: [
             Text(
               'Max copiers',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -489,7 +489,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: 'Unlimited if empty',
-                hintStyle: TextStyle(fontSize: 12.sp, color: _mutedText),
+                hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
           ],
@@ -537,7 +537,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
         ),
         child: Text(
           'Cancel',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -565,7 +565,7 @@ class _CopyTradingEditPlanScreenState extends State<CopyTradingEditPlanScreen> {
             ? CommonLoadingWidget(size: 22, color: AppColors.onColoredBackground)
             : Text(
                 'Save Changes',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.onColoredBackground,

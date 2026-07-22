@@ -49,7 +49,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             centerTitle: true,
             title: Text(
               'KYC Verification',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.textPrimary,
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
@@ -178,7 +178,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     ),
                     child: Text(
                       'Verify\nLater',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -201,7 +201,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     ),
                     child: Text(
                       'Continue',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -244,7 +244,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           children: [
             Text(
               'Rendering Error (Step $step):',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: Colors.red,
                 fontWeight: FontWeight.bold,
                 fontSize: 14.sp,
@@ -253,7 +253,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             SizedBox(height: 8.h),
             Text(
               e.toString(),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
                 fontSize: 12.sp,
@@ -262,7 +262,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             SizedBox(height: 8.h),
             Text(
               stack.toString(),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: Colors.red.withOpacity(0.7),
                 fontSize: 10.sp,
               ),
@@ -312,7 +312,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 : step == 2
                 ? 'Review and Submit'
                 : 'Verification Submitted',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 15.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
@@ -327,7 +327,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 : step == 2
                 ? 'Confirm details before finishing'
                 : 'Your details have been successfully saved',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 11.sp,
               color: AppColors.textGrey,
               fontWeight: FontWeight.w500,
@@ -379,7 +379,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           child: Center(
             child: Text(
               num,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w800,
                 color:
@@ -395,7 +395,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         SizedBox(height: 4.h),
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 10.sp,
             fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
             color: isCurrent ? AppColors.primary : AppColors.textGrey,
@@ -455,7 +455,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 Expanded(
                   child: Text(
                     'Profile details loaded dynamically from client database.',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.5.sp,
                       color: const Color(0xFF15803D),
                       fontWeight: FontWeight.w600,
@@ -507,7 +507,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               _buildOptionsDropdownField(
                 label: 'Title Selector',
                 fieldKey: 'title',
-                options: const [
+                options: [
                   {'value': 'Mr', 'label': 'Mr'},
                   {'value': 'Mrs', 'label': 'Mrs'},
                   {'value': 'Ms', 'label': 'Ms'},
@@ -519,7 +519,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               _buildOptionsDropdownField(
                 label: 'Gender Selector',
                 fieldKey: 'gender',
-                options: const [
+                options: [
                   {'value': 'male', 'label': '♂ Male'},
                   {'value': 'female', 'label': '♀ Female'},
                   {'value': 'other', 'label': 'Other'},
@@ -635,7 +635,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(width: 8.w),
               Text(
                 title,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.5.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -689,7 +689,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             ),
             child: Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w800,
                 color:
@@ -751,7 +751,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                           Expanded(
                             child: Text(
                               selectedLabel,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.5.sp,
                                 color:
                                     currentVal.isEmpty
@@ -835,7 +835,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                         Expanded(
                           child: Text(
                             selectedLabel,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.5.sp,
                               color:
                                   currentVal.isEmpty
@@ -874,14 +874,14 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 onChanged: (val) {
                   controller.formAnswers[key] = val;
                 },
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textPrimary,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Enter details...',
-                  hintStyle: TextStyle(
+                  hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
                   ),
@@ -976,7 +976,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       SizedBox(width: 6.w),
                       Text(
                         label,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.5.sp,
                           fontWeight:
                               isSelected ? FontWeight.w700 : FontWeight.w600,
@@ -1027,7 +1027,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               Expanded(
                 child: Text(
                   'Your profile details have been saved. Please upload the required documents.',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: const Color(0xFF15803D),
                     fontWeight: FontWeight.w600,
@@ -1041,7 +1041,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
         Text(
           'Upload Verification Documents',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 15.sp,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -1050,7 +1050,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         SizedBox(height: 2.h),
         Text(
           'Supported formats: JPG, PNG, PDF (Max 15MB each)',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 11.sp,
             color: AppColors.textGrey,
             fontWeight: FontWeight.w500,
@@ -1122,7 +1122,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(width: 8.w),
               Text(
                 title,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -1133,7 +1133,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           SizedBox(height: 2.h),
           Text(
             subtitle,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 11.sp,
               color: AppColors.textGrey,
               fontWeight: FontWeight.w500,
@@ -1217,7 +1217,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                           padding: EdgeInsets.symmetric(horizontal: 8.w),
                           child: Text(
                             file.path.split('/').last,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 10.sp,
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.w700,
@@ -1262,7 +1262,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     color: Colors.black.withOpacity(0.65),
                     child: Text(
                       label,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -1290,7 +1290,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     SizedBox(height: 6.h),
                     Text(
                       label,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -1311,7 +1311,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       ),
                       child: Text(
                         isRequired ? 'Required' : 'Optional',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 9.sp,
                           fontWeight: FontWeight.w800,
                           color: isRequired ? Colors.red : AppColors.textGrey,
@@ -1342,7 +1342,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         children: [
           Text(
             'Upload Details Summary',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -1354,14 +1354,14 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             children: [
               Text(
                 'Required Documents Selected:',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
                 ),
               ),
               Text(
                 '${controller.getRequiredCount()}/2',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
@@ -1375,14 +1375,14 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             children: [
               Text(
                 'Optional Documents Selected:',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
                 ),
               ),
               Text(
                 '${controller.getOptionalCount()}/2',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
@@ -1396,14 +1396,14 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             children: [
               Text(
                 'Total Combined Upload Size:',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
                 ),
               ),
               Text(
                 controller.getUploadedSizeSummary(),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
@@ -1440,7 +1440,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               Expanded(
                 child: Text(
                   'Please confirm that all details entered below are 100% accurate and match your uploaded documents.',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.5.sp,
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,
@@ -1558,7 +1558,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
@@ -1576,7 +1576,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                             .last
                             .toUpperCase()
                         : 'Not Uploaded',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.w800,
                       color: hasFile ? AppColors.primary : AppColors.textGrey,
@@ -1620,7 +1620,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(width: 8.w),
               Text(
                 heading,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
@@ -1641,7 +1641,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     flex: 4,
                     child: Text(
                       '${e.key}:',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
@@ -1652,7 +1652,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     flex: 6,
                     child: Text(
                       e.value,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w700,
@@ -1704,7 +1704,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           SizedBox(height: 20.h),
           Text(
             "Verification Request Submitted!",
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 17.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
@@ -1715,7 +1715,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           SizedBox(height: 8.h),
           Text(
             "Your profile details and documents are now being reviewed by our compliance team.",
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               color: AppColors.textGrey,
               fontWeight: FontWeight.w500,
@@ -1738,7 +1738,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               children: [
                 Text(
                   'Verification Timeline Progress',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -1792,7 +1792,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               ),
               child: Text(
                 "Done",
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -1874,7 +1874,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.5.sp,
                   fontWeight: FontWeight.w700,
                   color:
@@ -1886,7 +1886,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 1.h),
               Text(
                 desc,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 10.5.sp,
                   color: AppColors.textGrey,
                   fontWeight: FontWeight.w500,
@@ -1956,7 +1956,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                             )
                             : Text(
                               'Update Profile & Continue',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
                                 color:
@@ -1985,7 +1985,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 ),
                 child: Text(
                   'Back',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -2015,7 +2015,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     ),
                     child: Text(
                       'Continue to Review',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -2042,7 +2042,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 ),
                 child: Text(
                   'Edit Info',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -2080,7 +2080,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                             )
                             : Text(
                               'Confirm & Submit',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
@@ -2132,14 +2132,14 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             }
           },
           keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: readOnly ? AppColors.textGrey : AppColors.textPrimary,
             fontSize: 13.sp,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             hintText: readOnly ? '' : 'Enter...',
-            hintStyle: TextStyle(
+            hintStyle: AppTextStyles.bodyText.copyWith(
               color: AppColors.textSecondary,
               fontSize: 12.sp,
             ),
@@ -2192,7 +2192,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     SizedBox(width: 6.w),
                     Text(
                       'Checking availability...',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
                       ),
@@ -2207,7 +2207,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 padding: EdgeInsets.only(top: 4.h, left: 4.w),
                 child: Text(
                   controller.mobileError.value,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     color: Colors.red,
                     fontWeight: FontWeight.w500,
@@ -2259,7 +2259,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 Expanded(
                   child: Text(
                     selectedLabel,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color:
                           currentVal.isEmpty
@@ -2349,7 +2349,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                     final v = controller.formAnswers[key]?.toString() ?? '';
                     return Text(
                       v.isNotEmpty ? v : 'Select Date of Birth',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         color:
                             v.isEmpty
@@ -2377,7 +2377,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
   Widget _buildLabelText(String text) {
     return Text(
       text,
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 12.sp,
         fontWeight: FontWeight.w700,
         color: AppColors.textPrimary,
@@ -2389,16 +2389,16 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     return RichText(
       text: TextSpan(
         text: label,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 12.sp,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         children: [
           if (isRequired)
-            const TextSpan(
+            TextSpan(
               text: ' *',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              style: AppTextStyles.bodyText.copyWith(color: Colors.red, fontWeight: FontWeight.bold),
             ),
         ],
       ),
@@ -2431,7 +2431,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 12.h),
               Text(
                 title,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -2456,7 +2456,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       },
                       title: Text(
                         lbl,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color:
                               isSel ? AppColors.primary : AppColors.textPrimary,
@@ -2549,7 +2549,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                   Expanded(
                     child: Text(
                       displayValue.isNotEmpty ? displayValue : 'Select...',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.5.sp,
                         color:
                             displayValue.isEmpty
@@ -2609,7 +2609,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               Text(
                 'Select Country',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -2618,10 +2618,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               TextField(
                 controller: searchController,
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
+                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
                 decoration: InputDecoration(
                   hintText: 'Search countries...',
-                  hintStyle: TextStyle(
+                  hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
                   ),
@@ -2663,11 +2663,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       return ListTile(
                         leading: Text(
                           country.emoji ?? '',
-                          style: TextStyle(fontSize: 22.sp),
+                          style: AppTextStyles.bodyText.copyWith(fontSize: 22.sp),
                         ),
                         title: Text(
                           country.name ?? '',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textPrimary,
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -2720,7 +2720,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               Text(
                 'Select Nationality',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -2729,10 +2729,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               TextField(
                 controller: searchController,
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
+                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
                 decoration: InputDecoration(
                   hintText: 'Search nationalities...',
-                  hintStyle: TextStyle(
+                  hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
                   ),
@@ -2777,11 +2777,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       return ListTile(
                         leading: Text(
                           country.emoji ?? '',
-                          style: TextStyle(fontSize: 22.sp),
+                          style: AppTextStyles.bodyText.copyWith(fontSize: 22.sp),
                         ),
                         title: Text(
                           country.nationality ?? '',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textPrimary,
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -2837,7 +2837,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               Text(
                 'Select State',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -2846,10 +2846,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               TextField(
                 controller: searchController,
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
+                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
                 decoration: InputDecoration(
                   hintText: 'Search states...',
-                  hintStyle: TextStyle(
+                  hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
                   ),
@@ -2891,7 +2891,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       return ListTile(
                         title: Text(
                           state.name,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textPrimary,
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -2946,7 +2946,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               Text(
                 'Select City',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -2955,10 +2955,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               TextField(
                 controller: searchController,
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
+                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
                 decoration: InputDecoration(
                   hintText: 'Search cities...',
-                  hintStyle: TextStyle(
+                  hintStyle: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 12.sp,
                   ),
@@ -3000,7 +3000,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       return ListTile(
                         title: Text(
                           city.name,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textPrimary,
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,

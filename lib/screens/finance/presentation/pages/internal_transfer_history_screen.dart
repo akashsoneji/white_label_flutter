@@ -138,7 +138,7 @@ class _InternalTransferHistoryScreenState
         children: [
           Text(
             'Filter History',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
@@ -196,7 +196,7 @@ class _InternalTransferHistoryScreenState
                     ),
                     child: Text(
                       'Apply Filters',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.whiteColor,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
@@ -220,7 +220,7 @@ class _InternalTransferHistoryScreenState
                   ),
                   child: Text(
                     'Clear',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.textPrimary,
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -259,7 +259,7 @@ class _InternalTransferHistoryScreenState
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.icongrey,
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w500,
@@ -270,7 +270,7 @@ class _InternalTransferHistoryScreenState
                     value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.textPrimary,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -299,7 +299,7 @@ class _InternalTransferHistoryScreenState
           Expanded(
             child: Text(
               showing,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.icongrey,
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
@@ -314,7 +314,7 @@ class _InternalTransferHistoryScreenState
             ),
             child: Text(
               'Page ${pagination.currentPage} of ${pagination.lastPage}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.primary,
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w700,
@@ -373,7 +373,7 @@ class _InternalTransferHistoryScreenState
                           : item.reference,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textPrimary,
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w800,
@@ -384,7 +384,7 @@ class _InternalTransferHistoryScreenState
                       item.createdAt,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.icongrey,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
@@ -401,7 +401,7 @@ class _InternalTransferHistoryScreenState
                     item.formattedAmount.isEmpty
                         ? '\$${item.amount}'
                         : item.formattedAmount,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.success,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w800,
@@ -454,7 +454,7 @@ class _InternalTransferHistoryScreenState
               item.comment,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.icongrey,
                 fontSize: 12.sp,
                 height: 1.35,
@@ -479,7 +479,7 @@ class _InternalTransferHistoryScreenState
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.icongrey,
             fontSize: 11.sp,
             fontWeight: FontWeight.w600,
@@ -491,7 +491,7 @@ class _InternalTransferHistoryScreenState
           textAlign: textAlign,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 13.sp,
             fontWeight: FontWeight.w800,
@@ -511,7 +511,7 @@ class _InternalTransferHistoryScreenState
       ),
       child: Text(
         _titleCase(status.isEmpty ? 'Unknown' : status),
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           color: color,
           fontSize: 10.sp,
           fontWeight: FontWeight.w800,
@@ -525,7 +525,7 @@ class _InternalTransferHistoryScreenState
       if (controller.isLoadingMore.value) {
         return Padding(
           padding: EdgeInsets.symmetric(vertical: 22.h),
-          child: const Center(child: CommonLoadingWidget()),
+          child: Center(child: CommonLoadingWidget()),
         );
       }
 
@@ -540,7 +540,7 @@ class _InternalTransferHistoryScreenState
               ? 'Scroll down to load more'
               : 'You have reached the end',
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.icongrey,
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
@@ -573,7 +573,7 @@ class _InternalTransferHistoryScreenState
           Text(
             'No transfer history found',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
               fontSize: 16.sp,
               fontWeight: FontWeight.w800,
@@ -583,7 +583,7 @@ class _InternalTransferHistoryScreenState
           Text(
             'Try changing the date or status filter.',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.icongrey,
               fontSize: 13.sp,
               height: 1.35,
@@ -660,7 +660,7 @@ class _InternalTransferHistoryScreenState
                   SizedBox(height: 18.h),
                   Text(
                     'Select Status',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.textPrimary,
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w800,
@@ -680,7 +680,7 @@ class _InternalTransferHistoryScreenState
                             contentPadding: EdgeInsets.zero,
                             title: Text(
                               status.label,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color:
                                     isSelected
                                         ? AppColors.primary

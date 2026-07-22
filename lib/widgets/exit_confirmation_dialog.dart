@@ -31,7 +31,7 @@ class ExitConfirmationDialog extends StatelessWidget {
       ),
       content: Text(
         'Do you want to exit the app?',
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 15.sp,
           color: AppColors.textSecondary,
           height: 1.4,
@@ -54,7 +54,7 @@ class ExitConfirmationDialog extends StatelessWidget {
                 ),
                 child: Text(
                   'Cancel',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSecondary,
@@ -77,7 +77,7 @@ class ExitConfirmationDialog extends StatelessWidget {
                 ),
                 child: Text(
                   'Exit',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.whiteColor,

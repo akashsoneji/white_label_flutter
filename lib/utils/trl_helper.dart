@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -200,7 +201,7 @@ class RTLHelper {
       validator: validator,
       style:
           style ??
-          TextStyle(
+          AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w400,
@@ -232,9 +233,9 @@ class RTLHelper {
       maxLines: obscureText ? 1 : (maxLines ?? 1),
       decoration:
           decoration?.copyWith(
-            hintStyle: TextStyle(color: AppColors.hint),
-            labelStyle: TextStyle(color: AppColors.hint),
-            floatingLabelStyle: TextStyle(color: AppColors.primary),
+            hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
+            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
+            floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
             fillColor: AppColors.textFieldBg,
             filled: true,
             prefixIcon: isRTL ? suffixIcon : prefixIcon,
@@ -250,9 +251,9 @@ class RTLHelper {
                 ),
           ) ??
           InputDecoration(
-            labelStyle: TextStyle(color: AppColors.hint),
-            hintStyle: TextStyle(color: AppColors.hint),
-            floatingLabelStyle: TextStyle(color: AppColors.primary),
+            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
+            hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
+            floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
             labelText: labelText,
             hintText: hintText,
             fillColor: AppColors.textFieldBg,

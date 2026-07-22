@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:crm_app/constants/color.dart';
@@ -25,7 +26,7 @@ class SocialButton extends StatelessWidget {
         icon: SvgPicture.asset(icon, height: 18.h, width: 18.w),
         label: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             fontWeight: FontWeight.w400,
             color: AppColors.textPrimary,

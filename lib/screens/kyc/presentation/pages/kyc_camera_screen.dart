@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
@@ -73,7 +74,7 @@ class _KycCameraScreenState extends State<KycCameraScreen> {
           ),
           title:   Text(
             'Take Document Photo',
-            style: TextStyle(color: AppColors.whiteColor),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.whiteColor),
           ),
         ),
         body: GetBuilder<KycDocsController>(
@@ -141,14 +142,14 @@ class _KycCameraScreenState extends State<KycCameraScreen> {
                             ),
                             child:
                                 controller.isLoading.value
-                                    ? const Center(
+                                    ? Center(
                                       child: CommonLoadingWidget(
                                         size: 30.0,
                                         color: Colors.black,
                                       ),
                                     )
                                     : Container(
-                                      margin: const EdgeInsets.all(6),
+                                      margin: EdgeInsets.all(6),
                                       decoration: BoxDecoration(
                                         color: AppColors.whiteColor,
                                         shape: BoxShape.circle,

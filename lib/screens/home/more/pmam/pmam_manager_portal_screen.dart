@@ -108,7 +108,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                 ),
                 child: Text(
                   '+ New Plan',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.onColoredBackground,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
@@ -128,12 +128,12 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
               unselectedLabelColor: AppColors.textGrey,
               indicatorColor: AppColors.primary,
               indicatorWeight: 2.5,
-              labelStyle: TextStyle(
+              labelStyle: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
               ),
-              unselectedLabelStyle: TextStyle(fontSize: 14.sp),
-              tabs: const [Tab(text: 'My Investors'), Tab(text: 'My Plans')],
+              unselectedLabelStyle: AppTextStyles.bodyText.copyWith(fontSize: 14.sp),
+              tabs: [Tab(text: 'My Investors'), Tab(text: 'My Plans')],
             ),
           ),
         ),
@@ -281,7 +281,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                           SizedBox(height: 12.h),
                           Text(
                             'No investors in this category',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               color: AppColors.textGrey,
                             ),
@@ -361,7 +361,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                           .withOpacity(0.12),
                                       child: Text(
                                         initials,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           color: AppColors.primary,
                                           fontWeight: FontWeight.w700,
                                           fontSize: 13.sp,
@@ -376,7 +376,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                         children: [
                                           Text(
                                             name,
-                                            style: TextStyle(
+                                            style: AppTextStyles.bodyText.copyWith(
                                               fontSize: 13.sp,
                                               fontWeight: FontWeight.w700,
                                               color: AppColors.textPrimary,
@@ -384,7 +384,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                           ),
                                           Text(
                                             email,
-                                            style: TextStyle(
+                                            style: AppTextStyles.bodyText.copyWith(
                                               fontSize: 11.sp,
                                               color: AppColors.textGrey,
                                             ),
@@ -407,7 +407,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                       ),
                                       child: Text(
                                         status.toUpperCase(),
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 9.sp,
                                           color: _statusColor(status),
                                           fontWeight: FontWeight.w700,
@@ -460,7 +460,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                   SizedBox(height: 6.h),
                                   Text(
                                     'Active since: ${activeSince.substring(0, 10)}',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 10.sp,
                                       color: AppColors.textGrey,
                                     ),
@@ -520,7 +520,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                               )
                                               : Text(
                                                 'Reject',
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   color: AppColors.error,
                                                   fontSize: 13.sp,
                                                   fontWeight: FontWeight.w700,
@@ -580,7 +580,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                               )
                                               : Text(
                                                 'Approve',
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 13.sp,
                                                   fontWeight: FontWeight.w700,
                                                 ),
@@ -614,7 +614,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                       ),
                                       child: Text(
                                         'View',
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           color: AppColors.primary,
                                           fontSize: 13.sp,
                                           fontWeight: FontWeight.w700,
@@ -647,7 +647,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
         return Center(
           child: Text(
             'No plans yet',
-            style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
           ),
         );
       }
@@ -699,7 +699,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                       Expanded(
                         child: Text(
                           p['plan_name'] ?? 'Unnamed Plan',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -721,7 +721,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                               : status == 'pending_admin'
                               ? 'Pending Admin'
                               : status,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             color: statusColor,
                             fontWeight: FontWeight.w600,
@@ -771,7 +771,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                           ),
                            label:  Text(
                             'View',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
@@ -790,7 +790,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                           ),
                           label: Text(
                             'Edit',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
@@ -829,7 +829,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                             ),
                             label: Text(
                               isPaused ? 'Resume' : 'Pause',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: isPaused
                                     ? AppColors.green
                                     : AppColors.warningText,
@@ -866,7 +866,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                             ),
                             child: Text(
                               'Inactivate',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.error,
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w600,
@@ -919,7 +919,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
         ),
         title: Text(
           title,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 15.sp,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
@@ -927,7 +927,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
         ),
         content: Text(
           body,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             color: AppColors.textGrey,
             height: 1.4,
@@ -938,7 +938,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               'Cancel',
-              style: TextStyle(color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
             ),
           ),
           ElevatedButton(
@@ -999,7 +999,7 @@ class _StatPill extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w800,
             color: color,
@@ -1007,7 +1007,7 @@ class _StatPill extends StatelessWidget {
         ),
         Text(
           label,
-          style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey),
         ),
       ],
     );
@@ -1059,7 +1059,7 @@ class _PortalFilterChip extends StatelessWidget {
         ),
         child: Text(
           count > 0 ? '$label ($count)' : label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
             color: selected ? AppColors.onColoredBackground : AppColors.textGrey,
@@ -1087,7 +1087,7 @@ class _InvInfoCol extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: FontWeight.w700,
             color: valueColor ?? AppColors.textPrimary,
@@ -1096,7 +1096,7 @@ class _InvInfoCol extends StatelessWidget {
         ),
         Text(
           label,
-          style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey),
           textAlign: TextAlign.center,
         ),
       ],
@@ -1117,11 +1117,11 @@ class _PortalPlanInfoRow extends StatelessWidget {
         children: [
           Text(
             '$label: ',
-            style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../constants/text_styles.dart';
 import 'package:get/get.dart';
 
 import '../../../constants/color.dart';
@@ -18,23 +19,23 @@ class DemoGetStartedScreen extends StatelessWidget {
       backgroundColor: AppColors.primary.withValues(alpha: 0.06),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Text(
                 'DEMO BRAND',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
                   color: AppColors.primary,
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
                 _languageService.tr("onboarding_slide1_description"),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -49,7 +50,7 @@ class DemoGetStartedScreen extends StatelessWidget {
                   child: Text(_languageService.tr("onboarding_get_started")),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 height: 46,

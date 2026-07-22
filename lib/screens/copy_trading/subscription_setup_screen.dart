@@ -1,4 +1,5 @@
 import 'package:crm_app/widgets/dashBorder.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -89,7 +90,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
         ),
         title: Text(
           'Subscription Setup',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: AppColors.primary,
@@ -108,7 +109,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                   SizedBox(width: 12),
                   Text(
                     'Prime_traders',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -122,7 +123,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                 children: [
                   Text(
                     'Funds In Wallet',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   Row(
                     children: [
@@ -133,7 +134,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                       SizedBox(width: 8),
                       Text(
                         '50.01 USD',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: AppColors.icongrey,
@@ -156,7 +157,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                     children: [
                       Text(
                         'Copy Proportion',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -170,7 +171,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                         },
                         child: Text(
                           _isCustomMode ? '< Default' : 'Custom >',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13,
                             color: AppColors.primary,
                             fontWeight: FontWeight.w500,
@@ -212,7 +213,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                 children: [
                                   Text(
                                     _presets[i]['label']!,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                       color:
@@ -224,7 +225,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                   SizedBox(height: 4),
                                   Text(
                                     '${_presets[i]['required']!} required',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
                                       color:
@@ -236,7 +237,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                   SizedBox(height: 8),
                                   Text(
                                     _presets[i]['volume']!,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w400,
                                       color:
@@ -267,7 +268,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                       padding: EdgeInsets.only(left: 2),
                       child: Text(
                         'Required investment : \$188',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12,
                           color: AppColors.icongrey,
                           fontWeight: FontWeight.w400,
@@ -325,15 +326,15 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                       Expanded(
                         child: RichText(
                           text: TextSpan(
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12,
                               color: AppColors.icongrey,
                             ),
-                            children: const [
+                            children: [
                               TextSpan(text: 'Add '),
                               TextSpan(
                                 text: 'Support Funds',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                                style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
                               ),
                               TextSpan(
                                 text:
@@ -361,7 +362,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                       padding: EdgeInsets.only(left: 2),
                       child: Text(
                         '39% of the required investment.',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12,
                           color: AppColors.green,
                           fontWeight: FontWeight.w500,
@@ -381,7 +382,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                 children: [
                   Text(
                     'Summary',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 14),
                   _summaryRow('Copy proportion', _summaryProportion),
@@ -417,7 +418,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
           ),
           child:   Text(
             'Start Copying',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: AppColors.whiteColor,
@@ -460,7 +461,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
         TextField(
           controller: controller,
           keyboardType: keyboardType,
-          style: TextStyle(fontSize: 15),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 15),
           decoration: InputDecoration(
             contentPadding: EdgeInsets.symmetric(
               horizontal: 14,
@@ -488,7 +489,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
             padding: EdgeInsets.symmetric(horizontal: 4),
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: AppColors.primary),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 12, color: AppColors.primary),
             ),
           ),
         ),
@@ -504,7 +505,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14,
               color: isBold ? AppColors.textPrimary : AppColors.textGrey,
               fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
@@ -519,7 +520,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.5,
               color: isBold ? AppColors.textPrimary : AppColors.icongrey,
               fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,

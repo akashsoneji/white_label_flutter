@@ -2,6 +2,7 @@
 // No issues found!
 
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -90,32 +91,32 @@ class MetaTheme {
       _isDark(c) ? _primaryDark().withValues(alpha: 0.15) : _primaryLight().withValues(alpha: 0.08);
 
   // ── Typography ─────────────────────────────────────────────────────────
-  static TextStyle title(BuildContext c) => TextStyle(
+  static TextStyle title(BuildContext c) => AppTextStyles.bodyText.copyWith(
     color: headerText(c),
     fontSize: 22.sp,
     fontWeight: FontWeight.w800,
   );
 
-  static TextStyle sectionLabel(BuildContext c) => TextStyle(
+  static TextStyle sectionLabel(BuildContext c) => AppTextStyles.bodyText.copyWith(
     color: subText(c),
     fontSize: 12.sp,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.3,
   );
 
-  static TextStyle bigPrice(BuildContext c, {Color? color}) => TextStyle(
+  static TextStyle bigPrice(BuildContext c, {Color? color}) => AppTextStyles.bodyText.copyWith(
     color: color ?? mainText(c),
     fontSize: 18.sp,
     fontWeight: FontWeight.w800,
   );
 
-  static TextStyle label(BuildContext c) => TextStyle(
+  static TextStyle label(BuildContext c) => AppTextStyles.bodyText.copyWith(
     color: subText(c),
     fontSize: 11.sp,
     fontWeight: FontWeight.w600,
   );
 
-  static TextStyle value(BuildContext c, {Color? color}) => TextStyle(
+  static TextStyle value(BuildContext c, {Color? color}) => AppTextStyles.bodyText.copyWith(
     color: color ?? mainText(c),
     fontSize: 12.sp,
     fontWeight: FontWeight.w700,
@@ -190,7 +191,7 @@ class MetaBottomBar extends StatelessWidget {
                     SizedBox(height: 2.h),
                     Text(
                       items[i].label,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: color,
                         fontSize: 10.sp,
                         fontWeight:

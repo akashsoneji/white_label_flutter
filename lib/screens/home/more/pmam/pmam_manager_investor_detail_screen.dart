@@ -73,7 +73,7 @@ class _PmamManagerInvestorDetailScreenState
           fontWeight: FontWeight.w700,
           color: AppColors.textGrey,
         ) ??
-        TextStyle(
+        AppTextStyles.bodyText.copyWith(
           fontSize: 12.sp,
           fontWeight: FontWeight.w700,
           color: AppColors.textGrey,
@@ -87,7 +87,7 @@ class _PmamManagerInvestorDetailScreenState
           fontWeight: FontWeight.w700,
           color: color ?? AppColors.textPrimary,
         ) ??
-        TextStyle(
+        AppTextStyles.bodyText.copyWith(
           fontSize: 12.sp,
           fontWeight: FontWeight.w700,
           color: color ?? AppColors.textPrimary,
@@ -150,7 +150,7 @@ class _PmamManagerInvestorDetailScreenState
               Expanded(
                 child: Text(
                   a.symbol.isEmpty ? '-' : a.symbol,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
@@ -218,7 +218,7 @@ class _PmamManagerInvestorDetailScreenState
               Expanded(
                 child: Text(
                   _fmtDateLong(d.settledAt),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
@@ -285,7 +285,7 @@ class _PmamManagerInvestorDetailScreenState
               Expanded(
                 child: Text(
                   _fmtMoney(f.amount),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.primary,
@@ -369,7 +369,7 @@ class _PmamManagerInvestorDetailScreenState
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               color: AppColors.textGrey,
               fontWeight: FontWeight.w500,
@@ -378,7 +378,7 @@ class _PmamManagerInvestorDetailScreenState
           SizedBox(height: 8.h),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.primary,
@@ -394,7 +394,7 @@ class _PmamManagerInvestorDetailScreenState
       padding: EdgeInsets.only(bottom: 6.h),
       child: Text(
         text,
-        style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+        style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
       ),
     );
   }
@@ -440,7 +440,7 @@ class _PmamManagerInvestorDetailScreenState
                         
                         Text(
                           _error!,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.error,
                             fontWeight: FontWeight.w600,
@@ -457,7 +457,7 @@ class _PmamManagerInvestorDetailScreenState
                               borderRadius: BorderRadius.circular(10.r),
                             ),
                           ),
-                          child: const Text('Retry'),
+                          child: Text('Retry'),
                         ),
                       ],
                     ),
@@ -479,7 +479,7 @@ class _PmamManagerInvestorDetailScreenState
                                  
                                   Text(
                                     'Investment Summary',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w800,
                                       color: AppColors.textPrimary,
@@ -541,15 +541,15 @@ class _PmamManagerInvestorDetailScreenState
                                   unselectedLabelColor: AppColors.textGrey,
                                   indicatorColor: AppColors.primary,
                                   // indicatorWeight: 2.5,
-                                  labelStyle: TextStyle(
+                                  labelStyle: AppTextStyles.bodyText.copyWith(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w700,
                                   ),
-                                  unselectedLabelStyle: TextStyle(
+                                  unselectedLabelStyle: AppTextStyles.bodyText.copyWith(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
-                                  tabs: const [
+                                  tabs: [
                                     Tab(
                                       child: Center(
                                         child: Text(
@@ -588,7 +588,7 @@ class _PmamManagerInvestorDetailScreenState
                         children: [
                           Builder(
                             builder: (context) {
-                              final items = _data?.openAllocations ?? const [];
+                              final items = _data?.openAllocations ?? [];
                               if (items.isEmpty) {
                                 return Padding(
                                   padding: EdgeInsets.symmetric(
@@ -611,7 +611,7 @@ class _PmamManagerInvestorDetailScreenState
                           ),
                           Builder(
                             builder: (context) {
-                              final settlements = _data?.distributions ?? const [];
+                              final settlements = _data?.distributions ?? [];
                               return ListView(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 18.w,
@@ -634,7 +634,7 @@ class _PmamManagerInvestorDetailScreenState
                           ),
                           Builder(
                             builder: (context) {
-                              final funds = _data?.fundEntries ?? const [];
+                              final funds = _data?.fundEntries ?? [];
                               if (funds.isEmpty) {
                                 return Padding(
                                   padding: EdgeInsets.symmetric(

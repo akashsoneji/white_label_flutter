@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../utils/trl_helper.dart';
 import '../constants/color.dart';
@@ -62,7 +63,7 @@ class RTLComponents {
                     if (icon != null) ...[icon, SizedBox(width: 8.w)],
                     Text(
                       text,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -121,7 +122,7 @@ class RTLComponents {
                     if (icon != null) ...[icon, SizedBox(width: 8.w)],
                     Text(
                       text,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -172,7 +173,7 @@ class RTLComponents {
                     if (icon != null) ...[icon, SizedBox(width: 8.w)],
                     Text(
                       text,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -214,7 +215,7 @@ class RTLComponents {
         obscureText: obscureText,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-        style: style ?? TextStyle(fontSize: 16.sp),
+        style: style ?? AppTextStyles.bodyText.copyWith(fontSize: 16.sp),
         validator: validator,
         onChanged: onChanged,
         decoration:

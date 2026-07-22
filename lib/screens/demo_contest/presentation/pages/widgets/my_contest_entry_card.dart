@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/demo_contest/my_contest_entry_model.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/widgets/contest_countdown_timer.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +65,7 @@ class MyContestEntryCard extends StatelessWidget {
                     ),
                     child: Text(
                       translate('dc_status_${entry.statusKey()}').toUpperCase(),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.6,
@@ -76,7 +77,7 @@ class MyContestEntryCard extends StatelessWidget {
                   if (isWinner)
                     Text(
                       '🏆 #${entry.rank}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w800,
                         color: AppColors.warning,
@@ -87,7 +88,7 @@ class MyContestEntryCard extends StatelessWidget {
               SizedBox(height: 10.h),
               Text(
                 entry.contestTitle,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -96,7 +97,7 @@ class MyContestEntryCard extends StatelessWidget {
               SizedBox(height: 4.h),
               Text(
                 entry.contestSubtitle,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textGrey,
                 ),
@@ -164,7 +165,7 @@ class MyContestEntryCard extends StatelessWidget {
                             : isFinished
                                 ? translate('dc_finished_on')
                                 : '${translate('dc_starts_in')}:',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: AppColors.textGrey,
                           fontWeight: FontWeight.w500,
@@ -184,7 +185,7 @@ class MyContestEntryCard extends StatelessWidget {
                     else
                       Text(
                         _formatDate(entry.endsAt),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -215,7 +216,7 @@ class MyContestEntryCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           'Reward available: \$${entry.prizeAmount?.toStringAsFixed(0) ?? '0'}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.success,
@@ -224,7 +225,7 @@ class MyContestEntryCard extends StatelessWidget {
                       ),
                       Text(
                         translate('dc_claim'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.success,
@@ -288,7 +289,7 @@ class _StatBlock extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 9.sp,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.6,
@@ -298,7 +299,7 @@ class _StatBlock extends StatelessWidget {
         SizedBox(height: 3.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w700,
             color: color ?? AppColors.textPrimary,

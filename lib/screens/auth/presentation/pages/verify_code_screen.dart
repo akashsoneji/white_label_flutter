@@ -153,7 +153,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   Widget _buildDescription() {
     return Text(
       "${languageService.tr("verify_code_description")}\t${widget.email}",
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 14.sp,
         fontWeight: FontWeight.w400,
         color: AppColors.textGrey,
@@ -191,7 +191,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
               LengthLimitingTextInputFormatter(index == 0 ? 6 : 1),
             ],
             onChanged: (value) => _onCodeChanged(value, index),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: Colors.black,
@@ -255,7 +255,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
         children: [
           Text(
             languageService.tr("verify_code_didnt_receive"),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textGrey,
               fontSize: 14.sp,
               height: 22 / 14,
@@ -267,7 +267,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
             onTap: _resendCode,
             child: Text(
               languageService.tr("verify_code_resend"),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.primary,
                 fontSize: 14.sp,
                 height: 22 / 14,

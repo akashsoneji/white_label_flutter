@@ -1,4 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +103,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         elevation: 0,
         title: Text(
           'IB Dashboard',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -202,7 +203,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
         Expanded(
           child: Text(
             title,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 17.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -241,7 +242,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
             children: [
               Text(
                 'My Reference Links',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textGrey,
@@ -249,7 +250,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
               ),
               Text(
                 count.toString(),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.primary,
@@ -275,7 +276,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                     child: Text(
                       referenceUrl,
                       maxLines: 3,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.5.sp,
                         fontWeight: FontWeight.w400,
                         color: AppColors.textPrimary,
@@ -306,7 +307,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                             SizedBox(width: 3.w),
                             Text(
                               'Share Link',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.whiteColor,
@@ -349,7 +350,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                   value: period,
                   child: Text(
                     _getPeriodLabel(period),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primary,
@@ -414,7 +415,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textGrey,
@@ -423,7 +424,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                 SizedBox(height: 6.h),
                 Text(
                   '\$${amount.toStringAsFixed(2)}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.primary,
@@ -533,7 +534,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textGrey,
@@ -548,7 +549,7 @@ class _IbDashboardNewScreenState extends State<IbDashboardNewScreen> {
                         value,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w800,
                           color: AppColors.primary,

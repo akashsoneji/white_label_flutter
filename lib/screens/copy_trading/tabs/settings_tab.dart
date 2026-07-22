@@ -65,7 +65,7 @@ class SettingsTab extends StatelessWidget {
                       SizedBox(height: 15.h),
                       Text(
                         'Copy',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,

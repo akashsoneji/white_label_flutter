@@ -197,7 +197,7 @@ void _showLockedThemeSheet(
                       Expanded(
                         child: Text(
                           '${languageService.tr('settings_theme_locked')}: $label',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -252,7 +252,7 @@ Widget _buildThemeOption({
             Expanded(
               child: Text(
                 languageService.tr(option.translationKey),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,

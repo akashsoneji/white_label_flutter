@@ -215,7 +215,7 @@ class _MetaNativeChartState extends State<MetaNativeChart> {
                 getDrawingHorizontalLine: (_) => FlLine(
                   color: AppColors.border.withOpacity(0.45),
                   strokeWidth: 1,
-                  dashArray: const [4, 4],
+                  dashArray: [4, 4],
                 ),
               ),
               titlesData: FlTitlesData(

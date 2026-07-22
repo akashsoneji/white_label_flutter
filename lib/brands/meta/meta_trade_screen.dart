@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -306,7 +307,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(Get.find<LanguageService>().tr('meta_trade_trades'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: MetaTheme.mainText(c),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
@@ -314,7 +315,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                     )),
                 SizedBox(height: 2.h),
                 Text(_fmtPL(netPL) + ' USD',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: plColor,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -373,7 +374,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: labelColor,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
@@ -389,7 +390,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
             ),
             SizedBox(width: 8.w),
             Text(value,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: color ?? valueColor,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
@@ -433,7 +434,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
         child: Row(
           children: [
             Text(label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
@@ -457,7 +458,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 6.h),
       child: Text(label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: MetaTheme.subText(c),
             fontSize: 12.sp,
             fontWeight: FontWeight.w400,
@@ -580,7 +581,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
             Text(
               Get.find<LanguageService>()
                   .tr('meta_trade_label_colon', {'label': '$label'}),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: subtleColor,
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w400,
@@ -588,7 +589,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
             ),
             const Spacer(),
             Text(value,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: color ?? valueColor,
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w500,
@@ -663,7 +664,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                     children: [
                       TextSpan(
                         text: p.symbol,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.mainText(c),
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
@@ -671,7 +672,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                       ),
                       TextSpan(
                         text: ', ${isBuy ? 'buy' : 'sell'} ${p.volume.toStringAsFixed(2)}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.buy(c),
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -683,14 +684,14 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 const Spacer(),
                 if (isPending)
                   Text('placed',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: MetaTheme.subText(c),
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
                       ))
                 else
                   Text(_fmtPL(p.profitLoss),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: plColor,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -704,7 +705,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 '${p.volume.toStringAsFixed(2)} / '
                 '${tp.toStringAsFixed(p.digits)} at '
                 '${entry.toStringAsFixed(p.digits)}',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
@@ -713,7 +714,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
             else
               Text(
                 '${_fmt(entry, p.digits)}  →  ${_fmt(cur, p.digits)}',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
@@ -768,7 +769,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
               alignment: Alignment.center,
               child: Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: isHeader ? sub : (isCancel ? sub : text),
                   fontSize: isHeader ? 13.sp : 15.sp,
                   fontWeight: FontWeight.w400,
@@ -889,16 +890,16 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 child: Row(
                   children: [
                     Text(p.symbol,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                             color: text,
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700)),
                     SizedBox(width: 8.w),
                     Text(p.action,
-                        style: TextStyle(color: sub, fontSize: 13.sp)),
+                        style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 13.sp)),
                     const Spacer(),
                     Text('${p.volume.toStringAsFixed(2)} lot',
-                        style: TextStyle(color: sub, fontSize: 13.sp)),
+                        style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 13.sp)),
                   ],
                 ),
               ),
@@ -909,10 +910,10 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                   children: [
                     Text(
                         'Price: ${_fmt(_d(p.entryPrice), p.digits)}',
-                        style: TextStyle(color: sub, fontSize: 12.sp)),
+                        style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 12.sp)),
                     if (_d(p.currentPrice) > 0) ...[
                       Text('  →  ${_fmt(_d(p.currentPrice), p.digits)}',
-                          style: TextStyle(color: sub, fontSize: 12.sp)),
+                          style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 12.sp)),
                     ],
                   ],
                 ),
@@ -958,7 +959,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   alignment: Alignment.center,
                   child: Text(Get.find<LanguageService>().tr('meta_trade_cancel_order'),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.sell(ctx),
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600)),
@@ -972,7 +973,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   alignment: Alignment.center,
                   child: Text(Get.find<LanguageService>().tr('meta_trade_dismiss'),
-                      style: TextStyle(color: sub, fontSize: 15.sp)),
+                      style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 15.sp)),
                 ),
               ),
               SizedBox(height: 16.h + MediaQuery.of(ctx).padding.bottom),
@@ -1175,7 +1176,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
             Icon(icon, color: MetaTheme.mainText(c), size: 22.sp),
             SizedBox(width: 18.w),
             Text(label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.mainText(c),
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w500,
@@ -1517,7 +1518,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                   Row(
                     children: [
                       Text(widget.symbol,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                               color: MetaTheme.mainText(c),
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w800)),
@@ -1582,7 +1583,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                         const Spacer(),
                         if (_orderIdx == 0)
                           Text(price.toStringAsFixed(widget.digits),
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                   color: color,
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w800))
@@ -1595,7 +1596,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                   const TextInputType.numberWithOptions(
                                       decimal: true),
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: color,
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w800,
@@ -1640,7 +1641,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                             () => setState(() => _vol = (_vol - 0.01).clamp(0.01, 100))),
                         SizedBox(width: 18.w),
                         Text(_vol.toStringAsFixed(2),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                                 color: MetaTheme.mainText(c),
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w800)),
@@ -1761,13 +1762,13 @@ class _OrderTicketState extends State<_OrderTicket> {
                   : Column(
                       children: [
                         Text(_isSell ? 'Sell' : 'Buy',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                                 color: Colors.white,
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w800)),
                         Text(
                             '${_vol.toStringAsFixed(2)} ${widget.symbol} @ ${['Market', 'Limit', 'Stop', 'Stop Limit'][_orderIdx]}',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                                 color: Colors.white.withValues(alpha: 0.85),
                                 fontSize: 11.sp)),
                       ],
@@ -1794,7 +1795,7 @@ class _OrderTicketState extends State<_OrderTicket> {
           border: selected ? Border.all(color: color, width: 1) : null,
         ),
         child: Text(label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
                 color: selected ? color : MetaTheme.subText(c),
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700)),
@@ -1823,7 +1824,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(labels[i],
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         color: active
                             ? MetaTheme.mainText(c)
                             : MetaTheme.subText(c),
@@ -1864,7 +1865,7 @@ class _OrderTicketState extends State<_OrderTicket> {
           Row(
             children: [
               Text(label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                       color: on ? color : MetaTheme.subText(c),
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700)),
@@ -1921,7 +1922,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: on ? MetaTheme.mainText(c) : MetaTheme.subText(c),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
@@ -1999,7 +2000,7 @@ Widget _bidAsk(BuildContext c, String label, String value, Color color) {
       Text(label, style: MetaTheme.label(c).copyWith(fontSize: 11.sp)),
       SizedBox(height: 2.h),
       Text(value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
               color: color, fontSize: 20.sp, fontWeight: FontWeight.w800)),
     ],
   );
@@ -2019,7 +2020,7 @@ Widget _btn(BuildContext c, String label, Color color, VoidCallback? onTap,
       ),
       child: customChild ??
           Text(label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: Colors.white,
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800)),

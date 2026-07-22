@@ -98,13 +98,13 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                 // Title
                 Text(
                   'Select Account',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14,
                     color: AppColors.icongrey,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
 
                 // Radios side-by-side
                 Obx(() {
@@ -120,7 +120,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                           onChanged: (v) => controller.selected.value = v!,
                         ),
                       ),
-                      // const SizedBox(width: 28),
+                      // SizedBox(width: 28),
                       // _AccountRadio(
                       //   label: controller.accounts[1],
                       //   value: controller.accounts[1],
@@ -206,7 +206,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                     children: [
                       TextSpan(
                         text: 'Note :',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16,
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.w400,
@@ -215,7 +215,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                       TextSpan(
                         text:
                             'Your Investor password and trading password cannot be the same.',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14,
                           color: AppColors.textGrey,
                           fontWeight: FontWeight.w400,
@@ -394,7 +394,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                 ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
                 : Text(
                   'Create Account',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.whiteColor,
@@ -428,7 +428,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                   children: [
                     Text(
                       'Select $label',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -472,7 +472,7 @@ class _CreateCrmAppAccountScreenState extends State<CreateCrmAppAccountScreen> {
                               Expanded(
                                 child: Text(
                                   option,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 16.sp,
                                     color:
                                         isSelected
@@ -546,10 +546,10 @@ class _AccountRadio extends StatelessWidget {
             groupValue: groupValue,
             onChanged: onChanged,
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: 4),
           Text(
             label,
-            style:   TextStyle(
+            style:   AppTextStyles.bodyText.copyWith(
               fontSize: 14,
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w400,

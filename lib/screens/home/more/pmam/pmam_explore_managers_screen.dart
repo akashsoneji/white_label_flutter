@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -136,7 +137,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
         elevation: 0,
         title: Text(
           'Explore Fund Managers',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
@@ -244,7 +245,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                   label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w500,
@@ -254,7 +255,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                 SizedBox(height: 4.h),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w800,
                     color: valueColor ?? AppColors.textPrimary,
@@ -269,7 +270,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                   ),
                   child: Text(
                     sub,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w500,
@@ -292,11 +293,11 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
       child: TextField(
         controller: _searchCtrl,
         onChanged: (_) => setState(() {}),
-        style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
+        style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
         decoration: InputDecoration(
           isDense: true,
           hintText: 'Search manager name or code…',
-          hintStyle: TextStyle(color: AppColors.textGrey, fontSize: 13.sp),
+          hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 13.sp),
           prefixIcon: Icon(
             Icons.search,
             color: AppColors.textGrey,
@@ -374,7 +375,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: selected
@@ -396,7 +397,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                     ),
                     child: Text(
                       '$count',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
                         color: selected
@@ -452,7 +453,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                   SizedBox(width: 6.w),
                   Text(
                     'Sort: ${sortLabel()}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -500,7 +501,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
   }
 
   void _showSortSheet() {
-    final options = const [
+    final options = [
       ('gain', 'Gain %', Icons.trending_up_rounded),
       ('aum', 'AUM', Icons.account_balance_wallet_rounded),
       ('investors', 'Investors', Icons.group_rounded),
@@ -532,7 +533,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                 children: [
                   Text(
                     'Sort by',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -563,7 +564,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                 ),
                 title: Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   ),
@@ -640,7 +641,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
           SizedBox(height: 16.h),
           Text(
             'No managers found',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -650,7 +651,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
           Text(
             'Try adjusting your filters or search.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
           ),
         ],
       ),
@@ -763,7 +764,7 @@ class _ManagerCard extends StatelessWidget {
                     backgroundColor: AppColors.primary.withOpacity(0.12),
                     child: Text(
                       _initials,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w700,
                         fontSize: 13.sp,
@@ -780,7 +781,7 @@ class _ManagerCard extends StatelessWidget {
                           manager.managerName ?? '—',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -789,7 +790,7 @@ class _ManagerCard extends StatelessWidget {
                         SizedBox(height: 2.h),
                         Text(
                           _activeFor(),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             color: AppColors.textGrey,
                           ),
@@ -808,7 +809,7 @@ class _ManagerCard extends StatelessWidget {
                     ),
                     child: Text(
                       risk.label,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 9.sp,
                         fontWeight: FontWeight.w800,
                         color: risk.fg,
@@ -870,14 +871,14 @@ class _ManagerCard extends StatelessWidget {
                     children: [
                       Text(
                         'Fee: ',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: AppColors.textGrey,
                         ),
                       ),
                       Text(
                         '${manager.avgCommission.toStringAsFixed(0)}%',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primary,
@@ -891,7 +892,7 @@ class _ManagerCard extends StatelessWidget {
                       SizedBox(width: 4.w),
                       Text(
                         '${manager.totalInvestors}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: AppColors.textPrimary,
                           fontWeight: FontWeight.w600,
@@ -942,7 +943,7 @@ class _ManagerCard extends StatelessWidget {
                       ],
                       Text(
                         hasInvestment ? 'My Investment' : 'View Details',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.onColoredBackground,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w700,
@@ -979,7 +980,7 @@ class _ManagerCard extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 9.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textGrey,
@@ -989,7 +990,7 @@ class _ManagerCard extends StatelessWidget {
         SizedBox(height: 2.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             fontWeight: bold ? FontWeight.w800 : FontWeight.w700,
             color: valueColor,

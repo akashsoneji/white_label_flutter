@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 
@@ -51,7 +52,7 @@ class VantagePrimaryButton extends StatelessWidget {
               )
                 : Text(
                   text,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -89,7 +90,7 @@ class VantageOutlinedButton extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -130,10 +131,10 @@ class VantagePillTextField extends StatelessWidget {
       onChanged: onChanged,
       autovalidateMode: AutovalidateMode.disabled,
       validator: validator,
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         color: VantageAuthTheme.text,
         fontSize: 14.sp,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w400,
       ),
       decoration: VantageAuthTheme.pillDecoration(
         hintText: hintText,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -79,7 +80,7 @@ class CustomToast extends StatelessWidget {
                   if (title != null) ...[
                     Text(
                       title!,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.whiteColor,
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w600,
@@ -90,7 +91,7 @@ class CustomToast extends StatelessWidget {
                   ],
                   Text(
                     message,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.whiteColor.withValues(alpha: 0.95),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w400,

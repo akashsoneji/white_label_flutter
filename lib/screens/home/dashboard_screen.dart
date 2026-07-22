@@ -117,7 +117,7 @@ class DashboardScreen extends StatelessWidget {
                       fit: BoxFit.scaleDown,
                       child: Text(
                         formattedBal,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -178,7 +178,7 @@ class DashboardScreen extends StatelessWidget {
                       fit: BoxFit.scaleDown,
                       child: Text(
                         formattedBal,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700,
                           color: CelTheme.mainText(context),
@@ -366,7 +366,7 @@ class DashboardScreen extends StatelessWidget {
               SizedBox(height: 12.h),
               Text(
                 languageService.tr('dashboard_new_account_title'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: CelTheme.headerText(context),
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
@@ -376,7 +376,7 @@ class DashboardScreen extends StatelessWidget {
               SizedBox(height: 4.h),
               Text(
                 languageService.tr('dashboard_new_account_description'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: CelTheme.subText(context),
                   fontSize: 11.sp,
                   height: 1.35,
@@ -401,7 +401,7 @@ class DashboardScreen extends StatelessWidget {
                         ),
                         child: Text(
                           languageService.tr('dashboard_open_real_account'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: CelTheme.buyBlue,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -426,7 +426,7 @@ class DashboardScreen extends StatelessWidget {
                         ),
                         child: Text(
                           languageService.tr('dashboard_open_demo_account'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: Colors.white,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -442,6 +442,373 @@ class DashboardScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════
+  // IQUOTE — INNOVATIVE THEME DASHBOARD CONTENT
+  // ════════════════════════════════════════════════════════════════════════
+
+  Widget _buildIquoteDashboardContent(BuildContext context) {
+    final isDark = AppColors.isDarkMode;
+    final bgColor = isDark ? const Color(0xFF0F1421) : const Color(0xFFF4F6F9);
+
+    return Container(
+      color: bgColor,
+      child: Obx(() {
+        final accounts = controller.mt5Accounts;
+        final isEmpty = accounts.isEmpty;
+
+        return Stack(
+          children: [
+            AnimatedOpacity(
+              opacity: controller.isBottomSheetOpen.value ? 0.3 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  if (isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _buildCelestialEmptyState(context),
+                    )
+                  else
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 24.h),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final account = accounts[index];
+                          return Container(
+                            margin: EdgeInsets.only(bottom: 8.h),
+                            child: _buildIquoteAccountCard(context, account),
+                          );
+                        }, childCount: accounts.length),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (controller.isLoadingMT5Accounts.value)
+              Center(
+                child: CommonLoadingWidget(
+                  isFullScreen: true,
+                  color: AppColors.primary,
+                ),
+              ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildIquoteAccountCard(BuildContext context, MT5Account account) {
+    final accountController = Get.find<AccountController>();
+    final dashboardController = Get.find<DashboardController>();
+    final languageService = Get.find<LanguageService>();
+    final isDark = AppColors.isDarkMode;
+
+    final cardBg = isDark ? const Color(0xFF161B29) : Colors.white;
+    final textPrimary = isDark ? Colors.white : AppColors.textPrimary;
+    final textSecondary = isDark ? Colors.white54 : AppColors.textSecondary;
+
+    return Obx(() {
+      final activeAcc = accountController.activeMT5Account;
+      final isActive = (activeAcc?.metaAccountNumber == account.metaAccountNumber) || account.isPrimaryAccount;
+      final isDemo = account.accountType.toLowerCase() == 'demo';
+
+      final accountInfo = dashboardController.getAccountInfo(account.metaAccountNumber);
+      final balance = accountInfo?.balance ?? double.tryParse(account.balance) ?? 0.0;
+      final equity = accountInfo?.equity ?? double.tryParse(account.equity) ?? balance;
+      final pnl = accountInfo?.profit ?? double.tryParse(account.profit) ?? 0.0;
+      final leverage = account.leverageMax > 0 ? '1:${account.leverageMax}' : '1:500';
+
+      final borderColor = isActive
+          ? AppColors.primary
+          : (isDark ? const Color(0xFF232A3B) : AppColors.border.withValues(alpha: 0.12));
+
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 9.h),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(
+            color: borderColor,
+            width: isActive ? 1.3 : 0.8,
+          ),
+          boxShadow: [
+            if (!isDark)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Row 1: Account # | DEMO/LIVE | ACTIVE -- Balance & 3-Dot Menu
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '#${account.metaAccountNumber}',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: textPrimary,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+                      decoration: BoxDecoration(
+                        color: isDemo
+                            ? Colors.orange.withValues(alpha: 0.12)
+                            : Colors.green.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(3.r),
+                      ),
+                      child: Text(
+                        isDemo ? 'DEMO' : 'LIVE',
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: isDemo ? Colors.orange : Colors.green,
+                          fontSize: 8.5.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    if (isActive) ...[
+                      SizedBox(width: 5.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(3.r),
+                        ),
+                        child: Text(
+                          'ACTIVE',
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: AppColors.primary,
+                            fontSize: 8.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '\$${balance.toStringAsFixed(2)}',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: textPrimary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(width: 4.w),
+                    InkWell(
+                      onTap: () => _showAccountMenuBottomSheet(account),
+                      borderRadius: BorderRadius.circular(4.r),
+                      child: Padding(
+                        padding: EdgeInsets.all(2.r),
+                        child: Icon(
+                          Icons.more_vert_rounded,
+                          color: textSecondary,
+                          size: 16.r,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 4.h),
+
+            // Row 2: Equity & PnL details
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Eq: \$${equity.toStringAsFixed(2)}',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: textSecondary,
+                        fontSize: 10.5.sp,
+                      ),
+                    ),
+                    Text(
+                      ' • ',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: textSecondary,
+                        fontSize: 10.5.sp,
+                      ),
+                    ),
+                    Text(
+                      'P&L: ${pnl >= 0 ? '+' : '-'}\$${pnl.abs().toStringAsFixed(2)}',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: pnl >= 0 ? const Color(0xFF2ED573) : const Color(0xFFFF4757),
+                        fontSize: 10.5.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      ' • $leverage',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: textSecondary,
+                        fontSize: 10.5.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+
+            // Row 3: Action Buttons Row (Trade, Deposit, Withdrawal, Switch)
+            Row(
+              children: [
+                // Trade Icon Button
+                InkWell(
+                  onTap: () async {
+                    await accountController.setActiveMT5Account(account.metaAccountNumber);
+                    if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                      Navigator.of(Get.context!).pop();
+                    }
+                    if (onNavigateToTab != null) {
+                      onNavigateToTab!(2);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(6.r),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+                      borderRadius: BorderRadius.circular(6.r),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                    ),
+                    child: Icon(
+                      Icons.candlestick_chart_outlined,
+                      color: AppColors.primary,
+                      size: 15.r,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
+
+                // Deposit Button
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      if (isDemo) {
+                        controller.onDeposit(account.metaAccountNumber);
+                      } else {
+                        controller.onDepositRealAccount(account.metaAccountNumber);
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(6.r),
+                    child: Container(
+                      height: 28.h,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2ED573).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6.r),
+                        border: Border.all(color: const Color(0xFF2ED573).withValues(alpha: 0.25)),
+                      ),
+                      child: Text(
+                        languageService.tr('dashboard_deposit'),
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: const Color(0xFF2ED573),
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
+
+                // Withdrawal / Settings Button
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      if (isDemo) {
+                        controller.onSettings(account.metaAccountNumber);
+                      } else {
+                        controller.onWithdraw(account.metaAccountNumber);
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(6.r),
+                    child: Container(
+                      height: 28.h,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: isDemo
+                            ? AppColors.primary.withValues(alpha: 0.12)
+                            : const Color(0xFFFF4757).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6.r),
+                        border: Border.all(
+                          color: isDemo
+                              ? AppColors.primary.withValues(alpha: 0.25)
+                              : const Color(0xFFFF4757).withValues(alpha: 0.25),
+                        ),
+                      ),
+                      child: Text(
+                        isDemo
+                            ? languageService.tr('more_settings')
+                            : languageService.tr('dashboard_withdraw'),
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: isDemo ? AppColors.primary : const Color(0xFFFF4757),
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
+
+                // Switch Account Button (if not active)
+                if (!isActive)
+                  Expanded(
+                    child: InkWell(
+                      onTap: () {
+                        accountController
+                            .setActiveMT5Account(account.metaAccountNumber)
+                            .then((_) {
+                              if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                                Navigator.of(Get.context!).pop();
+                              }
+                            });
+                      },
+                      borderRadius: BorderRadius.circular(6.r),
+                      child: Container(
+                        height: 28.h,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6.r),
+                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                        ),
+                        child: Text(
+                          'Switch',
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: AppColors.primary,
+                            fontSize: 10.5.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildCelestialAccountCard(BuildContext context, MT5Account account) {
@@ -498,7 +865,7 @@ class DashboardScreen extends StatelessWidget {
                             account.metaAccountNumber,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: CelTheme.headerText(context),
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w700,
@@ -518,7 +885,7 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           child: Text(
                             account.accountType.capitalizeFirst ?? '',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: accentColor,
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w700,
@@ -578,7 +945,7 @@ class DashboardScreen extends StatelessWidget {
                     children: [
                       Text(
                         languageService.tr('dashboard_balance'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.subText(context),
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w600,
@@ -588,7 +955,7 @@ class DashboardScreen extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         '\$${balance.toStringAsFixed(2)}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.mainText(context),
                           fontSize: 19.sp,
                           fontWeight: FontWeight.w800,
@@ -623,7 +990,7 @@ class DashboardScreen extends StatelessWidget {
                         ),
                         Text(
                           '${pnl >= 0 ? '+' : '-'}\$${pnl.abs().toStringAsFixed(2)}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: pnl >= 0 ? CelTheme.tpGreen : CelTheme.slRed,
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w700,
@@ -688,7 +1055,7 @@ class DashboardScreen extends StatelessWidget {
                   SizedBox(width: 4.w),
                   Text(
                     '${account.tradingServer.capitalizeFirst} • ${account.masterGroupId}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: CelTheme.subText(context),
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w500,
@@ -715,10 +1082,11 @@ class DashboardScreen extends StatelessWidget {
                       await accountController.setActiveMT5Account(
                         account.metaAccountNumber,
                       );
+                      if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                        Navigator.of(Get.context!).pop();
+                      }
                       if (onNavigateToTab != null) {
                         onNavigateToTab!(
-                          // Vantage 5-tab nav (as of 2026-07-09): Trade is at index 2
-                          // for BOTH Vantage and Celestial (Chart shifted to 1 in Vantage).
                           FlavorConfig.isVantage() ? 2 : 2,
                         );
                       }
@@ -778,6 +1146,11 @@ class DashboardScreen extends StatelessWidget {
                       final accountController = Get.find<AccountController>();
                       accountController
                           .setActiveMT5Account(account.metaAccountNumber)
+                          .then((_) {
+                            if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                              Navigator.of(Get.context!).pop();
+                            }
+                          })
                           .catchError((e) {
                             if (kDebugMode) {
                               print('Account switch failed: $e');
@@ -802,7 +1175,7 @@ class DashboardScreen extends StatelessWidget {
                         SizedBox(width: 6.w),
                         Text(
                           languageService.tr('dashboard_switch_to_trade'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: CelTheme.buyBlue,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -836,7 +1209,7 @@ class DashboardScreen extends StatelessWidget {
           label.toUpperCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: CelTheme.subText(context),
             fontSize: 8.sp,
             fontWeight: FontWeight.w700,
@@ -848,7 +1221,7 @@ class DashboardScreen extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: CelTheme.mainText(context),
             fontSize: 11.sp,
             fontWeight: FontWeight.w700,
@@ -910,7 +1283,7 @@ class DashboardScreen extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: Colors.white,
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
@@ -1165,7 +1538,7 @@ class DashboardScreen extends StatelessWidget {
               //   padding: EdgeInsets.only(left: 4.w),
               //   child: Text(
               //     'Trading account',
-              //     style: TextStyle(
+              //     style: AppTextStyles.bodyText.copyWith(
               //       color: CelTheme.headerText(context),
               //       fontSize: 17.sp,
               //       fontWeight: FontWeight.w700,
@@ -1216,6 +1589,21 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ],
             );
+
+    // ── iQuote full-screen scaffold ─────────────────────────────────────
+    if (FlavorConfig.usesIquoteUi()) {
+      final isDark = AppColors.isDarkMode;
+      final bgColor = isDark ? const Color(0xFF0F1421) : const Color(0xFFF4F6F9);
+      return Scaffold(
+        backgroundColor: bgColor,
+        appBar: appBar,
+        body: RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: AppColors.primary,
+          child: _buildIquoteDashboardContent(context),
+        ),
+      );
+    }
 
     // ── Celestial full-screen scaffold ───────────────────────────────────
     if (isCelestial) {
@@ -1329,7 +1717,7 @@ class DashboardScreen extends StatelessWidget {
                       child: Text(
                         account.metaAccountNumber,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -1355,7 +1743,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       child: Text(
                         account.accountType.capitalizeFirst ?? '',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color:
@@ -1390,7 +1778,7 @@ class DashboardScreen extends StatelessWidget {
                         children: [
                           Text(
                             languageService.tr('dashboard_equity'),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12,
                               height: 1.4,
                               fontWeight: FontWeight.w400,
@@ -1401,7 +1789,7 @@ class DashboardScreen extends StatelessWidget {
                             accountInfo != null
                                 ? '\$${accountInfo.equity.toStringAsFixed(2)}'
                                 : '\$${account.equity}',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
@@ -1439,7 +1827,7 @@ class DashboardScreen extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: ' ${account.accountType.capitalizeFirst}\t\t',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         backgroundColor:
                             AppColors.isDarkMode
                                 ? Colors.white.withOpacity(0.12)
@@ -1455,7 +1843,7 @@ class DashboardScreen extends StatelessWidget {
 
                     TextSpan(
                       text: '\t${account.masterGroupId}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10,
                         fontWeight: FontWeight.w400,
                         color:
@@ -1486,10 +1874,11 @@ class DashboardScreen extends StatelessWidget {
                         await accountController.setActiveMT5Account(
                           account.metaAccountNumber,
                         );
+                        if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                          Navigator.of(Get.context!).pop();
+                        }
                         if (onNavigateToTab != null) {
                           onNavigateToTab!(
-                            // Vantage 5-tab nav (as of 2026-07-09): Trade is at index 2
-                            // for BOTH Vantage and Celestial (Chart shifted to 1 in Vantage).
                             FlavorConfig.isVantage() ? 2 : 2,
                           );
                         }
@@ -1613,9 +2002,9 @@ class DashboardScreen extends StatelessWidget {
                       await accountController.setActiveMT5Account(
                         account.metaAccountNumber,
                       );
-                      // Navigate to Trade screen and update bottom navigation.
-                      // Vantage 5-tab nav (as of 2026-07-09): Trade is at index 2
-                      // for ALL flavors (Vantage + non-Vantage legacy 5-tab).
+                      if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                        Navigator.of(Get.context!).pop();
+                      }
                       if (onNavigateToTab != null) {
                         onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 2);
                       }
@@ -1730,12 +2119,14 @@ class DashboardScreen extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () {
-                  // ✅ FIX: Switch account in background, stay on current screen
-                  // Same flow as account_header_widget.dart
                   final accountController = Get.find<AccountController>();
-                  // Call setActiveMT5Account in background (not awaited)
                   accountController
                       .setActiveMT5Account(account.metaAccountNumber)
+                      .then((_) {
+                        if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                          Navigator.of(Get.context!).pop();
+                        }
+                      })
                       .catchError((e) {
                         if (kDebugMode) {
                           print('Account switch failed: $e');
@@ -1767,7 +2158,7 @@ class DashboardScreen extends StatelessWidget {
                     SizedBox(width: 8),
                     Text(
                       languageService.tr('dashboard_switch_to_trade'),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: isVantage ? 12 : 14,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,
@@ -1842,7 +2233,7 @@ class DashboardScreen extends StatelessWidget {
                 Flexible(
                   child: Text(
                     label,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: fontSize,
                       fontWeight: FontWeight.w500,
                       color: textAndIconColor,
@@ -1900,7 +2291,7 @@ class _CelestialDetailRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: CelTheme.subText(context),
               fontSize: 12.sp,
               fontWeight: FontWeight.w500,
@@ -1908,7 +2299,7 @@ class _CelestialDetailRow extends StatelessWidget {
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: valueColor ?? CelTheme.mainText(context),
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
@@ -1977,7 +2368,7 @@ class AccountInfoBottomSheet extends StatelessWidget {
                       children: [
                         Text(
                           account.metaAccountNumber,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             height: 1.4,
                             fontWeight: FontWeight.w600,
@@ -2001,7 +2392,7 @@ class AccountInfoBottomSheet extends StatelessWidget {
                           ),
                           child: Text(
                             account.accountType.capitalizeFirst ?? '',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w600,
                               color:
@@ -2053,7 +2444,7 @@ class AccountInfoBottomSheet extends StatelessWidget {
                   children: [
                     Text(
                       languageService.tr('dashboard_equity'),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.icongrey,
                         height: 1.4,
@@ -2066,7 +2457,7 @@ class AccountInfoBottomSheet extends StatelessWidget {
                           accountInfo != null
                               ? '\$${accountInfo.equity.toStringAsFixed(2)} USD'
                               : '\$${account.equity} USD',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                             height: 1.4,
@@ -2221,7 +2612,7 @@ class AccountInfoBottomSheet extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w400,
@@ -2230,7 +2621,7 @@ class AccountInfoBottomSheet extends StatelessWidget {
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               color: AppColors.icongrey,
               fontWeight: FontWeight.w400,
@@ -2282,7 +2673,7 @@ class AccountInfoBottomSheet extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 maxLines: 2,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
                   color: color,
@@ -2333,7 +2724,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                   children: [
                     Text(
                       languageService.tr('change_master_password'),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
@@ -2342,7 +2733,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     SizedBox(height: 8.h),
                     Text(
                       'Account: ${account.metaAccountNumber}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
                       ),
@@ -2352,7 +2743,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                       () => RTLHelper.rtlTextField(
                         controller: passwordController,
                         obscureText: obscurePassword.value,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.textGrey,
                         ),
@@ -2369,11 +2760,11 @@ class AccountMenuBottomSheet extends StatelessWidget {
                           return null;
                         },
                         decoration: InputDecoration(
-                          labelStyle: TextStyle(
+                          labelStyle: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             color: AppColors.textGrey,
                           ),
-                          floatingLabelStyle: TextStyle(
+                          floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textGrey,
                           ),
                           labelText: 'New Password',
@@ -2423,7 +2814,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         decoration: InputDecoration(
                           labelText: 'Confirm Password',
                           hintText: 'Confirm new password',
-                          floatingLabelStyle: TextStyle(
+                          floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textGrey,
                           ),
                           suffixIcon: IconButton(
@@ -2521,7 +2912,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                   )
                                   : Text(
                                     'Change Password',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.whiteColor,
@@ -2544,7 +2935,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         ),
                         child: Text(
                           languageService.tr('navigation_cancel'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
@@ -2676,7 +3067,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                 onPressed: () => Get.back(closeOverlays: true),
                 child: Text(
                   languageService.tr('navigation_cancel'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.red,
@@ -2711,7 +3102,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
             SizedBox(width: 16),
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
@@ -2764,7 +3155,7 @@ class OpenAccountBottomSheet extends StatelessWidget {
               // Title
               Text(
                 languageService.tr('dashboard_open_account'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -2779,7 +3170,7 @@ class OpenAccountBottomSheet extends StatelessWidget {
                 child: Text(
                   languageService.tr('dashboard_open_account_subtitle'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     color: AppColors.textGrey,
                     height: 1.4,
@@ -2804,7 +3195,7 @@ class OpenAccountBottomSheet extends StatelessWidget {
                     child: Center(
                       child: Text(
                         languageService.tr('dashboard_live'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
                           color: AppColors.primary,
@@ -2828,7 +3219,7 @@ class OpenAccountBottomSheet extends StatelessWidget {
                     child: Center(
                       child: Text(
                         languageService.tr('dashboard_demo'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
@@ -2849,7 +3240,7 @@ class OpenAccountBottomSheet extends StatelessWidget {
                   child: Center(
                     child: Text(
                       languageService.tr('navigation_cancel'),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w500,
                         color: AppColors.red,

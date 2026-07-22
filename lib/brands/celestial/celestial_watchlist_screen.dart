@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -71,7 +72,7 @@ class _CelestialWatchlistScreenState
           Expanded(
             child: Text(
               Get.find<LanguageService>().tr('celestial_watchlist_title'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: CelTheme.headerText(c),
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w500,
@@ -109,13 +110,13 @@ class _CelestialWatchlistScreenState
               size: 52.sp, color: CelTheme.subText(c)),
           SizedBox(height: 10.h),
           Text(Get.find<LanguageService>().tr('celestial_watchlist_no_favorites'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: CelTheme.mainText(c),
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700)),
           SizedBox(height: 6.h),
           Text(Get.find<LanguageService>().tr('celestial_watchlist_search_hint'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: CelTheme.subText(c), fontSize: 12.sp)),
         ],
       ),
@@ -172,7 +173,7 @@ class _CelestialWatchlistScreenState
                       '  ${change >= 0 ? '+' : ''}${change.toStringAsFixed(digits)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: changeColor,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400),
@@ -182,7 +183,7 @@ class _CelestialWatchlistScreenState
                       item.symbol,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.headerText(c),
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500),
@@ -204,7 +205,7 @@ class _CelestialWatchlistScreenState
                     SizedBox(height: 1.h),
                     Text(
                       'L: ${price.dayLow.toStringAsFixed(digits)}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.subText(c), fontSize: 10.sp),
                     ),
                   ],
@@ -226,7 +227,7 @@ class _CelestialWatchlistScreenState
                     SizedBox(height: 1.h),
                     Text(
                       'H: ${price.dayHigh.toStringAsFixed(digits)}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.subText(c), fontSize: 10.sp),
                     ),
                   ],
@@ -243,13 +244,13 @@ class _CelestialWatchlistScreenState
   Widget _fractionPrice(BuildContext c, String value, Color color) {
     if (value.length < 3) {
       return Text(value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
               color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
     }
     final dotIdx = value.indexOf('.');
     if (dotIdx < 0 || dotIdx >= value.length - 2) {
       return Text(value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
               color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
     }
     final head = value.substring(0, value.length - 2);
@@ -258,11 +259,11 @@ class _CelestialWatchlistScreenState
       text: TextSpan(children: [
         TextSpan(
             text: head,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
                 color: color, fontSize: 13.sp, fontWeight: FontWeight.w400)),
         TextSpan(
             text: tail,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
                 color: color, fontSize: 16.sp, fontWeight: FontWeight.w500)),
       ]),
     );
@@ -340,11 +341,11 @@ class _SearchSheetState extends State<_SearchSheet> {
                         _sic.searchInstruments(v);
                         setState(() {});
                       },
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.mainText(c), fontSize: 14.sp),
                       decoration: InputDecoration(
                         hintText: Get.find<LanguageService>().tr('celestial_watchlist_search_btn'),
-                        hintStyle: TextStyle(
+                        hintStyle: AppTextStyles.bodyText.copyWith(
                             color: CelTheme.subText(c), fontSize: 14.sp),
                         prefixIcon: Icon(Icons.search,
                             color: CelTheme.subText(c), size: 20.sp),
@@ -393,14 +394,14 @@ class _SearchSheetState extends State<_SearchSheet> {
               child: Obx(() {
                 final results = _sic.filteredSymbols;
                 if (_sic.isLoading.value && results.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(child: CircularProgressIndicator());
                 }
                 if (results.isEmpty) {
                   return Center(
                     child: Padding(
                       padding: EdgeInsets.all(24.h),
                       child: Text(Get.find<LanguageService>().tr('celestial_watchlist_no_results'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                               color: CelTheme.subText(c), fontSize: 13.sp)),
                     ),
                   );
@@ -457,7 +458,7 @@ class _SearchSheetState extends State<_SearchSheet> {
                 ),
                 child: Text(
                   cat,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: active
                         ? CelTheme.mainText(c)
                         : CelTheme.subText(c),
@@ -522,14 +523,14 @@ class _SearchSheetState extends State<_SearchSheet> {
                   Text(symbol,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.headerText(c),
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500)),
                   Text(s.categoryName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.subText(c), fontSize: 11.sp)),
                 ],
               ),

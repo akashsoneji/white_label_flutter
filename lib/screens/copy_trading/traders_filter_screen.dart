@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -66,7 +67,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                     ),
                     child:   Text(
                       'Filters',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -82,7 +83,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                     },
                     child:   Text(
                       'Reset all',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14,
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w400,
@@ -124,7 +125,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           child: Text(
                             '\$25.00 or more',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16,
                               color: AppColors.textPrimary,
                             ),
@@ -138,7 +139,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                             padding: EdgeInsets.symmetric(horizontal: 4),
                             child: Text(
                               'Minimum Investment',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12,
                                 color: AppColors.textGrey,
                               ),
@@ -172,7 +173,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           children: [
                             Text(
                               'Free 7-day trial',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
@@ -224,7 +225,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                             padding: EdgeInsets.all(10),
                             child: Text(
                               'Minimum Expertise',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
@@ -341,7 +342,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                     },
                     child:   Text(
                       'Show 108 Master Traders',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.whiteColor,
@@ -374,7 +375,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: AppColors.icongrey,

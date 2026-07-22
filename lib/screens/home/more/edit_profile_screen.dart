@@ -232,7 +232,7 @@ class _EditProfileState extends State<EditProfile> {
       countryListTheme: CountryListThemeData(
         flagSize: 25,
         backgroundColor: AppColors.whiteColor,
-        textStyle: TextStyle(fontSize: 16, color: AppColors.textPrimary),
+        textStyle: AppTextStyles.bodyText.copyWith(fontSize: 16, color: AppColors.textPrimary),
         bottomSheetHeight: 500,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20.0),
@@ -418,7 +418,7 @@ class _EditProfileState extends State<EditProfile> {
                   SizedBox(height: 20.h),
                   Text(
                     languageService.tr('edit_profile_select_country'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -429,10 +429,10 @@ class _EditProfileState extends State<EditProfile> {
                     controller: searchController,
                     textCapitalization: TextCapitalization.none,
                     autocorrect: false,
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: languageService.tr('edit_profile_search_countries'),
-                      hintStyle: TextStyle(color: AppColors.textGrey),
+                      hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                       prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -459,11 +459,11 @@ class _EditProfileState extends State<EditProfile> {
                           return ListTile(
                             leading: Text(
                               country.emoji ?? '',
-                              style: TextStyle(fontSize: 24),
+                              style: AppTextStyles.bodyText.copyWith(fontSize: 24),
                             ),
                             title: Text(
                               country.name ?? '',
-                              style: TextStyle(color: AppColors.textPrimary),
+                              style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                             ),
                             onTap: () {
                               dropdownService.selectCountry(country);
@@ -516,7 +516,7 @@ class _EditProfileState extends State<EditProfile> {
                   SizedBox(height: 20.h),
                   Text(
                     languageService.tr('edit_profile_select_state'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -527,10 +527,10 @@ class _EditProfileState extends State<EditProfile> {
                     controller: searchController,
                     textCapitalization: TextCapitalization.none,
                     autocorrect: false,
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: languageService.tr('edit_profile_search_states'),
-                      hintStyle: TextStyle(color: AppColors.textGrey),
+                      hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                       prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -557,7 +557,7 @@ class _EditProfileState extends State<EditProfile> {
                           return ListTile(
                             title: Text(
                               state.name,
-                              style: TextStyle(color: AppColors.textPrimary),
+                              style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                             ),
                             onTap: () {
                               dropdownService.selectState(state);
@@ -610,7 +610,7 @@ class _EditProfileState extends State<EditProfile> {
                   SizedBox(height: 20.h),
                   Text(
                     languageService.tr('edit_profile_select_city'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -621,10 +621,10 @@ class _EditProfileState extends State<EditProfile> {
                     controller: searchController,
                     textCapitalization: TextCapitalization.none,
                     autocorrect: false,
-                    style: TextStyle(color: AppColors.textPrimary),
+                    style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: languageService.tr('edit_profile_search_cities'),
-                      hintStyle: TextStyle(color: AppColors.textGrey),
+                      hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                       prefixIcon: Icon(Icons.search, color: AppColors.iconGrey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -651,7 +651,7 @@ class _EditProfileState extends State<EditProfile> {
                           return ListTile(
                             title: Text(
                               city.name,
-                              style: TextStyle(color: AppColors.textPrimary),
+                              style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                             ),
                             onTap: () {
                               dropdownService.selectCity(city);
@@ -696,10 +696,10 @@ class _EditProfileState extends State<EditProfile> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 child: Text(
                   title,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -714,7 +714,7 @@ class _EditProfileState extends State<EditProfile> {
                     return ListTile(
                       title: Text(
                         items[index],
-                        style: TextStyle(color: AppColors.textPrimary),
+                        style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                       ),
                       onTap: () {
                         Navigator.pop(context);
@@ -810,14 +810,14 @@ class _EditProfileState extends State<EditProfile> {
                           labelText: languageService.tr(
                             'edit_profile_first_name',
                           ),
-                          labelStyle: TextStyle(color: AppColors.textGrey),
-                          floatingLabelStyle: TextStyle(
+                          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                          floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                           ),
                           hintText: languageService.tr(
                             'edit_profile_please_enter_first_name',
                           ),
-                          hintStyle: TextStyle(color: AppColors.textGrey),
+                          hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -855,8 +855,8 @@ class _EditProfileState extends State<EditProfile> {
                           ),
                           decoration: InputDecoration(
                             labelText: languageService.tr('kyc_details_title'),
-                            labelStyle: TextStyle(color: AppColors.textGrey),
-                            floatingLabelStyle: TextStyle(
+                            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                            floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                             ),
                           ),
@@ -882,14 +882,14 @@ class _EditProfileState extends State<EditProfile> {
                           labelText: languageService.tr(
                             'edit_profile_last_name',
                           ),
-                          labelStyle: TextStyle(color: AppColors.textGrey),
-                          floatingLabelStyle: TextStyle(
+                          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                          floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                           ),
                           hintText: languageService.tr(
                             'edit_profile_please_enter_last_name',
                           ),
-                          hintStyle: TextStyle(color: AppColors.textGrey),
+                          hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -911,14 +911,14 @@ class _EditProfileState extends State<EditProfile> {
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           labelText: languageService.tr('edit_profile_email'),
-                          labelStyle: TextStyle(color: AppColors.textGrey),
-                          floatingLabelStyle: TextStyle(
+                          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                          floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                           ),
                           hintText: languageService.tr(
                             'edit_profile_please_enter_email',
                           ),
-                          hintStyle: TextStyle(color: AppColors.textGrey),
+                          hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -957,7 +957,7 @@ class _EditProfileState extends State<EditProfile> {
                                   _selectedCountryFlag.isNotEmpty
                                       ? _selectedCountryFlag
                                       : "🌐 +--",
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 16.sp,
                                     color: AppColors.textPrimary,
                                   ),
@@ -979,15 +979,15 @@ class _EditProfileState extends State<EditProfile> {
                                   ),
                                 ],
                                 onChanged: (_) => _formatPhoneInput(),
-                                style: TextStyle(color: AppColors.textPrimary),
+                                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                                 decoration: InputDecoration(
                                   labelText: languageService.tr(
                                     'edit_profile_mobile_number',
                                   ),
-                                  labelStyle: TextStyle(
+                                  labelStyle: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.textGrey,
                                   ),
-                                  floatingLabelStyle: TextStyle(
+                                  floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.primary,
                                   ),
                                   counterText: '',
@@ -1058,7 +1058,7 @@ class _EditProfileState extends State<EditProfile> {
                           suffixIcon: InkWell(
                             onTap: isProfileVerified ? null : _selectDate,
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                 horizontal: 14,
                               ),
                               child: Icon(
@@ -1072,14 +1072,14 @@ class _EditProfileState extends State<EditProfile> {
                             labelText: languageService.tr(
                               'edit_profile_date_of_birth',
                             ),
-                            labelStyle: TextStyle(color: AppColors.textGrey),
-                            floatingLabelStyle: TextStyle(
+                            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                            floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                             ),
                             hintText: languageService.tr(
                               'edit_profile_please_select_dob',
                             ),
-                            hintStyle: TextStyle(color: AppColors.textGrey),
+                            hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                           ),
                           validator: (value) {
                             if (controller.dateOfBirth.value.isEmpty) {
@@ -1120,8 +1120,8 @@ class _EditProfileState extends State<EditProfile> {
                             labelText: languageService.tr(
                               'edit_profile_gender',
                             ),
-                            labelStyle: TextStyle(color: AppColors.textGrey),
-                            floatingLabelStyle: TextStyle(
+                            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                            floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                             ),
                           ),
@@ -1150,8 +1150,8 @@ class _EditProfileState extends State<EditProfile> {
                         textAlignVertical: TextAlignVertical.top,
                         decoration: InputDecoration(
                           labelText: languageService.tr('register_address'),
-                          labelStyle: TextStyle(color: AppColors.textGrey),
-                          floatingLabelStyle: TextStyle(
+                          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                          floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                           ),
                           alignLabelWithHint: true,
@@ -1197,14 +1197,14 @@ class _EditProfileState extends State<EditProfile> {
                           labelText: languageService.tr(
                             'edit_profile_postcode',
                           ),
-                          labelStyle: TextStyle(color: AppColors.textGrey),
-                          floatingLabelStyle: TextStyle(
+                          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                          floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                           ),
                           hintText: languageService.tr(
                             'edit_profile_please_enter_postcode',
                           ),
-                          hintStyle: TextStyle(color: AppColors.textGrey),
+                          hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -1287,8 +1287,8 @@ class _EditProfileState extends State<EditProfile> {
               ),
               decoration: InputDecoration(
                 labelText: languageService.tr('register_country'),
-                labelStyle: TextStyle(color: AppColors.textGrey),
-                floatingLabelStyle: TextStyle(color: AppColors.primary),
+                labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16.w,
                   vertical: 16.h,
@@ -1345,8 +1345,8 @@ class _EditProfileState extends State<EditProfile> {
               ),
               decoration: InputDecoration(
                 labelText: languageService.tr('edit_profile_state'),
-                labelStyle: TextStyle(color: AppColors.textGrey),
-                floatingLabelStyle: TextStyle(color: AppColors.primary),
+                labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16.w,
                   vertical: 16.h,
@@ -1397,8 +1397,8 @@ class _EditProfileState extends State<EditProfile> {
               ),
               decoration: InputDecoration(
                 labelText: languageService.tr('edit_profile_city'),
-                labelStyle: TextStyle(color: AppColors.textGrey),
-                floatingLabelStyle: TextStyle(color: AppColors.primary),
+                labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16.w,
                   vertical: 16.h,

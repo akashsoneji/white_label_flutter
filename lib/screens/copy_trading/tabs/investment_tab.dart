@@ -103,7 +103,7 @@ class _InvestmentTabState extends State<InvestmentTab> {
                   // ── Masters you copy ──
                   Text(
                     'Masters you copy (${_mockMasters.length})',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -119,7 +119,7 @@ class _InvestmentTabState extends State<InvestmentTab> {
                   // ── History ──
                   Text(
                     'History (0)',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -170,7 +170,7 @@ class _InvestmentTabState extends State<InvestmentTab> {
             childrenPadding: EdgeInsets.only(left: 10, right: 16, bottom: 12),
             title: Text(
               'Your Stats',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -197,7 +197,7 @@ class _InvestmentTabState extends State<InvestmentTab> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
           ),
           Flexible(
             child: DashedUnderline(
@@ -208,7 +208,7 @@ class _InvestmentTabState extends State<InvestmentTab> {
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
@@ -274,7 +274,7 @@ class _MasterCardState extends State<_MasterCard> {
                     children: [
                       Text(
                         widget.master.name,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -282,7 +282,7 @@ class _MasterCardState extends State<_MasterCard> {
                       ),
                       Text(
                         widget.master.badge,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w400,
                           color: AppColors.icongrey,
@@ -376,7 +376,7 @@ class _StatCell extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             color: AppColors.textGrey,
             fontWeight: FontWeight.w400,
@@ -385,7 +385,7 @@ class _StatCell extends StatelessWidget {
         SizedBox(height: 5.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
             color: valueColor,

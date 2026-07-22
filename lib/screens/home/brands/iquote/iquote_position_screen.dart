@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -199,7 +200,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                         children: [
                           Text(
                             _activeAccountLabel(),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 12.sp,
@@ -216,7 +217,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   SizedBox(width: 14.w),
                   Text(
                     balance.toStringAsFixed(4),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -225,7 +226,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   const Spacer(),
                   Text(
                     '${isProfitPositive ? '' : '-'}${profit.abs().toStringAsFixed(4)}(${marginLevel.toStringAsFixed(2)}%)',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: isProfitPositive ? _green : _red,
@@ -284,13 +285,13 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         child: Row(
           children: [
             Text('From Real',
-                style: TextStyle(color: Colors.white, fontSize: 12.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: Colors.white, fontSize: 12.sp)),
             SizedBox(width: 12.w),
             Text('arie***',
-                style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 12.sp)),
             SizedBox(width: 8.w),
             Text('EUR',
-                style: TextStyle(color: Colors.white, fontSize: 12.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: Colors.white, fontSize: 12.sp)),
             SizedBox(width: 6.w),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
@@ -299,7 +300,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 border: Border.all(color: _green, width: 1),
               ),
               child: Text('Buy 1',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: _green,
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
@@ -307,10 +308,10 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             ),
             SizedBox(width: 8.w),
             Text('Profit \$ 0.04',
-                style: TextStyle(color: _green, fontSize: 12.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: _green, fontSize: 12.sp)),
             SizedBox(width: 10.w),
             Text(_currentTimeHms(),
-                style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 12.sp)),
             const Spacer(),
             Icon(Icons.chevron_right, color: Colors.white54, size: 20.sp),
           ],
@@ -359,7 +360,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 15.sp,
               fontWeight: active ? FontWeight.bold : FontWeight.w500,
               color: active ? Colors.white : Colors.white54,
@@ -394,7 +395,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         child: Row(
           children: [
             Text('Start:',
-                style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 13.sp)),
             SizedBox(width: 12.w),
             Expanded(
               child: Container(
@@ -405,14 +406,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 ),
                 child: Center(
                   child: Text(startDate,
-                      style: TextStyle(color: Colors.white, fontSize: 13.sp)),
+                      style: AppTextStyles.bodyText.copyWith(color: Colors.white, fontSize: 13.sp)),
                 ),
               ),
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.w),
               child: Text('—',
-                  style: TextStyle(color: Colors.white70, fontSize: 13.sp)),
+                  style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 13.sp)),
             ),
             Expanded(
               child: Container(
@@ -423,7 +424,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 ),
                 child: Center(
                   child: Text(endDate,
-                      style: TextStyle(color: Colors.white, fontSize: 13.sp)),
+                      style: AppTextStyles.bodyText.copyWith(color: Colors.white, fontSize: 13.sp)),
                 ),
               ),
             ),
@@ -500,7 +501,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
           Icon(Icons.inbox_outlined, size: 44.sp, color: Colors.white54),
           SizedBox(height: 16.h),
           Text(message,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.white)),
@@ -579,7 +580,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                   child: Text(
                     isBuy ? 'Buy' : 'Sell',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: isBuy ? _green : _red,
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w700,
@@ -589,7 +590,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 SizedBox(width: 8.w),
                 Text(
                   symbol,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: Colors.white,
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
@@ -625,7 +626,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 ),
                 Text(
                   '${position.volume}Lot',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                       color: Colors.white,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600),
@@ -641,7 +642,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     ),
                     child: Text(
                       leverage,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: Colors.white70,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w600),
@@ -650,7 +651,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 const Spacer(),
                 Text(
                   '${isPositive ? '' : '-'}${position.profitLoss.abs().toStringAsFixed(4)}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: isPositive ? _green : _red,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
@@ -666,12 +667,12 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 SizedBox(width: 6.w),
                 Text(
                   _formatSwap(position.swap),
-                  style: TextStyle(color: Colors.white54, fontSize: 11.sp),
+                  style: AppTextStyles.bodyText.copyWith(color: Colors.white54, fontSize: 11.sp),
                 ),
                 const Spacer(),
                 Text(
                   position.entryPrice,
-                  style: TextStyle(color: Colors.white54, fontSize: 12.sp),
+                  style: AppTextStyles.bodyText.copyWith(color: Colors.white54, fontSize: 12.sp),
                 ),
                 SizedBox(width: 6.w),
                 Icon(Icons.arrow_forward,
@@ -679,7 +680,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 SizedBox(width: 6.w),
                 Text(
                   position.currentPrice,
-                  style: TextStyle(color: Colors.white70, fontSize: 12.sp),
+                  style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -689,7 +690,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 alignment: Alignment.centerRight,
                 child: Text(
                   DateHelper.formatIsoStringToUtcHistory(position.closeTime),
-                  style: TextStyle(color: Colors.white38, fontSize: 11.sp),
+                  style: AppTextStyles.bodyText.copyWith(color: Colors.white38, fontSize: 11.sp),
                 ),
               ),
             ],
@@ -715,13 +716,13 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('V',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w900,
                   fontSize: 11.sp)),
           SizedBox(width: 3.w),
           Text('VIP 0',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
                   fontSize: 9.sp)),
@@ -774,14 +775,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('Close Position'),
+                title: Text('Close Position'),
                 onTap: () {
                   Get.back();
                   Get.to(() => ClosePositionScreen(position: position));
                 },
               ),
               ListTile(
-                title: const Text('Edit Order'),
+                title: Text('Edit Order'),
                 onTap: () {
                   Get.back();
                   Get.to(() => EditOrderScreen(position: position));
@@ -847,7 +848,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
             SizedBox(height: 6.h),
             Text(
               'Switch account',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: Colors.white,
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w600,
@@ -911,7 +912,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                 ),
                 child: Text(
                   'Switch',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15.sp, fontWeight: FontWeight.w700),
                 ),
               ),
@@ -969,7 +970,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                     children: [
                       Text(
                         label,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: Colors.white,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
@@ -983,7 +984,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                   SizedBox(height: 2.h),
                   Text(
                     hasAccount ? balance : '---',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: hasAccount ? _accent : Colors.white38,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
@@ -1033,7 +1034,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
               SizedBox(width: 6.w),
             ],
             Text(label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                     color: Colors.white,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600)),

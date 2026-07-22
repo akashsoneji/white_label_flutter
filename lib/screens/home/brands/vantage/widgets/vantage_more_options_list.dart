@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_glass_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -136,7 +137,7 @@ class _VantageQuickActionTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 10.8.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -194,7 +195,7 @@ class _VantageOptionRow extends StatelessWidget {
                   item.label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,

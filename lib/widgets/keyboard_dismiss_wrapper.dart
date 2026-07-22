@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../constants/text_styles.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -146,12 +147,12 @@ class _DoneBar extends StatelessWidget {
               TextButton(
                 onPressed: onTap,
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: 16),
                   foregroundColor: const Color(0xFF007AFF),
                 ),
-                child: const Text(
+                child: Text(
                   'Done',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),

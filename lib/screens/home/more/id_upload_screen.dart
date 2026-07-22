@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'dart:io';
@@ -20,7 +21,7 @@ class IdUploadScreen extends StatelessWidget {
         leading: const AppBackButton(),
         title: Text(
           'ID/Aadhar card',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w500,
@@ -35,7 +36,7 @@ class IdUploadScreen extends StatelessWidget {
           children: [
             Text(
               'The document you are providing must be valid at least 30 days and contain all of the following details:',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 color: AppColors.textGrey,
                 height: 1.5,
@@ -98,7 +99,7 @@ class IdUploadScreen extends StatelessWidget {
                 ),
                 child: Text(
                   'Submit Request',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: AppColors.whiteColor,
@@ -139,7 +140,7 @@ class IdUploadScreen extends StatelessWidget {
                     SizedBox(height: 8),
                     Text(
                       title,
-                      style: TextStyle(fontSize: 14, color: AppColors.textGrey),
+                      style: AppTextStyles.bodyText.copyWith(fontSize: 14, color: AppColors.textGrey),
                     ),
                   ],
                 )
@@ -167,7 +168,7 @@ class IdUploadScreen extends StatelessWidget {
                           ),
                           child: Text(
                             title,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.whiteColor,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -195,7 +196,7 @@ class IdUploadScreen extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13,
               color: AppColors.textPrimary,
               height: 1.4,

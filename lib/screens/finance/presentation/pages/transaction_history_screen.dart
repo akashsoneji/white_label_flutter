@@ -56,7 +56,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         text,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 11.sp,
           fontWeight: FontWeight.w600,
           color: fg,
@@ -356,7 +356,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                           Expanded(
                             child: Text(
                               period,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w400,
                                 color: AppColors.textPrimary,
@@ -404,7 +404,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 children: [
                   Text(
                     'Start Date:',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w400,
                       color: AppColors.textPrimary,
@@ -424,7 +424,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                       customStartDate != null
                           ? _formatDate(customStartDate!)
                           : 'Select start date',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.pureWhite,
                       ),
@@ -448,7 +448,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 children: [
                   Text(
                     'End Date:',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w400,
                       color: AppColors.textPrimary,
@@ -468,7 +468,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                       customEndDate != null
                           ? _formatDate(customEndDate!)
                           : 'Select end date',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.pureWhite,
                       ),
@@ -487,7 +487,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     return Obx(() {
       // Show loader while fetching data
       if (controller.isLoading) {
-        return const Center(child: CommonLoadingWidget(isFullScreen: true));
+        return Center(child: CommonLoadingWidget(isFullScreen: true));
       }
 
       // Get filtered and sorted transactions - access observable inside Obx
@@ -524,7 +524,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               SizedBox(height: 16.h),
               Text(
                 'No transactions found',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,
                   color: Colors.grey[600],
@@ -533,7 +533,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               SizedBox(height: 8.h),
               Text(
                 'Try adjusting your filters',
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: Colors.grey[500]),
               ),
             ],
           ),
@@ -627,7 +627,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     children: [
                       Text(
                         transaction.referenceNumber as String,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -636,7 +636,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                       SizedBox(height: 2.h),
                       Text(
                         transaction.transactionType ?? "",
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: Colors.grey[600],
                         ),
@@ -649,7 +649,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 children: [
                   Text(
                     '$amountPrefix${transaction.amount}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       color: amountColor,
@@ -657,7 +657,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                   ),
                   Text(
                     _formatDateTime(transaction.createdAt ?? ''),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.grey[600],
@@ -835,7 +835,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 SizedBox(height: 24.h),
                 Text(
                   'Select Transaction Type',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -874,7 +874,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                               Expanded(
                                 child: Text(
                                   type,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 16.sp,
                                     color:
                                         isSelected

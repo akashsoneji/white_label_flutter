@@ -119,7 +119,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
               ),
               label: Text(
                 'Explore Masters',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,
@@ -142,7 +142,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
         final list = controller.subscriptions.toList();
 
         if (loading && list.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
 
         return RefreshIndicator(
@@ -203,11 +203,11 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
                             ? AppColors.textPrimaryDark
                             : AppColors.onColoredBackground,
                     unselectedLabelColor: AppColors.textGrey,
-                    labelStyle: TextStyle(
+                    labelStyle: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                     ),
-                    unselectedLabelStyle: TextStyle(
+                    unselectedLabelStyle: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -281,7 +281,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: const Text('Add capital'),
+            title: Text('Add capital'),
             content: TextField(
               controller: amountCtrl,
               keyboardType: const TextInputType.numberWithOptions(
@@ -292,7 +292,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(null),
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
               TextButton(
                 onPressed: () {
@@ -301,7 +301,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
                   if (v == null || v <= 0) return;
                   Navigator.of(ctx).pop(v);
                 },
-                child: const Text('Add'),
+                child: Text('Add'),
               ),
             ],
           ),
@@ -332,18 +332,18 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: const Text('Stop investment?'),
-            content: const Text(
+            title: Text('Stop investment?'),
+            content: Text(
               'This is permanent. You\'ll need to re-subscribe.',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
-                child: const Text('Stop'),
+                child: Text('Stop'),
               ),
             ],
           ),
@@ -478,7 +478,7 @@ class _SummarySection extends StatelessWidget {
                         ),
                         child: Text(
                           '$active active',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.green,
@@ -588,7 +588,7 @@ class _SummaryMetricTile extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 9.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w500,
@@ -597,7 +597,7 @@ class _SummaryMetricTile extends StatelessWidget {
                 SizedBox(height: 2.h),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                     color: valueColor ?? AppColors.textPrimary,
@@ -758,7 +758,7 @@ class _InvestmentRow extends StatelessWidget {
                                   ? item.masterName
                                   : item.masterCode,
                             ),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.onColoredBackground,
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w700,
@@ -795,7 +795,7 @@ class _InvestmentRow extends StatelessWidget {
                                   ),
                                   child: Text(
                                     _formatStatus(status),
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 11.sp,
                                       fontWeight: FontWeight.w600,
                                       color: _statusColor,
@@ -815,7 +815,7 @@ class _InvestmentRow extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                //  style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: item.totalPnl >= 0 ? AppColors.green : AppColors.error), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                //  style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, fontWeight: FontWeight.w600, color: item.totalPnl >= 0 ? AppColors.green : AppColors.error), maxLines: 1, overflow: TextOverflow.ellipsis),
                               ],
                             ),
                             SizedBox(height: 2.h),
@@ -833,7 +833,7 @@ class _InvestmentRow extends StatelessWidget {
                                     ),
                                     child: Text(
                                       item.serverType.toUpperCase(),
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 10.sp,
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.blue,
@@ -845,7 +845,7 @@ class _InvestmentRow extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       item.planName,
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 10.sp,
                                         color: AppColors.textGrey,
                                       ),
@@ -980,12 +980,12 @@ class _FieldChip extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey),
         ),
         SizedBox(height: 2.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: valueColor ?? AppColors.textPrimary,
@@ -1031,7 +1031,7 @@ class _SmallActionBtn extends StatelessWidget {
               Flexible(
                 child: Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
                     color: c,
@@ -1089,8 +1089,8 @@ class _TradeHistoryTab extends StatelessWidget {
                 SizedBox(height: 16.h),
                 TextButton.icon(
                   onPressed: controller.loadTrades,
-                  icon: const Icon(Icons.refresh, size: 16),
-                  label: const Text('Retry'),
+                  icon: Icon(Icons.refresh, size: 16),
+                  label: Text('Retry'),
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.primary,
                   ),
@@ -1216,7 +1216,7 @@ class _TradeRowState extends State<_TradeRow>
                         children: [
                           Text(
                             widget.item.symbol,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
@@ -1225,7 +1225,7 @@ class _TradeRowState extends State<_TradeRow>
                           SizedBox(width: 5.w),
                           Text(
                             '\u2013',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textGrey,
@@ -1236,7 +1236,7 @@ class _TradeRowState extends State<_TradeRow>
                             widget.item.copierVolume.toDouble().toStringAsFixed(
                               2,
                             ),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
@@ -1254,7 +1254,7 @@ class _TradeRowState extends State<_TradeRow>
                             ),
                             child: Text(
                               widget.item.tradeType.toUpperCase(),
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w700,
                                 color: badgeColor,
@@ -1264,7 +1264,7 @@ class _TradeRowState extends State<_TradeRow>
                         ],
                       ),
                       // SizedBox(height: 2.h),
-                      // Text(widget.item.status.toUpperCase(), style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey)),
+                      // Text(widget.item.status.toUpperCase(), style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey)),
                     ],
                   ),
                 ),
@@ -1273,13 +1273,13 @@ class _TradeRowState extends State<_TradeRow>
                   children: [
                     Text(
                       '${isProfit ? '+' : ''}\$${widget.item.copierProfit.toDouble().toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
                         color: isProfit ? AppColors.green : AppColors.error,
                       ),
                     ),
-                    // Text('P&L', style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey)),
+                    // Text('P&L', style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey)),
                   ],
                 ),
                 SizedBox(width: 8.w),
@@ -1381,7 +1381,7 @@ class _TField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 10.sp,
             color: AppColors.textGrey,
             fontWeight: FontWeight.w500,
@@ -1390,7 +1390,7 @@ class _TField extends StatelessWidget {
         SizedBox(height: 2.h),
         Text(
           value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: valueColor ?? AppColors.textPrimary,
@@ -1449,7 +1449,7 @@ class _EmptyInvestmentsState extends StatelessWidget {
               icon: Icon(Icons.explore_outlined, size: 16.r),
               label: Text(
                 'Explore Masters',
-                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w600),
               ),
               style: ElevatedButton.styleFrom(
                 elevation: 0,

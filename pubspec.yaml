@@ -181,6 +181,7 @@ flutter:
     - assets/svg/more/support/
     - assets/svg/more/tools_education/
     - assets/font/roboto/
+    - assets/font/sf_ui/
     - assets/audio/
     - assets/animation/
     - assets/svg/partnership_program/
@@ -223,19 +224,7 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
   fonts:
-    - family: Roboto
-      # fonts:
-      #   - asset: assets/font/roboto/Roboto-Light.ttf
-      #     weight: 300
-      #   - asset: assets/font/roboto/Roboto-Regular.ttf
-      #     weight: 400
-      #   - asset: assets/font/roboto/Roboto-Medium.ttf
-      #     weight: 500
-      #   - asset: assets/font/roboto/Roboto-SemiBold.ttf
-      #     weight: 600
-      #   - asset: assets/font/roboto/Roboto-Bold.ttf
-      #     weight: 700
-      #     - family: Roboto
+    - family: SF UI
       fonts:
         - asset: assets/font/sf_ui/SF-UI-Regular.otf
           weight: 300
@@ -243,7 +232,43 @@ flutter:
           weight: 400
         - asset: assets/font/sf_ui/SF-UI-Regular.otf
           weight: 500
-        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
           weight: 600
         - asset: assets/font/sf_ui/SF-UI-Heavy.otf
           weight: 700
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 800
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 900
+    - family: SF-UI
+      fonts:
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 300
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 400
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 500
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 600
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 700
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 800
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 900
+    - family: Roboto
+      fonts:
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 300
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 400
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 500
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 600
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 700
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 800
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 900

@@ -19,6 +19,7 @@ import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
 import 'constants/color.dart';
+import 'constants/text_styles.dart';
 
 import 'flavor_config.dart';
 import 'brands/brand_resolver.dart';
@@ -369,7 +370,7 @@ Future<void> initServices() async {
 /// Build light theme
 ThemeData _buildLightTheme() {
   return ThemeData(
-    fontFamily: 'Roboto',
+    fontFamily: 'SF UI',
     primaryColor: FlavorConfig.instance.primaryColor,
     colorScheme: ColorScheme.light(
       primary: FlavorConfig.instance.primaryColor,
@@ -413,9 +414,24 @@ ThemeData _buildLightTheme() {
       style: ElevatedButton.styleFrom(
         backgroundColor: FlavorConfig.instance.primaryColor,
         foregroundColor: AppColors.whiteColor,
+        textStyle: AppTextStyles.button,
         minimumSize: Size(double.infinity, 40.h),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: FlavorConfig.instance.primaryColor,
+        textStyle: AppTextStyles.outlinedButton,
+        minimumSize: Size(double.infinity, 40.h),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: FlavorConfig.instance.primaryColor,
+        textStyle: AppTextStyles.textButton,
       ),
     ),
     cardTheme: CardThemeData(
@@ -427,7 +443,7 @@ ThemeData _buildLightTheme() {
     listTileTheme: ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
       minLeadingWidth: 0,
-      leadingAndTrailingTextStyle: TextStyle(
+      leadingAndTrailingTextStyle: AppTextStyles.bodyText.copyWith(
         fontSize: 14.sp,
         color: AppColors.textGreyLightTheme,
       ),
@@ -464,19 +480,19 @@ ThemeData _buildLightTheme() {
     dialogTheme: DialogThemeData(
       backgroundColor: AppColors.whiteColor,
       surfaceTintColor: Colors.transparent,
-      titleTextStyle: TextStyle(
+      titleTextStyle: AppTextStyles.bodyText.copyWith(
         color: AppColors.textPrimary,
         fontSize: 18.sp,
         fontWeight: FontWeight.w600,
       ),
-      contentTextStyle: TextStyle(
+      contentTextStyle: AppTextStyles.bodyText.copyWith(
         color: AppColors.textSecondary,
         fontSize: 14.sp,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
     ),
     iconTheme: IconThemeData(color: AppColors.textPrimary),
-    textTheme: TextTheme(bodyLarge: TextStyle(color: AppColors.textPrimary)),
+    textTheme: TextTheme(bodyLarge: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary)),
     progressIndicatorTheme: ProgressIndicatorThemeData(
       color: AppColors.primary,
       circularTrackColor: Colors.transparent,
@@ -488,7 +504,7 @@ ThemeData _buildLightTheme() {
 /// Build dark theme
 ThemeData _buildDarkTheme() {
   return ThemeData(
-    fontFamily: 'Roboto',
+    fontFamily: 'SF UI',
     primaryColor: FlavorConfig.instance.darkPrimaryColor,
     colorScheme: ColorScheme.dark(
       primary: FlavorConfig.instance.darkPrimaryColor,
@@ -527,8 +543,8 @@ ThemeData _buildDarkTheme() {
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.error),
       ),
-      labelStyle: TextStyle(color: AppColors.hint),
-      hintStyle: TextStyle(color: AppColors.hint),
+      labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
+      hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint),
       contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       alignLabelWithHint: true,
     ),
@@ -536,9 +552,24 @@ ThemeData _buildDarkTheme() {
       style: ElevatedButton.styleFrom(
         backgroundColor: FlavorConfig.instance.darkPrimaryColor,
         foregroundColor: Colors.white,
+        textStyle: AppTextStyles.button,
         minimumSize: Size(double.infinity, 40.h),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: FlavorConfig.instance.darkPrimaryColor,
+        textStyle: AppTextStyles.outlinedButton,
+        minimumSize: Size(double.infinity, 40.h),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: FlavorConfig.instance.darkPrimaryColor,
+        textStyle: AppTextStyles.textButton,
       ),
     ),
     cardTheme: CardThemeData(
@@ -550,7 +581,7 @@ ThemeData _buildDarkTheme() {
     listTileTheme: ListTileThemeData(
       contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
       minLeadingWidth: 0,
-      leadingAndTrailingTextStyle: TextStyle(
+      leadingAndTrailingTextStyle: AppTextStyles.bodyText.copyWith(
         fontSize: 14.sp,
         color: AppColors.textGrey,
       ),
@@ -587,12 +618,12 @@ ThemeData _buildDarkTheme() {
     dialogTheme: DialogThemeData(
       backgroundColor: AppColors.whiteColor,
       surfaceTintColor: Colors.transparent,
-      titleTextStyle: TextStyle(
+      titleTextStyle: AppTextStyles.bodyText.copyWith(
         color: AppColors.textPrimary,
         fontSize: 18.sp,
         fontWeight: FontWeight.w600,
       ),
-      contentTextStyle: TextStyle(
+      contentTextStyle: AppTextStyles.bodyText.copyWith(
         color: AppColors.textSecondary,
         fontSize: 14.sp,
       ),
@@ -600,9 +631,9 @@ ThemeData _buildDarkTheme() {
     ),
     iconTheme: IconThemeData(color: AppColors.textPrimary),
     textTheme: TextTheme(
-      bodyLarge: TextStyle(color: AppColors.textPrimary),
-      bodyMedium: TextStyle(color: AppColors.textPrimary),
-      bodySmall: TextStyle(color: AppColors.textGrey),
+      bodyLarge: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
+      bodyMedium: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
+      bodySmall: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(
       color: AppColors.primary,
@@ -675,7 +706,7 @@ class MyGetXApp extends StatelessWidget {
                   // in Arabic / Hebrew / etc. without us forcing textDirection
                   // on every field (which would break tap-to-cursor placement
                   // on real devices).
-                  localizationsDelegates: const [
+                  localizationsDelegates: [
                     GlobalMaterialLocalizations.delegate,
                     GlobalWidgetsLocalizations.delegate,
                     GlobalCupertinoLocalizations.delegate,
@@ -832,7 +863,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // SvgPicture.asset(FlavorConfig.instance.splashLogoPath),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             // const CircularProgressIndicator(),
           ],
         ),

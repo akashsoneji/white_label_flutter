@@ -826,7 +826,7 @@ class _BottomActions extends StatelessWidget {
                     ),
                     child: Text(
                       languageService.tr('tw_done'),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: 16.sp,
                         color: btnTextColor,
@@ -849,7 +849,7 @@ class _BottomActions extends StatelessWidget {
                     ),
                     child: Text(
                       languageService.tr('tw_continue'),
-                      style: TextStyle(color: btnTextColor),
+                      style: AppTextStyles.bodyText.copyWith(color: btnTextColor),
                     ),
                   ),
                 ),
@@ -894,7 +894,7 @@ class _BottomActions extends StatelessWidget {
                             )
                             : Text(
                               languageService.tr('tw_submit_redemption'),
-                              style: TextStyle(color: btnTextColor),
+                              style: AppTextStyles.bodyText.copyWith(color: btnTextColor),
                             ),
                   ),
                 ),

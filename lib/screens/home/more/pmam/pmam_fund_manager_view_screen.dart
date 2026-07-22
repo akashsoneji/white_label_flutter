@@ -1,4 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -258,7 +259,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       children: [
                         Text(
                           'Invest in Plan',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w800,
                             color: AppColors.textPrimary,
@@ -288,7 +289,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                         // ── Select Plan ──
                         Text(
                           'Select Plan',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -341,7 +342,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                             ),
                             child: Text(
                               '$planName - ${commission.toStringAsFixed(2)}% Commission',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.isDarkMode
@@ -353,7 +354,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                         SizedBox(height: 6.h),
                         Text(
                           'Min. Investment: \$${minInvest.toStringAsFixed(2)}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
                           ),
@@ -363,7 +364,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                         // ── Trading Account ──
                         Text(
                           'Trading Account',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -426,7 +427,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                 Expanded(
                                   child: Text(
                                     'Insufficient balance for this plan.',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 11.sp,
                                       color: AppColors.error,
                                       fontWeight: FontWeight.w500,
@@ -442,17 +443,17 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                           SizedBox(height: 12.h),
                           RichText(
                             text: TextSpan(
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 color: AppColors.textGrey,
                               ),
                               children: [
-                                const TextSpan(
+                                TextSpan(
                                   text: 'Full balance will be invested: ',
                                 ),
                                 TextSpan(
                                   text: '\$${availBalance.toStringAsFixed(2)}',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
                                   ),
@@ -523,7 +524,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                               ),
                               child: Text(
                                 'Cancel',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.textPrimary,
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
@@ -562,7 +563,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                               ),
                               child: Text(
                                 'Confirm Investment',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.isDarkMode
                                       ? AppColors.pureBlack
                                       : AppColors.onColoredBackground,
@@ -599,12 +600,12 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
           ),
           SizedBox(height: 4.h),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w700,
               color: valueColor ?? AppColors.textPrimary,
@@ -635,7 +636,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
         ),
         title: Text(
           'Fund Manager',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
@@ -643,7 +644,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
         ),
       ),
       body: _loadingProfile
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : _profile.isEmpty
           ? _buildEmpty()
           : RefreshIndicator(
@@ -726,7 +727,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                               backgroundColor: AppColors.chipSurface,
                               child: Text(
                                 _initials,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.textPrimary,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16.sp,
@@ -742,7 +743,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                 shape: BoxShape.circle,
                                 color: AppColors.card,
                               ),
-                              padding: const EdgeInsets.all(1),
+                              padding: EdgeInsets.all(1),
                               child: Icon(
                                 Icons.check_circle,
                                 size: 14.sp,
@@ -763,7 +764,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                             name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w800,
                               color: AppColors.textPrimary,
@@ -786,7 +787,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                 ),
                                 child: Text(
                                   'FUND MANAGER',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 9.sp,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
@@ -799,7 +800,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                                     : 'Verified Manager',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w500,
                                   color: AppColors.textGrey,
@@ -831,7 +832,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                           SizedBox(width: 3.w),
                           Text(
                             risk.isNotEmpty ? risk : 'Moderate Risk',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 9.sp,
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFFD97706),
@@ -869,7 +870,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                     ),
                     child: Text(
                       hasInvestment ? 'My Investment' : 'INVEST NOW',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.isDarkMode
                             ? AppColors.pureBlack
                             : AppColors.onColoredBackground,
@@ -884,7 +885,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   alignment: Alignment.centerRight,
                   child: Text(
                     'Min. Investment: \$${minInv.toStringAsFixed(0)}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       color: AppColors.textGrey,
                     ),
@@ -953,7 +954,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 children: [
                   Text(
                     'DESCRIPTION',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textGrey,
@@ -966,7 +967,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                     softWrap: true,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       height: 1.4,
                       color: AppColors.textPrimary,
@@ -989,7 +990,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 9.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textGrey,
@@ -999,7 +1000,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
           SizedBox(height: 2.h),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w800,
               color: valueColor,
@@ -1030,7 +1031,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             children: [
               Text(
                 'Performance',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -1055,7 +1056,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       ),
                       child: Text(
                         e,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 9.sp,
                           fontWeight: FontWeight.bold,
                           color: isSelected
@@ -1114,7 +1115,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                       getTitlesWidget: (value, meta) {
                         return Text(
                           value == 0 ? '\$0' : '\$${value.toInt()}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textGreyLight,
                             fontSize: 9.sp,
                           ),
@@ -1130,7 +1131,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 maxY: 600,
                 lineBarsData: [
                   LineChartBarData(
-                    spots: const [
+                    spots: [
                       FlSpot(0, 0),
                       FlSpot(1, 150),
                       FlSpot(2, 300),
@@ -1168,10 +1169,10 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
 
   Widget _bottomTitle(String text) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
+      padding: EdgeInsets.only(top: 8.0),
       child: Text(
         text,
-        style: TextStyle(color: AppColors.textGreyLight, fontSize: 9.sp),
+        style: AppTextStyles.bodyText.copyWith(color: AppColors.textGreyLight, fontSize: 9.sp),
       ),
     );
   }
@@ -1193,7 +1194,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               children: [
                 Text(
                   'Open Positions',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
@@ -1207,7 +1208,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   ),
                   child: Text(
                     '${_openPositions.length} live',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF10B981),
@@ -1221,7 +1222,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
           if (_loadingOpen)
             Padding(
               padding: EdgeInsets.all(16.h),
-              child: const Center(child: CircularProgressIndicator()),
+              child: Center(child: CircularProgressIndicator()),
             )
           else if (_openPositions.isEmpty)
             Padding(
@@ -1229,7 +1230,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               child: Center(
                 child: Text(
                   'No open positions',
-                  style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
                 ),
               ),
             )
@@ -1274,7 +1275,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                         flex: 3,
                         child: Text(
                           symbol,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -1298,7 +1299,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                           ),
                           child: Text(
                             isBuy ? 'BUY' : 'SELL',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w700,
                               color: isBuy
@@ -1312,7 +1313,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                         flex: 3,
                         child: Text(
                           '${lot.toStringAsFixed(2)} lot',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             color: AppColors.textGrey,
                           ),
@@ -1322,7 +1323,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                         flex: 4,
                         child: Text(
                           openPrice,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
@@ -1335,7 +1336,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                           openTime.length > 10
                               ? openTime.substring(0, 10)
                               : openTime,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
                             color: AppColors.textGrey,
                           ),
@@ -1360,7 +1361,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   alignment: Alignment.center,
                   child: Text(
                     'View All',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -1392,7 +1393,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               children: [
                 Text(
                   'Trade History',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
@@ -1406,7 +1407,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   ),
                   child: Text(
                     '${_trades.length} trades',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textGrey,
@@ -1433,12 +1434,12 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
           if (_loadingTrades)
             Padding(
               padding: EdgeInsets.all(16.h),
-              child: const Center(child: CircularProgressIndicator()),
+              child: Center(child: CircularProgressIndicator()),
             )
           else if (_trades.isEmpty)
             Padding(
               padding: EdgeInsets.all(16.h),
-              child: const Center(child: Text('No trades available')),
+              child: Center(child: Text('No trades available')),
             )
           else
             ListView.separated(
@@ -1468,7 +1469,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                 alignment: Alignment.center,
                 child: Text(
                   'View All',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -1485,7 +1486,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
   Widget _colHeader(String text) {
     return Text(
       text,
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 9.sp,
         fontWeight: FontWeight.w600,
         color: AppColors.textGrey,
@@ -1528,7 +1529,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             flex: 3,
             child: Text(
               symbol,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
@@ -1551,7 +1552,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   ),
                   child: Text(
                     isBuy ? 'BUY' : 'SELL',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 9.sp,
                       fontWeight: FontWeight.w700,
                       color: isBuy
@@ -1569,7 +1570,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
               isProfit
                   ? '+\$${profit.toStringAsFixed(2)}'
                   : '-\$${profit.abs().toStringAsFixed(2)}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w700,
                 color: isProfit
@@ -1582,14 +1583,14 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             flex: 3,
             child: Text(
               closeTime.isNotEmpty ? closeTime : '-',
-              style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey),
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               duration,
-              style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey),
             ),
           ),
         ],
@@ -1612,7 +1613,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
             SizedBox(height: 12.h),
             Text(
               'Manager not found',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
@@ -1624,7 +1625,7 @@ class _PmamFundManagerViewScreenState extends State<PmamFundManagerViewScreen> {
                   ? 'No manager id was provided.'
                   : 'Unable to load profile for $_managerCode.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
             ),
           ],
         ),

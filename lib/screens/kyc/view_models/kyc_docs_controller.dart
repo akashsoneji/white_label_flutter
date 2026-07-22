@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -164,7 +165,7 @@ class KycDocsController extends GetxController {
                     SizedBox(height: 24.h),
                     Text(
                       'Select Camera',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -172,8 +173,8 @@ class KycDocsController extends GetxController {
                     ),
                     SizedBox(height: 24.h),
                     ListTile(
-                      leading: const Icon(Icons.camera_front),
-                      title: const Text('Front Camera'),
+                      leading: Icon(Icons.camera_front),
+                      title: Text('Front Camera'),
                       onTap: () => Get.back(
                         result: _cameras!.firstWhere(
                           (c) =>
@@ -182,8 +183,8 @@ class KycDocsController extends GetxController {
                       ),
                     ),
                     ListTile(
-                      leading: const Icon(Icons.camera_rear),
-                      title: const Text('Back Camera'),
+                      leading: Icon(Icons.camera_rear),
+                      title: Text('Back Camera'),
                       onTap: () => Get.back(
                         result: _cameras!.firstWhere(
                           (c) => c.lensDirection == CameraLensDirection.back,

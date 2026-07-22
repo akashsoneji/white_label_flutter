@@ -14,6 +14,7 @@
 // ============================================================
 
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -271,7 +272,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
             return GestureDetector(
               onTap: () => _pickSymbol(c),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Text(sym, style: TextStyle(
+                Text(sym, style: AppTextStyles.bodyText.copyWith(
                     color: MetaTheme.mainText(c), fontSize: 15.sp,
                     fontWeight: FontWeight.w800)),
                 SizedBox(width: 2.w),
@@ -290,7 +291,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
                 color: MetaTheme.softBg(c),
                 borderRadius: BorderRadius.circular(6.r),
               ),
-              child: Text(_tf, style: TextStyle(
+              child: Text(_tf, style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.mainText(c), fontSize: 12.sp,
                   fontWeight: FontWeight.w700)),
             ),
@@ -306,7 +307,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
                 color:   MetaTheme.buyBlue ,
                 borderRadius: BorderRadius.circular(6.r),
               ),
-              child: Text('Trade', style: TextStyle(
+              child: Text('Trade', style: AppTextStyles.bodyText.copyWith(
                   color: Colors.white,
                   fontSize: 12.sp, fontWeight: FontWeight.w700)),
             ),
@@ -334,11 +335,11 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(sym, style: TextStyle(
+              Text(sym, style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c), fontSize: 11.sp,
                   fontWeight: FontWeight.w600)),
               SizedBox(height: 1.h),
-              Text(price.ask.toStringAsFixed(digits), style: TextStyle(
+              Text(price.ask.toStringAsFixed(digits), style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.mainText(c), fontSize: 20.sp,
                   fontWeight: FontWeight.w800)),
             ]),
@@ -347,16 +348,16 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
               padding: EdgeInsets.only(bottom: 2.h),
               child: Text(
                 '${change >= 0 ? '+' : ''}${change.toStringAsFixed(digits)} (${pct.toStringAsFixed(2)}%)',
-                style: TextStyle(color: col, fontSize: 12.sp,
+                style: AppTextStyles.bodyText.copyWith(color: col, fontSize: 12.sp,
                     fontWeight: FontWeight.w700),
               ),
             ),
             const Spacer(),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
               Text('H: ${price.dayHigh.toStringAsFixed(digits)}',
-                  style: TextStyle(color: MetaTheme.subText(c), fontSize: 10.sp)),
+                  style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(c), fontSize: 10.sp)),
               Text('L: ${price.dayLow.toStringAsFixed(digits)}',
-                  style: TextStyle(color: MetaTheme.subText(c), fontSize: 10.sp)),
+                  style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(c), fontSize: 10.sp)),
             ]),
           ],
         ),
@@ -423,11 +424,11 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
             color: color, borderRadius: BorderRadius.circular(8.r)),
         alignment: Alignment.center,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(label, style: TextStyle(
+          Text(label, style: AppTextStyles.bodyText.copyWith(
               color: Colors.white, fontSize: 15.sp,
               fontWeight: FontWeight.w800)),
           SizedBox(height: 2.h),
-          Text(sub, style: TextStyle(
+          Text(sub, style: AppTextStyles.bodyText.copyWith(
               color: Colors.white.withValues(alpha: 0.85),
               fontSize: 11.sp, fontWeight: FontWeight.w500)),
         ]),
@@ -450,7 +451,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
               () => _lot = (_lot - 0.01).clamp(0.01, double.infinity)),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-            child: Text('−', style: TextStyle(
+            child: Text('−', style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.mainText(c), fontSize: 18.sp,
                 fontWeight: FontWeight.w700)),
           ),
@@ -461,7 +462,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
           child: Container(
             width: 52.w,
             alignment: Alignment.center,
-            child: Text(_lot.toStringAsFixed(2), style: TextStyle(
+            child: Text(_lot.toStringAsFixed(2), style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.mainText(c), fontSize: 14.sp,
                 fontWeight: FontWeight.w800)),
           ),
@@ -471,7 +472,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
           onTap: () => setState(() => _lot += 0.01),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-            child: Text('+', style: TextStyle(
+            child: Text('+', style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.mainText(c), fontSize: 18.sp,
                 fontWeight: FontWeight.w700)),
           ),
@@ -488,13 +489,13 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
       builder: (_) => AlertDialog(
         backgroundColor: MetaTheme.card(c),
         title: Text(Get.find<LanguageService>().tr('meta_chart_enter_lot_size'),
-            style: TextStyle(color: MetaTheme.mainText(c), fontSize: 15.sp,
+            style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(c), fontSize: 15.sp,
                 fontWeight: FontWeight.w700)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          style: TextStyle(color: MetaTheme.mainText(c), fontSize: 18.sp,
+          style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(c), fontSize: 18.sp,
               fontWeight: FontWeight.w800),
           decoration: InputDecoration(
             filled: true,
@@ -509,7 +510,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
           TextButton(
             onPressed: () => Navigator.pop(c),
             child: Text(Get.find<LanguageService>().tr('meta_chart_cancel'),
-                style: TextStyle(color: MetaTheme.subText(c))),
+                style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(c))),
           ),
           TextButton(
             onPressed: () {
@@ -518,7 +519,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
               Navigator.pop(c);
             },
             child: Text('OK',
-                style: TextStyle(color: MetaTheme.buy(c),
+                style: AppTextStyles.bodyText.copyWith(color: MetaTheme.buy(c),
                     fontWeight: FontWeight.w800)),
           ),
         ],
@@ -538,7 +539,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
           children: _tfMap.entries.map((e) {
             final active = e.key == _tf;
             return ListTile(
-              title: Text(e.key, style: TextStyle(
+              title: Text(e.key, style: AppTextStyles.bodyText.copyWith(
                   color: active ? MetaTheme.buy(c) : MetaTheme.mainText(c),
                   fontWeight: active ? FontWeight.w800 : FontWeight.w500)),
               trailing: active ? Icon(Icons.check, color: MetaTheme.buy(c)) : null,
@@ -626,7 +627,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(Get.find<LanguageService>().tr('meta_chart_select_symbol'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.headerText(c),
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500)),
@@ -634,7 +635,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
           TextField(
             decoration: InputDecoration(
               hintText: Get.find<LanguageService>().tr('meta_chart_search_hint'),
-              prefixIcon: const Icon(Icons.search, size: 18),
+              prefixIcon: Icon(Icons.search, size: 18),
               filled: true,
               fillColor: MetaTheme.softBg(c),
               isDense: true,
@@ -645,7 +646,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
                 borderSide: BorderSide.none,
               ),
             ),
-            style: TextStyle(color: MetaTheme.mainText(c), fontSize: 13.sp),
+            style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(c), fontSize: 13.sp),
             onChanged: (v) => setState(() => _query = v.toLowerCase()),
           ),
           SizedBox(height: 4.h),
@@ -669,7 +670,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
                       padding: EdgeInsets.symmetric(
                           horizontal: 4.w, vertical: 6.h),
                       child: Text(item.symbol,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                               color: MetaTheme.mainText(c),
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w500)),

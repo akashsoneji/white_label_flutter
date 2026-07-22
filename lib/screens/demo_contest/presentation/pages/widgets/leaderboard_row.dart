@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/demo_contest/leaderboard_entry_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -49,7 +50,7 @@ class LeaderboardRow extends StatelessWidget {
                   child: medal ??
                       Text(
                         '${entry.rank}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -67,7 +68,7 @@ class LeaderboardRow extends StatelessWidget {
                         Flexible(
                           child: Text(
                             entry.displayName,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: isCurrent
                                   ? FontWeight.w700
@@ -91,7 +92,7 @@ class LeaderboardRow extends StatelessWidget {
                             ),
                             child: Text(
                               'YOU',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 9.sp,
                                 color: AppColors.whiteColor,
                                 fontWeight: FontWeight.w700,
@@ -106,7 +107,7 @@ class LeaderboardRow extends StatelessWidget {
                       children: [
                         Text(
                           '🏅 ${entry.tradesCount} trades',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
                           ),
@@ -114,7 +115,7 @@ class LeaderboardRow extends StatelessWidget {
                         SizedBox(width: 8.w),
                         Text(
                           '· ${(entry.winRate * 100).toStringAsFixed(0)}% WR',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
                           ),
@@ -130,7 +131,7 @@ class LeaderboardRow extends StatelessWidget {
                 children: [
                   Text(
                     '${entry.pnlPercent >= 0 ? '+' : ''}${entry.pnlPercent.toStringAsFixed(2)}%',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                       color: pnlColor,
@@ -139,7 +140,7 @@ class LeaderboardRow extends StatelessWidget {
                   SizedBox(height: 2.h),
                   Text(
                     '\$${entry.pnl.toStringAsFixed(0)}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w500,
@@ -184,7 +185,7 @@ class _Medal extends StatelessWidget {
         border: Border.all(color: color, width: 1.5),
       ),
       alignment: Alignment.center,
-      child: Text(emoji, style: TextStyle(fontSize: 14.sp)),
+      child: Text(emoji, style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp)),
     );
   }
 }

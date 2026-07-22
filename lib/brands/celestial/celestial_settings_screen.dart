@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -331,7 +332,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
       padding: EdgeInsets.only(left: 4.w),
       child: Text(
         label.toUpperCase(),
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 10.sp,
           fontWeight: FontWeight.w700,
           color: CelTheme.subText(c),
@@ -381,7 +382,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
             child: Center(
               child: Text(
                 initial,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -397,7 +398,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               children: [
                 Text(
                   name,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontWeight: FontWeight.w600,
                     fontSize: 15.sp,
                     color: CelTheme.mainText(c),
@@ -409,7 +410,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                   SizedBox(height: 2.h),
                   Text(
                     email,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: CelTheme.subText(c),
                       fontSize: 12.sp,
                     ),
@@ -491,7 +492,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                       children: [
                         Text(
                           languageService.tr('settings_verify_account'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
                             color: CelTheme.mainText(c),
@@ -500,7 +501,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                         Text(
                           languageService.tr(
                               'settings_complete_verification'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: CelTheme.subText(c),
                           ),
@@ -547,7 +548,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                   Text(
                     languageService
                         .tr('settings_completion_pct', {'completion': '$completion'}),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: CelTheme.buy(c),
@@ -637,7 +638,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               Expanded(
                 child: Text(
                   item.label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
                     color: CelTheme.mainText(c),
@@ -868,7 +869,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               Expanded(
                 child: Text(
                   item.label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
                     color: CelTheme.mainText(c),
@@ -946,7 +947,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
             child: Text(
               languageService
                   .tr('settings_version', {'version': snap.data!.version}),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 color: CelTheme.subText(c).withValues(alpha: 0.5),
                 fontWeight: FontWeight.w500,
@@ -991,7 +992,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               Text(
                 languageService.tr('settings_logout_confirm'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: CelTheme.mainText(c),
@@ -1058,7 +1059,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               Text(
                 languageService.tr('settings_delete_account_confirm'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: CelTheme.mainText(c),
@@ -1068,11 +1069,11 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               Obx(() => TextField(
                     controller: passwordCtrl,
                     obscureText: true,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp, color: CelTheme.mainText(c)),
                     decoration: InputDecoration(
                       hintText: 'Enter your password',
-                      hintStyle: TextStyle(color: CelTheme.subText(c)),
+                      hintStyle: AppTextStyles.bodyText.copyWith(color: CelTheme.subText(c)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.r),
                         borderSide:
@@ -1171,7 +1172,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
           alignment: Alignment.center,
           child: Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: isPrimary ? Colors.white : CelTheme.mainText(c),
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
@@ -1281,7 +1282,7 @@ class _AccountActionButton extends StatelessWidget {
             SizedBox(width: 8.w),
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: color,
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,

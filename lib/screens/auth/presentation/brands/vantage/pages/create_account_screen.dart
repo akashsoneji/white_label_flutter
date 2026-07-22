@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'package:crm_app/constants/text_styles.dart';
 
 import 'package:country_picker/country_picker.dart';
 import 'package:crm_app/constants/color.dart';
@@ -262,7 +263,7 @@ class _VantageCreateAccountScreenState
           children: [
             Text(
               _languageService.tr('create_account_screen_title'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: VantageAuthTheme.text,
                 fontSize: 24.sp,
                 fontWeight: FontWeight.w800,
@@ -272,13 +273,13 @@ class _VantageCreateAccountScreenState
             VantagePillTextField(
               controller: _firstNameController,
               hintText: _languageService.tr('create_account_screen_first_name'),
-              prefixIcon: const Icon(Icons.person_outline_rounded),
+              prefixIcon: Icon(Icons.person_outline_rounded),
             ),
             SizedBox(height: 10.h),
             VantagePillTextField(
               controller: _lastNameController,
               hintText: _languageService.tr('create_account_screen_last_name'),
-              prefixIcon: const Icon(Icons.person_outline_rounded),
+              prefixIcon: Icon(Icons.person_outline_rounded),
             ),
             SizedBox(height: 10.h),
             Row(
@@ -300,7 +301,7 @@ class _VantageCreateAccountScreenState
                       _selectedCountryFlag.isNotEmpty
                           ? _selectedCountryFlag
                           : '🌐',
-                      style: TextStyle(fontSize: 16.sp),
+                      style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp),
                     ),
                   ),
                 ),
@@ -326,7 +327,7 @@ class _VantageCreateAccountScreenState
               controller: _emailController,
               hintText: _languageService.tr('create_account_screen_email'),
               keyboardType: TextInputType.emailAddress,
-              prefixIcon: const Icon(Icons.mail_outline_rounded),
+              prefixIcon: Icon(Icons.mail_outline_rounded),
               onChanged: (_) => _validateForm(),
             ),
             SizedBox(height: 10.h),
@@ -334,7 +335,7 @@ class _VantageCreateAccountScreenState
               controller: _passwordController,
               hintText: _languageService.tr('create_account_screen_password'),
               obscureText: !_passwordVisible,
-              prefixIcon: const Icon(Icons.lock_outline_rounded),
+              prefixIcon: Icon(Icons.lock_outline_rounded),
               suffixIcon: IconButton(
                 onPressed:
                     () => setState(() => _passwordVisible = !_passwordVisible),
@@ -381,7 +382,7 @@ class _VantageCreateAccountScreenState
                 Expanded(
                   child: Text(
                     _languageService.tr('biometric_enable_checkbox'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: VantageAuthTheme.muted,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -407,14 +408,14 @@ class _VantageCreateAccountScreenState
               child: Text.rich(
                 TextSpan(
                   text: _languageService.tr('create_account_screen_already_have_account'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: VantageAuthTheme.muted,
                     fontSize: 13.sp,
                   ),
                   children: [
                     TextSpan(
                       text: _languageService.tr('login_screen_sign_in'),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: VantageAuthTheme.primary,
                         fontWeight: FontWeight.w700,
                       ),
@@ -427,14 +428,14 @@ class _VantageCreateAccountScreenState
             Text(
               _languageService.tr('create_account_screen_agree_terms'),
               textAlign: TextAlign.center,
-              style: TextStyle(color: VantageAuthTheme.muted, fontSize: 11.sp),
+              style: AppTextStyles.bodyText.copyWith(color: VantageAuthTheme.muted, fontSize: 11.sp),
             ),
             // SizedBox(height: 6.h),
             // if (_selectedCountryCode.isNotEmpty)
             //   Text(
             //     'Selected code: $_selectedCountryCode',
             //     textAlign: TextAlign.center,
-            //     style: TextStyle(color: VantageAuthTheme.muted, fontSize: 11.sp),
+            //     style: AppTextStyles.bodyText.copyWith(color: VantageAuthTheme.muted, fontSize: 11.sp),
             //   ),
           ],
       ),

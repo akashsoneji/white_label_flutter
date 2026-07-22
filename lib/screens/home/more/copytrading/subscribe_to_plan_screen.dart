@@ -274,7 +274,7 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         final sub = controller;
 
         if (masterController.isLoading.value && masterController.profile.value == null) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
         if (masterController.errorMessage.value.isNotEmpty && masterController.profile.value == null) {
           return _ErrorState(
@@ -284,13 +284,13 @@ class _SubscribeToPlanScreenState extends State<SubscribeToPlanScreen> {
         }
 
         final profile = masterController.profile.value;
-        final plans = profile?.plans ?? const <CopyTradingPlan>[];
+        final plans = profile?.plans ?? <CopyTradingPlan>[];
         final effectivePlan = selectedPlan;
 
         if (_isEditMode) {
           return Obx(() {
             if (_editLoading.value) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: CircularProgressIndicator());
             }
             if (_editLoadError.value.isNotEmpty) {
               return _ErrorState(
@@ -683,7 +683,7 @@ class _EditSubscriptionSummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Plan & account', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Text('Plan & account', style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           SizedBox(height: 10.h),
           Text(plan.planName, style: AppTextStyles.black14600),
           SizedBox(height: 6.h),
@@ -736,7 +736,7 @@ class _AccountPickerCard extends StatelessWidget {
             Obx(() {
               final c = controller!;
               if (c.isLoading.value && c.eligibleAccounts.isEmpty) {
-              return const Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()));
+              return Center(child: Padding(padding: EdgeInsets.all(12), child: CircularProgressIndicator()));
             }
             if (c.errorMessage.value.isNotEmpty && c.eligibleAccounts.isEmpty) {
               return _InlineError(
@@ -798,7 +798,7 @@ class _CopySettingsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Copy settings', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Text('Copy settings', style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           SizedBox(height: 10.h),
           Obx(() {
             final method = controller.sizingMethod.value;
@@ -807,7 +807,7 @@ class _CopySettingsCard extends StatelessWidget {
               children: [
                 _SelectTile(
                   value: method,
-                  items: const [
+                  items: [
                     _SelectItem(value: 'fixed', label: 'Fixed Lot — e.g. always trade 0.10 lot'),
                     _SelectItem(value: 'proportional_equity', label: 'Equity-Based — scales by your equity vs master\'s'),
                     _SelectItem(value: 'proportional_balance', label: 'Balance-Based — scales by your balance vs master\'s'),
@@ -1235,8 +1235,8 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                   spacing: 6.w,
                                   runSpacing: 6.h,
                                   children: (controller.slTpMode.value == 'pip'
-                                          ? const [5, 10, 15]
-                                          : const [5, 10, 20])
+                                          ? [5, 10, 15]
+                                          : [5, 10, 20])
                                       .map((v) => _MiniPresetChip(
                                             selected: controller.slTpMode.value == 'pip' ? v == controller.takeProfitPips.value : v == controller.takeProfitDollar.value,
                                             label: controller.slTpMode.value == 'pip' ? '$v' : r'$' '$v',
@@ -1251,8 +1251,8 @@ class _AdvancedSettingsCard extends StatelessWidget {
                                   spacing: 6.w,
                                   runSpacing: 6.h,
                                   children: (controller.slTpMode.value == 'pip'
-                                          ? const [5, 10, 15]
-                                          : const [5, 10, 20])
+                                          ? [5, 10, 15]
+                                          : [5, 10, 20])
                                       .map((v) => _MiniPresetChip(
                                             label: controller.slTpMode.value == 'pip' ? '$v' : r'$' '$v',
                                             onTap: () => onSlPreset(v),
@@ -1375,7 +1375,7 @@ class _SmallChoiceChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: selected ? AppColors.onColoredBackground : AppColors.textPrimary,
@@ -1406,7 +1406,7 @@ class _MiniPresetChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 11.sp,
             fontWeight: FontWeight.w700,
             color: selected ? AppColors.onColoredBackground : AppColors.textGrey,
@@ -1437,7 +1437,7 @@ class _ModeChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: FontWeight.w800,
             color: selected ? AppColors.onColoredBackground : AppColors.textPrimary,
@@ -1479,7 +1479,7 @@ class _SelectTile extends StatelessWidget {
                   value: e.value,
                   child: Text(
                     e.label,
-                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                   ),
                 ),
               )
@@ -1567,7 +1567,7 @@ class _ErrorState extends StatelessWidget {
           children: [
             Icon(Icons.error_outline, size: 40.r, color: AppColors.error),
             SizedBox(height: 10.h),
-            Text(message, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textGrey)),
+            Text(message, textAlign: TextAlign.center, style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey)),
             SizedBox(height: 12.h),
             ElevatedButton(
               onPressed: onRetry,
@@ -1904,7 +1904,7 @@ class _Pill extends StatelessWidget {
             Icon(icon, size: 14.r, color: fg),
             SizedBox(width: 5.w),
           ],
-          Text(text, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: fg)),
+          Text(text, style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, fontWeight: FontWeight.w600, color: fg)),
         ],
       ),
     );

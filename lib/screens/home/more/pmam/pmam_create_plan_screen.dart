@@ -145,7 +145,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                   children: [
                     Text(
                       'MANAGER PROFILE',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primary,
@@ -169,7 +169,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                       children: [
                         Text(
                           'Status',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
                           ),
@@ -185,7 +185,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                           ),
                           child: Text(
                             'Approved Manager',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               color: AppColors.green,
                               fontWeight: FontWeight.w700,
@@ -235,7 +235,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                           ),
                           child: Text(
                             'No eligible accounts available',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               color: AppColors.textGrey,
                             ),
@@ -279,7 +279,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                       onTap: () {},
                       child: Text(
                         "Don't see your account? Add new account",
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: AppColors.primary,
                         ),
@@ -304,7 +304,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                     SizedBox(height: 4.h),
                     Text(
                       'Percentage of profits charged as your commission.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
                       ),
@@ -366,7 +366,7 @@ class _PmamCreatePlanScreenState extends State<PmamCreatePlanScreen> {
                             ? CommonLoadingWidget(size: 22, color: AppColors.onColoredBackground)
                             : Text(
                               'Submit Plan',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.onColoredBackground,
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w600,
@@ -396,7 +396,7 @@ class _FormLabel extends StatelessWidget {
       padding: EdgeInsets.only(bottom: 8.h),
       child: RichText(
         text: TextSpan(
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.primary,
@@ -406,13 +406,13 @@ class _FormLabel extends StatelessWidget {
             if (optional)
               TextSpan(
                 text: ' (optional)',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textGrey,
                   fontWeight: FontWeight.w400,
                 ),
               ),
             if (required)
-              TextSpan(text: ' *', style: TextStyle(color: AppColors.error)),
+              TextSpan(text: ' *', style: AppTextStyles.bodyText.copyWith(color: AppColors.error)),
           ],
         ),
       ),
@@ -441,10 +441,10 @@ class _StyledTextField extends StatelessWidget {
       keyboardType: keyboardType,
       maxLines: maxLines,
       validator: validator,
-      style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
+      style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+        hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
         contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
@@ -481,11 +481,11 @@ class _ProfileRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,

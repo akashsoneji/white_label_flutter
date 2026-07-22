@@ -55,7 +55,7 @@ class CopyTradingInternalTransferScreen extends StatelessWidget {
                 ),
                 child: Text(
                   'Transfer Now',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -80,7 +80,7 @@ class CopyTradingInternalTransferScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             color: AppColors.textGrey,
             fontWeight: FontWeight.w500,

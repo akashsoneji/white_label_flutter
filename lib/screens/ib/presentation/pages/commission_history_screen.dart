@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 
@@ -21,7 +22,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
         elevation: 0,
         title: Text(
           'Commission Tracking',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -104,7 +105,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                             children: [
                               Text(
                                 '\$30',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primary,
@@ -113,7 +114,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                               SizedBox(height: 4.h),
                               Text(
                                 'Pending Commissions',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: AppColors.textGrey,
                                 ),
@@ -132,7 +133,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                           ),
                           child: Text(
                             'Withdraw',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.whiteColor,
@@ -167,7 +168,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                             children: [
                               Text(
                                 '3',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primary,
@@ -176,7 +177,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                               SizedBox(height: 4.h),
                               Text(
                                 'Request Payout',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: AppColors.textGrey,
                                 ),
@@ -190,7 +191,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                             children: [
                               Text(
                                 '\$70',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primary,
@@ -199,7 +200,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                               SizedBox(height: 4.h),
                               Text(
                                 'Withdrawn',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: AppColors.textGrey,
                                 ),
@@ -224,7 +225,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                 children: [
                   Text(
                     'Request Payout History',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -251,7 +252,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
                           Expanded(
                             child: Text(
                               'IB Rebet',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.textPrimary,
@@ -284,7 +285,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(12.r),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: Color(0x1A000000),
             blurRadius: 4,
@@ -297,7 +298,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
         children: [
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.primary,
@@ -306,7 +307,7 @@ class _CommissionHistoryScreenState extends State<CommissionHistoryScreen> {
           SizedBox(height: 4.h),
           Text(
             title,
-            style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

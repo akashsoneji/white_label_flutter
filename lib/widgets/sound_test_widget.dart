@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,19 +14,19 @@ class SoundTestWidget extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: const AppBackButton(),
-        title: const Text('Sound Test'),
+        title: Text('Sound Test'),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               'Test Audio Playback',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: 30),
 
             // Test No Money Sound Button
             ElevatedButton(
@@ -51,21 +52,21 @@ class SoundTestWidget extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 30,
                   vertical: 15,
                 ),
               ),
               child:   Text(
                 'Test No Money Sound',
-                style: TextStyle(fontSize: 18, color: AppColors.whiteColor),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 18, color: AppColors.whiteColor),
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             // Instructions
-            const Card(
+            Card(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Column(
@@ -73,7 +74,7 @@ class SoundTestWidget extends StatelessWidget {
                   children: [
                     Text(
                       'Instructions:',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
