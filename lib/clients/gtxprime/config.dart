@@ -18,9 +18,9 @@ class GtxprimeConfig extends BaseClientConfig {
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',
- apiBaseUrl: 'https://member.gtxprime.com/api/',
- websocketUrl: 'wss://member.gtxprime.com/trade-engine',
- chartBaseUrl: 'https://member.gtxprime.com',
- useNewChart: false,
+          apiBaseUrl: 'https://member.gtxprime.com/api/',
+          websocketUrl: 'wss://member.gtxprime.com/trade-engine',
+          chartBaseUrl: 'https://member.gtxprime.com',
+          useNewChart: false,
  );
 }

@@ -283,14 +283,23 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     // data the rest of the app uses); fall back to the favourite string
     // itself if the stream hasn't loaded yet.
     final filtered = <String>[];
+    final seen = <String>{};
     if (instruments.isNotEmpty) {
       for (final inst in instruments) {
-        if (favSet.contains(_stripSuffix(inst.symbol).toUpperCase())) {
+        final stripped = _stripSuffix(inst.symbol).toUpperCase();
+        if (favSet.contains(stripped) && !seen.contains(stripped)) {
+          seen.add(stripped);
           filtered.add(inst.symbol);
         }
       }
     } else {
-      filtered.addAll(favoritesRaw);
+      for (final raw in favoritesRaw) {
+        final stripped = _stripSuffix(raw).toUpperCase();
+        if (!seen.contains(stripped)) {
+          seen.add(stripped);
+          filtered.add(raw);
+        }
+      }
     }
     filtered.sort(
       (a, b) => _stripSuffix(
@@ -661,6 +670,7 @@ class _ChartArea extends StatelessWidget {
     // server-side mobile-chart loader picks up the symbol on first paint.
     final url =
         '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$raw&theme=${isDark ? 'dark' : 'light'}';
+    print('Chart URL: $url');
     return ChartInAppWebView(
       key: ValueKey('vantage_chart_$raw'),
       symbol: raw,

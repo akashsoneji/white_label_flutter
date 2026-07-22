@@ -1871,6 +1871,8 @@ Placing Order:
     // in-session symbol switches without a full reload (via didUpdateWidget).
     final chartUrl =
         '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$effectiveDatafeedSymbol&theme=${AppColors.chartTheme}';
+    
+    print('Chart URL: $chartUrl');
 
     return Container(
       width: double.infinity,
