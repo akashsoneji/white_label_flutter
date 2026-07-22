@@ -1,21 +1,21 @@
 {
-  "default": "pipze",
+  "default": "kantara",
   "brands": [
-    "pipze",
-    "iquote"
+    "kantara",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "pipze",
+      "name": "kantara",
       "type": "child",
-      "inheritsFrom": "iquote",
-      "label": "Pipze",
+      "inheritsFrom": "vantage",
+      "label": "Kantara",
       "themeMode": "both"
     },
     {
-      "name": "iquote",
+      "name": "vantage",
       "type": "parent",
-      "label": "iQuote",
+      "label": "Vantage",
       "themeMode": "both"
     }
   ]

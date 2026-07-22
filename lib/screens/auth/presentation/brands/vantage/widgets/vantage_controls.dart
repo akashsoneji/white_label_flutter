@@ -55,6 +55,9 @@ class VantagePrimaryButton extends StatelessWidget {
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
+                    color: AppColors.isDarkMode
+                        ? AppColors.textPrimaryLight
+                        : AppColors.textPrimaryDark,
                   ),
                 ),
       ),

@@ -239,7 +239,10 @@ class CongratulationsDialog extends StatelessWidget {
                     height: 48.h,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        backgroundColor:
+                            AppColors.isDarkMode
+                                ? AppColors.primary.withOpacity(0.1)
+                                : AppColors.primary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),

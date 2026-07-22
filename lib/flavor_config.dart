@@ -3,10 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'clients/base_config.dart';
-import 'clients/pipze/config.dart';
+import 'clients/kantara/config.dart';
 
 enum Flavor {
-  pipze,
+  kantara,
 }
 
 class FlavorConfig {
@@ -91,7 +91,7 @@ class FlavorConfig {
  this.useNewChart = false,
  }) : appTitle = title;
 
-  static FlavorConfig get instance => _instance ?? activate(Flavor.pipze);
+  static FlavorConfig get instance => _instance ?? activate(Flavor.kantara);
 
   static void reset() {
     _instance = null;
@@ -107,21 +107,21 @@ class FlavorConfig {
     final normalized = name.trim().toLowerCase();
     final flavor = Flavor.values.firstWhere(
       (value) => value.name == normalized,
-      orElse: () => Flavor.pipze,
+      orElse: () => Flavor.kantara,
     );
     return activate(flavor);
   }
 
   static FlavorConfig _configFor(Flavor flavor) {
     switch (flavor) {
-      case Flavor.pipze:
-        const config = PipzeConfig();
-        return config.toFlavorConfig(Flavor.pipze, 'pipze');
+      case Flavor.kantara:
+        const config = KantaraConfig();
+        return config.toFlavorConfig(Flavor.kantara, 'kantara');
     }
   }
 
-  static bool isPipze() => _instance?.flavor == Flavor.pipze;
-  static FlavorConfig get pipze => activate(Flavor.pipze);
+  static bool isKantara() => _instance?.flavor == Flavor.kantara;
+  static FlavorConfig get kantara => activate(Flavor.kantara);
 
   static bool isVantage() => usesVantageUi();
 
@@ -130,7 +130,7 @@ class FlavorConfig {
     if (explicitParent == 'vantage') return true;
     if (explicitParent.isNotEmpty && explicitParent != 'vantage') return false;
 
-    final name = (_instance?.flavor.name ?? Flavor.pipze.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.kantara.name).toLowerCase();
     return const <String>{'vantage', 'gtxprime', 'kantara', 'riyadex', 'telifox', 'tenax'}.contains(name);
   }
 
@@ -139,7 +139,7 @@ class FlavorConfig {
     if (explicitParent == 'iquote') return true;
     if (explicitParent.isNotEmpty && explicitParent != 'iquote') return false;
 
-    final name = (_instance?.flavor.name ?? Flavor.pipze.name).toLowerCase();
+    final name = (_instance?.flavor.name ?? Flavor.kantara.name).toLowerCase();
     return const <String>{'iquote', 'pipze', 'skyriss', 'baazex'}.contains(name);
   }
 

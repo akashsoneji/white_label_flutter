@@ -577,13 +577,13 @@ class _Header extends StatelessWidget {
       child: Row(
         children: [
           // Back arrow
-          IconButton(
-            onPressed: onBack,
-            icon: Icon(Icons.arrow_back, size: 22.sp, color: fg),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-          SizedBox(width: 6.w),
+          // IconButton(
+          //   onPressed: onBack,
+          //   icon: Icon(Icons.arrow_back, size: 22.sp, color: fg),
+          //   padding: EdgeInsets.zero,
+          //   constraints: const BoxConstraints(),
+          // ),
+          // SizedBox(width: 6.w),
           // Symbol pill
           Expanded(
             child: InkWell(
@@ -878,7 +878,10 @@ class _QuantityBar extends StatelessWidget {
                 children: [
                   Text(
                     'Quantity (lots)',
-                    style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: muted),
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 10.sp,
+                      color: muted,
+                    ),
                   ),
                   // Editable TextField in place of the static Text widget.
                   // Same footprint as the previous Text so the +/- icons

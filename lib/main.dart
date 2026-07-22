@@ -369,8 +369,9 @@ Future<void> initServices() async {
 
 /// Build light theme
 ThemeData _buildLightTheme() {
+  final String fontFamily = FlavorConfig.usesVantageUi() ? 'Inter' : 'SF UI';
   return ThemeData(
-    fontFamily: 'SF UI',
+    fontFamily: fontFamily,
     primaryColor: FlavorConfig.instance.primaryColor,
     colorScheme: ColorScheme.light(
       primary: FlavorConfig.instance.primaryColor,
@@ -503,8 +504,9 @@ ThemeData _buildLightTheme() {
 
 /// Build dark theme
 ThemeData _buildDarkTheme() {
+  final String fontFamily = FlavorConfig.usesVantageUi() ? 'Inter' : 'SF UI';
   return ThemeData(
-    fontFamily: 'SF UI',
+    fontFamily: fontFamily,
     primaryColor: FlavorConfig.instance.darkPrimaryColor,
     colorScheme: ColorScheme.dark(
       primary: FlavorConfig.instance.darkPrimaryColor,

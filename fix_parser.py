@@ -1,12 +1,17 @@
 import re
 
-with open('lib/services/trading_websocket_service.dart', 'r') as f:
-    content = f.read()
+def clean_output(filename):
+    with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
+        content = f.read()
+    
+    # Remove all ANSI escape sequences
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    clean = ansi_escape.sub('', content)
+    
+    lines = clean.split('\n')
+    for line in lines:
+        if 'error' in line.lower() or 'warning' in line.lower() or 'riyadex' in line.lower():
+            if 'unused_import' not in line.lower(): # skip simple warnings to find errors
+                print(line.strip())
 
-# Fix account matching
-content = re.sub(r'account != currentAccount(?!Number)', r'!_accountMatches(currentAccount, account)', content)
-content = re.sub(r'account != _lastSubscribedAccount', r'!_accountMatches(_lastSubscribedAccount, account)', content)
-content = re.sub(r'currentAccount != null && !_accountMatches', r'currentAccount != null && currentAccount.isNotEmpty && !_accountMatches', content)
-
-with open('lib/services/trading_websocket_service.dart', 'w') as f:
-    f.write(content)
+clean_output('err_flutter.txt')

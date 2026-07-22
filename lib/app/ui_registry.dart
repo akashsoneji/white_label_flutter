@@ -17,6 +17,8 @@ import 'package:crm_app/screens/home/more/more_screen.dart';
 import 'package:crm_app/screens/kyc/presentation/pages/kyc_intro_screen.dart';
 import 'package:crm_app/screens/trading/presentation/pages/trading_main_screen.dart';
 
+import 'package:crm_app/screens/auth/presentation/brands/riyadex/pages/riyadex_create_account_screen.dart'
+    as riyadex;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/create_account_screen.dart'
     as vantage;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/create_new_password_screen.dart'
@@ -176,6 +178,10 @@ class UiRegistry implements UiSlots {
 
   @override
   Widget createAccount() {
+    final flavorName = FlavorConfig.instance.flavor.name.toLowerCase();
+    if (flavorName == 'riyadex') {
+      return const riyadex.RiyadexCreateAccountScreen();
+    }
     if (_usesVantageUi || _usesIquoteUi) return vantage.VantageCreateAccountScreen();
     return CreateAccountScreen();
   }
