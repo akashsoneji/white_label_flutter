@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
 import 'package:crm_app/models/mt5_account.dart';
+import 'package:crm_app/screens/home/brands/iquote/history_filter_sheet.dart';
 
 class IQuotePositionScreen extends StatefulWidget {
   final Function(String)? onNavigateToChart;
@@ -31,12 +33,19 @@ class IQuotePositionScreen extends StatefulWidget {
 }
 
 class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
-  static const Color _bgColor = Color(0xFF1A1D2B);
-  static const Color _cardColor = Color(0xFF232739);
-  static const Color _chipBgColor = Color(0xFF333950);
-  static const Color _accent = Color(0xFFE88A4A);
-  static const Color _green = Color(0xFF2EBD6F);
-  static const Color _red = Color(0xFFE53935);
+  Color get _bgColor => AppColors.background;
+  Color get _cardColor => AppColors.card;
+  Color get _chipBgColor => AppColors.isDarkMode
+      ? const Color(0xFF333950)
+      : AppColors.primary.withValues(alpha: 0.12);
+  Color get _accent => AppColors.primary;
+  Color get _green => AppColors.statusGreen;
+  Color get _red => AppColors.statusRed;
+  Color get _textPrimary => AppColors.textPrimary;
+  Color get _textSecondary => AppColors.textSecondary;
+  Color get _textMuted => AppColors.isDarkMode
+      ? Colors.white38
+      : AppColors.textSecondary.withValues(alpha: 0.6);
 
   final LanguageService languageService = Get.find<LanguageService>();
 
@@ -201,7 +210,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                           Text(
                             _activeAccountLabel(),
                             style: AppTextStyles.bodyText.copyWith(
-                              color: Colors.white,
+                              color: _textPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 12.sp,
                               letterSpacing: 0.5,
@@ -209,7 +218,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                           ),
                           SizedBox(width: 4.w),
                           Icon(Icons.arrow_drop_down,
-                              color: Colors.white, size: 18.sp),
+                              color: _textPrimary, size: 18.sp),
                         ],
                       ),
                     ),
@@ -220,7 +229,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: _textPrimary,
                     ),
                   ),
                   const Spacer(),
@@ -285,13 +294,13 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         child: Row(
           children: [
             Text('From Real',
-                style: AppTextStyles.bodyText.copyWith(color: Colors.white, fontSize: 12.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 12.sp)),
             SizedBox(width: 12.w),
             Text('arie***',
-                style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 12.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 12.sp)),
             SizedBox(width: 8.w),
             Text('EUR',
-                style: AppTextStyles.bodyText.copyWith(color: Colors.white, fontSize: 12.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 12.sp)),
             SizedBox(width: 6.w),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
@@ -311,9 +320,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 style: AppTextStyles.bodyText.copyWith(color: _green, fontSize: 12.sp)),
             SizedBox(width: 10.w),
             Text(_currentTimeHms(),
-                style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 12.sp)),
+                style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 12.sp)),
             const Spacer(),
-            Icon(Icons.chevron_right, color: Colors.white54, size: 20.sp),
+            Icon(Icons.chevron_right, color: _textSecondary, size: 20.sp),
           ],
         ),
       ),
@@ -343,9 +352,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             _tabText('History', selected == 2,
                 () => tradingController.setSelectedTab(2)),
             const Spacer(),
-            Icon(Icons.swap_vert, color: Colors.white70, size: 20.sp),
+            Icon(Icons.swap_vert, color: _textSecondary, size: 20.sp),
             SizedBox(width: 16.w),
-            Icon(Icons.more_horiz, color: Colors.white70, size: 20.sp),
+            Icon(Icons.more_horiz, color: _textSecondary, size: 20.sp),
           ],
         );
       }),
@@ -363,7 +372,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 15.sp,
               fontWeight: active ? FontWeight.bold : FontWeight.w500,
-              color: active ? Colors.white : Colors.white54,
+              color: active ? _textPrimary : _textSecondary,
             ),
           ),
           SizedBox(height: 6.h),
@@ -385,55 +394,96 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     return Obx(() {
       if (tradingController.selectedTab != 2) return const SizedBox.shrink();
 
+      if (!tradingController.historyFilterInitialized) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (Get.find<TradingController>().historyFilterInitialized) return;
+          Get.find<TradingController>().applyHistoryFilter();
+        });
+      }
+
       final now = DateHelper.nowUtc();
-      final startDate =
-          DateHelper.formatUtcDateTime(now.subtract(const Duration(days: 7)));
-      final endDate = DateHelper.formatUtcDateTime(now);
+      final start = tradingController.historyStartDate ??
+          DateTime(now.year, now.month, now.day);
+      final end = tradingController.historyEndDate ?? now;
+      final startDate = DateHelper.formatUtcDateTime(start);
+      final endDate = DateHelper.formatUtcDateTime(end);
 
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        child: Row(
-          children: [
-            Text('Start:',
-                style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 13.sp)),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: _cardColor,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Center(
-                  child: Text(startDate,
-                      style: AppTextStyles.bodyText.copyWith(color: Colors.white, fontSize: 13.sp)),
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.w),
-              child: Text('—',
-                  style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 13.sp)),
-            ),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: _cardColor,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                child: Center(
-                  child: Text(endDate,
-                      style: AppTextStyles.bodyText.copyWith(color: Colors.white, fontSize: 13.sp)),
+        child: InkWell(
+          onTap: _openHistoryFilterSheet,
+          borderRadius: BorderRadius.circular(6.r),
+          child: Row(
+            children: [
+              Text('Start:',
+                  style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 13.sp)),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: _cardColor,
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Center(
+                    child: Text(startDate,
+                        style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 13.sp)),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: 12.w),
-            Icon(Icons.history, color: Colors.white70, size: 24.sp),
-          ],
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                child: Text('—',
+                    style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 13.sp)),
+              ),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: _cardColor,
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: Center(
+                    child: Text(endDate,
+                        style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 13.sp)),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Icon(Icons.history, color: _textSecondary, size: 24.sp),
+            ],
+          ),
         ),
       );
     });
+  }
+
+  void _openHistoryFilterSheet() {
+    final controller = Get.find<TradingController>();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      isDismissible: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => HistoryFilterScreen(
+        initialPeriod: controller.historyFilterPeriod,
+        initialSymbols: controller.selectedInstruments,
+        onConfirm: (period, symbols) async {
+          controller.clearInstruments();
+          if (!symbols.contains('all')) {
+            for (final s in symbols) {
+              controller.addInstrument(s);
+            }
+          }
+          await controller.applyHistoryFilter(period: period);
+        },
+        onReset: () async {
+          controller.clearInstruments();
+          await controller.resetHistoryFilter();
+        },
+      ),
+    );
   }
 
   Widget _buildBody() {
@@ -498,13 +548,13 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_outlined, size: 44.sp, color: Colors.white54),
+          Icon(Icons.inbox_outlined, size: 44.sp, color: _textSecondary),
           SizedBox(height: 16.h),
           Text(message,
               style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white)),
+                  color: _textPrimary)),
         ],
       ),
     );
@@ -591,7 +641,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 Text(
                   symbol,
                   style: AppTextStyles.bodyText.copyWith(
-                    color: Colors.white,
+                    color: _textPrimary,
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -606,7 +656,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     child: Container(
                       padding: EdgeInsets.all(4.w),
                       child: Icon(Icons.cancel,
-                          color: Colors.white54, size: 20.sp),
+                          color: _textSecondary, size: 20.sp),
                     ),
                   ),
               ],
@@ -627,7 +677,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 Text(
                   '${position.volume}Lot',
                   style: AppTextStyles.bodyText.copyWith(
-                      color: Colors.white,
+                      color: _textPrimary,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600),
                 ),
@@ -643,7 +693,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     child: Text(
                       leverage,
                       style: AppTextStyles.bodyText.copyWith(
-                          color: Colors.white70,
+                          color: _textSecondary,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w600),
                     ),
@@ -667,20 +717,20 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 SizedBox(width: 6.w),
                 Text(
                   _formatSwap(position.swap),
-                  style: AppTextStyles.bodyText.copyWith(color: Colors.white54, fontSize: 11.sp),
+                  style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 11.sp),
                 ),
                 const Spacer(),
                 Text(
                   position.entryPrice,
-                  style: AppTextStyles.bodyText.copyWith(color: Colors.white54, fontSize: 12.sp),
+                  style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 12.sp),
                 ),
                 SizedBox(width: 6.w),
                 Icon(Icons.arrow_forward,
-                    color: Colors.white54, size: 12.sp),
+                    color: _textSecondary, size: 12.sp),
                 SizedBox(width: 6.w),
                 Text(
                   position.currentPrice,
-                  style: AppTextStyles.bodyText.copyWith(color: Colors.white70, fontSize: 12.sp),
+                  style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -690,7 +740,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 alignment: Alignment.centerRight,
                 child: Text(
                   DateHelper.formatIsoStringToUtcHistory(position.closeTime),
-                  style: AppTextStyles.bodyText.copyWith(color: Colors.white38, fontSize: 11.sp),
+                  style: AppTextStyles.bodyText.copyWith(color: _textMuted, fontSize: 11.sp),
                 ),
               ),
             ],
@@ -825,6 +875,16 @@ class _SwitchAccountSheet extends StatefulWidget {
 class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
   static const Color _accent = Color(0xFFE88A4A);
 
+  // Theme-aware text colors — mirrors the getters on the outer
+  // _IQuotePositionScreenState but scoped here so the bottom-sheet state
+  // (which lives in a separate widget class) can access them.
+  Color get _textPrimary => AppColors.textPrimary;
+  Color get _textSecondary => AppColors.textSecondary;
+  Color get _textMuted =>
+      Theme.of(context).brightness == Brightness.dark
+          ? Colors.white38
+          : AppColors.textSecondary.withValues(alpha: 0.6);
+
   String? _selectedAccountNumber;
 
   @override
@@ -849,7 +909,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
             Text(
               'Switch account',
               style: AppTextStyles.bodyText.copyWith(
-                color: Colors.white,
+                color: _textPrimary,
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w600,
               ),
@@ -876,7 +936,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                         Get.toNamed(Routes.CHOOSE_ACCOUNT);
                       },
                     ),
-                    Divider(color: Colors.white12, height: 24.h),
+                    Divider(color: AppColors.border, height: 24.h),
                     _buildAccountRow(
                       label: 'DEMO',
                       account: demo.isNotEmpty ? demo.first : null,
@@ -952,7 +1012,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? _accent : Colors.white54,
+                  color: isSelected ? _accent : _textSecondary,
                   width: 2,
                 ),
                 color: isSelected ? _accent : Colors.transparent,
@@ -971,21 +1031,21 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                       Text(
                         label,
                         style: AppTextStyles.bodyText.copyWith(
-                          color: Colors.white,
+                          color: _textPrimary,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       SizedBox(width: 4.w),
                       Icon(Icons.help_outline,
-                          color: Colors.white54, size: 14.sp),
+                          color: _textSecondary, size: 14.sp),
                     ],
                   ),
                   SizedBox(height: 2.h),
                   Text(
                     hasAccount ? balance : '---',
                     style: AppTextStyles.bodyText.copyWith(
-                      color: hasAccount ? _accent : Colors.white38,
+                      color: hasAccount ? _accent : _textMuted,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
                     ),

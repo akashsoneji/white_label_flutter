@@ -145,32 +145,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Left: Markets Title & Search Icon
-          Row(
-            children: [
-              Text(
-                _ls.tr('markets_title'),
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(width: 8.w),
-              IconButton(
-                onPressed: _openSearchSheet,
-                icon: Icon(
-                  Icons.search_rounded,
-                  size: 22.r,
-                  color: AppColors.textSecondary,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-
-          // Right: Active Account Selector (Account Number + LIVE/DEMO Badge)
+          // Left: Active Account Selector (Account Number + LIVE/DEMO Badge)
           GestureDetector(
             onTap: () => _showAccountBottomSheet(context),
             child: Obx(() {
@@ -201,7 +176,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                     Text(
                       '#$accNumber',
                       style: AppTextStyles.bodyText.copyWith(
-                        color: IquoteThemeColors.textPrimary,
+                        color: AppColors.textPrimary,
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -239,12 +214,14 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
               );
             }),
           ),
+
+          // Right: Search Button
           IconButton(
             onPressed: _openSearchSheet,
             icon: Icon(
               Icons.search_rounded,
               size: 22.r,
-              color: IquoteThemeColors.textSecondary,
+              color: AppColors.textSecondary,
             ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -513,7 +490,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w400,
-                                  color: IquoteThemeColors.textPrimary,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               if (instrument.category != null &&
@@ -522,14 +499,14 @@ class _IquoteInstrumentRow extends StatelessWidget {
                                   ' · ',
                                   style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 11.sp,
-                                    color: IquoteThemeColors.textSecondary,
+                                    color: AppColors.textSecondary,
                                   ),
                                 ),
                                 Text(
                                   instrument.category!,
                                   style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 11.sp,
-                                    color: IquoteThemeColors.textSecondary,
+                                    color: AppColors.textSecondary,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),

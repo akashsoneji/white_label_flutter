@@ -21,12 +21,14 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 /// require a server-side symbol filter parameter.
 class HistoryFilterScreen extends StatefulWidget {
   final String initialPeriod;
-  final Future<void> Function(String period) onConfirm;
+  final Set<String> initialSymbols;
+  final Future<void> Function(String period, Set<String> symbols) onConfirm;
   final Future<void> Function() onReset;
 
   const HistoryFilterScreen({
     super.key,
     required this.initialPeriod,
+    this.initialSymbols = const {},
     required this.onConfirm,
     required this.onReset,
   });
@@ -78,18 +80,25 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
   void initState() {
     super.initState();
     _selectedPeriod = widget.initialPeriod.isEmpty ? 'today' : widget.initialPeriod;
-    _selectedSymbols.add('all');
+    if (widget.initialSymbols.isEmpty) {
+      _selectedSymbols.add('all');
+    } else {
+      _selectedSymbols.addAll(widget.initialSymbols);
+    }
   }
 
   List<String> _availableSymbols() {
-    if (!Get.isRegistered<InstrumentsController>()) return const [];
-    return Get.find<InstrumentsController>()
-        .instruments
-        .map((e) => e.symbol)
-        .where((s) => s.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
+    final symbols = <String>{};
+    if (Get.isRegistered<InstrumentsController>()) {
+      symbols.addAll(
+        Get.find<InstrumentsController>()
+            .instruments
+            .map((e) => e.symbol)
+            .where((s) => s.isNotEmpty),
+      );
+    }
+    final sorted = symbols.toList()..sort();
+    return sorted;
   }
 
   @override
@@ -99,7 +108,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
     final mq = MediaQuery.of(context);
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxHeight: mq.size.height * 0.78,
+        maxHeight: mq.size.height * 0.85,
       ),
       child: Material(
         color: p.panel,
@@ -108,40 +117,51 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeader(p),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Data',
-                          style: TextStyle(
-                            color: p.textPrimary,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                          )),
-                      SizedBox(height: 10.h),
-                      _buildPeriodGrid(p),
-                      SizedBox(height: 20.h),
-                      Text('Trading pair',
-                          style: TextStyle(
-                            color: p.textPrimary,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                          )),
-                      SizedBox(height: 10.h),
-                      _buildSymbolSection(symbols, p),
-                      SizedBox(height: 20.h),
-                    ],
-                  ),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildHeader(p),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Data',
+                      style: TextStyle(
+                        color: p.textPrimary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    _buildPeriodGrid(p),
+                    SizedBox(height: 20.h),
+                    Text(
+                      'Trading pair',
+                      style: TextStyle(
+                        color: p.textPrimary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    _buildSymbolSection(symbols, p),
+                    SizedBox(height: 20.h),
+                  ],
                 ),
               ),
-              _buildActions(p),
-            ],
-          ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                16.w,
+                8.h,
+                16.w,
+                mq.padding.bottom + 16.h,
+              ),
+              child: _buildActions(p),
+            ),
+          ],
         ),
       ),
     );
@@ -322,7 +342,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
             height: 48.h,
             child: ElevatedButton(
               onPressed: () async {
-                await widget.onConfirm(_selectedPeriod);
+                await widget.onConfirm(_selectedPeriod, _selectedSymbols);
                 if (!mounted) return;
                 Navigator.of(context).pop();
               },
