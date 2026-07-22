@@ -480,10 +480,10 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
   @override
   Widget build(BuildContext context) {
     final isDark = AppColors.isDarkMode;
-    final bgDark = IquoteThemeColors.background;
-    final cardBg = IquoteThemeColors.cardBackground;
-    final textPrimary = IquoteThemeColors.textPrimary;
-    final textSecondary = IquoteThemeColors.textSecondary;
+    final bgDark = AppColors.background;
+    final cardBg = AppColors.card;
+    final textPrimary = AppColors.textPrimary;
+    final textSecondary = AppColors.textSecondary;
     final primaryColor = AppColors.primary;
     final languageService =
         Get.isRegistered<LanguageService>()

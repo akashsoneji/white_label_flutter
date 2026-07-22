@@ -121,7 +121,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bgDark = IquoteThemeColors.background;
+    final bgDark = AppColors.background;
 
     return Scaffold(
       backgroundColor: bgDark,
@@ -145,6 +145,32 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Left: Markets Title & Search Icon
+          Row(
+            children: [
+              Text(
+                _ls.tr('markets_title'),
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              IconButton(
+                onPressed: _openSearchSheet,
+                icon: Icon(
+                  Icons.search_rounded,
+                  size: 22.r,
+                  color: AppColors.textSecondary,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+
+          // Right: Active Account Selector (Account Number + LIVE/DEMO Badge)
           GestureDetector(
             onTap: () => _showAccountBottomSheet(context),
             child: Obx(() {
@@ -206,7 +232,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
                       size: 18.r,
-                      color: IquoteThemeColors.textSecondary,
+                      color: AppColors.textSecondary,
                     ),
                   ],
                 ),
@@ -240,8 +266,8 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
   }
 
   Widget _buildTabBar() {
-    final activeColor = IquoteThemeColors.selectedTabColor;
-    final textSecondary = IquoteThemeColors.textSecondary;
+    final activeColor = AppColors.primary;
+    final textSecondary = AppColors.textSecondary;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

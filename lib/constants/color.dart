@@ -386,32 +386,3 @@ class AppColors {
   static Color get neutralTrackSoft =>
       isDarkMode ? const Color(0xFF4A4A5A) : const Color(0xFFEEEEEE);
 }
-
-
-/// ─────────────────────────────────────────────────────────────────────────────
-/// iQuote Flavor Theme Colors (Common Color Class for iQuote UI tree)
-/// ─────────────────────────────────────────────────────────────────────────────
-class IquoteThemeColors {
-  // ── Dark Mode Colors (Black background in Dark mode) ────────────────────
-  static const Color darkBackground = Color(0xFF000000);
-  static const Color darkCardBackground = Color(0xFF1C1C1E);
-  static const Color darkNavBackground = Color(0xFF000000);
-  static const Color darkTextPrimary = Colors.white;
-  static const Color darkTextSecondary = Colors.white70;
-  static const Color darkActiveTab = Colors.white;
-
-  // ── Light Mode Colors ─────────────────────────────────────────────────────
-  static const Color lightBackground = Color(0xFFF7F8FA);
-  static const Color lightCardBackground = Colors.white;
-  static const Color lightNavBackground = Colors.white;
-  static const Color lightTextPrimary = Color(0xFF1F2937);
-  static const Color lightTextSecondary = Color(0xFF6B7280);
-
-  // ── Dynamic Theme Getters ──────────────────────────────────────────────────
-  static Color get background => AppColors.isDarkMode ? darkBackground : lightBackground;
-  static Color get cardBackground => AppColors.isDarkMode ? darkCardBackground : lightCardBackground;
-  static Color get navBackground => AppColors.isDarkMode ? darkNavBackground : lightNavBackground;
-  static Color get textPrimary => AppColors.isDarkMode ? darkTextPrimary : lightTextPrimary;
-  static Color get textSecondary => AppColors.isDarkMode ? darkTextSecondary : lightTextSecondary;
-  static Color get selectedTabColor => AppColors.isDarkMode ? darkActiveTab : AppColors.primary;
-}
