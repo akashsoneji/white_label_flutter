@@ -161,8 +161,15 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
 
   Future<void> _seedCurrentProfileIfMissing() async {
     final authController = Get.find<AuthController>();
-    final email = (authController.userEmail ?? '').trim().toLowerCase();
-    final name = (authController.userFullName ?? '').trim();
+    final String rawEmail = authController.userEmail?.isNotEmpty == true 
+        ? authController.userEmail! 
+        : (authController.profileData?.data.user.email ?? '');
+    final String rawName = authController.userFullName?.isNotEmpty == true 
+        ? authController.userFullName! 
+        : (authController.profileData?.data.user.fullName ?? '');
+
+    final email = rawEmail.trim().toLowerCase();
+    final name = rawName.trim();
     final brokerData = await SecureStorageService.getTenaxBrokerSelection();
     if (email.isEmpty || brokerData == null) return;
 
@@ -808,7 +815,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           Row(
                             children: [
                               Obx(() {
-                                final name = authController.userFullName ?? '';
+                                final name = authController.userFullName?.isNotEmpty == true 
+                                    ? authController.userFullName! 
+                                    : (authController.profileData?.data.user.fullName ?? '');
                                 return Text(
                                   name,
                                   style: AppTextStyles.bodyText.copyWith(
@@ -842,7 +851,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           ),
                           SizedBox(height: 2.h),
                           Obx(() {
-                            final email = authController.userEmail ?? '';
+                            final email = authController.userEmail?.isNotEmpty == true 
+                                ? authController.userEmail! 
+                                : (authController.profileData?.data.user.email ?? '');
                             return Text(
                               email,
                               style: AppTextStyles.bodyText.copyWith(

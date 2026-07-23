@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:crm_app/brands/brand_resolver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -11,6 +12,7 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/models/dropdown_models.dart';
 import 'package:crm_app/screens/kyc/view_models/compliance_controller.dart';
+import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 
 class UnifiedComplianceWizard extends StatefulWidget {
   const UnifiedComplianceWizard({Key? key}) : super(key: key);
@@ -31,6 +33,15 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     controller = Get.put(ComplianceController());
     languageService = Get.find<LanguageService>();
     controller.fetchRegulationSchema();
+  }
+
+  bool get _isComplianceForced {
+    try {
+      final auth = Get.find<AuthController>();
+      return auth.profileData?.data.user.forceRegulatedForm == 1;
+    } catch (_) {
+      return false;
+    }
   }
 
   @override
@@ -164,31 +175,33 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           actions: [
             Row(
               children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      Get.back(closeOverlays: true);
-                      Get.offAllNamed('/trading');
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor: AppColors.primary.withAlpha(20),
-                      foregroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                if (!(Get.find<BrandResolver>().activeBrand.value.value == 'riyadex' && _isComplianceForced)) ...[
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Get.back(closeOverlays: true);
+                        Get.offAllNamed('/trading');
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: AppColors.primary.withAlpha(20),
+                        foregroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                    ),
-                    child: Text(
-                      'Verify\nLater',
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w700,
+                      child: Text(
+                        'Verify\nLater',
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
-                ),
-                SizedBox(width: 12.w),
+                  SizedBox(width: 12.w),
+                ],
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {

@@ -699,10 +699,18 @@ class AuthController extends GetxController {
 
         // Check if the response has the expected structure
         if (response.data!.data.token.isNotEmpty) {
+          // Merge registration payload data into the user model if they exist
+          final fetchedUser = response.data!.data.user;
+          final updatedUser = fetchedUser.copyWith(
+            firstName: fetchedUser.firstName.isNotEmpty ? fetchedUser.firstName : data['first_name']?.toString(),
+            lastName: fetchedUser.lastName.isNotEmpty ? fetchedUser.lastName : data['last_name']?.toString(),
+            mobile: fetchedUser.mobile.isNotEmpty ? fetchedUser.mobile : data['mobile']?.toString(),
+          );
+
           final loginData = {
             'token': response.data!.data.token,
             'websocket_token': response.data!.data.websocketToken,
-            'user': response.data!.data.user.toJson(),
+            'user': updatedUser.toJson(),
             'is_logged_in': true,
           };
 
@@ -717,7 +725,7 @@ class AuthController extends GetxController {
           _registerFcmTokenInBackground(response.data!.data.token);
 
           // Set user data in controller
-          _userData.value = response.data!.data.user;
+          _userData.value = updatedUser;
           _isAuthenticated.value = true;
 
           // Enable one-click trading by default after registration
