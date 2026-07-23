@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -21,7 +19,9 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
 import 'package:crm_app/models/mt5_account.dart';
+import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/home/brands/iquote/history_filter_sheet.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 class IQuotePositionScreen extends StatefulWidget {
   final Function(String)? onNavigateToChart;
@@ -33,19 +33,13 @@ class IQuotePositionScreen extends StatefulWidget {
 }
 
 class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
-  Color get _bgColor => AppColors.background;
-  Color get _cardColor => AppColors.card;
-  Color get _chipBgColor => AppColors.isDarkMode
-      ? const Color(0xFF333950)
-      : AppColors.primary.withValues(alpha: 0.12);
-  Color get _accent => AppColors.primary;
-  Color get _green => AppColors.statusGreen;
-  Color get _red => AppColors.statusRed;
-  Color get _textPrimary => AppColors.textPrimary;
-  Color get _textSecondary => AppColors.textSecondary;
-  Color get _textMuted => AppColors.isDarkMode
-      ? Colors.white38
-      : AppColors.textSecondary.withValues(alpha: 0.6);
+  // Theme-aware tokens — values flip with AppColors.isDarkMode.
+  static Color get _bgColor => AppColors.background;
+  static Color get _cardColor => AppColors.card;
+  static Color get _chipBgColor => AppColors.iconBgTertiary;
+  static Color get _accent => AppColors.primary;
+  static Color get _green => AppColors.statusGreen;
+  static Color get _red => AppColors.statusRed;
 
   final LanguageService languageService = Get.find<LanguageService>();
 
@@ -209,8 +203,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                         children: [
                           Text(
                             _activeAccountLabel(),
-                            style: AppTextStyles.bodyText.copyWith(
-                              color: _textPrimary,
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
                               fontWeight: FontWeight.w700,
                               fontSize: 12.sp,
                               letterSpacing: 0.5,
@@ -218,7 +212,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                           ),
                           SizedBox(width: 4.w),
                           Icon(Icons.arrow_drop_down,
-                              color: _textPrimary, size: 18.sp),
+                              color: AppColors.textPrimary, size: 18.sp),
                         ],
                       ),
                     ),
@@ -226,16 +220,16 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   SizedBox(width: 14.w),
                   Text(
                     balance.toStringAsFixed(4),
-                    style: AppTextStyles.bodyText.copyWith(
+                    style: TextStyle(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w700,
-                      color: _textPrimary,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const Spacer(),
                   Text(
                     '${isProfitPositive ? '' : '-'}${profit.abs().toStringAsFixed(4)}(${marginLevel.toStringAsFixed(2)}%)',
-                    style: AppTextStyles.bodyText.copyWith(
+                    style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
                       color: isProfitPositive ? _green : _red,
@@ -294,13 +288,16 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         child: Row(
           children: [
             Text('From Real',
-                style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 12.sp)),
+                style: TextStyle(
+                    color: AppColors.textPrimary, fontSize: 12.sp)),
             SizedBox(width: 12.w),
             Text('arie***',
-                style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 12.sp)),
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 12.sp)),
             SizedBox(width: 8.w),
             Text('EUR',
-                style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 12.sp)),
+                style: TextStyle(
+                    color: AppColors.textPrimary, fontSize: 12.sp)),
             SizedBox(width: 6.w),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
@@ -309,7 +306,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 border: Border.all(color: _green, width: 1),
               ),
               child: Text('Buy 1',
-                  style: AppTextStyles.bodyText.copyWith(
+                  style: TextStyle(
                     color: _green,
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
@@ -317,12 +314,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             ),
             SizedBox(width: 8.w),
             Text('Profit \$ 0.04',
-                style: AppTextStyles.bodyText.copyWith(color: _green, fontSize: 12.sp)),
+                style: TextStyle(color: _green, fontSize: 12.sp)),
             SizedBox(width: 10.w),
             Text(_currentTimeHms(),
-                style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 12.sp)),
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 12.sp)),
             const Spacer(),
-            Icon(Icons.chevron_right, color: _textSecondary, size: 20.sp),
+            Icon(Icons.chevron_right,
+                color: AppColors.textSecondary, size: 20.sp),
           ],
         ),
       ),
@@ -352,9 +351,11 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             _tabText('History', selected == 2,
                 () => tradingController.setSelectedTab(2)),
             const Spacer(),
-            Icon(Icons.swap_vert, color: _textSecondary, size: 20.sp),
+            Icon(Icons.swap_vert,
+                color: AppColors.textSecondary, size: 20.sp),
             SizedBox(width: 16.w),
-            Icon(Icons.more_horiz, color: _textSecondary, size: 20.sp),
+            Icon(Icons.more_horiz,
+                color: AppColors.textSecondary, size: 20.sp),
           ],
         );
       }),
@@ -369,10 +370,12 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         children: [
           Text(
             label,
-            style: AppTextStyles.bodyText.copyWith(
+            style: TextStyle(
               fontSize: 15.sp,
               fontWeight: active ? FontWeight.bold : FontWeight.w500,
-              color: active ? _textPrimary : _textSecondary,
+              color: active
+                  ? AppColors.textPrimary
+                  : AppColors.textSecondary,
             ),
           ),
           SizedBox(height: 6.h),
@@ -394,6 +397,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     return Obx(() {
       if (tradingController.selectedTab != 2) return const SizedBox.shrink();
 
+      // Lazy-init: the first time the History tab is rendered after the user
+      // taps into it, apply the default 'today' filter so the list shows
+      // today's trades without requiring the user to open the dialog.
       if (!tradingController.historyFilterInitialized) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (Get.find<TradingController>().historyFilterInitialized) return;
@@ -416,7 +422,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
           child: Row(
             children: [
               Text('Start:',
-                  style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 13.sp)),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 13.sp)),
               SizedBox(width: 12.w),
               Expanded(
                 child: Container(
@@ -427,14 +434,16 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                   child: Center(
                     child: Text(startDate,
-                        style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 13.sp)),
+                        style: TextStyle(
+                            color: AppColors.textPrimary, fontSize: 13.sp)),
                   ),
                 ),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.w),
                 child: Text('—',
-                    style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 13.sp)),
+                    style: TextStyle(
+                        color: AppColors.textSecondary, fontSize: 13.sp)),
               ),
               Expanded(
                 child: Container(
@@ -445,12 +454,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                   child: Center(
                     child: Text(endDate,
-                        style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 13.sp)),
+                        style: TextStyle(
+                            color: AppColors.textPrimary, fontSize: 13.sp)),
                   ),
                 ),
               ),
               SizedBox(width: 12.w),
-              Icon(Icons.history, color: _textSecondary, size: 24.sp),
+              Icon(Icons.history,
+                  color: AppColors.textSecondary, size: 24.sp),
             ],
           ),
         ),
@@ -460,29 +471,38 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
 
   void _openHistoryFilterSheet() {
     final controller = Get.find<TradingController>();
-    showModalBottomSheet<void>(
+    showGeneralDialog(
       context: context,
-      isScrollControlled: true,
-      enableDrag: true,
-      isDismissible: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetCtx) => HistoryFilterScreen(
-        initialPeriod: controller.historyFilterPeriod,
-        initialSymbols: controller.selectedInstruments,
-        onConfirm: (period, symbols) async {
-          controller.clearInstruments();
-          if (!symbols.contains('all')) {
-            for (final s in symbols) {
-              controller.addInstrument(s);
-            }
-          }
-          await controller.applyHistoryFilter(period: period);
-        },
-        onReset: () async {
-          controller.clearInstruments();
-          await controller.resetHistoryFilter();
-        },
-      ),
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Align(
+          alignment: Alignment.centerRight,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.85,
+            height: MediaQuery.of(context).size.height,
+            child: HistoryFilterScreen(
+              initialPeriod: controller.historyFilterPeriod,
+              onConfirm: (period, symbols) async {
+                await controller.applyHistoryFilter(period: period, symbols: symbols);
+              },
+              onReset: () async {
+                await controller.resetHistoryFilter();
+              },
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        );
+      },
     );
   }
 
@@ -548,13 +568,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inbox_outlined, size: 44.sp, color: _textSecondary),
+          Icon(Icons.inbox_outlined,
+              size: 44.sp, color: AppColors.textSecondary),
           SizedBox(height: 16.h),
           Text(message,
-              style: AppTextStyles.bodyText.copyWith(
+              style: TextStyle(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
-                  color: _textPrimary)),
+                  color: AppColors.textPrimary)),
         ],
       ),
     );
@@ -630,7 +651,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                   child: Text(
                     isBuy ? 'Buy' : 'Sell',
-                    style: AppTextStyles.bodyText.copyWith(
+                    style: TextStyle(
                       color: isBuy ? _green : _red,
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w700,
@@ -640,8 +661,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 SizedBox(width: 8.w),
                 Text(
                   symbol,
-                  style: AppTextStyles.bodyText.copyWith(
-                    color: _textPrimary,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -650,13 +671,13 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 if (!isHistory)
                   InkWell(
                     borderRadius: BorderRadius.circular(20.r),
-                    onTap: () {
-                      Get.to(() => ClosePositionScreen(position: position));
-                    },
+                    onTap: () => _showCloseConfirmDialog(
+                        tradingController, position),
                     child: Container(
                       padding: EdgeInsets.all(4.w),
                       child: Icon(Icons.cancel,
-                          color: _textSecondary, size: 20.sp),
+                          color: AppColors.textSecondary,
+                          size: 20.sp),
                     ),
                   ),
               ],
@@ -676,8 +697,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 ),
                 Text(
                   '${position.volume}Lot',
-                  style: AppTextStyles.bodyText.copyWith(
-                      color: _textPrimary,
+                  style: TextStyle(
+                      color: AppColors.textPrimary,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600),
                 ),
@@ -692,8 +713,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     ),
                     child: Text(
                       leverage,
-                      style: AppTextStyles.bodyText.copyWith(
-                          color: _textSecondary,
+                      style: TextStyle(
+                          color: AppColors.textPrimary,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w600),
                     ),
@@ -701,7 +722,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 const Spacer(),
                 Text(
                   '${isPositive ? '' : '-'}${position.profitLoss.abs().toStringAsFixed(4)}',
-                  style: AppTextStyles.bodyText.copyWith(
+                  style: TextStyle(
                     color: isPositive ? _green : _red,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
@@ -717,20 +738,23 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 SizedBox(width: 6.w),
                 Text(
                   _formatSwap(position.swap),
-                  style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 11.sp),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 11.sp),
                 ),
                 const Spacer(),
                 Text(
                   position.entryPrice,
-                  style: AppTextStyles.bodyText.copyWith(color: _textSecondary, fontSize: 12.sp),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 12.sp),
                 ),
                 SizedBox(width: 6.w),
                 Icon(Icons.arrow_forward,
-                    color: _textSecondary, size: 12.sp),
+                    color: AppColors.textSecondary, size: 12.sp),
                 SizedBox(width: 6.w),
                 Text(
                   position.currentPrice,
-                  style: AppTextStyles.bodyText.copyWith(color: _textPrimary, fontSize: 12.sp),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 12.sp),
                 ),
               ],
             ),
@@ -740,7 +764,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 alignment: Alignment.centerRight,
                 child: Text(
                   DateHelper.formatIsoStringToUtcHistory(position.closeTime),
-                  style: AppTextStyles.bodyText.copyWith(color: _textMuted, fontSize: 11.sp),
+                  style: TextStyle(
+                      color: AppColors.textSecondary, fontSize: 11.sp),
                 ),
               ),
             ],
@@ -766,14 +791,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('V',
-              style: AppTextStyles.bodyText.copyWith(
-                  color: Colors.white,
+              style: TextStyle(
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w900,
                   fontSize: 11.sp)),
           SizedBox(width: 3.w),
           Text('VIP 0',
-              style: AppTextStyles.bodyText.copyWith(
-                  color: Colors.white,
+              style: TextStyle(
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
                   fontSize: 9.sp)),
         ],
@@ -820,19 +845,19 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     Get.bottomSheet(
       SafeArea(
         child: Container(
-          color: Colors.white,
+          color: AppColors.card,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: Text('Close Position'),
+                title: const Text('Close Position'),
                 onTap: () {
                   Get.back();
                   Get.to(() => ClosePositionScreen(position: position));
                 },
               ),
               ListTile(
-                title: Text('Edit Order'),
+                title: const Text('Edit Order'),
                 onTap: () {
                   Get.back();
                   Get.to(() => EditOrderScreen(position: position));
@@ -843,6 +868,226 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         ),
       ),
     );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Close-position confirmation dialog (matches iQuote design)
+  // ─────────────────────────────────────────────────────────────────────────
+  Future<void> _showCloseConfirmDialog(
+      TradingController tradingController, TradePosition position) async {
+    final symbol = _formatSymbol(position.symbol);
+    final leverage = _leverageLabel(position);
+    final isBuy = position.action.toLowerCase() == 'buy';
+    final isPositive = position.profitLoss >= 0;
+    final closePrice = isBuy ? position.currentPrice : position.currentPrice;
+
+    await showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.55),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: _cardColor,
+          insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Close all $symbol positions at market price?',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    height: 1.3,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                // Side chip + symbol
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 8.w, vertical: 3.h),
+                      decoration: BoxDecoration(
+                        color: (isBuy ? _green : _red).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        isBuy ? 'Buy' : 'Sell',
+                        style: TextStyle(
+                          color: isBuy ? _green : _red,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      symbol,
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10.h),
+                // Lot + leverage • close price
+                Row(
+                  children: [
+                    Text(
+                      '${position.volume}Lot',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (leverage.isNotEmpty) ...[
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4.r),
+                          border: Border.all(
+                              color: AppColors.textSecondary, width: 1),
+                        ),
+                        child: Text(
+                          leverage,
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    Text(
+                      closePrice,
+                      style: TextStyle(
+                        color: isPositive ? _green : _red,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 6.h),
+                // Cashback / swap row
+                Row(
+                  children: [
+                    Text(
+                      'Cashback',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12.sp,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      _formatSwap(position.swap),
+                      style: TextStyle(
+                        color: _accent,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.h),
+                // Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 44.h,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: _accent, width: 1.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: _accent,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: SizedBox(
+                        height: 44.h,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop();
+                            _confirmClosePosition(tradingController, position);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _accent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Confirm',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _confirmClosePosition(
+      TradingController tradingController, TradePosition position) async {
+    try {
+      final accountController = Get.find<AccountController>();
+      final activeAccount = accountController.activeMT5Account;
+      if (activeAccount == null) {
+        CustomToastService.showError(
+          title: 'Error',
+          message: 'No active account found',
+        );
+        return;
+      }
+      final positionId = int.tryParse(position.orderId) ?? 0;
+      await tradingController.closePositionById(
+        mt5Account: activeAccount.metaAccountNumber,
+        positionId: positionId,
+      );
+    } catch (e) {
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Failed to close position: $e',
+      );
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -873,17 +1118,7 @@ class _SwitchAccountSheet extends StatefulWidget {
 }
 
 class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
-  static const Color _accent = Color(0xFFE88A4A);
-
-  // Theme-aware text colors — mirrors the getters on the outer
-  // _IQuotePositionScreenState but scoped here so the bottom-sheet state
-  // (which lives in a separate widget class) can access them.
-  Color get _textPrimary => AppColors.textPrimary;
-  Color get _textSecondary => AppColors.textSecondary;
-  Color get _textMuted =>
-      Theme.of(context).brightness == Brightness.dark
-          ? Colors.white38
-          : AppColors.textSecondary.withValues(alpha: 0.6);
+  static Color get _accent => AppColors.primary;
 
   String? _selectedAccountNumber;
 
@@ -908,8 +1143,8 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
             SizedBox(height: 6.h),
             Text(
               'Switch account',
-              style: AppTextStyles.bodyText.copyWith(
-                color: _textPrimary,
+              style: TextStyle(
+                color: AppColors.textPrimary,
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w600,
               ),
@@ -936,7 +1171,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                         Get.toNamed(Routes.CHOOSE_ACCOUNT);
                       },
                     ),
-                    Divider(color: AppColors.border, height: 24.h),
+                    Divider(color: AppColors.divider, height: 24.h),
                     _buildAccountRow(
                       label: 'DEMO',
                       account: demo.isNotEmpty ? demo.first : null,
@@ -965,14 +1200,14 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _accent,
                   disabledBackgroundColor: _accent.withOpacity(0.4),
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.textPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24.r),
                   ),
                 ),
                 child: Text(
                   'Switch',
-                  style: AppTextStyles.bodyText.copyWith(
+                  style: TextStyle(
                       fontSize: 15.sp, fontWeight: FontWeight.w700),
                 ),
               ),
@@ -1012,13 +1247,14 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? _accent : _textSecondary,
+                  color: isSelected ? _accent : AppColors.textSecondary,
                   width: 2,
                 ),
                 color: isSelected ? _accent : Colors.transparent,
               ),
               child: isSelected
-                  ? Icon(Icons.circle, size: 10.sp, color: Colors.white)
+                  ? Icon(Icons.circle,
+                      size: 10.sp, color: AppColors.textPrimary)
                   : null,
             ),
             SizedBox(width: 14.w),
@@ -1030,22 +1266,25 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
                     children: [
                       Text(
                         label,
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: _textPrimary,
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       SizedBox(width: 4.w),
                       Icon(Icons.help_outline,
-                          color: _textSecondary, size: 14.sp),
+                          color: AppColors.textSecondary,
+                          size: 14.sp),
                     ],
                   ),
                   SizedBox(height: 2.h),
                   Text(
                     hasAccount ? balance : '---',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: hasAccount ? _accent : _textMuted,
+                    style: TextStyle(
+                      color: hasAccount
+                          ? _accent
+                          : AppColors.textSecondary,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1056,13 +1295,13 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
             hasAccount
                 ? _actionButton(
                     label: 'Deposit',
-                    color: const Color(0xFF2EBD6F),
+                    color: AppColors.statusGreen,
                     icon: Icons.savings_outlined,
                     onTap: () => onDepositTap(accountNumber!),
                   )
                 : _actionButton(
                     label: emptyActionLabel,
-                    color: const Color(0xFF3A4062),
+                    color: AppColors.iconBgTertiary,
                     onTap: onEmptyAction,
                   ),
           ],
@@ -1094,7 +1333,7 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
               SizedBox(width: 6.w),
             ],
             Text(label,
-                style: AppTextStyles.bodyText.copyWith(
+                style: TextStyle(
                     color: Colors.white,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600)),
