@@ -21,7 +21,7 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 /// require a server-side symbol filter parameter.
 class HistoryFilterScreen extends StatefulWidget {
   final String initialPeriod;
-  final Future<void> Function(String period) onConfirm;
+  final Future<void> Function(String period, List<String> symbols) onConfirm;
   final Future<void> Function() onReset;
 
   const HistoryFilterScreen({
@@ -77,14 +77,14 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedPeriod = widget.initialPeriod.isEmpty ? 'today' : widget.initialPeriod;
+    _selectedPeriod =
+        widget.initialPeriod.isEmpty ? 'today' : widget.initialPeriod;
     _selectedSymbols.add('all');
   }
 
   List<String> _availableSymbols() {
     if (!Get.isRegistered<InstrumentsController>()) return const [];
-    return Get.find<InstrumentsController>()
-        .instruments
+    return Get.find<InstrumentsController>().instruments
         .map((e) => e.symbol)
         .where((s) => s.isNotEmpty)
         .toSet()
@@ -97,50 +97,42 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
     final symbols = _availableSymbols();
     final p = _p;
     final mq = MediaQuery.of(context);
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: mq.size.height * 0.78,
-      ),
-      child: Material(
-        color: p.panel,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHeader(p),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Data',
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 10, top: 16),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: mq.size.height),
+          child: Material(
+            color: p.panel,
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(p),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Data',
                           style: TextStyle(
                             color: p.textPrimary,
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w700,
-                          )),
-                      SizedBox(height: 10.h),
-                      _buildPeriodGrid(p),
-                      SizedBox(height: 20.h),
-                      Text('Trading pair',
-                          style: TextStyle(
-                            color: p.textPrimary,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                          )),
-                      SizedBox(height: 10.h),
-                      _buildSymbolSection(symbols, p),
-                      SizedBox(height: 20.h),
-                    ],
+                          ),
+                        ),
+                        SizedBox(height: 10.h),
+                        _buildPeriodGrid(p),
+                        SizedBox(height: 20.h),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              _buildActions(p),
-            ],
+                Expanded(child: _buildActions(p)),
+              ],
+            ),
           ),
         ),
       ),
@@ -151,29 +143,23 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
   /// is dismissed by swiping down or tapping the scrim, matching iOS-style
   /// modal bottom sheet behavior.
   Widget _buildHeader(_ThemePalette p) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 4.h),
-      child: Column(
-        children: [
-          Container(
-            width: 40.w,
-            height: 4.h,
-            decoration: BoxDecoration(
-              color: p.textSecondary.withValues(alpha: 0.35),
-              borderRadius: BorderRadius.circular(2),
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 4.h),
+        child: Column(
+          children: [
+            Text(
+              'Filter',
+              style: TextStyle(
+                color: p.textPrimary,
+                fontSize: 17.sp,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          SizedBox(height: 10.h),
-          Text(
-            'Filter',
-            style: TextStyle(
-              color: p.textPrimary,
-              fontSize: 17.sp,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(height: 6.h),
-        ],
+            SizedBox(height: 6.h),
+          ],
+        ),
       ),
     );
   }
@@ -220,16 +206,17 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InkWell(
-          onTap: () => setState(() {
-            if (selectAllSelected) {
-              _selectedSymbols.clear();
-            } else {
-              _selectedSymbols
-                ..clear()
-                ..add('all')
-                ..addAll(symbols);
-            }
-          }),
+          onTap:
+              () => setState(() {
+                if (selectAllSelected) {
+                  _selectedSymbols.clear();
+                } else {
+                  _selectedSymbols
+                    ..clear()
+                    ..add('all')
+                    ..addAll(symbols);
+                }
+              }),
           borderRadius: BorderRadius.circular(8.r),
           child: Container(
             width: double.infinity,
@@ -254,36 +241,41 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
           Wrap(
             spacing: 8.w,
             runSpacing: 8.h,
-            children: symbols.map((s) {
-              final selected = _selectedSymbols.contains(s);
-              return InkWell(
-                onTap: () => setState(() {
-                  _selectedSymbols.remove('all');
-                  if (selected) {
-                    _selectedSymbols.remove(s);
-                  } else {
-                    _selectedSymbols.add(s);
-                  }
-                }),
-                borderRadius: BorderRadius.circular(16.r),
-                child: Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-                  decoration: BoxDecoration(
-                    color: selected ? _accent : p.card,
+            children:
+                symbols.map((s) {
+                  final selected = _selectedSymbols.contains(s);
+                  return InkWell(
+                    onTap:
+                        () => setState(() {
+                          _selectedSymbols.remove('all');
+                          if (selected) {
+                            _selectedSymbols.remove(s);
+                          } else {
+                            _selectedSymbols.add(s);
+                          }
+                        }),
                     borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  child: Text(
-                    s,
-                    style: TextStyle(
-                      color: selected ? p.accentForeground : p.textSecondary,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 7.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: selected ? _accent : p.card,
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      child: Text(
+                        s,
+                        style: TextStyle(
+                          color:
+                              selected ? p.accentForeground : p.textSecondary,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
           ),
         ],
       ],
@@ -294,49 +286,53 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
     return Row(
       children: [
         Expanded(
-          child: SizedBox(
-            height: 48.h,
-            child: ElevatedButton(
-              onPressed: () async {
+          child: Material(
+            color: p.reset,
+            child: InkWell(
+              onTap: () async {
                 await widget.onReset();
                 if (!mounted) return;
                 Navigator.of(context).pop();
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: p.reset,
-                foregroundColor: p.resetForeground,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24.r),
+              child: Container(
+                height: 56.h,
+                alignment: Alignment.center,
+                child: Text(
+                  'Reset',
+                  style: TextStyle(
+                    color: p.resetForeground,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-              child: Text('Reset',
-                  style: TextStyle(
-                      fontSize: 15.sp, fontWeight: FontWeight.w700)),
             ),
           ),
         ),
-        SizedBox(width: 12.w),
         Expanded(
-          child: SizedBox(
-            height: 48.h,
-            child: ElevatedButton(
-              onPressed: () async {
-                await widget.onConfirm(_selectedPeriod);
+          child: Material(
+            color: _accent,
+            child: InkWell(
+              onTap: () async {
+                await widget.onConfirm(
+                  _selectedPeriod,
+                  _selectedSymbols.toList(),
+                );
                 if (!mounted) return;
                 Navigator.of(context).pop();
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _accent,
-                foregroundColor: p.accentForeground,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24.r),
+              child: Container(
+                height: 56.h,
+                alignment: Alignment.center,
+                child: Text(
+                  'Confirm',
+                  style: TextStyle(
+                    color: p.accentForeground,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-              child: Text('Confirm',
-                  style: TextStyle(
-                      fontSize: 15.sp, fontWeight: FontWeight.w700)),
             ),
           ),
         ),

@@ -2181,6 +2181,7 @@ class TradingController extends GetxController {
     required int fromTimestamp,
     required int toTimestamp,
     String? filterType, // 'today', 'thisWeek', 'thisMonth', 'custom'
+    List<String>? symbols,
   }) async {
     _hasDateFilter.value = true;
 
@@ -2210,6 +2211,10 @@ class TradingController extends GetxController {
       'from': fromDateStr,
       'to': toDateStr,
     };
+    
+    if (symbols != null && symbols.isNotEmpty && !symbols.contains('all')) {
+      additionalParams['symbol'] = symbols.join(',');
+    }
 
     // Store all filter parameters for pagination
     _currentFilterParams = Map<String, String>.from(additionalParams);
@@ -2232,7 +2237,7 @@ class TradingController extends GetxController {
   /// [_historyEndDate] so the date row stays in sync, and forwards to
   /// [loadTradeHistoryWithTimestamps] with the appropriate filterType
   /// so the API matches the existing 'today' / 'thisWeek' / etc. labels.
-  Future<void> applyHistoryFilter({String? period}) async {
+  Future<void> applyHistoryFilter({String? period, List<String>? symbols}) async {
     period ??= _historyFilterPeriod;
     _historyFilterPeriod = period;
     final now = DateTime.now();
@@ -2265,6 +2270,7 @@ class TradingController extends GetxController {
       fromTimestamp: _historyStartDate!.millisecondsSinceEpoch ~/ 1000,
       toTimestamp: now.millisecondsSinceEpoch ~/ 1000,
       filterType: filterType,
+      symbols: symbols,
     );
   }
 
