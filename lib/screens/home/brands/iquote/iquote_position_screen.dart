@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/services/account_websocket_service.dart';
 import 'package:crm_app/utils/precision_helper.dart';
@@ -15,9 +16,8 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/home/close_position_screen.dart';
 import 'package:crm_app/screens/home/edit_order_screen.dart';
 import 'package:crm_app/screens/home/brands/iquote/iquote_order_details_screen.dart';
-import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
-import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
+import 'package:crm_app/screens/finance/presentation/pages/withdrawal_screen.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/home/brands/iquote/history_filter_sheet.dart';
@@ -176,8 +176,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         final accountInfo = tradingController.accountInfo;
         final balance = accountInfo?.balance ?? 0.00;
         final profit = accountInfo?.profit ?? 0.00;
-        final marginLevel = accountInfo?.marginLevel ?? 0.00;
         final isProfitPositive = profit >= 0;
+        final pnlPercent = balance != 0 ? (profit / balance * 100) : 0.0;
 
         return Container(
           width: double.infinity,
@@ -187,37 +187,74 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             children: [
               Row(
                 children: [
-                  // DEMO / LIVE chip → opens Switch Account sheet
-                  InkWell(
-                    borderRadius: BorderRadius.circular(6.r),
-                    onTap: _openSwitchAccountSheet,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 10.w, vertical: 7.h),
-                      decoration: BoxDecoration(
-                        color: _chipBgColor,
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _activeAccountLabel(),
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12.sp,
-                              letterSpacing: 0.5,
-                            ),
+                  // Account chip → opens dashboard bottom sheet (mirrors market tab)
+                  GestureDetector(
+                    onTap: () => showDashboardBottomSheet(context),
+                    child: Obx(() {
+                      final active = Get.find<AccountController>().activeMT5Account;
+                      final accNumber = active?.metaAccountNumber ?? '------';
+                      final rawType = (active?.accountType ?? 'REAL').toUpperCase();
+                      final isDemo = rawType == 'DEMO';
+                      final badgeLabel = isDemo ? 'DEMO' : 'LIVE';
+
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.isDarkMode
+                              ? const Color(0xFF252C41)
+                              : AppColors.primary.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: Border.all(
+                            color: AppColors.isDarkMode
+                                ? Colors.white12
+                                : AppColors.primary.withValues(alpha: 0.2),
                           ),
-                          SizedBox(width: 4.w),
-                          Icon(Icons.arrow_drop_down,
-                              color: AppColors.textPrimary, size: 18.sp),
-                        ],
-                      ),
-                    ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '#$accNumber',
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 12.5.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(width: 6.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                              decoration: BoxDecoration(
+                                color: isDemo
+                                    ? Colors.orange.withValues(alpha: 0.18)
+                                    : Colors.green.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                              child: Text(
+                                badgeLabel,
+                                style: TextStyle(
+                                  color: isDemo ? Colors.orange : Colors.green,
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 4.w),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              size: 18.r,
+                              color: AppColors.textSecondary,
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                   ),
-                  SizedBox(width: 14.w),
+                ],
+              ),
+              SizedBox(height: 12.h),
+              Row(
+                children: [
                   Text(
                     balance.toStringAsFixed(4),
                     style: TextStyle(
@@ -228,7 +265,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                   const Spacer(),
                   Text(
-                    '${isProfitPositive ? '' : '-'}${profit.abs().toStringAsFixed(4)}(${marginLevel.toStringAsFixed(2)}%)',
+                    '${isProfitPositive ? '+' : '-'}${profit.abs().toStringAsFixed(4)} (${pnlPercent.toStringAsFixed(2)}%)',
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -340,42 +377,74 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Obx(() {
         final selected = tradingController.selectedTab;
+        final positionCount = tradingController.marketPositions.length;
+        final pendingCount = tradingController.pendingPositions.length;
         return Row(
           children: [
             _tabText('Position', selected == 0,
-                () => tradingController.setSelectedTab(0)),
+                () => tradingController.setSelectedTab(0),
+                count: positionCount),
             SizedBox(width: 28.w),
             _tabText('Pending', selected == 1,
-                () => tradingController.setSelectedTab(1)),
+                () => tradingController.setSelectedTab(1),
+                count: pendingCount),
             SizedBox(width: 28.w),
             _tabText('History', selected == 2,
                 () => tradingController.setSelectedTab(2)),
             const Spacer(),
-            Icon(Icons.swap_vert,
-                color: AppColors.textSecondary, size: 20.sp),
-            SizedBox(width: 16.w),
-            Icon(Icons.more_horiz,
-                color: AppColors.textSecondary, size: 20.sp),
+            
+            if(selected == 0 )...[InkWell(
+              borderRadius: BorderRadius.circular(20.r),
+              onTap: () {
+                if (selected == 0 &&
+                    tradingController.marketPositions.isNotEmpty) {
+                  _showBulkOperationsSheet(tradingController);
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.all(4.w),
+                child: Icon(Icons.more_horiz,
+                    color: AppColors.textSecondary, size: 20.sp),
+              ),
+            ),
+            ]
           ],
         );
       }),
     );
   }
 
-  Widget _tabText(String label, bool active, VoidCallback onTap) {
+  Widget _tabText(String label, bool active, VoidCallback onTap,
+      {int count = 0}) {
     return InkWell(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: active ? FontWeight.bold : FontWeight.w500,
-              color: active
-                  ? AppColors.textPrimary
-                  : AppColors.textSecondary,
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: label,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight:
+                        active ? FontWeight.bold : FontWeight.w500,
+                    color: active
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+                if (count > 0)
+                  TextSpan(
+                    text: ' ($count)',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: _accent,
+                    ),
+                  ),
+              ],
             ),
           ),
           SizedBox(height: 6.h),
@@ -671,8 +740,15 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 if (!isHistory)
                   InkWell(
                     borderRadius: BorderRadius.circular(20.r),
-                    onTap: () => _showCloseConfirmDialog(
-                        tradingController, position),
+                    onTap: () {
+                      if (tradingController.selectedTab == 1) {
+                        _showCancelPendingDialog(
+                            tradingController, position);
+                      } else {
+                        _showCloseConfirmDialog(
+                            tradingController, position);
+                      }
+                    },
                     child: Container(
                       padding: EdgeInsets.all(4.w),
                       child: Icon(Icons.cancel,
@@ -734,8 +810,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             // Row 3: VIP badge + swap • prices
             Row(
               children: [
-                _buildVipBadge(),
-                SizedBox(width: 6.w),
+               
                 Text(
                   _formatSwap(position.swap),
                   style: TextStyle(
@@ -868,6 +943,264 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         ),
       ),
     );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Bulk Operations bottom sheet (Position tab)
+  // ─────────────────────────────────────────────────────────────────────────
+  void _showBulkOperationsSheet(TradingController tradingController) {
+    Get.bottomSheet(
+      Container(
+        decoration: BoxDecoration(
+          color: _cardColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+        ),
+        padding: EdgeInsets.fromLTRB(0, 12.h, 0, 24.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: AppColors.textSecondary.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+            SizedBox(height: 20.h),
+            Text(
+              'Bulk Operations',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: 24.h),
+            _bulkTile(
+              label: 'Close Losing Positions',
+              chipLabel: 'Loss',
+              chipColor: _red,
+              onTap: () {
+                Get.back();
+                _confirmBulkClose(
+                  tradingController,
+                  title: 'Close all losing positions?',
+                  filter: (p) => p.profitLoss < 0,
+                );
+              },
+            ),
+            _bulkTile(
+              label: 'Close Profitable Positions',
+              chipLabel: 'Profitable',
+              chipColor: _green,
+              onTap: () {
+                Get.back();
+                _confirmBulkClose(
+                  tradingController,
+                  title: 'Close all profitable positions?',
+                  filter: (p) => p.profitLoss > 0,
+                );
+              },
+            ),
+            _bulkTile(
+              label: 'Close All Positions',
+              chipLabel: 'ALL',
+              chipColor: _accent,
+              onTap: () {
+                Get.back();
+                _confirmBulkClose(
+                  tradingController,
+                  title: 'Close all positions?',
+                  filter: (_) => true,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: false,
+    );
+  }
+
+  Widget _bulkTile({
+    required String label,
+    required String chipLabel,
+    required Color chipColor,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 22.h),
+        child: Row(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Container(
+              padding:
+                  EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+              decoration: BoxDecoration(
+                color: chipColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+              child: Text(
+                chipLabel,
+                style: TextStyle(
+                  color: chipColor,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmBulkClose(
+    TradingController tradingController, {
+    required String title,
+    required bool Function(TradePosition) filter,
+  }) async {
+    final targets =
+        tradingController.marketPositions.where(filter).toList();
+    if (targets.isEmpty) {
+      CustomToastService.showInfo(
+        title: 'No positions',
+        message: 'No positions matched the selected filter',
+      );
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.55),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: _cardColor,
+          insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  '${targets.length} position(s) will be closed at market price.',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13.sp,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 44.h,
+                        child: OutlinedButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(false),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: _accent, width: 1.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: _accent,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: SizedBox(
+                        height: 44.h,
+                        child: ElevatedButton(
+                          onPressed: () =>
+                              Navigator.of(dialogContext).pop(true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _accent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Confirm',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (confirmed != true) return;
+    await _executeBulkClose(tradingController, targets);
+  }
+
+  Future<void> _executeBulkClose(TradingController tradingController,
+      List<TradePosition> targets) async {
+    try {
+      final accountController = Get.find<AccountController>();
+      final activeAccount = accountController.activeMT5Account;
+      if (activeAccount == null) {
+        CustomToastService.showError(
+          title: 'Error',
+          message: 'No active account found',
+        );
+        return;
+      }
+      for (final p in targets) {
+        final positionId = int.tryParse(p.orderId) ?? 0;
+        if (positionId == 0) continue;
+        await tradingController.closePositionById(
+          mt5Account: activeAccount.metaAccountNumber,
+          positionId: positionId,
+        );
+      }
+    } catch (e) {
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Failed to close positions: $e',
+      );
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1091,6 +1424,153 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // Cancel-pending confirmation dialog (matches iQuote design)
+  // ─────────────────────────────────────────────────────────────────────────
+  Future<void> _showCancelPendingDialog(
+      TradingController tradingController, TradePosition position) async {
+    await showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.55),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: _cardColor,
+          insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Title
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 14.h),
+                child: Center(
+                  child: Text(
+                    'Cancel pending',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              Divider(color: AppColors.divider, height: 1),
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 16.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'You will cancel Pending Order',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 18.h),
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 44.h,
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                              style: OutlinedButton.styleFrom(
+                                side:
+                                    BorderSide(color: _accent, width: 1.2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: _accent,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: SizedBox(
+                            height: 44.h,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop();
+                                _confirmCancelPending(
+                                    tradingController, position);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _accent,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'Cancel pending',
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  overflow: TextOverflow.visible,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _confirmCancelPending(
+      TradingController tradingController, TradePosition position) async {
+    try {
+      final accountController = Get.find<AccountController>();
+      final activeAccount = accountController.activeMT5Account;
+      if (activeAccount == null) {
+        CustomToastService.showError(
+          title: 'Error',
+          message: 'No active account found',
+        );
+        return;
+      }
+      final orderId = int.tryParse(position.orderId) ?? 0;
+      await tradingController.cancelOrderWithImmediateUpdate(
+        mt5Account: activeAccount.metaAccountNumber,
+        orderId: orderId,
+      );
+    } catch (e) {
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Failed to cancel order: $e',
+      );
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // Switch-account bottom sheet (REAL / DEMO)
   // ─────────────────────────────────────────────────────────────────────────
   void _openSwitchAccountSheet() {
@@ -1118,8 +1598,6 @@ class _SwitchAccountSheet extends StatefulWidget {
 }
 
 class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
-  static Color get _accent => AppColors.primary;
-
   String? _selectedAccountNumber;
 
   @override
@@ -1136,226 +1614,315 @@ class _SwitchAccountSheetState extends State<_SwitchAccountSheet> {
     return SafeArea(
       top: false,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+        padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 20.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 6.h),
-            Text(
-              'Switch account',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w600,
+            // Drag handle
+            Container(
+              width: 36.w,
+              height: 4.h,
+              margin: EdgeInsets.only(bottom: 14.h),
+              decoration: BoxDecoration(
+                color: AppColors.textSecondary.withOpacity(0.35),
+                borderRadius: BorderRadius.circular(2.r),
               ),
             ),
-            SizedBox(height: 16.h),
             GetBuilder<DashboardController>(
               builder: (dashboard) {
-                final real = dashboard.realMT5Accounts;
-                final demo = dashboard.demoMT5Accounts;
+                final accounts = <MT5Account>[
+                  ...dashboard.realMT5Accounts,
+                  ...dashboard.demoMT5Accounts,
+                ];
+                if (accounts.isEmpty) {
+                  return Text(
+                    'No accounts linked',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14.sp,
+                    ),
+                  );
+                }
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildAccountRow(
-                      label: 'REAL',
-                      account: real.isNotEmpty ? real.first : null,
-                      onDepositTap: (accountNumber) {
-                        Get.back();
-                        Get.to(() =>
-                            PaymentMethodsScreen(accountNumber: accountNumber));
-                      },
-                      emptyActionLabel: 'Sign in/Sign up',
-                      onEmptyAction: () {
-                        Get.back();
-                        Get.toNamed(Routes.CHOOSE_ACCOUNT);
-                      },
-                    ),
-                    Divider(color: AppColors.divider, height: 24.h),
-                    _buildAccountRow(
-                      label: 'DEMO',
-                      account: demo.isNotEmpty ? demo.first : null,
-                      onDepositTap: (accountNumber) {
-                        Get.back();
-                        Get.to(() =>
-                            DepositScreen(accountNumber: accountNumber));
-                      },
-                      emptyActionLabel: 'Open Demo',
-                      onEmptyAction: () {
-                        Get.back();
-                        Get.toNamed(Routes.CHOOSE_ACCOUNT,
-                            arguments: {'isDemo': true});
-                      },
-                    ),
+                    for (final acc in accounts)
+                      _AccountRow(
+                        account: acc,
+                        isActive:
+                            acc.metaAccountNumber == _selectedAccountNumber,
+                        onTap: () {
+                          if (acc.metaAccountNumber ==
+                              _selectedAccountNumber) return;
+                          setState(
+                              () => _selectedAccountNumber = acc.metaAccountNumber);
+                        },
+                        onDeposit: () {
+                          Get.back();
+                          Get.to(
+                            () => PaymentMethodsScreen(
+                              accountNumber: acc.metaAccountNumber,
+                            ),
+                          );
+                        },
+                        onWithdraw: () {
+                          Get.back();
+                          Get.to(
+                            () => WithdrawalScreen(
+                              accountNumber: acc.metaAccountNumber,
+                            ),
+                          );
+                        },
+                        onSwitch: () async {
+                          Get.back();
+                          try {
+                            await Get.find<AccountController>()
+                                .setActiveMT5Account(acc.metaAccountNumber);
+                          } catch (e) {
+                            if (kDebugMode) {
+                              print('Switch account error: $e');
+                            }
+                          }
+                        },
+                      ),
                   ],
                 );
               },
             ),
-            SizedBox(height: 24.h),
-            SizedBox(
-              width: double.infinity,
-              height: 48.h,
-              child: ElevatedButton(
-                onPressed: _selectedAccountNumber == null ? null : _onSwitch,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _accent,
-                  disabledBackgroundColor: _accent.withOpacity(0.4),
-                  foregroundColor: AppColors.textPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24.r),
-                  ),
-                ),
-                child: Text(
-                  'Switch',
-                  style: TextStyle(
-                      fontSize: 15.sp, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildAccountRow({
-    required String label,
-    required MT5Account? account,
-    required void Function(String accountNumber) onDepositTap,
-    required String emptyActionLabel,
-    required VoidCallback onEmptyAction,
-  }) {
-    final hasAccount = account != null;
-    final accountNumber = account?.metaAccountNumber;
-    final isSelected =
-        hasAccount && _selectedAccountNumber == accountNumber;
-    final balance = account?.balance ?? '0.00';
+/// One account card inside the switch-account bottom sheet.
+/// Layout mirrors the iQuote dashboard account card.
+class _AccountRow extends StatelessWidget {
+  final MT5Account account;
+  final bool isActive;
+  final VoidCallback onTap;
+  final VoidCallback onDeposit;
+  final VoidCallback onWithdraw;
+  final VoidCallback onSwitch;
+
+  const _AccountRow({
+    required this.account,
+    required this.isActive,
+    required this.onTap,
+    required this.onDeposit,
+    required this.onWithdraw,
+    required this.onSwitch,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final profit = double.tryParse(account.profit) ?? 0.0;
+    final balance = double.tryParse(account.balance) ?? 0.0;
+    final equity = double.tryParse(account.equity) ?? balance;
+    final isDemo = account.accountType.toLowerCase() == 'demo';
+    final leverage = account.leverageMax > 0
+        ? '1:${account.leverageMax}'
+        : '1:500';
+    final accountNumber = account.metaAccountNumber;
 
     return InkWell(
-      onTap: hasAccount
-          ? () => setState(() => _selectedAccountNumber = accountNumber)
-          : null,
-      borderRadius: BorderRadius.circular(8.r),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 6.h),
-        child: Row(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10.r),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10.h),
+        padding: EdgeInsets.fromLTRB(10.w, 10.h, 10.w, 10.h),
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppColors.primary.withOpacity(0.10)
+              : AppColors.card,
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(
+            color: isActive
+                ? AppColors.primary
+                : AppColors.divider.withOpacity(0.45),
+            width: isActive ? 1.3 : 0.8,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Selection radio
-            Container(
-              width: 22.w,
-              height: 22.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? _accent : AppColors.textSecondary,
-                  width: 2,
+            // Row 1: #account · LIVE/DEMO chip · ACTIVE chip · balance · 3-dot
+            Row(
+              children: [
+                Text(
+                  '#$accountNumber',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                color: isSelected ? _accent : Colors.transparent,
-              ),
-              child: isSelected
-                  ? Icon(Icons.circle,
-                      size: 10.sp, color: AppColors.textPrimary)
-                  : null,
+                SizedBox(width: 8.w),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: isDemo
+                        ? Colors.orange.withValues(alpha: 0.12)
+                        : Colors.green.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: Text(
+                    isDemo ? 'DEMO' : 'LIVE',
+                    style: TextStyle(
+                      color: isDemo ? Colors.orange : Colors.green,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (isActive) ...[
+                  SizedBox(width: 6.w),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.18),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Text(
+                      'ACTIVE',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+                const Spacer(),
+                // Equity
+                Text(
+                  '\$${equity.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: 14.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            SizedBox(height: 8.h),
+            // P&L + leverage
+            Row(
+              children: [
+                Text(
+                  'Eq: \$${equity.toStringAsFixed(2)} • P&L: ${profit >= 0 ? '+' : '-'}\$${profit.abs().toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (leverage.isNotEmpty) ...[
+                  SizedBox(width: 6.w),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4.r),
+                      border: Border.all(
+                          color: AppColors.textSecondary, width: 1),
+                    ),
+                    child: Text(
+                      leverage,
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            SizedBox(height: 12.h),
+            // Actions
+            if (isActive) ...[
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        label,
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: SizedBox(
+                      height: 36.h,
+                      child: ElevatedButton(
+                        onPressed: onDeposit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.statusGreen,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: Text(
+                          'Deposit',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                      SizedBox(width: 4.w),
-                      Icon(Icons.help_outline,
-                          color: AppColors.textSecondary,
-                          size: 14.sp),
-                    ],
+                    ),
                   ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    hasAccount ? balance : '---',
-                    style: TextStyle(
-                      color: hasAccount
-                          ? _accent
-                          : AppColors.textSecondary,
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: SizedBox(
+                      height: 36.h,
+                      child: ElevatedButton(
+                        onPressed: onWithdraw,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.statusRed.withOpacity(0.12),
+                          foregroundColor: AppColors.statusRed,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                        child: Text(
+                          'Withdraw',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            hasAccount
-                ? _actionButton(
-                    label: 'Deposit',
-                    color: AppColors.statusGreen,
-                    icon: Icons.savings_outlined,
-                    onTap: () => onDepositTap(accountNumber!),
-                  )
-                : _actionButton(
-                    label: emptyActionLabel,
-                    color: AppColors.iconBgTertiary,
-                    onTap: onEmptyAction,
+            ] else ...[
+              SizedBox(
+                width: double.infinity,
+                height: 36.h,
+                child: ElevatedButton(
+                  onPressed: onSwitch,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary.withOpacity(0.12),
+                    foregroundColor: AppColors.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
                   ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _actionButton({
-    required String label,
-    required Color color,
-    IconData? icon,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, color: Colors.white, size: 14.sp),
-              SizedBox(width: 6.w),
+                  child: Text(
+                    'Switch',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
             ],
-            Text(label,
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600)),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> _onSwitch() async {
-    final target = _selectedAccountNumber;
-    if (target == null) return;
-    try {
-      final accountController = Get.find<AccountController>();
-      if (accountController.activeMT5Account?.metaAccountNumber == target) {
-        Get.back();
-        return;
-      }
-      Get.back();
-      await accountController.setActiveMT5Account(target);
-    } catch (e) {
-      if (kDebugMode) print('IQuotePosition: switch account error: $e');
-    }
   }
 }
