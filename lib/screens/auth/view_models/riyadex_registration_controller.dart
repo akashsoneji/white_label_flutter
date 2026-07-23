@@ -124,6 +124,8 @@ class RiyadexRegistrationController extends GetxController {
       'country': country.iso2.toUpperCase(),
       'country_slug': country.iso2.toLowerCase(),
       'register_event_type': 'register',
+      'otp_verification_type': 'email',
+      'accept_terms': true,
     };
 
     final phoneCountry = selectedPhoneCountry.value ?? country;
@@ -134,30 +136,69 @@ class RiyadexRegistrationController extends GetxController {
 
     if (referCode != null && referCode.isNotEmpty) {
       payload['refer_code'] = referCode;
+      payload['ib_affiliate_refcode'] = referCode;
     }
 
-    // Only attach full fields if not minimal
-    if (!isMinimal.value) {
-      if (firstName != null && firstName.isNotEmpty) {
-        payload['first_name'] = firstName;
-      }
-      if (lastName != null && lastName.isNotEmpty) {
-        payload['last_name'] = lastName;
-      }
-      if (mobile != null && mobile.isNotEmpty) {
-        payload['mobile'] = mobile;
-      }
+    if (firstName != null && firstName.isNotEmpty) {
+      payload['first_name'] = firstName;
+    }
+    if (lastName != null && lastName.isNotEmpty) {
+      payload['last_name'] = lastName;
+    }
+    if (mobile != null && mobile.isNotEmpty) {
+      payload['mobile'] = mobile;
+      payload['phone_number'] = mobile;
     }
 
     return await _authController.register(data: payload);
   }
 
-  Future<bool> verifyOtp(String email, String otp) async {
+  Future<bool> verifyOtp(
+    String email, 
+    String otp, 
+    String password, {
+    String? firstName,
+    String? lastName,
+    String? mobile,
+    String? referCode,
+  }) async {
+    final country = selectedCountry.value;
     final payload = <String, dynamic>{
       'email': email,
+      'password': password,
       'otp': otp,
       'register_event_type': 'verifyOtp',
+      'otp_verification_type': 'email',
+      'accept_terms': true,
     };
+
+    if (country != null) {
+      payload['country'] = country.iso2.toUpperCase();
+      payload['country_slug'] = country.iso2.toLowerCase();
+      
+      final phoneCountry = selectedPhoneCountry.value ?? country;
+      if (phoneCountry.dialCode != null) {
+        payload['country_code'] = phoneCountry.dialCode;
+        payload['register_country_code'] = phoneCountry.dialCode;
+      }
+    }
+
+    if (referCode != null && referCode.isNotEmpty) {
+      payload['refer_code'] = referCode;
+      payload['ib_affiliate_refcode'] = referCode;
+    }
+
+    if (firstName != null && firstName.isNotEmpty) {
+      payload['first_name'] = firstName;
+    }
+    if (lastName != null && lastName.isNotEmpty) {
+      payload['last_name'] = lastName;
+    }
+    if (mobile != null && mobile.isNotEmpty) {
+      payload['mobile'] = mobile;
+      payload['phone_number'] = mobile;
+    }
+
     return await _authController.registerWithOTPVerification(data: payload);
   }
 }

@@ -1,15 +1,15 @@
 {
-  "default": "kantara",
+  "default": "riyadex",
   "brands": [
-    "kantara",
+    "riyadex",
     "vantage"
   ],
   "brandDetails": [
     {
-      "name": "kantara",
+      "name": "riyadex",
       "type": "child",
       "inheritsFrom": "vantage",
-      "label": "Kantara",
+      "label": "Riyadex",
       "themeMode": "both"
     },
     {

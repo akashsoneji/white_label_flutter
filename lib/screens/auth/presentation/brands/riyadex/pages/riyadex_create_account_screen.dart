@@ -39,7 +39,6 @@ class _RiyadexCreateAccountScreenState
   final _passwordFocusNode = FocusNode();
 
   bool _isPasswordVisible = false;
-  bool _isUsCitizen = false;
   bool _isSubmitting = false;
 
   late RiyadexRegistrationController _controller;
@@ -59,12 +58,15 @@ class _RiyadexCreateAccountScreenState
     _phoneController.addListener(_formatPhone);
   }
 
-  String get _phoneDigits => _phoneController.text.replaceAll(RegExp(r'\D'), '');
+  String get _phoneDigits =>
+      _phoneController.text.replaceAll(RegExp(r'\D'), '');
 
   bool get _isPhoneValid {
     final digits = _phoneDigits;
     if (digits.isEmpty) return false;
-    final pCountry = _controller.selectedPhoneCountry.value ?? _controller.selectedCountry.value;
+    final pCountry =
+        _controller.selectedPhoneCountry.value ??
+        _controller.selectedCountry.value;
     final iso = pCountry?.iso2;
     IsoCode? isoCode;
     if (iso != null && iso.isNotEmpty) {
@@ -84,7 +86,9 @@ class _RiyadexCreateAccountScreenState
   }
 
   void _formatPhone() {
-    final pCountry = _controller.selectedPhoneCountry.value ?? _controller.selectedCountry.value;
+    final pCountry =
+        _controller.selectedPhoneCountry.value ??
+        _controller.selectedCountry.value;
     final iso = pCountry?.iso2;
     final digits = _phoneDigits;
     IsoCode? isoCode;
@@ -96,7 +100,8 @@ class _RiyadexCreateAccountScreenState
     if (isoCode == null || digits.isEmpty) return;
 
     try {
-      final formatted = PhoneNumber.parse(digits, destinationCountry: isoCode).formatNsn();
+      final formatted =
+          PhoneNumber.parse(digits, destinationCountry: isoCode).formatNsn();
       if (formatted.isNotEmpty && formatted != _phoneController.text) {
         _phoneController.value = TextEditingValue(
           text: formatted,
@@ -119,31 +124,45 @@ class _RiyadexCreateAccountScreenState
   }
 
   Future<void> _handleRegister() async {
-    if (_emailController.text.trim().isEmpty || !AuthFormValidation.isValidEmail(_emailController.text.trim())) {
-      CustomToastService.showError(title: 'Error', message: 'Please enter a valid email address');
+    if (_emailController.text.trim().isEmpty ||
+        !AuthFormValidation.isValidEmail(_emailController.text.trim())) {
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Please enter a valid email address',
+      );
       return;
     }
     if (_passwordController.text.length < 8) {
-      CustomToastService.showError(title: 'Error', message: 'Password must be at least 8 characters');
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'Password must be at least 8 characters',
+      );
       return;
     }
     if (!_controller.isMinimal.value) {
-      if (_firstNameController.text.trim().isEmpty || _lastNameController.text.trim().isEmpty || _phoneController.text.trim().isEmpty) {
-        CustomToastService.showError(title: 'Error', message: 'Please fill in all required fields');
+      if (_firstNameController.text.trim().isEmpty ||
+          _lastNameController.text.trim().isEmpty ||
+          _phoneController.text.trim().isEmpty) {
+        CustomToastService.showError(
+          title: 'Error',
+          message: 'Please fill in all required fields',
+        );
         return;
       }
       if (!_isPhoneValid) {
-        CustomToastService.showError(title: 'Error', message: 'Please enter a valid phone number');
+        CustomToastService.showError(
+          title: 'Error',
+          message: 'Please enter a valid phone number',
+        );
         return;
       }
     }
 
-    if (_isUsCitizen) {
-      CustomToastService.showError(title: 'Error', message: "Cannot register as US Citizen/Resident");
-      return;
-    }
     if (!_controller.allowedToRegister.value) {
-      CustomToastService.showError(title: 'Error', message: _controller.restrictedMessage.value);
+      CustomToastService.showError(
+        title: 'Error',
+        message: _controller.restrictedMessage.value,
+      );
       return;
     }
 
@@ -161,30 +180,42 @@ class _RiyadexCreateAccountScreenState
 
       if (success) {
         if (!mounted) return;
-        showDialog(
+        showModalBottomSheet(
           context: context,
-          builder: (context) => OtpModal(
-            email: _emailController.text.trim(),
-            onResendOtp: () async {
-              await _controller.register(
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          isDismissible: false,
+          enableDrag: false,
+          builder:
+              (context) => OtpModal(
                 email: _emailController.text.trim(),
-                password: _passwordController.text.trim(),
-                firstName: _firstNameController.text.trim(),
-                lastName: _lastNameController.text.trim(),
-                mobile: _phoneController.text.trim(),
-                referCode: _referController.text.trim(),
-              );
-            },
-            onOtpSubmitted: (otp) async {
-              final otpVerified = await _controller.verifyOtp(
-                _emailController.text.trim(),
-                otp,
-              );
-              if (otpVerified) {
-                Get.offAllNamed(Routes.ACCOUNT_CREATED);
-              }
-            },
-          ),
+                isEmailVerification: true,
+                otpLength: 6,
+                onResendOtp: () async {
+                  await _controller.register(
+                    email: _emailController.text.trim(),
+                    password: _passwordController.text.trim(),
+                    firstName: _firstNameController.text.trim(),
+                    lastName: _lastNameController.text.trim(),
+                    mobile: _phoneController.text.trim(),
+                    referCode: _referController.text.trim(),
+                  );
+                },
+                onOtpSubmitted: (otp) async {
+                  final otpVerified = await _controller.verifyOtp(
+                    _emailController.text.trim(),
+                    otp,
+                    _passwordController.text.trim(),
+                    firstName: _firstNameController.text.trim(),
+                    lastName: _lastNameController.text.trim(),
+                    mobile: _phoneController.text.trim(),
+                    referCode: _referController.text.trim(),
+                  );
+                  if (otpVerified) {
+                    Get.offAllNamed(Routes.ACCOUNT_CREATED);
+                  }
+                },
+              ),
         );
       }
     } finally {
@@ -197,14 +228,15 @@ class _RiyadexCreateAccountScreenState
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _CountryPickerSheet(
-        countries: _controller.countries,
-        selectedCountry: _controller.selectedCountry.value,
-        onSelect: (country) {
-          _controller.selectCountry(country);
-          Navigator.pop(context);
-        },
-      ),
+      builder:
+          (context) => _CountryPickerSheet(
+            countries: _controller.countries,
+            selectedCountry: _controller.selectedCountry.value,
+            onSelect: (country) {
+              _controller.selectCountry(country);
+              Navigator.pop(context);
+            },
+          ),
     );
   }
 
@@ -213,14 +245,15 @@ class _RiyadexCreateAccountScreenState
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _CountryPickerSheet(
-        countries: _controller.countries,
-        selectedCountry: _controller.selectedPhoneCountry.value,
-        onSelect: (country) {
-          _controller.selectedPhoneCountry.value = country;
-          Navigator.pop(context);
-        },
-      ),
+      builder:
+          (context) => _CountryPickerSheet(
+            countries: _controller.countries,
+            selectedCountry: _controller.selectedPhoneCountry.value,
+            onSelect: (country) {
+              _controller.selectedPhoneCountry.value = country;
+              Navigator.pop(context);
+            },
+          ),
     );
   }
 
@@ -280,7 +313,6 @@ class _RiyadexCreateAccountScreenState
             // SizedBox(height: 8.h),
             // Divider(color: VantageAuthTheme.fieldBorder, height: 1.h),
             // SizedBox(height: 24.h),
-
             Obx(() {
               if (_controller.isLoading.value) {
                 return const Center(child: CircularProgressIndicator());
@@ -349,7 +381,11 @@ class _RiyadexCreateAccountScreenState
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error_outline, color: Colors.red, size: 20.sp),
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 20.sp,
+                          ),
                           SizedBox(width: 8.w),
                           Expanded(
                             child: Text(
@@ -412,7 +448,9 @@ class _RiyadexCreateAccountScreenState
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Obx(() {
-                                  final pCountry = _controller.selectedPhoneCountry.value ?? country;
+                                  final pCountry =
+                                      _controller.selectedPhoneCountry.value ??
+                                      country;
                                   return Text(
                                     _getFlagEmoji(pCountry?.iso2 ?? 'US'),
                                     style: TextStyle(fontSize: 16.sp),
@@ -422,7 +460,9 @@ class _RiyadexCreateAccountScreenState
                                 Icon(Icons.arrow_drop_down, size: 16.sp),
                                 SizedBox(width: 4.w),
                                 Obx(() {
-                                  final pCountry = _controller.selectedPhoneCountry.value ?? country;
+                                  final pCountry =
+                                      _controller.selectedPhoneCountry.value ??
+                                      country;
                                   return Text(
                                     pCountry?.dialCode ?? '',
                                     style: AppTextStyles.bodyText.copyWith(
@@ -442,7 +482,7 @@ class _RiyadexCreateAccountScreenState
                     VantagePillTextField(
                       hintText: "Create your account password",
                       controller: _passwordController,
-                      
+
                       obscureText: !_isPasswordVisible,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -458,11 +498,9 @@ class _RiyadexCreateAccountScreenState
                         },
                       ),
                     ),
-                    
-                    if (_passwordFocusNode.hasFocus || _passwordController.text.isNotEmpty) ...[
-                      SizedBox(height: 12.h),
-                      _PasswordRulesWidget(password: _passwordController.text),
-                    ],
+
+                    // SizedBox(height: 12.h),
+                    // _PasswordRulesWidget(password: _passwordController.text),
                     SizedBox(height: 12.h),
 
                     // Theme(
@@ -486,41 +524,6 @@ class _RiyadexCreateAccountScreenState
                     //   ),
                     // ),
                     // SizedBox(height: 24.h),
-
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 24.w,
-                          width: 24.w,
-                          child: Checkbox(
-                            value: _isUsCitizen,
-                            onChanged: (val) {
-                              setState(() {
-                                _isUsCitizen = val ?? false;
-                              });
-                            },
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                            side: BorderSide(color: VantageAuthTheme.muted),
-                            activeColor: AppColors.brandPrimary,
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: Text(
-                            "I declare and confirm that I am not a citizen or resident of the US for tax purposes.",
-                            style: AppTextStyles.bodyText.copyWith(
-                              fontSize: 14.sp,
-                              color: VantageAuthTheme.text,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
-
                     VantagePrimaryButton(
                       text: "Register",
                       onPressed: _handleRegister,
@@ -600,9 +603,10 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
 
   void _filter(String query) {
     setState(() {
-      _filtered = widget.countries
-          .where((c) => c.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+      _filtered =
+          widget.countries
+              .where((c) => c.name.toLowerCase().contains(query.toLowerCase()))
+              .toList();
     });
   }
 
@@ -672,9 +676,10 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                       color: VantageAuthTheme.text,
                     ),
                   ),
-                  trailing: isSelected
-                      ? Icon(Icons.check, color: AppColors.brandPrimary)
-                      : null,
+                  trailing:
+                      isSelected
+                          ? Icon(Icons.check, color: AppColors.brandPrimary)
+                          : null,
                   onTap: () => widget.onSelect(c),
                 );
               },
@@ -693,16 +698,23 @@ class _PasswordRulesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasLength = password.length >= 8 && password.length <= 15;
-    final hasUpperLower = password.contains(RegExp(r'[A-Z]')) && password.contains(RegExp(r'[a-z]'));
+    final hasUpperLower =
+        password.contains(RegExp(r'[A-Z]')) &&
+        password.contains(RegExp(r'[a-z]'));
     final hasNumber = password.contains(RegExp(r'[0-9]'));
-    final hasSpecial = password.contains(RegExp(r'''[!@#\$%\^&\*\(\)_\+\-\=\[\]\{\};:'",<>\./?\\|`~]'''));
+    final hasSpecial = password.contains(
+      RegExp(r'''[!@#\$%\^&\*\(\)_\+\-\=\[\]\{\};:'",<>\./?\\|`~]'''),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _RuleRow(text: "Between 8-15 characters", isMet: hasLength),
         SizedBox(height: 4.h),
-        _RuleRow(text: "At least one upper and one lower case letter", isMet: hasUpperLower),
+        _RuleRow(
+          text: "At least one upper and one lower case letter",
+          isMet: hasUpperLower,
+        ),
         SizedBox(height: 4.h),
         _RuleRow(text: "At least one number", isMet: hasNumber),
         SizedBox(height: 4.h),

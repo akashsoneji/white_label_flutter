@@ -128,7 +128,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               Align(
                 alignment: Alignment.topRight,
                 child: GestureDetector(
-                  onTap: () => Get.back(closeOverlays: true),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
                   child: Container(
                     width: 24.w,
                     height: 24.h,
@@ -189,7 +191,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 SizedBox(width: 12.w),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Get.back(closeOverlays: true),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.whiteColor,
@@ -204,6 +208,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
+                        color: AppColors.whiteColor,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -384,7 +389,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 fontWeight: FontWeight.w800,
                 color:
                     isCurrent
-                        ? Colors.black
+                        ? Colors.white
                         : isActive
                         ? AppColors.primary
                         : AppColors.textGrey,
@@ -2398,7 +2403,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           if (isRequired)
             TextSpan(
               text: ' *',
-              style: AppTextStyles.bodyText.copyWith(color: Colors.red, fontWeight: FontWeight.bold),
+              style: AppTextStyles.bodyText.copyWith(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
             ),
         ],
       ),
@@ -2618,7 +2626,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               TextField(
                 controller: searchController,
-                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.textPrimary,
+                  fontSize: 13.sp,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Search countries...',
                   hintStyle: AppTextStyles.bodyText.copyWith(
@@ -2663,7 +2674,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       return ListTile(
                         leading: Text(
                           country.emoji ?? '',
-                          style: AppTextStyles.bodyText.copyWith(fontSize: 22.sp),
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 22.sp,
+                          ),
                         ),
                         title: Text(
                           country.name ?? '',
@@ -2729,7 +2742,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               TextField(
                 controller: searchController,
-                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.textPrimary,
+                  fontSize: 13.sp,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Search nationalities...',
                   hintStyle: AppTextStyles.bodyText.copyWith(
@@ -2777,7 +2793,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       return ListTile(
                         leading: Text(
                           country.emoji ?? '',
-                          style: AppTextStyles.bodyText.copyWith(fontSize: 22.sp),
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 22.sp,
+                          ),
                         ),
                         title: Text(
                           country.nationality ?? '',
@@ -2846,7 +2864,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               TextField(
                 controller: searchController,
-                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.textPrimary,
+                  fontSize: 13.sp,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Search states...',
                   hintStyle: AppTextStyles.bodyText.copyWith(
@@ -2955,7 +2976,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               SizedBox(height: 16.h),
               TextField(
                 controller: searchController,
-                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
+                style: AppTextStyles.bodyText.copyWith(
+                  color: AppColors.textPrimary,
+                  fontSize: 13.sp,
+                ),
                 decoration: InputDecoration(
                   hintText: 'Search cities...',
                   hintStyle: AppTextStyles.bodyText.copyWith(
