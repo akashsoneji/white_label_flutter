@@ -122,7 +122,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
             children: [
               Text(
                 'Complete all steps to become a Copy Trading Master',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   color: AppColors.textGrey,
                   fontWeight: FontWeight.w500,
@@ -264,7 +264,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                             children: [
                               Text(
                                 'Verification Required',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primary,
@@ -273,7 +273,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                               SizedBox(height: 2.h),
                               Text(
                                 'Please complete your KYC to submit the application.',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.primary.withValues(
                                     alpha: 0.85,
@@ -339,7 +339,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                       ),
                       child: Text(
                         userName,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.textGrey,
                           fontWeight: FontWeight.w500,
@@ -349,7 +349,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                     SizedBox(height: 4.h),
                     Text(
                       'Shown for admin reference; update in profile if incorrect.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.textGrey,
                       ),
@@ -366,7 +366,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                     SizedBox(height: 4.h),
                     Text(
                       'Displayed on the public leaderboard and master profile.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.textGrey,
                       ),
@@ -384,7 +384,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                     SizedBox(height: 4.h),
                     Text(
                       'Explain your trading logic and strategy to copy investors.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.textGrey,
                       ),
@@ -402,7 +402,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                     SizedBox(height: 4.h),
                     Text(
                       'Provide information about expected drawdown, leverage, or risk constraints.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.textGrey,
                       ),
@@ -441,7 +441,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                         Expanded(
                           child: Text(
                             'I accept the Master Trader Terms & Conditions and confirm that I will trade responsibly. Copiers may mirror my trades in real time.',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               color: AppColors.textPrimary,
                               height: 1.3,
@@ -612,7 +612,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                 Expanded(
                   child: Text(
                     title,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -633,7 +633,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
               ),
               child: Text(
                 statusText,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
                   color: statusColor,
@@ -662,7 +662,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
           SizedBox(height: 14.h),
           Text(
             'Under Review',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 18.sp,
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w700,
@@ -672,7 +672,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
           Text(
             'Your application is currently being reviewed by our administration team. We will notify you as soon as your status is updated.',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               color: AppColors.textGrey,
               height: 1.4,
@@ -688,7 +688,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
               ),
               child: Text(
                 'Master Code: $masterCode',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,

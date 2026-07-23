@@ -65,7 +65,7 @@
 //               width: double.maxFinite,
 //               height: 490.h,
 //               color: AppColors.whiteColor,
-//               child: const Center(child: OverlayLoadingWidget()),
+//               child: Center(child: OverlayLoadingWidget()),
 //             ),
 //           if (_hasError)
 //             Container(
@@ -80,7 +80,7 @@
 //                     SizedBox(height: 16.h),
 //                     Text(
 //                       'Failed to load chart',
-//                       style: TextStyle(
+//                       style: AppTextStyles.bodyText.copyWith(
 //                         fontSize: 16.sp,
 //                         color: Colors.grey[600],
 //                       ),
@@ -957,7 +957,7 @@ class FixedSizeWebViewState extends State<FixedSizeWebView>
               width: double.maxFinite,
               height: 490.h,
               color: AppColors.whiteColor,
-              child: const Center(child: OverlayLoadingWidget()),
+              child: Center(child: OverlayLoadingWidget()),
             ),
           if (_hasError)
             Container(
@@ -990,7 +990,7 @@ class FixedSizeWebViewState extends State<FixedSizeWebView>
                             _retryCount == 0
                                 ? 'Failed to load chart'
                                 : 'Chart loading failed',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               color: Colors.grey[600],
                               fontWeight: FontWeight.w600,
@@ -999,7 +999,7 @@ class FixedSizeWebViewState extends State<FixedSizeWebView>
                           SizedBox(height: 4.h),
                           Text(
                             'Check your internet connection',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               color: Colors.grey[500],
                             ),
@@ -1008,7 +1008,7 @@ class FixedSizeWebViewState extends State<FixedSizeWebView>
                             SizedBox(height: 8.h),
                             Text(
                               'Attempt $_retryCount/$_maxRetries',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 color: Colors.grey[500],
                               ),

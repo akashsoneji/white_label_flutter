@@ -127,11 +127,11 @@ brands:
  bundleId: "com.kantara.app"
  appName: "Kantara"
  colors:
- primary: "#2E2174"
- secondary: "#4AAF46"
+ primary: "#366D43"
+ secondary: "#82BA4B"
  accent: "#2E2174"
- splashColor: "#2E2174"
- launcherBackground: "#2E2174"
+ splashColor: "#FFFFFF"
+ launcherBackground: "#FFFFFF"
  urls:
  api: "https://client.kantaracapital.io/api/"
  websocket: "wss://client.kantaracapital.io/trade-engine"

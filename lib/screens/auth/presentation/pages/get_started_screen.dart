@@ -24,7 +24,7 @@ class GetStartedScreen extends StatelessWidget {
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -41,7 +41,7 @@ class GetStartedScreen extends StatelessWidget {
                       Text(
                         languageService.tr("onboarding_slide1_description"),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
@@ -81,7 +81,7 @@ class GetStartedScreen extends StatelessWidget {
                           ),
                           child: Text(
                             languageService.tr("register_title"),
-                            style: TextStyle(color: AppColors.primary),
+                            style: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
                           ),
                         ),
                       ),
@@ -92,16 +92,16 @@ class GetStartedScreen extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
               child: Text.rich(
                 TextSpan(
-                  style: TextStyle(color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                   text: "${languageService.tr("register_terms").tr}\n",
                   children: [
                     TextSpan(
                       text:
                           "${languageService.tr("register_terms_condition").tr}",
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         decoration: TextDecoration.underline,
                         color: AppColors.primary,
                         fontWeight: FontWeight.w500,
@@ -112,10 +112,10 @@ class GetStartedScreen extends StatelessWidget {
                               AgreementLauncher.openTerms();
                             },
                     ),
-                    const TextSpan(text: " and "),
+                    TextSpan(text: " and "),
                     TextSpan(
                       text: "${languageService.tr("privacy_policy_title").tr}",
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         decoration: TextDecoration.underline,
                         color: AppColors.primary,
                         fontWeight: FontWeight.w500,
@@ -129,7 +129,7 @@ class GetStartedScreen extends StatelessWidget {
                   ],
                 ),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 12),
               ),
             ),
           ],

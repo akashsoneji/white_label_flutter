@@ -53,7 +53,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
                 padding: EdgeInsets.all(0.w),
                 child: Text(
                   r'$',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.textPrimary,
                   ),
@@ -65,7 +65,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Available for withdrawal : \$${_amountController.text}',
-                style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
               ),
             ),
             SizedBox(height: 16.h),
@@ -103,7 +103,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
             ),
             child: Text(
               'Confirm',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.whiteColor,
@@ -130,7 +130,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
             SizedBox(width: 12),
             Text(
               'Prime_traders',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -157,7 +157,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
               SizedBox(width: 10.w),
               Text(
                 'Important',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -171,8 +171,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
           SizedBox(height: 12.h),
           Text(
             'Enter the amount you want to add to your current investment with this master trader.',
-            style: TextStyle(
-              fontFamily: 'Roboto',
+            style: AppTextStyles.bodyText.copyWith(
               fontWeight: FontWeight.w400,
               color: AppColors.icongrey,
               fontSize: 14.0,
@@ -195,7 +194,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               color: AppColors.textGrey,
               height: 1.4,

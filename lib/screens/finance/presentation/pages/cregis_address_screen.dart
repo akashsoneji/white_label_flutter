@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart';
@@ -169,19 +170,19 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel payment?'),
-        content: const Text(
+        title: Text('Cancel payment?'),
+        content: Text(
           'Are you sure you want to cancel this payment? The transaction '
           'will not be processed and you will be returned to the home screen.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('No, keep waiting'),
+            child: Text('No, keep waiting'),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Yes, cancel'),
+            child: Text('Yes, cancel'),
           ),
         ],
       ),
@@ -245,17 +246,17 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
           leading: AppBackButton(onPressed: _confirmCancel),
           title: Text(
             'Direct Crypto Transfer',
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 16.sp),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 16.sp),
           ),
           centerTitle: true,
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24.0),
           child: Column(
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
@@ -264,24 +265,24 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                   children: [
                     Text(
                       'Send',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       '${widget.amount} USD',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       'using $networkLabel',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.primary,
                         fontWeight: FontWeight.w500,
@@ -290,9 +291,9 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.whiteColor,
                   borderRadius: BorderRadius.circular(12),
@@ -337,19 +338,19 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Text(
                 'Deposit Wallet Address',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   color: AppColors.textGrey,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: AppColors.whiteColor,
                   borderRadius: BorderRadius.circular(8),
@@ -360,14 +361,12 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                     Expanded(
                       child: Text(
                         widget.cregisAddress,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontFamily: 'monospace',
+                        style: AppTextStyles.caption.copyWith(
                           color: AppColors.textPrimary,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     GestureDetector(
                       onTap: () {
                         Clipboard.setData(
@@ -378,7 +377,7 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
                           shape: BoxShape.circle,
@@ -393,10 +392,10 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.red.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
@@ -404,16 +403,16 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.warning_amber_rounded,
                       color: Colors.red,
                       size: 20,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Only send ${_getSafetyCurrency(widget.networkKey)} on $networkLabel. Sending other assets may result in loss.',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: Colors.red.shade700,
                           height: 1.4,
@@ -423,18 +422,18 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16),
               Text(
                 'Reference: ${widget.referenceNumber}',
-                style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               // ── Debug strip: shows last Transaction-History poll
               //    request/response so QA can see whether the Cregis
               //    reference_number matched. Remove once flow is stable. ──
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.04),
                   borderRadius: BorderRadius.circular(8),
@@ -447,7 +446,7 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                   children: [
                     Text(
                       'Debug — last poll',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
                         color: Colors.black54,
@@ -456,18 +455,18 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                     SizedBox(height: 4.h),
                     Text(
                       _debugLastCall,
-                      style: TextStyle(fontSize: 10.sp),
+                      style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp),
                     ),
                     SizedBox(height: 2.h),
                     Text(
                       _debugLastResponse,
-                      style: TextStyle(fontSize: 10.sp),
+                      style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp),
                     ),
                     if (_debugLastAt != null) ...[
                       SizedBox(height: 2.h),
                       Text(
                         'at ${_debugLastAt!.toIso8601String()}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 9.sp,
                           color: Colors.black45,
                         ),
@@ -476,7 +475,7 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
               if (_isPolling)
                 Column(
                   children: [
@@ -488,10 +487,10 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                         color: AppColors.primary,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     Text(
                       _statusText,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         color: AppColors.textGrey,
                         fontStyle: FontStyle.italic,
@@ -503,17 +502,17 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
               else
                 Column(
                   children: [
-                    const Icon(Icons.info_outline, size: 40, color: Colors.orange),
-                    const SizedBox(height: 12),
+                    Icon(Icons.info_outline, size: 40, color: Colors.orange),
+                    SizedBox(height: 12),
                     Text(
                       _statusText,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         color: Colors.orange.shade800,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -529,7 +528,7 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                         ),
                         child: Text(
                           'Go to Transaction History',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                           ),

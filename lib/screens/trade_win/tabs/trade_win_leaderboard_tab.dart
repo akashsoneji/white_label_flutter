@@ -248,7 +248,7 @@ class _LeaderboardRow extends StatelessWidget {
             ),
             child: Text(
               initial,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w700,
                 fontSize: 16.sp,

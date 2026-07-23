@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/text_styles.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
@@ -250,7 +251,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                           children: [
                             Text(
                               widget.symbol,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
@@ -266,7 +267,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         ),
                         Text(
                           _getSymbolDescription(),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                           ),
@@ -314,7 +315,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                             ? 'Placing order...'
                             : '#$orderTicket ${_getOrderTypeDisplay()} ${widget.volume.toStringAsFixed(2)} ${widget.symbol} at',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           color: AppColors.textPrimary,
                           height: 1.5,
@@ -325,7 +326,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       Text(
                         priceDisplay.toString(),
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 24.sp,
                           fontWeight: FontWeight.bold,
                           color:
@@ -340,7 +341,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         Text(
                           'DONE',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             color: AppColors.success,
                             fontWeight: FontWeight.w500,
@@ -351,7 +352,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                         Text(
                           'Redirecting to trade screen in $_remainingSeconds seconds...',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                           ),

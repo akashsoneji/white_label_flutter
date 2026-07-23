@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -150,7 +151,7 @@ class _OtpModalState extends State<OtpModal> {
                 widget.isEmailVerification
                     ? 'Verify Email'
                     : 'Verify Mobile Number',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -163,7 +164,7 @@ class _OtpModalState extends State<OtpModal> {
                 widget.isEmailVerification
                     ? 'Enter the ${widget.otpLength}-digit code we\'ve sent to your email'
                     : 'Enter the ${widget.otpLength}-digit code we\'ve sent to your number',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   color: AppColors.textGrey.withValues(alpha: 0.9),
                 ),
@@ -174,7 +175,7 @@ class _OtpModalState extends State<OtpModal> {
                 widget.isEmailVerification
                     ? widget.email
                     : (widget.phoneNumber ?? ''),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textPrimary,
@@ -216,7 +217,7 @@ class _OtpModalState extends State<OtpModal> {
                   ),
                   child: Text(
                     'Verify',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.whiteColor,
@@ -232,7 +233,7 @@ class _OtpModalState extends State<OtpModal> {
                 children: [
                   Text(
                     'Didn\'t receive the code? ',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       color: AppColors.textGrey.withValues(alpha: 0.9),
                     ),
@@ -241,7 +242,7 @@ class _OtpModalState extends State<OtpModal> {
                     onPressed: _handleResendOtp,
                     child: Text(
                       'Resend',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,
@@ -270,7 +271,7 @@ class _OtpModalState extends State<OtpModal> {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(index == 0 ? widget.otpLength : 1),
       ],
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 20.sp,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
@@ -353,7 +354,7 @@ class _OtpModalState extends State<OtpModal> {
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(widget.otpLength),
           ],
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -423,7 +424,7 @@ class _OtpModalState extends State<OtpModal> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(1),
             ],
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,

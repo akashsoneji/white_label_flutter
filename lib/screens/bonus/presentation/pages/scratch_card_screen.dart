@@ -250,7 +250,7 @@ class ScratchCardSummaryModel {
               )
               .toList();
     } else {
-      parsedSteps = const [];
+      parsedSteps = [];
     }
 
     return ScratchCardSummaryModel(
@@ -924,7 +924,7 @@ class ScratchCardListScreen extends StatelessWidget {
         leading: AppBackButton(onPressed: () => Navigator.of(context).pop()),
         title: Text(
           'My Rewards',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
@@ -1028,7 +1028,7 @@ class _ScratchCardsGridState extends State<_ScratchCardsGrid> {
               children: [
                 Text(
                   'Scratch Cards',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primary,
@@ -1120,7 +1120,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Scratch Leaderboard',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -1150,7 +1150,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Text(
               'Top Earners This Week',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -1177,7 +1177,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
                       Expanded(
                         child: Text(
                           'Scratch Leaderboard',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -1187,7 +1187,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
                       if (week.isNotEmpty)
                         Text(
                           week,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
                             fontWeight: FontWeight.w600,
@@ -1220,7 +1220,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
                             child: Text(
                               r.rankLabel,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 color: AppColors.textGrey,
                                 fontWeight: FontWeight.w600,
@@ -1238,7 +1238,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
                             child: Center(
                               child: Text(
                                 letter,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primary,
@@ -1250,7 +1250,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
                           Expanded(
                             child: Text(
                               r.displayName,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.sp,
                                 color: AppColors.textPrimary,
                                 fontWeight: FontWeight.w600,
@@ -1260,7 +1260,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
                           ),
                           Text(
                             '\$${r.amount.toStringAsFixed(2)}',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 13.sp,
                               color: AppColors.prizeGreen,
                               fontWeight: FontWeight.w700,
@@ -1359,7 +1359,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
               children: [
                 Text(
                   'Lots Progress',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w700,
@@ -1368,7 +1368,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                 const Spacer(),
                 Text(
                   '${doneLots.toStringAsFixed(2)} / ${targetLots.toStringAsFixed(2)}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w700,
@@ -1402,7 +1402,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
               children: [
                 Text(
                   '0 lots',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w600,
@@ -1412,7 +1412,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                 if (firstStep != null && firstStep.targetLots > 0) ...[
                   Text(
                     '${firstStep.targetLots.toStringAsFixed(0)} lots',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w600,
@@ -1421,7 +1421,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                   SizedBox(width: 8.w),
                   Text(
                     '${firstStep.thresholdPercent}%',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w700,
@@ -1431,7 +1431,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                 const Spacer(),
                 Text(
                   '${targetLots.toStringAsFixed(0)} lots ✓',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w700,
@@ -1457,7 +1457,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                         Expanded(
                           child: Text(
                             'Lots Completed',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               color: AppColors.textGrey,
                               fontWeight: FontWeight.w600,
@@ -1466,7 +1466,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                         ),
                         Text(
                           'Withdrawable Amount',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
                             fontWeight: FontWeight.w600,
@@ -1495,7 +1495,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                                 children: [
                                   Text(
                                     '${step.step} Lot${step.step == 1 ? '' : 's'}',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 13.sp,
                                       color:
                                           isCompleted
@@ -1509,7 +1509,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                                   SizedBox(width: 6.w),
                                   Text(
                                     '(${step.targetLots.toStringAsFixed(0)} lots · ${step.thresholdPercent}%)',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 11.sp,
                                       color: AppColors.textGrey,
                                       fontWeight: FontWeight.w600,
@@ -1528,7 +1528,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                                     ),
                                     child: Text(
                                       statusLabel(status),
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 10.sp,
                                         color: statusTextColor(status),
                                         fontWeight: FontWeight.w700,
@@ -1540,7 +1540,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                             ),
                             Text(
                               '\$${amount.toStringAsFixed(2)}',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.sp,
                                 color:
                                     isCompleted
@@ -1678,7 +1678,7 @@ class _ScratchRewardsMockSection extends StatelessWidget {
     final leaderboard =
         (_mockJson["leaderboard"] as Map).cast<String, dynamic>();
     final history =
-        ((_mockJson["history"] as List?) ?? const [])
+        ((_mockJson["history"] as List?) ?? [])
             .cast<Map>()
             .map((e) => e.cast<String, dynamic>())
             .toList();
@@ -1715,7 +1715,7 @@ class _MockStreakBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text('🔥', style: TextStyle(fontSize: 22.sp)),
+          Text('🔥', style: AppTextStyles.bodyText.copyWith(fontSize: 22.sp)),
           SizedBox(width: 10.w),
           Expanded(
             child: Column(
@@ -1723,7 +1723,7 @@ class _MockStreakBanner extends StatelessWidget {
               children: [
                 Text(
                   (data["titleSmall"] ?? "").toString(),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     color: Colors.white.withOpacity(0.7),
                     fontWeight: FontWeight.w600,
@@ -1732,7 +1732,7 @@ class _MockStreakBanner extends StatelessWidget {
                 SizedBox(height: 2.h),
                 Text(
                   (data["title"] ?? "").toString(),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.prizeYellow,
                     fontWeight: FontWeight.w700,
@@ -1746,7 +1746,7 @@ class _MockStreakBanner extends StatelessWidget {
             children: [
               Text(
                 (data["rightSmall"] ?? "").toString(),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 10.sp,
                   color: Colors.white.withOpacity(0.6),
                   fontWeight: FontWeight.w500,
@@ -1755,7 +1755,7 @@ class _MockStreakBanner extends StatelessWidget {
               SizedBox(height: 2.h),
               Text(
                 (data["rightCta"] ?? "").toString(),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 11.sp,
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
@@ -1780,7 +1780,7 @@ class _MockUnlockCard extends StatelessWidget {
     final remaining = max(0.0, targetLots - doneLots);
     final pct = targetLots <= 0 ? 0.0 : (doneLots / targetLots).clamp(0.0, 1.0);
     final tiers =
-        ((data["withdrawTiers"] as List?) ?? const [])
+        ((data["withdrawTiers"] as List?) ?? [])
             .cast<Map>()
             .map((e) => e.cast<String, dynamic>())
             .toList();
@@ -1811,7 +1811,7 @@ class _MockUnlockCard extends StatelessWidget {
                   children: [
                     Text(
                       (data["title"] ?? "").toString(),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         color: AppColors.primary,
                         fontWeight: FontWeight.w500,
@@ -1820,7 +1820,7 @@ class _MockUnlockCard extends StatelessWidget {
                     SizedBox(height: 4.h),
                     Text(
                       (data["subtitle"] ?? "").toString(),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: Colors.grey.shade600,
                         height: 1.25,
@@ -1839,7 +1839,7 @@ class _MockUnlockCard extends StatelessWidget {
                   children: [
                     Text(
                       'Target',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 9.sp,
                         color: Colors.grey.shade700,
                         fontWeight: FontWeight.w600,
@@ -1848,7 +1848,7 @@ class _MockUnlockCard extends StatelessWidget {
                     SizedBox(height: 2.h),
                     Text(
                       '${targetLots.toStringAsFixed(0)} Lots',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -1865,7 +1865,7 @@ class _MockUnlockCard extends StatelessWidget {
             children: [
               Text(
                 doneLots.toStringAsFixed(1),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,
@@ -1877,7 +1877,7 @@ class _MockUnlockCard extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: 2.h),
                 child: Text(
                   'lots traded',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: Colors.grey.shade700,
                     fontWeight: FontWeight.w600,
@@ -1889,7 +1889,7 @@ class _MockUnlockCard extends StatelessWidget {
                 padding: EdgeInsets.only(bottom: 2.h),
                 child: Text(
                   'of ${targetLots.toStringAsFixed(1)} lots',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: Colors.grey.shade500,
                     fontWeight: FontWeight.w600,
@@ -1923,35 +1923,35 @@ class _MockUnlockCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Text('⚡', style: TextStyle(fontSize: 18.sp)),
+                Text('⚡', style: AppTextStyles.bodyText.copyWith(fontSize: 18.sp)),
                 SizedBox(width: 10.w),
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.prizeBrown,
                         height: 1.3,
                       ),
                       children: [
-                        const TextSpan(text: 'Only '),
+                        TextSpan(text: 'Only '),
                         TextSpan(
                           text:
                               '${remaining.toStringAsFixed(1)} more lots to trade',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const TextSpan(text: ' — and your full '),
+                        TextSpan(text: ' — and your full '),
                         TextSpan(
                           text: '\$30.00',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const TextSpan(
+                        TextSpan(
                           text: ' will be withdrawable to your main balance!',
                         ),
                       ],
@@ -1976,7 +1976,7 @@ class _MockUnlockCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Lots Completed',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: Colors.grey.shade600,
                           fontWeight: FontWeight.w600,
@@ -1985,7 +1985,7 @@ class _MockUnlockCard extends StatelessWidget {
                     ),
                     Text(
                       'Withdrawable Amount',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: Colors.grey.shade600,
                         fontWeight: FontWeight.w600,
@@ -2016,7 +2016,7 @@ class _MockUnlockCard extends StatelessWidget {
                             children: [
                               Text(
                                 '$lots Lot${lots == "1" ? "" : "s"}',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 13.sp,
                                   color:
                                       isDone
@@ -2040,7 +2040,7 @@ class _MockUnlockCard extends StatelessWidget {
                                 ),
                                 child: Text(
                                   isDone ? 'done' : 'pending',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 10.sp,
                                     color:
                                         isDone
@@ -2055,7 +2055,7 @@ class _MockUnlockCard extends StatelessWidget {
                         ),
                         Text(
                           '\$${amount.toStringAsFixed(2)}${label.isNotEmpty ? ' ← $label' : ''}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color:
                                 isDone
@@ -2082,7 +2082,7 @@ class _MockUnlockCard extends StatelessWidget {
               children: [
                 Text(
                   'Withdraw \$30.00 — Locked',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                     color: Colors.grey.shade600,
@@ -2091,7 +2091,7 @@ class _MockUnlockCard extends StatelessWidget {
                 SizedBox(height: 3.h),
                 Text(
                   'Complete ${remaining.toStringAsFixed(1)} more lots to unlock withdrawal',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.grey.shade500,
@@ -2113,7 +2113,7 @@ class _MockLeaderboardCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows =
-        ((data["rows"] as List?) ?? const [])
+        ((data["rows"] as List?) ?? [])
             .cast<Map>()
             .map((e) => e.cast<String, dynamic>())
             .toList();
@@ -2133,7 +2133,7 @@ class _MockLeaderboardCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   (data["title"] ?? "").toString(),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
@@ -2142,7 +2142,7 @@ class _MockLeaderboardCard extends StatelessWidget {
               ),
               Text(
                 (data["week"] ?? "").toString(),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 11.sp,
                   color: Colors.grey.shade500,
                   fontWeight: FontWeight.w600,
@@ -2171,7 +2171,7 @@ class _MockLeaderboardCard extends StatelessWidget {
                     child: Text(
                       rank,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color:
                             isYou ? AppColors.primary : AppColors.textPrimary,
@@ -2193,7 +2193,7 @@ class _MockLeaderboardCard extends StatelessWidget {
                     child: Center(
                       child: Text(
                         initials,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                           color:
@@ -2208,7 +2208,7 @@ class _MockLeaderboardCard extends StatelessWidget {
                       children: [
                         Text(
                           name,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color:
                                 isYou
@@ -2232,7 +2232,7 @@ class _MockLeaderboardCard extends StatelessWidget {
                             ),
                             child: Text(
                               'You',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 10.sp,
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w500,
@@ -2245,7 +2245,7 @@ class _MockLeaderboardCard extends StatelessWidget {
                   ),
                   Text(
                     '\$${amount.toStringAsFixed(2)}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.prizeGreen,
                       fontWeight: FontWeight.w600,
@@ -2273,7 +2273,7 @@ class _MockHistoryCard extends StatelessWidget {
       children: [
         Text(
           'History',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
             color: AppColors.textPrimary,
@@ -2304,7 +2304,7 @@ class _MockHistoryCard extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Center(
-                    child: Text(icon, style: TextStyle(fontSize: 16.sp)),
+                    child: Text(icon, style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp)),
                   ),
                 ),
                 SizedBox(width: 12.w),
@@ -2314,7 +2314,7 @@ class _MockHistoryCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
@@ -2323,7 +2323,7 @@ class _MockHistoryCard extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         sub,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: Colors.grey.shade600,
                           fontWeight: FontWeight.w600,
@@ -2342,7 +2342,7 @@ class _MockHistoryCard extends StatelessWidget {
                           ),
                           child: Text(
                             chip,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 10.sp,
                               color: AppColors.prizeDarkGreen,
                               fontWeight: FontWeight.w500,
@@ -2355,7 +2355,7 @@ class _MockHistoryCard extends StatelessWidget {
                 ),
                 Text(
                   '+\$${amount.toStringAsFixed(2)}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.prizeGreen,
@@ -2400,7 +2400,7 @@ class _ScratchHistoryListState extends State<_ScratchHistoryList> {
               children: [
                 Text(
                   'History',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primary,
@@ -2472,7 +2472,7 @@ class _ScratchHistoryListState extends State<_ScratchHistoryList> {
                           children: [
                             Text(
                               reward > 0 ? 'Reward unlocked' : 'No reward',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textPrimary,
@@ -2481,7 +2481,7 @@ class _ScratchHistoryListState extends State<_ScratchHistoryList> {
                             SizedBox(height: 2.h),
                             Text(
                               'Expires: ${card.expiresLabel}',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: Colors.grey.shade600,
                               ),
@@ -2491,7 +2491,7 @@ class _ScratchHistoryListState extends State<_ScratchHistoryList> {
                       ),
                       Text(
                         reward > 0 ? '\$${reward.toStringAsFixed(2)}' : '-',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                           color:
@@ -2555,7 +2555,7 @@ class _SummaryBanner extends StatelessWidget {
                     children: [
                       Text(
                         'ScratchCard Account',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
@@ -2564,7 +2564,7 @@ class _SummaryBanner extends StatelessWidget {
                       SizedBox(height: 6.h),
                       Text(
                         'Account details will appear here once available.',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: Colors.grey.shade600,
                         ),
@@ -2608,7 +2608,7 @@ class _SummaryBanner extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       color: Colors.grey.shade600,
                       fontWeight: FontWeight.w600,
@@ -2619,7 +2619,7 @@ class _SummaryBanner extends StatelessWidget {
                     value,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
@@ -2641,7 +2641,7 @@ class _SummaryBanner extends StatelessWidget {
                       children: [
                         Text(
                           'ScratchCard Account',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
@@ -2653,7 +2653,7 @@ class _SummaryBanner extends StatelessWidget {
                             Flexible(
                               child: Text(
                                 acc.metaAccountNumber,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
                                   letterSpacing: 0.2,
@@ -2670,7 +2670,7 @@ class _SummaryBanner extends StatelessWidget {
                                 children: [
                                   Text(
                                     '---> \$${earned.toStringAsFixed(2)}',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 0.2,
@@ -2893,7 +2893,7 @@ class _NextCardCountdownBannerState extends State<_NextCardCountdownBanner> {
                 Expanded(
                   child: Text(
                     'Next card available at',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: Colors.orange.shade800,
                       fontWeight: FontWeight.w500,
@@ -2902,7 +2902,7 @@ class _NextCardCountdownBannerState extends State<_NextCardCountdownBanner> {
                 ),
                 Text(
                   s.nextCardLabel,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w700,
@@ -2926,7 +2926,7 @@ class _NextCardCountdownBannerState extends State<_NextCardCountdownBanner> {
                   ),
                   child: Text(
                     _formatCountdown(diff),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.whiteColor,
                       fontWeight: FontWeight.w700,
@@ -2960,7 +2960,7 @@ class _NextCardCountdownBannerState extends State<_NextCardCountdownBanner> {
                       SizedBox(height: 4.h),
                       Text(
                         'New card arriving...',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: Colors.orange.shade600,
                         ),
@@ -2992,7 +2992,7 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 12.h),
           Text(
             'No scratch cards available',
-            style: TextStyle(fontSize: 15.sp, color: Colors.grey.shade500),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 15.sp, color: Colors.grey.shade500),
           ),
         ],
       ),
@@ -3070,7 +3070,7 @@ class _LockedScratchCardGridItemState
         //           SizedBox(width: 8.w),
         //           Text(
         //             'Card Locked',
-        //             style: TextStyle(
+        //             style: AppTextStyles.bodyText.copyWith(
         //               fontSize: 16.sp,
         //               fontWeight: FontWeight.w700,
         //               color: AppColors.textPrimary,
@@ -3084,7 +3084,7 @@ class _LockedScratchCardGridItemState
         //         children: [
         //           Text(
         //             'Next card will be available at:',
-        //             style: TextStyle(
+        //             style: AppTextStyles.bodyText.copyWith(
         //               fontSize: 13.sp,
         //               color: AppColors.textSecondary,
         //             ),
@@ -3103,7 +3103,7 @@ class _LockedScratchCardGridItemState
         //                 SizedBox(width: 8.w),
         //                 Text(
         //                   widget.summary.nextCardLabel,
-        //                   style: TextStyle(
+        //                   style: AppTextStyles.bodyText.copyWith(
         //                     fontSize: 15.sp,
         //                     fontWeight: FontWeight.w700,
         //                     color: Colors.orange.shade800,
@@ -3119,7 +3119,7 @@ class _LockedScratchCardGridItemState
         //               SizedBox(width: 6.w),
         //               Text(
         //                 'Time remaining: ${_formatCountdown(diff)}',
-        //                 style: TextStyle(
+        //                 style: AppTextStyles.bodyText.copyWith(
         //                   fontSize: 13.sp,
         //                   color: Colors.grey.shade600,
         //                   fontWeight: FontWeight.w500,
@@ -3134,7 +3134,7 @@ class _LockedScratchCardGridItemState
         //           onPressed: () => Get.back(),
         //           child: Text(
         //             'OK',
-        //             style: TextStyle(
+        //             style: AppTextStyles.bodyText.copyWith(
         //               color: AppColors.primary,
         //               fontWeight: FontWeight.w700,
         //               fontSize: 14.sp,
@@ -3250,7 +3250,7 @@ class _ScratchCardGridItem extends StatelessWidget {
                 child: Center(
                   child: Text(
                     'Tap to Scratch',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.pureWhite,
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
@@ -3280,7 +3280,7 @@ class _ScratchCardGridItem extends StatelessWidget {
                         // SizedBox(height: 6.h),
                         // Text(
                         //   'Revealed',
-                        //   style: TextStyle(
+                        //   style: AppTextStyles.bodyText.copyWith(
                         //     color: AppColors.whiteColor,
                         //     fontWeight: FontWeight.w700,
                         //     fontSize: 14.sp,
@@ -3298,7 +3298,7 @@ class _ScratchCardGridItem extends StatelessWidget {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.whiteColor,
@@ -3309,7 +3309,7 @@ class _ScratchCardGridItem extends StatelessWidget {
                         ] else
                           Text(
                             'No Reward',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.whiteColor.withOpacity(0.7),
                               fontSize: 13.sp,
                             ),
@@ -3352,7 +3352,7 @@ class ScratchCardDetailScreen extends StatelessWidget {
         centerTitle: true,
         title: Text(
           'My Rewards',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
@@ -3370,7 +3370,7 @@ class ScratchCardDetailScreen extends StatelessWidget {
                 // Title
                 Text(
                   'Hooray! 🎉',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.primary,
@@ -3380,7 +3380,7 @@ class ScratchCardDetailScreen extends StatelessWidget {
                 SizedBox(height: 6.h),
                 Text(
                   "You've got a scratch card reward!",
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     color: Colors.grey.shade600,
                   ),
@@ -3428,7 +3428,7 @@ class ScratchCardDetailScreen extends StatelessWidget {
                       Text(
                         'Scratch the card to reveal\nyour reward',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w500,
                           color: AppColors.primary,
@@ -3439,7 +3439,7 @@ class ScratchCardDetailScreen extends StatelessWidget {
                       Text(
                         'Scratch at least 25% to unlock your reward.\nCredited to your trading account.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           color: Colors.grey.shade500,
                           height: 1.4,
@@ -3488,7 +3488,7 @@ class _ScratchCardDialog extends StatelessWidget {
             children: [
               Text(
                 'Hooray! 🎉',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -3498,7 +3498,7 @@ class _ScratchCardDialog extends StatelessWidget {
               SizedBox(height: 6.h),
               Text(
                 "You've got a scratch card reward!",
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -3545,7 +3545,7 @@ class _ScratchCardDialog extends StatelessWidget {
                     Text(
                       'Scratch the card to reveal\nyour reward',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primary,
@@ -3556,7 +3556,7 @@ class _ScratchCardDialog extends StatelessWidget {
                     Text(
                       'Scratch at least 25% to unlock your reward.\nCredited to your trading account.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.icongrey,
                         height: 1.4,
@@ -3634,7 +3634,7 @@ class _RevealingCardState extends State<_RevealingCard> {
               SizedBox(height: 16.h),
               Text(
                 'Revealing your reward...',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   color: AppColors.primary,
                   fontWeight: FontWeight.w600,
@@ -3819,7 +3819,7 @@ class _RewardContent extends StatelessWidget {
                   hasResult && rewardAmount != null
                       ? '\$${rewardAmount!.toStringAsFixed(2)}'
                       : '???',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 40.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.yellow.shade300,
@@ -3836,7 +3836,7 @@ class _RewardContent extends StatelessWidget {
                 // Status text
                 Text(
                   hasResult ? 'Reward Unlocked!' : 'Scratch to reveal',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.whiteColor.withOpacity(0.9),
@@ -3914,7 +3914,7 @@ class _RevealedCard extends StatelessWidget {
                   if (isWin)
                     Text(
                       '\$${card.rewardAmount!.toStringAsFixed(2)}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 40.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.yellow.shade300,
@@ -3931,7 +3931,7 @@ class _RevealedCard extends StatelessWidget {
                     Text(
                       'Better luck\nnext time!',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.whiteColor,
@@ -3940,7 +3940,7 @@ class _RevealedCard extends StatelessWidget {
                   SizedBox(height: 8.h),
                   Text(
                     isWin ? 'Reward Unlocked!' : 'No reward this time',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.whiteColor.withOpacity(0.9),
@@ -3995,7 +3995,7 @@ class _WinResultDialog extends StatelessWidget {
                 // Cup icon
                 Text(
                   'Congratulations! 🎉',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -4006,7 +4006,7 @@ class _WinResultDialog extends StatelessWidget {
 
                 Text(
                   'You won',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.textPrimary,
                   ),
@@ -4046,7 +4046,7 @@ class _WinResultDialog extends StatelessWidget {
                         SizedBox(height: 6.h),
                         Text(
                           '\$${reveal.rewardAmount.toStringAsFixed(2)}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 34.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -4081,7 +4081,7 @@ class _WinResultDialog extends StatelessWidget {
                     ),
                     child: Text(
                       'Done',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                       ),
@@ -4122,7 +4122,7 @@ class _CreditStatusBadge extends StatelessWidget {
             Flexible(
               child: Text(
                 'Credit failed: ${reveal.creditError.isNotEmpty ? reveal.creditError : 'Please contact support'}',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 11.sp,
                   color: Colors.orange.shade200,
                 ),
@@ -4145,7 +4145,7 @@ class _CreditStatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 12.sp,
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w400,
@@ -4194,7 +4194,7 @@ class _LoseResultDialog extends StatelessWidget {
 
             Text(
               'Better Luck Next Time!',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
@@ -4206,7 +4206,7 @@ class _LoseResultDialog extends StatelessWidget {
             Text(
               'No reward this time.\nNew cards are released every 12 hours — keep scratching!',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 color: Colors.grey.shade500,
                 height: 1.5,
@@ -4229,7 +4229,7 @@ class _LoseResultDialog extends StatelessWidget {
                 ),
                 child: Text(
                   'Close',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -4328,7 +4328,7 @@ class _CreateScratchAccountDialogState
                     children: [
                       Text(
                         'Create Scratch Account',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -4336,7 +4336,7 @@ class _CreateScratchAccountDialogState
                       ),
                       Text(
                         'Required to scratch and reveal rewards',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: Colors.grey.shade500,
                         ),
@@ -4351,7 +4351,7 @@ class _CreateScratchAccountDialogState
             // Main password
             Text(
               'Main Password',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -4369,7 +4369,7 @@ class _CreateScratchAccountDialogState
             // Investor password
             Text(
               'Investor Password',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -4394,7 +4394,7 @@ class _CreateScratchAccountDialogState
                   Expanded(
                     child: Text(
                       _error!,
-                      style: TextStyle(fontSize: 12.sp, color: Colors.red),
+                      style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: Colors.red),
                     ),
                   ),
                 ],
@@ -4421,7 +4421,7 @@ class _CreateScratchAccountDialogState
                       ),
                       child: Text(
                         'Cancel',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -4453,7 +4453,7 @@ class _CreateScratchAccountDialogState
                               )
                               : Text(
                                 'Create',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -4488,10 +4488,10 @@ class _PasswordField extends StatelessWidget {
     return TextField(
       controller: controller,
       obscureText: obscure,
-      style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
+      style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(fontSize: 13.sp, color: Colors.grey.shade400),
+        hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: Colors.grey.shade400),
         filled: true,
         fillColor: Colors.grey.shade50,
         contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),

@@ -170,7 +170,7 @@ class KycDocsScreen extends StatelessWidget {
               SizedBox(height: 16),
               Text(
                 Get.find<LanguageService>().tr('kyc_error_loading'),
-                style: TextStyle(fontSize: 16),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 16),
               ),
               SizedBox(height: 16),
               ElevatedButton(
@@ -270,7 +270,7 @@ class KycDocsScreen extends StatelessWidget {
                             SizedBox(height: 8.h),
                             Text(
                               title,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w500,
                                 color:
@@ -344,7 +344,7 @@ class KycDocsScreen extends StatelessWidget {
                 SizedBox(height: 8),
                 Text(
                   'Error',
-                  style: TextStyle(color: Colors.red, fontSize: 12),
+                  style: AppTextStyles.bodyText.copyWith(color: Colors.red, fontSize: 12),
                 ),
               ],
             ),
@@ -396,7 +396,7 @@ class KycDocsScreen extends StatelessWidget {
           child: Text(
             'Optional',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.whiteColor, fontSize: 12),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.whiteColor, fontSize: 12),
           ),
         ),
       );
@@ -431,7 +431,7 @@ class KycDocsScreen extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: TextStyle(color: AppColors.whiteColor, fontSize: 12),
+          style: AppTextStyles.bodyText.copyWith(color: AppColors.whiteColor, fontSize: 12),
         ),
       ),
     );
@@ -481,7 +481,7 @@ class KycDocsScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Upload ${_getDocumentDisplayName(documentType)}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,

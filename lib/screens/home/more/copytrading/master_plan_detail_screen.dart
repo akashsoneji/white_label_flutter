@@ -62,15 +62,15 @@ class MasterPlanDetailScreen extends StatelessWidget {
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 24),
+              padding: EdgeInsets.fromLTRB(14, 10, 14, 24),
               children: [
                 // Header card
                 _PlanHeaderCard(plan: plan, controller: controller, tokens: t),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // KPI cards (2 hero + 4 pill strip)
                 _KpiGrid(plan: plan, tokens: t),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Performance row (4-column compact grid)
                 _SectionCard(
@@ -79,7 +79,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
                   accentColor: t.success,
                   child: _PerformanceRow(perf: plan.performance, tokens: t),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Equity curve
                 _SectionCard(
@@ -88,7 +88,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
                   accentColor: t.success,
                   child: _EquityCurve(equity: plan.equityCurve, tokens: t),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Commission summary
                 _SectionCard(
@@ -100,7 +100,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
                     tokens: t,
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Settlement cycle
                 _SectionCard(
@@ -109,7 +109,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
                   accentColor: t.warning,
                   child: _SettlementCycle(settle: plan.settlement, tokens: t),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Commission & fees
                 _SectionCard(
@@ -118,7 +118,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
                   accentColor: t.warning,
                   child: _CommissionFees(plan: plan, tokens: t),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Copier rules
                 _SectionCard(
@@ -126,7 +126,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
                   tokens: t,
                   child: _CopierRules(plan: plan, tokens: t),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Strategy & risk disclosure
                 _SectionCard(
@@ -134,7 +134,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
                   tokens: t,
                   child: _StrategyDisclosure(plan: plan, tokens: t),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Account & system
                 _SectionCard(
@@ -142,7 +142,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
                   tokens: t,
                   child: _AccountSystem(plan: plan, tokens: t),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Plan timeline
                 _SectionCard(
@@ -257,19 +257,19 @@ class _EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.error_outline, size: 56, color: tokens.mutedText),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             'Plan not found',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontWeight: FontWeight.w600,
               fontSize: 16,
               color: tokens.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           ElevatedButton(
             onPressed: () => onRetry(),
-            child: const Text('Retry'),
+            child: Text('Retry'),
           ),
         ],
       ),
@@ -329,7 +329,7 @@ class _PlanHeaderCard extends StatelessWidget {
 
     return Container(
       decoration: tokens.cardDecoration,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+      padding: EdgeInsets.fromLTRB(14, 12, 14, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -341,14 +341,14 @@ class _PlanHeaderCard extends StatelessWidget {
                 backgroundColor: tokens.brandBlue,
                 child: Text(
                   _initials(plan.planName),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: tokens.card,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,7 +356,7 @@ class _PlanHeaderCard extends StatelessWidget {
                   children: [
                     Text(
                       plan.planName,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: tokens.textPrimary,
@@ -364,7 +364,7 @@ class _PlanHeaderCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Wrap(
                       spacing: 6,
                       runSpacing: 4,
@@ -393,7 +393,7 @@ class _PlanHeaderCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -405,7 +405,7 @@ class _PlanHeaderCard extends StatelessWidget {
                   tokens: tokens,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: _HeaderAction(
                   icon: isPaused
@@ -419,7 +419,7 @@ class _PlanHeaderCard extends StatelessWidget {
                   tokens: tokens,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: _HeaderAction(
                   icon: Icons.block,
@@ -452,14 +452,14 @@ class _StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 11,
           color: color,
           fontWeight: FontWeight.w600,
@@ -477,11 +477,11 @@ class _GrayPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: tokens.chipDecoration,
       child: Text(
         label,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 11,
           color: tokens.bodyText,
           fontWeight: FontWeight.w500,
@@ -501,7 +501,7 @@ class _CopyingDotPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = on ? tokens.success : tokens.mutedText;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(10),
@@ -517,10 +517,10 @@ class _CopyingDotPill extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 5),
+          SizedBox(width: 5),
           Text(
             on ? 'Copying on' : 'Copying off',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 10.5,
               color: color,
               fontWeight: FontWeight.w600,
@@ -572,10 +572,10 @@ class _HeaderAction extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 14, color: disabled ? tokens.mutedText : c),
-            const SizedBox(width: 4),
+            SizedBox(width: 4),
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: disabled ? tokens.mutedText : c,
@@ -614,7 +614,7 @@ class _KpiGrid extends StatelessWidget {
                 tokens: tokens,
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Expanded(
               child: _KpiHeroCard(
                 icon: Icons.trending_up_rounded,
@@ -626,7 +626,7 @@ class _KpiGrid extends StatelessWidget {
                 tokens: tokens,
                 trailing: Text(
                   'After fees',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10,
                     color: tokens.mutedText,
                     fontWeight: FontWeight.w500,
@@ -636,7 +636,7 @@ class _KpiGrid extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10),
 
         // ── Compact pill strip: 4 secondary metrics, horizontal scroll
         SizedBox(
@@ -652,7 +652,7 @@ class _KpiGrid extends StatelessWidget {
                 accent: tokens.brandBlue,
                 tokens: tokens,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               _KpiPill(
                 icon: Icons.grid_view_rounded,
                 label: 'Open Positions',
@@ -660,7 +660,7 @@ class _KpiGrid extends StatelessWidget {
                 accent: tokens.brandBlue,
                 tokens: tokens,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               _KpiPill(
                 icon: Icons.percent_rounded,
                 label: 'Floating Comm.',
@@ -669,7 +669,7 @@ class _KpiGrid extends StatelessWidget {
                 accent: tokens.warning,
                 tokens: tokens,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               _KpiPill(
                 icon: Icons.payments_outlined,
                 label: 'Earned',
@@ -706,7 +706,7 @@ class _KpiPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 122,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: tokens.card,
         borderRadius: BorderRadius.circular(10),
@@ -723,7 +723,7 @@ class _KpiPill extends StatelessWidget {
             ),
             child: Icon(icon, color: accent, size: 16),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -731,7 +731,7 @@ class _KpiPill extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: tokens.textPrimary,
@@ -740,10 +740,10 @@ class _KpiPill extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: 3),
                 Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w500,
                     color: tokens.mutedText,
@@ -782,7 +782,7 @@ class _KpiHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: EdgeInsets.fromLTRB(12, 10, 12, 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -812,11 +812,11 @@ class _KpiHeroCard extends StatelessWidget {
                 ),
                 child: Icon(icon, color: AppColors.onColoredBackground, size: 15),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: tokens.descText,
@@ -827,13 +827,13 @@ class _KpiHeroCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: tokens.textPrimary,
@@ -844,7 +844,7 @@ class _KpiHeroCard extends StatelessWidget {
             ),
           ),
           if (trailing != null) ...[
-            const SizedBox(height: 4),
+            SizedBox(height: 4),
             trailing!,
           ],
         ],
@@ -876,7 +876,7 @@ class _SectionCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: tokens.cardDecoration,
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      padding: EdgeInsets.fromLTRB(14, 12, 14, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -892,10 +892,10 @@ class _SectionCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 title,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: tokens.textPrimary,
@@ -904,7 +904,7 @@ class _SectionCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           child,
         ],
       ),
@@ -936,7 +936,7 @@ class _PerformanceRow extends StatelessWidget {
                 tokens: tokens,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
                 label: 'Win rate',
@@ -944,7 +944,7 @@ class _PerformanceRow extends StatelessWidget {
                 tokens: tokens,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
                 label: 'Profit factor',
@@ -952,7 +952,7 @@ class _PerformanceRow extends StatelessWidget {
                 tokens: tokens,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
                 label: 'Expectancy',
@@ -963,7 +963,7 @@ class _PerformanceRow extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -974,7 +974,7 @@ class _PerformanceRow extends StatelessWidget {
                 tokens: tokens,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
                 label: 'Avg loss',
@@ -983,7 +983,7 @@ class _PerformanceRow extends StatelessWidget {
                 tokens: tokens,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
                 label: 'Max DD',
@@ -992,7 +992,7 @@ class _PerformanceRow extends StatelessWidget {
                 tokens: tokens,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
                 label: 'Net P&L',
@@ -1026,7 +1026,7 @@ class _PerfCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: tokens.muted,
         borderRadius: BorderRadius.circular(8),
@@ -1037,7 +1037,7 @@ class _PerfCell extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 10,
               fontWeight: FontWeight.w500,
               color: tokens.mutedText,
@@ -1046,13 +1046,13 @@ class _PerfCell extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: valueColor ?? tokens.textPrimary,
@@ -1084,7 +1084,7 @@ class _EquityCurve extends StatelessWidget {
         child: Center(
           child: Text(
             'No equity data yet',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: tokens.mutedText,
               fontSize: 13,
             ),
@@ -1111,7 +1111,7 @@ class _EquityCurve extends StatelessWidget {
         child: Center(
           child: Text(
             'No equity data yet',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: tokens.mutedText,
               fontSize: 13,
             ),
@@ -1167,10 +1167,10 @@ class _EquityCurve extends StatelessWidget {
                   }
                   final d = pts[idx].date;
                   return Padding(
-                    padding: const EdgeInsets.only(top: 6),
+                    padding: EdgeInsets.only(top: 6),
                     child: Text(
                       DateFormat('yyyy-MM-dd').format(d),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 9,
                         color: tokens.mutedText,
                       ),
@@ -1186,11 +1186,11 @@ class _EquityCurve extends StatelessWidget {
                 interval: yInterval,
                 getTitlesWidget: (value, meta) {
                   return Padding(
-                    padding: const EdgeInsets.only(right: 6),
+                    padding: EdgeInsets.only(right: 6),
                     child: Text(
                       NumberFormat.compactCurrency(symbol: '\$')
                           .format(value),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 9,
                         color: tokens.mutedText,
                       ),
@@ -1302,7 +1302,7 @@ class _SummaryCell extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 10,
             fontWeight: FontWeight.w500,
             color: tokens.mutedText,
@@ -1311,13 +1311,13 @@ class _SummaryCell extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
           child: Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: valueColor ?? tokens.textPrimary,
@@ -1341,7 +1341,7 @@ class _SummaryVSep extends StatelessWidget {
     return Container(
       width: 1,
       height: 28,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
+      margin: EdgeInsets.symmetric(horizontal: 8),
       color: tokens.divider,
     );
   }
@@ -1408,14 +1408,14 @@ class _DueBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: tokens.warningSoft,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         'Due now',
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 10,
           color: tokens.warningText,
           fontWeight: FontWeight.w600,
@@ -1519,40 +1519,40 @@ class _StrategyDisclosure extends StatelessWidget {
       children: [
         Text(
           'STRATEGY DESCRIPTION',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 10,
             fontWeight: FontWeight.w600,
             color: tokens.subText,
             letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Text(
           plan.strategyDescription.isNotEmpty
               ? plan.strategyDescription
               : '— Not provided. Edit the plan to add a public description for copiers.',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13,
             color: tokens.bodyText,
             height: 1.4,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Text(
           'RISK INFORMATION',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 10,
             fontWeight: FontWeight.w600,
             color: tokens.subText,
             letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Text(
           plan.riskInformation.isNotEmpty
               ? plan.riskInformation
               : '— Not provided. Edit the plan to disclose drawdown and risk.',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13,
             color: tokens.bodyText,
             height: 1.4,
@@ -1715,7 +1715,7 @@ class _PlanTimeline extends StatelessWidget {
     if (events.isEmpty) {
       return Text(
         'No timeline events',
-        style: TextStyle(color: tokens.mutedText, fontSize: 13),
+        style: AppTextStyles.bodyText.copyWith(color: tokens.mutedText, fontSize: 13),
       );
     }
 
@@ -1793,7 +1793,7 @@ class _TimelineRowWidget extends StatelessWidget {
               Container(
                 width: 12,
                 height: 12,
-                margin: const EdgeInsets.only(top: 4),
+                margin: EdgeInsets.only(top: 4),
                 decoration: BoxDecoration(
                   color: _dotColor(),
                   shape: BoxShape.circle,
@@ -1808,7 +1808,7 @@ class _TimelineRowWidget extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
@@ -1820,7 +1820,7 @@ class _TimelineRowWidget extends StatelessWidget {
                       Expanded(
                         child: Text(
                           event.title,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: tokens.textPrimary,
@@ -1829,17 +1829,17 @@ class _TimelineRowWidget extends StatelessWidget {
                       ),
                       Text(
                         _fmt(event.date),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11,
                           color: tokens.mutedText,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
                     event.description,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11,
                       color: tokens.subText,
                     ),
@@ -1878,7 +1878,7 @@ class _KeyValueRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1888,16 +1888,16 @@ class _KeyValueRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: tokens.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11,
                     color: tokens.mutedText,
                   ),
@@ -1905,20 +1905,20 @@ class _KeyValueRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 value,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: valueColor ?? tokens.textPrimary,
                 ),
               ),
               if (trailingWidget != null) ...[
-                const SizedBox(height: 4),
+                SizedBox(height: 4),
                 trailingWidget!,
               ],
             ],

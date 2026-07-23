@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -95,7 +96,7 @@ class CongratulationsDialog extends StatelessWidget {
                   // Headers
                   Text(
                     'Congratulations!',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -105,7 +106,7 @@ class CongratulationsDialog extends StatelessWidget {
                   SizedBox(height: 8.h),
                   Text(
                     'You have successfully created a trading account.',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w400,
@@ -138,7 +139,7 @@ class CongratulationsDialog extends StatelessWidget {
                             children: [
                               Text(
                                 'Account Number',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
                                   color: AppColors.textGrey,
@@ -150,7 +151,7 @@ class CongratulationsDialog extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       accountNumber,
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 16.sp,
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.textPrimary,
@@ -206,7 +207,7 @@ class CongratulationsDialog extends StatelessWidget {
                             children: [
                               Text(
                                 'Server Name',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
                                   color: AppColors.textGrey,
@@ -215,7 +216,7 @@ class CongratulationsDialog extends StatelessWidget {
                               SizedBox(height: 6.h),
                               Text(
                                 serverName,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
@@ -238,7 +239,10 @@ class CongratulationsDialog extends StatelessWidget {
                     height: 48.h,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        backgroundColor:
+                            AppColors.isDarkMode
+                                ? AppColors.primary.withOpacity(0.1)
+                                : AppColors.primary,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
@@ -290,7 +294,7 @@ class CongratulationsDialog extends StatelessWidget {
                       },
                       child: Text(
                         'Make Deposit',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.pureWhite,
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w600,
@@ -306,7 +310,7 @@ class CongratulationsDialog extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 8.w),
                     child: Text(
                       'Please remember your password. Your real Account ID & Password have been sent to your email. You can always change your password in account settings.',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGreyLight,
                         fontWeight: FontWeight.w400,
@@ -323,7 +327,7 @@ class CongratulationsDialog extends StatelessWidget {
                     onTap: _refreshAccountsAndNavigateBack,
                     child: Text(
                       'See account list',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../constants/color.dart';
+import '../../constants/text_styles.dart';
 import '../../flavor_config.dart';
 import '../../brand_switcher.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
@@ -19,7 +20,7 @@ class BrandTestScreen extends StatelessWidget {
         foregroundColor: AppColors.whiteColor,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -27,36 +28,36 @@ class BrandTestScreen extends StatelessWidget {
             Card(
               color: FlavorConfig.instance.primaryColor,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '🎯 Current Brand: ${FlavorConfig.instance.appName}',
-                      style:   TextStyle(
+                      style:   AppTextStyles.bodyText.copyWith(
                         color: AppColors.whiteColor,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
                     Text(
                       'App Title: ${FlavorConfig.instance.appTitle}',
-                      style:   TextStyle(color: AppColors.whiteColor),
+                      style:   AppTextStyles.bodyText.copyWith(color: AppColors.whiteColor),
                     ),
                   ],
                 ),
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             // Color Samples
             Text(
               '🎨 Brand Colors:',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             // Primary Color
             _buildColorSample(
@@ -79,14 +80,14 @@ class BrandTestScreen extends StatelessWidget {
               'Used for highlights, links, etc.',
             ),
 
-            const SizedBox(height: 30),
+            SizedBox(height: 30),
 
             // Brand Switching Buttons
             Text(
               '🔄 Switch Brands:',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             SizedBox(
               width: double.infinity,
@@ -104,11 +105,11 @@ class BrandTestScreen extends StatelessWidget {
                   backgroundColor: FlavorConfig.instance.primaryColor,
                   foregroundColor: AppColors.whiteColor,
                 ),
-                child: const Text('Tenax'),
+                child: Text('Tenax'),
               ),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             SizedBox(
               width: double.infinity,
@@ -126,29 +127,29 @@ class BrandTestScreen extends StatelessWidget {
                   backgroundColor: FlavorConfig.instance.primaryColor,
                   foregroundColor: AppColors.whiteColor,
                 ),
-                child: const Text('🔄 Quick Switch to Next Brand'),
+                child: Text('🔄 Quick Switch to Next Brand'),
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             // Test using AppColors
             Text(
               '🧪 Testing AppColors:',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 'This uses AppColors.primary - should match brand color!',
-                style:   TextStyle(
+                style:   AppTextStyles.bodyText.copyWith(
                   color: AppColors.whiteColor,
                   fontWeight: FontWeight.bold,
                 ),
@@ -163,9 +164,9 @@ class BrandTestScreen extends StatelessWidget {
 
   Widget _buildColorSample(String name, Color color, String description) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Row(
           children: [
             Container(
@@ -177,28 +178,22 @@ class BrandTestScreen extends StatelessWidget {
                 border: Border.all(color: Colors.grey.shade300),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: AppTextStyles.cardTitle,
                   ),
                   Text(
                     '#${color.value.toRadixString(16).substring(2).toUpperCase()}',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontFamily: 'monospace',
-                    ),
+                    style: AppTextStyles.caption,
                   ),
                   Text(
                     description,
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                    style: AppTextStyles.caption,
                   ),
                 ],
               ),

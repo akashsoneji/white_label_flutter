@@ -146,7 +146,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                     SizedBox(width: 4.w),
                     Text(
                       'Create Plan',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.isDarkMode ? AppColors.whiteColorDark : AppColors.whiteColorLight ,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
@@ -188,13 +188,13 @@ class _MyPlansTabState extends State<MyPlansTab> {
                       ),
                       child: TextField(
                         controller: _searchController,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           color: AppColors.textPrimary,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Search plan name, ID...',
-                          hintStyle: TextStyle(
+                          hintStyle: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
                           ),
@@ -235,7 +235,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                           size: 18.r,
                           color: AppColors.textGrey,
                         ),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -282,7 +282,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                         SizedBox(height: 14.h),
                         Text(
                           'Loading plans...',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             color: AppColors.textGrey,
                           ),
@@ -326,7 +326,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                                 Text(
                                   err,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 14.sp,
                                     color: AppColors.error,
                                     fontWeight: FontWeight.w600,
@@ -339,11 +339,11 @@ class _MyPlansTabState extends State<MyPlansTab> {
                                       () => controller.refreshAll(
                                         showLoading: true,
                                       ),
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.refresh_rounded,
                                     size: 16,
                                   ),
-                                  label: const Text('Try Again'),
+                                  label: Text('Try Again'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
                                     foregroundColor:
@@ -396,7 +396,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                               SizedBox(height: 12.h),
                               Text(
                                 'No plans match your search',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 14.sp,
                                   color: AppColors.textGrey,
                                   fontWeight: FontWeight.w500,
@@ -460,7 +460,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
             SizedBox(height: 18.h),
             Text(
               'No Copy Plans Yet',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 17.sp,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
@@ -470,7 +470,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
             Text(
               'Create a copying plan to start sharing\nyour trades with investors.',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 color: AppColors.textGrey,
                 height: 1.5,
@@ -479,8 +479,8 @@ class _MyPlansTabState extends State<MyPlansTab> {
             SizedBox(height: 24.h),
             ElevatedButton.icon(
               onPressed: () => _openCreatePlanScreen(controller),
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Create First Plan'),
+              icon: Icon(Icons.add_rounded, size: 18),
+              label: Text('Create First Plan'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onColoredBackground,
@@ -489,7 +489,7 @@ class _MyPlansTabState extends State<MyPlansTab> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                textStyle: TextStyle(
+                textStyle: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                 ),
@@ -634,7 +634,7 @@ class _PlanCardItem extends StatelessWidget {
                     children: [
                       Text(
                         plan.planName.isEmpty ? 'Unnamed Plan' : plan.planName,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.whiteColor,
@@ -648,7 +648,7 @@ class _PlanCardItem extends StatelessWidget {
                         children: [
                           Text(
                             plan.tradingAccountNumber,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w500,
                               color: AppColors.whiteColor,
@@ -669,7 +669,7 @@ class _PlanCardItem extends StatelessWidget {
                   ),
                   child: Text(
                     '#${plan.id}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w800,
                       color: AppColors.whiteColor,
@@ -703,7 +703,7 @@ class _PlanCardItem extends StatelessWidget {
                       SizedBox(width: 4.w),
                       Text(
                         _statusLabel(status),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.5.sp,
                           fontWeight: FontWeight.w700,
                           color: _statusFg(status),
@@ -747,7 +747,7 @@ class _PlanCardItem extends StatelessWidget {
                           plan.copyingPaused
                               ? 'Copying Paused'
                               : 'Copying Active',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.5.sp,
                             fontWeight: FontWeight.w600,
                             color:
@@ -774,7 +774,7 @@ class _PlanCardItem extends StatelessWidget {
                     ),
                     child: Text(
                       'FULL',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 9.sp,
                         fontWeight: FontWeight.w800,
                         color: AppColors.warning,
@@ -871,7 +871,7 @@ class _PlanCardItem extends StatelessWidget {
                     ),
                     label: Text(
                       'View Details',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,
@@ -906,7 +906,7 @@ class _PlanCardItem extends StatelessWidget {
                     ),
                     label: Text(
                       'Edit Plan',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,
@@ -961,7 +961,7 @@ class _PlanCardItem extends StatelessWidget {
                             SizedBox(width: 4.w),
                             Text(
                               plan.copyingPaused ? 'Resume' : 'Pause',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w700,
                                 color:
@@ -999,18 +999,18 @@ class _PlanCardItem extends StatelessWidget {
             ),
             title: Text(
               actionText,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w700),
             ),
             content: Text(
               confirmationMessage,
-              style: TextStyle(fontSize: 13.sp, height: 1.5),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, height: 1.5),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(),
                 child: Text(
                   'Cancel',
-                  style: TextStyle(color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                 ),
               ),
               TextButton(
@@ -1035,7 +1035,7 @@ class _PlanCardItem extends StatelessWidget {
                 },
                 child: Text(
                   plan.copyingPaused ? 'Resume' : 'Pause',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontWeight: FontWeight.w700,
                     color:
                         plan.copyingPaused
@@ -1094,7 +1094,7 @@ class _MetricTile extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 9.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textGrey,
@@ -1104,7 +1104,7 @@ class _MetricTile extends StatelessWidget {
                 SizedBox(height: 2.h),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,

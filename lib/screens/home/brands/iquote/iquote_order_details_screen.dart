@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -48,7 +49,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
         ),
         title: Text(
           t('order_details_title'),
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -145,7 +146,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
         children: [
           Text(
             _d.symbol,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
@@ -163,7 +164,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
               SizedBox(width: 8.w),
               Text(
                 '${_d.lots}Lot  ${_d.contractSize}  ${_d.leverage}',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textGrey,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w500,
@@ -174,7 +175,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
           SizedBox(height: 16.h),
           Text(
             _d.profit,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: isProfit ? AppColors.statusGreen : AppColors.statusRed,
               fontSize: 32.sp,
               fontWeight: FontWeight.w700,
@@ -194,7 +195,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           color: fg,
           fontSize: 11.sp,
           fontWeight: FontWeight.w600,
@@ -213,7 +214,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 13.sp,
                   ),
@@ -224,7 +225,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
               else
                 Text(
                   value.isEmpty ? '---' : value,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: valueColor ?? AppColors.textPrimary,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
@@ -253,7 +254,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
           titleText: const SizedBox.shrink(),
           messageText: Text(
             'Copied',
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 12.sp),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 12.sp),
           ),
         );
       },
@@ -262,7 +263,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
         children: [
           Text(
             text,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,
@@ -296,7 +297,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.textSecondary,
                       fontSize: 13.sp,
                     ),

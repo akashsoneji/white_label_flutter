@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -145,7 +146,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
           children: [
             Text(
               parts.big,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: color,
                 fontSize: 26.sp,
                 fontWeight: FontWeight.w700,
@@ -158,7 +159,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
                 offset: Offset(0, -4.h),
                 child: Text(
                   parts.small,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: color,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
@@ -309,7 +310,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
               child: Center(
                 child: Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: MetaTheme.mainText(c),
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -375,7 +376,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,5}$')),
             ],
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: MetaTheme.mainText(c),
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
@@ -419,7 +420,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
           children: [
             Text(
               Get.find<LanguageService>().tr('meta_modify_position_label', {'id': '$p.orderId'}),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.mainText(c),
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
@@ -428,7 +429,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
             SizedBox(height: 2.h),
             Text(
               '${isBuy ? 'buy' : 'sell'} ${p.volume.toStringAsFixed(2)} ${p.symbol} at ${p.entryPrice}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.subText(c),
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w400,
@@ -494,7 +495,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
             //       icon: Icon(Icons.calculate_outlined, color: MetaTheme.buy(c)),
             //       label: Text(
             //         Get.find<LanguageService>().tr('meta_modify_auto_sl_tp'),
-            //         style: TextStyle(
+            //         style: AppTextStyles.bodyText.copyWith(
             //           color: MetaTheme.buy(c),
             //           fontSize: 14.sp,
             //           fontWeight: FontWeight.w600,
@@ -513,7 +514,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
               child: Text(
                 'Stop Loss or Take Profit you set must differ from market price by at least 20 points. Stops processing is performed on the broker side.',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
@@ -551,7 +552,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
                           )
                           : Text(
                             Get.find<LanguageService>().tr('meta_modify_button'),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color:
                                   _isModifyEnabled
                                       ? Colors.white
@@ -704,7 +705,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
     return SwitchListTile(
       title: Text(
         label,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           color: MetaTheme.mainText(c),
           fontSize: 14.sp,
           fontWeight: FontWeight.w600,
@@ -750,7 +751,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: color,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
@@ -789,7 +790,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
                         RegExp(r'^\d*\.?\d{0,5}$'),
                       ),
                     ],
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: MetaTheme.mainText(c),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
@@ -839,7 +840,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
               label == Get.find<LanguageService>().tr('meta_modify_take_profit')
                   ? 'Potential Profit: \$${pnl.toStringAsFixed(2)}'
                   : 'Potential Loss: \$${(-pnl.abs()).toStringAsFixed(2)}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color:
                     label == Get.find<LanguageService>().tr('meta_modify_take_profit')
                         ? MetaTheme.buy(c)
@@ -888,7 +889,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Text(
               Get.find<LanguageService>().tr('meta_modify_auto_sl_tp'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.mainText(c),
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w800,
@@ -1010,7 +1011,7 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
                 },
                 child: Text(
                   Get.find<LanguageService>().tr('meta_modify_apply'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: Colors.white,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,

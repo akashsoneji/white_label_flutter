@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -151,7 +152,7 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
           Expanded(
             child: Text(
               'Edit plan',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.primary,
                 fontSize: 17.sp,
                 fontWeight: FontWeight.w800,
@@ -244,7 +245,7 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
           ),
           child: Text(
             'Cancel',
-            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w600),
           ),
         ),
         ElevatedButton(
@@ -269,7 +270,7 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
                 )
               : Text(
                   'Save changes',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                   ),
@@ -296,7 +297,7 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
                 'This plan has active investors. You can update the name '
                 'and descriptions only. To change commission or minimum '
                 'investment, all investors must unsubscribe first.',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.error,
                   fontSize: 12.sp,
                   height: 1.4,
@@ -312,7 +313,7 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
         children: [
           Text(
             text,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
               fontSize: 13.sp,
               fontWeight: FontWeight.w700,
@@ -322,7 +323,7 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
             SizedBox(width: 4.w),
             Text(
               '*',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.error,
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
@@ -347,13 +348,13 @@ class _EditPlanBottomSheetState extends State<EditPlanBottomSheet> {
       maxLines: maxLines,
       minLines: minLines,
       keyboardType: keyboardType,
-      style: TextStyle(color: AppColors.textPrimary, fontSize: 14.sp),
+      style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 14.sp),
       decoration: InputDecoration(
         isDense: true,
         prefixText: prefix,
         suffixText: suffix,
-        prefixStyle: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
-        suffixStyle: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
+        prefixStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
+        suffixStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
         contentPadding:
             EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
         filled: true,

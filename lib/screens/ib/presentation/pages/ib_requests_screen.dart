@@ -97,7 +97,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
         elevation: 0,
         title: Text(
           'IB Requests',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -189,7 +189,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       ),
                       child: Text(
                         status,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: isSelected ? AppColors.whiteColor : AppColors.textGrey,
                           fontWeight:
                               isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -230,7 +230,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
               SizedBox(height: 20.h),
               Text(
                 'No requests found',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -239,7 +239,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
               SizedBox(height: 8.h),
               Text(
                 'There are no $_selectedStatus requests at the moment',
-                style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -323,7 +323,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                   child: Center(
                     child: Text(
                       name.isNotEmpty ? name[0].toUpperCase() : 'N',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.whiteColor,
@@ -338,7 +338,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                     children: [
                       Text(
                         name,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
@@ -349,7 +349,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       SizedBox(height: 3.h),
                       Text(
                         email,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: AppColors.textGrey,
                           fontWeight: FontWeight.w400,
@@ -376,7 +376,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                   ),
                   child: Text(
                     _getStatusLabel(request.status),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w700,
                       color: statusColor,
@@ -426,7 +426,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                 ),
                 label: Text(
                   'Change Plan',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.whiteColor,
@@ -481,7 +481,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 11.sp,
                   color: AppColors.textGrey,
                   fontWeight: FontWeight.w400,
@@ -490,7 +490,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
               SizedBox(height: 2.h),
               Text(
                 value,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                   color: valueColor ?? AppColors.textPrimary,
@@ -534,7 +534,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       children: [
                         Text(
                           'Assign Plan',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -564,7 +564,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       alignment: Alignment.center,
                       child: Text(
                         'Standard Group',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.whiteColor,
                           fontWeight: FontWeight.w600,
                           fontSize: 14.sp,
@@ -579,7 +579,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
 
                     Obx(() {
                       if (ibController.isCommissionGroupsLoading.value) {
-                        return const SizedBox(
+                        return SizedBox(
                           height: 50,
                           child: Center(child: CircularProgressIndicator()),
                         );
@@ -609,7 +609,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                           child: DropdownButton<CommissionGroup>(
                             isExpanded: true,
                             value: selectedGroup,
-                            hint: const Text('Select Group'),
+                            hint: Text('Select Group'),
                             items:
                                 ibController.commissionGroups.map((group) {
                                   return DropdownMenuItem(
@@ -631,12 +631,12 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                     SizedBox(height: 8.h),
 
                     TextField(
-                      style: TextStyle(color: AppColors.textPrimary),
+                      style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                       controller: reasonController,
                       maxLines: 4,
                       decoration: InputDecoration(
                         hintText: 'Please provide a reason...',
-                        hintStyle: TextStyle(color: AppColors.textGrey),
+                        hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.r),
                         ),
@@ -652,7 +652,7 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                       children: [
                         // OutlinedButton(
                         //   onPressed: Get.back,
-                        //   child: const Text('Close'),
+                        //   child: Text('Close'),
                         // ),
                         ElevatedButton(
                           onPressed: () async {
@@ -698,13 +698,13 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
     return RichText(
       text: TextSpan(
         text: '$text ',
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 13.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        children: const [
-          TextSpan(text: '*', style: TextStyle(color: AppColors.error)),
+        children: [
+          TextSpan(text: '*', style: AppTextStyles.bodyText.copyWith(color: AppColors.error)),
         ],
       ),
     );

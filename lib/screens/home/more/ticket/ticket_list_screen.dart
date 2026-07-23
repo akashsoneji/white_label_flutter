@@ -72,7 +72,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
                   SizedBox(width: 6.w),
                   Text(
                     lang.tr('ticket_new_ticket'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.whiteColor,
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -92,7 +92,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(child: CircularProgressIndicator());
               }
               if (controller.tickets.isEmpty) {
                 return RefreshIndicator(
@@ -120,7 +120,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
                     if (index >= controller.tickets.length) {
                       return Padding(
                         padding: EdgeInsets.symmetric(vertical: 16.h),
-                        child: const Center(
+                        child: Center(
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                       );
@@ -178,7 +178,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
                 ),
                 child: Text(
                   dep.name,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: selected
                         ? AppColors.whiteColor
                         : AppColors.textPrimary,
@@ -274,7 +274,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
             isExpanded: true,
             value: value.value,
             icon: Icon(Icons.keyboard_arrow_down, color: AppColors.iconGrey),
-            style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 13.sp),
             dropdownColor: AppColors.card,
             items: items.entries
                 .map((e) =>
@@ -305,7 +305,7 @@ class _TicketListScreenState extends State<TicketListScreen> {
             Text(
               lang.tr('ticket_no_tickets_subtitle'),
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary, fontSize: 13.sp),
             ),
             if (controller.hasActiveFilters) ...[
               SizedBox(height: 16.h),
@@ -367,7 +367,7 @@ class _TicketCard extends StatelessWidget {
             Row(
               children: [
                 Text('#${ticket.id}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textSecondary, fontSize: 12.sp)),
                 const Spacer(),
                 _badge(
@@ -392,7 +392,7 @@ class _TicketCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style:
-                    TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+                    AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary, fontSize: 12.sp),
               ),
             ],
             SizedBox(height: 10.h),
@@ -419,13 +419,13 @@ class _TicketCard extends StatelessWidget {
                     backgroundColor: AppColors.surfacePrimary,
                     child: Text(
                       ticket.assignee!.name.characters.first.toUpperCase(),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp, color: AppColors.primary),
                     ),
                   ),
                   SizedBox(width: 6.w),
                   Text(ticket.assignee!.name,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp, color: AppColors.textSecondary)),
                 ],
               ),
@@ -445,7 +445,7 @@ class _TicketCard extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
             color: color, fontSize: 10.sp, fontWeight: FontWeight.w600),
       ),
     );
@@ -458,7 +458,7 @@ class _TicketCard extends StatelessWidget {
         Icon(icon, size: 13.sp, color: AppColors.iconGrey),
         SizedBox(width: 3.w),
         Text(text,
-            style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary)),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textSecondary)),
       ],
     );
   }

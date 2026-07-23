@@ -105,7 +105,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     SizedBox(height: 18.h),
                     Text(
                       'Invest Now',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -117,7 +117,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     if (_manager.plans.length > 1) ...[
                       Text(
                         'Select Plan',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textGrey,
@@ -154,7 +154,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
 
                     Text(
                       'Select Trading Account',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textGrey,
@@ -223,14 +223,14 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                               children: [
                                 Text(
                                   'Min. Investment:',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 12.sp,
                                     color: AppColors.textGrey,
                                   ),
                                 ),
                                 Text(
                                   _fmt(_selectedPlan!.minimumInvestment),
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
@@ -246,14 +246,14 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                                 children: [
                                   Text(
                                     'Your Balance:',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 12.sp,
                                       color: AppColors.textGrey,
                                     ),
                                   ),
                                   Text(
                                     _fmt(balance),
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w700,
                                       color:
@@ -274,7 +274,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                         padding: EdgeInsets.only(top: 8.h),
                         child: Text(
                           'Insufficient balance for this plan.',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.error,
                             fontWeight: FontWeight.w500,
@@ -317,7 +317,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                           ),
                           child: Text(
                             'Confirm Invest',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.onColoredBackground,
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w700,
@@ -393,7 +393,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     backgroundColor: AppColors.primary.withOpacity(0.15),
                     child: Text(
                       initials,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primary,
@@ -403,7 +403,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                   SizedBox(height: 10.h),
                   Text(
                     name,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -422,7 +422,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     ),
                     child: Text(
                       'FUND MANAGER',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.primary,
                         fontWeight: FontWeight.w700,
@@ -456,7 +456,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                             SizedBox(width: 6.w),
                             Text(
                               'INVEST NOW',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.onColoredBackground,
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
@@ -470,7 +470,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                     SizedBox(height: 8.h),
                     Text(
                       'Min. Investment: $minInvest',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.textGrey,
                       ),
@@ -504,7 +504,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                               children: [
                                 Text(
                                   'No Active Plan Yet',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w500,
                                     color: AppColors.textPrimary,
@@ -582,7 +582,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       children: [
                         Text(
                           'Plan Details',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -594,7 +594,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                                 _showInvestSheet, // Or a dedicated plan picker
                             child: Text(
                               'Change Plan',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
@@ -614,7 +614,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       SizedBox(height: 12.h),
                       Text(
                         'Strategy',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,
@@ -623,7 +623,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       SizedBox(height: 4.h),
                       Text(
                         _selectedPlan!.strategyDescription!,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           color: AppColors.textGrey,
                           height: 1.4,
@@ -636,7 +636,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       SizedBox(height: 12.h),
                       Text(
                         'Risk Information',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,
@@ -645,7 +645,7 @@ class _PmamManagerDetailScreenState extends State<PmamManagerDetailScreen> {
                       SizedBox(height: 4.h),
                       Text(
                         _selectedPlan!.riskInformation!,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           color: AppColors.textGrey,
                           height: 1.4,
@@ -707,7 +707,7 @@ class _DetailStatCard extends StatelessWidget {
                   children: [
                     Text(
                       value,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
                         color: c,
@@ -716,7 +716,7 @@ class _DetailStatCard extends StatelessWidget {
                     ),
                     Text(
                       label,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 9.sp,
                         color: AppColors.textGrey,
                         letterSpacing: 0.5,
@@ -747,11 +747,11 @@ class _DetailRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,

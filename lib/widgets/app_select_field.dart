@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 
@@ -91,7 +92,7 @@ class AppSelectField<T> extends StatelessWidget {
                 SizedBox(height: 16.h),
                 Text(
                   sheetTitle,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 17.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -138,7 +139,7 @@ class AppSelectField<T> extends StatelessWidget {
                                   children: [
                                     Text(
                                       opt.title,
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 14.sp,
                                         fontWeight:
                                             selected
@@ -155,7 +156,7 @@ class AppSelectField<T> extends StatelessWidget {
                                       SizedBox(height: 4.h),
                                       Text(
                                         opt.subtitle!,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 12.sp,
                                           color: AppColors.textGrey,
                                         ),
@@ -215,7 +216,7 @@ class AppSelectField<T> extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label ?? hint,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: textSize,
                       fontWeight:
                           label != null ? FontWeight.w500 : FontWeight.w400,

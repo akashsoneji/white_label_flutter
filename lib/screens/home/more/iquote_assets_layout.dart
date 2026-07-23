@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -114,7 +115,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 languageService?.tr('biometric_not_enrolled_title') ??
                     'Biometric Security',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 17.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -125,7 +126,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 languageService?.tr('biometric_not_enrolled_message') ??
                     'Biometric authentication is not set up on this device.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.5.sp,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textSecondary,
@@ -148,7 +149,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                         alignment: Alignment.center,
                         child: Text(
                           languageService?.tr('common_close') ?? 'Close',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w600,
@@ -176,7 +177,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                         child: Text(
                           languageService?.tr('biometric_open_settings') ??
                               'Open Settings',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.pureWhite,
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w600,
@@ -277,7 +278,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 languageService?.tr('logout_confirm_message') ??
                     'Are you sure you want to log out?',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -302,7 +303,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                         alignment: Alignment.center,
                         child: Text(
                           languageService?.tr('navigation_yes') ?? 'Yes',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: Colors.white,
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
@@ -325,7 +326,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                         alignment: Alignment.center,
                         child: Text(
                           languageService?.tr('navigation_no') ?? 'No',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
@@ -373,7 +374,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 languageService?.tr('delete_account_confirm_message') ??
                     'Are you sure you want to delete your account?',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -384,12 +385,12 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 () => TextField(
                   controller: passwordController,
                   obscureText: true,
-                  style: TextStyle(color: AppColors.textPrimary),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     hintText:
                         languageService?.tr('delete_account_password_hint') ??
                         'Enter your password',
-                    hintStyle: TextStyle(color: AppColors.textSecondary),
+                    hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                       borderSide: BorderSide(
@@ -434,7 +435,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                           alignment: Alignment.center,
                           child: Text(
                             languageService?.tr('navigation_yes') ?? 'Delete',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: Colors.white,
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w600,
@@ -458,7 +459,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                         alignment: Alignment.center,
                         child: Text(
                           languageService?.tr('navigation_no') ?? 'Cancel',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
@@ -520,7 +521,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               Text(
                 languageService?.tr('general_financial') ??
                     'Services & Account',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: textPrimary,
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
@@ -540,7 +541,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               Text(
                 languageService?.tr('general_account_security') ??
                     'Account & Security',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: textPrimary,
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
@@ -668,7 +669,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                               displayName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w600,
                                 color: textPrimary,
@@ -688,7 +689,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                               subText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: textSecondary,
                               ),
@@ -816,7 +817,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                       SizedBox(width: 8.w),
                       Text(
                         'Deposit',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: Colors.white,
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -859,7 +860,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                       SizedBox(width: 8.w),
                       Text(
                         'Withdrawal',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: Colors.white,
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -894,7 +895,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                   ),
                   child: Text(
                     'Sign in',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: textPrimary,
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
@@ -926,7 +927,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                   ),
                   child: Text(
                     'Sign up',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: Colors.white,
                       fontSize: 15.sp,
                       fontWeight: FontWeight.bold,
@@ -989,7 +990,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                   SizedBox(height: 6.h),
                   Text(
                     'Create Demo Account',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: textPrimary,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
@@ -1041,7 +1042,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                   SizedBox(height: 6.h),
                   Text(
                     'Create Real Account',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: textPrimary,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
@@ -1339,7 +1340,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                     Expanded(
                       child: Text(
                         formattedTitle,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: textPrimary,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -1354,7 +1355,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                   if (formattedSubtitle != null) ...[
                     Text(
                       formattedSubtitle,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: const Color(0xFFFF9538),
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,

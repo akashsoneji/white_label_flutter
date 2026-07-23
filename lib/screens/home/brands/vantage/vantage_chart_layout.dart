@@ -29,6 +29,7 @@
 // ============================================================
 
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 
 import 'package:crm_app/widgets/app_svg_icon.dart';
 import 'package:flutter/material.dart';
@@ -282,14 +283,23 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     // data the rest of the app uses); fall back to the favourite string
     // itself if the stream hasn't loaded yet.
     final filtered = <String>[];
+    final seen = <String>{};
     if (instruments.isNotEmpty) {
       for (final inst in instruments) {
-        if (favSet.contains(_stripSuffix(inst.symbol).toUpperCase())) {
+        final stripped = _stripSuffix(inst.symbol).toUpperCase();
+        if (favSet.contains(stripped) && !seen.contains(stripped)) {
+          seen.add(stripped);
           filtered.add(inst.symbol);
         }
       }
     } else {
-      filtered.addAll(favoritesRaw);
+      for (final raw in favoritesRaw) {
+        final stripped = _stripSuffix(raw).toUpperCase();
+        if (!seen.contains(stripped)) {
+          seen.add(stripped);
+          filtered.add(raw);
+        }
+      }
     }
     filtered.sort(
       (a, b) => _stripSuffix(
@@ -400,7 +410,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                               Expanded(
                                 child: Text(
                                   sym,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 15.sp,
                                     fontWeight:
                                         isActive
@@ -576,13 +586,13 @@ class _Header extends StatelessWidget {
       child: Row(
         children: [
           // Back arrow
-          IconButton(
-            onPressed: onBack,
-            icon: Icon(Icons.arrow_back, size: 22.sp, color: fg),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-          SizedBox(width: 6.w),
+          // IconButton(
+          //   onPressed: onBack,
+          //   icon: Icon(Icons.arrow_back, size: 22.sp, color: fg),
+          //   padding: EdgeInsets.zero,
+          //   constraints: const BoxConstraints(),
+          // ),
+          // SizedBox(width: 6.w),
           // Symbol pill
           Expanded(
             child: InkWell(
@@ -594,7 +604,7 @@ class _Header extends StatelessWidget {
                   // Slightly bolder font for the symbol, like the reference
                   Text(
                     symbol,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: fg,
@@ -660,6 +670,7 @@ class _ChartArea extends StatelessWidget {
     // server-side mobile-chart loader picks up the symbol on first paint.
     final url =
         '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$raw&theme=${isDark ? 'dark' : 'light'}';
+    print('Chart URL: $url');
     return ChartInAppWebView(
       key: ValueKey('vantage_chart_$raw'),
       symbol: raw,
@@ -719,7 +730,7 @@ class _BottomDock extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0F0F12) : Colors.white,
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: Color(0x0F000000),
             blurRadius: 12,
@@ -802,7 +813,7 @@ class _BottomDock extends StatelessWidget {
                     ),
                     child: Text(
                       spreadStr,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                         color: isDark ? Colors.white : Colors.black87,
@@ -877,7 +888,10 @@ class _QuantityBar extends StatelessWidget {
                 children: [
                   Text(
                     'Quantity (lots)',
-                    style: TextStyle(fontSize: 10.sp, color: muted),
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 10.sp,
+                      color: muted,
+                    ),
                   ),
                   // Editable TextField in place of the static Text widget.
                   // Same footprint as the previous Text so the +/- icons
@@ -898,7 +912,7 @@ class _QuantityBar extends StatelessWidget {
                       onChanged: onVolumeChanged,
                       onEditingComplete: onVolumeSubmitted,
                       onSubmitted: (_) => onVolumeSubmitted(),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
                         // color: fg,
@@ -986,7 +1000,7 @@ class _SideButton extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.whiteColor,
@@ -996,7 +1010,7 @@ class _SideButton extends StatelessWidget {
             SizedBox(height: 2.h),
             Text(
               sub,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.whiteColor,

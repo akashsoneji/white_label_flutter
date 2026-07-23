@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import '../../constants/color.dart';
@@ -39,7 +40,7 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
         leading: const AppBackButton(),
         title: Text(
           'Open Account',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -56,7 +57,7 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
             child: Text(
               'Open a trading account to get superior trading conditions any strategy',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 color: AppColors.textGrey,
                 height: 1.4,
@@ -104,7 +105,7 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
                           SizedBox(height: 12),
                           Text(
                             'Real Account',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                               color:
@@ -156,7 +157,7 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
                           SizedBox(height: 12),
                           Text(
                             'Demo Account',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                               color:
@@ -196,7 +197,7 @@ class _OpenAccountScreenState extends State<OpenAccountScreen> {
                     selectedAccountType != null
                         ? 'Next'
                         : 'Select Account Type',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppColors.whiteColor,

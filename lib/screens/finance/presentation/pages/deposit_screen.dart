@@ -107,7 +107,7 @@ class _DepositScreenState extends State<DepositScreen> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(
+        padding: EdgeInsets.only(
           bottom: kToolbarHeight,
           left: 24.0,
           right: 24.0,
@@ -129,7 +129,7 @@ class _DepositScreenState extends State<DepositScreen> {
     });
 
     return RTLHelper.rtlTextField(
-      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w400),
+      style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w400),
       controller: amountController,
       focusNode: amountFocusNode,
       keyboardType: TextInputType.numberWithOptions(
@@ -175,7 +175,7 @@ class _DepositScreenState extends State<DepositScreen> {
       ),
       child: Text(
         languageService.tr('deposit_confirm_deposit'),
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 14.sp,
           height: 1.71,
           fontWeight: FontWeight.w600,

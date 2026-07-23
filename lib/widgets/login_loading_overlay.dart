@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../constants/color.dart';
@@ -46,7 +47,7 @@ class LoginLoadingOverlay extends StatelessWidget {
               SizedBox(height: 16.h),
               Text(
                 message,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textPrimary,
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,

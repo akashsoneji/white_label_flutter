@@ -158,7 +158,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
                       ),
                     ),
                     child: Text(lang.tr('ticket_cancel'),
-                        style: TextStyle(color: AppColors.textPrimary)),
+                        style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary)),
                   ),
                 ),
                 SizedBox(width: 12.w),
@@ -185,7 +185,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
                             )
                           : Text(
                               lang.tr('ticket_create'),
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.whiteColor,
                                   fontWeight: FontWeight.w600),
                             ),
@@ -221,7 +221,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
                 _attachment!.path.split('/').last,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 13.sp, color: AppColors.textPrimary),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textPrimary),
               ),
             ),
             GestureDetector(
@@ -246,7 +246,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
               SizedBox(height: 8.h),
               Text(
                 lang.tr('ticket_attach_files'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.primary,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -256,7 +256,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
               Text(
                 lang.tr('ticket_attachment_formats'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp, color: AppColors.textSecondary),
               ),
             ],
@@ -273,7 +273,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
 
   InputDecoration _inputDecoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: AppColors.hint, fontSize: 13.sp),
+        hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.hint, fontSize: 13.sp),
         isDense: true,
         filled: true,
         fillColor: AppColors.surface,

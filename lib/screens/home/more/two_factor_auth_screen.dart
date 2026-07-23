@@ -88,7 +88,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
           }),
           Obx(() {
             if (_controller.isLoading) {
-              return const Center(child: CommonLoadingWidget(isFullScreen: true));
+              return Center(child: CommonLoadingWidget(isFullScreen: true));
             }
             return const SizedBox.shrink();
           }),
@@ -105,7 +105,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
         children: [
           Text(
             _languageService.tr('two_factor_subtitle'),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               color: AppColors.textGrey,
               height: 1.5,
@@ -118,7 +118,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
               children: [
                 Text(
                   _languageService.tr('two_factor_setup_title'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -127,7 +127,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
                 SizedBox(height: 8.h),
                 Text(
                   _languageService.tr('two_factor_setup_description'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     color: AppColors.textGrey,
                     height: 1.4,
@@ -155,7 +155,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
         children: [
           Text(
             _languageService.tr('two_factor_scan_instruction'),
-            style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
           ),
           SizedBox(height: 20.h),
           if (data != null && data.qrCodeUrl.isNotEmpty) ...[
@@ -175,7 +175,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
                   placeholder: (_, __) => SizedBox(
                     width: 200.w,
                     height: 200.w,
-                    child: const Center(child: CircularProgressIndicator()),
+                    child: Center(child: CircularProgressIndicator()),
                   ),
                   errorWidget: (_, __, ___) => Icon(
                     Icons.qr_code_2,
@@ -188,7 +188,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
             SizedBox(height: 20.h),
             Text(
               _languageService.tr('two_factor_manual_code'),
-              style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
             ),
             SizedBox(height: 8.h),
             _buildSecretBox(data.secretKey),
@@ -216,7 +216,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
         children: [
           Text(
             _languageService.tr('two_factor_subtitle'),
-            style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
           ),
           SizedBox(height: 24.h),
           Container(
@@ -240,7 +240,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
                 Expanded(
                   child: Text(
                     _languageService.tr('two_factor_enabled_status'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                       color: AppColors.quickActionGreen,
@@ -268,7 +268,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
         children: [
           Text(
             _languageService.tr('two_factor_disable_instruction'),
-            style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
           ),
           SizedBox(height: 24.h),
           _primaryButton(
@@ -312,10 +312,8 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
           Expanded(
             child: Text(
               secret,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
-                fontFamily: 'monospace',
-                color: AppColors.textPrimary,
                 letterSpacing: 1.2,
               ),
             ),
@@ -350,7 +348,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.whiteColor,
@@ -372,7 +370,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -394,7 +392,7 @@ class _TwoFactorAuthScreenState extends State<TwoFactorAuthScreen> {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.error,

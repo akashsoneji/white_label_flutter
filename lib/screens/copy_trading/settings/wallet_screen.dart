@@ -91,7 +91,7 @@ class CopyTradingWalletScreen extends StatelessWidget {
                   Obx(
                     () => Text(
                       controller.walletBalance.value,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 36.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -410,7 +410,7 @@ class CopyTradingWalletScreen extends StatelessWidget {
             child: Text(
               label,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: isSelected ? AppColors.whiteColor : AppColors.primary,
                 fontWeight: FontWeight.w600,
                 fontSize: 14.sp,
@@ -594,7 +594,7 @@ class _HistoryItem extends StatelessWidget {
         ),
         child: Text(
           'T',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.whiteColor,
             fontSize: 12.sp,
             fontWeight: FontWeight.bold,
@@ -627,7 +627,7 @@ class _DetailRow extends StatelessWidget {
                 '..........................................................................................................................................',
                 maxLines: 1,
                 overflow: TextOverflow.clip,
-                style: TextStyle(color: AppColors.border.withValues(alpha: 0.3)),
+                style: AppTextStyles.bodyText.copyWith(color: AppColors.border.withValues(alpha: 0.3)),
               ),
             ),
           ),

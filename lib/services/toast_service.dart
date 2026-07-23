@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 
 /// Simple toast service for showing messages
@@ -75,7 +76,7 @@ class ToastService {
       SnackBar(
         content: Text(
           message,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: textColor ?? AppColors.onColoredBackground,
           ),
         ),

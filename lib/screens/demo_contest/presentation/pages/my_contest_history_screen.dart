@@ -54,7 +54,7 @@ class _MyContestHistoryScreenState extends State<MyContestHistoryScreen>
           unselectedLabelColor: AppColors.textGrey,
           indicatorColor: AppColors.primary,
           indicatorWeight: 3,
-          labelStyle: TextStyle(
+          labelStyle: AppTextStyles.bodyText.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 13.sp,
           ),
@@ -198,7 +198,7 @@ class _WinnersTab extends StatelessWidget {
               padding: EdgeInsets.only(left: 4.w, bottom: 10.h),
               child: Text(
                 languageService.tr('dc_your_wins'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -222,7 +222,7 @@ class _WinnersTab extends StatelessWidget {
               padding: EdgeInsets.only(left: 4.w, bottom: 10.h),
               child: Text(
                 languageService.tr('dc_recent_winners'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -265,7 +265,7 @@ class _WinnerTile extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               '#${winner.rank}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w800,
                 color: AppColors.warning,
@@ -279,7 +279,7 @@ class _WinnerTile extends StatelessWidget {
               children: [
                 Text(
                   winner.displayName,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -289,7 +289,7 @@ class _WinnerTile extends StatelessWidget {
                 ),
                 Text(
                   winner.contestTitle,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     color: AppColors.textGrey,
                   ),
@@ -304,7 +304,7 @@ class _WinnerTile extends StatelessWidget {
             children: [
               Text(
                 '\$${winner.prizeAmount.toStringAsFixed(0)}',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.warning,
@@ -312,7 +312,7 @@ class _WinnerTile extends StatelessWidget {
               ),
               Text(
                 '+${winner.pnlPercent.toStringAsFixed(1)}%',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 10.sp,
                   color: AppColors.success,
                   fontWeight: FontWeight.w600,
@@ -339,12 +339,12 @@ class _EmptyHistory extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('📭', style: TextStyle(fontSize: 60.sp)),
+            Text('📭', style: AppTextStyles.bodyText.copyWith(fontSize: 60.sp)),
             SizedBox(height: 14.h),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
@@ -354,7 +354,7 @@ class _EmptyHistory extends StatelessWidget {
             Text(
               desc,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 color: AppColors.textGrey,
                 height: 1.4,

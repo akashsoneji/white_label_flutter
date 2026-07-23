@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 
 import 'package:crm_app/constants/color.dart';
 import 'package:flutter/material.dart';
@@ -64,11 +65,11 @@ class _ContestCountdownTimerState extends State<ContestCountdownTimer> {
     final parts = _formatDuration(_remaining);
 
     final textStyle = widget.textStyle ??
-        TextStyle(
+        AppTextStyles.bodyText.copyWith(
           fontSize: 14.sp,
           fontWeight: FontWeight.w600,
           color: positive ? AppColors.textPrimary : AppColors.error,
-          fontFeatures: const [FontFeature.tabularFigures()],
+          fontFeatures: [FontFeature.tabularFigures()],
         );
 
     return Row(
@@ -92,7 +93,7 @@ class _ContestCountdownTimerState extends State<ContestCountdownTimer> {
   List<_CountdownPart> _formatDuration(Duration d) {
     final total = d.inSeconds;
     if (total <= 0) {
-      return const [
+      return [
         _CountdownPart(label: '00', value: '00'),
         _CountdownPart(label: '00', value: '00'),
         _CountdownPart(label: '00', value: '00'),
@@ -157,7 +158,7 @@ class _CountdownCell extends StatelessWidget {
           if (!compact && label.isNotEmpty)
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 9.sp,
                 color: accent,
                 fontWeight: FontWeight.w600,

@@ -352,7 +352,7 @@ class _TradeScreenState extends State<TradeScreen> {
                 //   color: AppColors.isDarkMode ? Colors.transparent : AppColors.grey,
                 // ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 0.0),
+                  padding: EdgeInsets.symmetric(vertical: 0.0),
                   child: _buildTabs(tradingController),
                 ),
                 SizedBox(height: 4.h),
@@ -917,7 +917,7 @@ class _TradeScreenState extends State<TradeScreen> {
                             tradingController.selectedTab == 1
                                 ? '${positions.length} orders'
                                 : '\$${PrecisionHelper.formatPnL(totalProfitLoss)}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontWeight: FontWeight.w600,
                           color:
                               tradingController.selectedTab == 1
@@ -987,7 +987,7 @@ class _TradeScreenState extends State<TradeScreen> {
                                 child: Center(
                                   child: Text(
                                     filteredCount.toString(),
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       color: AppColors.whiteColor,
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.bold,
@@ -1056,7 +1056,7 @@ class _TradeScreenState extends State<TradeScreen> {
                               child: Center(
                                 child: Text(
                                   filteredCount.toString(),
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.whiteColor,
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.bold,
@@ -1126,7 +1126,7 @@ class _TradeScreenState extends State<TradeScreen> {
                               child: Center(
                                 child: Text(
                                   filteredCount.toString(),
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.whiteColor,
                                     fontSize: 10.sp,
                                     fontWeight: FontWeight.bold,
@@ -1476,7 +1476,7 @@ class _TradeScreenState extends State<TradeScreen> {
                   ],
                 ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: EdgeInsets.all(8.0),
           child: _buildCardContent(tradingController, position, isPositive),
         ),
       ),
@@ -1521,7 +1521,7 @@ class _TradeScreenState extends State<TradeScreen> {
               SizedBox(width: 8.w),
               Text(
                 'Close',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.whiteColor,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
@@ -4032,7 +4032,7 @@ class _TradeScreenState extends State<TradeScreen> {
                 child: Center(
                   child: Text(
                     '💱',
-                    style: TextStyle(fontSize: fontSize),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: fontSize),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -4279,7 +4279,7 @@ class _TradeScreenState extends State<TradeScreen> {
             children: [
               Text(
                 "$label1: ",
-                style: TextStyle(fontSize: 12, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 12, color: AppColors.textGrey),
               ),
               Expanded(
                 child: FittedBox(
@@ -4287,7 +4287,7 @@ class _TradeScreenState extends State<TradeScreen> {
                   alignment: Alignment.centerRight,
                   child: Text(
                     value1,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textGrey,
@@ -4307,7 +4307,7 @@ class _TradeScreenState extends State<TradeScreen> {
             children: [
               Text(
                 "$label2: ",
-                style: TextStyle(fontSize: 12, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 12, color: AppColors.textGrey),
               ),
               Expanded(
                 child: FittedBox(
@@ -4315,7 +4315,7 @@ class _TradeScreenState extends State<TradeScreen> {
                   alignment: Alignment.centerRight,
                   child: Text(
                     value2,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textGrey,

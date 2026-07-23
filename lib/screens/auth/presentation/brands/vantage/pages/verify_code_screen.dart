@@ -1,4 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
@@ -112,11 +113,11 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
         child: Text.rich(
           TextSpan(
             text: languageService.tr('verify_code_bottom_remember_password'),
-            style: TextStyle(color: VantageAuthTheme.muted, fontSize: 13.sp),
+            style: AppTextStyles.bodyText.copyWith(color: VantageAuthTheme.muted, fontSize: 13.sp),
             children: [
               TextSpan(
                 text: languageService.tr('login_screen_sign_in'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: VantageAuthTheme.primary,
                   fontWeight: FontWeight.w700,
                 ),
@@ -130,7 +131,7 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
         children: [
           Text(
             languageService.tr('verify_code_screen_title'),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: VantageAuthTheme.text,
               fontSize: 24.sp,
               fontWeight: FontWeight.w800,
@@ -142,7 +143,7 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
             // via the en.json key and the runtime email is concatenated.
             languageService.tr('verify_code_screen_subtitle')
                 .replaceFirst('{email}', widget.email),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: VantageAuthTheme.muted,
               fontSize: 13.sp,
               height: 1.3,
@@ -168,7 +169,7 @@ class _VantageVerifyCodeScreenState extends State<VantageVerifyCodeScreen> {
               onPressed: authController.isLoading ? null : _resendCode,
               child: Text(
                 languageService.tr('verify_code_screen_resend'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: VantageAuthTheme.primary,
                   fontWeight: FontWeight.w700,
                 ),

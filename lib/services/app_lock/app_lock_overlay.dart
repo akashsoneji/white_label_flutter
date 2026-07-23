@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -70,7 +71,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                       Text(
                         language.tr('biometric_locked_title'),
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w800,
                           color: AppColors.textPrimary,
@@ -80,7 +81,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                       Text(
                         language.tr('biometric_locked_subtitle'),
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textGrey,
@@ -91,7 +92,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                         Text(
                           language.tr('biometric_unlock_failed'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.5.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.red,
@@ -136,7 +137,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                                   )
                                   : Text(
                                     language.tr('biometric_unlock_button'),
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -162,7 +163,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                             ),
                             child: Text(
                               language.tr('biometric_open_settings'),
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -193,7 +194,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                               child: Text(
                                 language.tr('biometric_disable_app_lock'),
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.5.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -222,7 +223,7 @@ class _AppLockOverlayState extends State<AppLockOverlay> {
                               child: Text(
                                 language.tr('biometric_logout'),
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.5.sp,
                                   fontWeight: FontWeight.w800,
                                 ),

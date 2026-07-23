@@ -101,7 +101,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
       child: Text(
         'Choose an account type you\'d like to start trading with',
         textAlign: TextAlign.center,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 17.sp,
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w400,
@@ -188,7 +188,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
                   Expanded(
                     child: Text(
                       '${accountType.tradingPlatform ?? ''} ${accountType.planTitle ?? ''}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primary,
@@ -251,7 +251,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
                       alignment: Alignment.center,
                       child: Text(
                         'Open Account',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.whiteColor,
@@ -288,7 +288,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
             flex: 2,
             child: Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textPrimary,
@@ -303,7 +303,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
               value,
               maxLines: maxLine,
               textAlign: TextAlign.end,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 overflow: TextOverflow.ellipsis,
                 fontWeight: FontWeight.w500,

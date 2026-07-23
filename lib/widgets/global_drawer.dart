@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
@@ -45,7 +46,7 @@ class GlobalDrawer extends StatelessWidget {
                   SizedBox(height: 12.h),
                   Text(
                     languageService.tr('Welcome User'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.whiteColor,
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -53,7 +54,7 @@ class GlobalDrawer extends StatelessWidget {
                   ),
                   Text(
                     languageService.tr('trading_platform'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.whiteColor.withOpacity(0.8),
                       fontSize: 14.sp,
                     ),
@@ -148,7 +149,7 @@ class GlobalDrawer extends StatelessWidget {
       leading: Icon(icon, color: iconColor ?? AppColors.textGrey),
       title: Text(
         title,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 16.sp,
           color: textColor ?? AppColors.textPrimary,
         ),
@@ -178,7 +179,7 @@ class GlobalDrawer extends StatelessWidget {
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.red),
             child: Text(
               languageService.tr('logout'),
-              style: const TextStyle(color: Colors.white),
+              style: AppTextStyles.bodyText.copyWith(color: Colors.white),
             ),
           ),
         ],

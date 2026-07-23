@@ -1,4 +1,5 @@
 import 'package:crm_app/widgets/app_svg_back_button.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -161,7 +162,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
           children: [
             Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 color: AppColors.textGrey,
                 fontWeight: FontWeight.w600,
@@ -170,7 +171,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
             SizedBox(height: 4.h),
             Text(
               value,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w800,
                 color: valueColor,
@@ -196,7 +197,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
         ),
         title: Text(
           'My P&L Trade History',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
@@ -212,14 +213,14 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
               if (planName.isNotEmpty || managerName.isNotEmpty)
                 Text(
                   '$planName • $managerName',
-                  style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
                 ),
               SizedBox(height: 12.h),
               Row(
                 children: [
                   Text(
                     'From',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w600,
@@ -245,7 +246,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                             Expanded(
                               child: Text(
                                 _fmtDateShort(_from.toIso8601String()),
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
@@ -265,7 +266,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                   SizedBox(width: 10.w),
                   Text(
                     'To',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w600,
@@ -291,7 +292,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                             Expanded(
                               child: Text(
                                 _fmtDateShort(_to.toIso8601String()),
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
@@ -374,7 +375,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                     return Center(
                       child: Text(
                         'Missing enrollment info for trades.',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           color: AppColors.textGrey,
                         ),
@@ -396,7 +397,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                     return Center(
                       child: Text(
                         'No trades found for the selected dates.',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           color: AppColors.textGrey,
                         ),
@@ -446,7 +447,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                                       )
                                       : Text(
                                         'Load more',
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 12.sp,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.primary,
@@ -487,7 +488,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                             children: [
                               Text(
                                 k,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 10.sp,
                                   color: AppColors.textGrey,
                                   fontWeight: FontWeight.w700,
@@ -496,7 +497,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                               SizedBox(height: 3.h),
                               Text(
                                 v,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: vColor ?? AppColors.textPrimary,
                                   fontWeight: FontWeight.w700,
@@ -531,7 +532,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                                 Expanded(
                                   child: Text(
                                     symbol,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w800,
                                       color: AppColors.textPrimary,
@@ -549,7 +550,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                                   ),
                                   child: Text(
                                     type.toUpperCase(),
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w900,
                                       color: typeFg,
@@ -563,7 +564,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                               children: [
                                 Text(
                                   'Position #$posId',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 11.sp,
                                     color: AppColors.textGrey,
                                     fontWeight: FontWeight.w600,
@@ -572,7 +573,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                                 const Spacer(),
                                 Text(
                                   '${pnlPos ? '+' : ''}\$${profit.abs().toStringAsFixed(2)}',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w900,
                                     color: pnlColor,

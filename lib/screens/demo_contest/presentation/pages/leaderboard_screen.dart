@@ -89,7 +89,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           return Center(
             child: Text(
               languageService.tr('dc_empty_all_desc'),
-              style: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
             ),
           );
         }
@@ -199,11 +199,11 @@ class _ContestPicker extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Text(c.bannerEmoji, style: TextStyle(fontSize: 14.sp)),
+                  Text(c.bannerEmoji, style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp)),
                   SizedBox(width: 6.w),
                   Text(
                     c.title,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: selected ? AppColors.primary : AppColors.textPrimary,
@@ -243,7 +243,7 @@ class _SelectedContestHeader extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Text(contest.bannerEmoji, style: TextStyle(fontSize: 26.sp)),
+            Text(contest.bannerEmoji, style: AppTextStyles.bodyText.copyWith(fontSize: 26.sp)),
             SizedBox(width: 10.w),
             Expanded(
               child: Column(
@@ -251,7 +251,7 @@ class _SelectedContestHeader extends StatelessWidget {
                 children: [
                   Text(
                     contest.title,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w800,
                       color: AppColors.whiteColor,
@@ -260,7 +260,7 @@ class _SelectedContestHeader extends StatelessWidget {
                   SizedBox(height: 2.h),
                   Text(
                     '${contest.joinedParticipants} ${languageService.tr('dc_traders_competing')}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.sp,
                       color: AppColors.whiteColor.withValues(alpha: 0.85),
                     ),
@@ -276,7 +276,7 @@ class _SelectedContestHeader extends StatelessWidget {
               ),
               child: Text(
                 live ? '● LIVE' : 'UPCOMING',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 10.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.whiteColor,
@@ -357,7 +357,7 @@ class _LeaderboardBody extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Text(
                         'Your rank',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primary,
@@ -366,7 +366,7 @@ class _LeaderboardBody extends StatelessWidget {
                       const Spacer(),
                       Text(
                         '#${myEntry.rank}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w800,
                           color: AppColors.primary,
@@ -401,12 +401,12 @@ class _EmptyLeaderboard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('🏁', style: TextStyle(fontSize: 60.sp)),
+              Text('🏁', style: AppTextStyles.bodyText.copyWith(fontSize: 60.sp)),
               SizedBox(height: 14.h),
               Text(
                 languageService.tr('dc_no_leaderboard_yet'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -416,7 +416,7 @@ class _EmptyLeaderboard extends StatelessWidget {
               Text(
                 languageService.tr('dc_no_leaderboard_desc'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textGrey,
                   height: 1.4,

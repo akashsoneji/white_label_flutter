@@ -61,7 +61,7 @@ class CloseOrderScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(position.flag, style: TextStyle(fontSize: 30.sp)),
+                  Text(position.flag, style: AppTextStyles.bodyText.copyWith(fontSize: 30.sp)),
                   SizedBox(width: 8.w),
                   Column(
                     children: [
@@ -275,7 +275,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             children: [
               Row(
                 children: [
-                  Text(position.flag, style: TextStyle(fontSize: 30.sp)),
+                  Text(position.flag, style: AppTextStyles.bodyText.copyWith(fontSize: 30.sp)),
                   SizedBox(width: 8.w),
                   Column(
                     children: [
@@ -503,7 +503,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 ],
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
+                                padding: EdgeInsets.only(top: 8.0),
                                 child: DashedUnderline(
                                   color: AppColors.icongreylight,
                                   dashSpace: 7,

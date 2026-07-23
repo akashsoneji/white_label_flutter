@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -65,7 +66,7 @@ class AppNotificationItem extends StatelessWidget {
         children: [
           Text(
             '${notification.symbol} $typeText ${PrecisionHelper.formatVolume(notification.volume ?? 0)}',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w400,
               color: AppColors.whiteColor,
@@ -85,7 +86,7 @@ class AppNotificationItem extends StatelessWidget {
           else if (statusText != null)
             Text(
               statusText,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w500,
                 color: leftBorderColor,
@@ -151,7 +152,7 @@ class AppNotificationItem extends StatelessWidget {
                     notification.title!.isNotEmpty)
                   Text(
                     notification.title!,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                       color: AppColors.whiteColor,
@@ -163,7 +164,7 @@ class AppNotificationItem extends StatelessWidget {
                   SizedBox(height: 2.h),
                 Text(
                   displayMessage,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w400,
                     color: AppColors.whiteColor,

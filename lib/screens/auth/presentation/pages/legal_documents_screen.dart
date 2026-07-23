@@ -91,7 +91,7 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
             ),
             const Spacer(),
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(24.0),
               child: _buildSubmitButton(),
             ),
           ],
@@ -163,7 +163,7 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
             padding: EdgeInsets.only(top: 3.h, left: 5.h),
             child: Text(
               languageService.tr("legal_documents_subtitle"),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16,
                 height: 22 / 16,
                 color: AppColors.textPrimary,

@@ -29,7 +29,7 @@ class CopyTradingHubScreen extends StatelessWidget {
         centerTitle: true,
         title: Text(
           'Copy Trading',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
@@ -100,7 +100,7 @@ class CopyTradingHubScreen extends StatelessWidget {
                     ),
                     child: Text(
                       controller.errorMessage.value,
-                      style: TextStyle(color: AppColors.errorText, fontSize: 12.sp),
+                      style: AppTextStyles.bodyText.copyWith(color: AppColors.errorText, fontSize: 12.sp),
                     ),
                   ),
 
@@ -221,7 +221,7 @@ class _HubMenuItem extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -231,7 +231,7 @@ class _HubMenuItem extends StatelessWidget {
                   //   SizedBox(height: 2.h),
                   //   Text(
                   //     subtitle!,
-                  //     style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+                  //     style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
                   //   ),
                   // ],
                 ],
@@ -265,7 +265,7 @@ class _StatusPill extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: color),
+        style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, fontWeight: FontWeight.w600, color: color),
       ),
     );
   }
@@ -282,7 +282,7 @@ class _PendingReviewScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.tradeBackgroundCenterColor,
         elevation: 0,
-        title: const Text('Pending Review'),
+        title: Text('Pending Review'),
       ),
       body: Center(
         child: Container(
@@ -301,11 +301,11 @@ class _PendingReviewScreen extends StatelessWidget {
               Text(
                 'Your master application is under review.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
               ),
               if (masterCode.isNotEmpty) ...[
                 SizedBox(height: 6.h),
-                Text('Code: $masterCode', style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey)),
+                Text('Code: $masterCode', style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey)),
               ],
               SizedBox(height: 14.h),
               ElevatedButton(
@@ -317,7 +317,7 @@ class _PendingReviewScreen extends StatelessWidget {
                           ? AppColors.textPrimaryLight
                           : AppColors.onColoredBackground,
                 ),
-                child: const Text('OK'),
+                child: Text('OK'),
               ),
             ],
           ),
@@ -451,7 +451,7 @@ class _BecomeMasterScreenState extends State<_BecomeMasterScreen> {
                       padding: EdgeInsets.only(left: 4.w),
                       child: Text(
                         'I accept the Terms & Conditions',
-                        style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
+                        style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textPrimary),
                       ),
                     ),
                   ],

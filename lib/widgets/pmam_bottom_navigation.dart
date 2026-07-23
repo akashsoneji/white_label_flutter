@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../constants/color.dart';
 
@@ -24,14 +25,14 @@ class PmamBottomNavigation extends StatelessWidget {
   final PmamNavMode mode;
 
   List<_PmamTab> get _tabs => mode == PmamNavMode.manager
-      ? const [
+      ? [
           _PmamTab('Dashboard', Icons.dashboard_rounded),
           _PmamTab('Plans', Icons.layers_rounded),
           _PmamTab('Investors', Icons.group_rounded),
           _PmamTab('Explore', Icons.travel_explore_rounded),
           _PmamTab('Invest', Icons.account_balance_wallet_rounded),
         ]
-      : const [
+      : [
           _PmamTab('Become Mgr', Icons.workspace_premium_rounded),
           _PmamTab('Explore', Icons.travel_explore_rounded),
           _PmamTab('Invest', Icons.account_balance_wallet_rounded),
@@ -115,7 +116,7 @@ class _NavItem extends StatelessWidget {
               tab.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 color: color,

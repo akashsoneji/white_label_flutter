@@ -1,4 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -52,7 +53,7 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
         ),
         title: Text(
           'More',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -169,7 +170,7 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
             ),
             title: Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textPrimary,

@@ -173,7 +173,7 @@ class _FeaturedBanner extends StatelessWidget {
                       SizedBox(width: 4.w),
                       Text(
                         languageService.tr('dc_featured'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.whiteColor,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w700,
@@ -187,7 +187,7 @@ class _FeaturedBanner extends StatelessWidget {
                 Expanded(
                   child: Text(
                     contest.subtitle ?? '',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.whiteColor.withValues(alpha: 0.85),
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w500,
@@ -200,12 +200,12 @@ class _FeaturedBanner extends StatelessWidget {
             SizedBox(height: 8.h),
             Text(
               contest.bannerEmoji ?? '🏆',
-              style: TextStyle(fontSize: 28.sp),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 28.sp),
             ),
             SizedBox(height: 4.h),
             Text(
               contest.title ?? '',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.whiteColor,
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
@@ -216,7 +216,7 @@ class _FeaturedBanner extends StatelessWidget {
               contest.description ?? '',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.whiteColor.withValues(alpha: 0.85),
                 fontSize: 12.sp,
                 height: 1.45,
@@ -245,7 +245,7 @@ class _FeaturedBanner extends StatelessWidget {
                   controller.isJoined(contest.id)
                       ? languageService.tr('dc_view_entry')
                       : languageService.tr('dc_join_now'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 13.sp,
                   ),
@@ -268,7 +268,7 @@ class _SectionLabel extends StatelessWidget {
       padding: EdgeInsets.only(left: 4.w, bottom: 6.h),
       child: Text(
         text.toUpperCase(),
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 10.5.sp,
           fontWeight: FontWeight.w700,
           color: AppColors.textGrey.withValues(alpha: 0.85),
@@ -307,7 +307,7 @@ class _InfoBanner extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               'ℹ️',
-              style: TextStyle(fontSize: 16.sp),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp),
             ),
           ),
           SizedBox(width: 12.w),
@@ -317,7 +317,7 @@ class _InfoBanner extends StatelessWidget {
               children: [
                 Text(
                   languageService.tr('dc_how_to_play'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primary,
@@ -326,7 +326,7 @@ class _InfoBanner extends StatelessWidget {
                 SizedBox(height: 4.h),
                 Text(
                   languageService.tr('dc_how_to_play_desc'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     height: 1.4,
                     color: AppColors.textPrimary,

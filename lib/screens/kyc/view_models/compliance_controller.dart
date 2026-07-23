@@ -47,7 +47,6 @@ class ComplianceController extends GetxController {
       if (country != null) {
         formAnswers['country'] = country.id.toString();
         formAnswers['country_name'] = country.name ?? '';
-        formAnswers['nationality'] = country.nationality ?? '';
         // Reset state/city
         formAnswers['state'] = '';
         formAnswers['state_name'] = '';
@@ -56,7 +55,6 @@ class ComplianceController extends GetxController {
       } else {
         formAnswers['country'] = '';
         formAnswers['country_name'] = '';
-        formAnswers['nationality'] = '';
       }
     });
 
@@ -138,15 +136,27 @@ class ComplianceController extends GetxController {
           final country = dropdownService.countries.firstWhereOrNull((c) => c.id == details.country);
           if (country != null) {
             dropdownService.selectedCountry.value = country;
+            // Always load states for the pre-selected country so dropdown works
+            await dropdownService.loadStates(country.id!);
             
+            // Re-apply formAnswers since the `ever` listener might have wiped them
+            formAnswers['state'] = details.state != 0 ? details.state.toString() : '';
+            formAnswers['state_name'] = details.state_name;
+            formAnswers['city'] = details.city != 0 ? details.city.toString() : '';
+            formAnswers['city_name'] = details.city_name;
+
             if (details.state != 0) {
-              await dropdownService.loadStates(country.id!);
               final state = dropdownService.states.firstWhereOrNull((s) => s.id == details.state);
               if (state != null) {
                 dropdownService.selectedState.value = state;
-                
+                // Always load cities for the pre-selected state so dropdown works
+                await dropdownService.loadCities(state.id!);
+
+                // Re-apply city formAnswers since `ever` listener on state might wipe them
+                formAnswers['city'] = details.city != 0 ? details.city.toString() : '';
+                formAnswers['city_name'] = details.city_name;
+
                 if (details.city != 0) {
-                  await dropdownService.loadCities(state.id!);
                   final city = dropdownService.cities.firstWhereOrNull((c) => c.id == details.city);
                   if (city != null) {
                     dropdownService.selectedCity.value = city;

@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
@@ -56,7 +57,7 @@ class CameraScreen extends StatelessWidget {
                 ),
                 child: Obx(() => Text(
                   'Position ${controller.currentSide.value} side of your ID within the frame',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontSize: 16,
                   ),

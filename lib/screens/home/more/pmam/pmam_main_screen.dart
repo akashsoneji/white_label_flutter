@@ -1,4 +1,5 @@
 import 'package:crm_app/widgets/app_svg_back_button.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -65,7 +66,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
 
   List<Widget> _pagesFor(PmamNavMode mode) {
     if (mode == PmamNavMode.manager) {
-      return const [
+      return [
         PmamManagerDashboardScreen(),
         // Plans tab of the manager portal.
         PmamManagerPortalScreen(initialTab: 1, embedded: true),
@@ -76,7 +77,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
         PmamInvestorPortalScreen(initialTab: 1, embedded: true),
       ];
     }
-    return const [
+    return [
       PmamBecomeManagerScreen(),
       PmamExploreManagersScreen(embedded: true),
       PmamInvestorPortalScreen(initialTab: 1, embedded: true),
@@ -85,7 +86,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
 
   String _titleFor(PmamNavMode mode, int i) {
     if (mode == PmamNavMode.manager) {
-      return const [
+      return [
         'Manager Dashboard',
         'My Plans',
         'My Investors',
@@ -93,7 +94,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
         'My Investments',
       ][i];
     }
-    return const [
+    return [
       'Become a Manager',
       'Explore Fund Managers',
       'My Investments',
@@ -133,7 +134,7 @@ class _PmamMainScreenState extends State<PmamMainScreen> {
           iconTheme: IconThemeData(color: AppColors.textPrimary),
           title: Text(
             _titleFor(mode, safeIdx),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,

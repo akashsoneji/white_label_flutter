@@ -122,7 +122,7 @@ class AccountCreatedScreen extends StatelessWidget {
         SizedBox(height: 12.h),
         Text(
           languageService.tr("onboarding_slide3_subtitle"),
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             color: AppColors.textGrey,
             height: 1.4,
@@ -139,7 +139,7 @@ class AccountCreatedScreen extends StatelessWidget {
         children: [
           Text(
             languageService.tr("common_to_start_trading"),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               color: AppColors.textGrey,
               fontWeight: FontWeight.w500,
@@ -169,7 +169,7 @@ class AccountCreatedScreen extends StatelessWidget {
       children: [
         Text(
           languageService.tr("common_to_start_trading"),
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             color: AppColors.textGrey,
             fontWeight: FontWeight.w500,

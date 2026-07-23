@@ -254,7 +254,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
               children: [
                 Text(
                   fullName.isEmpty ? '—' : fullName,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -263,7 +263,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 SizedBox(height: 4.h),
                 Text(
                   _safe(controller.email.value),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w400,
@@ -290,7 +290,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                       SizedBox(width: 4.w),
                       Text(
                         languageService.tr('profile_verified'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,
@@ -321,7 +321,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
           padding: EdgeInsets.only(left: 4.w, bottom: 8.h),
           child: Text(
             title.toUpperCase(),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 10.5.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textGrey.withValues(alpha: 0.75),
@@ -383,7 +383,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w500,
@@ -392,7 +392,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 SizedBox(height: 2.h),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
@@ -436,7 +436,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
               Expanded(
                 child: Text(
                   languageService.tr('view_profile_readonly_note'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w500,

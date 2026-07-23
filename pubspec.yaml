@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # of the product and file versions while build-number is used as the build suffix.
 # version: 1.0.10+11
 
-version: 1.0.149+146
+version: 1.0.159+156
 
 # FOR STAGING
 # version: 1.0.99+96
@@ -160,8 +160,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND
-    - assets/clients/pipze/
-    - assets/clients/iquote/
+    - assets/clients/riyadex/
+    - assets/clients/vantage/
     - assets/config/brands/brands.json
     # END GENERATED ACTIVE CLIENT ASSETS
 
@@ -181,6 +181,7 @@ flutter:
     - assets/svg/more/support/
     - assets/svg/more/tools_education/
     - assets/font/roboto/
+    - assets/font/sf_ui/
     - assets/audio/
     - assets/animation/
     - assets/svg/partnership_program/
@@ -223,19 +224,7 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
   fonts:
-    - family: Roboto
-      # fonts:
-      #   - asset: assets/font/roboto/Roboto-Light.ttf
-      #     weight: 300
-      #   - asset: assets/font/roboto/Roboto-Regular.ttf
-      #     weight: 400
-      #   - asset: assets/font/roboto/Roboto-Medium.ttf
-      #     weight: 500
-      #   - asset: assets/font/roboto/Roboto-SemiBold.ttf
-      #     weight: 600
-      #   - asset: assets/font/roboto/Roboto-Bold.ttf
-      #     weight: 700
-      #     - family: Roboto
+    - family: SF UI
       fonts:
         - asset: assets/font/sf_ui/SF-UI-Regular.otf
           weight: 300
@@ -243,7 +232,39 @@ flutter:
           weight: 400
         - asset: assets/font/sf_ui/SF-UI-Regular.otf
           weight: 500
-        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
           weight: 600
         - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 700
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 800
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 900
+    - family: SF-UI
+      fonts:
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 300
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 400
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 500
+        - asset: assets/font/sf_ui/SF-UI-Regular.otf
+          weight: 600
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 700
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 800
+        - asset: assets/font/sf_ui/SF-UI-Heavy.otf
+          weight: 900
+    - family: Inter
+      fonts:
+        - asset: assets/font/inter/Inter_18pt-Light.ttf
+          weight: 300
+        - asset: assets/font/inter/Inter_18pt-Regular.ttf
+          weight: 400
+        - asset: assets/font/inter/Inter_18pt-Medium.ttf
+          weight: 500
+        - asset: assets/font/inter/Inter_18pt-SemiBold.ttf
+          weight: 600
+        - asset: assets/font/inter/Inter_18pt-Bold.ttf
           weight: 700

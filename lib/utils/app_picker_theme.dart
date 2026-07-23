@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/constants/color.dart';
 
 /// Theme-aware helpers for dropdowns and date pickers in forms.
@@ -12,7 +13,7 @@ class AppPickerTheme {
   static TextStyle dropdownTextStyle(
     double fontSize, {
     FontWeight? fontWeight,
-  }) => TextStyle(
+  }) => AppTextStyles.bodyText.copyWith(
     fontSize: fontSize,
     color: AppColors.textPrimary,
     fontWeight: fontWeight,
@@ -20,7 +21,7 @@ class AppPickerTheme {
 
   /// Hint / placeholder text in dropdowns.
   static TextStyle dropdownHintStyle(double fontSize) =>
-      TextStyle(fontSize: fontSize, color: AppColors.textGrey);
+      AppTextStyles.bodyText.copyWith(fontSize: fontSize, color: AppColors.textGrey);
 
   /// Icon color for dropdown arrows.
   static Color get dropdownIconColor => AppColors.textGrey;
@@ -38,12 +39,12 @@ class AppPickerTheme {
       backgroundColor: AppColors.card,
       headerBackgroundColor: AppColors.primary.withValues(alpha: 0.1),
       headerForegroundColor: AppColors.onColoredBackground,
-      weekdayStyle: TextStyle(
+      weekdayStyle: AppTextStyles.bodyText.copyWith(
         color: AppColors.textGrey,
         fontWeight: FontWeight.w600,
       ),
-      yearStyle: TextStyle(color: dayFg),
-      dayStyle: TextStyle(color: dayFg),
+      yearStyle: AppTextStyles.bodyText.copyWith(color: dayFg),
+      dayStyle: AppTextStyles.bodyText.copyWith(color: dayFg),
       dayBackgroundColor: WidgetStateProperty<Color?>.fromMap({
         WidgetState.selected: selectedBg,
       }),
@@ -109,7 +110,7 @@ class AppPickerTheme {
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary,
-                textStyle: const TextStyle(fontWeight: FontWeight.w600),
+                textStyle: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
           ),

@@ -234,7 +234,7 @@ class AccountHeaderWidget extends StatelessWidget {
                                   ),
                                   child: Text(
                                     accountTypeText.toUpperCase(),
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       color:
                                           AppColors.isDarkMode
                                               ? AppColors.whiteColor
@@ -512,7 +512,7 @@ class AccountHeaderWidget extends StatelessWidget {
                     ),
                     child: Text(
                       type,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color:
                             AppColors.isDarkMode
                                 ? AppColors.whiteColor

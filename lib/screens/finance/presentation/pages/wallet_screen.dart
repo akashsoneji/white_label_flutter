@@ -144,7 +144,7 @@ class _WalletScreenState extends State<WalletScreen> {
             children: [
               Text(
                 languageService.tr('wallet_wallet_id'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w500,
@@ -154,7 +154,7 @@ class _WalletScreenState extends State<WalletScreen> {
               Obx(
                 () => Text(
                   controller.wallet.value?.walletId ?? '',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.icongrey,
                     fontWeight: FontWeight.w400,
@@ -176,7 +176,7 @@ class _WalletScreenState extends State<WalletScreen> {
             children: [
               Text(
                 languageService.tr('wallet_balance'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w500,
@@ -185,7 +185,7 @@ class _WalletScreenState extends State<WalletScreen> {
               Obx(
                 () => Text(
                   '\$${controller.balance.value}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.icongrey,
                     fontWeight: FontWeight.w400,
@@ -215,7 +215,7 @@ class _WalletScreenState extends State<WalletScreen> {
           if (controller.mt5Accounts.isEmpty) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0),
                 child: Text(languageService.tr('common_no_accounts')),
               ),
             );
@@ -229,7 +229,7 @@ class _WalletScreenState extends State<WalletScreen> {
               return ListTile(
                 title: Text(
                   "${account.metaAccountName} (${account.metaAccountNumber})",
-                  style: TextStyle(fontWeight: FontWeight.w500),
+                  style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.w500),
                 ),
                 subtitle: Text("\$ ${account.balance}"),
                 onTap: () {
@@ -282,7 +282,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   children: [
                     Text(
                       languageService.tr('wallet_enter_otp'),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -302,7 +302,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 // OTP Input Fields
                 Text(
                   languageService.tr('wallet_enter_otp'),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textGrey,
@@ -405,7 +405,7 @@ class _WalletScreenState extends State<WalletScreen> {
                               )
                               : Text(
                                 languageService.tr('wallet_submit_transfer'),
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.whiteColor,
@@ -579,7 +579,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       )
                       : Text(
                         languageService.tr('wallet_deposit_wallet'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,
@@ -615,7 +615,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     )
                     : Text(
                       languageService.tr('internal_transfer'),
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.whiteColor,
@@ -646,7 +646,7 @@ class _WalletScreenState extends State<WalletScreen> {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(index == 0 ? 6 : 1),
       ],
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 20.sp,
         fontWeight: FontWeight.w600,
         color: AppColors.textPrimary,
@@ -732,7 +732,7 @@ class _WalletScreenState extends State<WalletScreen> {
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(6),
           ],
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -804,7 +804,7 @@ class _WalletScreenState extends State<WalletScreen> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(1),
             ],
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,

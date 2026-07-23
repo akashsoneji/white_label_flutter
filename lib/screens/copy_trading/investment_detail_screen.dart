@@ -190,19 +190,19 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: const Text('Stop investment?'),
-            content: const Text(
+            title: Text('Stop investment?'),
+            content: Text(
               'This is permanent. You\'ll need to re-subscribe.',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
                 style: TextButton.styleFrom(foregroundColor: AppColors.error),
-                child: const Text('Stop'),
+                child: Text('Stop'),
               ),
             ],
           ),
@@ -229,7 +229,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
       context: context,
       builder:
           (ctx) => AlertDialog(
-            title: const Text('Add capital'),
+            title: Text('Add capital'),
             content: TextField(
               controller: amountCtrl,
               keyboardType: const TextInputType.numberWithOptions(
@@ -240,7 +240,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(null),
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
               TextButton(
                 onPressed: () {
@@ -248,7 +248,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                   if (v == null || v <= 0) return;
                   Navigator.of(ctx).pop(v);
                 },
-                child: const Text('Add'),
+                child: Text('Add'),
               ),
             ],
           ),
@@ -333,14 +333,14 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
             : widget.equity;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.r),
         ),
         elevation: 0.8,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 14),
           child: Row(
             children: [
               // Avatar
@@ -351,17 +351,17 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                 children: [
                   Text(
                     widget.traderName,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
+                    padding: EdgeInsets.only(top: 4.0),
                     child: Text(
                       'Equity',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w400,
                         color: AppColors.textGrey,
@@ -373,7 +373,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
               const Spacer(),
               Text(
                 displayEquity,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primary,
@@ -433,7 +433,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
       case 2:
         return _buildOptionsTab();
       default:
-        return const SizedBox();
+        return SizedBox();
     }
   }
 
@@ -520,7 +520,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                     children: [
                       Text(
                         copyingMethodDisplay,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w400,
                           color: AppColors.textPrimary,
@@ -565,7 +565,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
                   child: DashedUnderline(
                     color: AppColors.dashLineColor,
                     dashWidth: 1,
@@ -652,7 +652,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
           children: [
             Text(
               'Quick Actions',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -665,8 +665,8 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _onPauseTap,
-                      icon: const Icon(Icons.pause, color: Colors.white),
-                      label: const Text('Pause'),
+                      icon: Icon(Icons.pause, color: Colors.white),
+                      label: Text('Pause'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.warning,
                         foregroundColor: Colors.white,
@@ -681,8 +681,8 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _onResumeTap,
-                      icon: const Icon(Icons.play_arrow, color: Colors.white),
-                      label: const Text('Resume'),
+                      icon: Icon(Icons.play_arrow, color: Colors.white),
+                      label: Text('Resume'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.green,
                         foregroundColor: Colors.white,
@@ -698,8 +698,8 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _onStopTap,
-                      icon: const Icon(Icons.stop, color: Colors.white),
-                      label: const Text('Stop'),
+                      icon: Icon(Icons.stop, color: Colors.white),
+                      label: Text('Stop'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.error,
                         foregroundColor: Colors.white,
@@ -721,7 +721,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                       alignment: Alignment.center,
                       child: Text(
                         'No Actions Available (${status.toUpperCase()})',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.textGrey,
                           fontWeight: FontWeight.w500,
                           fontSize: 12.sp,
@@ -751,7 +751,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
           children: [
             Text(
               leftLabel,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 color: leftColor,
                 fontWeight: FontWeight.w400,
@@ -759,11 +759,11 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
             ),
             Text(
               '—',
-              style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
             ),
             Text(
               rightLabel,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 color: rightColor,
                 fontWeight: FontWeight.w400,
@@ -814,7 +814,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
   // ─────────────────────────────────────────────────────────────────
   Widget _buildTradesTab() {
     if (_isLoadingTrades && _trades.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator());
     }
     if (_tradesError.isNotEmpty && _trades.isEmpty) {
       return Center(
@@ -822,7 +822,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
           padding: EdgeInsets.all(16.w),
           child: Text(
             _tradesError,
-            style: TextStyle(color: AppColors.error, fontSize: 14.sp),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.error, fontSize: 14.sp),
             textAlign: TextAlign.center,
           ),
         ),
@@ -832,7 +832,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
       return Center(
         child: Text(
           'No trade history found.',
-          style: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
+          style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
         ),
       );
     }
@@ -968,7 +968,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            insetPadding: const EdgeInsets.symmetric(
+            insetPadding: EdgeInsets.symmetric(
               horizontal: 16.0,
             ), // ← main change for width
             shape: RoundedRectangleBorder(
@@ -989,7 +989,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                 SizedBox(height: 20.h), // slightly more breathing room
                 Text(
                   'Are you Sure?',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp, // optional: little bigger title
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -999,7 +999,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                 Text(
                   'This investment has a bonus applied. It amounts \$23.50. If you stop copying, the bonus will be cancelled and you will not be able to reapply it.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     color: AppColors.textGrey,
                     fontWeight: FontWeight.w400,
@@ -1022,7 +1022,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                           ),
                           child: Text(
                             'Back',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -1064,7 +1064,7 @@ class _InvestmentDetailScreenState extends State<InvestmentDetailScreen> {
                           ),
                           child: Text(
                             'Close and Stop',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.whiteColor,
                               fontSize: 13.5.sp, // was 12.8 – little small
                               fontWeight: FontWeight.w600,
@@ -1113,7 +1113,7 @@ class _TabButton extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: isSelected ? AppColors.whiteColor : AppColors.primary,
@@ -1159,7 +1159,7 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
           InkWell(
             onTap: () => setState(() => _expanded = !_expanded),
             child: Padding(
-              padding: const EdgeInsets.all(14.0),
+              padding: EdgeInsets.all(14.0),
               child: Column(
                 children: [
                   Row(
@@ -1171,7 +1171,7 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(
+                                padding: EdgeInsets.symmetric(
                                   horizontal: 6,
                                   vertical: 2,
                                 ),
@@ -1182,17 +1182,17 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                                 ),
                                 child: Text(
                                   t.tradeType.toUpperCase(),
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.whiteColor,
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Text(
                                 t.copierVolume.toStringAsFixed(2),
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.icongrey,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w400,
@@ -1200,10 +1200,10 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Text(
                             t.symbol,
-                            style: const TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
@@ -1219,20 +1219,20 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                               SvgPicture.asset(
                                 'assets/svg/copy_trading/calendar.svg',
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: 4),
                               Text(
                                 t.status,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.icongrey,
                                   fontSize: 12,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Text(
                             '\$${t.copierProfit.toStringAsFixed(2)}',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color:
                                   t.copierProfit >= 0
                                       ? AppColors.green
@@ -1243,7 +1243,7 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
                           ),
                         ],
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       Icon(
                         _expanded
                             ? Icons.keyboard_arrow_up
@@ -1262,7 +1262,7 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
 
           // ── Expanded details ──
           AnimatedCrossFade(
-            firstChild: const SizedBox(width: double.infinity),
+            firstChild: SizedBox(width: double.infinity),
             secondChild: _buildDetails(t),
             crossFadeState:
                 _expanded
@@ -1310,11 +1310,11 @@ class _TradeExpandableCardState extends State<_TradeExpandableCard> {
             children: [
               Text(
                 label,
-                style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
               ),
               Text(
                 value,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w500,
@@ -1358,7 +1358,7 @@ class _OptionItem extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textPrimary,
@@ -1424,7 +1424,7 @@ class _SummaryRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w400,
               color: AppColors.icongrey,
@@ -1439,7 +1439,7 @@ class _SummaryRow extends StatelessWidget {
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w400,
               color: valueColor,

@@ -30,19 +30,19 @@ class ExampleUpdatedScreen extends StatelessWidget {
           centerTitle: true,
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Welcome section
               _buildWelcomeSection(),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // Form section
               _buildFormSection(),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // Actions section
               _buildActionsSection(),
@@ -56,7 +56,7 @@ class ExampleUpdatedScreen extends StatelessWidget {
   Widget _buildWelcomeSection() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -72,7 +72,7 @@ class ExampleUpdatedScreen extends StatelessWidget {
               fontSize: 20,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           RTLText(
             text: TranslationUtils.tr('welcome_subtitle'),
             style: AppTextStyles.subheading.copyWith(
@@ -95,11 +95,11 @@ class ExampleUpdatedScreen extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Email field
         RTLContainer(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.backgroundLight,
             borderRadius: BorderRadius.circular(8),
@@ -115,7 +115,7 @@ class ExampleUpdatedScreen extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               TextField(
                 decoration: InputDecoration(
                   hintText: TranslationUtils.tr('email_hint'),
@@ -128,11 +128,11 @@ class ExampleUpdatedScreen extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Password field
         RTLContainer(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: AppColors.backgroundLight,
             borderRadius: BorderRadius.circular(8),
@@ -148,7 +148,7 @@ class ExampleUpdatedScreen extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               TextField(
                 obscureText: true,
                 decoration: InputDecoration(
@@ -176,7 +176,7 @@ class ExampleUpdatedScreen extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Primary action button
         SizedBox(
@@ -202,7 +202,7 @@ class ExampleUpdatedScreen extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 12),
+        SizedBox(height: 12),
 
         // Secondary action button
         SizedBox(
@@ -227,11 +227,11 @@ class ExampleUpdatedScreen extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
         // Info text with arguments
         RTLContainer(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppColors.backgroundLight,
             borderRadius: BorderRadius.circular(8),

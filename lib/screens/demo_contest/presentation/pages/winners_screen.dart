@@ -65,7 +65,7 @@ class WinnersScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Text('🏆', style: TextStyle(fontSize: 30.sp)),
+                  Text('🏆', style: AppTextStyles.bodyText.copyWith(fontSize: 30.sp)),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
@@ -73,7 +73,7 @@ class WinnersScreen extends StatelessWidget {
                       children: [
                         Text(
                           languageService.tr('dc_hall_of_fame'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w800,
                             color: AppColors.textPrimary,
@@ -82,7 +82,7 @@ class WinnersScreen extends StatelessWidget {
                         SizedBox(height: 2.h),
                         Text(
                           languageService.tr('dc_hall_of_fame_desc'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                             height: 1.4,
@@ -126,14 +126,14 @@ class WinnersScreen extends StatelessWidget {
                               alignment: Alignment.center,
                               child: Text(
                                 '🏅',
-                                style: TextStyle(fontSize: 16.sp),
+                                style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp),
                               ),
                             ),
                             SizedBox(width: 10.w),
                             Expanded(
                               child: Text(
                                 title,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.textPrimary,
@@ -181,10 +181,10 @@ class _WinnerRow extends StatelessWidget {
             width: 28.w,
             child: Center(
               child: medal != null
-                  ? Text(medal, style: TextStyle(fontSize: 16.sp))
+                  ? Text(medal, style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp))
                   : Text(
                       '#${winner.rank}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -196,7 +196,7 @@ class _WinnerRow extends StatelessWidget {
           Expanded(
             child: Text(
               winner.displayName,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -208,7 +208,7 @@ class _WinnerRow extends StatelessWidget {
           SizedBox(width: 8.w),
           Text(
             '+${winner.pnlPercent.toStringAsFixed(1)}%',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
               color: pnlColor,
@@ -217,7 +217,7 @@ class _WinnerRow extends StatelessWidget {
           SizedBox(width: 10.w),
           Text(
             '\$${winner.prizeAmount.toStringAsFixed(0)}',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w800,
               color: AppColors.warning,

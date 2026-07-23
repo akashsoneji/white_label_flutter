@@ -1,4 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -58,25 +59,25 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
       AlertDialog(
         title: Text(
           'Delete Group',
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 18.sp, fontWeight: FontWeight.w600),
         ),
         content: Text(
           'Are you sure you want to delete "${group.groupName}"?',
-          style: TextStyle(fontSize: 14.sp),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
             child: Text(
               'Cancel',
-              style: TextStyle(color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
             ),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
             child: Text(
               'Delete',
-              style: TextStyle(color: AppColors.error),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.error),
             ),
           ),
         ],
@@ -113,7 +114,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
         ),
         title: Text(
           'IB Structure',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -155,7 +156,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                       Flexible(
                         child: Text(
                           'Commission Groups',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -181,7 +182,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                               SizedBox(width: 4.w),
                               Text(
                                 'Add Group',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.whiteColor,
@@ -210,7 +211,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                             SizedBox(height: 16.h),
                             Text(
                               'No commission groups found',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 16.sp,
                                 color: AppColors.textGrey,
                               ),
@@ -270,7 +271,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                     width: 40.w,
                     child: Text(
                       '#',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -281,7 +282,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                     flex: 2,
                     child: Text(
                       'Group Name',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -292,7 +293,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                     flex: 2,
                     child: Text(
                       'Created Date',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -304,7 +305,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                     child: Text(
                       'Actions',
                       textAlign: TextAlign.right,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -334,7 +335,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                       width: 40.w,
                       child: Text(
                         '${index + 1}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.textPrimary,
                         ),
@@ -344,7 +345,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                       flex: 2,
                       child: Text(
                         group.groupName ?? 'N/A',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textPrimary,
@@ -355,7 +356,7 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
                       flex: 2,
                       child: Text(
                         _formatDate(group.createdAt),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.textPrimary,
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -128,7 +129,7 @@ class _MetaMainShellState extends State<MetaMainShell> {
                     SizedBox(height: 2.h),
                     Text(
                       tab.label,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: selected ? accent : inactive,
                         fontSize: 10.sp,
                         fontWeight: selected ? FontWeight.w700 : FontWeight.w500,

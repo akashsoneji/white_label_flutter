@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_dashboard_controller.dart';
 import 'package:crm_app/models/copy_trading_dashboard_overview.dart';
 import 'package:flutter/material.dart';
@@ -57,7 +58,7 @@ class MasterDashboardOverviewTab extends StatelessWidget {
       );
 
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: EdgeInsets.fromLTRB(16, 12, 16, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -84,14 +85,14 @@ class MasterDashboardOverviewTab extends StatelessWidget {
                             key: const ValueKey('loading'),
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const SizedBox(
+                              SizedBox(
                                 width: 12,
                                 height: 12,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 1.6,
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: 6),
                               Text(
                                 'Updating…',
                                 style: theme.textTheme.labelSmall?.copyWith(
@@ -105,7 +106,7 @@ class MasterDashboardOverviewTab extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
 
             // Range pills — disable taps + dim while a fetch is in flight
             // so users can't queue overlapping requests and get clear
@@ -122,7 +123,7 @@ class MasterDashboardOverviewTab extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
 
             // Dim all data sections while a range-change fetch is in
             // flight, so the user sees every chart/card visibly refresh
@@ -136,19 +137,19 @@ class MasterDashboardOverviewTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _KpiGrid(overview: overview),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _PerformanceChartCard(overview: overview),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _CopierHealthCard(health: overview.copierHealth),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   _PlanPerformanceCard(plans: overview.plans),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   _PayoutsCard(payouts: overview.payouts),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _RecentTradesCard(trades: overview.recentTrades),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   _RiskAlertsCard(alerts: overview.alerts),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                 ],
               ),
             ),
@@ -216,7 +217,7 @@ class _RangePills extends StatelessWidget {
               onTap: () => onChanged(chip),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(
+                padding: EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 8,
                 ),
@@ -245,7 +246,7 @@ class _RangePills extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
           ],
         ],
       ),
@@ -372,7 +373,7 @@ class _KpiCard extends StatelessWidget {
             // Top accent stripe — pure color, full width.
             Container(height: 3, color: accent),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+              padding: EdgeInsets.fromLTRB(12, 10, 12, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -398,7 +399,7 @@ class _KpiCard extends StatelessWidget {
                       if (pill != null) pill!,
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6),
                   // Big value.
                   Text(
                     value,
@@ -412,7 +413,7 @@ class _KpiCard extends StatelessWidget {
                       color: AppColors.textGrey,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   // Sub.
                   Text(
                     sub,
@@ -482,14 +483,14 @@ class _TrendPill extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: soft,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           color: color,
           fontSize: 10,
           fontWeight: FontWeight.w700,
@@ -577,7 +578,7 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
   String _series = 'equity'; // equity | aum | pnl
 
   List<double> _parseSeries(List<dynamic>? raw) {
-    if (raw == null) return const [];
+    if (raw == null) return [];
     return raw
         .where((e) => e != null)
         .map((e) => (e is num) ? e.toDouble() : double.tryParse('$e') ?? 0)
@@ -617,7 +618,7 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
     final labels = widget.overview.mainChart.labels;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      padding: EdgeInsets.fromLTRB(14, 14, 14, 14),
       decoration: _cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -629,7 +630,7 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
               color: AppColors.textGrey,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -640,14 +641,14 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
                   color: const Color(0xFF2C5FFB),
                   onTap: () => setState(() => _series = 'equity'),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 _ChartToggle(
                   label: 'AUM',
                   selected: _series == 'aum',
                   color: const Color(0xFF00BFA6),
                   onTap: () => setState(() => _series = 'aum'),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 _ChartToggle(
                   label: 'Net P/L',
                   selected: _series == 'pnl',
@@ -657,7 +658,7 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           SizedBox(
             height: 200,
             child:
@@ -680,7 +681,7 @@ class _PerformanceChartCardState extends State<_PerformanceChartCard> {
                       ),
                     ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           if (labels.length >= 2) _ChartXAxis(labels: labels),
         ],
       ),
@@ -707,7 +708,7 @@ class _ChartToggle extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: selected ? color.withValues(alpha: 0.12) : Colors.transparent,
           borderRadius: BorderRadius.circular(999),
@@ -724,7 +725,7 @@ class _ChartToggle extends StatelessWidget {
               height: 6,
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: 6),
             Text(
               label,
               style: theme.textTheme.labelMedium?.copyWith(
@@ -910,7 +911,7 @@ class _CopierHealthCard extends StatelessWidget {
     final theme = Theme.of(context);
     final total = health.active + health.paused + health.stopped;
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: _cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -922,7 +923,7 @@ class _CopierHealthCard extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Row(
             children: [
               SizedBox(
@@ -947,7 +948,7 @@ class _CopierHealthCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -957,13 +958,13 @@ class _CopierHealthCard extends StatelessWidget {
                       label: 'Active',
                       value: health.active,
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     _LegendDot(
                       color: const Color(0xFFF79009),
                       label: 'Paused',
                       value: health.paused,
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     _LegendDot(
                       color: const Color(0xFFE5484D),
                       label: 'Stopped',
@@ -974,7 +975,7 @@ class _CopierHealthCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -1074,7 +1075,7 @@ class _LegendDot extends StatelessWidget {
           height: 8,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8),
         Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
         Text(
           '$value',
@@ -1106,7 +1107,7 @@ class _CopierStat extends StatelessWidget {
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4),
         Text(
           value,
           style: theme.textTheme.titleMedium?.copyWith(
@@ -1131,7 +1132,7 @@ class _PlanPerformanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: _cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1143,10 +1144,10 @@ class _PlanPerformanceCard extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           if (plans.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: 16),
               child: Text(
                 'No plans yet',
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -1179,7 +1180,7 @@ class _PlanRow extends StatelessWidget {
     final theme = Theme.of(context);
     final positive = plan.roiPct >= 0;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Expanded(
@@ -1195,7 +1196,7 @@ class _PlanRow extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   plan.status,
                   style: theme.textTheme.labelSmall?.copyWith(
@@ -1210,7 +1211,7 @@ class _PlanRow extends StatelessWidget {
             child: Text(
               _fmtMoney(plan.totalCapital),
               style: theme.textTheme.bodyMedium?.copyWith(
-                fontFeatures: const [FontFeature.tabularFigures()],
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -1227,7 +1228,7 @@ class _PlanRow extends StatelessWidget {
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: _roiColor,
-                fontFeatures: const [FontFeature.tabularFigures()],
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -1249,7 +1250,7 @@ class _PayoutsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: _cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1261,7 +1262,7 @@ class _PayoutsCard extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -1270,7 +1271,7 @@ class _PayoutsCard extends StatelessWidget {
                   value: _fmtMoney(payouts.earnedInWindow),
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: 10),
               Expanded(
                 child: _PayoutStat(
                   label: 'PENDING',
@@ -1279,7 +1280,7 @@ class _PayoutsCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14),
           Text(
             'UPCOMING',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -1288,10 +1289,10 @@ class _PayoutsCard extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           if (payouts.upcoming.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
+              padding: EdgeInsets.symmetric(vertical: 6),
               child: Text(
                 'No upcoming payouts.',
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -1301,7 +1302,7 @@ class _PayoutsCard extends StatelessWidget {
             )
           else
             ...payouts.upcoming.map((u) => _PayoutRow(item: u)),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Text(
             'RECENT',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -1310,10 +1311,10 @@ class _PayoutsCard extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           if (payouts.recent.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
+              padding: EdgeInsets.symmetric(vertical: 6),
               child: Text(
                 'No recent payouts.',
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -1339,7 +1340,7 @@ class _PayoutStat extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: theme.dividerColor.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(10),
@@ -1355,7 +1356,7 @@ class _PayoutStat extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             value,
             style: theme.textTheme.titleMedium?.copyWith(
@@ -1378,7 +1379,7 @@ class _PayoutRow extends StatelessWidget {
     final isPaid = item.status.toLowerCase() == 'paid';
     final accent = isPaid ? AppColors.successText : AppColors.warningText;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           Container(
@@ -1386,17 +1387,17 @@ class _PayoutRow extends StatelessWidget {
             height: 6,
             decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text(
             item.status.toUpperCase(),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontWeight: FontWeight.w700,
               color: accent,
               fontSize: 11,
               letterSpacing: 0.6,
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: 10),
           Expanded(
             child: Text(
               _fmtDate(item.date),
@@ -1431,7 +1432,7 @@ class _RecentTradesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: _cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1447,9 +1448,9 @@ class _RecentTradesCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Text(
+              Text(
                 'Auto-refresh 15s',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: Color(0xFF2C5FFB),
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -1457,10 +1458,10 @@ class _RecentTradesCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           if (trades.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: 16),
               child: Text(
                 'No trades yet',
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -1511,7 +1512,7 @@ class _TradeRow extends StatelessWidget {
     final isProfit = trade.pnl > 0;
     final isLoss = trade.pnl < 0;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           SizedBox(
@@ -1536,7 +1537,7 @@ class _TradeRow extends StatelessWidget {
             width: 50,
             child: Text(
               isBuy ? 'BUY' : 'SELL',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.6,
@@ -1566,7 +1567,7 @@ class _TradeRow extends StatelessWidget {
                         : isLoss
                         ? const Color(0xFFE5484D)
                         : theme.textTheme.bodyMedium?.color,
-                fontFeatures: const [FontFeature.tabularFigures()],
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -1588,7 +1589,7 @@ class _RiskAlertsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: _cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1600,10 +1601,10 @@ class _RiskAlertsCard extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           if (alerts.isEmpty)
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppColors.successBg,
                 borderRadius: BorderRadius.circular(10),
@@ -1615,7 +1616,7 @@ class _RiskAlertsCard extends StatelessWidget {
                     color: AppColors.successText,
                     size: 18,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'All clear. No risk alerts in this range.',
@@ -1678,8 +1679,8 @@ class _AlertRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: _soft,
         borderRadius: BorderRadius.circular(10),
@@ -1688,7 +1689,7 @@ class _AlertRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(_icon, color: _accent, size: 18),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(
             child: Text(
               alert.message,
@@ -1737,7 +1738,7 @@ class _LoadingState extends StatelessWidget {
   const _LoadingState();
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(vertical: 80),
       child: Center(child: CircularProgressIndicator()),
     );
@@ -1750,19 +1751,19 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 80),
+      padding: EdgeInsets.symmetric(vertical: 80),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.bar_chart_rounded, size: 48),
-            const SizedBox(height: 8),
-            const Text('No overview data available'),
-            const SizedBox(height: 12),
+            Icon(Icons.bar_chart_rounded, size: 48),
+            SizedBox(height: 8),
+            Text('No overview data available'),
+            SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
+              icon: Icon(Icons.refresh_rounded),
+              label: Text('Retry'),
             ),
           ],
         ),

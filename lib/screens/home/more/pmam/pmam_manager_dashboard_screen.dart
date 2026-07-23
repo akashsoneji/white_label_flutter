@@ -128,7 +128,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
               },
               selectedColor: AppColors.primary,
               backgroundColor: AppColors.card,
-              labelStyle: TextStyle(
+              labelStyle: AppTextStyles.bodyText.copyWith(
                 color: isSelected ? AppColors.onColoredBackground : AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
                 fontSize: 12.sp,
@@ -207,7 +207,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
             children: [
               Text(
                 'Performance Overview',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -236,7 +236,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                     ),
                     child: Text(
                       tab,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: isSelected ? AppColors.primary : AppColors.textGrey,
                         fontWeight: FontWeight.w600,
                         fontSize: 13.sp,
@@ -267,7 +267,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
     if (series == null || series['data'] == null || (series['data'] as List).isEmpty) {
       return Center(
         child: Text('No data available for $_selectedChartTab',
-            style: TextStyle(color: AppColors.textGrey)),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey)),
       );
     }
 
@@ -287,7 +287,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
       spots.add(FlSpot(i.toDouble(), y));
     }
 
-    if (spots.isEmpty) return const SizedBox();
+    if (spots.isEmpty) return SizedBox();
 
     if (minY == maxY) {
       // Give zero / flat series a tiny visible band.
@@ -343,7 +343,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
           getDrawingHorizontalLine: (_) => FlLine(
             color: AppColors.border.withOpacity(0.25),
             strokeWidth: 1,
-            dashArray: const [4, 4],
+            dashArray: [4, 4],
           ),
         ),
         titlesData: FlTitlesData(
@@ -357,12 +357,12 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
               interval: labelStep.toDouble(),
               getTitlesWidget: (value, meta) {
                 final text = fmtLabel(value);
-                if (text.isEmpty) return const SizedBox();
+                if (text.isEmpty) return SizedBox();
                 return Padding(
                   padding: EdgeInsets.only(top: 6.h),
                   child: Text(
                     text,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       color: AppColors.textGrey,
                       fontWeight: FontWeight.w500,
@@ -391,7 +391,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                 final val = fmtValue(s.y);
                 return LineTooltipItem(
                   '$val\n',
-                  TextStyle(
+                  AppTextStyles.bodyText.copyWith(
                     color: AppColors.onColoredBackground,
                     fontWeight: FontWeight.w700,
                     fontSize: 12.sp,
@@ -399,7 +399,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                   children: [
                     TextSpan(
                       text: label,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.onColoredBackground.withOpacity(0.7),
                         fontWeight: FontWeight.w500,
                         fontSize: 10.sp,
@@ -475,7 +475,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
         children: [
           Text(
             'Investor Health',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -567,7 +567,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
             children: [
               Text(
                 'Plan Performance',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -580,7 +580,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                 ),
                 child: Text(
                   'View All',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,
@@ -591,7 +591,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
           ),
           SizedBox(height: 12.h),
           if (plans.isEmpty)
-            Text('No plans available', style: TextStyle(color: AppColors.textGrey))
+            Text('No plans available', style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey))
           else
             ListView.separated(
               shrinkWrap: true,
@@ -611,7 +611,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                           children: [
                             Text(
                               p['plan_name'] ?? 'Unnamed',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
@@ -622,7 +622,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                             SizedBox(height: 2.h),
                             Text(
                               '${p['active_investors'] ?? 0} Investors',
-                              style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                              style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
                             ),
                           ],
                         ),
@@ -632,7 +632,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                         children: [
                           Text(
                             _fmt(p['total_locked_aum']),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
@@ -641,7 +641,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                           SizedBox(height: 2.h),
                           Text(
                             'AUM',
-                            style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                            style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
                           ),
                         ],
                       ),
@@ -669,7 +669,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
         children: [
           Text(
             'Payouts',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
@@ -690,12 +690,12 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                     children: [
                       Text(
                         'Earned (30d)',
-                        style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+                        style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
                       ),
                       SizedBox(height: 4.h),
                       Text(
                         _fmt(payouts['earned_period']),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
@@ -718,12 +718,12 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                     children: [
                       Text(
                         'Pending',
-                        style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+                        style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
                       ),
                       SizedBox(height: 4.h),
                       Text(
                         _fmt(payouts['pending']),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                           color: AppColors.warning,
@@ -757,7 +757,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
             children: [
               Text(
                 'Recent Trades',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
@@ -767,7 +767,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
           ),
           SizedBox(height: 12.h),
           if (trades.isEmpty)
-            Text('No recent trades', style: TextStyle(color: AppColors.textGrey))
+            Text('No recent trades', style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey))
           else
             ListView.separated(
               shrinkWrap: true,
@@ -801,7 +801,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                           children: [
                             Text(
                               t['symbol'] ?? 'UNKNOWN',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
@@ -810,7 +810,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                             SizedBox(height: 2.h),
                             Text(
                               t['close_time']?.toString().split(' ').first ?? '-',
-                              style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                              style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
                             ),
                           ],
                         ),
@@ -820,7 +820,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                         children: [
                           Text(
                             _fmt(pnl),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.bold,
                               color: isProfit ? AppColors.green : AppColors.error,
@@ -829,7 +829,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                           SizedBox(height: 2.h),
                           Text(
                             'Vol: ${t['volume'] ?? 0}',
-                            style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                            style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
                           ),
                         ],
                       ),
@@ -863,10 +863,10 @@ class _HealthRow extends StatelessWidget {
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             SizedBox(width: 8.w),
-            Text(label, style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey)),
+            Text(label, style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey)),
           ],
         ),
-        Text(value, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        Text(value, style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
       ],
     );
   }
@@ -884,12 +884,12 @@ class _StatItem extends StatelessWidget {
       children: [
         Text(
           value,
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
         ),
         SizedBox(height: 4.h),
         Text(
           label,
-          style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
         ),
       ],
     );
@@ -936,7 +936,7 @@ class _HeroCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500),
               ),
               Icon(icon, size: 16.sp, color: AppColors.primary.withOpacity(0.6)),
             ],
@@ -944,7 +944,7 @@ class _HeroCard extends StatelessWidget {
           SizedBox(height: 8.h),
           Text(
             value,
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -959,7 +959,7 @@ class _HeroCard extends StatelessWidget {
                 ),
                 child: Text(
                   dText,
-                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: dColor),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, fontWeight: FontWeight.bold, color: dColor),
                 ),
               ),
               if (sparklineData != null && sparklineData is List && (sparklineData as List).isNotEmpty)
@@ -984,7 +984,7 @@ class _MiniSparkline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (data.isEmpty) return const SizedBox();
+    if (data.isEmpty) return SizedBox();
     
     double minY = double.infinity;
     double maxY = -double.infinity;

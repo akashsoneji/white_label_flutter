@@ -26,7 +26,7 @@ class CopyTradingPaymentMethodsScreen extends StatelessWidget {
             ),
             Text(
               'MT5 5013314, \$100',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: AppColors.textGrey,
                 fontWeight: FontWeight.w400,
@@ -152,7 +152,7 @@ class _PaymentMethodTile extends StatelessWidget {
           ),
           subtitle: Text(
             sublabel,
-            style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
           ),
           trailing: Icon(
             Icons.arrow_forward_ios,

@@ -14,6 +14,7 @@
 // ============================================================
 
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -271,7 +272,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
             return GestureDetector(
               onTap: () => _pickSymbol(c),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Text(sym, style: TextStyle(
+                Text(sym, style: AppTextStyles.bodyText.copyWith(
                     color: CelTheme.mainText(c), fontSize: 15.sp,
                     fontWeight: FontWeight.w800)),
                 SizedBox(width: 2.w),
@@ -290,7 +291,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
                 color: CelTheme.softBg(c),
                 borderRadius: BorderRadius.circular(6.r),
               ),
-              child: Text(_tf, style: TextStyle(
+              child: Text(_tf, style: AppTextStyles.bodyText.copyWith(
                   color: CelTheme.mainText(c), fontSize: 12.sp,
                   fontWeight: FontWeight.w700)),
             ),
@@ -305,7 +306,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
                 color:   CelTheme.buyBlue ,
                 borderRadius: BorderRadius.circular(6.r),
               ),
-              child: Text(Get.find<LanguageService>().tr('celestial_chart_trade'), style: TextStyle(
+              child: Text(Get.find<LanguageService>().tr('celestial_chart_trade'), style: AppTextStyles.bodyText.copyWith(
                   color: Colors.white,
                   fontSize: 12.sp, fontWeight: FontWeight.w700)),
             ),
@@ -375,11 +376,11 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
             color: color, borderRadius: BorderRadius.circular(8.r)),
         alignment: Alignment.center,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(label, style: TextStyle(
+          Text(label, style: AppTextStyles.bodyText.copyWith(
               color: Colors.white, fontSize: 15.sp,
               fontWeight: FontWeight.w800)),
           SizedBox(height: 2.h),
-          Text(sub, style: TextStyle(
+          Text(sub, style: AppTextStyles.bodyText.copyWith(
               color: Colors.white.withValues(alpha: 0.85),
               fontSize: 11.sp, fontWeight: FontWeight.w500)),
         ]),
@@ -402,7 +403,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
               () => _lot = (_lot - 0.01).clamp(0.01, double.infinity)),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-            child: Text('−', style: TextStyle(
+            child: Text('−', style: AppTextStyles.bodyText.copyWith(
                 color: CelTheme.mainText(c), fontSize: 18.sp,
                 fontWeight: FontWeight.w700)),
           ),
@@ -413,7 +414,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
           child: Container(
             width: 52.w,
             alignment: Alignment.center,
-            child: Text(_lot.toStringAsFixed(2), style: TextStyle(
+            child: Text(_lot.toStringAsFixed(2), style: AppTextStyles.bodyText.copyWith(
                 color: CelTheme.mainText(c), fontSize: 14.sp,
                 fontWeight: FontWeight.w800)),
           ),
@@ -423,7 +424,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
           onTap: () => setState(() => _lot += 0.01),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-            child: Text('+', style: TextStyle(
+            child: Text('+', style: AppTextStyles.bodyText.copyWith(
                 color: CelTheme.mainText(c), fontSize: 18.sp,
                 fontWeight: FontWeight.w700)),
           ),
@@ -440,14 +441,12 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
       builder: (_) => AlertDialog(
         backgroundColor: CelTheme.card(c),
         title: Text(Get.find<LanguageService>().tr('celestial_chart_enter_lot_size'),
-            style: TextStyle(color: CelTheme.mainText(c), fontSize: 15.sp,
-                fontWeight: FontWeight.w700)),
+            style: AppTextStyles.cardTitle.copyWith(color: CelTheme.mainText(c), fontSize: 15.sp)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          style: TextStyle(color: CelTheme.mainText(c), fontSize: 18.sp,
-              fontWeight: FontWeight.w800),
+          style: AppTextStyles.heading.copyWith(color: CelTheme.mainText(c), fontSize: 18.sp),
           decoration: InputDecoration(
             filled: true,
             fillColor: CelTheme.softBg(c),
@@ -461,7 +460,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
           TextButton(
             onPressed: () => Navigator.pop(c),
             child: Text(Get.find<LanguageService>().tr('celestial_chart_cancel'),
-                style: TextStyle(color: CelTheme.subText(c))),
+                style: AppTextStyles.bodyText.copyWith(color: CelTheme.subText(c))),
           ),
           TextButton(
             onPressed: () {
@@ -470,7 +469,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
               Navigator.pop(c);
             },
             child: Text('OK',
-                style: TextStyle(color: CelTheme.buy(c),
+                style: AppTextStyles.bodyText.copyWith(color: CelTheme.buy(c),
                     fontWeight: FontWeight.w800)),
           ),
         ],
@@ -490,7 +489,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
           children: _tfMap.entries.map((e) {
             final active = e.key == _tf;
             return ListTile(
-              title: Text(e.key, style: TextStyle(
+              title: Text(e.key, style: AppTextStyles.bodyText.copyWith(
                   color: active ? CelTheme.buy(c) : CelTheme.mainText(c),
                   fontWeight: active ? FontWeight.w800 : FontWeight.w500)),
               trailing: active ? Icon(Icons.check, color: CelTheme.buy(c)) : null,
@@ -578,7 +577,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(Get.find<LanguageService>().tr('celestial_chart_select_symbol'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: CelTheme.headerText(c),
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500)),
@@ -586,7 +585,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
           TextField(
             decoration: InputDecoration(
               hintText: Get.find<LanguageService>().tr('celestial_chart_search_hint'),
-              prefixIcon: const Icon(Icons.search, size: 18),
+              prefixIcon: Icon(Icons.search, size: 18),
               filled: true,
               fillColor: CelTheme.softBg(c),
               isDense: true,
@@ -597,7 +596,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
                 borderSide: BorderSide.none,
               ),
             ),
-            style: TextStyle(color: CelTheme.mainText(c), fontSize: 13.sp),
+            style: AppTextStyles.bodyText.copyWith(color: CelTheme.mainText(c), fontSize: 13.sp),
             onChanged: (v) => setState(() => _query = v.toLowerCase()),
           ),
           SizedBox(height: 4.h),
@@ -621,7 +620,7 @@ class _SymbolPickerState extends State<_SymbolPicker> {
                       padding: EdgeInsets.symmetric(
                           horizontal: 4.w, vertical: 6.h),
                       child: Text(item.symbol,
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                               color: CelTheme.mainText(c),
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w500)),

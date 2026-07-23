@@ -47,7 +47,7 @@ class _ChangeProportionScreenState extends State<ChangeProportionScreen> {
             SizedBox(height: 16.h),
             Text(
               'Copy Proportion',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -74,7 +74,7 @@ class _ChangeProportionScreenState extends State<ChangeProportionScreen> {
           children: [
             Text(
               'New copy proportion : ${_proportionController.text}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w400,
@@ -95,7 +95,7 @@ class _ChangeProportionScreenState extends State<ChangeProportionScreen> {
                 ),
                 child: Text(
                   'Apply new Proportion',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.whiteColor,
@@ -124,7 +124,7 @@ class _ChangeProportionScreenState extends State<ChangeProportionScreen> {
             SizedBox(width: 12),
             Text(
               'Prime_traders',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -145,7 +145,7 @@ class _ChangeProportionScreenState extends State<ChangeProportionScreen> {
         children: [
           Text(
             'Balance',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -161,7 +161,7 @@ class _ChangeProportionScreenState extends State<ChangeProportionScreen> {
               SizedBox(width: 8.w),
               Text(
                 '50.01 USD',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   color: AppColors.textGrey,
                   fontWeight: FontWeight.w500,

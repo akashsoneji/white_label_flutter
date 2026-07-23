@@ -210,7 +210,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
 
                               Text(
                                 _getSubtitle(latestVersion),
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 14.sp,
                                   color: subtitleColor,
                                   height: 1.5,
@@ -250,7 +250,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                           SizedBox(width: 6.w),
                                           Text(
                                             "What's new",
-                                            style: TextStyle(
+                                            style: AppTextStyles.bodyText.copyWith(
                                               fontSize: 11.sp,
                                               fontWeight: FontWeight.w600,
                                               color: subtitleColor,
@@ -261,7 +261,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                       SizedBox(height: 8.h),
                                       Text(
                                         releaseNotes,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 13.sp,
                                           color: titleColor.withValues(alpha: 0.8),
                                           height: 1.5,
@@ -285,7 +285,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                                   },
                                   child: Text(
                                     'Remind me later',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 14.sp,
                                       color: subtitleColor.withValues(alpha: 0.8),
                                       fontWeight: FontWeight.w500,
@@ -405,7 +405,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                 ),
                 child: Text(
                   '${((_downloadProgress ?? 0) * 100).toStringAsFixed(0)}%',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
@@ -480,7 +480,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
             SizedBox(width: 4.w),
             Text(
               'Do not close the app',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: AppColors.textGrey,
               ),
@@ -531,7 +531,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
               children: [
                 Text(
                   'Tap Install when prompted',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                     color: textColor,
@@ -540,7 +540,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                 SizedBox(height: 2.h),
                 Text(
                   'Allow "Unknown apps" if asked by your device',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: textColor.withValues(alpha: 0.85),
                     height: 1.3,
@@ -569,7 +569,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
         SizedBox(width: 10.w),
         Text(
           'Redirecting to app store...',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 13.sp,
             color: AppColors.textSecondary,
           ),
@@ -618,7 +618,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
             SizedBox(width: 10.w),
             Text(
               hasApkUrl ? 'Download & Install' : 'Update Now',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.onColoredBackground,
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
@@ -663,7 +663,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
               SizedBox(width: 12.w),
               Text(
                 'Downloading... ${((_downloadProgress ?? 0) * 100).toStringAsFixed(0)}%',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: _accentColor,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -678,7 +678,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
             onTap: null,
             child: Text(
               'Remind me later',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 color: AppColors.textGrey,
               ),
@@ -721,7 +721,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
               SizedBox(width: 10.w),
               Text(
                 'Download complete!',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: textColor,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -733,7 +733,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
         SizedBox(height: 8.h),
         Text(
           'System installer should have opened automatically',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             color: AppColors.textGrey,
           ),
@@ -773,7 +773,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
           SizedBox(width: 12.w),
           Text(
             'Opening app store...',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: _accentColor,
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
@@ -810,7 +810,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
                 SizedBox(width: 10.w),
                 Text(
                   'Try Again',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.onColoredBackground,
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
@@ -828,7 +828,7 @@ class _ForceUpdateDialogState extends State<ForceUpdateDialog> {
           },
           child: Text(
             'Skip this version',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               color: AppColors.textGrey,
             ),

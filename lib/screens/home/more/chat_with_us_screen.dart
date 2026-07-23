@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:crm_app/constants/color.dart';
@@ -23,7 +24,7 @@ class ChatWithUsScreen extends StatelessWidget {
         leading: const AppBackButton(),
         title: Text(
           'Chat with us',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -80,7 +81,7 @@ class ChatWithUsScreen extends StatelessWidget {
 
   Widget _buildMessageBubble(ChatMessage message, bool isTablet) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16),
       child: Row(
         mainAxisAlignment:
             message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -91,7 +92,7 @@ class ChatWithUsScreen extends StatelessWidget {
             Container(
               width: 32,
               height: 32,
-              margin: const EdgeInsets.only(right: 8),
+              margin: EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 shape: BoxShape.circle,
@@ -114,10 +115,10 @@ class ChatWithUsScreen extends StatelessWidget {
               children: [
                 if (!message.isUser && message.sender != null)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4, left: 8),
+                    padding: EdgeInsets.only(bottom: 4, left: 8),
                     child: Text(
                       message.sender!,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12,
                         color: AppColors.textGrey,
                         fontWeight: FontWeight.w500,
@@ -126,7 +127,7 @@ class ChatWithUsScreen extends StatelessWidget {
                   ),
 
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
                   ),
@@ -143,7 +144,7 @@ class ChatWithUsScreen extends StatelessWidget {
                   ),
                   child: Text(
                     message.text,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15,
                       color:
                           message.isUser
@@ -158,7 +159,7 @@ class ChatWithUsScreen extends StatelessWidget {
           ),
 
           if (message.isUser) ...[
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             // User avatar
             Container(
               width: 32,
@@ -177,12 +178,12 @@ class ChatWithUsScreen extends StatelessWidget {
 
   Widget _buildLanguageSelectionCard(ChatController controller) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16, left: 40),
+      margin: EdgeInsets.only(bottom: 16, left: 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(12),
@@ -192,9 +193,9 @@ class ChatWithUsScreen extends StatelessWidget {
               children: [
                 Text(
                   "Please select the department where you want to get assistance.",
-                  style: TextStyle(fontSize: 14, color: AppColors.textPrimary),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 14, color: AppColors.textPrimary),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
 
                 // Language options
                 ...controller.languages
@@ -202,10 +203,10 @@ class ChatWithUsScreen extends StatelessWidget {
                       (language) => GestureDetector(
                         onTap: () => controller.selectLanguage(language),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          padding: EdgeInsets.symmetric(vertical: 4),
                           child: Text(
                             "${language.number}. ${language.name}",
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14,
                               color: AppColors.primary,
                               fontWeight: FontWeight.w500,
@@ -225,11 +226,11 @@ class ChatWithUsScreen extends StatelessWidget {
 
   Widget _buildTypingIndicator() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16, left: 40),
+      margin: EdgeInsets.only(bottom: 16, left: 40),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.whiteColor,
               borderRadius: BorderRadius.circular(20),
@@ -245,9 +246,9 @@ class ChatWithUsScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildTypingDot(0),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 _buildTypingDot(1),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 _buildTypingDot(2),
               ],
             ),
@@ -307,8 +308,8 @@ class ChatWithUsScreen extends StatelessWidget {
                   controller: controller.messageController,
                   decoration: InputDecoration(
                     hintText: 'Ask me anything...',
-                    hintStyle: TextStyle(color: Colors.grey[500], fontSize: 15),
-                    contentPadding: const EdgeInsets.symmetric(
+                    hintStyle: AppTextStyles.bodyText.copyWith(color: Colors.grey[500], fontSize: 15),
+                    contentPadding: EdgeInsets.symmetric(
                       horizontal: 20,
                       vertical: 12,
                     ),
@@ -341,7 +342,7 @@ class ChatWithUsScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
 
             // Send button
             GestureDetector(

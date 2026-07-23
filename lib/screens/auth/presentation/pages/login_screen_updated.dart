@@ -228,7 +228,7 @@ class _LoginScreenUpdatedState extends State<LoginScreenUpdated> {
                     Expanded(
                       child: Text(
                         languageService.tr('biometric_enable_checkbox'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textGrey,
@@ -255,7 +255,7 @@ class _LoginScreenUpdatedState extends State<LoginScreenUpdated> {
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
                       child: Text(
                         languageService.tr("login_or_with"),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.textGrey,
                           fontSize: 14.sp,
                         ),

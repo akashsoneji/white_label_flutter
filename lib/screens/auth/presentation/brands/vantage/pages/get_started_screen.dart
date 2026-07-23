@@ -1,4 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -23,7 +24,7 @@ class VantageGetStartedScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [VantageAuthTheme.primary, VantageAuthTheme.background],
-            stops: const [0.0, 0.9],
+            stops: [0.0, 0.9],
           ),
         ),
         child: SafeArea(
@@ -44,7 +45,7 @@ class VantageGetStartedScreen extends StatelessWidget {
                 SizedBox(height: 18.h),
                 // Text(
                 //   FlavorConfig.instance.appName,
-                //   style: TextStyle(
+                //   style: AppTextStyles.bodyText.copyWith(
                 //     color: Colors.white,
                 //     fontSize: 34.sp,
                 //     fontWeight: FontWeight.w800,
@@ -55,7 +56,7 @@ class VantageGetStartedScreen extends StatelessWidget {
                 Text(
                   languageService.tr('get_started_tagline'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,

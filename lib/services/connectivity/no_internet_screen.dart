@@ -60,7 +60,7 @@ class NoInternetScreen extends StatelessWidget {
               // Message
               Text(
                 'Please check your connection and try again',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 11.45.sp,
                   color: AppColors.textSecondary,
                   height: 1.5,
@@ -98,7 +98,7 @@ class NoInternetScreen extends StatelessWidget {
                       SizedBox(width: 8.w),
                       Text(
                         'Refresh',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.whiteColor,

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:crm_app/constants/text_styles.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -70,14 +71,14 @@ class KycVerificationScreen extends StatelessWidget {
                   child: Text(
                     languageService.tr('kyc_verification'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                const SizedBox(width: 48), // Balance the back button
+                SizedBox(width: 48), // Balance the back button
               ],
             ),
           ),
@@ -104,7 +105,7 @@ class KycVerificationScreen extends StatelessWidget {
                         'kyc_verification_first_lets_know_you',
                       ),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: isTablet ? 32 : 28,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -118,19 +119,19 @@ class KycVerificationScreen extends StatelessWidget {
                     Text(
                       languageService.tr('kyc_verification_prepare_documents'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: isTablet ? 18 : 16,
                         color: AppColors.textGrey,
                         height: 1.4,
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8),
 
                     Text(
                       languageService.tr('kyc_verification_document_types'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: isTablet ? 18 : 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -161,7 +162,7 @@ class KycVerificationScreen extends StatelessWidget {
                             languageService.tr(
                               'kyc_verification_choose_document',
                             ),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: isTablet ? 18 : 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -251,20 +252,20 @@ class KycVerificationScreen extends StatelessWidget {
         children: [
           // Header lines
           Container(
-            margin: const EdgeInsets.all(8),
+            margin: EdgeInsets.all(8),
             child: Column(
               children: [
                 Container(
                   height: 3,
                   width: double.infinity,
                   color: Colors.grey[400],
-                  margin: const EdgeInsets.only(bottom: 4),
+                  margin: EdgeInsets.only(bottom: 4),
                 ),
                 Container(
                   height: 2,
                   width: 40,
                   color: Colors.grey[400],
-                  margin: const EdgeInsets.only(bottom: 4),
+                  margin: EdgeInsets.only(bottom: 4),
                 ),
                 Container(height: 2, width: 50, color: Colors.grey[400]),
               ],
@@ -276,7 +277,7 @@ class KycVerificationScreen extends StatelessWidget {
             Expanded(
               child: Container(
                 width: double.infinity,
-                margin: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+                margin: EdgeInsets.fromLTRB(8, 4, 8, 8),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(4),
@@ -418,7 +419,7 @@ class KycVerificationScreen extends StatelessWidget {
             Container(
               width: 40,
               height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 12),
+              margin: EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(2),
@@ -427,24 +428,24 @@ class KycVerificationScreen extends StatelessWidget {
 
             // Title
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'Choose\nDocument Type',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
                       height: 1.2,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Text(
                     'Make sure the document includes a\npicture of your face.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14,
                       color: Colors.grey[600],
                       height: 1.4,
@@ -454,7 +455,7 @@ class KycVerificationScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
 
             // Document options
             ...controller.documentTypes
@@ -473,8 +474,8 @@ class KycVerificationScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => controller.selectDocument(document),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-        padding: const EdgeInsets.all(16),
+        margin: EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.whiteColor,
           borderRadius: BorderRadius.circular(12),
@@ -500,7 +501,7 @@ class KycVerificationScreen extends StatelessWidget {
               child: Icon(document.icon, color: document.iconColor, size: 24),
             ),
 
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
 
             // Text content
             Expanded(
@@ -509,16 +510,16 @@ class KycVerificationScreen extends StatelessWidget {
                 children: [
                   Text(
                     document.title,
-                    style: const TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
                     document.subtitle,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 13, color: Colors.grey[600]),
                   ),
                 ],
               ),

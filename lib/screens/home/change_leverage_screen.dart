@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -35,7 +36,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
     // Initialize leverage values dynamically from widget.leverageOptions, fallback to defaults
     _leverageValues = (widget.leverageOptions != null && widget.leverageOptions!.isNotEmpty)
         ? widget.leverageOptions!
-        : const [100, 150, 200, 300, 400, 500];
+        : [100, 150, 200, 300, 400, 500];
 
     // Set to current leverage if provided and valid, otherwise default to first value
     if (widget.currentLeverage != null &&
@@ -90,7 +91,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                       children: [
                         Text(
                           'Select Leverage',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -139,7 +140,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                               children: [
                                 Text(
                                   _formatLeverage(leverage),
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 16.sp,
                                     fontWeight:
                                         isSelected
@@ -237,7 +238,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                   SizedBox(width: 12.w),
                   Text(
                     'Account: ${widget.accountNumber}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
@@ -251,7 +252,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
             // Leverage Dropdown
             Text(
               'Select Leverage',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textGrey,
@@ -326,7 +327,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                         )
                         : Text(
                           'Change Leverage',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.whiteColor,

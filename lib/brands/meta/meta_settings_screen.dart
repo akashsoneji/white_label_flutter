@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -326,7 +327,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
       padding: EdgeInsets.only(left: 4.w),
       child: Text(
         label.toUpperCase(),
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 10.sp,
           fontWeight: FontWeight.w700,
           color: MetaTheme.subText(c),
@@ -376,7 +377,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
             child: Center(
               child: Text(
                 initial,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -392,7 +393,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               children: [
                 Text(
                   name,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontWeight: FontWeight.w600,
                     fontSize: 15.sp,
                     color: MetaTheme.mainText(c),
@@ -404,7 +405,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                   SizedBox(height: 2.h),
                   Text(
                     email,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: MetaTheme.subText(c),
                       fontSize: 12.sp,
                     ),
@@ -486,7 +487,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                       children: [
                         Text(
                           languageService.tr('settings_verify_account'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
                             color: MetaTheme.mainText(c),
@@ -495,7 +496,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                         Text(
                           languageService.tr(
                               'settings_complete_verification'),
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: MetaTheme.subText(c),
                           ),
@@ -542,7 +543,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
                   Text(
                     languageService
                         .tr('settings_completion_pct', {'completion': '$completion'}),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: MetaTheme.buy(c),
@@ -632,7 +633,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               Expanded(
                 child: Text(
                   item.label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
                     color: MetaTheme.mainText(c),
@@ -863,7 +864,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               Expanded(
                 child: Text(
                   item.label,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
                     color: MetaTheme.mainText(c),
@@ -941,7 +942,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
             child: Text(
               languageService
                   .tr('settings_version', {'version': snap.data!.version}),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 color: MetaTheme.subText(c).withValues(alpha: 0.5),
                 fontWeight: FontWeight.w500,
@@ -986,7 +987,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               Text(
                 languageService.tr('settings_logout_confirm'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: MetaTheme.mainText(c),
@@ -1053,7 +1054,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               Text(
                 languageService.tr('settings_delete_account_confirm'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                   color: MetaTheme.mainText(c),
@@ -1063,12 +1064,12 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
               Obx(() => TextField(
                     controller: passwordCtrl,
                     obscureText: true,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp, color: MetaTheme.mainText(c)),
                     decoration: InputDecoration(
                       hintText:
                           languageService.tr('settings_enter_password'),
-                      hintStyle: TextStyle(color: MetaTheme.subText(c)),
+                      hintStyle: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(c)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.r),
                         borderSide:
@@ -1167,7 +1168,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
           alignment: Alignment.center,
           child: Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: isPrimary ? Colors.white : MetaTheme.mainText(c),
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,

@@ -604,8 +604,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                                     ? AppTextStyles.label
                                     : AppTextStyles.input)
                                 .copyWith(
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.w600,
+                                                                    fontWeight: FontWeight.w600,
                                   fontSize: (isVantage ? 13.0 : 13.0).sp,
                                   height: 1.15,
                                   color: AppColors.textPrimary,
@@ -616,8 +615,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                           Text(
                             currentTime,
                             style: AppTextStyles.caption.copyWith(
-                              fontFamily: 'Roboto',
-                              fontSize: 10.sp,
+                                                            fontSize: 10.sp,
                               color: AppColors.textGrey,
                               height: 1.1,
                             ),
@@ -643,8 +641,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                                   return Text(
                                     _formatSpreadDiff(spreadDiff),
                                     style: AppTextStyles.caption.copyWith(
-                                      fontFamily: 'Roboto',
-                                      fontSize: 10.sp,
+                                                                            fontSize: 10.sp,
                                       color: AppColors.textGrey,
                                       height: 1.1,
                                     ),
@@ -1226,8 +1223,7 @@ class _BidPriceColumn extends StatelessWidget {
                       TextSpan(
                         text: 'L: ',
                         style: AppTextStyles.caption.copyWith(
-                          fontFamily: 'Roboto',
-                          fontSize: 9.sp,
+                                                    fontSize: 9.sp,
                           color: AppColors.textGrey,
                           height: 1.0,
                         ),
@@ -1238,8 +1234,7 @@ class _BidPriceColumn extends StatelessWidget {
                           decimals: digits,
                         ),
                         style: AppTextStyles.caption.copyWith(
-                          fontFamily: 'Roboto',
-                          fontSize: 9.sp,
+                                                    fontSize: 9.sp,
                           color: AppColors.textGrey,
                           height: 1.0,
                         ),
@@ -1267,9 +1262,8 @@ class _BidPriceColumn extends StatelessWidget {
       return [
         TextSpan(
           text: priceStr,
-          style: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: (compact ? 14.5 : 14.0).sp,
+          style: AppTextStyles.bodyText.copyWith(
+                        fontSize: (compact ? 14.5 : 14.0).sp,
             color: color,
             fontWeight: FontWeight.w600,
           ),
@@ -1291,18 +1285,16 @@ class _BidPriceColumn extends StatelessWidget {
     return [
       TextSpan(
         text: prefix,
-        style: TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: (compact ? 14.5 : 14.0).sp,
+        style: AppTextStyles.bodyText.copyWith(
+                    fontSize: (compact ? 14.5 : 14.0).sp,
           color: color,
           fontWeight: FontWeight.w600,
         ),
       ),
       TextSpan(
         text: bigPart,
-        style: TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: (compact ? 20.0 : 20.0).sp,
+        style: AppTextStyles.bodyText.copyWith(
+                    fontSize: (compact ? 20.0 : 20.0).sp,
           color: color,
           fontWeight: FontWeight.w700,
         ),
@@ -1313,9 +1305,8 @@ class _BidPriceColumn extends StatelessWidget {
           offset: const Offset(0, -4),
           child: Text(
             lastDigit,
-            style: TextStyle(
-              fontFamily: 'Roboto',
-              fontSize: (compact ? 11.0 : 10.0).sp,
+            style: AppTextStyles.bodyText.copyWith(
+                            fontSize: (compact ? 11.0 : 10.0).sp,
               color: color,
               fontWeight: FontWeight.w600,
             ),
@@ -1374,8 +1365,7 @@ class _AskPriceColumn extends StatelessWidget {
                   TextSpan(
                     text: 'H: ',
                     style: AppTextStyles.caption.copyWith(
-                      fontFamily: 'Roboto',
-                      fontSize: 9.sp,
+                                            fontSize: 9.sp,
                       color: AppColors.textGrey,
                       height: 1.0,
                     ),
@@ -1386,8 +1376,7 @@ class _AskPriceColumn extends StatelessWidget {
                       decimals: digits,
                     ),
                     style: AppTextStyles.caption.copyWith(
-                      fontFamily: 'Roboto',
-                      fontSize: 9.sp,
+                                            fontSize: 9.sp,
                       color: AppColors.textGrey,
                       height: 1.0,
                     ),
@@ -1413,9 +1402,8 @@ class _AskPriceColumn extends StatelessWidget {
       return [
         TextSpan(
           text: priceStr,
-          style: TextStyle(
-            fontFamily: 'Roboto',
-            fontSize: (compact ? 14.5 : 14.0).sp,
+          style: AppTextStyles.bodyText.copyWith(
+                        fontSize: (compact ? 14.5 : 14.0).sp,
             color: color,
             fontWeight: FontWeight.w600,
           ),
@@ -1437,18 +1425,16 @@ class _AskPriceColumn extends StatelessWidget {
     return [
       TextSpan(
         text: prefix,
-        style: TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: (compact ? 14.5 : 14.0).sp,
+        style: AppTextStyles.bodyText.copyWith(
+                    fontSize: (compact ? 14.5 : 14.0).sp,
           color: color,
           fontWeight: FontWeight.w600,
         ),
       ),
       TextSpan(
         text: bigPart,
-        style: TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: (compact ? 20.0 : 20.0).sp,
+        style: AppTextStyles.bodyText.copyWith(
+                    fontSize: (compact ? 20.0 : 20.0).sp,
           color: color,
           fontWeight: FontWeight.w700,
         ),
@@ -1459,9 +1445,8 @@ class _AskPriceColumn extends StatelessWidget {
           offset: const Offset(0, -4),
           child: Text(
             lastDigit,
-            style: TextStyle(
-              fontFamily: 'Roboto',
-              fontSize: (compact ? 11.0 : 10.0).sp,
+            style: AppTextStyles.bodyText.copyWith(
+                            fontSize: (compact ? 11.0 : 10.0).sp,
               color: color,
               fontWeight: FontWeight.w600,
             ),

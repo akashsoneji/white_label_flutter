@@ -56,7 +56,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
         ),
         title: Text(
           lang.tr('ticket_close'),
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
@@ -64,7 +64,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
         ),
         content: Text(
           lang.tr('ticket_close_confirm'),
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textSecondary,
             fontSize: 14.sp,
           ),
@@ -74,7 +74,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
             onPressed: () => Get.back(),
             child: Text(
               lang.tr('ticket_cancel'),
-              style: TextStyle(color: AppColors.primary),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
             ),
           ),
           ElevatedButton(
@@ -88,7 +88,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
             },
             child: Text(
               lang.tr('ticket_close'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.pureWhite,
                 fontWeight: FontWeight.w600,
               ),
@@ -115,7 +115,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
       body: Obx(() {
         if (controller.isDetailLoading.value &&
             controller.ticketDetail.value == null) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator());
         }
         final detail = controller.ticketDetail.value;
         if (detail == null) {
@@ -124,7 +124,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
               controller.errorMessage.value.isEmpty
                   ? lang.tr('ticket_no_tickets')
                   : controller.errorMessage.value,
-              style: TextStyle(color: AppColors.textSecondary),
+              style: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary),
             ),
           );
         }
@@ -202,7 +202,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
                   icon: Icon(Icons.lock_outline,
                       size: 18.sp, color: AppColors.statusRed),
                   label: Text(lang.tr('ticket_close'),
-                      style: TextStyle(color: AppColors.statusRed)),
+                      style: AppTextStyles.bodyText.copyWith(color: AppColors.statusRed)),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: AppColors.statusRed),
                   ),
@@ -219,7 +219,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
     if (detail.conversation.isEmpty) {
       return Center(
         child: Text(lang.tr('ticket_no_data'),
-            style: TextStyle(color: AppColors.textSecondary)),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary)),
       );
     }
     return ListView.builder(
@@ -243,13 +243,13 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
               children: [
                 if (c.author.name.isNotEmpty)
                   Text(c.author.name,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary)),
                 SizedBox(height: 4.h),
                 Text(c.content,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp, color: AppColors.textPrimary)),
                 if (c.attachment != null) ...[
                   SizedBox(height: 6.h),
@@ -265,7 +265,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
                           child: Text(
                             c.attachment!.filename,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 color: AppColors.primary,
                                 decoration: TextDecoration.underline),
@@ -277,7 +277,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
                 ],
                 SizedBox(height: 4.h),
                 Text(c.timestamp,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp, color: AppColors.textSecondary)),
               ],
             ),
@@ -292,7 +292,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
     if (attachments.isEmpty) {
       return Center(
         child: Text(lang.tr('ticket_no_data'),
-            style: TextStyle(color: AppColors.textSecondary)),
+            style: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary)),
       );
     }
     return ListView.separated(
@@ -319,7 +319,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style:
-                      TextStyle(fontSize: 13.sp, color: AppColors.textPrimary),
+                      AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textPrimary),
                 ),
               ),
               Obx(
@@ -361,13 +361,13 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
                     minLines: 1,
                     maxLines: 4,
                     cursorColor: AppColors.primary,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.textPrimary,
                       fontSize: 14.sp,
                     ),
                     decoration: InputDecoration(
                       hintText: lang.tr('ticket_reply_placeholder'),
-                      hintStyle: TextStyle(
+                      hintStyle: AppTextStyles.bodyText.copyWith(
                         color: AppColors.hint,
                         fontSize: 13.sp,
                       ),
@@ -426,13 +426,13 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
           SizedBox(
             width: 110.w,
             child: Text(label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp, color: AppColors.textSecondary)),
           ),
           Expanded(
             child: Text(value,
                 style:
-                    TextStyle(fontSize: 12.sp, color: AppColors.textPrimary)),
+                    AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textPrimary)),
           ),
         ],
       ),
@@ -447,7 +447,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen>
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(text,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
               color: color, fontSize: 10.sp, fontWeight: FontWeight.w600)),
     );
   }

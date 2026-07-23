@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -115,7 +116,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                       size: 13.sp, color: CelTheme.subText(c)),
                   SizedBox(width: 5.w),
                   Text(_periodLabel,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.mainText(c),
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700)),
@@ -147,7 +148,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
             final active = o == _periodLabel;
             return ListTile(
               title: Text(o,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                       color: active ? CelTheme.buy(c) : CelTheme.mainText(c),
                       fontWeight:
                           active ? FontWeight.w800 : FontWeight.w500)),
@@ -180,7 +181,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
             Text(label, style: CelTheme.label(c)),
             SizedBox(height: 2.h),
             Text(value,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                     color: color ?? CelTheme.mainText(c),
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w800)),
@@ -225,7 +226,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
   Widget _body(BuildContext c) {
     return Obx(() {
       if (_c.isLoadingHistory) {
-        return const Center(child: CircularProgressIndicator());
+        return Center(child: CircularProgressIndicator());
       }
       final items = _c.tradeHistory.toList();
       if (items.isEmpty) {
@@ -236,7 +237,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
               Icon(Icons.history, size: 56.sp, color: CelTheme.subText(c)),
               SizedBox(height: 8.h),
               Text(Get.find<LanguageService>().tr('celestial_history_no_period', {'period': '$_periodLabel'}),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                       color: CelTheme.subText(c),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600)),
@@ -260,7 +261,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
               Divider(color: CelTheme.divider(c), height: 1, thickness: 0.5),
           itemBuilder: (_, i) {
             if (i == items.length) {
-              return const Center(
+              return Center(
                   child: Padding(
                       padding: EdgeInsets.all(12),
                       child: CircularProgressIndicator()));
@@ -308,7 +309,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(t.tradeSymbol,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                             color: CelTheme.mainText(c),
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w800)),
@@ -322,7 +323,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                       ),
                       child: Text(
                         '${isBuy ? 'BUY' : 'SELL'} $vol',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                             color: sideColor,
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w700),
@@ -333,7 +334,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                 SizedBox(height: 3.h),
                 // Open → Close price
                 Text(Get.find<LanguageService>().tr('celestial_history_open_close', {'open': '$open', 'close': '$close'}),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         color: CelTheme.subText(c),
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600)),
@@ -343,7 +344,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
                   t.tradeCloseTime.isNotEmpty
                       ? '${t.tradeOpenTime}  →  ${t.tradeCloseTime}'
                       : t.tradeOpenTime,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                       color: CelTheme.subText(c),
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w500),
@@ -355,7 +356,7 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
           // P/L
           Text(
             '${profit >= 0 ? '+' : ''}${profit.toStringAsFixed(2)}',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
                 color: plColor,
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w800),

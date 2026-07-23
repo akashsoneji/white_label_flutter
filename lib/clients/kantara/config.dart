@@ -11,9 +11,9 @@ class KantaraConfig extends BaseClientConfig {
       : super(
           brandName: 'Kantara',
           appTitle: 'Kantara',
-          primaryColor: const Color(0xFF2E2174),
+          primaryColor: const Color(0xFF366D43),
           darkPrimaryColor: const Color(0xFFFFFFFF),
-          secondaryColor: const Color(0xFF4AAF46),
+          secondaryColor: const Color(0xFF82BA4B),
           accentColor: const Color(0xFF2E2174),
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',

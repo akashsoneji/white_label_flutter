@@ -59,7 +59,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                 padding: EdgeInsets.all(0.w),
                 child: Text(
                   r'$',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.textPrimary,
                   ),
@@ -71,7 +71,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 '${_amountController.text} USD',
-                style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
               ),
             ),
             SizedBox(height: 20.h),
@@ -87,7 +87,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                 SizedBox(width: 6.w),
                 Text(
                   'Your investment with this master trader will total \$50.01',
-                  style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
                 ),
               ],
             ),
@@ -114,7 +114,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
             ),
             child: Text(
               'Confirm',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.whiteColor,
@@ -141,7 +141,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
             SizedBox(width: 12),
             Text(
               'Prime_traders',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 15, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -168,7 +168,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
               SizedBox(width: 10.w),
               Text(
                 'Important',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
@@ -182,8 +182,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
           SizedBox(height: 12.h),
           Text(
             'Enter the amount you want to add to your current investment with this master trader.',
-            style: TextStyle(
-              fontFamily: 'Roboto',
+            style: AppTextStyles.bodyText.copyWith(
               fontWeight: FontWeight.w400,
               color: AppColors.icongrey,
               fontSize: 14.0,

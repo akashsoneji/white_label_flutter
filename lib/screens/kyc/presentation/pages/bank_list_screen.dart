@@ -171,7 +171,7 @@ class _BankListScreenState extends State<BankListScreen> {
               ),
               child: Text(
                 'Add Withdrawal Method',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.whiteColor,
@@ -191,7 +191,7 @@ class _BankListScreenState extends State<BankListScreen> {
         await controller.fetchWithdrawalList();
       },
       child: Padding(
-        padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+        padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight),
         child: ListView.builder(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           itemCount: controller.bankWithdrawalList.length,
@@ -233,7 +233,7 @@ class _BankListScreenState extends State<BankListScreen> {
             },
             title: Text(
               _getDisplayTitle(method),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
@@ -241,7 +241,7 @@ class _BankListScreenState extends State<BankListScreen> {
             ),
             subtitle: Text(
               _getDisplaySubtitle(method),
-              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textSecondary),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -299,7 +299,7 @@ class _BankListScreenState extends State<BankListScreen> {
       ),
       child: Text(
         status?.toUpperCase() ?? 'UNKNOWN',
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 12.sp,
           fontWeight: FontWeight.w600,
           color: AppColors.whiteColor,
@@ -369,7 +369,7 @@ class _BankListScreenState extends State<BankListScreen> {
             children: [
               Text(
                 'Proof',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textSecondary,
@@ -416,7 +416,7 @@ class _BankListScreenState extends State<BankListScreen> {
             flex: 2,
             child: Text(
               label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
@@ -427,7 +427,7 @@ class _BankListScreenState extends State<BankListScreen> {
             flex: 3,
             child: Text(
               value,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textPrimary,
@@ -501,9 +501,9 @@ class _ProofImageViewer extends StatelessWidget {
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Proof',
-          style: TextStyle(color: Colors.white),
+          style: AppTextStyles.bodyText.copyWith(color: Colors.white),
         ),
       ),
       body: Center(

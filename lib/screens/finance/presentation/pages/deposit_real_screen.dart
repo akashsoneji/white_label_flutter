@@ -247,7 +247,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(
+        padding: EdgeInsets.only(
           bottom: kToolbarHeight,
           left: 24.0,
           right: 24.0,
@@ -259,7 +259,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   Widget _buildPaymentModeField() {
     return RTLHelper.rtlTextField(
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 16.sp,
         fontWeight: FontWeight.w400,
         color: AppColors.textPrimary,
@@ -292,7 +292,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   Widget _buildTransferToField() {
     return RTLHelper.rtlTextField(
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 16.sp,
         fontWeight: FontWeight.w400,
         color: AppColors.textPrimary,
@@ -332,7 +332,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   Widget _buildAmountField() {
     return RTLHelper.rtlTextField(
-      style: TextStyle(
+      style: AppTextStyles.bodyText.copyWith(
         fontSize: 16.sp,
         fontWeight: FontWeight.w400,
         color: AppColors.textPrimary,
@@ -413,7 +413,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
           children: [
             TextSpan(
               text: '₹',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textPrimary,
@@ -421,7 +421,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
             ),
             TextSpan(
               text: '${fee.toStringAsFixed(2)}',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
                 color: AppColors.icongrey,
@@ -446,7 +446,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         children: [
           Text(
             'To be deposited',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
               color: AppColors.textGrey,
@@ -456,7 +456,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
             controller.depositMethod.value; // reactive trigger
             return Text(
               _convertedDepositText(),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
@@ -480,7 +480,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       ),
       child: Text(
         'Confirm',
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 14.sp,
           height: 1.71,
           fontWeight: FontWeight.w600,
@@ -534,11 +534,11 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
           if (accounts.isEmpty) {
             return Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(24.0),
               child: Center(
                 child: Text(
                   "No accounts available",
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500,
                   ),
@@ -581,7 +581,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                         ),
                         child: Text(
                           account['master_group_id'] ?? "N/A",
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
                             color: AppColors.primary,
@@ -595,7 +595,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                       Expanded(
                         child: Text(
                           account['meta_account_number'] ?? "-",
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -606,7 +606,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
                       // Balance
                       Text(
                         "\$ ${account['balance'] ?? '0.00'}",
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textGrey,

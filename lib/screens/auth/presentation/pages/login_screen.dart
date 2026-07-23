@@ -1,5 +1,5 @@
-import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -124,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: EdgeInsets.symmetric(horizontal: 24),
                         child: ConstrainedBox(
                           constraints: BoxConstraints(minHeight: constraints.maxHeight),
                           child: IntrinsicHeight(
@@ -147,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     padding: EdgeInsets.only(top: 70.h),
                                     child: Text(
                                       languageService.tr("welcome_title"),
-                                      style: const TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 28,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -233,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         languageService.tr(
                                           "login_forgot_password",
                                         ),
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           color: AppColors.primary,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -285,7 +285,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           languageService.tr(
                                             'biometric_enable_checkbox',
                                           ),
-                                          style: TextStyle(
+                                          style: AppTextStyles.bodyText.copyWith(
                                             fontSize: 13.sp,
                                             fontWeight: FontWeight.w500,
                                             color: AppColors.textGrey,
@@ -308,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                       child: Text(
                                         languageService.tr("login_button"),
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.isDarkMode ? AppColors.textPrimaryLight : AppColors.textPrimaryDark,
@@ -327,7 +327,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                  padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
                   child: Center(
                     child: TextButton(
                       onPressed: () {
@@ -336,11 +336,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text.rich(
                         TextSpan(
                           text: "${languageService.tr("login_no_account_login")} ",
-                          style: TextStyle(color: AppColors.textGrey),
+                          style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                           children: [
                             TextSpan(
                               text: languageService.tr("login_register"),
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
                               ),

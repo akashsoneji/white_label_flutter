@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/models/socket_response.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
@@ -51,12 +52,25 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
     _sym = Get.put(SymbolSelectionService(), permanent: true);
     _accountCtrl = Get.find<AccountController>();
 
+    _ic.markInitialScreenOpening();
+
     for (final e in _ic.instruments) {
       final key = _stripSuffix(e.symbol);
       if (e.bid > 0 && !_bidHistory.containsKey(key)) {
         _bidHistory[key] = List<double>.filled(_kSparklinePoints, e.bid);
       }
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final deadline = DateTime.now().add(const Duration(milliseconds: 400));
+      while (_ic.isLoadingFavorites.value &&
+          DateTime.now().isBefore(deadline)) {
+        await Future<void>.delayed(const Duration(milliseconds: 16));
+      }
+      try {
+        await _ic.startMarketWatchV2Only();
+      } catch (_) {}
+    });
   }
 
   @override
@@ -115,7 +129,6 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
         child: Column(
           children: [
             _buildTopBar(),
-            // _buildTabBar(),
             SizedBox(height: 6.h),
             Expanded(child: _buildList()),
           ],
@@ -132,32 +145,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Left: Markets Title & Search Icon
-          Row(
-            children: [
-              Text(
-                _ls.tr('markets_title'),
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(width: 8.w),
-              IconButton(
-                onPressed: _openSearchSheet,
-                icon: Icon(
-                  Icons.search_rounded,
-                  size: 22.r,
-                  color: AppColors.textSecondary,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-
-          // Right: Active Account Selector (Account Number + LIVE/DEMO Badge)
+          // Left: Active Account Selector (Account Number + LIVE/DEMO Badge)
           GestureDetector(
             onTap: () => _showAccountBottomSheet(context),
             child: Obx(() {
@@ -187,7 +175,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                   children: [
                     Text(
                       '#$accNumber',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textPrimary,
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w600,
@@ -208,7 +196,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                       ),
                       child: Text(
                         badgeLabel,
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: isDemo ? Colors.orange : Colors.green,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w700,
@@ -225,6 +213,18 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                 ),
               );
             }),
+          ),
+
+          // Right: Search Button
+          IconButton(
+            onPressed: _openSearchSheet,
+            icon: Icon(
+              Icons.search_rounded,
+              size: 22.r,
+              color: AppColors.textSecondary,
+            ),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
         ],
       ),
@@ -260,11 +260,12 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                   child: Column(
                     children: [
                       Text(
-                        _ls.tr(tab.toLowerCase()),
-                        style: TextStyle(
+                        tab,
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: selected ? activeColor : textSecondary,
-                          fontWeight: FontWeight.w400,
+                          fontWeight:
+                              selected ? FontWeight.w600 : FontWeight.w400,
                         ),
                       ),
                       SizedBox(height: 6.h),
@@ -288,26 +289,10 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
 
   Widget _buildList() {
     return Obx(() {
-      final list = _ic.instruments;
-      final filtered =
-          _selectedTab == 'Hot'
-              ? list.where((e) {
-                final cat = (e.category ?? '').toLowerCase();
-                return cat.contains('hot') ||
-                    cat.contains('popular') ||
-                    e.last > 0;
-              }).toList()
-              : list.where((e) {
-                final cat = (e.category ?? '').toLowerCase();
-                final tab = _selectedTab.toLowerCase();
-                return cat.contains(tab) ||
-                    tab.contains(cat) ||
-                    _matchesBroaderCategory(e, tab);
-              }).toList();
+      final list =
+          _ic.instruments.isNotEmpty ? _ic.instruments : _ic.allInstruments;
 
-      final displayList = filtered.isNotEmpty ? filtered : list;
-
-      if (displayList.isEmpty) {
+      if (list.isEmpty) {
         return Center(
           child: CommonLoadingWidget(
             message: 'Loading instruments...',
@@ -319,10 +304,10 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
 
       return ListView.builder(
         padding: EdgeInsets.only(bottom: 20.h),
-        itemCount: displayList.length,
+        itemCount: list.length,
         itemBuilder: (context, i) {
           return _IquoteInstrumentRow(
-            instrument: displayList[i],
+            instrument: list[i],
             bidHistory: _bidHistory,
             controller: _ic,
             onTap: (sym) {
@@ -410,7 +395,15 @@ class _IquoteInstrumentRow extends StatelessWidget {
 
     return Obx(() {
       final livePrice = controller.priceRx(sym).value;
-      final hist = bidHistory[key] ?? const <double>[];
+      final hist = bidHistory[key] ?? <double>[];
+
+      if (livePrice.bid > 0) {
+        if (hist.isEmpty || (hist.last - livePrice.bid).abs() > 1e-7) {
+          final list = bidHistory.putIfAbsent(key, () => <double>[]);
+          list.add(livePrice.bid);
+          if (list.length > _kSparklinePoints) list.removeAt(0);
+        }
+      }
 
       double currentBid =
           livePrice.bid > 0
@@ -473,40 +466,58 @@ class _IquoteInstrumentRow extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Symbol + Subtitle + Sparkline
+              // Symbol + Name+Category (single line) + Sparkline
               Expanded(
                 flex: 4,
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FlagIcon(symbol: displaySym),
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.h),
+                      child: _FlagIcon(symbol: displaySym),
+                    ),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            displaySym,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w400,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          if (instrument.category != null &&
-                              instrument.category!.isNotEmpty)
-                            Text(
-                              instrument.category!,
-                            style: TextStyle(
-                                fontSize: 10.sp,
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w400,
+                          // Single-line: "EURUSD · Forex"
+                          Row(
+                            children: [
+                              Text(
+                                displaySym,
+                                style: AppTextStyles.bodyText.copyWith(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
-                            ),
-                          SizedBox(height: 3.h),
+                              if (instrument.category != null &&
+                                  instrument.category!.isNotEmpty) ...[
+                                Text(
+                                  ' · ',
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    fontSize: 11.sp,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                Text(
+                                  instrument.category!,
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    fontSize: 11.sp,
+                                    color: AppColors.textSecondary,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          SizedBox(height: 4.h),
+                          // Larger sparkline chart below the name/category
                           SizedBox(
-                            width: 100.w,
-                            height: 26.h,
+                            width: 160.w,
+                            height: 44.h,
                             child: _IquoteSparkline(
                               history: hist,
                               lineColor: lineColor,
@@ -521,13 +532,14 @@ class _IquoteInstrumentRow extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 6.w),
-              // Change + Buy + [Spread Pill] + Sell
+              // Change + Buy/Sell/Spread row — flex layout so wide
+              // spread values never overflow.
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     changeStr,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       color: changeColor,
                       fontWeight: FontWeight.w400,
@@ -537,47 +549,63 @@ class _IquoteInstrumentRow extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _SideButton(
-                        label: 'Buy',
-                        price: currentAsk,
-                        digits: digits,
-                        color: const Color(0xFF2ED573),
-                      ),
-                      // Center Spread Pill between Buy and Sell buttons
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 4.w),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 5.w,
-                          vertical: 3.h,
+                      SizedBox(
+                        width: 66.w,
+                        child: _SideButton(
+                          label: 'Buy',
+                          price: currentAsk,
+                          digits: digits,
+                          color: const Color.fromARGB(255, 35, 187, 98),
                         ),
+                      ),
+                      SizedBox(width: 4.w),
+                      // Center Spread Pill between Buy and Sell buttons with fixed width
+                      Container(
+                        width: 32.w,
+                        padding: EdgeInsets.symmetric(vertical: 3.h),
                         decoration: BoxDecoration(
                           color:
                               isDark
                                   ? const Color(0xFF1C2234)
-                                  : AppColors.primary.withOpacity(0.08),
+                                  : AppColors.primary.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(10.r),
                           border: Border.all(
                             color:
                                 isDark
                                     ? Colors.white12
-                                    : AppColors.primary.withOpacity(0.15),
+                                    : AppColors.primary.withValues(alpha: 0.15),
                             width: 0.5,
                           ),
                         ),
-                        child: Text(
-                          spreadText,
-                          style: TextStyle(
-                            fontSize: 9.sp,
-                            color: isDark ? Colors.white70 : AppColors.primary,
-                            fontWeight: FontWeight.w400,
+                        child: Center(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 2.w),
+                              child: Text(
+                                spreadText,
+                                style: AppTextStyles.bodyText.copyWith(
+                                  fontSize: 9.sp,
+                                  color:
+                                      isDark
+                                          ? Colors.white70
+                                          : AppColors.primary,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                      _SideButton(
-                        label: 'Sell',
-                        price: currentBid,
-                        digits: digits,
-                        color: const Color(0xFFFF4757),
+                      SizedBox(width: 4.w),
+                      SizedBox(
+                        width: 66.w,
+                        child: _SideButton(
+                          label: 'Sell',
+                          price: currentBid,
+                          digits: digits,
+                          color: const Color(0xFFFF4757),
+                        ),
                       ),
                     ],
                   ),
@@ -597,27 +625,49 @@ class _FlagIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final path = 'assets/svg/flags/${symbol.toLowerCase()}.svg';
+    String clean =
+        symbol.contains('.')
+            ? symbol.substring(0, symbol.lastIndexOf('.'))
+            : symbol;
+    String primaryCurr =
+        clean.length >= 3
+            ? clean.substring(0, 3).toLowerCase()
+            : clean.toLowerCase();
+
+    final flagPath1 = 'assets/svg/flags/${clean.toLowerCase()}.svg';
+    final flagPath2 = 'assets/svg/flags/$primaryCurr.svg';
+
     return SizedBox(
       width: 32.w,
       height: 32.w,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.08),
+          color: AppColors.primary.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: ClipOval(
-          child: SvgPicture.asset(
-            path,
-            width: 32.w,
-            height: 32.w,
-            fit: BoxFit.cover,
-            placeholderBuilder:
-                (_) => Icon(
-                  Icons.public_rounded,
-                  size: 16.w,
-                  color: AppColors.textGrey,
-                ),
+          child: Padding(
+            padding: EdgeInsets.all(3.r),
+            child: SvgPicture.asset(
+              flagPath1,
+              fit: BoxFit.cover,
+              placeholderBuilder:
+                  (_) => SvgPicture.asset(
+                    flagPath2,
+                    fit: BoxFit.cover,
+                    placeholderBuilder:
+                        (_) => Center(
+                          child: Text(
+                            clean.isNotEmpty ? clean[0].toUpperCase() : '?',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                  ),
+            ),
           ),
         ),
       ),
@@ -641,7 +691,6 @@ class _SideButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final dec = digits.clamp(0, 5);
     return Container(
-      width: 64.w,
       height: 38.h,
       decoration: BoxDecoration(
         color: color,
@@ -652,7 +701,7 @@ class _SideButton extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 10.sp,
               color: Colors.white,
               fontWeight: FontWeight.w400,
@@ -660,7 +709,7 @@ class _SideButton extends StatelessWidget {
           ),
           Text(
             price.toStringAsFixed(dec),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 11.sp,
               fontWeight: FontWeight.w400,
               color: Colors.white,
@@ -687,22 +736,10 @@ class _IquoteSparkline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<double> dataPoints = history;
+    List<double> dataPoints = List<double>.from(history);
     if (dataPoints.length < 2) {
-      final base = fallbackPrice > 0 ? fallbackPrice : 100.0;
-      final factor = base * 0.001;
-      dataPoints = [
-        base - factor * 2,
-        base - factor,
-        base - factor * 0.5,
-        base + factor * 0.2,
-        base + factor * 0.8,
-        base + factor * 0.5,
-        base + factor * 1.2,
-        base + factor * 1.0,
-        base + factor * 1.5,
-        base + factor * 1.8,
-      ];
+      final base = fallbackPrice > 0 ? fallbackPrice : 1.0;
+      dataPoints = [base, base];
     }
 
     final spots = <FlSpot>[];

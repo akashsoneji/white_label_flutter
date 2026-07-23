@@ -101,17 +101,22 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
       final allInstruments = _instrumentsController.instruments;
       final query = _searchController.text.toLowerCase();
 
-      final filtered = query.isEmpty
-          ? allInstruments.toList()
-          : allInstruments
-              .where((i) => _removeSymbolSuffix(i.symbol)
-                  .toLowerCase()
-                  .contains(query))
-              .toList();
+      final filtered = <ListElement>[];
+      final seen = <String>{};
+      for (final inst in allInstruments) {
+        final stripped = _removeSymbolSuffix(inst.symbol);
+        if (query.isNotEmpty && !stripped.toLowerCase().contains(query)) {
+          continue;
+        }
+        if (!seen.contains(stripped.toUpperCase())) {
+          seen.add(stripped.toUpperCase());
+          filtered.add(inst);
+        }
+      }
 
       if (_instrumentsController.isLoadingFavorites.value &&
           allInstruments.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
+        return Center(child: CircularProgressIndicator());
       }
 
       if (filtered.isEmpty) {
@@ -167,7 +172,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
   Widget _buildNormalList() {
     return Obx(() {
       if (_searchController2.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return Center(child: CircularProgressIndicator());
       }
       if (_searchController2.filteredSymbols.isEmpty) {
         return _buildNoData();

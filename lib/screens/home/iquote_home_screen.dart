@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -180,24 +181,23 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
               Center(
                 child: Text(
                   appTitle,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w400,
                     color: textPrimary,
-                    fontFamily: 'Roboto',
                   ),
                 ),
               ),
               SizedBox(height: 14.h),
 
               // 2. Active Account Card with Switch Account Bottom Sheet
-              _ActiveAccountBar(
-                cardBg: cardBg,
-                textPrimary: textPrimary,
-                textSecondary: textSecondary,
-                isDark: isDark,
-              ),
-              SizedBox(height: 14.h),
+              // _ActiveAccountBar(
+              //   cardBg: cardBg,
+              //   textPrimary: textPrimary,
+              //   textSecondary: textSecondary,
+              //   isDark: isDark,
+              // ),
+              // SizedBox(height: 14.h),
 
               // 3. Banner: Profit & Bonus Ranking
               Container(
@@ -229,7 +229,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                         children: [
                           Text(
                             'Profit & Bonus Ranking',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w400,
                               color: isDark ? Colors.black : textPrimary,
@@ -238,7 +238,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                           SizedBox(height: 4.h),
                           Text(
                             'Data updated daily',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w400,
                               color: isDark ? Colors.black87 : textSecondary,
@@ -256,7 +256,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                             ),
                             child: Text(
                               'View',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: Colors.white,
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w400,
@@ -363,7 +363,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                 children: [
                   Text(
                     'Favourites',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: textPrimary,
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w400,
@@ -419,7 +419,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
             padding: EdgeInsets.all(20.h),
             child: Text(
               'No instruments available',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: textSecondary,
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w400,
@@ -496,7 +496,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                     ),
                     child: Text(
                       'Hot',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         color: Colors.white,
                         fontSize: 8.sp,
                         fontWeight: FontWeight.w400,
@@ -511,7 +511,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: textColor,
               fontSize: 11.sp,
               fontWeight: FontWeight.w400,
@@ -553,7 +553,15 @@ class _LiveTickerCard extends StatelessWidget {
 
     return Obx(() {
       final livePrice = controller.priceRx(sym).value;
-      final hist = bidHistory[key] ?? const <double>[];
+      final hist = bidHistory[key] ?? <double>[];
+
+      if (livePrice.bid > 0) {
+        if (hist.isEmpty || (hist.last - livePrice.bid).abs() > 1e-7) {
+          final list = bidHistory.putIfAbsent(key, () => <double>[]);
+          list.add(livePrice.bid);
+          if (list.length > _kHomeSparklinePoints) list.removeAt(0);
+        }
+      }
 
       double currentBid =
           livePrice.bid > 0
@@ -609,7 +617,7 @@ class _LiveTickerCard extends StatelessWidget {
                 children: [
                   Text(
                     displaySym,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: textPrimary,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
@@ -617,7 +625,7 @@ class _LiveTickerCard extends StatelessWidget {
                   ),
                   Text(
                     changeStr,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       color: changeColor,
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w400,
@@ -627,7 +635,7 @@ class _LiveTickerCard extends StatelessWidget {
               ),
               Text(
                 PrecisionHelper.formatPrice(currentBid, decimals: digits),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   color: changeColor,
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
@@ -667,22 +675,10 @@ class _HomeSparkline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<double> dataPoints = history;
+    List<double> dataPoints = List<double>.from(history);
     if (dataPoints.length < 2) {
-      final base = fallbackPrice > 0 ? fallbackPrice : 100.0;
-      final factor = base * 0.001;
-      dataPoints = [
-        base - factor * 2,
-        base - factor,
-        base - factor * 0.5,
-        base + factor * 0.2,
-        base + factor * 0.8,
-        base + factor * 0.5,
-        base + factor * 1.2,
-        base + factor * 1.0,
-        base + factor * 1.5,
-        base + factor * 1.8,
-      ];
+      final base = fallbackPrice > 0 ? fallbackPrice : 1.0;
+      dataPoints = [base, base];
     }
 
     final spots = <FlSpot>[];
@@ -803,7 +799,7 @@ class _ActiveAccountBar extends StatelessWidget {
                         children: [
                           Text(
                             'Account: #$accNumber',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: textPrimary,
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w400,
@@ -824,7 +820,7 @@ class _ActiveAccountBar extends StatelessWidget {
                             ),
                             child: Text(
                               accType,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color:
                                     accType == 'DEMO'
                                         ? Colors.orange
@@ -839,7 +835,7 @@ class _ActiveAccountBar extends StatelessWidget {
                       SizedBox(height: 2.h),
                       Text(
                         'P&L: $pnl  |  Equity: $equity',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: textSecondary,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400,

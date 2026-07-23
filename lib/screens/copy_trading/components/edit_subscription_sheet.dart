@@ -253,14 +253,14 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
               children: [
                 Text(
                   'Edit Copy Settings',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close),
                   onPressed: () => Get.back(),
                 ),
               ],
@@ -271,18 +271,18 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
           if (_isLoadingDetail)
             Padding(
               padding: EdgeInsets.symmetric(vertical: 40.h),
-              child: const Center(child: CircularProgressIndicator()),
+              child: Center(child: CircularProgressIndicator()),
             )
           else if (_detailError.isNotEmpty)
             Padding(
               padding: EdgeInsets.all(24.r),
               child: Column(
                 children: [
-                  Text(_detailError, style: TextStyle(color: AppColors.error)),
+                  Text(_detailError, style: AppTextStyles.bodyText.copyWith(color: AppColors.error)),
                   SizedBox(height: 12.h),
                   ElevatedButton(
                     onPressed: _loadSubscriptionDetail,
-                    child: const Text('Retry'),
+                    child: Text('Retry'),
                   ),
                 ],
               ),
@@ -299,7 +299,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                     children: [
                       Text(
                         'Copying master: ${widget.masterName}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: AppColors.textGrey,
                           fontWeight: FontWeight.w500,
@@ -321,7 +321,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                             borderRadius: BorderRadius.circular(10.r),
                           ),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(value: 'fixed', child: Text('Fixed Lot Size')),
                           DropdownMenuItem(value: 'proportional_equity', child: Text('Equity Proportional')),
                           DropdownMenuItem(value: 'proportional_balance', child: Text('Balance Proportional')),
@@ -421,7 +421,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                               children: [
                                 Text(
                                   'Override Master SL/TP',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
@@ -501,7 +501,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                               ),
-                              child: const Text('Cancel'),
+                              child: Text('Cancel'),
                             ),
                           ),
                           SizedBox(width: 12.w),
@@ -516,7 +516,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                               ),
-                              child: const Text('Save Changes'),
+                              child: Text('Save Changes'),
                             ),
                           ),
                         ],
@@ -550,7 +550,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
         alignment: Alignment.center,
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: selected ? AppColors.primary : AppColors.textGrey,

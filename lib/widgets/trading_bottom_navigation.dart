@@ -8,6 +8,8 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/app_svg_icon.dart';
 
+import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+
 class TradingBottomNavigation extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -28,35 +30,41 @@ class TradingBottomNavigation extends StatelessWidget {
       final isDark = AppColors.isDarkMode;
       final bgColor = AppColors.scaffold;
 
-      return Container(
-        width: double.infinity,
-        padding: EdgeInsets.only(
-          left: 16.w,
-          right: 16.w,
-          top: 6.h,
-          bottom: 4.h + MediaQuery.of(context).padding.bottom,
-        ),
-        decoration: BoxDecoration(
-          color: bgColor,
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 10,
-                offset: const Offset(0, -4),
-              ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildIquoteNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
-            _buildIquoteNavItem(1, Icons.bar_chart_outlined, Icons.bar_chart, 'Markets'),
-            _buildIquoteNavItem(2, Icons.assignment_outlined, Icons.assignment, 'Position', hasBadge: true),
-            _buildIquoteNavItem(3, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Assets'),
-          ],
-        ),
-      );
+      return Obx(() {
+        final openCount = Get.isRegistered<TradingController>()
+            ? Get.find<TradingController>().marketPositionsRx.length
+            : 0;
+
+        return Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(
+            left: 16.w,
+            right: 16.w,
+            top: 6.h,
+            bottom: 4.h + MediaQuery.of(context).padding.bottom,
+          ),
+          decoration: BoxDecoration(
+            color: bgColor,
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 10,
+                  offset: const Offset(0, -4),
+                ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildIquoteNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
+              _buildIquoteNavItem(1, Icons.bar_chart_outlined, Icons.bar_chart, 'Markets'),
+              _buildIquoteNavItem(2, Icons.assignment_outlined, Icons.assignment, 'Position', badgeCount: openCount),
+              _buildIquoteNavItem(3, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Assets'),
+            ],
+          ),
+        );
+      });
     }
 
     if (isVantage) {
@@ -275,7 +283,7 @@ class TradingBottomNavigation extends StatelessWidget {
   }
 
   
-  Widget _buildIquoteNavItem(int index, IconData icon, IconData activeIcon, String label, {bool hasBadge = false}) {
+  Widget _buildIquoteNavItem(int index, IconData icon, IconData activeIcon, String label, {int badgeCount = 0}) {
     final isSelected = currentIndex == index;
     final activeColor = AppColors.primary;
     final inactiveColor = AppColors.textSecondary;
@@ -294,17 +302,26 @@ class TradingBottomNavigation extends StatelessWidget {
                 color: isSelected ? activeColor : inactiveColor,
                 size: 22.r,
               ),
-              if (hasBadge)
+              if (badgeCount > 0)
                 Positioned(
-                  top: -2.h,
-                  right: -4.w,
+                  top: -4.h,
+                  right: -8.w,
                   child: Container(
-                    padding: EdgeInsets.all(3.r),
-                    decoration: const BoxDecoration(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                    decoration: BoxDecoration(
                       color: Colors.red,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
-                    child: Text('1', style: TextStyle(color: Colors.white, fontSize: 8.sp, fontWeight: FontWeight.normal)),
+                    constraints: BoxConstraints(minWidth: 14.w, minHeight: 14.h),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$badgeCount',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: Colors.white,
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
             ],
@@ -312,7 +329,7 @@ class TradingBottomNavigation extends StatelessWidget {
           SizedBox(height: 2.h),
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: isSelected ? activeColor : inactiveColor,
               fontSize: 10.sp,
               fontWeight: FontWeight.w400, // Regular font weight

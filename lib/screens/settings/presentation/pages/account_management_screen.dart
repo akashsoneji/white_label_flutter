@@ -99,18 +99,18 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
             ),
             title: Text(
               '${account.type} Account',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
+              style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.w600, fontSize: 16.sp),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'ID: ${account.id}',
-                  style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp),
+                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 12.sp),
                 ),
                 Text(
                   'Balance: ${account.currency} ${account.balance.toStringAsFixed(2)}',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textPrimary,
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -131,7 +131,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                       ),
                       child: Text(
                         'Active',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           color: AppColors.whiteColor,
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w500,
@@ -147,8 +147,8 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                               value: 'activate',
                               child: Row(
                                 children: [
-                                  const Icon(Icons.check_circle, size: 16),
-                                  const SizedBox(width: 8),
+                                  Icon(Icons.check_circle, size: 16),
+                                  SizedBox(width: 8),
                                   Text(
                                     languageService.tr(
                                       'account_management_set_active',
@@ -161,15 +161,15 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.delete,
                                     size: 16,
                                     color: Colors.red,
                                   ),
-                                  const SizedBox(width: 8),
-                                  const Text(
+                                  SizedBox(width: 8),
+                                  Text(
                                     'Delete',
-                                    style: TextStyle(color: Colors.red),
+                                    style: AppTextStyles.bodyText.copyWith(color: Colors.red),
                                   ),
                                 ],
                               ),
@@ -211,7 +211,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Get.back(closeOverlays: true),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -221,7 +221,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: Text(
               languageService.tr('account_management_delete'),
-              style: const TextStyle(color: Colors.white),
+              style: AppTextStyles.bodyText.copyWith(color: Colors.white),
             ),
           ),
         ],
@@ -251,7 +251,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
                 typeController.text = value ?? '';
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             TextFormField(
               controller: balanceController,
               decoration: const InputDecoration(labelText: 'Initial Balance'),
@@ -262,7 +262,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Get.back(closeOverlays: true),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {

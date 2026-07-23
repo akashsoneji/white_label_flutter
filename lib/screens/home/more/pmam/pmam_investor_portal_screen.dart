@@ -1,11 +1,11 @@
 import 'dart:async';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/pmam/pmam_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
@@ -138,7 +138,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
               ),
               title: Text(
                 widget.managerCode != null ? 'My Investment' : 'PAMM Investor',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -151,13 +151,13 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                       indicatorColor: AppColors.primary,
                       indicatorWeight: 3,
                       labelColor: AppColors.primary,
-                      labelStyle: TextStyle(
+                      labelStyle: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
                       ),
                       unselectedLabelColor: AppColors.textGrey,
-                      unselectedLabelStyle: TextStyle(fontSize: 14.sp),
-                      tabs: const [
+                      unselectedLabelStyle: AppTextStyles.bodyText.copyWith(fontSize: 14.sp),
+                      tabs: [
                         Tab(text: 'Fund Managers'),
                         Tab(text: 'My Investments'),
                       ],
@@ -209,7 +209,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                     Expanded(
                       child: Text(
                         'Add funds',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w800,
                           color: AppColors.textPrimary,
@@ -218,18 +218,18 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                     ),
                     IconButton(
                       onPressed: () => Navigator.of(ctx).pop(),
-                      icon: const Icon(Icons.close),
+                      icon: Icon(Icons.close),
                     ),
                   ],
                 ),
                 Text(
                   'The amount will be locked and deposited to the pool immediately. It will apply to future trades only.',
-                  style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey),
                 ),
                 SizedBox(height: 14.h),
                 Text(
                   'Amount (\$)',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -242,7 +242,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                     decimal: true,
                     signed: false,
                   ),
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -284,7 +284,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                         ),
                         child: Text(
                           'Cancel',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textPrimary,
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w700,
@@ -328,7 +328,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                 )
                               : Text(
                                   'Add funds',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.onColoredBackground,
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w800,
@@ -352,21 +352,21 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Withdraw'),
-          content: const Text(
+          title: Text('Withdraw'),
+          content: Text(
             'Are you sure you want to withdraw from this plan? This will trigger proportional trade settlement.',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel'),
+              child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () async {
                 Navigator.of(ctx).pop();
                 await _ctrl.unsubscribe(pmamInvestorId);
               },
-              child: const Text('OK'),
+              child: Text('OK'),
             ),
           ],
         );
@@ -457,7 +457,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                           Expanded(
                             child: Text(
                               'My P&L Trade History',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textPrimary,
@@ -475,7 +475,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                       ),
                       Text(
                         '${enrollment['plan_name'] ?? ''} • ${enrollment['manager_name'] ?? ''}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: AppColors.textGrey,
                         ),
@@ -485,7 +485,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                         children: [
                           Text(
                             'From',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               color: AppColors.textGrey,
                               fontWeight: FontWeight.w600,
@@ -511,7 +511,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     Expanded(
                                       child: Text(
                                         _fmtDateShort(from.toIso8601String()),
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 12.sp,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.textPrimary,
@@ -531,7 +531,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                           SizedBox(width: 10.w),
                           Text(
                             'To',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               color: AppColors.textGrey,
                               fontWeight: FontWeight.w600,
@@ -557,7 +557,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     Expanded(
                                       child: Text(
                                         _fmtDateShort(to.toIso8601String()),
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 12.sp,
                                           fontWeight: FontWeight.w700,
                                           color: AppColors.textPrimary,
@@ -593,7 +593,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                               children: [
                                 Text(
                                   label,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 10.sp,
                                     color: AppColors.textGrey,
                                     fontWeight: FontWeight.w600,
@@ -602,7 +602,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                 SizedBox(height: 2.h),
                                 Text(
                                   value,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w800,
                                     color: color,
@@ -690,7 +690,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     Expanded(
                                       child: Text(
                                         _ctrl.errorMessage.value,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 12.sp,
                                           color: AppColors.error,
                                           fontWeight: FontWeight.w600,
@@ -699,7 +699,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     ),
                                     TextButton(
                                       onPressed: load,
-                                      child: const Text('Retry'),
+                                      child: Text('Retry'),
                                     ),
                                   ],
                                 ),
@@ -721,7 +721,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                             return Center(
                               child: Text(
                                 'No trades found for the selected dates.',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 13.sp,
                                   color: AppColors.textGrey,
                                 ),
@@ -746,7 +746,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                               flex: 3,
                                               child: Text(
                                                 'POSITION ID',
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 10.sp,
                                                   color: AppColors.textGrey,
                                                   fontWeight: FontWeight.w700,
@@ -757,7 +757,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                               flex: 2,
                                               child: Text(
                                                 'SYMBOL',
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 10.sp,
                                                   color: AppColors.textGrey,
                                                   fontWeight: FontWeight.w700,
@@ -768,7 +768,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                               flex: 2,
                                               child: Text(
                                                 'TYPE',
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 10.sp,
                                                   color: AppColors.textGrey,
                                                   fontWeight: FontWeight.w700,
@@ -779,7 +779,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                               flex: 2,
                                               child: Text(
                                                 'LOT',
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 10.sp,
                                                   color: AppColors.textGrey,
                                                   fontWeight: FontWeight.w700,
@@ -790,7 +790,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                               flex: 3,
                                               child: Text(
                                                 'CLOSE PRICE',
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 10.sp,
                                                   color: AppColors.textGrey,
                                                   fontWeight: FontWeight.w700,
@@ -801,7 +801,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                               flex: 4,
                                               child: Text(
                                                 'CLOSE TIME',
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 10.sp,
                                                   color: AppColors.textGrey,
                                                   fontWeight: FontWeight.w700,
@@ -813,7 +813,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                               child: Text(
                                                 'COMMISSION',
                                                 textAlign: TextAlign.right,
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 10.sp,
                                                   color: AppColors.textGrey,
                                                   fontWeight: FontWeight.w700,
@@ -825,7 +825,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                               child: Text(
                                                 'MY P&L',
                                                 textAlign: TextAlign.right,
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 10.sp,
                                                   color: AppColors.textGrey,
                                                   fontWeight: FontWeight.w700,
@@ -893,7 +893,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                     flex: 3,
                                                     child: Text(
                                                       posId,
-                                                      style: TextStyle(
+                                                      style: AppTextStyles.bodyText.copyWith(
                                                         fontSize: 12.sp,
                                                         color: AppColors
                                                             .textPrimary,
@@ -906,7 +906,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                     flex: 2,
                                                     child: Text(
                                                       symbol,
-                                                      style: TextStyle(
+                                                      style: AppTextStyles.bodyText.copyWith(
                                                         fontSize: 12.sp,
                                                         color: AppColors
                                                             .textPrimary,
@@ -919,7 +919,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                     flex: 2,
                                                     child: Text(
                                                       type.toUpperCase(),
-                                                      style: TextStyle(
+                                                      style: AppTextStyles.bodyText.copyWith(
                                                         fontSize: 12.sp,
                                                         color: isBuy
                                                             ? AppColors.green
@@ -933,7 +933,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                     flex: 2,
                                                     child: Text(
                                                       lot,
-                                                      style: TextStyle(
+                                                      style: AppTextStyles.bodyText.copyWith(
                                                         fontSize: 12.sp,
                                                         color: AppColors
                                                             .textPrimary,
@@ -946,7 +946,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                     flex: 3,
                                                     child: Text(
                                                       closePrice,
-                                                      style: TextStyle(
+                                                      style: AppTextStyles.bodyText.copyWith(
                                                         fontSize: 12.sp,
                                                         color: AppColors
                                                             .textPrimary,
@@ -959,7 +959,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                     flex: 4,
                                                     child: Text(
                                                       closeTime,
-                                                      style: TextStyle(
+                                                      style: AppTextStyles.bodyText.copyWith(
                                                         fontSize: 12.sp,
                                                         color: AppColors
                                                             .textPrimary,
@@ -974,7 +974,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                       '${comm >= 0 ? '+' : ''}${comm.toStringAsFixed(2)}',
                                                       textAlign:
                                                           TextAlign.right,
-                                                      style: TextStyle(
+                                                      style: AppTextStyles.bodyText.copyWith(
                                                         fontSize: 12.sp,
                                                         color: comm >= 0
                                                             ? AppColors.green
@@ -990,7 +990,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                                       '${pnlPos ? '+' : ''}${profit.toStringAsFixed(2)}',
                                                       textAlign:
                                                           TextAlign.right,
-                                                      style: TextStyle(
+                                                      style: AppTextStyles.bodyText.copyWith(
                                                         fontSize: 12.sp,
                                                         color: pnlColor,
                                                         fontWeight:
@@ -1047,10 +1047,10 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                 setState(() => _searchQuery = v);
                 _onSearchChanged(v);
               },
-              style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textPrimary),
               decoration: InputDecoration(
                 hintText: 'Search managers by name or code…',
-                hintStyle: TextStyle(
+                hintStyle: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   color: AppColors.textGrey,
                 ),
@@ -1093,7 +1093,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                       _searchQuery.isEmpty
                           ? 'No fund managers available'
                           : 'No results for "$_searchQuery"',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
                       ),
@@ -1162,7 +1162,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                 ),
                                 child: Text(
                                   initials,
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 14.sp,
@@ -1176,7 +1176,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   children: [
                                     Text(
                                       name,
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.w700,
                                         color: AppColors.textPrimary,
@@ -1187,7 +1187,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     if (code.isNotEmpty)
                                       Text(
                                         code,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 11.sp,
                                           color: AppColors.primary,
                                           fontWeight: FontWeight.w500,
@@ -1196,7 +1196,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     if (memberSince.isNotEmpty)
                                       Text(
                                         'Since $memberSince',
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 10.sp,
                                           color: AppColors.textGrey,
                                         ),
@@ -1312,7 +1312,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                   Expanded(
                     child: Text(
                       _ctrl.errorMessage.value,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.error,
                         fontWeight: FontWeight.w600,
@@ -1321,7 +1321,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                   ),
                   TextButton(
                     onPressed: () => _ctrl.loadInvestorPortal(),
-                    child: const Text('Retry'),
+                    child: Text('Retry'),
                   ),
                 ],
               ),
@@ -1406,7 +1406,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                       ? 'Unable to load investments.\nTap Retry to try again.'
                       : 'No investments yet.\nBrowse Fund Managers to get started!',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
                 ),
               ),
             )
@@ -1454,7 +1454,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   inv['plan_name'] ??
                                       inv['plan']?['plan_name'] ??
                                       'Unnamed Plan',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary,
@@ -1462,7 +1462,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                 ),
                                 Text(
                                   'Manager: ${inv['manager_name'] ?? inv['manager']?['name'] ?? '-'}  •  ${inv['commission_percentage'] ?? 0}% commission',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 11.sp,
                                     color: AppColors.textGrey,
                                   ),
@@ -1481,7 +1481,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                             ),
                             child: Text(
                               status.isEmpty ? 'UNKNOWN' : status.toUpperCase(),
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 9.sp,
                                 color: statusColor,
                                 fontWeight: FontWeight.w700,
@@ -1536,7 +1536,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                               ),
                               child: Text(
                                 'View P&L Trades',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.primary,
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
@@ -1561,7 +1561,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                 ),
                                 child: Text(
                                   'Add Funds',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.primary,
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w600,
@@ -1587,7 +1587,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                 ),
                                 child: Text(
                                   'Withdraw',
-                                  style: TextStyle(
+                                  style: AppTextStyles.bodyText.copyWith(
                                     color: AppColors.error,
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w600,
@@ -1625,7 +1625,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
               ),
               title: Text(
                 'Fund Entries',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
@@ -1637,7 +1637,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                       padding: EdgeInsets.only(top: 2.h),
                       child: Text(
                         '${fundEntries.length} transaction${fundEntries.length == 1 ? '' : 's'} found',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: AppColors.textGrey,
                           fontWeight: FontWeight.w600,
@@ -1664,7 +1664,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                         Expanded(
                           child: Text(
                             'No fund entries found.',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               color: AppColors.textGrey,
                               fontWeight: FontWeight.w600,
@@ -1673,7 +1673,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                         ),
                         TextButton(
                           onPressed: () => _ctrl.loadInvestorPortal(),
-                          child: const Text('Refresh'),
+                          child: Text('Refresh'),
                         ),
                       ],
                     ),
@@ -1765,7 +1765,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     children: [
                                       Text(
                                         '$prefixSign $type',
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 13.sp,
                                           color: transactionColor,
                                           fontWeight: FontWeight.w800,
@@ -1773,7 +1773,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                       ),
                                       Text(
                                         amountText,
-                                        style: TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 14.sp,
                                           color: AppColors.textPrimary,
                                           fontWeight: FontWeight.w900,
@@ -1792,20 +1792,20 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           text: TextSpan(
-                                            style: TextStyle(
+                                            style: AppTextStyles.bodyText.copyWith(
                                               fontSize: 11.sp,
                                               color: AppColors.textGrey,
                                             ),
                                             children: [
-                                              const TextSpan(
+                                              TextSpan(
                                                 text: 'Plan: ',
-                                                style: TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontWeight: FontWeight.w700,
                                                 ),
                                               ),
                                               TextSpan(
                                                 text: plan,
-                                                style: const TextStyle(
+                                                style: AppTextStyles.bodyText.copyWith(
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
@@ -1830,7 +1830,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                           status == '-'
                                               ? '-'
                                               : status.toUpperCase(),
-                                          style: TextStyle(
+                                          style: AppTextStyles.bodyText.copyWith(
                                             fontSize: 9.sp,
                                             color: statusColor,
                                             fontWeight: FontWeight.w800,
@@ -1859,20 +1859,20 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                       SizedBox(width: 6.w),
                                       RichText(
                                         text: TextSpan(
-                                          style: TextStyle(
+                                          style: AppTextStyles.bodyText.copyWith(
                                             fontSize: 11.sp,
                                             color: AppColors.textGrey,
                                           ),
                                           children: [
-                                            const TextSpan(
+                                            TextSpan(
                                               text: 'Date: ',
-                                              style: TextStyle(
+                                              style: AppTextStyles.bodyText.copyWith(
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),
                                             TextSpan(
                                               text: _fmtDateTimeShort(date),
-                                              style: const TextStyle(
+                                              style: AppTextStyles.bodyText.copyWith(
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
@@ -1915,7 +1915,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                 ),
                 title: Text(
                   'Open Positions',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -1954,7 +1954,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                             children: [
                               Text(
                                 plan,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w800,
@@ -1967,7 +1967,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                 children: [
                                   Text(
                                     symbol,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 12.sp,
                                       color: AppColors.textPrimary,
                                       fontWeight: FontWeight.w700,
@@ -1989,7 +1989,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                     ),
                                     child: Text(
                                       isBuy ? 'BUY' : 'SELL',
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 9.sp,
                                         fontWeight: FontWeight.w800,
                                         color: isBuy
@@ -2001,7 +2001,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   const Spacer(),
                                   Text(
                                     'Lot $lot',
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 11.sp,
                                       color: AppColors.textGrey,
                                     ),
@@ -2014,7 +2014,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   Expanded(
                                     child: Text(
                                       'Open $openPrice',
-                                      style: TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 11.sp,
                                         color: AppColors.textGrey,
                                       ),
@@ -2022,7 +2022,7 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
                                   ),
                                   Text(
                                     openTime,
-                                    style: TextStyle(
+                                    style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 11.sp,
                                       color: AppColors.textGrey,
                                     ),
@@ -2063,7 +2063,7 @@ class _PerfChip extends StatelessWidget {
         children: [
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
               color: color ?? AppColors.textPrimary,
@@ -2071,7 +2071,7 @@ class _PerfChip extends StatelessWidget {
           ),
           Text(
             label,
-            style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey),
           ),
         ],
       ),
@@ -2108,7 +2108,7 @@ class _SummaryChip extends StatelessWidget {
         children: [
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w700,
               color: valueColor ?? AppColors.textPrimary,
@@ -2117,7 +2117,7 @@ class _SummaryChip extends StatelessWidget {
           SizedBox(height: 2.h),
           Text(
             label,
-            style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey),
           ),
         ],
       ),
@@ -2150,7 +2150,7 @@ class _SmallFilterChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 12.sp,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             color: selected
@@ -2180,11 +2180,11 @@ class _InvestmentInfoRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: valueColor ?? AppColors.textPrimary,

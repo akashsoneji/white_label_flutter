@@ -1,4 +1,5 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +67,7 @@ class _VantageCreateNewPasswordScreenState
           children: [
             Text(
               languageService.tr('create_new_password_title'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: VantageAuthTheme.text,
                 fontSize: 24.sp,
                 fontWeight: FontWeight.w800,
@@ -75,7 +76,7 @@ class _VantageCreateNewPasswordScreenState
             SizedBox(height: 6.h),
             Text(
               languageService.tr('create_new_password_instruction'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: VantageAuthTheme.muted,
                 fontSize: 13.sp,
                 height: 1.3,

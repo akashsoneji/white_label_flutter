@@ -74,7 +74,7 @@ class ContestPromoCard extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       contest.bannerEmoji,
-                      style: TextStyle(fontSize: 30.sp),
+                      style: AppTextStyles.bodyText.copyWith(fontSize: 30.sp),
                     ),
                   ),
                   SizedBox(width: 14.w),
@@ -95,7 +95,7 @@ class ContestPromoCard extends StatelessWidget {
                               ),
                               child: Text(
                                 tagLabel,
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   color: AppColors.whiteColor,
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w700,
@@ -106,7 +106,7 @@ class ContestPromoCard extends StatelessWidget {
                             SizedBox(width: 8.w),
                             Text(
                               contest.subtitle,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.whiteColor.withValues(
                                   alpha: 0.85,
                                 ),
@@ -137,7 +137,7 @@ class ContestPromoCard extends StatelessWidget {
                   contest.description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor.withValues(alpha: 0.85),
                     fontSize: 12.sp,
                     height: 1.45,
@@ -192,11 +192,11 @@ class _StatPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: TextStyle(fontSize: 11.sp)),
+          Text(emoji, style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp)),
           SizedBox(width: 4.w),
           Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color: AppColors.whiteColor,
               fontSize: 11.sp,
               fontWeight: FontWeight.w600,

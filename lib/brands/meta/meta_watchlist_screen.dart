@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -156,7 +157,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
           Expanded(
             child: Text(
               Get.find<LanguageService>().tr('meta_watchlist_quotes'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.headerText(c),
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w500,
@@ -208,7 +209,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                   flex: 4,
                   child: Text(
                     Get.find<LanguageService>().tr('meta_watchlist_symbol'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         color: MetaTheme.headerText(c),
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500),
@@ -219,7 +220,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                   child: Text(
                     Get.find<LanguageService>().tr('meta_watchlist_bid'),
                     textAlign: TextAlign.right,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         color: MetaTheme.headerText(c),
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500),
@@ -231,7 +232,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                   child: Text(
                     Get.find<LanguageService>().tr('meta_watchlist_ask'),
                     textAlign: TextAlign.right,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         color: MetaTheme.headerText(c),
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500),
@@ -264,7 +265,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                   item.symbol,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                       color: MetaTheme.headerText(c),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500),
@@ -275,7 +276,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                 child: Text(
                   price.bid.toStringAsFixed(digits),
                   textAlign: TextAlign.right,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                       color: MetaTheme.sell(c),
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500),
@@ -287,7 +288,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                 child: Text(
                   price.ask.toStringAsFixed(digits),
                   textAlign: TextAlign.right,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                       color: MetaTheme.tpGreen,
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500),
@@ -309,13 +310,13 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
               size: 52.sp, color: MetaTheme.subText(c)),
           SizedBox(height: 10.h),
           Text(Get.find<LanguageService>().tr('meta_watchlist_no_favorites'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.mainText(c),
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700)),
           SizedBox(height: 6.h),
           Text('Tap  +  to add symbols',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c), fontSize: 12.sp)),
         ],
       ),
@@ -364,7 +365,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                       '  ${change >= 0 ? '+' : ''}${change.toStringAsFixed(digits)}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: changeColor,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w400),
@@ -374,7 +375,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                       item.symbol,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.headerText(c),
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500),
@@ -386,7 +387,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                       _formatRowSubtitleDate(price),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c), fontSize: 10.sp),
                     ), 
                     
@@ -400,7 +401,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                       _formatRowSubtitleDiff(price),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c), fontSize: 10.sp),
                     ),
                       ],
@@ -419,7 +420,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                     SizedBox(height: 1.h),
                     Text(
                       'L: ${price.dayLow.toStringAsFixed(digits)}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c), fontSize: 10.sp),
                     ),
                   ],
@@ -436,7 +437,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                     SizedBox(height: 1.h),
                     Text(
                       'H: ${price.dayHigh.toStringAsFixed(digits)}',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c), fontSize: 10.sp),
                     ),
                   ],
@@ -452,13 +453,13 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
   Widget _fractionPrice(BuildContext c, String value, Color color) {
     if (value.length < 3) {
       return Text(value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
               color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
     }
     final dotIdx = value.indexOf('.');
     if (dotIdx < 0 || dotIdx >= value.length - 2) {
       return Text(value,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
               color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
     }
     final head = value.substring(0, value.length - 2);
@@ -467,11 +468,11 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
       text: TextSpan(children: [
         TextSpan(
             text: head,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
                 color: color, fontSize: 13.sp, fontWeight: FontWeight.w400)),
         TextSpan(
             text: tail,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
                 color: color, fontSize: 16.sp, fontWeight: FontWeight.w500)),
       ]),
     );
@@ -588,7 +589,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
         ),
         title: Text(
           Get.find<LanguageService>().tr('meta_watchlist_add_symbol'),
-          style: TextStyle(color: MetaTheme.mainText(c), fontSize: 17.sp),
+          style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(c), fontSize: 17.sp),
         ),
       ),
       body: SafeArea(
@@ -614,10 +615,10 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
             child: TextField(
               controller: _ctrl,
               onChanged: (v) => _sic.searchInstruments(v),
-              style: TextStyle(color: MetaTheme.mainText(c), fontSize: 14.sp),
+              style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(c), fontSize: 14.sp),
               decoration: InputDecoration(
                 hintText: Get.find<LanguageService>().tr('meta_watchlist_find_symbols'),
-                hintStyle: TextStyle(
+                hintStyle: AppTextStyles.bodyText.copyWith(
                     color: MetaTheme.subText(c), fontSize: 14.sp),
                 isDense: true,
                 border: const UnderlineInputBorder(
@@ -661,7 +662,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
           _chevron(18, MetaTheme.subText(c)),
           SizedBox(width: 6.w),
           Text(label,
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.buyBlue,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500)),
@@ -684,14 +685,14 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
       }
 
       if (loading && allSymbols.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
+        return Center(child: CircularProgressIndicator());
       }
       if (allSymbols.isEmpty) {
         return Center(
           child: Padding(
             padding: EdgeInsets.all(24.h),
             child: Text(Get.find<LanguageService>().tr('meta_watchlist_no_results'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                     color: MetaTheme.subText(c), fontSize: 13.sp)),
           ),
         );
@@ -724,14 +725,14 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
     }).toList();
 
     if (loading && inFolder.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator());
     }
     if (inFolder.isEmpty) {
       return Center(
         child: Padding(
           padding: EdgeInsets.all(24.h),
           child: Text(Get.find<LanguageService>().tr('meta_watchlist_no_symbols_folder'),
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c), fontSize: 13.sp)),
         ),
       );
@@ -770,7 +771,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
     }
 
     if (groups.isEmpty && loading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(child: CircularProgressIndicator());
     }
     final sortedKeys = groups.keys.toList()
       ..sort((a, b) => _sortFolders(a).compareTo(_sortFolders(b)));
@@ -811,7 +812,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
             Expanded(
               child: Text(
                 group.label,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                     color: MetaTheme.mainText(c),
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w500),
@@ -820,7 +821,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
             if (totalCount > 0 || selectedCount > 0)
               Text(
                 Get.find<LanguageService>().tr('meta_watchlist_selected_count', {'sel': '$selectedCount', 'total': '$totalCount'}),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                     color: MetaTheme.subText(c), fontSize: 14.sp),
               ),
             if (hasSubfolders) ...[
@@ -853,7 +854,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
                   Text(symbol,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.headerText(c),
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500)),
@@ -864,7 +865,7 @@ class _AddSymbolSheetState extends State<_AddSymbolSheet> {
                         : s.categoryName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         color: MetaTheme.subText(c), fontSize: 11.sp),
                   ),
                 ],
@@ -953,7 +954,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remove symbols'),
+        title: Text('Remove symbols'),
         content:
             Text('Remove ${_checked.length} symbol(s) from your watchlist?'),
         actions: [
@@ -973,7 +974,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
                 });
               },
               child: Text(Get.find<LanguageService>().tr('meta_watchlist_delete'),
-                  style: const TextStyle(color: Colors.red))),
+                  style: AppTextStyles.bodyText.copyWith(color: Colors.red))),
         ],
       ),
     );
@@ -992,7 +993,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
           onPressed: () => Navigator.of(c).pop(),
         ),
         title: Text(Get.find<LanguageService>().tr('meta_watchlist_selected_symbols'),
-            style: TextStyle(color: MetaTheme.mainText(c), fontSize: 17.sp)),
+            style: AppTextStyles.bodyText.copyWith(color: MetaTheme.mainText(c), fontSize: 17.sp)),
         actions: _deleteMode
             ? [
                 // ✓ done | folder (select all) | trash
@@ -1054,7 +1055,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
               child: Padding(
                 padding: EdgeInsets.all(24.h),
                 child: Text(Get.find<LanguageService>().tr('meta_watchlist_no_selection'),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                         color: MetaTheme.subText(c), fontSize: 14.sp)),
               ),
             );
@@ -1099,7 +1100,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
                   Text(item.symbol,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.headerText(c),
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w500)),
@@ -1107,7 +1108,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
                   Text(item.category ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c), fontSize: 11.sp)),
                 ],
               ),
@@ -1182,7 +1183,7 @@ class _RowActionSheet extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 12.h),
               child: Text(
                 '${symbol.symbol}: ${symbol.category}',
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                     color: MetaTheme.headerText(c),
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w500),
@@ -1208,7 +1209,7 @@ class _RowActionSheet extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 14.h),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
               color: MetaTheme.mainText(c), fontSize: 15.sp),
         ),
       ),

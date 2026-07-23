@@ -408,7 +408,7 @@ class _OverviewFooterText extends StatelessWidget {
           TextSpan(text: line.prefix),
           TextSpan(
             text: ' ${line.value}',
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 11.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.primary,
@@ -447,7 +447,7 @@ class _CatalogInfoChip extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 7.sp,
               fontWeight: FontWeight.w700,
               color: labelColor,
@@ -527,7 +527,7 @@ class _ProductCatalogCard extends StatelessWidget {
                           ),
                           child: Text(
                             TradeWinFormat.categoryTag(product.category),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 9.sp,
                               fontWeight: FontWeight.w700,
                               color: AppColors.green,
@@ -604,7 +604,7 @@ class _ProductCatalogCard extends StatelessWidget {
               ),
               child: Text(
                 languageService.tr('tw_redeem_now'),
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontWeight: FontWeight.w700,
                   fontSize: 15.sp,
                   color: ThemeData.estimateBrightnessForColor(AppColors.primary) == Brightness.light
@@ -668,7 +668,7 @@ class _CatalogFilterChip extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               color:
                   selected
                       ? AppColors.primary

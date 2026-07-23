@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
@@ -58,20 +59,20 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
       AlertDialog(
         title: Text(
           'Delete Group',
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 18.sp, fontWeight: FontWeight.w600),
         ),
         content: Text(
           'Are you sure you want to delete "${group.groupName}"?',
-          style: TextStyle(fontSize: 14.sp),
+          style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.textGrey)),
+            child: Text('Cancel', style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey)),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
-            child: Text('Delete', style: TextStyle(color: AppColors.error)),
+            child: Text('Delete', style: AppTextStyles.bodyText.copyWith(color: AppColors.error)),
           ),
         ],
       ),
@@ -106,7 +107,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
         ),
         title: Text(
           'Commission Groups',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -179,7 +180,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                             ),
                             child: Text(
                               'Standard Groups',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.primary,
@@ -198,7 +199,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                         Flexible(
                           child: Text(
                             'Existing Standard Groups',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.primary,
@@ -223,7 +224,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                               fit: BoxFit.scaleDown,
                               child: Text(
                                 'Add New Standard Group',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.whiteColor,
@@ -246,7 +247,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                           SizedBox(height: 16.h),
                           Text(
                             'No commission groups found',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               color: AppColors.textGrey,
                             ),
@@ -303,7 +304,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                           ),
                           child: Text(
                             'Standard Groups',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.primary,
@@ -323,7 +324,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                       Flexible(
                         child: Text(
                           'Existing Standard Groups',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
@@ -348,7 +349,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                             fit: BoxFit.scaleDown,
                             child: Text(
                               'Add New Standard Group',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.whiteColor,
@@ -376,7 +377,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                             SizedBox(height: 16.h),
                             Text(
                               'No commission groups found',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 16.sp,
                                 color: AppColors.textGrey,
                               ),
@@ -424,7 +425,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
@@ -433,7 +434,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                 SizedBox(height: 8.h),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     color: AppColors.textGrey,
                     height: 1.4,
@@ -483,7 +484,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                     width: 40.w,
                     child: Text(
                       '#',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -494,7 +495,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                     flex: 2,
                     child: Text(
                       'Group Name',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -505,7 +506,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                     flex: 2,
                     child: Text(
                       'Created Date',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -517,7 +518,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                     child: Text(
                       'Actions',
                       textAlign: TextAlign.right,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -547,7 +548,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                       width: 40.w,
                       child: Text(
                         '${index + 1}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.textPrimary,
                         ),
@@ -557,7 +558,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                       flex: 2,
                       child: Text(
                         group.groupName ?? 'N/A',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.textPrimary,
                         ),
@@ -567,7 +568,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                       flex: 2,
                       child: Text(
                         _formatDate(group.createdAt),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: AppColors.textPrimary,
                         ),
@@ -596,7 +597,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                               ),
                               child: Text(
                                 'Edit',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.textPrimary,
                                 ),
@@ -621,7 +622,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                               ),
                               child: Text(
                                 'Delete',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.textPrimary,
                                 ),

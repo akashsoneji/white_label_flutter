@@ -1,4 +1,5 @@
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +64,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       return SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        padding: EdgeInsets.symmetric(horizontal: 24),
                         child: ConstrainedBox(
                           constraints: BoxConstraints(minHeight: constraints.maxHeight),
                           child: IntrinsicHeight(
@@ -85,7 +86,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                     padding: EdgeInsets.only(top: 70.h),
                                     child: Text(
                                       languageService.tr("forgot_password_title"),
-                                      style: const TextStyle(
+                                      style: AppTextStyles.bodyText.copyWith(
                                         fontSize: 28,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -128,7 +129,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                         languageService.tr(
                                           "forgot_password_send_otp",
                                         ),
-                                        style: const TextStyle(
+                                        style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -146,18 +147,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                  padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
                   child: Center(
                     child: RichText(
                       text: TextSpan(
                         text: languageService.tr(
                           "forgot_password_remember_password",
                         ),
-                        style: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
+                        style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 14.sp),
                         children: [
                           TextSpan(
                             text: languageService.tr("forgot_password_login"),
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.w600,
                             ),

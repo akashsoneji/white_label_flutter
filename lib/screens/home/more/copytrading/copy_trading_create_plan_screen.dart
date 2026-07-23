@@ -98,7 +98,7 @@ class _CopyTradingCreatePlanScreenState
                     children: [
                       Text(
                         'Trading Account *',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
                           fontWeight: FontWeight.w600,
@@ -115,7 +115,7 @@ class _CopyTradingCreatePlanScreenState
                             padding: EdgeInsets.only(bottom: 6.h),
                             child: Text(
                               err,
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 color: AppColors.error,
                                 fontWeight: FontWeight.w600,
@@ -147,7 +147,7 @@ class _CopyTradingCreatePlanScreenState
                       SizedBox(height: 4.h),
                       Text(
                         'This is the master trading account for this plan only (copiers mirror trades from this account). You can use a different account on another plan.',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: _mutedText,
                           height: 1.3,
@@ -156,7 +156,7 @@ class _CopyTradingCreatePlanScreenState
                       SizedBox(height: 14.h),
                       Text(
                         'Plan Name *',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
                           fontWeight: FontWeight.w600,
@@ -172,7 +172,7 @@ class _CopyTradingCreatePlanScreenState
                                     : null,
                         decoration: InputDecoration(
                           hintText: 'e.g. Conservative Growth Plan',
-                          hintStyle: TextStyle(
+                          hintStyle: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: _mutedText,
                             fontWeight: FontWeight.w400,
@@ -185,7 +185,7 @@ class _CopyTradingCreatePlanScreenState
                         SizedBox(height: 14.h),
                         Text(
                           'Billing Period *',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: _mutedText,
                             fontWeight: FontWeight.w600,
@@ -196,7 +196,7 @@ class _CopyTradingCreatePlanScreenState
                           value: _subscriptionPeriod ?? 'monthly',
                           hint: 'Select billing period',
                           sheetTitle: 'Billing Period',
-                          options: const [
+                          options: [
                             AppSelectOption(value: 'weekly', title: 'Weekly'),
                             AppSelectOption(value: 'monthly', title: 'Monthly'),
                             AppSelectOption(
@@ -215,7 +215,7 @@ class _CopyTradingCreatePlanScreenState
                       SizedBox(height: 14.h),
                       Text(
                         'Strategy Description',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
                           fontWeight: FontWeight.w600,
@@ -227,7 +227,7 @@ class _CopyTradingCreatePlanScreenState
                         maxLines: 3,
                         decoration: InputDecoration(
                           hintText: 'Describe your trading strategy and risk approach.',
-                          hintStyle: TextStyle(
+                          hintStyle: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: _mutedText,
                           ),
@@ -236,7 +236,7 @@ class _CopyTradingCreatePlanScreenState
                       SizedBox(height: 12.h),
                       Text(
                         'Risk Information',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: _mutedText,
                           fontWeight: FontWeight.w600,
@@ -248,7 +248,7 @@ class _CopyTradingCreatePlanScreenState
                         maxLines: 3,
                         decoration: InputDecoration(
                           hintText: 'Describe potential drawdowns and risk level.',
-                          hintStyle: TextStyle(
+                          hintStyle: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: _mutedText,
                           ),
@@ -278,7 +278,7 @@ class _CopyTradingCreatePlanScreenState
           children: [
             Text(
               'Commission Type *',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -289,7 +289,7 @@ class _CopyTradingCreatePlanScreenState
               value: _commissionType,
               hint: 'Select commission type',
               sheetTitle: 'Commission Type',
-              options: const [
+              options: [
                 AppSelectOption(
                   value: 'per_trade',
                   title: 'Per Trade (% commission)',
@@ -320,7 +320,7 @@ class _CopyTradingCreatePlanScreenState
               _commissionType == 'per_trade'
                   ? 'Commission (%) *'
                   : 'Subscription Fee (USD) *',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -337,7 +337,7 @@ class _CopyTradingCreatePlanScreenState
               decoration: InputDecoration(
                 hintText:
                     _commissionType == 'per_trade' ? 'e.g. 30' : 'e.g. 50',
-                hintStyle: TextStyle(fontSize: 12.sp, color: _mutedText),
+                hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
           ],
@@ -367,7 +367,7 @@ class _CopyTradingCreatePlanScreenState
           children: [
             Text(
               'No-Fee Grace Period (days)',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -382,7 +382,7 @@ class _CopyTradingCreatePlanScreenState
             SizedBox(height: 4.h),
             Text(
               'Copiers won\'t pay commission on trades within this grace period.',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 10.sp,
                 color: _mutedText,
                 height: 1.3,
@@ -396,7 +396,7 @@ class _CopyTradingCreatePlanScreenState
           children: [
             Text(
               'Min. Capital (USD) *',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -412,7 +412,7 @@ class _CopyTradingCreatePlanScreenState
                   (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
               decoration: InputDecoration(
                 hintText: 'e.g. 100',
-                hintStyle: TextStyle(fontSize: 12.sp, color: _mutedText),
+                hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
           ],
@@ -442,7 +442,7 @@ class _CopyTradingCreatePlanScreenState
           children: [
             Text(
               'Copy ratio',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -461,7 +461,7 @@ class _CopyTradingCreatePlanScreenState
             SizedBox(height: 4.h),
             Text(
               'Default 1 — copier volume scales from this ratio.',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 10.sp,
                 color: _mutedText,
               ),
@@ -474,7 +474,7 @@ class _CopyTradingCreatePlanScreenState
           children: [
             Text(
               'Max copiers',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: _mutedText,
                 fontWeight: FontWeight.w600,
@@ -486,7 +486,7 @@ class _CopyTradingCreatePlanScreenState
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: 'Unlimited if empty',
-                hintStyle: TextStyle(fontSize: 12.sp, color: _mutedText),
+                hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: _mutedText),
               ),
             ),
           ],
@@ -534,7 +534,7 @@ class _CopyTradingCreatePlanScreenState
         ),
         child: Text(
           'Cancel',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -563,7 +563,7 @@ class _CopyTradingCreatePlanScreenState
                 ? CommonLoadingWidget(size: 22, color: AppColors.onColoredBackground)
                 : Text(
                   'Create Plan',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.onColoredBackground,

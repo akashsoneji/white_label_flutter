@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
@@ -34,7 +35,7 @@ class _TradersTabState extends State<TradersTab> {
           children: [
             // Header with Master Rating, Search, and Filter
             Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: 16.0,
                 vertical: 0.0,
               ),
@@ -47,9 +48,9 @@ class _TradersTabState extends State<TradersTab> {
                     },
                     icon: SvgPicture.asset('assets/svg/ib_dashboard/home.svg'),
                   ),
-                  const Text(
+                  Text(
                     'Master Rating',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                    style: AppTextStyles.bodyText.copyWith(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
                   Row(
                     children: [
@@ -72,7 +73,7 @@ class _TradersTabState extends State<TradersTab> {
 
             // Filters Section
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Card(
                 elevation: 0.5,
                 shadowColor: AppColors.icongrey,
@@ -93,9 +94,9 @@ class _TradersTabState extends State<TradersTab> {
                         _isRiskScoreExpanded = expanded;
                       });
                     },
-                    title: const Text(
+                    title: Text(
                       'Risk Score',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -105,18 +106,18 @@ class _TradersTabState extends State<TradersTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(left: 15),
+                            padding: EdgeInsets.only(left: 15),
                             child: Text(
                               'Whom to show first',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.textGrey,
                                 fontSize: 12,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
+                            padding: EdgeInsets.only(left: 10.0),
                             child: Wrap(
                               alignment: WrapAlignment.start,
                               spacing: 8,
@@ -143,12 +144,12 @@ class _TradersTabState extends State<TradersTab> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Padding(
-                            padding: const EdgeInsets.only(left: 15),
+                            padding: EdgeInsets.only(left: 15),
                             child: Text(
                               'For what time',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.textGrey,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w400,
@@ -156,9 +157,9 @@ class _TradersTabState extends State<TradersTab> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           Padding(
-                            padding: const EdgeInsets.only(left: 10),
+                            padding: EdgeInsets.only(left: 10),
                             child: Wrap(
                               alignment: WrapAlignment.start,
                               spacing: 8,
@@ -192,7 +193,7 @@ class _TradersTabState extends State<TradersTab> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16),
                           // 'For what time' section moved to bottom sheet
                         ],
                       ),
@@ -203,37 +204,37 @@ class _TradersTabState extends State<TradersTab> {
             ),
 
             // Trader List Data using TraderCard
-            ListView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              children: const [
-                TraderCard(
-                  name: 'Prime_traders',
-                  badge: '1 RISK',
-                  gain: '33.71%',
-                  copier: '138',
-                  commission: '35%',
-                  profitAndLoss: r'$12345.67',
-                ),
-                TraderCard(
-                  name: 'Prime_traders',
-                  badge: '1 RISK',
-                  gain: '33.71%',
-                  copier: '138',
-                  commission: '35%',
-                  profitAndLoss: r'$12345.67',
-                ),
-                TraderCard(
-                  name: 'Prime_traders',
-                  badge: '1 RISK',
-                  gain: '33.71%',
-                  copier: '138',
-                  commission: '35%',
-                  profitAndLoss: r'$12345.67',
-                ),
-              ],
-            ),
+            // ListView(
+            //   shrinkWrap: true,
+            //   physics: const NeverScrollableScrollPhysics(),
+            //   padding: EdgeInsets.all(16),
+            //   children: [
+            //     TraderCard(
+            //       name: 'Prime_traders',
+            //       badge: '1 RISK',
+            //       gain: '33.71%',
+            //       copier: '138',
+            //       commission: '35%',
+            //       profitAndLoss: r'$12345.67',
+            //     ),
+            //     TraderCard(
+            //       name: 'Prime_traders',
+            //       badge: '1 RISK',
+            //       gain: '33.71%',
+            //       copier: '138',
+            //       commission: '35%',
+            //       profitAndLoss: r'$12345.67',
+            //     ),
+            //     TraderCard(
+            //       name: 'Prime_traders',
+            //       badge: '1 RISK',
+            //       gain: '33.71%',
+            //       copier: '138',
+            //       commission: '35%',
+            //       profitAndLoss: r'$12345.67',
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       ),
@@ -259,7 +260,7 @@ class _TradersTabState extends State<TradersTab> {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             color: isSelected ? AppColors.whiteColor : AppColors.textPrimary,
             fontWeight: FontWeight.w400,
             fontSize: 14,

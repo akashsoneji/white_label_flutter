@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:crm_app/constants/color.dart';
 
@@ -31,10 +32,10 @@ class CommonLoadingWidget extends StatelessWidget {
           size: size,
         ),
         // if (message != null) ...[
-        //   const SizedBox(height: 16),
+        //   SizedBox(height: 16),
         //   Text(
         //     message!,
-        //     style: TextStyle(
+        //     style: AppTextStyles.bodyText.copyWith(
         //       color: AppColors.whiteColor,
         //       fontSize: 16,
         //       fontWeight: FontWeight.w500,
@@ -52,7 +53,7 @@ class CommonLoadingWidget extends StatelessWidget {
         color: bgColor,
         child: Center(
           child: Container(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             decoration: BoxDecoration(
               // color: Colors.transparent,
               borderRadius: BorderRadius.circular(16),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/flavor_config.dart';
@@ -23,7 +24,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           color: FlavorConfig.isVantage() ? AppColors.primary : AppColors.textPrimary,
         ),
       ),
-      body: const Padding(
+      body: Padding(
         padding: EdgeInsets.all(24.0),
         child: SingleChildScrollView(
           child: Column(
@@ -31,12 +32,12 @@ class PrivacyPolicyScreen extends StatelessWidget {
             children: [
               Text(
                 'Privacy Policy',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
               Text(
                 'This is a placeholder for the privacy policy content. You can replace this with your actual privacy policy text.',
-                style: TextStyle(fontSize: 16),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 16),
               ),
             ],
           ),

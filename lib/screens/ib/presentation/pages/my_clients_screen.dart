@@ -1,4 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'dart:async';
 
 import 'package:crm_app/screens/home/trading_main_screen.dart';
@@ -454,7 +455,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
         elevation: 0,
         title: Text(
           'My Client',
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
@@ -523,7 +524,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     SizedBox(height: 24.h),
                     Text(
                       'No Data Found',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
@@ -533,7 +534,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     Text(
                       'We couldn\'t find any records for this IB. Please check your connection or try again.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
                         height: 1.5,
@@ -667,7 +668,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           child: Center(
             child: Text(
               'No clients found',
-              style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
             ),
           ),
         ),
@@ -697,7 +698,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           child: Center(
             child: Text(
               'No Sub-IBs found',
-              style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
             ),
           ),
         ),
@@ -754,7 +755,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
           child: Center(
             child: Text(
               'No trade history found.',
-              style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+              style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
             ),
           ),
         ),
@@ -799,7 +800,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 SizedBox(width: 6.w),
                 Text(
                   'Select Client',
-                  style: TextStyle(
+                  style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
@@ -817,7 +818,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
             ),
             child: Text(
               controller.selectedClientName.value ?? 'Client',
-              style: TextStyle(
+              style: AppTextStyles.bodyText.copyWith(
                 fontSize: 11.sp,
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -864,7 +865,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 Expanded(
                   child: Text(
                     bannerTitle,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.whiteColor,
@@ -910,7 +911,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                             _ibHierarchy.length > 1
                                 ? 'Back to Sub IB'
                                 : 'Back to Master IB',
-                            style: TextStyle(
+                            style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
                               color: AppColors.primary,
@@ -925,7 +926,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 Expanded(
                   child: Text(
                     '${ibController.ibClients.length} clients under ${_selectedSubIB?.name ?? "Sub IB"}',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 11.sp,
                       color: AppColors.textGrey,
                     ),
@@ -978,7 +979,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                           children: [
                             Text(
                               'Show More',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
@@ -987,7 +988,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                             SizedBox(height: 2.h),
                             Text(
                               'View statistics & performance overview',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
                               ),
@@ -1075,7 +1076,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
             Flexible(
               child: Text(
                 text,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                   color: isSelected ? AppColors.whiteColor : AppColors.primary,
@@ -1144,7 +1145,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
               _expandedItems.clear();
             });
           },
-          style: TextStyle(
+          style: AppTextStyles.bodyText.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w400,
             color: AppColors.textPrimary,
@@ -1169,7 +1170,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                   : null,
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
+            hintStyle: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
             filled: true,
             fillColor: AppColors.whiteColor,
             contentPadding: EdgeInsets.symmetric(
@@ -1334,7 +1335,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -1342,7 +1343,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
               SizedBox(height: 2.h),
               Text(
                 value,
-                style: TextStyle(
+                style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                   color:
@@ -1411,7 +1412,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     child: Center(
                       child: Text(
                         _getInitials(client.name),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,
@@ -1427,7 +1428,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       children: [
                         Text(
                           client.name ?? 'N/A',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -1436,7 +1437,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                         SizedBox(height: 2.h),
                         Text(
                           client.email ?? '',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                           ),
@@ -1453,7 +1454,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                         //     SizedBox(width: 4.w),
                         //     Text(
                         //       '${clientCount} Clients',
-                        //       style: TextStyle(
+                        //       style: AppTextStyles.bodyText.copyWith(
                         //         fontSize: 11.sp,
                         //         color: AppColors.textGrey,
                         //       ),
@@ -1467,7 +1468,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                         //     SizedBox(width: 4.w),
                         //     Text(
                         //       '$subIbCount Sub IBs',
-                        //       style: TextStyle(
+                        //       style: AppTextStyles.bodyText.copyWith(
                         //         fontSize: 11.sp,
                         //         color: AppColors.textGrey,
                         //       ),
@@ -1602,11 +1603,11 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey),
+            style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -1671,7 +1672,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     child: Center(
                       child: Text(
                         _getInitials(subIB.name),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                           color: AppColors.primary,
@@ -1687,7 +1688,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       children: [
                         Text(
                           subIB.name ?? 'N/A',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
@@ -1696,7 +1697,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                         SizedBox(height: 2.h),
                         Text(
                           subIB.email ?? '',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
                           ),
@@ -1712,7 +1713,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                             SizedBox(width: 4.w),
                             Text(
                               '${clientCount} Clients',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
                               ),
@@ -1726,7 +1727,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                             SizedBox(width: 4.w),
                             Text(
                               '$subIbCount Sub IBs',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
                               ),
@@ -1839,10 +1840,10 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 child: TextField(
                   controller: _clientSearchController,
                   focusNode: _tradeHistorySearchFocusNode,
-                  style: TextStyle(fontSize: 13.sp),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp),
                   decoration: InputDecoration(
                     hintText: 'Search name, email, or account...',
-                    hintStyle: TextStyle(
+                    hintStyle: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.textGrey,
                     ),
@@ -1897,7 +1898,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                   ),
                   child: Text(
                     'Search',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.whiteColor,
                       fontWeight: FontWeight.w600,
@@ -1943,7 +1944,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 child: Text(
                   'No clients found for "${_clientSearchController.text}"',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13.sp, color: AppColors.textGrey),
+                  style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textGrey),
                 ),
               ),
             ),
@@ -1969,7 +1970,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                   child: Text(
                     'Search for a client to view their trade history',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.textGrey,
                     ),
@@ -2034,7 +2035,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                   )
                   : Text(
                     'Load More',
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -2082,7 +2083,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                 child: Center(
                   child: Text(
                     _getInitials(client.name),
-                    style: TextStyle(
+                    style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primary,
@@ -2097,7 +2098,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                   children: [
                     Text(
                       client.name ?? 'N/A',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -2106,7 +2107,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     SizedBox(height: 2.h),
                     Text(
                       client.email ?? 'N/A',
-                      style: TextStyle(
+                      style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
                       ),
@@ -2150,7 +2151,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
       ),
       child: Text(
         text,
-        style: TextStyle(
+        style: AppTextStyles.bodyText.copyWith(
           fontSize: 10.sp,
           fontWeight: FontWeight.w600,
           color: color,
@@ -2211,7 +2212,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                         (trade.symbol?.length ?? 0) > 3
                             ? trade.symbol!.substring(0, 3)
                             : (trade.symbol ?? '--'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w700,
                           color: isBuy ? AppColors.success : AppColors.error,
@@ -2229,7 +2230,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                           children: [
                             Text(
                               trade.symbol ?? 'N/A',
-                              style: TextStyle(
+                              style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textPrimary,
@@ -2254,7 +2255,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                               ),
                               child: Text(
                                 trade.type?.toUpperCase() ?? '--',
-                                style: TextStyle(
+                                style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 10.sp,
                                   fontWeight: FontWeight.w700,
                                   color:
@@ -2269,7 +2270,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                         SizedBox(height: 2.h),
                         Text(
                           'Vol: ${trade.volume?.toStringAsFixed(2) ?? '0.00'} | ${_formatDate(trade.openTime)}',
-                          style: TextStyle(
+                          style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
                           ),
@@ -2283,7 +2284,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                     children: [
                       Text(
                         '${isProfit ? '+' : ''}\$${trade.profit?.toStringAsFixed(2) ?? '0.00'}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w700,
                           color: isProfit ? AppColors.success : AppColors.error,
@@ -2292,7 +2293,7 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
                       SizedBox(height: 2.h),
                       Text(
                         'Comm: \$${trade.commission?.toStringAsFixed(2) ?? '0.00'}',
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: AppColors.textGrey,
                         ),

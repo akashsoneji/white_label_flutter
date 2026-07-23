@@ -114,7 +114,7 @@ class TradeWinRedemptionSuccessScreen extends StatelessWidget {
                       ),
                       child: Text(
                         languageService.tr('tw_done'),
-                        style: TextStyle(
+                        style: AppTextStyles.bodyText.copyWith(
                           fontWeight: FontWeight.w700,
                           fontSize: 16.sp,
                           color: btnTextColor,

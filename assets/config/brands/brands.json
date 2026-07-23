@@ -1,21 +1,21 @@
 {
-  "default": "pipze",
+  "default": "riyadex",
   "brands": [
-    "pipze",
-    "iquote"
+    "riyadex",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "pipze",
+      "name": "riyadex",
       "type": "child",
-      "inheritsFrom": "iquote",
-      "label": "Pipze",
+      "inheritsFrom": "vantage",
+      "label": "Riyadex",
       "themeMode": "both"
     },
     {
-      "name": "iquote",
+      "name": "vantage",
       "type": "parent",
-      "label": "iQuote",
+      "label": "Vantage",
       "themeMode": "both"
     }
   ]

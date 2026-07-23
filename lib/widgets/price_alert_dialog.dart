@@ -417,7 +417,7 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
                                 )
                                 : Text(
                                   'Set Alert',
-                                  style: TextStyle(color: AppColors.whiteColor),
+                                  style: AppTextStyles.bodyText.copyWith(color: AppColors.whiteColor),
                                 ),
                       ),
                     ),
