@@ -1,4 +1,6 @@
 import 'dart:convert';
+export 'ib_progressive_stats_model.dart';
+export 'banner_model.dart';
 
 // IB Status Response Model
 class IBStatusResponse {

@@ -1,6 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -31,7 +30,9 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
     } else {
       ibController = Get.put(IBController());
     }
-    _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
   }
 
   Future<void> _loadData() async {

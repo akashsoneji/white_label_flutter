@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
-// import 'package:crm_app/screens/ib/presentation/pages/commission_history_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_dashboard_new_screen.dart';
+import 'package:crm_app/screens/ib/presentation/pages/my_structure_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_structure_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_requests_screen.dart';
-import 'package:crm_app/screens/ib/presentation/pages/ib_more_screen.dart';
+// import 'package:crm_app/screens/ib/presentation/pages/ib_more_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/my_clients_screen.dart';
 import 'package:crm_app/widgets/ib_bottom_navigation.dart';
 
@@ -81,7 +81,7 @@ class _IbMainScreenState extends State<IbMainScreen> {
     ibController.update(['ib_clients', 'ib_structure']);
   }
 
-  List<Widget> _getScreens() {
+  List<Widget> _getScreens(bool isTraditional) {
     // Use key to force rebuild when navigating back
     return [
       KeepAliveWrapper(
@@ -98,64 +98,77 @@ class _IbMainScreenState extends State<IbMainScreen> {
         ),
       ),
       KeepAliveWrapper(
-        key: ValueKey('structure_$_screenKey'),
-        child: IBStructureScreen(),
+        key: ValueKey('my_structure_$_screenKey'),
+        child: const MyStructureScreen(),
       ),
-      KeepAliveWrapper(
-        key: ValueKey('clients_$_screenKey'),
-        child: MyClientsScreen(),
-      ),
-      KeepAliveWrapper(
-        key: ValueKey('requests_$_screenKey'),
-        child: IBRequestsScreen(),
-      ),
-      KeepAliveWrapper(
-        key: ValueKey('more_$_screenKey'),
-        child: IBMoreScreen(),
-      ),
+      if (!isTraditional) ...[
+        KeepAliveWrapper(
+          key: ValueKey('structure_$_screenKey'),
+          child: const IBStructureScreen(),
+        ),
+        KeepAliveWrapper(
+          key: ValueKey('clients_$_screenKey'),
+          child: const MyClientsScreen(),
+        ),
+        KeepAliveWrapper(
+          key: ValueKey('requests_$_screenKey'),
+          child: const IBRequestsScreen(),
+        ),
+      ] else ...[
+        KeepAliveWrapper(
+          key: ValueKey('clients_$_screenKey'),
+          child: const MyClientsScreen(),
+        ),
+      ],
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.tradeBackgroundCenterColor,
-      extendBody: true,
-      body: SafeArea(
-        child: PageView(
-          controller: _pageController,
-          onPageChanged: (index) {
+    return Obx(() {
+      final ibType = ibController.ibStatusResponse.value?.data?.ibType ?? 'dynamic';
+      final isTraditional = ibType == 'traditional';
+
+      return Scaffold(
+        backgroundColor: AppColors.tradeBackgroundCenterColor,
+        extendBody: true,
+        body: SafeArea(
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              if (_currentIndex == index) return;
+              setState(() {
+                if (index == 0 && _currentIndex != 0) {
+                  _resetIBState();
+                }
+                _currentIndex = index;
+              });
+            },
+            physics: const NeverScrollableScrollPhysics(),
+            children: _getScreens(isTraditional),
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+        floatingActionButton: IbBottomNavigation(
+          currentIndex: _currentIndex,
+          isTraditional: isTraditional,
+          onTap: (index) {
             if (_currentIndex == index) return;
+            if (_pageController.hasClients) {
+              _pageController.jumpToPage(index);
+            }
             setState(() {
+              // If switching to Dashboard, reset state
               if (index == 0 && _currentIndex != 0) {
                 _resetIBState();
               }
               _currentIndex = index;
             });
           },
-          physics: const NeverScrollableScrollPhysics(),
-          children: _getScreens(),
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
-      floatingActionButton: IbBottomNavigation(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (_currentIndex == index) return;
-          if (_pageController.hasClients) {
-            _pageController.jumpToPage(index);
-          }
-          setState(() {
-            // If switching to Dashboard, reset state
-            if (index == 0 && _currentIndex != 0) {
-              _resetIBState();
-            }
-            _currentIndex = index;
-          });
-        },
-      ),
-    );
+      );
+    });
   }
 }
 

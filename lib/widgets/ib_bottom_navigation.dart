@@ -8,11 +8,13 @@ import 'package:crm_app/constants/text_styles.dart';
 class IbBottomNavigation extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final bool isTraditional;
 
   const IbBottomNavigation({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.isTraditional = false,
   });
 
   @override
@@ -59,26 +61,28 @@ class IbBottomNavigation extends StatelessWidget {
                       1,
                       "assets/svg/ib_dashboard/coin.svg",
                       "assets/svg/ib_dashboard/coin_bold.svg",
-                      "Structure",
+                      "My Structure",
                     ),
+                    if (!isTraditional)
+                      _buildNavItem(
+                        2,
+                        "assets/svg/ib_dashboard/coin.svg",
+                        "assets/svg/ib_dashboard/coin_bold.svg",
+                        "IB Structure",
+                      ),
                     _buildNavItem(
-                      2,
+                      isTraditional ? 2 : 3,
                       "assets/svg/ib_dashboard/myclient.svg",
                       "assets/svg/ib_dashboard/myclient_bold.svg",
-                      "Clients",
+                      isTraditional ? "My Network" : "Clients",
                     ),
-                    _buildNavItem(
-                      3,
-                      "assets/svg/ib_dashboard/marketing.svg",
-                      "assets/svg/ib_dashboard/marketing_bold.svg",
-                      "Requests",
-                    ),
-                    _buildNavItem(
-                      4,
-                      "assets/svg/bottom_navigation/setting.svg",
-                      "assets/svg/bottom_navigation/setting_bold.svg",
-                      "More",
-                    ),
+                    if (!isTraditional)
+                      _buildNavItem(
+                        4,
+                        "assets/svg/ib_dashboard/marketing.svg",
+                        "assets/svg/ib_dashboard/marketing_bold.svg",
+                        "Requests",
+                      ),
                   ],
                 ),
               ),

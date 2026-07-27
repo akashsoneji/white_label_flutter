@@ -1,6 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -23,8 +22,14 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
   @override
   void initState() {
     super.initState();
-    ibController = Get.find<IBController>();
-    _loadMoreData();
+    if (Get.isRegistered<IBController>()) {
+      ibController = Get.find<IBController>();
+    } else {
+      ibController = Get.put(IBController());
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMoreData();
+    });
   }
 
   Future<void> _loadMoreData() async {
