@@ -16,6 +16,7 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/home/close_position_screen.dart';
 import 'package:crm_app/screens/home/edit_order_screen.dart';
 import 'package:crm_app/screens/home/brands/iquote/iquote_order_details_screen.dart';
+import 'package:crm_app/screens/home/brands/iquote/iquote_position_detail_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/withdrawal_screen.dart';
 import 'package:crm_app/models/mt5_account.dart';
@@ -696,7 +697,12 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 ),
               ));
         } else {
-          _showActionSheet(tradingController, position);
+          // Open the full position-detail screen so the user can manage
+          // TP/SL, Add Position, or Reverse Order for this open position.
+          Get.to<void>(
+            () => IQuotePositionDetailScreen(position: position),
+            transition: Transition.cupertino,
+          );
         }
       },
       child: Container(
