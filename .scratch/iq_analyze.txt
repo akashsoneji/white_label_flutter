@@ -1,0 +1,9 @@
+Analyzing iquote_chart_screen.dart...                           
+
+warning • The value of the field '_prevMinutePrice' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:250:11 • unused_field
+warning • The value of the field '_sameMinuteTicks' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:251:7 • unused_field
+warning • The value of the field '_cachedPriceLabels' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:254:32 • unused_field
+warning • The declaration '_priceRow' isn't referenced. Try removing the declaration of '_priceRow' • lib/screens/home/brands/iquote/iquote_chart_screen.dart:360:10 • unused_element
+warning • The value of the local variable 'pct' isn't used. Try removing the variable or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:364:11 • unused_local_variable
+
+5 issues found. (ran in 2.9s)

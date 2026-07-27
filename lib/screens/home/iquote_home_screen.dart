@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/screens/home/brands/iquote/iquote_chart_screen.dart';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -590,7 +591,9 @@ class _LiveTickerCard extends StatelessWidget {
       return InkWell(
         onTap: () {
           ChartScreen.setSelectedSymbol(sym);
-          Get.to(() => const ChartScreen());
+          // Get.to(() => const ChartScreen());
+          Get.to(() => IQuoteChartScreen(symbol: sym));
+
         },
         borderRadius: BorderRadius.circular(12.r),
         child: Container(

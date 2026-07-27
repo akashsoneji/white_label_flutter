@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:crm_app/screens/home/brands/iquote/iquote_chart_screen.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -310,12 +311,15 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
             instrument: list[i],
             bidHistory: _bidHistory,
             controller: _ic,
-            onTap: (sym) {
-              if (widget.onNavigateToChart != null) {
-                widget.onNavigateToChart!(sym);
-              } else {
-                _sym.setSymbol(sym);
-              }
+              onTap: (sym) {
+              print("object symsdjhdhs  ----. $sym");
+               Get.to(() => IQuoteChartScreen(symbol: sym));
+              // if (widget.onNavigateToChart != null) {
+              //   widget.onNavigateToChart!(sym);
+              // } else {
+              //   Get.to(() => IQuoteChartScreen(symbol: sym));
+              // }
+            
             },
           );
         },

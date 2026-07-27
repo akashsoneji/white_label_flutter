@@ -1,0 +1,5 @@
+Analyzing riyadex_create_account_screen.dart...                 
+
+warning • The declaration '_PasswordRulesWidget' isn't referenced. Try removing the declaration of '_PasswordRulesWidget' • lib/screens/auth/presentation/brands/riyadex/pages/riyadex_create_account_screen.dart:692:7 • unused_element
+
+1 issue found. (ran in 2.6s)

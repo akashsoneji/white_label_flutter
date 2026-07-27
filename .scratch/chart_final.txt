@@ -1,0 +1,28 @@
+Analyzing iquote...                                             
+
+warning • The value of the local variable 'symbols' isn't used. Try removing the variable or using it • lib/screens/home/brands/iquote/history_filter_sheet.dart:97:11 • unused_local_variable
+warning • The declaration '_buildSymbolSection' isn't referenced. Try removing the declaration of '_buildSymbolSection' • lib/screens/home/brands/iquote/history_filter_sheet.dart:203:10 • unused_element
+  error • The getter 'ltr' isn't defined for the type 'TextDirection'. Try importing the library that defines 'ltr', correcting the name to the name of an existing getter, or defining a getter or field named 'ltr' • lib/screens/home/brands/iquote/iquote_chart_screen.dart:65:36 • undefined_getter
+  error • The getter 'operators' isn't defined for the type 'Path'. Try importing the library that defines 'operators', correcting the name to the name of an existing getter, or defining a getter or field named 'operators' • lib/screens/home/brands/iquote/iquote_chart_screen.dart:94:16 • undefined_getter
+  error • The getter 'operators' isn't defined for the type 'Path'. Try importing the library that defines 'operators', correcting the name to the name of an existing getter, or defining a getter or field named 'operators' • lib/screens/home/brands/iquote/iquote_chart_screen.dart:220:16 • undefined_getter
+warning • The value of the field '_prevMinutePrice' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:247:11 • unused_field
+warning • The value of the field '_sameMinuteTicks' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:248:7 • unused_field
+warning • The value of the field '_cachedPriceLabels' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:251:32 • unused_field
+warning • The declaration '_priceRow' isn't referenced. Try removing the declaration of '_priceRow' • lib/screens/home/brands/iquote/iquote_chart_screen.dart:357:10 • unused_element
+warning • The value of the local variable 'pct' isn't used. Try removing the variable or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:361:11 • unused_local_variable
+  error • The getter 'kPeriods' isn't defined for the type 'IQuoteChartController'. Try importing the library that defines 'kPeriods', correcting the name to the name of an existing getter, or defining a getter or field named 'kPeriods' • lib/screens/home/brands/iquote/iquote_chart_screen.dart:402:49 • undefined_getter
+warning • The value of the field '_ls' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_market_screen.dart:37:30 • unused_field
+warning • The value of the field '_sym' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_market_screen.dart:38:37 • unused_field
+warning • The declaration '_buildTabBar' isn't referenced. Try removing the declaration of '_buildTabBar' • lib/screens/home/brands/iquote/iquote_market_screen.dart:246:10 • unused_element
+warning • The declaration '_matchesBroaderCategory' isn't referenced. Try removing the declaration of '_matchesBroaderCategory' • lib/screens/home/brands/iquote/iquote_market_screen.dart:329:8 • unused_element
+warning • Unused import: 'package:flutter_svg/svg.dart'. Try removing the import directive • lib/screens/home/brands/iquote/iquote_order_details_screen.dart:5:8 • unused_import
+warning • The declaration '_buildVipBadge' isn't referenced. Try removing the declaration of '_buildVipBadge' • lib/screens/home/brands/iquote/iquote_position_screen.dart:853:10 • unused_element
+warning • The declaration '_activeAccountLabel' isn't referenced. Try removing the declaration of '_activeAccountLabel' • lib/screens/home/brands/iquote/iquote_position_screen.dart:908:10 • unused_element
+warning • The declaration '_openSwitchAccountSheet' isn't referenced. Try removing the declaration of '_openSwitchAccountSheet' • lib/screens/home/brands/iquote/iquote_position_screen.dart:1576:8 • unused_element
+  error • The argument type 'Object' can't be assigned to the parameter type 'DateTime'.  • lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart:212:71 • argument_type_not_assignable
+  error • The argument type 'Object' can't be assigned to the parameter type 'DateTime'.  • lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart:217:56 • argument_type_not_assignable
+  error • The named parameter 'endpoint' is required, but there's no corresponding argument. Try adding the required argument • lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart:238:34 • missing_required_argument
+  error • Too many positional arguments: 0 expected, but 1 found. Try removing the extra positional arguments, or specifying the name for named arguments • lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart:239:7 • extra_positional_arguments_could_be_named
+warning • The '!' will have no effect because the receiver can't be null. Try removing the '!' operator • lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart:347:57 • unnecessary_non_null_assertion
+
+24 issues found. (ran in 3.7s)

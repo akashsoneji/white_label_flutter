@@ -84,7 +84,7 @@ dependencies:
   # Charts
   # syncfusion_flutter_charts: ^24.2.9
   syncfusion_flutter_charts: ^31.2.5
-  
+  deriv_chart: ^0.5.0
   # WebView
   webview_flutter: ^4.7.0
   
@@ -146,6 +146,8 @@ dev_dependencies:
   mocktail: ^1.0.4
   yaml: ^3.1.2
 
+dependency_overrides:
+  intl: ^0.20.2
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

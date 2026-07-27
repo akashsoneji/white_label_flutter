@@ -1,0 +1,133 @@
+Analyzing lib...                                                
+
+warning • Unused import: 'package:crm_app/widgets/custom_toast.dart'. Try removing the import directive • lib/brands/celestial/celestial_trade_screen.dart:18:8 • unused_import
+warning • The declaration '_priceHeader' isn't referenced. Try removing the declaration of '_priceHeader' • lib/brands/meta/meta_chart_screen.dart:322:10 • unused_element
+warning • Unused import: 'package:crm_app/models/websocket_trading_response.dart'. Try removing the import directive • lib/brands/meta/meta_close_position_screen.dart:8:8 • unused_import
+warning • The declaration '_d' isn't referenced. Try removing the declaration of '_d' • lib/brands/meta/meta_close_position_screen.dart:16:8 • unused_element
+warning • The declaration '_fmt' isn't referenced. Try removing the declaration of '_fmt' • lib/brands/meta/meta_close_position_screen.dart:17:8 • unused_element
+warning • The declaration '_pillCloseVolume' isn't referenced. Try removing the declaration of '_pillCloseVolume' • lib/brands/meta/meta_close_position_screen.dart:150:10 • unused_element
+warning • Unused import: 'package:crm_app/models/websocket_trading_response.dart'. Try removing the import directive • lib/brands/meta/meta_modify_position_screen.dart:8:8 • unused_import
+warning • The declaration '_d' isn't referenced. Try removing the declaration of '_d' • lib/brands/meta/meta_modify_position_screen.dart:18:8 • unused_element
+warning • The declaration '_showAutoSlTpBottomSheet' isn't referenced. Try removing the declaration of '_showAutoSlTpBottomSheet' • lib/brands/meta/meta_modify_position_screen.dart:198:8 • unused_element
+warning • Unused import: 'widgets/meta_native_chart.dart'. Try removing the import directive • lib/brands/meta/meta_trade_screen.dart:18:8 • unused_import
+warning • The declaration '_openOrderTicket' isn't referenced. Try removing the declaration of '_openOrderTicket' • lib/brands/meta/meta_trade_screen.dart:996:8 • unused_element
+warning • Duplicate import. Try removing all but one import of the library • lib/main.dart:64:8 • duplicate_import
+warning • Unused import: 'package:flutter/gestures.dart'. Try removing the import directive • lib/screens/auth/presentation/brands/riyadex/pages/riyadex_create_account_screen.dart:1:8 • unused_import
+warning • Unused import: 'package:crm_app/services/language_service.dart'. Try removing the import directive • lib/screens/auth/presentation/brands/riyadex/pages/riyadex_create_account_screen.dart:13:8 • unused_import
+warning • The declaration '_PasswordRulesWidget' isn't referenced. Try removing the declaration of '_PasswordRulesWidget' • lib/screens/auth/presentation/brands/riyadex/pages/riyadex_create_account_screen.dart:694:7 • unused_element
+warning • Unused import: 'package:crm_app/screens/kyc/view_models/compliance_controller.dart'. Try removing the import directive • lib/screens/auth/view_models/auth_controller.dart:9:8 • unused_import
+warning • The value of the local variable 'documentsSubmitted' isn't used. Try removing the variable or using it • lib/screens/auth/view_models/auth_controller.dart:1689:15 • unused_local_variable
+warning • Unused import: '../../../core/storage/session_storage.dart'. Try removing the import directive • lib/screens/auth/view_models/riyadex_registration_controller.dart:6:8 • unused_import
+warning • The declaration '_groupingDateTime' isn't referenced. Try removing the declaration of '_groupingDateTime' • lib/screens/bonus/presentation/pages/scratch_card_screen.dart:78:17 • unused_element
+warning • The declaration '_ScratchRewardsMockSection' isn't referenced. Try removing the declaration of '_ScratchRewardsMockSection' • lib/screens/bonus/presentation/pages/scratch_card_screen.dart:1612:7 • unused_element
+warning • Duplicate import. Try removing all but one import of the library • lib/screens/copy_trading/copy_trading_main_screen.dart:2:8 • duplicate_import
+warning • The value of the field '_isLoadingDetail' isn't used. Try removing the field, or using it • lib/screens/copy_trading/investment_detail_screen.dart:47:8 • unused_field
+warning • The value of the field '_detailError' isn't used. Try removing the field, or using it • lib/screens/copy_trading/investment_detail_screen.dart:48:10 • unused_field
+warning • The declaration '_summaryDivider' isn't referenced. Try removing the declaration of '_summaryDivider' • lib/screens/copy_trading/subscription_setup_screen.dart:534:10 • unused_element
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/copy_trading/tabs/become_master_tab.dart:1:8 • unused_import
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/copy_trading/tabs/my_plans_tab.dart:2:8 • unused_import
+warning • The value of the local variable 'controller' isn't used. Try removing the variable or using it • lib/screens/copy_trading/tabs/settings_tab.dart:18:11 • unused_local_variable
+warning • A value for optional parameter 'trailing' isn't ever given. Try removing the unused parameter • lib/screens/copy_trading/tabs/settings_tab.dart:145:10 • unused_element_parameter
+warning • Unused import: '../components/trader_card.dart'. Try removing the import directive • lib/screens/copy_trading/tabs/traders_tab.dart:6:8 • unused_import
+warning • The declaration '_buildTradeDetailRow' isn't referenced. Try removing the declaration of '_buildTradeDetailRow' • lib/screens/copy_trading/trader_details_screen.dart:420:10 • unused_element
+warning • The declaration '_buildChartYAxisRow' isn't referenced. Try removing the declaration of '_buildChartYAxisRow' • lib/screens/copy_trading/trader_details_screen.dart:479:10 • unused_element
+warning • Unused import: 'package:flutter_svg/svg.dart'. Try removing the import directive • lib/screens/finance/presentation/pages/deposit_real_screen.dart:5:8 • unused_import
+warning • The value of the local variable 'isKeyboardVisible' isn't used. Try removing the variable or using it • lib/screens/finance/presentation/pages/deposit_real_screen.dart:184:16 • unused_local_variable
+warning • The declaration '_buildFeeDisplay' isn't referenced. Try removing the declaration of '_buildFeeDisplay' • lib/screens/finance/presentation/pages/deposit_real_screen.dart:408:10 • unused_element
+warning • The value of the local variable 'symbols' isn't used. Try removing the variable or using it • lib/screens/home/brands/iquote/history_filter_sheet.dart:97:11 • unused_local_variable
+warning • The declaration '_buildSymbolSection' isn't referenced. Try removing the declaration of '_buildSymbolSection' • lib/screens/home/brands/iquote/history_filter_sheet.dart:203:10 • unused_element
+warning • Unused import: 'dart:math'. Try removing the import directive • lib/screens/home/brands/iquote/iquote_chart_screen.dart:1:8 • unused_import
+warning • This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: IQuoteChartScreen._crosshairX, IQuoteChartScreen._crosshairY, IQuoteChartScreen._showCrosshair • lib/screens/home/brands/iquote/iquote_chart_screen.dart:13:7 • must_be_immutable
+  error • Can't define a const constructor for a class with non-final fields. Try making all of the fields final, or removing the keyword 'const' from the constructor • lib/screens/home/brands/iquote/iquote_chart_screen.dart:14:9 • const_constructor_with_non_final_field
+warning • The value of the local variable 'd' isn't used. Try removing the variable or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:317:11 • unused_local_variable
+warning • The value of the field '_ls' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_market_screen.dart:36:30 • unused_field
+warning • The declaration '_buildTabBar' isn't referenced. Try removing the declaration of '_buildTabBar' • lib/screens/home/brands/iquote/iquote_market_screen.dart:245:10 • unused_element
+warning • The declaration '_matchesBroaderCategory' isn't referenced. Try removing the declaration of '_matchesBroaderCategory' • lib/screens/home/brands/iquote/iquote_market_screen.dart:326:8 • unused_element
+warning • Unused import: 'package:flutter_svg/svg.dart'. Try removing the import directive • lib/screens/home/brands/iquote/iquote_order_details_screen.dart:5:8 • unused_import
+warning • The declaration '_buildVipBadge' isn't referenced. Try removing the declaration of '_buildVipBadge' • lib/screens/home/brands/iquote/iquote_position_screen.dart:853:10 • unused_element
+warning • The declaration '_activeAccountLabel' isn't referenced. Try removing the declaration of '_activeAccountLabel' • lib/screens/home/brands/iquote/iquote_position_screen.dart:908:10 • unused_element
+warning • The declaration '_openSwitchAccountSheet' isn't referenced. Try removing the declaration of '_openSwitchAccountSheet' • lib/screens/home/brands/iquote/iquote_position_screen.dart:1576:8 • unused_element
+warning • Unnecessary type check; the result is always 'false'. Try correcting the type check, or removing the type check • lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart:113:11 • unnecessary_type_check
+  error • The static method 'get' can't be accessed through an instance. Try using the class 'ApiService' to access the method • lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart:183:46 • instance_access_to_static_member
+warning • Unused import: 'package:crm_app/widgets/app_svg_icon.dart'. Try removing the import directive • lib/screens/home/brands/vantage/vantage_chart_layout.dart:34:8 • unused_import
+warning • The value of the local variable 'iconColor' isn't used. Try removing the variable or using it • lib/screens/home/brands/vantage/vantage_chart_layout.dart:581:11 • unused_local_variable
+warning • The value of the local variable 'fg' isn't used. Try removing the variable or using it • lib/screens/home/brands/vantage/vantage_chart_layout.dart:872:11 • unused_local_variable
+warning • Unused import: 'package:crm_app/screens/trading/view_models/dashboard_controller.dart'. Try removing the import directive • lib/screens/home/chart_screen.dart:21:8 • unused_import
+warning • The declaration '_buildPriceTextSpans' isn't referenced. Try removing the declaration of '_buildPriceTextSpans' • lib/screens/home/chart_screen.dart:203:18 • unused_element
+warning • The declaration '_formatSpreadDiff' isn't referenced. Try removing the declaration of '_formatSpreadDiff' • lib/screens/home/chart_screen.dart:276:10 • unused_element
+warning • The declaration '_isPendingOrderValid' isn't referenced. Try removing the declaration of '_isPendingOrderValid' • lib/screens/home/chart_screen.dart:856:8 • unused_element
+warning • The declaration '_showPriceDebugInfo' isn't referenced. Try removing the declaration of '_showPriceDebugInfo' • lib/screens/home/chart_screen.dart:1063:8 • unused_element
+warning • The declaration '_testPriceAlert' isn't referenced. Try removing the declaration of '_testPriceAlert' • lib/screens/home/chart_screen.dart:1275:8 • unused_element
+warning • The declaration '_buildFlagIcon' isn't referenced. Try removing the declaration of '_buildFlagIcon' • lib/screens/home/chart_screen.dart:1325:10 • unused_element
+warning • The declaration '_buildAssetDetails' isn't referenced. Try removing the declaration of '_buildAssetDetails' • lib/screens/home/chart_screen.dart:1727:10 • unused_element
+warning • The declaration '_convertListElementsToInstruments' isn't referenced. Try removing the declaration of '_convertListElementsToInstruments' • lib/screens/home/chart_screen.dart:2025:20 • unused_element
+warning • The declaration '_showTradingOrderBottomSheet' isn't referenced. Try removing the declaration of '_showTradingOrderBottomSheet' • lib/screens/home/chart_screen.dart:2907:8 • unused_element
+warning • The declaration '_buildMarketOrderContent' isn't referenced. Try removing the declaration of '_buildMarketOrderContent' • lib/screens/home/chart_screen.dart:2987:10 • unused_element
+warning • The declaration '_executeOneClickTrade' isn't referenced. Try removing the declaration of '_executeOneClickTrade' • lib/screens/home/chart_screen.dart:3597:16 • unused_element
+warning • The declaration '_buildQuentyPendingOrder' isn't referenced. Try removing the declaration of '_buildQuentyPendingOrder' • lib/screens/home/chart_screen.dart:3841:10 • unused_element
+warning • The declaration '_buildOpenPriceInput' isn't referenced. Try removing the declaration of '_buildOpenPriceInput' • lib/screens/home/chart_screen.dart:3902:10 • unused_element
+warning • The declaration '_buildPriceInputField' isn't referenced. Try removing the declaration of '_buildPriceInputField' • lib/screens/home/chart_screen.dart:4015:10 • unused_element
+warning • The declaration '_buildPriceInput' isn't referenced. Try removing the declaration of '_buildPriceInput' • lib/screens/home/chart_screen.dart:4138:10 • unused_element
+warning • The declaration '_getMarketStatus' isn't referenced. Try removing the declaration of '_getMarketStatus' • lib/screens/home/chart_screen.dart:4753:10 • unused_element
+warning • Unused import: 'package:crm_app/widgets/app_back_button.dart'. Try removing the import directive • lib/screens/home/close_position_screen.dart:22:8 • unused_import
+warning • The '!' will have no effect because the receiver can't be null. Try removing the '!' operator • lib/screens/home/close_position_screen.dart:1053:60 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null. Try removing the '!' operator • lib/screens/home/close_position_screen.dart:1134:74 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null. Try removing the '!' operator • lib/screens/home/close_position_screen.dart:1755:52 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null. Try removing the '!' operator • lib/screens/home/close_position_screen.dart:1764:58 • unnecessary_non_null_assertion
+warning • The declaration '_vantageGlassCardDecoration' isn't referenced. Try removing the declaration of '_vantageGlassCardDecoration' • lib/screens/home/dashboard_screen.dart:64:17 • unused_element
+warning • The declaration '_buildCelestialBackButton' isn't referenced. Try removing the declaration of '_buildCelestialBackButton' • lib/screens/home/dashboard_screen.dart:224:10 • unused_element
+warning • The value of the local variable 'languageService' isn't used. Try removing the variable or using it • lib/screens/home/dashboard_screen.dart:1461:11 • unused_local_variable
+warning • The declaration '_CelestialDivider' isn't referenced. Try removing the declaration of '_CelestialDivider' • lib/screens/home/dashboard_screen.dart:2257:7 • unused_element
+warning • The declaration '_CelestialDetailRow' isn't referenced. Try removing the declaration of '_CelestialDetailRow' • lib/screens/home/dashboard_screen.dart:2272:7 • unused_element
+warning • A value for optional parameter 'valueColor' isn't ever given. Try removing the unused parameter • lib/screens/home/dashboard_screen.dart:2282:10 • unused_element_parameter
+warning • The declaration '_ActiveAccountBar' isn't referenced. Try removing the declaration of '_ActiveAccountBar' • lib/screens/home/iquote_home_screen.dart:728:7 • unused_element
+warning • Unnecessary cast. Try removing the cast • lib/screens/home/more/copytrading/explore_masters_screen.dart:178:26 • unnecessary_cast
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/home/more/copytrading/master_dashboard_screen.dart:5:8 • unused_import
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/home/more/copytrading/my_copies_screen.dart:2:8 • unused_import
+warning • Unused import: 'package:crm_app/widgets/app_svg_back_button.dart'. Try removing the import directive • lib/screens/home/more/copytrading/my_copies_screen.dart:11:8 • unused_import
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/home/more/copytrading/my_investments_screen.dart:15:8 • unused_import
+warning • Unused import: 'package:crm_app/widgets/app_svg_back_button.dart'. Try removing the import directive • lib/screens/home/more/copytrading/my_investments_screen.dart:16:8 • unused_import
+warning • A value for optional parameter 'valueColor' isn't ever given. Try removing the unused parameter • lib/screens/home/more/copytrading/my_investments_screen.dart:974:68 • unused_element_parameter
+warning • A value for optional parameter 'valueColor' isn't ever given. Try removing the unused parameter • lib/screens/home/more/copytrading/my_investments_screen.dart:1375:65 • unused_element_parameter
+warning • The '!' will have no effect because the receiver can't be null. Try removing the '!' operator • lib/screens/home/more/edit_profile_screen.dart:342:48 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null. Try removing the '!' operator • lib/screens/home/more/edit_profile_screen.dart:345:44 • unnecessary_non_null_assertion
+warning • The '!' will have no effect because the receiver can't be null. Try removing the '!' operator • lib/screens/home/more/edit_profile_screen.dart:345:67 • unnecessary_non_null_assertion
+warning • A value for optional parameter 'iconData' isn't ever given. Try removing the unused parameter • lib/screens/home/more/more_screen.dart:1614:10 • unused_element_parameter
+warning • Unused import: 'package:crm_app/widgets/app_svg_back_button.dart'. Try removing the import directive • lib/screens/home/more/pmam/pmam_become_manager_screen.dart:1:8 • unused_import
+warning • Unused import: 'package:flutter_svg/svg.dart'. Try removing the import directive • lib/screens/home/more/pmam/pmam_become_manager_screen.dart:3:8 • unused_import
+warning • Unused import: 'package:flutter_svg/svg.dart'. Try removing the import directive • lib/screens/home/more/pmam/pmam_create_plan_screen.dart:3:8 • unused_import
+warning • The value of the local variable 'accBalance' isn't used. Try removing the variable or using it • lib/screens/home/more/pmam/pmam_fund_manager_view_screen.dart:233:24 • unused_local_variable
+warning • The value of the local variable 'accNo' isn't used. Try removing the variable or using it • lib/screens/home/more/pmam/pmam_fund_manager_view_screen.dart:236:24 • unused_local_variable
+warning • The declaration '_buildFundManagersTab' isn't referenced. Try removing the declaration of '_buildFundManagersTab' • lib/screens/home/more/pmam/pmam_investor_portal_screen.dart:1026:10 • unused_element
+warning • Unused import: 'package:crm_app/widgets/app_svg_back_button.dart'. Try removing the import directive • lib/screens/home/more/pmam/pmam_manager_dashboard_screen.dart:1:8 • unused_import
+warning • Unused import: 'package:flutter_svg/svg.dart'. Try removing the import directive • lib/screens/home/more/pmam/pmam_manager_portal_screen.dart:3:8 • unused_import
+warning • Unused import: 'package:crm_app/widgets/app_back_button.dart'. Try removing the import directive • lib/screens/home/search_instruments_screen.dart:16:8 • unused_import
+warning • The value of the field '_emptyStateSvgFuture' isn't used. Try removing the field, or using it • lib/screens/home/trade_screen.dart:94:29 • unused_field
+warning • Unused import: 'chart_tab_host.dart'. Try removing the import directive • lib/screens/home/trading_main_screen.dart:18:8 • unused_import
+warning • Unused import: 'package:crm_app/screens/kyc/view_models/compliance_controller.dart'. Try removing the import directive • lib/screens/home/trading_main_screen.dart:32:8 • unused_import
+warning • The value of the field '_preChartIndex' isn't used. Try removing the field, or using it • lib/screens/home/trading_main_screen.dart:43:7 • unused_field
+warning • The value of the local variable 'documentsSubmitted' isn't used. Try removing the variable or using it • lib/screens/home/trading_main_screen.dart:349:15 • unused_local_variable
+warning • The value of the local variable 'isIquote' isn't used. Try removing the variable or using it • lib/screens/home/trading_main_screen.dart:372:11 • unused_local_variable
+warning • The value of the local variable 'isIquote' isn't used. Try removing the variable or using it • lib/screens/home/trading_main_screen.dart:418:11 • unused_local_variable
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/ib/presentation/pages/ib_dashboard_new_screen.dart:11:8 • unused_import
+warning • A value for optional parameter 'showBottomBorder' isn't ever given. Try removing the unused parameter • lib/screens/ib/presentation/pages/ib_dashboard_screen.dart:126:10 • unused_element_parameter
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/ib/presentation/pages/ib_more_screen.dart:3:8 • unused_import
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/ib/presentation/pages/ib_requests_screen.dart:3:8 • unused_import
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/ib/presentation/pages/ib_structure_screen.dart:3:8 • unused_import
+warning • Unused import: 'package:crm_app/screens/home/trading_main_screen.dart'. Try removing the import directive • lib/screens/ib/presentation/pages/my_clients_screen.dart:5:8 • unused_import
+warning • The '!' will have no effect because the receiver can't be null. Try removing the '!' operator • lib/screens/kyc/view_models/compliance_controller.dart:153:58 • unnecessary_non_null_assertion
+   info • Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause • lib/screens/trading/view_models/chart_socket_controller.dart:1009:19 • empty_catches
+   info • Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause • lib/screens/trading/view_models/trading_controller.dart:1258:21 • empty_catches
+   info • Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause • lib/screens/trading/view_models/trading_controller.dart:1326:21 • empty_catches
+   info • Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause • lib/screens/trading/view_models/trading_controller.dart:1462:19 • empty_catches
+   info • Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause • lib/screens/trading/view_models/trading_controller.dart:1525:19 • empty_catches
+   info • Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause • lib/screens/trading/view_models/trading_controller.dart:1579:19 • empty_catches
+   info • Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause • lib/screens/trading/view_models/trading_controller.dart:1635:19 • empty_catches
+   info • Empty catch block. Try adding statements to the block, adding a comment to the block, or removing the 'catch' clause • lib/screens/trading/view_models/trading_controller.dart:1805:21 • empty_catches
+warning • Returning a 'Future' without 'await' inside a try block. Try adding an 'await' • lib/services/api_service.dart:132:11 • unawaited_return_in_try_block
+warning • Returning a 'Future' without 'await' inside a try block. Try adding an 'await' • lib/services/api_service.dart:250:11 • unawaited_return_in_try_block
+warning • Returning a 'Future' without 'await' inside a try block. Try adding an 'await' • lib/services/api_service.dart:328:11 • unawaited_return_in_try_block
+warning • Returning a 'Future' without 'await' inside a try block. Try adding an 'await' • lib/services/api_service.dart:391:11 • unawaited_return_in_try_block
+warning • Unused import: 'package:crm_app/constants/text_styles.dart'. Try removing the import directive • lib/widgets/common_loading_widget.dart:2:8 • unused_import
+
+129 issues found. (ran in 4.0s)

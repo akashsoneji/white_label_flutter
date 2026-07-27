@@ -1,0 +1,26 @@
+Analyzing iquote...                                             
+
+warning • The value of the local variable 'symbols' isn't used. Try removing the variable or using it • lib/screens/home/brands/iquote/history_filter_sheet.dart:97:11 • unused_local_variable
+warning • The declaration '_buildSymbolSection' isn't referenced. Try removing the declaration of '_buildSymbolSection' • lib/screens/home/brands/iquote/history_filter_sheet.dart:203:10 • unused_element
+warning • Unused import: 'dart:math'. Try removing the import directive • lib/screens/home/brands/iquote/iquote_chart_screen.dart:1:8 • unused_import
+warning • This class (or a class that this class inherits from) is marked as '@immutable', but one or more of its instance fields aren't final: IQuoteChartScreen._crosshairX, IQuoteChartScreen._crosshairY, IQuoteChartScreen._showCrosshair • lib/screens/home/brands/iquote/iquote_chart_screen.dart:13:7 • must_be_immutable
+  error • Can't define a const constructor for a class with non-final fields. Try making all of the fields final, or removing the keyword 'const' from the constructor • lib/screens/home/brands/iquote/iquote_chart_screen.dart:14:9 • const_constructor_with_non_final_field
+warning • The value of the local variable 'd' isn't used. Try removing the variable or using it • lib/screens/home/brands/iquote/iquote_chart_screen.dart:317:11 • unused_local_variable
+warning • The value of the field '_ls' isn't used. Try removing the field, or using it • lib/screens/home/brands/iquote/iquote_market_screen.dart:36:30 • unused_field
+warning • The declaration '_buildTabBar' isn't referenced. Try removing the declaration of '_buildTabBar' • lib/screens/home/brands/iquote/iquote_market_screen.dart:245:10 • unused_element
+warning • The declaration '_matchesBroaderCategory' isn't referenced. Try removing the declaration of '_matchesBroaderCategory' • lib/screens/home/brands/iquote/iquote_market_screen.dart:326:8 • unused_element
+warning • Unused import: 'package:flutter_svg/svg.dart'. Try removing the import directive • lib/screens/home/brands/iquote/iquote_order_details_screen.dart:5:8 • unused_import
+warning • The declaration '_buildVipBadge' isn't referenced. Try removing the declaration of '_buildVipBadge' • lib/screens/home/brands/iquote/iquote_position_screen.dart:853:10 • unused_element
+warning • The declaration '_activeAccountLabel' isn't referenced. Try removing the declaration of '_activeAccountLabel' • lib/screens/home/brands/iquote/iquote_position_screen.dart:908:10 • unused_element
+warning • The declaration '_openSwitchAccountSheet' isn't referenced. Try removing the declaration of '_openSwitchAccountSheet' • lib/screens/home/brands/iquote/iquote_position_screen.dart:1576:8 • unused_element
+  error • The name '_Candle' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named '_Candle' • lib/screens/home/brands/iquote/presentation/widgets/candle_chart_painter.dart:22:14 • non_type_as_type_argument
+  error • Undefined name '_maFast'. Try correcting the name to one that is defined, or defining the name • lib/screens/home/brands/iquote/presentation/widgets/candle_chart_painter.dart:117:29 • undefined_identifier
+  error • Undefined name '_maSlow'. Try correcting the name to one that is defined, or defining the name • lib/screens/home/brands/iquote/presentation/widgets/candle_chart_painter.dart:118:29 • undefined_identifier
+  error • Undefined name '_maLong'. Try correcting the name to one that is defined, or defining the name • lib/screens/home/brands/iquote/presentation/widgets/candle_chart_painter.dart:119:29 • undefined_identifier
+warning • Unused import: 'package:crm_app/screens/home/brands/iquote/view_models/iquote_chart_controller.dart'. Try removing the import directive • lib/screens/home/brands/iquote/presentation/widgets/macd_painter.dart:3:8 • unused_import
+  error • The operator '-' can't be unconditionally invoked because the receiver can be 'null'. Try adding a null check to the target ('!') • lib/screens/home/brands/iquote/presentation/widgets/macd_painter.dart:29:24 • unchecked_use_of_nullable_value
+  error • The operator '+' can't be unconditionally invoked because the receiver can be 'null'. Try adding a null check to the target ('!') • lib/screens/home/brands/iquote/presentation/widgets/macd_painter.dart:30:37 • unchecked_use_of_nullable_value
+warning • Unnecessary type check; the result is always 'false'. Try correcting the type check, or removing the type check • lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart:113:11 • unnecessary_type_check
+  error • The static method 'get' can't be accessed through an instance. Try using the class 'ApiService' to access the method • lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart:183:46 • instance_access_to_static_member
+
+22 issues found. (ran in 3.5s)
