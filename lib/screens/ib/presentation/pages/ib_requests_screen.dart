@@ -1,6 +1,5 @@
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/constants/text_styles.dart';
-import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -25,10 +24,16 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
   @override
   void initState() {
     super.initState();
-    ibController = Get.find<IBController>();
+    if (Get.isRegistered<IBController>()) {
+      ibController = Get.find<IBController>();
+    } else {
+      ibController = Get.put(IBController());
+    }
     // Reset filter when screen initializes
     _selectedStatus = 'All';
-    _loadApprovalRequests();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadApprovalRequests();
+    });
   }
 
   Future<void> _loadApprovalRequests() async {

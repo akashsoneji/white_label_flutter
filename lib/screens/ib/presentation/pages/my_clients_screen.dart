@@ -2,7 +2,6 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'dart:async';
 
-import 'package:crm_app/screens/home/trading_main_screen.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -56,8 +55,12 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
     _selectedSubIB = null;
     _searchFocusNode.addListener(_onSearchFocusChanged);
     _tradeHistorySearchFocusNode.addListener(_onSearchFocusChanged);
-    // Load all data on screen load
-    _loadMyClientsData();
+    // Load all data on screen load after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadMyClientsData();
+      }
+    });
   }
 
   void _onSearchFocusChanged() {
@@ -453,14 +456,17 @@ class _MyClientsScreenState extends State<MyClientsScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: AppColors.backgroundLight,
         elevation: 0,
-        title: Text(
-          'My Client',
-          style: AppTextStyles.bodyText.copyWith(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
+        title: Obx(() {
+          final ibType = ibController.ibStatusResponse.value?.data?.ibType ?? 'dynamic';
+          return Text(
+            ibType == 'traditional' ? 'My Network' : 'My Client',
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          );
+        }),
         leading: IconButton(
           icon: SvgPicture.asset(
             "assets/svg/ib_dashboard/home.svg",
