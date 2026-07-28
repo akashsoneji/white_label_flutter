@@ -159,8 +159,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         child: Column(
           children: [
             _buildHeader(),
-            _buildFromRealStrip(),
-            SizedBox(height: 8.h),
+            // _buildFromRealStrip(),
+            // SizedBox(height: 8.h),
             _buildPillTabs(),
             _buildDateFilter(),
             Expanded(child: _buildBody()),

@@ -173,6 +173,7 @@ class AppColors {
   static const Color notificationBlue = Color(0xFF2196F3);
   static const Color accentGold = Color(0xFFFFB800);
   static const Color blue = Color(0xFF3478F6);
+  static const Color tabAccent = Color(0xFFF97316);
 
   // ── Divider & Border ───────────────────────────────────────────────────────
   static const Color dividerLight = Color(0xFFEAEAEA);
