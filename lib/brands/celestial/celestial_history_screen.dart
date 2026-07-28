@@ -10,13 +10,29 @@ import 'celestial_theme.dart';
 
 /// History screen — MT5-style, wired to [TradingController] trade history API.
 class CelestialHistoryScreen extends StatefulWidget {
-  const CelestialHistoryScreen({super.key});
+  /// Called every time the History tab becomes active (initial mount + each
+  /// subsequent tab-switch back to it). Used by the shell to trigger a fresh
+  /// history fetch so the list is always up-to-date when the user arrives.
+  final Future<void> Function()? onActivated;
+
+  const CelestialHistoryScreen({super.key, this.onActivated});
 
   @override
   State<CelestialHistoryScreen> createState() => _CelestialHistoryScreenState();
 }
 
 class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
+  /// Public refresh hook — wraps the controller call so the shell (or any
+  /// caller) can trigger a history re-fetch without reaching into the
+  /// controller directly. Pull-to-refresh and tab-switch both route here.
+  Future<void> refreshHistory() async {
+    try {
+      await Get.find<TradingController>().refreshTradeHistory();
+    } catch (_) {
+      // Swallow: refresh failures are non-fatal; UI keeps showing the
+      // previously-cached list.
+    }
+  }
   TradingController get _c => Get.find<TradingController>();
 
   String _periodLabel = 'Today';
@@ -224,7 +240,10 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
 
   // ── Body ──────────────────────────────────────────────────────────────────
   Widget _body(BuildContext c) {
-    return Obx(() {
+    return RefreshIndicator(
+      color: CelTheme.buyBlue,
+      onRefresh: refreshHistory,
+      child: Obx(() {
       if (_c.isLoadingHistory) {
         return Center(child: CircularProgressIndicator());
       }
@@ -270,7 +289,8 @@ class _CelestialHistoryScreenState extends State<CelestialHistoryScreen> {
           },
         ),
       );
-    });
+    }),
+    );
   }
 
   // ── Trade row ──────────────────────────────────────────────────────────────

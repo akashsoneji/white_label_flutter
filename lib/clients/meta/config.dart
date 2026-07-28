@@ -18,9 +18,9 @@ class MetaConfig extends BaseClientConfig {
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',
- apiBaseUrl: 'https://app.tenaxcode.com/api/',
- websocketUrl: 'wss://app.tenaxcode.com/trade-engine',
- chartBaseUrl: 'https://app.tenaxcode.com',
+ apiBaseUrl: 'https://app.askbidfx.com/api/',
+ websocketUrl: 'wss://app.askbidfx.com/trade-engine',
+ chartBaseUrl: 'https://app.askbidfx.com',
  useNewChart: false,
  );
 }

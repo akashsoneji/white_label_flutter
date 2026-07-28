@@ -266,7 +266,7 @@ class _MasterHeroCard extends StatelessWidget {
               ),
               child: Text(
                 'Subscribe',
-                style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, fontWeight: FontWeight.w400),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, fontWeight: FontWeight.w400,color:AppColors.whiteColor),
               ),
             ),
           ),

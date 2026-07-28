@@ -1449,7 +1449,7 @@ class _EmptyInvestmentsState extends StatelessWidget {
               icon: Icon(Icons.explore_outlined, size: 16.r),
               label: Text(
                 'Explore Masters',
-                style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w600),
+                style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w600,color: AppColors.whiteColor),
               ),
               style: ElevatedButton.styleFrom(
                 elevation: 0,

@@ -459,6 +459,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
         final model = controller.dashboardModel.value;
         final stage = model?.data?.stageCompletion;
         final completion = _calculateCompletion(stage);
+        print("object of cc is ----> $completion");
         if (completion == 100) return const SizedBox.shrink();
 
         return Container(
@@ -547,7 +548,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                   SizedBox(width: 10.w),
                   Text(
                     languageService
-                        .tr('settings_completion_pct', {'completion': '$completion'}),
+                        .tr('settings_completion_pct', {'completion': '${completion}'}),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,

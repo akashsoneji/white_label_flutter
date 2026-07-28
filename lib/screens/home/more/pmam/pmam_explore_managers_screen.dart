@@ -379,8 +379,8 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: selected
-                          ? AppColors.onColoredBackground
-                          : AppColors.textPrimary,
+                          ? AppColors.isDarkMode?AppColors.primary:AppColors.whiteColor
+                          : AppColors.textGreyLight,
                     ),
                   ),
                   SizedBox(width: 6.w),
@@ -391,7 +391,7 @@ class _PmamExploreManagersScreenState extends State<PmamExploreManagersScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: selected
-                          ? AppColors.whiteColor.withOpacity(0.25)
+                          ? AppColors.primary
                           : AppColors.background,
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -924,9 +924,11 @@ class _ManagerCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: hasInvestment
                         ? const Color(0xFF10B981)
-                        : AppColors.isDarkMode
-                        ? AppColors.primary.withValues(alpha: 0.2)
-                        : AppColors.brandPrimary,
+                        : 
+                        // AppColors.isDarkMode
+                        // ? AppColors.primary.withValues(alpha: 0.2)
+                        // : AppColors.brandPrimary,
+                        AppColors.primary,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   alignment: Alignment.center,

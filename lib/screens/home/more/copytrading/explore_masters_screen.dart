@@ -882,6 +882,7 @@ class _MasterCardHorizontal extends StatelessWidget {
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
+                        color: AppColors.whiteColor
                       ),
                     ),
                   ),
