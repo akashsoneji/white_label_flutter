@@ -6,6 +6,8 @@ import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
 import 'package:crm_app/screens/wallet/data/repositories/wallet_repository.dart';
+import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
+import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart' show Data; 
 
 // --- Models ---
 class WalletResponse {
@@ -121,6 +123,7 @@ class IbAccount {
 
 class WalletController extends GetxController {
   final WalletRepository _repo = Get.find<WalletRepository>();
+  final FinanceRepository _financeRepo = Get.find<FinanceRepository>();
   var walletId = 'PIPW008'.obs;
   var balance = ''.obs;
   var transferFromAccount = ''.obs;
@@ -149,6 +152,19 @@ class WalletController extends GetxController {
   final transferToController = TextEditingController();
   final amountController = TextEditingController(text: '0.00');
 
+  // History State
+  var isHistoryLoading = false.obs;
+  var historyTransactions = <Data>[].obs;
+  var currentPage = 1.obs;
+  var lastPage = 1.obs;
+  var totalItems = 0.obs;
+  
+  // History Filters
+  var filterDateFrom = ''.obs;
+  var filterDateTo = ''.obs;
+  var filterType = 'All Types'.obs;
+  var filterStatus = 'All Status'.obs;
+
   // Sample account options for dropdown
   final List<String> accountOptions = [
     'MT5 Account Number',
@@ -161,13 +177,8 @@ class WalletController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Set default values
-    // transferFromAccount.value = accountOptions[0];
-    // transferFromController.text = accountOptions[0];
-    // transferToController.text = accountOptions[0];
-    // amountController.text = '\$500.00';
-    // amount.value = '\$500.00';
     fetchWalletData();
+    fetchWalletHistory();
   }
 
   void selectTransferFromAccount(String account) {
@@ -527,6 +538,77 @@ class WalletController extends GetxController {
     ibAccount.refresh();
     balance.refresh();
 
-    print('WalletController: All wallet data cleared successfully');
+    print('WalletController: All data cleared.');
+  }
+
+  // --- History & Pagination Logic ---
+
+  Future<void> fetchWalletHistory({int page = 1}) async {
+    try {
+      isHistoryLoading.value = true;
+      if (page == 1) {
+        historyTransactions.clear();
+      }
+
+      final token = await SecureStorageService.getAuthToken();
+      
+      final typeQuery = filterType.value != 'All Types' ? filterType.value : '';
+      final statusQuery = filterStatus.value != 'All Status' ? filterStatus.value : '';
+      final fromQuery = filterDateFrom.value;
+      final toQuery = filterDateTo.value;
+
+      final response = await _financeRepo.getTransactions(
+        token: token ?? '',
+        page: page,
+        perPage: 10,
+        transactionType: typeQuery, // Or 'type', depending on API. The API uses transaction_type sometimes. Let's pass it to 'type' as well.
+        type: typeQuery,
+        status: statusQuery,
+        dateFrom: fromQuery,
+        dateTo: toQuery,
+      );
+
+      if (response.success && response.data != null) {
+        final data = response.data;
+        if (data['data'] != null) {
+          final List transactionsList = data['data'];
+          historyTransactions.value = transactionsList.map((e) => Data.fromJson(e)).toList();
+        }
+        
+        if (data['pagination'] != null) {
+          currentPage.value = data['pagination']['current_page'] ?? 1;
+          lastPage.value = data['pagination']['last_page'] ?? 1;
+          totalItems.value = data['pagination']['total'] ?? 0;
+        }
+      }
+    } catch (e) {
+      print("Error fetching wallet history: $e");
+    } finally {
+      isHistoryLoading.value = false;
+    }
+  }
+
+  void nextPage() {
+    if (currentPage.value < lastPage.value) {
+      fetchWalletHistory(page: currentPage.value + 1);
+    }
+  }
+
+  void prevPage() {
+    if (currentPage.value > 1) {
+      fetchWalletHistory(page: currentPage.value - 1);
+    }
+  }
+
+  void applyFilters() {
+    fetchWalletHistory(page: 1);
+  }
+
+  void clearFilters() {
+    filterDateFrom.value = '';
+    filterDateTo.value = '';
+    filterType.value = 'All Types';
+    filterStatus.value = 'All Status';
+    fetchWalletHistory(page: 1);
   }
 }

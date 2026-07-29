@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/home/brands/iquote/iquote_chart_screen.dart';
+import 'package:crm_app/screens/home/brands/iquote/view_models/iquote_chart_controller.dart';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
@@ -12,7 +13,6 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/models/socket_response.dart';
 import 'package:crm_app/routes/app_pages.dart';
-import 'package:crm_app/screens/home/chart_screen.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
@@ -450,6 +450,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
             textPrimary: textPrimary,
             textSecondary: textSecondary,
             isDark: isDark,
+            onNavigateToTab: widget.onNavigateToTab,
           );
         },
       );
@@ -532,6 +533,7 @@ class _LiveTickerCard extends StatelessWidget {
   final Color textPrimary;
   final Color textSecondary;
   final bool isDark;
+  final Function(int)? onNavigateToTab;
 
   const _LiveTickerCard({
     required this.instrument,
@@ -541,6 +543,7 @@ class _LiveTickerCard extends StatelessWidget {
     required this.textPrimary,
     required this.textSecondary,
     required this.isDark,
+    this.onNavigateToTab,
   });
 
   @override
@@ -590,10 +593,16 @@ class _LiveTickerCard extends StatelessWidget {
 
       return InkWell(
         onTap: () {
-          ChartScreen.setSelectedSymbol(sym);
-          // Get.to(() => const ChartScreen());
-          Get.to(() => IQuoteChartScreen(symbol: sym));
-
+          if (onNavigateToTab != null) {
+            onNavigateToTab!(2);
+            if (Get.isRegistered<IQuoteChartController>()) {
+              Get.find<IQuoteChartController>().symbolRx.value = sym;
+            } else {
+              Get.put(IQuoteChartController(sym));
+            }
+          } else {
+            Get.to(() => IQuoteChartScreen(symbol: sym));
+          }
         },
         borderRadius: BorderRadius.circular(12.r),
         child: Container(

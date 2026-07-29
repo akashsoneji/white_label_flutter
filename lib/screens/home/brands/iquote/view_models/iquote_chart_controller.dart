@@ -23,11 +23,36 @@ import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/services/api_service.dart';
+
+class CandleData {
+  final DateTime dateTime;
+  final double open;
+  final double high;
+  final double low;
+  final double close;
+  final double volume;
+
+  CandleData({
+    required this.dateTime,
+    required this.open,
+    required this.high,
+    required this.low,
+    required this.close,
+    required this.volume,
+  });
+}
 
 class IQuoteChartController extends GetxController {
-  IQuoteChartController(this.symbol);
+  IQuoteChartController([String? initialSymbol]) {
+    if (initialSymbol != null) {
+      symbolRx.value = initialSymbol;
+    }
+  }
 
-  final String symbol;
+  final symbolRx = 'XAUUSD.c'.obs;
+  String get symbol => symbolRx.value;
+  set symbol(String value) => symbolRx.value = value;
 
   // ── header state ────────────────────────────────────────────────────────
   final currentPrice = Rxn<double>();
@@ -37,8 +62,16 @@ class IQuoteChartController extends GetxController {
   final lastAsk = Rxn<double>();
   // Renamed from `digits` to avoid shadowing GetxController.digits.
   final priceDigits = 2.obs;
-  final period = '1M'.obs;
+  final period = '1M'.obs; // Default period
   final isLoading = false.obs;
+
+  // ── candlestick data ───────────────────────────────────────────────────
+  final chartData = <CandleData>[].obs;
+  final isChartLoading = false.obs;
+  final isLoadingOlder = false.obs;
+  final resolution = 1.obs; // Resolution in minutes (default 1M)
+  final customFromDate = Rxn<DateTime>();
+  final customToDate = Rxn<DateTime>();
 
   // ── bottom-bar counters ────────────────────────────────────────────────
   // Mirrors TradingController.marketPositionsRx / pendingPositions so the
@@ -56,30 +89,40 @@ class IQuoteChartController extends GetxController {
   TradingController get _trading => Get.find<TradingController>();
   InstrumentsController get _instruments => Get.find<InstrumentsController>();
 
+  Worker? _livePriceWorker;
+
   @override
   void onInit() {
     super.onInit();
     _hydrateInitial();
     _bindLive();
+    fetchHistoryData();
+
+    // Open positions drive the Team badge (once)
+    ever<List<TradePosition>>(
+      _trading.marketPositionsRx,
+      (_) => _refreshCounts(),
+    );
+
+    // Re-fetch and re-bind if the symbol changes!
+    ever(symbolRx, (_) {
+      _hydrateInitial();
+      _bindLive();
+      fetchHistoryData();
+    });
   }
 
   void _hydrateInitial() {
-    final quote = _instruments.priceRx(symbol.toUpperCase()).value;
+    final quote = _instruments.priceRx(symbol).value;
     _applyQuote(quote);
     _refreshCounts();
   }
 
   void _bindLive() {
-    final sym = symbol.toUpperCase();
+    _livePriceWorker?.dispose();
+    final sym = symbol;
     // Live tick stream — keeps header + chart markers + Buy/Sell pills live.
-    ever<InstrumentPrice>(_instruments.priceRx(sym), _applyQuote);
-    // Open positions drive the Team badge.
-    ever<List<TradePosition>>(
-      _trading.marketPositionsRx,
-      (_) => _refreshCounts(),
-    );
-    // pendingPositions is a plain List, so we also poll its length inside
-    // _refreshCounts() — the WS may not expose an RxList for it.
+    _livePriceWorker = ever<InstrumentPrice>(_instruments.priceRx(sym), _applyQuote);
   }
 
   void _applyQuote(InstrumentPrice? quote) {
@@ -93,7 +136,60 @@ class IQuoteChartController extends GetxController {
     priceDigits.value = quote.digits;
     lastBid.value = quote.bid;
     lastAsk.value = quote.ask;
+
+    final dayLow = quote.dayLow;
+    final changeVal = dayLow > 0 ? (quote.bid - dayLow) : 0.0;
+    final changePct = dayLow > 0 ? ((quote.bid - dayLow) / dayLow * 100) : 0.0;
+    priceChange.value = changeVal;
+    priceChangePct.value = changePct;
+
     _pushScaleMarkers(quote.bid, quote.ask, mid);
+    if (mid != null) {
+      _updateLiveCandle(mid);
+    }
+  }
+
+  void _updateLiveCandle(double price) {
+    if (chartData.isEmpty) return;
+
+    final lastCandle = chartData.last;
+    final now = DateTime.now();
+    final candleDuration = Duration(minutes: resolution.value);
+    final nextCandleTime = lastCandle.dateTime.add(candleDuration);
+
+    if (now.isBefore(nextCandleTime)) {
+      // Update the current last candle
+      final double newHigh = price > lastCandle.high ? price : lastCandle.high;
+      final double newLow = price < lastCandle.low ? price : lastCandle.low;
+
+      chartData[chartData.length - 1] = CandleData(
+        dateTime: lastCandle.dateTime,
+        open: lastCandle.open,
+        high: newHigh,
+        low: newLow,
+        close: price,
+        volume: lastCandle.volume,
+      );
+    } else {
+      // Start a new candle aligned to the resolution minutes boundary
+      final int minutesSinceEpoch = now.millisecondsSinceEpoch ~/ (60 * 1000);
+      final int alignedMinutes = (minutesSinceEpoch ~/ resolution.value) * resolution.value;
+      final alignedTime = DateTime.fromMillisecondsSinceEpoch(alignedMinutes * 60 * 1000);
+
+      final newCandle = CandleData(
+        dateTime: alignedTime,
+        open: price,
+        high: price,
+        low: price,
+        close: price,
+        volume: 0.0,
+      );
+
+      chartData.add(newCandle);
+      if (chartData.length > 1000) {
+        chartData.removeAt(0);
+      }
+    }
   }
 
   void _refreshCounts() {
@@ -118,15 +214,204 @@ class IQuoteChartController extends GetxController {
     chartAskLine.value = ask;
   }
 
+  Future<void> fetchHistoryData() async {
+    try {
+      isChartLoading.value = true;
+      final sym = symbol; // Preserve case!
+      
+      int resVal = resolution.value;
+      int countVal = 500; // Safe count of bars (fits server retention bounds)
+      
+      // Calculate from and to timestamps
+      int toEpoch = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      int fromEpoch;
+      
+      if (period.value == 'More') {
+        if (customFromDate.value == null || customToDate.value == null) {
+          isChartLoading.value = false;
+          return;
+        }
+        fromEpoch = customFromDate.value!.millisecondsSinceEpoch ~/ 1000;
+        toEpoch = customToDate.value!.millisecondsSinceEpoch ~/ 1000;
+        countVal = 1000; // Allow larger custom range requests
+      } else {
+        // Map standard timeframes to durations (fetching approx 500 bars)
+        switch (period.value) {
+          case '1m':
+            resVal = 1;
+            countVal = 1; // Default: last 1 minute (60 seconds)
+            fromEpoch = toEpoch - (countVal * 60);
+            break;
+          case '5m':
+            resVal = 5;
+            countVal = 500;
+            fromEpoch = toEpoch - (countVal * 5 * 60); // 2500 minutes ago (~41.6 hours)
+            break;
+          case '15m':
+            resVal = 15;
+            countVal = 500;
+            fromEpoch = toEpoch - (countVal * 15 * 60); // 7500 minutes ago (~5.2 days)
+            break;
+          case '30m':
+            resVal = 30;
+            countVal = 500;
+            fromEpoch = toEpoch - (countVal * 30 * 60); // 15000 minutes ago (~10.4 days)
+            break;
+          default:
+            resVal = 15;
+            countVal = 500;
+            fromEpoch = toEpoch - (countVal * 15 * 60);
+        }
+        resolution.value = resVal;
+      }
+      
+      final Map<String, String> queryParams = {
+        'symbol': sym,
+        'from': fromEpoch.toString(),
+        'to': toEpoch.toString(),
+        'count': countVal.toString(),
+        'resolution': resVal.toString(),
+      };
+      
+      print('📈 iQuote Chart: Fetching market history for $sym: $queryParams');
+      final response = await ApiService.get(
+        endpoint: 'market/history',
+        queryParameters: queryParams,
+      );
+      
+      print('📈 iQuote Chart API Success: ${response.success}, HasData: ${response.data != null}');
+      if (response.success && response.data != null) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['s'] == 'ok') {
+          final tList = data['t'] as List<dynamic>?;
+          final oList = data['o'] as List<dynamic>?;
+          final hList = data['h'] as List<dynamic>?;
+          final lList = data['l'] as List<dynamic>?;
+          final cList = data['c'] as List<dynamic>?;
+          final vList = data['v'] as List<dynamic>?;
+          
+          if (tList != null && oList != null && hList != null && lList != null && cList != null) {
+            final List<CandleData> parsed = [];
+            for (var i = 0; i < tList.length; i++) {
+              final int timestamp = (tList[i] as num).toInt();
+              final double open = (oList[i] as num).toDouble();
+              final double high = (hList[i] as num).toDouble();
+              final double low = (lList[i] as num).toDouble();
+              final double close = (cList[i] as num).toDouble();
+              final double volume = (vList != null && i < vList.length) 
+                  ? (vList[i] as num).toDouble() 
+                  : 0.0;
+              
+              parsed.add(CandleData(
+                dateTime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
+                open: open,
+                high: high,
+                low: low,
+                close: close,
+                volume: volume,
+              ));
+            }
+            chartData.value = parsed;
+            print('📈 iQuote Chart: Loaded ${parsed.length} candles.');
+          }
+        } else {
+          print('📈 iQuote Chart API response error: $data');
+        }
+      } else {
+        print('📈 iQuote Chart API failed or no response: ${response.message}');
+      }
+    } catch (e) {
+      print('📈 iQuote Chart Error fetching market history: $e');
+    } finally {
+      isChartLoading.value = false;
+    }
+  }
+
+  // ── load older history on pan-to-start ────────────────────────────────
+  Future<void> loadOlderHistory() async {
+    if (isLoadingOlder.value) return;
+    if (chartData.isEmpty) return;
+    if (symbol.isEmpty) return;
+
+    isLoadingOlder.value = true;
+    try {
+      int resVal = 1;
+      int countVal = 500;
+      final earliestMs = chartData.first.dateTime.millisecondsSinceEpoch;
+      // For resolution=1 (1-minute), step back by `countVal * 60` seconds.
+      // (Matches the multipliers used in fetchHistoryData.)
+      final fromEpoch = (earliestMs ~/ 1000) - (countVal * 60);
+      final toEpoch = (earliestMs ~/ 1000);
+
+      final queryParams = <String, String>{
+        'symbol': symbol,
+        'resolution': resVal.toString(),
+        'from': fromEpoch.toString(),
+        'to': toEpoch.toString(),
+      };
+
+      print('📈 iQuote Chart: Fetching older market history for $symbol: $queryParams');
+      final response = await ApiService.get(
+        endpoint: 'market/history',
+        queryParameters: queryParams,
+      );
+
+      if (response.success && response.data != null) {
+        final data = response.data;
+        if (data is Map<String, dynamic> && data['s'] == 'ok') {
+          final tList = data['t'] as List<dynamic>?;
+          final oList = data['o'] as List<dynamic>?;
+          final hList = data['h'] as List<dynamic>?;
+          final lList = data['l'] as List<dynamic>?;
+          final cList = data['c'] as List<dynamic>?;
+          final vList = data['v'] as List<dynamic>?;
+
+          if (tList != null && tList.isNotEmpty &&
+              oList != null && hList != null && lList != null && cList != null) {
+            final List<CandleData> older = [];
+            for (var i = 0; i < tList.length; i++) {
+              final int timestamp = (tList[i] as num).toInt();
+              // Skip if not strictly older than our current earliest.
+              if (timestamp * 1000 >= earliestMs) continue;
+              older.add(CandleData(
+                dateTime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
+                open: (oList[i] as num).toDouble(),
+                high: (hList[i] as num).toDouble(),
+                low: (lList[i] as num).toDouble(),
+                close: (cList[i] as num).toDouble(),
+                volume: (vList != null && i < vList.length)
+                    ? (vList[i] as num).toDouble()
+                    : 0.0,
+              ));
+            }
+            if (older.isNotEmpty) {
+              chartData.value = [...older, ...chartData];
+              print('📈 iQuote Chart: Prepended ${older.length} older candles.');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('📈 iQuote Chart Error loading older history: $e');
+    } finally {
+      isLoadingOlder.value = false;
+    }
+  }
+
   // ── account helpers (typed) ────────────────────────────────────────────
   MT5Account? get activeAccount => _account.activeMT5AccountRx.value;
   bool get isDemoAccount =>
       activeAccount == null || activeAccount!.isDemoAccount;
 
   // ── period selector ────────────────────────────────────────────────────
-  static const List<String> kPeriods = ['1M', '5M', '15M', '30M', 'More'];
+  static const List<String> kPeriods = ['1m', '5m', '15m', '30m', 'More'];
   void changePeriod(String p) {
-    if (kPeriods.contains(p)) period.value = p;
+    if (kPeriods.contains(p)) {
+      period.value = p;
+      if (p != 'More') {
+        fetchHistoryData();
+      }
+    }
   }
 
   // ── order placement ───────────────────────────────────────────────────

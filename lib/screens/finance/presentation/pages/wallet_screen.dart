@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -88,18 +89,10 @@ class _WalletScreenState extends State<WalletScreen> {
                   // Divider
                   _buildDivider(),
 
-                  SizedBox(height: 32.h),
+                  SizedBox(height: 16.h),
 
-                  Padding(
-                    padding: RTLHelper.getRTLPadding(left: 24.w, right: 24.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /// Transfer Section
-                        // _buildTransferSection(),
-                      ],
-                    ),
-                  ),
+                  // Wallet History Section
+                  _buildWalletHistorySection(),
                 ],
               ),
             ),
@@ -874,6 +867,359 @@ class _SingleDecimalTextFormatter extends TextInputFormatter {
           parts[0] + (parts.length > 1 ? '.${parts.sublist(1).join('')}' : '');
     }
     return clean;
+  }
+
+  // --- Wallet History Section ---
+
+  Widget _buildWalletHistorySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: Text(
+            'History Filters',
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        SizedBox(height: 12.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: _buildFilters(),
+        ),
+        SizedBox(height: 24.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          child: _buildHistoryList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilters() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildFilterDropdown(
+                label: 'Type',
+                value: controller.filterType.value,
+                options: ['All Types', 'Deposit', 'Withdrawal', 'Transfer'],
+                onChanged: (val) {
+                  if (val != null) controller.filterType.value = val;
+                },
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _buildFilterDropdown(
+                label: 'Status',
+                value: controller.filterStatus.value,
+                options: ['All Status', 'Approved', 'Pending', 'Rejected'],
+                onChanged: (val) {
+                  if (val != null) controller.filterStatus.value = val;
+                },
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              onPressed: controller.clearFilters,
+              child: Text(
+                'Clear',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            ElevatedButton(
+              onPressed: controller.applyFilters,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              child: Text(
+                'Apply Filters',
+                style: TextStyle(color: Colors.white, fontSize: 12.sp),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterDropdown({
+    required String label,
+    required String value,
+    required List<String> options,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Obx(() => Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              isExpanded: true,
+              value: options.contains(value) ? value : options.first,
+              items: options.map((opt) {
+                return DropdownMenuItem(
+                  value: opt,
+                  child: Text(opt, style: TextStyle(fontSize: 12.sp)),
+                );
+              }).toList(),
+              onChanged: onChanged,
+            ),
+          ),
+        ));
+  }
+
+  Widget _buildHistoryList() {
+    return Obx(() {
+      if (controller.isHistoryLoading.value && controller.historyTransactions.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(20.h),
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        );
+      }
+
+      if (controller.historyTransactions.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.all(30.h),
+            child: Text(
+              'No transactions found',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp),
+            ),
+          ),
+        );
+      }
+
+      return Column(
+        children: [
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: controller.historyTransactions.length,
+            separatorBuilder: (_, __) => SizedBox(height: 12.h),
+            itemBuilder: (context, index) {
+              final tx = controller.historyTransactions[index];
+              return _buildTransactionCard(tx);
+            },
+          ),
+          SizedBox(height: 20.h),
+          _buildPagination(),
+        ],
+      );
+    });
+  }
+
+  Widget _buildTransactionCard(dynamic tx) {
+    final bool isApproved = tx.status?.toLowerCase() == 'approved';
+    final bool isDeposit = tx.transactionType?.toLowerCase() == 'deposit';
+    final String amountText = tx.amount?.toString() ?? '0.00';
+    
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark 
+            ? const Color(0xFF1E293B) 
+            : Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: isDeposit ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Text(
+                  tx.transactionType?.toUpperCase() ?? 'UNKNOWN',
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                    color: isDeposit ? Colors.green : Colors.orange,
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: isApproved ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Text(
+                  tx.status?.toUpperCase() ?? 'PENDING',
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                    color: isApproved ? Colors.green : Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tx.referenceNumber ?? 'N/A',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    tx.createdAtIso != null 
+                        ? DateFormat('MMM dd, yyyy hh:mm a').format(DateTime.tryParse(tx.createdAtIso!)?.toLocal() ?? DateTime.now())
+                        : (tx.createdAt ?? ''),
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                (isDeposit ? '+' : '-') + amountText,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  color: isDeposit ? Colors.green : Colors.red,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Divider(color: Colors.grey.withOpacity(0.2)),
+          SizedBox(height: 8.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Account',
+                      style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary),
+                    ),
+                    Text(
+                      tx.mt5AccountId ?? 'Wallet',
+                      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Method',
+                      style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary),
+                    ),
+                    Text(
+                      tx.paymentMethod ?? 'N/A',
+                      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                      textAlign: TextAlign.right,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPagination() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Showing page ${controller.currentPage.value} of ${controller.lastPage.value}',
+          style: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
+        ),
+        Row(
+          children: [
+            InkWell(
+              onTap: controller.currentPage.value > 1 ? controller.prevPage : null,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: controller.currentPage.value > 1 ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Text(
+                  'Prev',
+                  style: TextStyle(
+                    color: controller.currentPage.value > 1 ? AppColors.primary : Colors.grey,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            InkWell(
+              onTap: controller.currentPage.value < controller.lastPage.value ? controller.nextPage : null,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: controller.currentPage.value < controller.lastPage.value ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Text(
+                  'Next',
+                  style: TextStyle(
+                    color: controller.currentPage.value < controller.lastPage.value ? AppColors.primary : Colors.grey,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }
 

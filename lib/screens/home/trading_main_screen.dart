@@ -1,6 +1,8 @@
 import 'iquote_home_screen.dart';
 import 'brands/iquote/iquote_market_screen.dart';
 import 'brands/iquote/iquote_position_screen.dart';
+import 'brands/iquote/iquote_chart_screen.dart';
+import 'brands/iquote/view_models/iquote_chart_controller.dart';
 import 'dart:async';
 
 
@@ -68,8 +70,18 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   // Tenax/default: switch to chart tab and set symbol.
   void _switchToChartTab(String symbol) {
     try {
-      _onTabChanged(1);
-      ChartScreen.setSelectedSymbol(symbol);
+      final isIquote = FlavorConfig.usesIquoteUi();
+      if (isIquote) {
+        _onTabChanged(2); // Charts tab is index 2
+        if (Get.isRegistered<IQuoteChartController>()) {
+          Get.find<IQuoteChartController>().symbolRx.value = symbol;
+        } else {
+          Get.put(IQuoteChartController(symbol));
+        }
+      } else {
+        _onTabChanged(1);
+        ChartScreen.setSelectedSymbol(symbol);
+      }
     } catch (e) {
       print('🚨 TradingMainScreen: Error switching to chart tab: $e');
     }
@@ -86,7 +98,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     final arguments = Get.arguments;
     if (arguments != null && arguments is int) {
       // If argument is a valid tab index, set it (vantage: 0-4, default: 0-4)
-      final maxIndex = isIquote ? 3 : (_isVantage ? 4 : 4);
+      final maxIndex = isIquote ? 4 : (_isVantage ? 4 : 4);
       if (arguments >= 0 && arguments <= maxIndex) {
         _currentIndex = arguments;
         print('TradingMainScreen: Initial tab set to index $arguments');
@@ -98,13 +110,13 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     if (isIquote) {
       _screens = [
         KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged)), // 0. Home
-        // 1. Markets — redesigned Iquote-style market screen
         KeepAliveWrapper(child: IquoteMarketScreen(onNavigateToChart: (sym) {
           _symbolSelectionService.setSymbol(sym);
           _switchToChartTab(sym);
-        })),
-        KeepAliveWrapper(child: IQuotePositionScreen(onNavigateToChart: _switchToChartTab)), // 2. Position
-        const KeepAliveWrapper(child: MoreScreen()), // 3. Assets
+        })), // 1. Markets
+        KeepAliveWrapper(child: IQuoteChartScreen()), // 2. Charts
+        KeepAliveWrapper(child: IQuotePositionScreen(onNavigateToChart: _switchToChartTab)), // 3. Position
+        const KeepAliveWrapper(child: MoreScreen()), // 4. Assets
       ];
     } else if (_isVantage) {
       // Vantage 5-tab layout (as of 2026-07-09):
@@ -240,9 +252,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
     // Vantage 5-tab layout: Prices(0), Chart(1), Markets(2), Accounts(3), Settings(4).
     final isIquote = FlavorConfig.usesIquoteUi();
-    final tradeIndex = isIquote ? 2 : (_isVantage ? 2 : 2);
+    final tradeIndex = isIquote ? -1 : (_isVantage ? 2 : 2);
     final dashboardIndex = isIquote ? 0 : (_isVantage ? 3 : 3);
-    final moreIndex = isIquote ? 3 : (_isVantage ? 4 : 4);
+    final moreIndex = isIquote ? 4 : (_isVantage ? 4 : 4);
 
     // Vantage UI brands (pipze, baazex, gtxprime, kantara, skyriss,
     // telifox, tenax, vantage): The Chart tab is now handled directly in the PageView
