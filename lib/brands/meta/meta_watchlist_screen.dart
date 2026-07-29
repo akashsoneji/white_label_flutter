@@ -29,10 +29,15 @@ class MetaWatchlistScreen extends StatefulWidget {
   /// row itself). The shell is expected to switch to the Chart tab.
   final ValueChanged<ListElement>? onOpenChart;
 
+  /// Called when the user taps the hamburger icon in the top-left.
+  /// The shell is expected to switch to the Settings tab.
+  final VoidCallback? onHamburgerTap;
+
   const MetaWatchlistScreen({
     super.key,
     this.onOpenNewOrder,
     this.onOpenChart,
+    this.onHamburgerTap,
   });
 
   @override
@@ -150,7 +155,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
             icon: Icon(Icons.menu,
                 color: MetaTheme.mainText(c), size: 24.sp),
             onPressed: () {
-              Scaffold.of(c).openDrawer();
+              widget.onHamburgerTap?.call();
             },
           ),
           SizedBox(width: 4.w),

@@ -49,9 +49,9 @@ brands:
  splashColor: "#24324D"
  launcherBackground: "#24324D"
  urls:
- api: "https://app.askbidfx.com/api/"
- websocket: "wss://app.askbidfx.com/trade-engine"
- chart: "https://app.askbidfx.com"
+ api: "https://dev.tenaxcodecrm.com/api/"
+ websocket: "wss://dev.tenaxcodecrm.com/trade-engine"
+ chart: "https://dev.tenaxcodecrm.com"
  assets:
  appIcon: "assets/brands/celestial/icon.png"
  logo: "assets/brands/celestial/logo.svg"
@@ -160,9 +160,9 @@ brands:
  splashColor: "#3283ff"
  launcherBackground: "#3283ff"
  urls:
- api: "https://app.askbidfx.com/api/"
- websocket: "wss://app.askbidfx.com/trade-engine"
- chart: "https://app.askbidfx.com"
+ api: "https://dev.tenaxcodecrm.com/api/"
+ websocket: "wss://dev.tenaxcodecrm.com/trade-engine"
+ chart: "https://dev.tenaxcodecrm.com"
  assets:
  appIcon: "assets/brands/meta/icon.png"
  logo: "assets/brands/meta/logo.svg"

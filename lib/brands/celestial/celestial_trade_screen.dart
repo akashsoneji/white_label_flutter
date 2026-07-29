@@ -529,9 +529,8 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
 
     Future<void> closeWith(List<TradePosition> list) async {
       Navigator.pop(ctx);
-      for (final p in list) {
-        await _c.closePosition(p.orderId);
-      }
+      if (list.isEmpty) return;
+      await _c.closePositions(list);
     }
 
     showModalBottomSheet(

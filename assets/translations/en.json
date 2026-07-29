@@ -2476,7 +2476,7 @@
   "trading_dismiss": "Dismiss",
   "nav_tab_watchlist": "WatchList",
   "nav_tab_trade_alt": "Trade",
-  "meta_trade_label_colon": "$label:",
+  "meta_trade_label_colon": "{label}:",
   "meta_trade_column_price": "PRICE",
   "meta_trade_column_volume": "VOLUME",
   "meta_watchlist_search_btn": "Search",

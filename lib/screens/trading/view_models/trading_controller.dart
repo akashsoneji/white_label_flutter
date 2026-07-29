@@ -1195,81 +1195,26 @@ class TradingController extends GetxController {
   }
 
   Future<void> closeAllPositions({String? mt5Account}) async {
-    try {
-      _setLoading(true);
-      _clearError();
+    return _bulkClose(
+      mt5Account: mt5Account,
+      select: (_) => true,
+      summary: 'All positions closed successfully',
+    );
+  }
 
-      // Use provided account or get from first position
-      String accountToUse = mt5Account ?? '';
-      if (accountToUse.isEmpty && _marketPositions.isNotEmpty) {
-        accountToUse = _marketPositions.first.accountId;
-      }
-
-      if (accountToUse.isEmpty) {
-        _setError('No MT5 account found to close positions');
-        return;
-      }
-
-      // Get all positions for this account
-      final positionsToClose =
-          _marketPositions.where((p) => p.accountId == accountToUse).toList();
-
-      if (positionsToClose.isEmpty) {
-        _setError('No positions found to close');
-        return;
-      }
-
-      // Extract position IDs
-      final positionIds =
-          positionsToClose
-              .map((p) => int.tryParse(p.orderId))
-              .where((id) => id != null)
-              .toList();
-
-      if (positionIds.isEmpty) {
-        _setError('No valid position IDs found');
-        return;
-      }
-
-      // Call API with list of position IDs
-      final response = await _tradingRepo.closePositionByPositionId(
-        data: {'mt5_account': accountToUse, 'position_ids': positionIds},
-      );
-
-      if (response.success) {
-        // Mark as deleted to prevent websocket from re-adding them
-        for (final id in positionIds) {
-          markPositionAsDeleted(id.toString());
-        }
-
-        // Clear all market positions after successful API call
-        _marketPositions.value = [];
-        _marketPositions.refresh();
-
-        // ✅ FIX: Call update() for GetBuilder compatibility
-        update();
-
-        // Use API response message if available, otherwise use default
-        _setSuccess(response.message ?? 'All positions closed successfully');
-
-        // Play trade close sound when positions are closed successfully
-        try {
-          await AudioService.playTradeCloseSound();
-        } catch (e) {
-        }
-      } else {
-        // Use API response error message if available
-        if (response.message != null && response.message!.isNotEmpty) {
-          _setError(response.message!);
-        } else {
-          _setError('Failed to close all positions');
-        }
-      }
-    } catch (e) {
-      _setError('Failed to close all positions: $e');
-    } finally {
-      _setLoading(false);
+  /// Bulk-close a caller-supplied list of positions (used by Meta/Celestial
+  /// bottom sheets). Sends a single POST with `position_ids`.
+  Future<void> closePositions(List<TradePosition> positions) async {
+    if (positions.isEmpty) {
+      _setError('No positions found to close');
+      return;
     }
+    final mt5Account = positions.first.accountId;
+    return _bulkClose(
+      mt5Account: mt5Account,
+      select: (p) => positions.any((x) => x.orderId == p.orderId),
+      summary: 'All positions closed successfully',
+    );
   }
 
   /// Close position by position ID (more direct method)
@@ -1405,240 +1350,95 @@ class TradingController extends GetxController {
   }
 
   // New methods for closing different types of positions
-  Future<void> closeAllProfitablePositions({String? mt5Account}) async {
+  Future<void> _bulkClose({
+    required String? mt5Account,
+    required bool Function(TradePosition) select,
+    required String summary,
+  }) async {
     try {
       _setLoading(true);
       _clearError();
-
-      // Use provided account or get from first position
       String accountToUse = mt5Account ?? '';
       if (accountToUse.isEmpty && _marketPositions.isNotEmpty) {
         accountToUse = _marketPositions.first.accountId;
       }
-
       if (accountToUse.isEmpty) {
         _setError('No MT5 account found to close positions');
         return;
       }
-
-      // Get all profitable positions
-      final profitablePositions =
-          _marketPositions.where((p) => p.profitLoss > 0).toList();
-
-      // Close each profitable position
-      for (final position in profitablePositions) {
-        final response = await _tradingRepo.closePositionByPositionId(
-          data: {
-            'mt5_account': accountToUse,
-            'position_id': int.parse(position.orderId),
-          },
-        );
-
-        if (!response.success) {
-          _setError(
-            'Failed to close some profitable positions: ${response.message}',
-          );
-          return;
+      final positionsToClose =
+          _marketPositions
+              .where((p) => p.accountId == accountToUse && select(p))
+              .toList();
+      if (positionsToClose.isEmpty) {
+        _setError('No positions found to close');
+        return;
+      }
+      final positionIds =
+          positionsToClose
+              .map((p) => int.tryParse(p.orderId))
+              .whereType<int>()
+              .toList();
+      if (positionIds.isEmpty) {
+        _setError('No valid position IDs found');
+        return;
+      }
+      final response = await _tradingRepo.closePositionByPositionId(
+        data: {'mt5_account': accountToUse, 'position_ids': positionIds},
+      );
+      if (response.success) {
+        for (final id in positionIds) {
+          markPositionAsDeleted(id.toString());
         }
-      }
-
-      // Remove all profitable positions from local list
-      for (final position in profitablePositions) {
-        markPositionAsDeleted(position.orderId);
-      }
-
-      _marketPositions.value =
-          _marketPositions.where((p) => p.profitLoss <= 0).toList();
-      _marketPositions.refresh();
-
-      // ✅ FIX: Call update() for GetBuilder compatibility
-      update();
-
-      _setSuccess('All profitable positions closed successfully');
-
-      // Play trade close sound when positions are closed successfully
-      try {
-        await AudioService.playTradeCloseSound();
-      } catch (e) {
+        _marketPositions.removeWhere(
+          (p) => p.accountId == accountToUse,
+        );
+        _marketPositions.refresh();
+        update();
+        _setSuccess(response.message ?? summary);
+        try {
+          await AudioService.playTradeCloseSound();
+        } catch (e) {}
+      } else {
+        _setError(response.message ?? 'Failed to close positions');
       }
     } catch (e) {
-      _setError('Failed to close profitable positions: $e');
+      _setError('Failed to close positions: $e');
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> closeAllProfitablePositions({String? mt5Account}) async {
+    return _bulkClose(
+      mt5Account: mt5Account,
+      select: (p) => p.profitLoss > 0,
+      summary: 'All profitable positions closed successfully',
+    );
   }
 
   Future<void> closeAllLosingPositions({String? mt5Account}) async {
-    try {
-      _setLoading(true);
-      _clearError();
-
-      // Use provided account or get from first position
-      String accountToUse = mt5Account ?? '';
-      if (accountToUse.isEmpty && _marketPositions.isNotEmpty) {
-        accountToUse = _marketPositions.first.accountId;
-      }
-
-      if (accountToUse.isEmpty) {
-        _setError('No MT5 account found to close positions');
-        return;
-      }
-
-      // Get all losing positions
-      final losingPositions =
-          _marketPositions.where((p) => p.profitLoss < 0).toList();
-
-      // Close each losing position
-      for (final position in losingPositions) {
-        final response = await _tradingRepo.closePositionByPositionId(
-          data: {
-            'mt5_account': accountToUse,
-            'position_id': int.parse(position.orderId),
-          },
-        );
-
-        if (!response.success) {
-          _setError(
-            'Failed to close some losing positions: ${response.message}',
-          );
-          return;
-        }
-      }
-
-      // Remove all losing positions from local list
-      for (final position in losingPositions) {
-        markPositionAsDeleted(position.orderId);
-      }
-
-      _marketPositions.value =
-          _marketPositions.where((p) => p.profitLoss >= 0).toList();
-      _marketPositions.refresh();
-
-      // ✅ FIX: Call update() for GetBuilder compatibility
-      update();
-
-      _setSuccess('All losing positions closed successfully');
-
-      // Play trade close sound when positions are closed successfully
-      try {
-        await AudioService.playTradeCloseSound();
-      } catch (e) {
-      }
-    } catch (e) {
-      _setError('Failed to close losing positions: $e');
-    } finally {
-      _setLoading(false);
-    }
+    return _bulkClose(
+      mt5Account: mt5Account,
+      select: (p) => p.profitLoss < 0,
+      summary: 'All losing positions closed successfully',
+    );
   }
 
   Future<void> closeAllLongPositions({String? mt5Account}) async {
-    try {
-      _setLoading(true);
-      _clearError();
-
-      // Use provided account or get from first position
-      String accountToUse = mt5Account ?? '';
-      if (accountToUse.isEmpty && _marketPositions.isNotEmpty) {
-        accountToUse = _marketPositions.first.accountId;
-      }
-
-      if (accountToUse.isEmpty) {
-        _setError('No MT5 account found to close positions');
-        return;
-      }
-
-      // Get all long positions
-      final longPositions =
-          _marketPositions.where((p) => p.action == 'Buy').toList();
-
-      // Close each long position
-      for (final position in longPositions) {
-        final response = await _tradingRepo.closePositionByPositionId(
-          data: {
-            'mt5_account': accountToUse,
-            'position_id': int.parse(position.orderId),
-          },
-        );
-
-        if (!response.success) {
-          _setError('Failed to close some long positions: ${response.message}');
-          return;
-        }
-      }
-
-      // Remove all long positions from local list
-      _marketPositions.value =
-          _marketPositions.where((p) => p.action != 'Buy').toList();
-      _marketPositions.refresh();
-
-      _setSuccess('All long positions closed successfully');
-
-      // Play trade close sound when positions are closed successfully
-      try {
-        await AudioService.playTradeCloseSound();
-      } catch (e) {
-      }
-    } catch (e) {
-      _setError('Failed to close long positions: $e');
-    } finally {
-      _setLoading(false);
-    }
+    return _bulkClose(
+      mt5Account: mt5Account,
+      select: (p) => p.action == 'Buy',
+      summary: 'All long positions closed successfully',
+    );
   }
 
   Future<void> closeAllShortPositions({String? mt5Account}) async {
-    try {
-      _setLoading(true);
-      _clearError();
-
-      // Use provided account or get from first position
-      String accountToUse = mt5Account ?? '';
-      if (accountToUse.isEmpty && _marketPositions.isNotEmpty) {
-        accountToUse = _marketPositions.first.accountId;
-      }
-
-      if (accountToUse.isEmpty) {
-        _setError('No MT5 account found to close positions');
-        return;
-      }
-
-      // Get all short positions
-      final shortPositions =
-          _marketPositions.where((p) => p.action == 'Sell').toList();
-
-      // Close each short position
-      for (final position in shortPositions) {
-        final response = await _tradingRepo.closePositionByPositionId(
-          data: {
-            'mt5_account': accountToUse,
-            'position_id': int.parse(position.orderId),
-          },
-        );
-
-        if (!response.success) {
-          _setError(
-            'Failed to close some short positions: ${response.message}',
-          );
-          return;
-        }
-      }
-
-      // Remove all short positions from local list
-      _marketPositions.value =
-          _marketPositions.where((p) => p.action != 'Sell').toList();
-      _marketPositions.refresh();
-
-      _setSuccess('All short positions closed successfully');
-
-      // Play trade close sound when positions are closed successfully
-      try {
-        await AudioService.playTradeCloseSound();
-      } catch (e) {
-      }
-    } catch (e) {
-      _setError('Failed to close short positions: $e');
-    } finally {
-      _setLoading(false);
-    }
+    return _bulkClose(
+      mt5Account: mt5Account,
+      select: (p) => p.action == 'Sell',
+      summary: 'All short positions closed successfully',
+    );
   }
 
   // Helper methods to calculate totals for different position types

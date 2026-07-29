@@ -50,6 +50,11 @@ abstract class AuthService extends GetxService {
     required String newPassword,
   });
 
+  Future<ApiResponse<Map<String, dynamic>>> resetInvestorPassword({
+    required String mt5Account,
+    required String newPassword,
+  });
+
   Future<ApiResponse<Map<String, dynamic>>> changeLeverage({
     required String mt5Account,
     required int leverage,
@@ -389,6 +394,36 @@ class AuthServiceImpl extends AuthService {
       }
     } catch (e) {
       print("AuthService changePassword error: ${e.toString()}");
+      return ApiResponse.error('Network error: $e');
+    }
+  }
+
+  // ==================== RESET INVESTOR PASSWORD ====================
+  @override
+  Future<ApiResponse<Map<String, dynamic>>> resetInvestorPassword({
+    required String mt5Account,
+    required String newPassword,
+  }) async {
+    try {
+      final data = {
+        'meta_account_number': mt5Account,
+        'newPassword': newPassword,
+      };
+
+      final response = await _api.post(
+        endpoint: ApiConstants.resetInvestorPassword,
+        data: data,
+      );
+
+      if (response.success && response.data != null) {
+        return ApiResponse.success(response.data);
+      } else {
+        return ApiResponse.error(
+          response.data?['message'] ?? 'Reset investor password failed',
+        );
+      }
+    } catch (e) {
+      print("AuthService resetInvestorPassword error: ${e.toString()}");
       return ApiResponse.error('Network error: $e');
     }
   }

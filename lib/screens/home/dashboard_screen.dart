@@ -2694,6 +2694,21 @@ class AccountMenuBottomSheet extends StatelessWidget {
   const AccountMenuBottomSheet({Key? key, required this.account})
     : super(key: key);
 
+  // Regex covering MT5 password complexity: 8-16 chars, must include
+  // uppercase, lowercase, digit, and a special character.
+  static final _passwordComplexityRe = RegExp(
+    r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#\$%\^&\*\(\)_\+\-=\[\]\{\};:,.<>/?\\|`~]).{8,16}$',
+  );
+
+  bool _isPasswordComplex(String pwd) =>
+      _passwordComplexityRe.hasMatch(pwd);
+
+  bool _isChangeFormValid(String newPwd, String confirmPwd) {
+    if (newPwd.isEmpty || confirmPwd.isEmpty) return false;
+    if (newPwd != confirmPwd) return false;
+    return _isPasswordComplex(newPwd);
+  }
+
   void _showMT5ChangePasswordDialog() {
     final passwordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
@@ -2703,6 +2718,20 @@ class AccountMenuBottomSheet extends StatelessWidget {
     final isLoading = false.obs;
     final obscurePassword = true.obs;
     final obscureConfirmPassword = true.obs;
+    final isValid = false.obs;
+
+    // Recompute `isValid` whenever either field changes. Enables the
+    // Change Password button only when both fields are filled, equal,
+    // and the new password satisfies the complexity rule.
+    void onPwdChanged() {
+      isValid.value = _isChangeFormValid(
+        passwordController.text,
+        confirmPasswordController.text,
+      );
+    }
+
+    passwordController.addListener(onPwdChanged);
+    confirmPasswordController.addListener(onPwdChanged);
 
     Get.dialog(
       WillPopScope(
@@ -2754,8 +2783,11 @@ class AccountMenuBottomSheet extends StatelessWidget {
                           if (value == null || value.isEmpty) {
                             return 'Password is required';
                           }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
+                          if (value.length < 8 || value.length > 16) {
+                            return 'Password must be 8-16 characters';
+                          }
+                          if (!_isPasswordComplex(value)) {
+                            return 'Must include uppercase, lowercase, number, and special character';
                           }
                           return null;
                         },
@@ -2852,10 +2884,9 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         width: double.infinity,
                         height: 46.h,
                         child: ElevatedButton(
-                          onPressed:
-                              isLoading.value
-                                  ? null
-                                  : () async {
+                          onPressed: (isLoading.value || !isValid.value)
+                              ? null
+                              : () async {
                                     if (formKey.currentState!.validate()) {
                                       isLoading.value = true;
                                       try {
@@ -2888,6 +2919,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                         );
                                       } finally {
                                         isLoading.value = false;
+                                        Get.back();
                                       }
                                     }
                                   },
@@ -2926,7 +2958,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                       width: double.infinity,
                       height: 46.h,
                       child: OutlinedButton(
-                        onPressed: () => Get.back(closeOverlays: true),
+                        onPressed: () => Get.back(),
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: AppColors.primary),
                           shape: RoundedRectangleBorder(
@@ -2950,6 +2982,344 @@ class AccountMenuBottomSheet extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Reset Investor Password — same shape as Change Master but uses
+  //  `authService.resetInvestorPassword` (endpoint
+  //  /api/user/mt5accounts/resetinvestorpassword).
+  // ---------------------------------------------------------------------------
+  void _showMT5ResetInvestorPasswordDialog() {
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final authService = Get.find<AuthService>();
+    final languageService = Get.find<LanguageService>();
+    final isLoading = false.obs;
+    final obscurePassword = true.obs;
+    final obscureConfirmPassword = true.obs;
+    final isValid = false.obs;
+
+    void onPwdChanged() {
+      isValid.value = _isChangeFormValid(
+        passwordController.text,
+        confirmPasswordController.text,
+      );
+    }
+
+    passwordController.addListener(onPwdChanged);
+    confirmPasswordController.addListener(onPwdChanged);
+
+    Get.dialog(
+      WillPopScope(
+        onWillPop: () async => false,
+        child: Dialog(
+          backgroundColor: AppColors.whiteColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          insetPadding:
+              EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 400),
+            padding: EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Text(
+                        'Reset Investor Password',
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.pureBlack,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Obx(
+                      () => RTLHelper.rtlTextField(
+                        obscureText: obscurePassword.value,
+                        decoration: InputDecoration(
+                          labelText: 'New Investor Password',
+                          hintText: 'Enter new investor password (8-16 chars)',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide:
+                                BorderSide(color: AppColors.border),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide:
+                                BorderSide(color: AppColors.border),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                                color: AppColors.primary, width: 1.5),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 14),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscurePassword.value
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: AppColors.textGrey,
+                            ),
+                            onPressed: () =>
+                                obscurePassword.value = !obscurePassword.value,
+                          ),
+                        ),
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 14.sp,
+                          color: AppColors.textPrimary,
+                        ),
+                        controller: passwordController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password is required';
+                          }
+                          if (value.length < 8 || value.length > 16) {
+                            return 'Password must be 8-16 characters';
+                          }
+                          if (!_isPasswordComplex(value)) {
+                            return 'Must include uppercase, lowercase, number, and special character';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Text(
+                        '8-16 characters with uppercase, lowercase, numbers, and special characters',
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 11.sp,
+                          color: AppColors.textGrey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Obx(
+                      () => RTLHelper.rtlTextField(
+                        obscureText: obscureConfirmPassword.value,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          hintText: 'Confirm new investor password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide:
+                                BorderSide(color: AppColors.border),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide:
+                                BorderSide(color: AppColors.border),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                                color: AppColors.primary, width: 1.5),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 14),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscureConfirmPassword.value
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: AppColors.textGrey,
+                            ),
+                            onPressed: () => obscureConfirmPassword.value =
+                                !obscureConfirmPassword.value,
+                          ),
+                        ),
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 14.sp,
+                          color: AppColors.textPrimary,
+                        ),
+                        controller: confirmPasswordController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm password';
+                          }
+                          if (value != passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    if (confirmPasswordController.text.isNotEmpty &&
+                        passwordController.text !=
+                            confirmPasswordController.text)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8, top: 4),
+                        child: Text(
+                          languageService.tr('password_mismatch_error'),
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 11.sp,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 24),
+                    Obx(
+                      () => SizedBox(
+                        width: double.infinity,
+                        height: 46.h,
+                        child: ElevatedButton(
+                          onPressed: (isLoading.value || !isValid.value)
+                              ? null
+                              : () async {
+                                  if (formKey.currentState!.validate()) {
+                                    isLoading.value = true;
+                                    try {
+                                      final response = await authService
+                                          .resetInvestorPassword(
+                                        mt5Account:
+                                            account.metaAccountNumber,
+                                        newPassword:
+                                            passwordController.text.trim(),
+                                      );
+                                      if (response.success) {
+                                        CustomToastService.showSuccess(
+                                          message:
+                                              response.data?['message'] ??
+                                                  'Investor password reset successfully',
+                                        );
+                                        Get.back(closeOverlays: true);
+                                      } else {
+                                        CustomToastService.showError(
+                                          message: response.message ??
+                                              'Failed to reset investor password',
+                                        );
+                                      }
+                                    } catch (e) {
+                                      CustomToastService.showError(
+                                          message: 'Error: $e');
+                                    } finally {
+                                      isLoading.value = false;
+                                    }
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            disabledBackgroundColor:
+                                AppColors.primary.withOpacity(0.4),
+                            foregroundColor: Colors.white,
+                            disabledForegroundColor: Colors.white70,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: isLoading.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.0,
+                                  ),
+                                )
+                              : Text(
+                                  'Reset Password',
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  //  Bottom-sheet menu giving the user a choice between changing the
+  //  master password or resetting the investor password. Mirrors the
+  //  existing Transfer / Bonus / History / Leverage sheet pattern.
+  // ---------------------------------------------------------------------------
+  void _showMT5PasswordOptionsSheet() {
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading:
+                    Icon(Icons.lock_outline, color: AppColors.primary),
+                title: Text('Change Master Password'),
+                trailing:
+                    const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Get.back();
+                  _showMT5ChangePasswordDialog();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.vpn_key_outlined,
+                    color: AppColors.primary),
+                title: Text('Reset Investor Password'),
+                trailing:
+                    const Icon(Icons.chevron_right, color: Colors.grey),
+                onTap: () {
+                  Get.back();
+                  _showMT5ResetInvestorPasswordDialog();
+                },
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
     );
   }
 
@@ -3012,17 +3382,16 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     );
                   },
                 ),
-                if (account.tradingServer.toLowerCase() == 'mt5') ...[
-                  SizedBox(height: 16),
-                  _buildMenuItem(
-                    icon: Icons.lock,
-                    label: languageService.tr('change_password'),
-                    onTap: () {
-                      Get.back(closeOverlays: true);
-                      _showMT5ChangePasswordDialog();
-                    },
-                  ),
-                ],
+                SizedBox(height: 16),
+                _buildMenuItem(
+                  icon: Icons.lock,
+                  label: languageService.tr('change_password'),
+                  onTap: () {
+                    Get.back();
+                    // Get.back(closeOverlays: true);
+                    _showMT5PasswordOptionsSheet();
+                  },
+                ),
                 if (account.leverageChangeAllowed) ...[
                   SizedBox(height: 16),
                   _buildMenuItem(

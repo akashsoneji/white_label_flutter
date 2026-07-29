@@ -54,7 +54,15 @@ class MetaTradeScreen extends StatefulWidget {
   /// "Chart" — the shell is expected to switch to the Chart tab (index 1).
   final ValueChanged<int>? onSwitchTab;
 
-  const MetaTradeScreen({super.key, this.onSwitchTab});
+  /// Called when the user taps the hamburger icon in the top-left.
+  /// The shell is expected to switch to the Settings tab (index 4).
+  final VoidCallback? onHamburgerTap;
+
+  const MetaTradeScreen({
+    super.key,
+    this.onSwitchTab,
+    this.onHamburgerTap,
+  });
 
   @override
   State<MetaTradeScreen> createState() => _MetaTradeScreenState();
@@ -296,7 +304,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.menu, color: MetaTheme.mainText(c), size: 22.sp),
-            onPressed: () => Scaffold.of(c).openDrawer(),
+            onPressed: () => widget.onHamburgerTap?.call(),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
@@ -580,7 +588,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
           children: [
             Text(
               Get.find<LanguageService>()
-                  .tr('meta_trade_label_colon', {'label': '$label'}),
+                  .tr('meta_trade_label_colon', {'label': '${label}'}),
               style: AppTextStyles.bodyText.copyWith(
                 color: subtleColor,
                 fontSize: 11.sp,
@@ -609,7 +617,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                cell('#${p.orderId}', p.orderId.toString(),
+                cell('#', p.orderId.toString(),
                     color: subtleColor),
                 cell('S / L:', fmtSlTp(p.stopLoss, p.digits),
                     color: MetaTheme.sell(c)),
@@ -742,9 +750,8 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
 
     Future<void> closeWith(List<TradePosition> list) async {
       Navigator.pop(ctx);
-      for (final p in list) {
-        await _c.closePosition(p.orderId);
-      }
+      if (list.isEmpty) return;
+      await _c.closePositions(list);
     }
 
     showModalBottomSheet(

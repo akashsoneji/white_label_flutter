@@ -32,7 +32,7 @@ new_keys = {
     'meta_trade_volume': 'Volume',
     'meta_trade_risk_management': 'Risk Management',
     'meta_trade_spread': 'Spread $spread',
-    'meta_trade_label_colon': '$label:',
+    'meta_trade_label_colon': "{label}%",
     'meta_trade_column_price': 'PRICE',
     'meta_trade_column_volume': 'VOLUME',
     # ── meta_watchlist_screen.dart ──

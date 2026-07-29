@@ -18,9 +18,9 @@ class CelestialConfig extends BaseClientConfig {
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',
- apiBaseUrl: 'https://app.askbidfx.com/api/',
- websocketUrl: 'wss://app.askbidfx.com/trade-engine',
- chartBaseUrl: 'https://app.askbidfx.com',
+ apiBaseUrl: 'https://dev.tenaxcodecrm.com/api/',
+ websocketUrl: 'wss://dev.tenaxcodecrm.com/trade-engine',
+ chartBaseUrl: 'https://dev.tenaxcodecrm.com',
  useNewChart: false,
  );
 }

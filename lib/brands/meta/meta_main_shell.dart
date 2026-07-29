@@ -29,6 +29,25 @@ class MetaMainShell extends StatefulWidget {
 class _MetaMainShellState extends State<MetaMainShell> {
   int _index = 0;
 
+  /// GlobalKey to the History screen's State so we can invoke its
+  /// `refreshHistory()` directly when the user lands on the History
+  /// tab via any path (bottom-nav tap, hamburger shortcut, deep link).
+  final GlobalKey _historyKey = GlobalKey();
+
+  /// Re-fetches history whenever the History tab becomes active. Safe
+  /// to call when the History screen is not yet mounted — the
+  /// IndexedStack keeps it alive, so this only fires once the screen
+  /// has actually been built.
+  void _refreshHistoryIfPossible() {
+    final state = _historyKey.currentState as dynamic;
+    try {
+      state?.refreshHistory();
+    } catch (_) {
+      // Defensive: if the State API ever changes, swallow rather than
+      // crash the tab switch.
+    }
+  }
+
   List<Widget> get _screens => [
     MetaWatchlistScreen(
       // "New Order" row-menu action: push the New Order screen on top.
@@ -49,6 +68,9 @@ class _MetaMainShellState extends State<MetaMainShell> {
       onOpenChart: (item) {
         setState(() => _index = 1);
       },
+      // Top-left hamburger shortcut: jump straight to the Settings tab
+      // (index 4) instead of opening the side drawer.
+      onHamburgerTap: () => setState(() => _index = 4),
     ),
     MetaChartScreen(),
     MetaTradeScreen(
@@ -56,8 +78,16 @@ class _MetaMainShellState extends State<MetaMainShell> {
       // to the Chart tab. The trade screen already sets the chart
       // socket's currentSymbol before invoking this.
       onSwitchTab: (i) => setState(() => _index = i),
+      // Top-left hamburger shortcut: jump straight to the Settings tab
+      // (index 4) instead of opening the side drawer.
+      onHamburgerTap: () => setState(() => _index = 4),
     ),
-    MetaHistoryScreen(),
+    MetaHistoryScreen(
+      key: _historyKey,
+      // Top-left hamburger shortcut: jump straight to the Settings tab
+      // (index 4) instead of opening the side drawer.
+      onHamburgerTap: () => setState(() => _index = 4),
+    ),
     MetaSettingsScreen(
       onNavigateToTab: (i) => setState(() => _index = i),
     ),
@@ -83,6 +113,18 @@ class _MetaMainShellState extends State<MetaMainShell> {
     );
   }
 
+  void _onTabTap(int i) {
+    setState(() => _index = i);
+    // Re-fetch history every time the user lands on the History tab
+    // via the bottom nav. The IndexedStack keeps the History screen
+    // alive across tab switches, so the GlobalKey's State is always
+    // available and `refreshHistory()` always fires the API.
+    // Initial mount is handled by `MetaHistoryScreen.initState` itself.
+    if (i == 3) {
+      _refreshHistoryIfPossible();
+    }
+  }
+
   Widget _buildBottomNav(BuildContext c) {
     final isDark = Theme.of(c).brightness == Brightness.dark;
     return SafeArea(
@@ -106,7 +148,7 @@ class _MetaMainShellState extends State<MetaMainShell> {
             final inactive = isDark ? const Color(0xFF65676B) : const Color(0xFF8A8D91);
             return Expanded(
               child: InkWell(
-                onTap: () => setState(() => _index = i),
+                onTap: () => _onTabTap(i),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

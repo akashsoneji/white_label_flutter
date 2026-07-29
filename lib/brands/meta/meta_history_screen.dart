@@ -14,7 +14,17 @@ import 'meta_theme.dart';
 import 'package:crm_app/services/language_service.dart';
 
 class MetaHistoryScreen extends StatefulWidget {
-  const MetaHistoryScreen({super.key});
+  /// Called every time the History tab becomes active (initial mount +
+  /// each subsequent tab-switch back to it). The shell uses it to
+  /// trigger a fresh history fetch so the list is always up-to-date
+  /// when the user arrives.
+  final Future<void> Function()? onActivated;
+
+  /// Called when the user taps the hamburger icon in the top-left.
+  /// The shell is expected to switch to the Settings tab (index 4).
+  final VoidCallback? onHamburgerTap;
+
+  const MetaHistoryScreen({super.key, this.onActivated, this.onHamburgerTap});
 
   @override
   State<MetaHistoryScreen> createState() => _MetaHistoryScreenState();
@@ -58,8 +68,16 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
       }
     });
 
+    // Initial fetch — populate the list the first time the History
+    // tab is rendered. Subsequent tab-switches back to this screen
+    // route through `refreshHistory()` (see `MetaHistoryScreen.onActivated`).
     WidgetsBinding.instance.addPostFrameCallback((_) => _refresh());
   }
+
+  /// Public refresh hook called by the shell when the user taps the
+  /// History tab in the bottom nav. Re-runs the same query as a
+  /// pull-to-refresh so the list is always fresh on arrival.
+  Future<void> refreshHistory() => _refresh();
 
   @override
   void dispose() {
@@ -257,7 +275,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.menu, color: MetaTheme.mainText(context), size: 24),
-            onPressed: () => _openDrawer(context),
+                    onPressed: () => widget.onHamburgerTap?.call(),
           ),
           Expanded(
             child: Column(

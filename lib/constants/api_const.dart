@@ -18,6 +18,8 @@ class ApiConstants {
   static const String resetPasswordWithOTP = '${ajax}password/reset';
   static const String deleteAccount = '${ajax}settings/delete-account';
   static const String changePassword = '${ajax}mt5accounts/changepassword';
+  static const String resetInvestorPassword =
+      '${ajax}mt5accounts/resetinvestorpassword';
   static const String changeLeverage = '${ajax}mt5accounts/changeleverage';
   static const String changeUserPassword = '${ajax}settings/change-password';
   static const String googleOtpGenerate = '${ajax}settings/google-otp/generate';
