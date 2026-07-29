@@ -94,8 +94,33 @@ class FinanceRepositoryImpl implements FinanceRepository {
   }
 
   @override
-  Future<ApiResponse> getTransactions({required String token}) {
-    return _api.get(endpoint: ApiConstants.getTransactions, token: token);
+  Future<ApiResponse> getTransactions({
+    required String token,
+    int? page,
+    int? perPage,
+    String? transactionType,
+    String? dateFrom,
+    String? dateTo,
+    String? type,
+    String? status,
+    String? t,
+  }) {
+    final Map<String, dynamic> queryParams = {
+      'page': (page ?? 1).toString(),
+      'perPage': (perPage ?? 10).toString(),
+      'transactionType': transactionType ?? '',
+      'dateFrom': dateFrom ?? '',
+      'dateTo': dateTo ?? '',
+      'type': type ?? '',
+      'status': status ?? '',
+      '_t': t ?? DateTime.now().millisecondsSinceEpoch.toString(),
+    };
+
+    return _api.get(
+      endpoint: ApiConstants.getTransactions,
+      queryParameters: queryParams,
+      token: token,
+    );
   }
 
   @override

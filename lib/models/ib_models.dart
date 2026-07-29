@@ -57,8 +57,8 @@ class IBStatusData {
 }
 
 class IBStageCompletion {
-  String? mobileVerified;
-  String? emailVerified;
+  bool? mobileVerified;
+  bool? emailVerified;
   bool? personalDetails;
   bool? identityVerified;
   bool? addressProofVerified;

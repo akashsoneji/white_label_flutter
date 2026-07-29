@@ -12,7 +12,8 @@ import 'package:intl/intl.dart';
 import 'commission_group_form_screen.dart';
 
 class IBStructureScreen extends StatefulWidget {
-  const IBStructureScreen({super.key});
+  final bool isEmbedded;
+  const IBStructureScreen({super.key, this.isEmbedded = false});
 
   @override
   State<IBStructureScreen> createState() => _IBStructureScreenState();
@@ -105,24 +106,26 @@ class _IBStructureScreenState extends State<IBStructureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: AppColors.tradeBackgroundCenterColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: SvgPicture.asset("assets/svg/ib_dashboard/home.svg", colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn)),
-          onPressed: () => Get.offAllNamed(AppPages.TRADING),
-        ),
-        title: Text(
-          'IB Structure',
-          style: AppTextStyles.bodyText.copyWith(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      appBar: widget.isEmbedded
+          ? null
+          : AppBar(
+              scrolledUnderElevation: 0,
+              backgroundColor: AppColors.tradeBackgroundCenterColor,
+              elevation: 0,
+              leading: IconButton(
+                icon: SvgPicture.asset("assets/svg/ib_dashboard/home.svg", colorFilter: ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn)),
+                onPressed: () => Get.offAllNamed(AppPages.TRADING),
+              ),
+              title: Text(
+                'IB Structure',
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              centerTitle: true,
+            ),
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         backgroundColor: AppColors.whiteColor,

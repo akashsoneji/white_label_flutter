@@ -57,32 +57,39 @@ class IbBottomNavigation extends StatelessWidget {
                       "assets/svg/ib_dashboard/dashboard_bold.svg",
                       "Dashboard",
                     ),
-                    _buildNavItem(
-                      1,
-                      "assets/svg/ib_dashboard/coin.svg",
-                      "assets/svg/ib_dashboard/coin_bold.svg",
-                      "My Structure",
-                    ),
-                    if (!isTraditional)
+                    if (isTraditional)
                       _buildNavItem(
-                        2,
+                        1,
                         "assets/svg/ib_dashboard/coin.svg",
                         "assets/svg/ib_dashboard/coin_bold.svg",
-                        "IB Structure",
+                        "My Structure",
+                      )
+                    else
+                      _buildNavItem(
+                        1,
+                        "assets/svg/ib_dashboard/coin.svg",
+                        "assets/svg/ib_dashboard/coin_bold.svg",
+                        "Structure",
                       ),
                     _buildNavItem(
-                      isTraditional ? 2 : 3,
+                      2,
                       "assets/svg/ib_dashboard/myclient.svg",
                       "assets/svg/ib_dashboard/myclient_bold.svg",
                       isTraditional ? "My Network" : "Clients",
                     ),
                     if (!isTraditional)
                       _buildNavItem(
-                        4,
+                        3,
                         "assets/svg/ib_dashboard/marketing.svg",
                         "assets/svg/ib_dashboard/marketing_bold.svg",
                         "Requests",
                       ),
+                    _buildNavItem(
+                      isTraditional ? 3 : 4,
+                      "assets/svg/ib_dashboard/coin.svg",
+                      "assets/svg/ib_dashboard/coin_bold.svg",
+                      "Transfer Comm",
+                    ),
                   ],
                 ),
               ),

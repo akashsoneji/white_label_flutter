@@ -24,14 +24,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:intl/intl.dart';
 
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/theme_service.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/account_header_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/screens/home/brands/iquote/iquote_position_screen.dart';
 import 'package:crm_app/screens/home/brands/iquote/view_models/iquote_chart_controller.dart';
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
+import 'package:crm_app/widgets/chart_inapp_webview.dart';
+import 'package:crm_app/flavor_config.dart';
 
 // ── palette ─────────────────────────────────────────────────────────────────
 // MA-line + bullish/bearish colors stay the same across themes — they're
@@ -115,14 +121,14 @@ bool _isDark(BuildContext context) {
 }
 
 class IQuoteChartScreen extends StatelessWidget {
-  const IQuoteChartScreen({super.key, required this.symbol});
+  const IQuoteChartScreen({super.key, this.symbol});
 
-  final String symbol;
+  final String? symbol;
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<IQuoteChartController>(
-      init: IQuoteChartController(symbol),
+      init: IQuoteChartController(symbol ?? 'XAUUSD.c'),
       builder: (ctrl) {
         final palette = _ChartPalette.of(context);
         return Scaffold(
@@ -135,7 +141,7 @@ class IQuoteChartScreen extends StatelessWidget {
                 _SymbolRow(ctrl: ctrl, palette: palette),
                 _Toolbar(ctrl: ctrl, palette: palette),
                 _MaStrip(ctrl: ctrl, palette: palette),
-                Expanded(child: _ChartPlaceholder(palette: palette)),
+                Expanded(child: _CandleChart(ctrl: ctrl, palette: palette)),
                 _BottomBar(ctrl: ctrl, palette: palette),
               ],
             ),
@@ -159,13 +165,10 @@ class _Header extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       child: Row(
         children: [
-          AppBackButton(
-            onPressed: () => Get.back<void>(),
-          ),
-          SizedBox(width: 8.w),
-          _AccountPill(ctrl: ctrl),
-          const Spacer(),
-          // Live account balance in the top-right (mirrors dashboard top bar).
+          if (Navigator.canPop(context))
+            AppBackButton(onPressed: () => Get.back<void>())
+          else
+            SizedBox(width: 12.w),
           Expanded(
             child: AccountHeaderWidget(
               showSearchIcon: false,
@@ -173,11 +176,18 @@ class _Header extends StatelessWidget {
               layoutStyle: AccountHeaderLayoutStyle.defaultLayout,
             ),
           ),
-          SizedBox(width: 4.w),
-          Icon(
-            Icons.info_outline,
-            size: 20.sp,
-            color: AppColors.textPrimary,
+          SizedBox(width: 8.w),
+          IconButton(
+            icon: Icon(
+              Icons.fullscreen_outlined,
+              color: AppColors.textPrimary,
+              size: 26.sp,
+            ),
+            onPressed: () {
+              Get.to(() => IQuoteFullscreenChartScreen(symbol: ctrl.symbol));
+            },
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
         ],
       ),
@@ -193,9 +203,7 @@ class _AccountPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       final isDemo = ctrl.isDemoAccount;
-      final color = isDemo
-          ? const Color(0xFF3B82F6)
-          : const Color(0xFFEF4444);
+      final color = isDemo ? const Color(0xFF3B82F6) : const Color(0xFFEF4444);
       final label = isDemo ? 'DEMO' : 'LIVE';
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
@@ -237,58 +245,78 @@ class _SymbolRow extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
       child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 18.w,
-                height: 12.h,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E40AF),
-                  borderRadius: BorderRadius.circular(1.r),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _showFavoritesBottomSheet(context, ctrl),
+            child: Row(
+              children: [
+                Container(
+                  width: 18.w,
+                  height: 12.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E40AF),
+                    borderRadius: BorderRadius.circular(1.r),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text('🇺🇸', style: TextStyle(fontSize: 11.sp)),
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  '🇺🇸',
-                  style: TextStyle(fontSize: 11.sp),
+                SizedBox(width: 6.w),
+                Obx(
+                  () => Text(
+                    ctrl.symbol.replaceAll('.c', '').toUpperCase(),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(width: 6.w),
-              Text(
-                ctrl.symbol.toUpperCase(),
-                style: TextStyle(
+                SizedBox(width: 4.w),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 18.sp,
                   color: AppColors.textPrimary,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
                 ),
-              ),
-              SizedBox(width: 4.w),
-              Icon(
-                Icons.keyboard_arrow_down,
-                size: 18.sp,
-                color: AppColors.textPrimary,
-              ),
-            ],
+              ],
+            ),
           ),
           const Spacer(),
-          _CircleIcon(
-            svg: 'assets/svg/chart_screen_icon/bell_icon.svg',
-            onTap: () {/* notifications list — wired later */},
-          ),
-          SizedBox(width: 8.w),
-          _CircleIcon(
-            svg: 'assets/svg/calculator.svg',
-            onTap: () {/* open lot calculator — wired later */},
-          ),
-          SizedBox(width: 8.w),
-          _CircleIcon(
-            svg: 'assets/svg/chart_screen_icon/beg_icon.svg',
-            onTap: () {/* period presets sheet — wired later */},
-          ),
-          SizedBox(width: 8.w),
-          _CircleIcon(
-            svg: 'assets/svg/menu.svg',
-            onTap: () {/* chart settings sheet — wired later */},
-          ),
+          // Obx(() {
+          //   final bid = ctrl.lastBid.value;
+          //   final digits = ctrl.priceDigits.value;
+          //   final pct = ctrl.priceChangePct.value ?? 0.0;
+          //   final isUp = pct >= 0;
+          //   final changeColor = isUp ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
+          //   final sign = isUp ? '+' : '';
+
+          //   if (bid == null || bid == 0) {
+          //     return const SizedBox.shrink();
+          //   }
+
+          //   return Column(
+          //     crossAxisAlignment: CrossAxisAlignment.end,
+          //     mainAxisSize: MainAxisSize.min,
+          //     children: [
+          //       Text(
+          //         bid.toStringAsFixed(digits),
+          //         style: TextStyle(
+          //           color: AppColors.textPrimary,
+          //           fontSize: 16.sp,
+          //           fontWeight: FontWeight.w800,
+          //         ),
+          //       ),
+          //       SizedBox(height: 2.h),
+          //       Text(
+          //         '$sign${pct.toStringAsFixed(2)}%',
+          //         style: TextStyle(
+          //           color: changeColor,
+          //           fontSize: 11.sp,
+          //           fontWeight: FontWeight.w600,
+          //         ),
+          //       ),
+          //     ],
+          //   );
+          // }),
         ],
       ),
     );
@@ -340,35 +368,37 @@ class _Toolbar extends StatelessWidget {
             (p) => Padding(
               padding: EdgeInsets.only(right: 14.w),
               child: GestureDetector(
-                onTap: () => ctrl.changePeriod(p),
+                onTap: () {
+                  if (p == 'More') {
+                    _showCustomRangePicker(context, ctrl);
+                  } else {
+                    ctrl.changePeriod(p);
+                  }
+                },
                 child: Obx(() {
                   final active = ctrl.period.value == p;
                   return Text(
                     p,
                     style: TextStyle(
-                      color: active
-                          ? AppColors.textPrimary
-                          : palette.axisText,
+                      color: active ? AppColors.textPrimary : palette.axisText,
                       fontSize: 13.sp,
-                      fontWeight: active
-                          ? FontWeight.w700
-                          : FontWeight.normal,
+                      fontWeight: active ? FontWeight.w700 : FontWeight.normal,
                     ),
                   );
                 }),
               ),
             ),
           ),
-          const Spacer(),
-          Icon(
-            Icons.calendar_today_outlined,
-            size: 18.sp,
-            color: palette.axisText,
-          ),
-          SizedBox(width: 14.w),
-          Icon(Icons.tune, size: 18.sp, color: palette.axisText),
-          SizedBox(width: 14.w),
-          Icon(Icons.aspect_ratio, size: 18.sp, color: palette.axisText),
+          // const Spacer(),
+          // Icon(
+          //   Icons.calendar_today_outlined,
+          //   size: 18.sp,
+          //   color: palette.axisText,
+          // ),
+          // SizedBox(width: 14.w),
+          // Icon(Icons.tune, size: 18.sp, color: palette.axisText),
+          // SizedBox(width: 14.w),
+          // Icon(Icons.aspect_ratio, size: 18.sp, color: palette.axisText),
         ],
       ),
     );
@@ -470,8 +500,7 @@ class _ChartPlaceholder extends StatelessWidget {
                 left: 0,
                 right: 0,
                 top:
-                    MediaQuery.of(context).size.height *
-                    0 +
+                    MediaQuery.of(context).size.height * 0 +
                     (i + 1) *
                         (1 / 6.0) *
                         (MediaQuery.of(context).size.height * 0.42),
@@ -482,8 +511,7 @@ class _ChartPlaceholder extends StatelessWidget {
               return Positioned(
                 right: 8.w,
                 top:
-                    MediaQuery.of(context).size.height *
-                    0 +
+                    MediaQuery.of(context).size.height * 0 +
                     yFor(price).clamp(0.0, 1.0) *
                         (MediaQuery.of(context).size.height * 0.42) -
                     8,
@@ -498,8 +526,7 @@ class _ChartPlaceholder extends StatelessWidget {
                 left: 0,
                 right: 0,
                 top:
-                    MediaQuery.of(context).size.height *
-                    0 +
+                    MediaQuery.of(context).size.height * 0 +
                     yFor(ask).clamp(0.0, 1.0) *
                         (MediaQuery.of(context).size.height * 0.42),
                 child: Row(
@@ -530,8 +557,7 @@ class _ChartPlaceholder extends StatelessWidget {
                 left: 0,
                 right: 0,
                 top:
-                    MediaQuery.of(context).size.height *
-                    0 +
+                    MediaQuery.of(context).size.height * 0 +
                     yFor(bid).clamp(0.0, 1.0) *
                         (MediaQuery.of(context).size.height * 0.42),
                 child: Row(
@@ -609,48 +635,46 @@ class _BottomBar extends StatelessWidget {
               Row(
                 children: [
                   // Candle-type icon (left).
-                  Container(
-                    width: 36.w,
-                    height: 36.w,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: palette.sheetFieldBg,
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Icon(
-                      Icons.candlestick_chart_outlined,
-                      size: 18.sp,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  SizedBox(width: 6.w),
-                  // Team (open positions) — icon + badge only.
-                  _IconOnlyBadge(
-                    icon: Icons.group_outlined,
-                    badge: positionCount,
-                    palette: palette,
-                    onTap: () =>
-                        Get.to<void>(() => const IQuotePositionScreen()),
-                  ),
-                  SizedBox(width: 6.w),
-                  // Position (pending orders) — icon + badge only.
-                  _IconOnlyBadge(
-                    icon: Icons.assignment,
-                    badge: pendingCount,
-                    palette: palette,
-                    onTap: () =>
-                        Get.to<void>(() => const IQuotePositionScreen()),
-                  ),
-                  const SizedBox(width: 6),
+                  // Container(
+                  //   width: 36.w,
+                  //   height: 36.w,
+                  //   alignment: Alignment.center,
+                  //   decoration: BoxDecoration(
+                  //     color: palette.sheetFieldBg,
+                  //     borderRadius: BorderRadius.circular(6.r),
+                  //   ),
+                  //   child: Icon(
+                  //     Icons.candlestick_chart_outlined,
+                  //     size: 18.sp,
+                  //     color: AppColors.textPrimary,
+                  //   ),
+                  // ),
+                  // SizedBox(width: 6.w),
+                  // // Team (open positions) — icon + badge only.
+                  // _IconOnlyBadge(
+                  //   icon: Icons.group_outlined,
+                  //   badge: positionCount,
+                  //   palette: palette,
+                  //   onTap:
+                  //       () => Get.to<void>(() => const IQuotePositionScreen()),
+                  // ),
+                  // SizedBox(width: 6.w),
+                  // // Position (pending orders) — icon + badge only.
+                  // _IconOnlyBadge(
+                  //   icon: Icons.assignment,
+                  //   badge: pendingCount,
+                  //   palette: palette,
+                  //   onTap:
+                  //       () => Get.to<void>(() => const IQuotePositionScreen()),
+                  // ),
+                  // const SizedBox(width: 6),
                   Expanded(
                     flex: 5,
                     child: _ActionPill(
                       color: _kBullColor,
                       icon: Icons.trending_up,
                       label: 'Buy',
-                      price: ask != null
-                          ? ask.toStringAsFixed(d)
-                          : '—',
+                      price: ask != null ? ask.toStringAsFixed(d) : '—',
                       onTap: () => _openNewOrderSheet(context, side: 'buy'),
                     ),
                   ),
@@ -661,9 +685,7 @@ class _BottomBar extends StatelessWidget {
                       color: _kBearColor,
                       icon: Icons.trending_down,
                       label: 'Sell',
-                      price: bid != null
-                          ? bid.toStringAsFixed(d)
-                          : '—',
+                      price: bid != null ? bid.toStringAsFixed(d) : '—',
                       onTap: () => _openNewOrderSheet(context, side: 'sell'),
                     ),
                   ),
@@ -684,13 +706,15 @@ class _BottomBar extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
-      builder: (_) => _NewOrderSheet(
-        ctrl: ctrl,
-        side: side,
-        pricePreview: side == 'buy'
-            ? (ctrl.lastAsk.value ?? 0)
-            : (ctrl.lastBid.value ?? 0),
-      ),
+      builder:
+          (_) => _NewOrderSheet(
+            ctrl: ctrl,
+            side: side,
+            pricePreview:
+                side == 'buy'
+                    ? (ctrl.lastAsk.value ?? 0)
+                    : (ctrl.lastBid.value ?? 0),
+          ),
     );
   }
 }
@@ -735,17 +759,11 @@ class _IconOnlyBadge extends StatelessWidget {
                 right: -2.w,
                 top: -2.h,
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 5.w,
-                    vertical: 1.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     color: AppColors.error,
                     borderRadius: BorderRadius.circular(999.r),
-                    border: Border.all(
-                      color: palette.sheetBg,
-                      width: 1.2,
-                    ),
+                    border: Border.all(color: palette.sheetBg, width: 1.2),
                   ),
                   constraints: BoxConstraints(minWidth: 16.w),
                   alignment: Alignment.center,
@@ -855,9 +873,12 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
     super.initState();
     _volume = 1.00;
     _priceCtl = TextEditingController(
-      text: widget.pricePreview > 0
-          ? widget.pricePreview.toStringAsFixed(widget.ctrl.priceDigits.value)
-          : '',
+      text:
+          widget.pricePreview > 0
+              ? widget.pricePreview.toStringAsFixed(
+                widget.ctrl.priceDigits.value,
+              )
+              : '',
     );
     _tpCtl = TextEditingController();
     _slCtl = TextEditingController();
@@ -970,7 +991,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                             _volume = (_volume - 0.01).clamp(0.01, 99.0);
                           });
                         },
-                        icon:  Icon(Icons.remove, color: AppColors.textPrimary),
+                        icon: Icon(Icons.remove, color: AppColors.textPrimary),
                       ),
                       Expanded(
                         child: Center(
@@ -990,7 +1011,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                             _volume = (_volume + 0.01).clamp(0.01, 99.0);
                           });
                         },
-                        icon:  Icon(Icons.add, color: AppColors.textPrimary),
+                        icon: Icon(Icons.add, color: AppColors.textPrimary),
                       ),
                     ],
                   ),
@@ -998,8 +1019,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
               ),
               SizedBox(width: 8.w),
               Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   color: palette.sheetFieldBg,
                   borderRadius: BorderRadius.circular(8.r),
@@ -1029,38 +1049,44 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
           ),
           SizedBox(height: 8.h),
           Row(
-            children: _lots
-                .map(
-                  (lot) => Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 6.w),
-                      child: GestureDetector(
-                        onTap: () => setState(() => _volume = lot),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 10.h),
-                          decoration: BoxDecoration(
-                            color: (lot == _volume)
-                                ? palette.tabAccent
-                                : palette.sheetFieldBg,
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: palette.sheetFieldBorder),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            lot.toStringAsFixed(2),
-                            style: TextStyle(
-                              color: (lot == _volume)
-                                ?AppColors.whiteColor:AppColors.textPrimary,
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
+            children:
+                _lots
+                    .map(
+                      (lot) => Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 6.w),
+                          child: GestureDetector(
+                            onTap: () => setState(() => _volume = lot),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 10.h),
+                              decoration: BoxDecoration(
+                                color:
+                                    (lot == _volume)
+                                        ? palette.tabAccent
+                                        : palette.sheetFieldBg,
+                                borderRadius: BorderRadius.circular(8.r),
+                                border: Border.all(
+                                  color: palette.sheetFieldBorder,
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                lot.toStringAsFixed(2),
+                                style: TextStyle(
+                                  color:
+                                      (lot == _volume)
+                                          ? AppColors.whiteColor
+                                          : AppColors.textPrimary,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                )
-                .toList(),
+                    )
+                    .toList(),
           ),
           SizedBox(height: 14.h),
           if (_tab == 1) ...[
@@ -1103,7 +1129,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                         _priceCtl.text = p.toStringAsFixed(d);
                       });
                     },
-                    icon:  Icon(Icons.remove, color: AppColors.textPrimary),
+                    icon: Icon(Icons.remove, color: AppColors.textPrimary),
                   ),
                   IconButton(
                     onPressed: () {
@@ -1112,7 +1138,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                         _priceCtl.text = p.toStringAsFixed(d);
                       });
                     },
-                    icon:  Icon(Icons.add, color: AppColors.textPrimary),
+                    icon: Icon(Icons.add, color: AppColors.textPrimary),
                   ),
                 ],
               ),
@@ -1126,11 +1152,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                 style: TextStyle(color: palette.axisText, fontSize: 13.sp),
               ),
               SizedBox(width: 6.w),
-              Icon(
-                Icons.help_outline,
-                size: 14.sp,
-                color: palette.axisText,
-              ),
+              Icon(Icons.help_outline, size: 14.sp, color: palette.axisText),
               const Spacer(),
               Switch(
                 value: _tpSlEnabled,
@@ -1199,61 +1221,64 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                   ],
                 ),
               ),
-              SizedBox(
-                width: 130.w,
-                height: 44.h,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: color,
-                    foregroundColor: AppColors.textPrimary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
+              Flexible(
+                flex: 2,
+                child: SizedBox(
+                  height: 48.h,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: color,
+                      foregroundColor: AppColors.textPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
                     ),
-                  ),
-                  onPressed: () => _submit(side),
-                  child: Obx(() {
-                    if (widget.ctrl.isLoading.value) {
-                      return  SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          color: AppColors.textPrimary,
-                          strokeWidth: 2,
-                        ),
-                      );
-                    }
-                    final px = _tab == 0
-                        ? (widget.ctrl.lastAsk.value ??
-                            widget.ctrl.lastBid.value ??
-                            0)
-                        : _price;
-                    final sideLabel = side == 'buy' ? 'Buy' : 'Sell';
-                    final kindLabel = _tab == 1 ? 'Limit' : 'Market';
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '$sideLabel $kindLabel',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w700,
+                    onPressed: () => _submit(side),
+                    child: Obx(() {
+                      if (widget.ctrl.isLoading.value) {
+                        return SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            color: AppColors.textPrimary,
+                            strokeWidth: 2,
                           ),
-                        ),
-                        if (px > 0) ...[
-                          SizedBox(width: 6.w),
+                        );
+                      }
+                      final px =
+                          _tab == 0
+                              ? (widget.ctrl.lastAsk.value ??
+                                  widget.ctrl.lastBid.value ??
+                                  0)
+                              : _price;
+                      final sideLabel = side == 'buy' ? 'Buy' : 'Sell';
+                      final kindLabel = _tab == 1 ? 'Limit' : 'Market';
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                           Text(
-                            px.toStringAsFixed(d),
+                            '$sideLabel $kindLabel',
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
+                          if (px > 0) ...[
+                            SizedBox(width: 6.w),
+                            Text(
+                              px.toStringAsFixed(d),
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                          SizedBox(width: 6.w),
+                          Icon(Icons.trending_up, size: 16.sp),
                         ],
-                        SizedBox(width: 6.w),
-                        Icon(Icons.trending_up, size: 16.sp),
-                      ],
-                    );
-                  }),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ],
@@ -1395,6 +1420,591 @@ class _SummaryRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Custom range picker dialog ──────────────────────────────────────────────
+void _showCustomRangePicker(BuildContext context, IQuoteChartController ctrl) {
+  DateTime selectedFrom =
+      ctrl.customFromDate.value ??
+      DateTime.now().subtract(const Duration(days: 1));
+  DateTime selectedTo = ctrl.customToDate.value ?? DateTime.now();
+  int selectedRes = ctrl.resolution.value;
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final dialogBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+          final textColor = isDark ? Colors.white : Colors.black87;
+          final labelColor = isDark ? Colors.white70 : Colors.black54;
+
+          Future<void> pickDateTime(bool isFrom) async {
+            final initial = isFrom ? selectedFrom : selectedTo;
+            final date = await showDatePicker(
+              context: context,
+              initialDate: initial,
+              firstDate: DateTime.now().subtract(const Duration(days: 365)),
+              lastDate: DateTime.now(),
+            );
+            if (date != null) {
+              final time = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.fromDateTime(initial),
+              );
+              if (time != null) {
+                setState(() {
+                  final newDt = DateTime(
+                    date.year,
+                    date.month,
+                    date.day,
+                    time.hour,
+                    time.minute,
+                  );
+                  if (isFrom) {
+                    selectedFrom = newDt;
+                  } else {
+                    selectedTo = newDt;
+                  }
+                });
+              }
+            }
+          }
+
+          return AlertDialog(
+            backgroundColor: dialogBg,
+            title: Text(
+              'Select Custom Range',
+              style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'From Date & Time:',
+                  style: TextStyle(color: labelColor, fontSize: 12.sp),
+                ),
+                SizedBox(height: 4.h),
+                InkWell(
+                  onTap: () => pickDateTime(true),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.5),
+                      ),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          selectedFrom.toString().split('.')[0],
+                          style: TextStyle(color: textColor),
+                        ),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16.sp,
+                          color: labelColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'To Date & Time:',
+                  style: TextStyle(color: labelColor, fontSize: 12.sp),
+                ),
+                SizedBox(height: 4.h),
+                InkWell(
+                  onTap: () => pickDateTime(false),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.5),
+                      ),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          selectedTo.toString().split('.')[0],
+                          style: TextStyle(color: textColor),
+                        ),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 16.sp,
+                          color: labelColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  'Resolution:',
+                  style: TextStyle(color: labelColor, fontSize: 12.sp),
+                ),
+                SizedBox(height: 4.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.grey.withValues(alpha: 0.5),
+                    ),
+                    borderRadius: BorderRadius.circular(6.r),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<int>(
+                      value: selectedRes,
+                      dropdownColor: dialogBg,
+                      isExpanded: true,
+                      style: TextStyle(color: textColor),
+                      items: const [
+                        DropdownMenuItem(value: 1, child: Text('1 Minute')),
+                        DropdownMenuItem(value: 5, child: Text('5 Minutes')),
+                        DropdownMenuItem(value: 15, child: Text('15 Minutes')),
+                        DropdownMenuItem(value: 30, child: Text('30 Minutes')),
+                        DropdownMenuItem(value: 60, child: Text('1 Hour')),
+                        DropdownMenuItem(value: 1440, child: Text('1 Day')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            selectedRes = val;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel', style: TextStyle(color: labelColor)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
+                onPressed: () {
+                  if (selectedFrom.isAfter(selectedTo)) {
+                    CustomToastService.showError(
+                      message: 'From Date cannot be after To Date.',
+                    );
+                    return;
+                  }
+                  ctrl.customFromDate.value = selectedFrom;
+                  ctrl.customToDate.value = selectedTo;
+                  ctrl.resolution.value = selectedRes;
+                  ctrl.changePeriod('More');
+                  ctrl.fetchHistoryData();
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Apply',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+// ── Native Candlestick Chart ───────────────────────────────────────────────
+class _CandleChart extends StatefulWidget {
+  const _CandleChart({required this.ctrl, required this.palette});
+  final IQuoteChartController ctrl;
+  final _ChartPalette palette;
+
+  @override
+  State<_CandleChart> createState() => _CandleChartState();
+}
+
+class _CandleChartState extends State<_CandleChart> {
+  ChartSeriesController? _seriesController;
+  String? _lastPeriod;
+  bool _didInitialRange = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (widget.ctrl.isChartLoading.value) {
+        return Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        );
+      }
+
+      if (widget.ctrl.chartData.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.insert_chart_outlined,
+                size: 48.sp,
+                color: widget.palette.axisText,
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'No chart data available',
+                style: TextStyle(
+                  color: widget.palette.axisText,
+                  fontSize: 14.sp,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final gridColor =
+          isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.black.withValues(alpha: 0.05);
+
+      // Reset initial range only if period has changed
+      final bool periodChanged = _lastPeriod != widget.ctrl.period.value;
+      if (periodChanged) {
+        _lastPeriod = widget.ctrl.period.value;
+        _didInitialRange = false;
+      }
+
+      return SfCartesianChart(
+        backgroundColor: widget.palette.chartAreaBg,
+        plotAreaBorderWidth: 0,
+        margin: EdgeInsets.zero,
+        primaryXAxis: DateTimeCategoryAxis(
+          dateFormat:
+              widget.ctrl.resolution.value >= 1440
+                  ? DateFormat('MMM dd')
+                  : widget.ctrl.resolution.value >= 60
+                  ? DateFormat('MMM dd HH:mm')
+                  : DateFormat('HH:mm'),
+          majorGridLines: MajorGridLines(color: gridColor, width: 0.5),
+          axisLine: AxisLine(color: widget.palette.divider, width: 0.5),
+          labelStyle: TextStyle(
+            color: widget.palette.axisText,
+            fontSize: 10.sp,
+          ),
+          // Default window: 1 candle (= 1 minute for 1m res).
+          // Start zoomed to the newest bar; panned further back triggers loadOlderHistory.
+          initialVisibleMinimum: periodChanged && widget.ctrl.chartData.length > 1
+              ? widget.ctrl.chartData[widget.ctrl.chartData.length - 1].dateTime
+              : null,
+          initialVisibleMaximum:
+              periodChanged && widget.ctrl.chartData.isNotEmpty
+                  ? widget.ctrl.chartData.last.dateTime
+                  : null,
+        ),
+        onActualRangeChanged: (ActualRangeChangedArgs args) {
+          // Ignore the first fire (the initial zoom animation); after that,
+          // if the user has panned to the left edge, pull older candles.
+          if (_didInitialRange) {
+            final ctrl = widget.ctrl;
+            if (!ctrl.isLoadingOlder.value && ctrl.chartData.isNotEmpty) {
+              // visibleMin for DateTime axes is DateTime (fallback via epoch).
+              final Object? rawMin = args.visibleMin;
+              final DateTime? visibleMin = rawMin is DateTime
+                  ? rawMin
+                  : rawMin != null
+                      ? DateTime.fromMillisecondsSinceEpoch(
+                          (rawMin as num).toInt(),
+                        )
+                      : null;
+              if (visibleMin != null) {
+                final oldestLoaded = ctrl.chartData.first.dateTime;
+                // Trigger if the user has panned within 2 candles of the left edge.
+                final edge = oldestLoaded.add(
+                  Duration(minutes: ctrl.resolution.value * 2),
+                );
+                if (visibleMin.isBefore(edge)) {
+                  ctrl.loadOlderHistory();
+                }
+              }
+            }
+          } else {
+            _didInitialRange = true;
+          }
+        },
+        primaryYAxis: NumericAxis(
+          opposedPosition: true, // Right-axis scale
+          majorGridLines: MajorGridLines(color: gridColor, width: 0.5),
+          minorGridLines: const MinorGridLines(width: 0),
+          axisLine: AxisLine(color: widget.palette.divider, width: 0.5),
+          labelStyle: TextStyle(
+            color: widget.palette.axisText,
+            fontSize: 10.sp,
+          ),
+          anchorRangeToVisiblePoints: true,
+          plotBands: <PlotBand>[
+            if (widget.ctrl.lastAsk.value != null &&
+                widget.ctrl.lastAsk.value! > 0)
+              PlotBand(
+                start: widget.ctrl.lastAsk.value,
+                end: widget.ctrl.lastAsk.value,
+                borderWidth: 0.8,
+                borderColor: _kBullColor,
+                dashArray: const <double>[4, 4],
+                text:
+                    'Ask: ${widget.ctrl.lastAsk.value!.toStringAsFixed(widget.ctrl.priceDigits.value)}',
+                textStyle: TextStyle(color: _kBullColor, fontSize: 9.sp),
+                horizontalTextAlignment: TextAnchor.start,
+              ),
+            if (widget.ctrl.lastBid.value != null &&
+                widget.ctrl.lastBid.value! > 0)
+              PlotBand(
+                start: widget.ctrl.lastBid.value,
+                end: widget.ctrl.lastBid.value,
+                borderWidth: 0.8,
+                borderColor: _kBearColor,
+                dashArray: const <double>[4, 4],
+                text:
+                    'Bid: ${widget.ctrl.lastBid.value!.toStringAsFixed(widget.ctrl.priceDigits.value)}',
+                textStyle: TextStyle(color: _kBearColor, fontSize: 9.sp),
+                horizontalTextAlignment: TextAnchor.start,
+              ),
+          ],
+        ),
+        trackballBehavior: TrackballBehavior(
+          enable: true,
+          activationMode: ActivationMode.singleTap,
+          tooltipSettings: InteractiveTooltip(
+            enable: true,
+            color: widget.palette.sheetBg,
+            textStyle: TextStyle(color: isDark ? Colors.white : Colors.black),
+          ),
+          lineType: TrackballLineType.vertical,
+          lineColor: widget.palette.axisText.withValues(alpha: 0.5),
+          lineWidth: 0.8,
+        ),
+        zoomPanBehavior: ZoomPanBehavior(
+          enablePanning: true,
+          enablePinching: true,
+          zoomMode: ZoomMode.x,
+        ),
+        series: <CartesianSeries<CandleData, DateTime>>[
+          CandleSeries<CandleData, DateTime>(
+            key: ValueKey(widget.ctrl.period.value),
+            animationDuration: 600,
+            onRendererCreated: (ChartSeriesController controller) {
+              _seriesController = controller;
+            },
+            dataSource: widget.ctrl.chartData,
+            xValueMapper: (CandleData candle, _) => candle.dateTime,
+            lowValueMapper: (CandleData candle, _) => candle.low,
+            highValueMapper: (CandleData candle, _) => candle.high,
+            openValueMapper: (CandleData candle, _) => candle.open,
+            closeValueMapper: (CandleData candle, _) => candle.close,
+            bearColor: _kBearColor,
+            bullColor: _kBullColor,
+            enableSolidCandles: true,
+          ),
+        ],
+      );
+    });
+  }
+}
+
+// ── Favorites Bottom Sheet WATCHLIST ──────────────────────────────────────────
+void _showFavoritesBottomSheet(
+  BuildContext context,
+  IQuoteChartController ctrl,
+) {
+  final instrumentsCtrl = Get.find<InstrumentsController>();
+  final palette = _ChartPalette.of(context);
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (context) {
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        decoration: BoxDecoration(
+          color: palette.sheetBg,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.r),
+            topRight: Radius.circular(20.r),
+          ),
+          border: Border.all(color: palette.divider, width: 0.5),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: palette.axisText.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              'Favorites Watchlist',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Expanded(
+              child: Obx(() {
+                final favorites = instrumentsCtrl.favoriteInstruments;
+                if (favorites.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.star_outline,
+                          size: 48.sp,
+                          color: palette.axisText,
+                        ),
+                        SizedBox(height: 8.h),
+                        Text(
+                          'No favorites added yet',
+                          style: TextStyle(
+                            color: palette.axisText,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  itemCount: favorites.length,
+                  separatorBuilder:
+                      (context, index) =>
+                          Divider(color: palette.divider, height: 1),
+                  itemBuilder: (context, index) {
+                    final sym = favorites[index];
+                    return Obx(() {
+                      final quote = instrumentsCtrl.priceRx(sym).value;
+                      final isSelected = ctrl.symbol == sym;
+                      return ListTile(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
+                        ),
+                        title: Text(
+                          sym.replaceAll('.c', '').toUpperCase(),
+                          style: TextStyle(
+                            color:
+                                isSelected
+                                    ? AppColors.primary
+                                    : (isDark ? Colors.white : Colors.black),
+                            fontWeight:
+                                isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                            fontSize: 15.sp,
+                          ),
+                        ),
+                        subtitle: Text(
+                          sym,
+                          style: TextStyle(
+                            color: palette.axisText,
+                            fontSize: 11.sp,
+                          ),
+                        ),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              quote.bid == 0
+                                  ? '—'
+                                  : quote.bid.toStringAsFixed(quote.digits),
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14.sp,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              quote.ask == 0
+                                  ? '—'
+                                  : quote.ask.toStringAsFixed(quote.digits),
+                              style: TextStyle(
+                                color: palette.axisText,
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                        onTap: () {
+                          ctrl.symbolRx.value = sym;
+                          Navigator.pop(context);
+                        },
+                      );
+                    });
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+// ── Fullscreen WebView Chart Screen ──────────────────────────────────────────
+class IQuoteFullscreenChartScreen extends StatelessWidget {
+  final String symbol;
+
+  const IQuoteFullscreenChartScreen({super.key, required this.symbol});
+
+  @override
+  Widget build(BuildContext context) {
+    final chartUrl =
+        '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$symbol&theme=${AppColors.chartTheme}';
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.scaffold,
+        elevation: 0,
+        leading: AppBackButton(onPressed: () => Get.back()),
+        title: Text(
+          '${symbol.replaceAll('.c', '').toUpperCase()} Chart',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: SafeArea(child: ChartInAppWebView(symbol: symbol, url: chartUrl)),
     );
   }
 }

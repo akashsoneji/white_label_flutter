@@ -6,6 +6,11 @@ abstract class WalletRepository {
     Map<String, dynamic>? queryParameters,
   });
 
+  Future<ApiResponse> getWalletDetailsNew({
+    required String token,
+    Map<String, dynamic>? queryParameters,
+  });
+
   Future<ApiResponse> checkBalance({
     required String token,
     required Map<String, dynamic> payload,

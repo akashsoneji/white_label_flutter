@@ -1,17 +1,16 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/finance/presentation/pages/internal_transfer_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
-import 'package:crm_app/utils/trl_helper.dart';
-import 'package:crm_app/utils/navigation_helper.dart';
-
 import 'package:crm_app/screens/wallet/view_models/wallet_controller.dart';
+import 'package:crm_app/utils/navigation_helper.dart';
 import '../../../../services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
 import '../../../../widgets/custom_toast.dart';
@@ -25,46 +24,62 @@ class WalletScreen extends StatefulWidget {
 class _WalletScreenState extends State<WalletScreen> {
   final WalletController controller = Get.put(WalletController());
   final LanguageService languageService = Get.find<LanguageService>();
-  late final FocusNode _amountFocusNode;
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    // Initialize FocusNode for amount field
-    _amountFocusNode = FocusNode();
-    _amountFocusNode.addListener(() {
-      if (_amountFocusNode.hasFocus &&
-          controller.amountController.text == '0.00') {
-        controller.amountController.text = '';
-      } else if (!_amountFocusNode.hasFocus &&
-          controller.amountController.text.isEmpty) {
-        controller.amountController.text = '0.00';
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200.h) {
+        controller.loadMoreTransactions();
       }
     });
+    // Trigger fresh load on enter
     controller.fetchWalletData();
+    controller.fetchWalletHistory(page: 1);
   }
 
   @override
   void dispose() {
-    _amountFocusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  bool checkIfDeposit(dynamic tx) {
+    final String type = tx.transactionType?.toLowerCase() ?? '';
+    final String amountStr = tx.amount?.toString() ?? '';
+    if (type == 'deposit') return true;
+    if (type == 'withdrawal') return false;
+    return !amountStr.contains('-');
+  }
+
+  String formatAmount(dynamic amount, bool isDeposit) {
+    if (amount == null) return '0.00';
+    String amountStr = amount.toString();
+    amountStr = amountStr.replaceAll('+', '').replaceAll('-', '').trim();
+    String prefix = isDeposit ? '+' : '-';
+    if (amountStr.startsWith('\$')) {
+      return '$prefix$amountStr';
+    }
+    return '$prefix\$$amountStr';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.whiteColor,
-      resizeToAvoidBottomInset: false,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.whiteColor,
+        backgroundColor: AppColors.background,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: Padding(
           padding: EdgeInsets.only(left: 10.w),
           child: AppBackButton(
             onPressed: () => NavigationHelper.safeBack(context: context),
           ),
         ),
-
         title: Text(
           languageService.tr('wallet_title'),
           style: AppTextStyles.screenTitle,
@@ -74,38 +89,114 @@ class _WalletScreenState extends State<WalletScreen> {
       body: Stack(
         children: [
           SafeArea(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  SizedBox(height: 10.h),
+            child: Obx(() {
+              final isInitialLoading =
+                  controller.isHistoryLoading.value &&
+                  controller.historyTransactions.isEmpty;
 
-                  // Wallet Information Section
-                  _buildWalletInfoSection(),
+              return CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // 1. Balance Card
+                  SliverToBoxAdapter(child: _buildPremiumBalanceCard()),
 
-                  SizedBox(height: 10.h),
+                  // 2. Action buttons
+                  SliverToBoxAdapter(child: _buildQuickActions()),
 
-                  // Divider
-                  _buildDivider(),
+                  // 3. Filter Bar
+                  SliverToBoxAdapter(child: _buildFilterBar()),
 
-                  SizedBox(height: 32.h),
-
-                  Padding(
-                    padding: RTLHelper.getRTLPadding(left: 24.w, right: 24.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /// Transfer Section
-                        // _buildTransferSection(),
-                      ],
+                  // 4. Initial Loading State
+                  if (isInitialLoading)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    )
+                  // 5. Empty State
+                  else if (controller.historyTransactions.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 40.w,
+                            vertical: 40.h,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.receipt_long_outlined,
+                                size: 48.sp,
+                                color: AppColors.textSecondary.withOpacity(0.5),
+                              ),
+                              SizedBox(height: 16.h),
+                              Text(
+                                'No transactions found',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  // 6. Transactions List
+                  else ...[
+                    SliverPadding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 8.h,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final tx = controller.historyTransactions[index];
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 12.h),
+                            child: _buildTransactionCard(tx),
+                          );
+                        }, childCount: controller.historyTransactions.length),
+                      ),
                     ),
-                  ),
+
+                    // 7. Load More Loading / No More Items Indicator at bottom
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24.h),
+                        child: Center(
+                          child:
+                              controller.isLoadingMore.value
+                                  ? CircularProgressIndicator(
+                                    color: AppColors.primary,
+                                  )
+                                  : !controller.hasMore.value &&
+                                      controller.historyTransactions.isNotEmpty
+                                  ? Text(
+                                    'No more transactions to show',
+                                    style: TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 11.sp,
+                                    ),
+                                  )
+                                  : const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ),
-            ),
+              );
+            }),
           ),
 
-          // Loading Overlay - Center of Screen
+          // Processing overlay (used for deposit, transfers)
           Obx(
             () =>
                 controller.isLoading.value
@@ -119,761 +210,1081 @@ class _WalletScreenState extends State<WalletScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).padding.bottom + 10,
-          left: 24.w,
-          right: 24.w,
+    );
+  }
+
+  Widget _buildPremiumBalanceCard() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20.r),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.isDarkMode
+                ? AppColors.secondary.withOpacity(0.15)
+                : AppColors.primary,
+            AppColors.isDarkMode
+                ? AppColors.secondary.withOpacity(0.15)
+                : AppColors.primary.withOpacity(0.85),
+            AppColors.isDarkMode
+                ? AppColors.secondary.withOpacity(0.15)
+                : AppColors.secondary.withOpacity(0.9),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        child: _buildActionButtons(),
-      ),
-    );
-  }
-
-  Widget _buildWalletInfoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Wallet ID
-        _buildDivider(),
-        SizedBox(height: 10.h),
-        Padding(
-          padding: RTLHelper.getRTLPadding(left: 24.w, right: 24.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                languageService.tr('wallet_wallet_id'),
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 16.sp,
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w500,
-                  height: 1.375,
-                ),
-              ),
-              Obx(
-                () => Text(
-                  controller.wallet.value?.walletId ?? '',
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 16.sp,
-                    color: AppColors.icongrey,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-            ],
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.isDarkMode
+                ? Colors.black.withOpacity(0.4)
+                : AppColors.primary.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 10),
           ),
-        ),
-
-        SizedBox(height: 16.h),
-        _buildDivider(),
-        SizedBox(height: 10.h),
-        // Balance
-        Padding(
-          padding: RTLHelper.getRTLPadding(left: 24.w, right: 24.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                languageService.tr('wallet_balance'),
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 16.sp,
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Obx(
-                () => Text(
-                  '\$${controller.balance.value}',
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 16.sp,
-                    color: AppColors.icongrey,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDivider() {
-    return Container(height: 1, color: Colors.grey[200]);
-  }
-
-  void _showAccountSelectionSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.backgroundLight,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ],
       ),
-      builder: (BuildContext context) {
-        return Obx(() {
-          if (controller.mt5Accounts.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(languageService.tr('common_no_accounts')),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            shrinkWrap: true,
-            itemCount: controller.mt5Accounts.length,
-            itemBuilder: (context, index) {
-              final account = controller.mt5Accounts[index];
-              return ListTile(
-                title: Text(
-                  "${account.metaAccountName} (${account.metaAccountNumber})",
-                  style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.w500),
-                ),
-                subtitle: Text("\$ ${account.balance}"),
-                onTap: () {
-                  controller.selectedFromAccount.value = account;
-                  controller.transferFromAccount.value =
-                      "${account.metaAccountName} (${account.metaAccountNumber})  \$ ${account.balance}";
-                  Navigator.pop(context);
-                },
-              );
-            },
-          );
-        });
-      },
-    );
-  }
-
-  // ignore: unused_element
-  void _showOTPBottomSheet() {
-    final List<TextEditingController> otpControllers = List.generate(
-      6,
-      (index) => TextEditingController(),
-    );
-    final List<FocusNode> otpFocusNodes = List.generate(
-      6,
-      (index) => FocusNode(),
-    );
-    final List<String> previousOtpValues = List.generate(6, (index) => '');
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.backgroundLight,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.r),
+        child: Stack(
+          children: [
+          // Background circles decoration
+          Positioned(
+            right: -20.w,
+            top: -20.h,
+            child: CircleAvatar(
+              radius: 60.r,
+              backgroundColor:
+                  AppColors.isDarkMode
+                      ? AppColors.secondary.withOpacity(0.15)
+                      : Colors.white.withOpacity(0.08),
+            ),
           ),
-          child: Container(
+          Positioned(
+            left: -40.w,
+            bottom: -40.h,
+            child: CircleAvatar(
+              radius: 80.r,
+              backgroundColor:
+                  AppColors.isDarkMode
+                      ? AppColors.secondary.withOpacity(0.15)
+                      : Colors.white.withOpacity(0.05),
+            ),
+          ),
+          Padding(
             padding: EdgeInsets.all(24.w),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      languageService.tr('wallet_enter_otp'),
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                      languageService.tr('wallet_title').toUpperCase(),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(Icons.close, color: AppColors.textPrimary),
+                    Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: Colors.white.withOpacity(0.8),
+                      size: 24.sp,
                     ),
                   ],
                 ),
-
-                SizedBox(height: 16.h),
-
-                SizedBox(height: 16.h),
-
-                // OTP Input Fields
-                Text(
-                  languageService.tr('wallet_enter_otp'),
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textGrey,
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(6, (index) {
-                    return SizedBox(
-                      width: 50.w,
-                      height: 56.h,
-                      child:
-                          Platform.isAndroid
-                              ? _buildOtpBoxAndroid(
-                                index,
-                                otpControllers,
-                                otpFocusNodes,
-                                previousOtpValues,
-                              )
-                              : _buildOtpBox(
-                                index,
-                                otpControllers,
-                                otpFocusNodes,
-                                previousOtpValues,
-                              ),
-                    );
-                  }),
-                ),
-
-                SizedBox(height: 24.h),
-
-                // Submit Button
-                Container(
-                  width: double.infinity,
-                  height: 40.h,
-                  child: Obx(
-                    () => ElevatedButton(
-                      onPressed:
-                          controller.isTransferLoading.value
-                              ? null
-                              : () async {
-                                final otp =
-                                    otpControllers.map((c) => c.text).join();
-                                if (otp.isEmpty || otp.length != 6) {
-                                  CustomToastService.showError(
-                                    message: languageService.tr(
-                                      'wallet_validation_otp',
-                                    ),
-                                  );
-                                  return;
-                                }
-
-                                // Get account identifiers for transfer
-                                final fromAccountId =
-                                    controller
-                                        .selectedFromAccount
-                                        .value
-                                        ?.metaAccountNumber ??
-                                    '';
-                                final toAccountId =
-                                    controller.wallet.value?.walletId ?? '';
-
-                                // Parse amount
-                                final rawAmountText =
-                                    controller.amountController.text.trim();
-                                final cleanedAmount = rawAmountText.replaceAll(
-                                  RegExp(r'[^0-9.]'),
-                                  '',
-                                );
-
-                                // Submit transfer with all required parameters
-                                final success = await controller
-                                    .submitInternalTransfer(
-                                      otp,
-                                      '', // comment - empty for wallet screen
-                                      fromAccountId,
-                                      toAccountId,
-                                      cleanedAmount,
-                                    );
-
-                                if (success) {
-                                  Navigator.pop(context);
-                                }
-                              },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: AppColors.whiteColor,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ),
-                      child:
-                          controller.isTransferLoading.value
-                              ? ButtonLoadingWidget(
-                                size: 20.0,
-                                color: AppColors.whiteColor,
-                              )
-                              : Text(
-                                languageService.tr('wallet_submit_transfer'),
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.whiteColor,
-                                ),
-                              ),
+                SizedBox(height: 20.h),
+                Obx(
+                  () => Text(
+                    '\$${controller.balance.value}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 32.sp,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
                     ),
                   ),
                 ),
-
-                SizedBox(height: kBottomNavigationBarHeight),
+                SizedBox(height: 20.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          languageService.tr('wallet_wallet_id'),
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 10.sp,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Obx(
+                          () => Row(
+                            children: [
+                              Text(
+                                controller.wallet.value?.walletId ?? '',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              GestureDetector(
+                                onTap: () {
+                                  final walletId =
+                                      controller.wallet.value?.walletId ?? '';
+                                  if (walletId.isNotEmpty) {
+                                    Clipboard.setData(
+                                      ClipboardData(text: walletId),
+                                    );
+                                    CustomToastService.showSuccess(
+                                      message: 'Wallet ID copied',
+                                    );
+                                  }
+                                },
+                                child: Icon(
+                                  Icons.copy,
+                                  size: 14.sp,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-        );
-      },
-    );
-  }
-
-  // (removed unused `_buildTransferSection`)
-
-  // ignore: unused_element
-  Widget _buildTransferFromField() {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: Obx(() {
-        return RTLHelper.rtlTextField(
-          controller: TextEditingController(
-            text: controller.transferFromAccount.value,
-          ),
-          readOnly: true,
-          onTap: _showAccountSelectionSheet,
-          suffixIcon: InkWell(
-            onTap: _showAccountSelectionSheet,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14.w),
-              child: RTLHelper.rtlIcon(
-                Icons.arrow_drop_down,
-                color: Colors.grey,
-              ),
-            ),
-          ),
-          decoration: InputDecoration(
-            labelText: languageService.tr('wallet_transfer_from'),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16.w,
-              vertical: 16.h,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.error),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-
-  // ignore: unused_element
-  Widget _buildTransferToField() {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: TextField(
-        controller: TextEditingController(
-          text: languageService.tr('wallet_title'),
-        ),
-        readOnly: true,
-        decoration: InputDecoration(
-          labelText: languageService.tr('wallet_transfer_to'),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 10.h,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.primary, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.error),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ignore: unused_element
-  Widget _buildAmountField() {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: RTLHelper.rtlTextField(
-        controller: controller.amountController,
-        focusNode: _amountFocusNode,
-        keyboardType: TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-          _SingleDecimalTextFormatter(),
         ],
-        decoration: InputDecoration(
-          labelText: languageService.tr('wallet_amount_label'),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 16.h,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.primary, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AppColors.error),
-          ),
-        ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildActionButtons() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Deposit Wallet Button
-        Container(
-          width: double.infinity,
-          height: 40.h,
-          child: Obx(
-            () => OutlinedButton(
+  Widget _buildQuickActions() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildActionButton(
+              label: languageService.tr('wallet_deposit_wallet'),
+              icon: Icons.add_circle_outline,
               onPressed: () {
                 Get.to(() => PaymentMethodsScreen(accountNumber: ''));
               },
-
-              // controller.isOtpLoading.value ? null : _onInternalTransfer,
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.primary, width: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child:
-                  controller.isOtpLoading.value
-                      ? ButtonLoadingWidget(
-                        size: 20.0,
-                        color: AppColors.primary,
-                      )
-                      : Text(
-                        languageService.tr('wallet_deposit_wallet'),
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
+              isPrimary: true,
             ),
           ),
-        ),
-
-        SizedBox(height: 16.h),
-
-        // Internal Transfer Button
-        Obx(
-          () => ElevatedButton(
-            onPressed: () {
-              Get.to(() => InternalTransferScreen());
-            },
-            // controller.isLoading.value ? null : _onInternalTransfer,
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.zero,
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.whiteColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 0,
+          SizedBox(width: 16.w),
+          Expanded(
+            child: _buildActionButton(
+              label: languageService.tr('internal_transfer'),
+              icon: Icons.swap_horiz,
+              onPressed: () {
+                Get.to(() => InternalTransferScreen());
+              },
+              isPrimary: false,
             ),
-            child:
-                controller.isLoading.value
-                    ? ButtonLoadingWidget(
-                      size: 20.0,
-                      color: AppColors.whiteColor,
-                    )
-                    : Text(
-                      languageService.tr('internal_transfer'),
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.whiteColor,
-                      ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required VoidCallback onPressed,
+    required bool isPrimary,
+  }) {
+    final bool isDark =
+        Theme.of(context).brightness == Brightness.dark || AppColors.isDarkMode;
+    return Container(
+      height: 48.h,
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(
+          icon,
+          size: 18.sp,
+          color: isPrimary ? AppColors.onPrimary : AppColors.primary,
+        ),
+        label: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.bold,
+            color: isPrimary ? AppColors.onPrimary : AppColors.primary,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor:
+              isPrimary
+                  ? AppColors.primary
+                  : isDark
+                  ? AppColors.textFieldBg
+                  : AppColors.primary.withOpacity(0.08),
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            side:
+                isPrimary
+                    ? BorderSide.none
+                    : BorderSide(
+                      color: AppColors.primary.withOpacity(0.2),
+                      width: 1,
                     ),
           ),
         ),
-      ],
+      ),
     );
   }
 
-  // (removed unused `_onInternalTransfer`)
+  Widget _buildFilterBar() {
+    return Obx(() {
+      final List<Widget> chips = [];
 
-  // Build OTP box for iOS
-  Widget _buildOtpBox(
-    int index,
-    List<TextEditingController> controllers,
-    List<FocusNode> focusNodes,
-    List<String> previousValues,
-  ) {
-    return TextField(
-      controller: controllers[index],
-      focusNode: focusNodes[index],
-      keyboardType: TextInputType.number,
-      textAlign: TextAlign.center,
-      maxLength: index == 0 ? 6 : 1,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(index == 0 ? 6 : 1),
-      ],
-      style: AppTextStyles.bodyText.copyWith(
-        fontSize: 20.sp,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-        height: 1.2,
-      ),
-      decoration: InputDecoration(
-        counterText: '',
-        contentPadding: EdgeInsets.symmetric(vertical: 16.h),
-        isDense: true,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
-        ),
-      ),
-      onChanged: (value) {
-        if (value.length > 1 && value.length <= 6) {
-          // Handle paste - distribute digits across fields
-          final otp = value.padRight(6, '');
-          for (int i = 0; i < 6; i++) {
-            controllers[i].text = i < otp.length ? otp[i] : '';
-            previousValues[i] = i < otp.length ? otp[i] : '';
-          }
-          if (otp.length == 6) {
-            focusNodes[5].requestFocus();
-          } else if (otp.length >
-              controllers.indexWhere((c) => c.text.isEmpty)) {
-            focusNodes[otp.length - 1].requestFocus();
-          }
-        } else if (value.length == 1 && index < 5) {
-          // Move to next box when a digit is entered
-          previousValues[index] = value;
-          focusNodes[index + 1].requestFocus();
-        } else if (value.isEmpty && index > 0) {
-          // Move to previous box when backspace clears the current box
-          previousValues[index] = '';
-          focusNodes[index - 1].requestFocus();
-        } else if (value.isEmpty && index == 0) {
-          // Clear all fields and reset focus to first box if first box is cleared
-          for (int i = 0; i < 6; i++) {
-            controllers[i].clear();
-            previousValues[i] = '';
-          }
-          focusNodes[0].requestFocus();
-        }
-      },
-      onTap: () {
-        // When user taps on a box, select all text for easy replacement
-        if (controllers[index].text.isNotEmpty) {
-          controllers[index].selection = TextSelection(
-            baseOffset: 0,
-            extentOffset: controllers[index].text.length,
-          );
-        }
-      },
-    );
-  }
-
-  // Build OTP box for Android with RawKeyboardListener for backspace handling
-  Widget _buildOtpBoxAndroid(
-    int index,
-    List<TextEditingController> controllers,
-    List<FocusNode> focusNodes,
-    List<String> previousValues,
-  ) {
-    final keyboardFocusNode = FocusNode();
-
-    return index == 0
-        ? TextField(
-          controller: controllers[index],
-          focusNode: focusNodes[index],
-          keyboardType: TextInputType.number,
-          textAlign: TextAlign.center,
-          maxLength: 6, // Allow paste of full OTP in first field
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(6),
-          ],
-          style: AppTextStyles.bodyText.copyWith(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-            height: 1.2,
-          ),
-          decoration: InputDecoration(
-            counterText: '',
-            contentPadding: EdgeInsets.symmetric(vertical: 16.h),
-            isDense: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-          ),
-          onChanged: (value) {
-            if (value.length > 1 && value.length <= 6) {
-              // Handle paste - distribute digits across fields
-              final otp = value.padRight(6, '');
-              for (int i = 0; i < 6; i++) {
-                controllers[i].text = i < otp.length ? otp[i] : '';
-                previousValues[i] = i < otp.length ? otp[i] : '';
-              }
-              if (otp.length == 6) {
-                focusNodes[5].requestFocus();
-              } else if (otp.length >
-                  controllers.indexWhere((c) => c.text.isEmpty)) {
-                focusNodes[otp.length - 1].requestFocus();
-              }
-            } else if (value.length == 1 && index < 5) {
-              previousValues[index] = value;
-              focusNodes[index + 1].requestFocus();
-            }
-          },
-          onTap: () {
-            if (controllers[index].text.isNotEmpty) {
-              controllers[index].selection = TextSelection(
-                baseOffset: 0,
-                extentOffset: controllers[index].text.length,
-              );
-            }
-          },
-        )
-        : RawKeyboardListener(
-          focusNode: keyboardFocusNode,
-          onKey: (event) {
-            if (event is RawKeyDownEvent &&
-                event.logicalKey == LogicalKeyboardKey.backspace &&
-                controllers[index].text.isEmpty &&
-                index > 0) {
-              // Handle backspace on empty field - move to previous field
-              focusNodes[index - 1].requestFocus();
-            }
-          },
-          child: TextField(
-            controller: controllers[index],
-            focusNode: focusNodes[index],
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            maxLength: 1,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(1),
-            ],
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-              height: 1.2,
-            ),
-            decoration: InputDecoration(
-              counterText: '',
-              contentPadding: EdgeInsets.symmetric(vertical: 16.h),
-              isDense: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: AppColors.primary, width: 2),
-              ),
-            ),
-            onChanged: (value) {
-              if (value.isNotEmpty && index < 5) {
-                previousValues[index] = value;
-                focusNodes[index + 1].requestFocus();
-              } else if (value.isEmpty && index > 0) {
-                // Move to previous box when backspace clears the current box
-                previousValues[index] = '';
-                focusNodes[index - 1].requestFocus();
-              }
-            },
-            onTap: () {
-              if (controllers[index].text.isNotEmpty) {
-                controllers[index].selection = TextSelection(
-                  baseOffset: 0,
-                  extentOffset: controllers[index].text.length,
-                );
-              }
+      if (controller.filterType.value != 'All Types') {
+        chips.add(
+          _buildFilterChip(
+            label: 'Type: ${controller.filterType.value}',
+            onDeleted: () {
+              controller.filterType.value = 'All Types';
+              controller.applyFilters();
             },
           ),
         );
+      }
+
+      if (controller.filterStatus.value != 'All Status') {
+        chips.add(
+          _buildFilterChip(
+            label: 'Status: ${controller.filterStatus.value}',
+            onDeleted: () {
+              controller.filterStatus.value = 'All Status';
+              controller.applyFilters();
+            },
+          ),
+        );
+      }
+
+      if (controller.filterDateFrom.value.isNotEmpty ||
+          controller.filterDateTo.value.isNotEmpty) {
+        final from =
+            controller.filterDateFrom.value.isNotEmpty
+                ? controller.filterDateFrom.value
+                : 'Any';
+        final to =
+            controller.filterDateTo.value.isNotEmpty
+                ? controller.filterDateTo.value
+                : 'Any';
+        chips.add(
+          _buildFilterChip(
+            label: '$from to $to',
+            onDeleted: () {
+              controller.filterDateFrom.value = '';
+              controller.filterDateTo.value = '';
+              controller.applyFilters();
+            },
+          ),
+        );
+      }
+
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+        child: Row(
+          children: [
+            InkWell(
+              onTap: _showFilterBottomSheet,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.15),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.filter_alt_outlined,
+                      size: 16.sp,
+                      color: AppColors.primary,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      'Filters',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child:
+                  chips.isEmpty
+                      ? Text(
+                        'All Transactions',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      )
+                      : SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children:
+                              chips
+                                  .map(
+                                    (c) => Padding(
+                                      padding: EdgeInsets.only(right: 6.w),
+                                      child: c,
+                                    ),
+                                  )
+                                  .toList(),
+                        ),
+                      ),
+            ),
+            if (chips.isNotEmpty) ...[
+              SizedBox(width: 6.w),
+              GestureDetector(
+                onTap: controller.clearFilters,
+                child: Text(
+                  'Clear All',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    });
   }
-}
 
-/// Formatter that keeps digits and a single decimal point.
-class _SingleDecimalTextFormatter extends TextInputFormatter {
-  const _SingleDecimalTextFormatter();
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final sanitized = _sanitize(newValue.text);
-    return TextEditingValue(
-      text: sanitized,
-      selection: TextSelection.collapsed(offset: sanitized.length),
+  Widget _buildFilterChip({
+    required String label,
+    required VoidCallback onDeleted,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: AppColors.textFieldBg,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.border.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(width: 4.w),
+          GestureDetector(
+            onTap: onDeleted,
+            child: Icon(
+              Icons.close,
+              size: 12.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  String _sanitize(String value) {
-    String clean = value.replaceAll(RegExp(r'[^0-9.]'), '');
-    if (clean.contains('.')) {
-      final parts = clean.split('.');
-      clean =
-          parts[0] + (parts.length > 1 ? '.${parts.sublist(1).join('')}' : '');
+  void _showFilterBottomSheet() {
+    final localType = controller.filterType.value.obs;
+    final localStatus = controller.filterStatus.value.obs;
+    final localDateFrom = controller.filterDateFrom.value.obs;
+    final localDateTo = controller.filterDateTo.value.obs;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.cardBackground,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(
+            24.w,
+            24.h,
+            24.w,
+            MediaQuery.of(context).padding.bottom + 24.h,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Filter Transactions',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+              Divider(color: AppColors.divider),
+              SizedBox(height: 16.h),
+              Text(
+                'Date Range',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: Obx(
+                      () => _buildDateField(
+                        label: 'From Date',
+                        value: localDateFrom.value,
+                        onTap: () async {
+                          final picked = await _pickDate(context);
+                          if (picked != null) localDateFrom.value = picked;
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Obx(
+                      () => _buildDateField(
+                        label: 'To Date',
+                        value: localDateTo.value,
+                        onTap: () async {
+                          final picked = await _pickDate(context);
+                          if (picked != null) localDateTo.value = picked;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Type',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Obx(
+                          () => _buildFilterDropdownWidget(
+                            value: localType.value,
+                            options: [
+                              'All Types',
+                              'Deposit',
+                              'Withdrawal',
+                              'Transfer',
+                            ],
+                            onChanged: (val) {
+                              if (val != null) localType.value = val;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Status',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                        Obx(
+                          () => _buildFilterDropdownWidget(
+                            value: localStatus.value,
+                            options: [
+                              'All Status',
+                              'Approved',
+                              'Pending',
+                              'Rejected',
+                            ],
+                            onChanged: (val) {
+                              if (val != null) localStatus.value = val;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 32.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        localType.value = 'All Types';
+                        localStatus.value = 'All Status';
+                        localDateFrom.value = '';
+                        localDateTo.value = '';
+                      },
+                      child: Text(
+                        'Reset Filters',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        controller.filterType.value = localType.value;
+                        controller.filterStatus.value = localStatus.value;
+                        controller.filterDateFrom.value = localDateFrom.value;
+                        controller.filterDateTo.value = localDateTo.value;
+                        controller.applyFilters();
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                      child: Text(
+                        'Apply Filters',
+                        style: TextStyle(
+                          color: AppColors.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<String?> _pickDate(BuildContext context) async {
+    final bool isDark =
+        Theme.of(context).brightness == Brightness.dark || AppColors.isDarkMode;
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme:
+                isDark
+                    ? ColorScheme.dark(
+                      primary: AppColors.primary,
+                      onPrimary: Colors.black,
+                      surface: AppColors.cardBackground,
+                      onSurface: AppColors.textPrimary,
+                    )
+                    : ColorScheme.light(
+                      primary: AppColors.primary,
+                      onPrimary: Colors.white,
+                      surface: AppColors.cardBackground,
+                      onSurface: AppColors.textPrimary,
+                    ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      return DateFormat('yyyy-MM-dd').format(picked);
     }
-    return clean;
+    return null;
+  }
+
+  Widget _buildDateField({
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        height: 44.h,
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        decoration: BoxDecoration(
+          color: AppColors.textFieldBg,
+          border: Border.all(color: AppColors.border.withOpacity(0.2)),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                value.isEmpty ? label : value,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color:
+                      value.isEmpty
+                          ? AppColors.textGrey
+                          : AppColors.textPrimary,
+                ),
+              ),
+            ),
+            Icon(Icons.calendar_today, size: 14.sp, color: AppColors.primary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterDropdownWidget({
+    required String value,
+    required List<String> options,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      height: 44.h,
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: AppColors.textFieldBg,
+        border: Border.all(color: AppColors.border.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          dropdownColor: AppColors.cardBackground,
+          value: options.contains(value) ? value : options.first,
+          items:
+              options.map((opt) {
+                return DropdownMenuItem(
+                  value: opt,
+                  child: Text(
+                    opt,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                );
+              }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTransactionCard(dynamic tx) {
+    final bool isDeposit = checkIfDeposit(tx);
+    final bool isApproved = tx.status?.toLowerCase() == 'approved';
+    final bool isRejected = tx.status?.toLowerCase() == 'rejected';
+    final String amountText = formatAmount(tx.amount, isDeposit);
+
+    IconData iconData;
+    Color iconColor;
+    Color iconBgColor;
+
+    final String typeStr = tx.transactionType?.toLowerCase() ?? '';
+    if (typeStr == 'deposit') {
+      iconData = Icons.arrow_downward;
+      iconColor = const Color(0xFF22C55E);
+      iconBgColor = const Color(0xFF22C55E).withOpacity(0.1);
+    } else if (typeStr == 'withdrawal') {
+      iconData = Icons.arrow_upward;
+      iconColor = const Color(0xFFEF4444);
+      iconBgColor = const Color(0xFFEF4444).withOpacity(0.1);
+    } else {
+      iconData = Icons.swap_horiz;
+      iconColor = const Color(0xFF3478F6);
+      iconBgColor = const Color(0xFF3478F6).withOpacity(0.1);
+    }
+
+    Color statusTextColor;
+    Color statusBgColor;
+    if (isApproved) {
+      statusTextColor = const Color(0xFF15803D);
+      statusBgColor = const Color(0xFFECFDF5);
+    } else if (isRejected) {
+      statusTextColor = const Color(0xFFB91C1C);
+      statusBgColor = const Color(0xFFFEF2F2);
+    } else {
+      statusTextColor = const Color(0xFFB45309);
+      statusBgColor = const Color(0xFFFFFBEB);
+    }
+
+    return InkWell(
+      onTap: () => _showTransactionDetails(tx),
+      borderRadius: BorderRadius.circular(16.r),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(color: AppColors.border.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40.w,
+              height: 40.h,
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(iconData, size: 20.sp, color: iconColor),
+            ),
+            SizedBox(width: 14.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tx.transactionType ?? 'Transaction',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    tx.referenceNumber ?? 'N/A',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontFamily: 'monospace',
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  if (tx.paymentDetails != null &&
+                      tx.paymentDetails!.isNotEmpty) ...[
+                    SizedBox(height: 4.h),
+                    Text(
+                      tx.paymentDetails!,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  SizedBox(height: 4.h),
+                  Text(
+                    tx.createdAt != null
+                        ? (() {
+                          final parsedDate = DateTime.tryParse(tx.createdAt!);
+                          if (parsedDate != null) {
+                            return DateFormat(
+                              'MMM dd, yyyy hh:mm a',
+                            ).format(parsedDate.toLocal());
+                          }
+                          return tx.createdAt!;
+                        })()
+                        : '',
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      color: AppColors.textSecondary.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  amountText,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                    color:
+                        isDeposit
+                            ? const Color(0xFF22C55E)
+                            : const Color(0xFFEF4444),
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: statusBgColor,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    (tx.status ?? 'PENDING').toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      fontWeight: FontWeight.bold,
+                      color: statusTextColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTransactionDetails(dynamic tx) {
+    final bool isDeposit = checkIfDeposit(tx);
+    final bool isApproved = tx.status?.toLowerCase() == 'approved';
+    final bool isRejected = tx.status?.toLowerCase() == 'rejected';
+    final String amountText = formatAmount(tx.amount, isDeposit);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.cardBackground,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.fromLTRB(
+            24.w,
+            24.h,
+            24.w,
+            MediaQuery.of(context).padding.bottom + 24.h,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Transaction Details',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+              Divider(color: AppColors.divider),
+              SizedBox(height: 16.h),
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      amountText,
+                      style: TextStyle(
+                        fontSize: 28.sp,
+                        fontWeight: FontWeight.w800,
+                        color:
+                            isDeposit
+                                ? const Color(0xFF22C55E)
+                                : const Color(0xFFEF4444),
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            isApproved
+                                ? const Color(0xFFECFDF5)
+                                : isRejected
+                                ? const Color(0xFFFEF2F2)
+                                : const Color(0xFFFFFBEB),
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(
+                          color:
+                              isApproved
+                                  ? const Color(0xFFBBF7D0)
+                                  : isRejected
+                                  ? const Color(0xFFFEE2E2)
+                                  : const Color(0xFFFEF3C7),
+                        ),
+                      ),
+                      child: Text(
+                        (tx.status ?? 'PENDING').toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              isApproved
+                                  ? const Color(0xFF15803D)
+                                  : isRejected
+                                  ? const Color(0xFFB91C1C)
+                                  : const Color(0xFFB45309),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 24.h),
+              _buildDetailRow('Reference Number', tx.referenceNumber ?? 'N/A'),
+              _buildDetailRow('Transaction Type', tx.transactionType ?? 'N/A'),
+              _buildDetailRow('Payment Method', tx.paymentMethod ?? 'N/A'),
+              _buildDetailRow(
+                'Account/Wallet',
+                tx.mt5AccountId != null && tx.mt5AccountId.toString().isNotEmpty
+                    ? 'MT5: ${tx.mt5AccountId}'
+                    : 'Wallet',
+              ),
+              _buildDetailRow(
+                'Date & Time',
+                tx.createdAt != null
+                    ? (() {
+                      final parsedDate = DateTime.tryParse(tx.createdAt!);
+                      if (parsedDate != null) {
+                        return DateFormat(
+                          'MMMM dd, yyyy hh:mm a',
+                        ).format(parsedDate.toLocal());
+                      }
+                      return tx.createdAt!;
+                    })()
+                    : 'N/A',
+              ),
+              if (tx.paymentDetails != null && tx.paymentDetails!.isNotEmpty)
+                _buildDetailRow('Payment Details', tx.paymentDetails!),
+
+              if (tx.proofUrl != null && tx.proofUrl!.isNotEmpty) ...[
+                SizedBox(height: 20.h),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44.h,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final Uri uri = Uri.parse(tx.proofUrl!);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      } else {
+                        CustomToastService.showError(
+                          message: 'Could not open proof link',
+                        );
+                      }
+                    },
+                    icon: Icon(Icons.receipt_long, color: AppColors.onPrimary),
+                    label: Text(
+                      'View Proof',
+                      style: TextStyle(
+                        color: AppColors.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
+          ),
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

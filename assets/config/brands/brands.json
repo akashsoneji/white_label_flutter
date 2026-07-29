@@ -1,13 +1,21 @@
 {
-  "default": "meta",
+  "default": "pipze",
   "brands": [
-    "meta"
+    "pipze",
+    "iquote"
   ],
   "brandDetails": [
     {
-      "name": "meta",
+      "name": "pipze",
+      "type": "child",
+      "inheritsFrom": "iquote",
+      "label": "Pipze",
+      "themeMode": "both"
+    },
+    {
+      "name": "iquote",
       "type": "parent",
-      "label": "Meta",
+      "label": "iQuote",
       "themeMode": "both"
     }
   ]

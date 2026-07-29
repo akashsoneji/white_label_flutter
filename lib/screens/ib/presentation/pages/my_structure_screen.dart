@@ -9,7 +9,8 @@ import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
 
 class MyStructureScreen extends StatefulWidget {
-  const MyStructureScreen({super.key});
+  final bool isEmbedded;
+  const MyStructureScreen({super.key, this.isEmbedded = false});
 
   @override
   State<MyStructureScreen> createState() => _MyStructureScreenState();
@@ -33,7 +34,8 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
 
   Future<void> _loadData() async {
     final statusResponse = await ibController.getIBStatus(showLoading: false);
-    final ibType = statusResponse?.data?.ibType ??
+    final ibType =
+        statusResponse?.data?.ibType ??
         ibController.ibStatusResponse.value?.data?.ibType ??
         'dynamic';
 
@@ -52,25 +54,28 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: AppBar(
-        scrolledUnderElevation: 0,
-        backgroundColor: AppColors.tradeBackgroundCenterColor,
-        elevation: 0,
-        leading: AppSvgBackButton(
-          onPressed: () => Get.back(closeOverlays: true),
-          iconWidth: 30.w,
-          iconHeight: 30.h,
-        ),
-        title: Text(
-          'My Structure',
-          style: AppTextStyles.bodyText.copyWith(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      appBar:
+          widget.isEmbedded
+              ? null
+              : AppBar(
+                scrolledUnderElevation: 0,
+                backgroundColor: AppColors.tradeBackgroundCenterColor,
+                elevation: 0,
+                leading: AppSvgBackButton(
+                  onPressed: () => Get.back(closeOverlays: true),
+                  iconWidth: 30.w,
+                  iconHeight: 30.h,
+                ),
+                title: Text(
+                  'My Structure',
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                centerTitle: true,
+              ),
       body: Obx(() {
         if (ibController.isLoading.value) {
           return Center(
@@ -92,9 +97,10 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.all(16.w),
-            child: ibType == 'traditional'
-                ? _buildTraditionalPerformanceDashboard()
-                : _buildDynamicStructureDashboard(),
+            child:
+                ibType == 'traditional'
+                    ? _buildTraditionalPerformanceDashboard()
+                    : _buildDynamicStructureDashboard(),
           ),
         );
       }),
@@ -135,10 +141,10 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
         Text(
           'Performance Dashboard',
           style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.w400,
             color: AppColors.textPrimary,
-          ),
+          fontFamily: 'SF UI'),
         ),
         SizedBox(height: 2.h),
         Text(
@@ -170,14 +176,46 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
       physics: const NeverScrollableScrollPhysics(),
       childAspectRatio: 2.2,
       children: [
-        _buildMetricCard('ACTIVE CLIENTS', (stats.activeClients ?? 0).toString(), Icons.people_alt_outlined),
-        _buildMetricCard('TOTAL DEPOSIT', '\$${(stats.totalDeposit ?? 0).toStringAsFixed(2)}', Icons.arrow_outward_rounded),
-        _buildMetricCard('TOTAL WITHDRAWAL', '\$${(stats.totalWithdrawal ?? 0).toStringAsFixed(2)}', Icons.south_west_rounded),
-        _buildMetricCard('NET DEPOSIT VOLUME', '\$${(stats.netDeposit ?? 0).toStringAsFixed(2)}', Icons.account_balance_wallet_outlined),
-        _buildMetricCard('CURRENT TIER', stats.currentTier?.name ?? 'None', Icons.verified_outlined),
-        _buildMetricCard('TOTAL LOT', (stats.totalLots ?? 0).toStringAsFixed(2), Icons.grid_view_rounded),
-        _buildMetricCard('CURRENT TIER REBATE', '\$${(stats.currentTierEarnings ?? 0).toStringAsFixed(2)}', Icons.percent_rounded),
-        _buildMetricCard('TOTAL EARNED', '\$${(stats.totalEarned ?? 0).toStringAsFixed(2)}', Icons.payments_outlined),
+        _buildMetricCard(
+          'ACTIVE CLIENTS',
+          (stats.activeClients ?? 0).toString(),
+          Icons.people_alt_outlined,
+        ),
+        _buildMetricCard(
+          'TOTAL DEPOSIT',
+          '\$${(stats.totalDeposit ?? 0).toStringAsFixed(2)}',
+          Icons.arrow_outward_rounded,
+        ),
+        _buildMetricCard(
+          'TOTAL WITHDRAWAL',
+          '\$${(stats.totalWithdrawal ?? 0).toStringAsFixed(2)}',
+          Icons.south_west_rounded,
+        ),
+        _buildMetricCard(
+          'NET DEPOSIT VOLUME',
+          '\$${(stats.netDeposit ?? 0).toStringAsFixed(2)}',
+          Icons.account_balance_wallet_outlined,
+        ),
+        _buildMetricCard(
+          'CURRENT TIER',
+          stats.currentTier?.name ?? 'None',
+          Icons.verified_outlined,
+        ),
+        _buildMetricCard(
+          'TOTAL LOT',
+          (stats.totalLots ?? 0).toStringAsFixed(2),
+          Icons.grid_view_rounded,
+        ),
+        _buildMetricCard(
+          'CURRENT TIER REBATE',
+          '\$${(stats.currentTierEarnings ?? 0).toStringAsFixed(2)}',
+          Icons.percent_rounded,
+        ),
+        _buildMetricCard(
+          'TOTAL EARNED',
+          '\$${(stats.totalEarned ?? 0).toStringAsFixed(2)}',
+          Icons.payments_outlined,
+        ),
       ],
     );
   }
@@ -219,11 +257,11 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 8.5.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 10.5.sp,
+                    fontWeight: FontWeight.w400,
                     color: AppColors.textGrey,
                     letterSpacing: 0.3,
-                  ),
+                  fontFamily: 'SF UI'),
                 ),
                 SizedBox(height: 3.h),
                 Text(
@@ -231,10 +269,10 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 13.5.sp,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 15.5.sp,
+                    fontWeight: FontWeight.w400,
                     color: AppColors.textPrimary,
-                  ),
+                  fontFamily: 'SF UI'),
                 ),
               ],
             ),
@@ -252,8 +290,14 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
     final currentDeposit = stats.netDeposit ?? 0.0;
     final totalClientsTarget = currentClients + clientsNeeded;
     final totalDepositTarget = currentDeposit + depositNeeded;
-    final clientProgress = totalClientsTarget > 0 ? (currentClients / totalClientsTarget).clamp(0.0, 1.0) : 0.0;
-    final depositProgress = totalDepositTarget > 0 ? (currentDeposit / totalDepositTarget).clamp(0.0, 1.0) : 0.0;
+    final clientProgress =
+        totalClientsTarget > 0
+            ? (currentClients / totalClientsTarget).clamp(0.0, 1.0)
+            : 0.0;
+    final depositProgress =
+        totalDepositTarget > 0
+            ? (currentDeposit / totalDepositTarget).clamp(0.0, 1.0)
+            : 0.0;
 
     return Container(
       decoration: BoxDecoration(
@@ -278,7 +322,11 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                     color: AppColors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.emoji_events_outlined, color: AppColors.primary, size: 22.sp),
+                  child: Icon(
+                    Icons.emoji_events_outlined,
+                    color: AppColors.primary,
+                    size: 22.sp,
+                  ),
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
@@ -288,10 +336,10 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                       Text(
                         'Unlock ${nextTier?.name ?? "Next Tier"}',
                         style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w400,
                           color: AppColors.textPrimary,
-                        ),
+                        fontFamily: 'SF UI'),
                       ),
                       SizedBox(height: 2.h),
                       Text(
@@ -338,7 +386,14 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
     );
   }
 
-  Widget _buildProgressBar(String title, String current, String target, double progress, String remaining, IconData icon) {
+  Widget _buildProgressBar(
+    String title,
+    String current,
+    String target,
+    double progress,
+    String remaining,
+    IconData icon,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -351,7 +406,11 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                 SizedBox(width: 6.w),
                 Text(
                   title,
-                  style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textPrimary,
+                  fontFamily: 'SF UI'),
                 ),
               ],
             ),
@@ -359,11 +418,19 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
               children: [
                 Text(
                   current,
-                  style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 14.5.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textPrimary,
+                  fontFamily: 'SF UI'),
                 ),
                 Text(
                   ' / $target',
-                  style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w500, color: AppColors.textGrey),
+                  style: TextStyle(
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textGrey,
+                  fontFamily: 'SF UI'),
                 ),
               ],
             ),
@@ -384,7 +451,11 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
           alignment: Alignment.centerRight,
           child: Text(
             remaining,
-            style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w400, color: AppColors.textGrey),
+            style: TextStyle(
+              fontSize: 10.5.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textGrey,
+            ),
           ),
         ),
       ],
@@ -405,7 +476,11 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
             padding: EdgeInsets.all(14.w),
             child: Text(
               'Active Rebates (Per Lot)',
-              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textPrimary,
+              fontFamily: 'SF UI'),
             ),
           ),
           Container(
@@ -413,8 +488,30 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
             color: AppColors.tradeBackgroundCenterColor.withValues(alpha: 0.5),
             child: Row(
               children: [
-                Expanded(flex: 2, child: Text('CATEGORY', style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.w600, color: AppColors.textGrey, letterSpacing: 0.5))),
-                Expanded(flex: 5, child: Text('PAYOUT RATES', style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.w600, color: AppColors.textGrey, letterSpacing: 0.5))),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'CATEGORY',
+                    style: TextStyle(
+                      fontSize: 11.5.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textGrey,
+                      letterSpacing: 0.5,
+                    fontFamily: 'SF UI'),
+                  ),
+                ),
+                Expanded(
+                  flex: 5,
+                  child: Text(
+                    'PAYOUT RATES',
+                    style: TextStyle(
+                      fontSize: 11.5.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.textGrey,
+                      letterSpacing: 0.5,
+                    fontFamily: 'SF UI'),
+                  ),
+                ),
               ],
             ),
           ),
@@ -422,7 +519,11 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: stats.currentRebates!.length,
-            separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.border.withValues(alpha: 0.5)),
+            separatorBuilder:
+                (context, index) => Divider(
+                  height: 1,
+                  color: AppColors.border.withValues(alpha: 0.5),
+                ),
             itemBuilder: (context, index) {
               final rebate = stats.currentRebates![index];
               return Padding(
@@ -434,12 +535,20 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                       flex: 2,
                       child: Row(
                         children: [
-                          Icon(Icons.category_outlined, size: 15.sp, color: AppColors.primary),
+                          Icon(
+                            Icons.category_outlined,
+                            size: 15.sp,
+                            color: AppColors.primary,
+                          ),
                           SizedBox(width: 6.w),
                           Expanded(
                             child: Text(
                               rebate.categoryName ?? '',
-                              style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                              style: TextStyle(
+                                fontSize: 13.5.sp,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.textPrimary,
+                              fontFamily: 'SF UI'),
                             ),
                           ),
                         ],
@@ -450,23 +559,43 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                       child: Wrap(
                         spacing: 6.w,
                         runSpacing: 6.h,
-                        children: (rebate.levels ?? []).map<Widget>((level) {
-                          return Container(
-                            padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.5.h),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('L${level.level}', style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.w600, color: AppColors.textGrey)),
-                                SizedBox(width: 6.w),
-                                Text('\$${level.rate?.toStringAsFixed(2)}', style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w700, color: Colors.green)),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                        children:
+                            (rebate.levels ?? []).map<Widget>((level) {
+                              return Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 7.w,
+                                  vertical: 3.5.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.05,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'L${level.level}',
+                                      style: TextStyle(
+                                        fontSize: 11.5.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: AppColors.textGrey,
+                                      fontFamily: 'SF UI'),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      '\$${level.rate?.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        fontSize: 12.5.sp,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.green,
+                                      fontFamily: 'SF UI'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
                       ),
                     ),
                   ],
@@ -516,8 +645,8 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Top Info Cards (Standard Groups & Private Groups)
-        _buildDynamicInfoCards(),
-        SizedBox(height: 20.h),
+        // _buildDynamicInfoCards(),
+        // SizedBox(height: 20.h),
 
         // Section Title / Tab Banner
         Container(
@@ -528,12 +657,12 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
             ),
           ),
           child: Text(
-            'Standard Groups',
+            'Groups',
             style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w700,
+              fontSize: 17.sp,
+              fontWeight: FontWeight.w400,
               color: AppColors.textPrimary,
-            ),
+            fontFamily: 'SF UI'),
           ),
         ),
         SizedBox(height: 16.h),
@@ -579,10 +708,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
     );
   }
 
-  Widget _buildInfoCard({
-    required String title,
-    required String description,
-  }) {
+  Widget _buildInfoCard({required String title, required String description}) {
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
@@ -617,10 +743,10 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13.5.sp,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 15.5.sp,
+                    fontWeight: FontWeight.w400,
                     color: AppColors.textPrimary,
-                  ),
+                  fontFamily: 'SF UI'),
                 ),
                 SizedBox(height: 4.h),
                 Text(
@@ -669,11 +795,11 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
             child: Text(
               (group.groupName ?? group.planTitle ?? 'GROUP').toUpperCase(),
               style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w800,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
                 color: AppColors.whiteColor,
                 letterSpacing: 1.0,
-              ),
+              fontFamily: 'SF UI'),
             ),
           ),
           Expanded(
@@ -682,49 +808,52 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
               padding: EdgeInsets.all(14.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: categories.map((cat) {
-                  final catName = cat.categoryName ?? '';
-                  final rate = _getCommissionValue(group, catName);
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          catName,
-                          style: TextStyle(
-                            fontSize: 11.5.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        SizedBox(height: 6.h),
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 10.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.cardBackGround,
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(
-                              color: AppColors.border.withValues(alpha: 0.5),
+                children:
+                    categories.map((cat) {
+                      final catName = cat.categoryName ?? '';
+                      final rate = _getCommissionValue(group, catName);
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              catName,
+                              style: TextStyle(
+                                fontSize: 13.5.sp,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.textPrimary,
+                              fontFamily: 'SF UI'),
                             ),
-                          ),
-                          child: Text(
-                            '\$  $rate',
-                            style: TextStyle(
-                              fontSize: 12.5.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                            SizedBox(height: 6.h),
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 10.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.cardBackGround,
+                                borderRadius: BorderRadius.circular(8.r),
+                                border: Border.all(
+                                  color: AppColors.border.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                '\$  $rate',
+                                style: TextStyle(
+                                  fontSize: 14.5.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.textPrimary,
+                                fontFamily: 'SF UI'),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
               ),
             ),
           ),

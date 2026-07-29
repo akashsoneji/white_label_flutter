@@ -59,8 +59,9 @@ class TradingBottomNavigation extends StatelessWidget {
             children: [
               _buildIquoteNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
               _buildIquoteNavItem(1, Icons.bar_chart_outlined, Icons.bar_chart, 'Markets'),
-              _buildIquoteNavItem(2, Icons.assignment_outlined, Icons.assignment, 'Position', badgeCount: openCount),
-              _buildIquoteNavItem(3, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Assets'),
+              _buildIquoteNavItem(2, Icons.insert_chart_outlined, Icons.insert_chart, 'Charts'),
+              _buildIquoteNavItem(3, Icons.assignment_outlined, Icons.assignment, 'Position', badgeCount: openCount),
+              _buildIquoteNavItem(4, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Assets'),
             ],
           ),
         );

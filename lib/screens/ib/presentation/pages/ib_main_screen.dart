@@ -6,8 +6,9 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_dashboard_new_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/my_structure_screen.dart';
-import 'package:crm_app/screens/ib/presentation/pages/ib_structure_screen.dart';
+import 'package:crm_app/screens/ib/presentation/pages/ib_combined_structure_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_requests_screen.dart';
+import 'package:crm_app/screens/ib/presentation/pages/ib_transfer_commission_screen.dart';
 // import 'package:crm_app/screens/ib/presentation/pages/ib_more_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/my_clients_screen.dart';
 import 'package:crm_app/widgets/ib_bottom_navigation.dart';
@@ -97,29 +98,29 @@ class _IbMainScreenState extends State<IbMainScreen> {
           },
         ),
       ),
+      if (isTraditional)
+        KeepAliveWrapper(
+          key: ValueKey('my_structure_$_screenKey'),
+          child: const MyStructureScreen(),
+        )
+      else
+        KeepAliveWrapper(
+          key: ValueKey('combined_structure_$_screenKey'),
+          child: const IbCombinedStructureScreen(),
+        ),
       KeepAliveWrapper(
-        key: ValueKey('my_structure_$_screenKey'),
-        child: const MyStructureScreen(),
+        key: ValueKey('clients_$_screenKey'),
+        child: const MyClientsScreen(),
       ),
-      if (!isTraditional) ...[
-        KeepAliveWrapper(
-          key: ValueKey('structure_$_screenKey'),
-          child: const IBStructureScreen(),
-        ),
-        KeepAliveWrapper(
-          key: ValueKey('clients_$_screenKey'),
-          child: const MyClientsScreen(),
-        ),
+      if (!isTraditional)
         KeepAliveWrapper(
           key: ValueKey('requests_$_screenKey'),
           child: const IBRequestsScreen(),
         ),
-      ] else ...[
-        KeepAliveWrapper(
-          key: ValueKey('clients_$_screenKey'),
-          child: const MyClientsScreen(),
-        ),
-      ],
+      KeepAliveWrapper(
+        key: ValueKey('transfer_commission_$_screenKey'),
+        child: const IbTransferCommissionScreen(),
+      ),
     ];
   }
 

@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:crm_app/screens/home/brands/iquote/iquote_chart_screen.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -296,7 +294,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
       if (list.isEmpty) {
         return Center(
           child: CommonLoadingWidget(
-            message: 'Loading instruments...',
+            message: 'Loading...',
             size: 40,
             color: AppColors.primary,
           ),
@@ -304,22 +302,19 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
       }
 
       return ListView.builder(
-        padding: EdgeInsets.only(bottom: 20.h),
+        // padding: EdgeInsets.only(top: 10.h, bottom: 10.h),
         itemCount: list.length,
         itemBuilder: (context, i) {
           return _IquoteInstrumentRow(
             instrument: list[i],
             bidHistory: _bidHistory,
             controller: _ic,
-              onTap: (sym) {
-              print("object symsdjhdhs  ----. $sym");
-               Get.to(() => IQuoteChartScreen(symbol: sym));
-              // if (widget.onNavigateToChart != null) {
-              //   widget.onNavigateToChart!(sym);
-              // } else {
-              //   Get.to(() => IQuoteChartScreen(symbol: sym));
-              // }
-            
+            onTap: (sym) {
+              if (widget.onNavigateToChart != null) {
+                widget.onNavigateToChart!(sym);
+              } else {
+                Get.to(() => IQuoteChartScreen(symbol: sym));
+              }
             },
           );
         },
@@ -388,6 +383,17 @@ class _IquoteInstrumentRow extends StatelessWidget {
     this.onTap,
   });
 
+  String _formatSymbolName(String sym) {
+    final clean = sym.replaceAll('.c', '').toUpperCase();
+    if (clean.length == 6) {
+      return '${clean.substring(0, 3)}/${clean.substring(3)}';
+    }
+    if (clean.length == 7 && clean.endsWith('USDT')) {
+      return '${clean.substring(0, 3)}/USDT';
+    }
+    return clean;
+  }
+
   @override
   Widget build(BuildContext context) {
     final sym = instrument.symbol;
@@ -447,171 +453,187 @@ class _IquoteInstrumentRow extends StatelessWidget {
       final changePct =
           dayLow > 0 ? ((currentBid - dayLow) / dayLow * 100) : 0.0;
       final isUp = changePct >= 0;
-      final sign = isUp ? '+' : '';
 
-      final lineColor =
-          isUp ? const Color(0xFF2ED573) : const Color(0xFFFF4757);
       final changeColor =
-          isUp ? const Color(0xFF2ED573) : const Color(0xFFFF4757);
+          isUp ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
+      final String valSign = isUp ? '↑' : '↓';
+      final String pctSign = isUp ? '+' : '-';
       final changeStr =
-          '$sign${changeVal.abs().toStringAsFixed(digits.clamp(1, 4))}(${sign}${changePct.abs().toStringAsFixed(2)}%)';
+          '$valSign${changeVal.abs().toStringAsFixed(digits.clamp(1, 4))} ($pctSign${changePct.abs().toStringAsFixed(2)}%)';
 
       return GestureDetector(
         onTap: () => onTap?.call(sym),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: AppColors.border.withOpacity(0.2),
+                color: AppColors.border.withOpacity(0.1),
                 width: 0.5,
               ),
             ),
           ),
           child: Row(
             children: [
-              // Symbol + Name+Category (single line) + Sparkline
+              // Symbol Icon + Info
               Expanded(
-                flex: 4,
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 2.h),
-                      child: _FlagIcon(symbol: displaySym),
-                    ),
-                    SizedBox(width: 8.w),
+                    _FlagIcon(symbol: displaySym),
+                    SizedBox(width: 10.w),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Single-line: "EURUSD · Forex"
-                          Row(
-                            children: [
-                              Text(
-                                displaySym,
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              if (instrument.category != null &&
-                                  instrument.category!.isNotEmpty) ...[
-                                Text(
-                                  ' · ',
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    fontSize: 11.sp,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                Text(
-                                  instrument.category!,
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    fontSize: 11.sp,
-                                    color: AppColors.textSecondary,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          SizedBox(height: 4.h),
-                          // Larger sparkline chart below the name/category
-                          SizedBox(
-                            width: 160.w,
-                            height: 44.h,
-                            child: _IquoteSparkline(
-                              history: hist,
-                              lineColor: lineColor,
-                              digits: digits,
-                              fallbackPrice: currentBid,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        _formatSymbolName(sym),
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(width: 6.w),
-              // Change + Buy/Sell/Spread row — flex layout so wide
-              // spread values never overflow.
+              SizedBox(width: 8.w),
+              // Right: Prices & Spreads & Changes
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Change text
                   Text(
                     changeStr,
                     style: AppTextStyles.bodyText.copyWith(
-                      fontSize: 10.sp,
+                      fontSize: 10.5.sp,
                       color: changeColor,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  SizedBox(height: 2.h),
+                  // Buy/Sell side-by-side with overlapping center spread badge
+                  Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
                     children: [
-                      SizedBox(
-                        width: 66.w,
-                        child: _SideButton(
-                          label: 'Buy',
-                          price: currentAsk,
-                          digits: digits,
-                          color: const Color.fromARGB(255, 35, 187, 98),
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Buy Button (Green)
+                          Container(
+                            width: 68.w,
+                            height: 34.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF22C55E),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(6.r),
+                                bottomLeft: Radius.circular(6.r),
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Buy',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.85),
+                                    fontSize: 8.5.sp,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: 1.h),
+                                Text(
+                                  currentAsk.toStringAsFixed(
+                                    digits.clamp(0, 5),
+                                  ),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10.5.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 1.w),
+                          // Sell Button (Red)
+                          Container(
+                            width: 68.w,
+                            height: 34.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEF4444),
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(6.r),
+                                bottomRight: Radius.circular(6.r),
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Sell',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.85),
+                                    fontSize: 8.5.sp,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: 1.h),
+                                Text(
+                                  currentBid.toStringAsFixed(
+                                    digits.clamp(0, 5),
+                                  ),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10.5.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 4.w),
-                      // Center Spread Pill between Buy and Sell buttons with fixed width
-                      Container(
-                        width: 32.w,
-                        padding: EdgeInsets.symmetric(vertical: 3.h),
-                        decoration: BoxDecoration(
-                          color:
-                              isDark
-                                  ? const Color(0xFF1C2234)
-                                  : AppColors.primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(10.r),
-                          border: Border.all(
+                      // Overlay Spread Oval Badge in Center
+                      Positioned(
+                        top: 3.h,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 5.w,
+                            vertical: 1.5.h,
+                          ),
+                          decoration: BoxDecoration(
                             color:
                                 isDark
-                                    ? Colors.white12
-                                    : AppColors.primary.withValues(alpha: 0.15),
-                            width: 0.5,
+                                    ? const Color(0xFF0F172A)
+                                    : const Color(0xFF1E293B),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(
+                              color: Colors.white24,
+                              width: 0.5,
+                            ),
                           ),
-                        ),
-                        child: Center(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 2.w),
-                              child: Text(
-                                spreadText,
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 9.sp,
-                                  color:
-                                      isDark
-                                          ? Colors.white70
-                                          : AppColors.primary,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
+                          child: Text(
+                            spreadText,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 8.5.sp,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(width: 4.w),
-                      SizedBox(
-                        width: 66.w,
-                        child: _SideButton(
-                          label: 'Sell',
-                          price: currentBid,
-                          digits: digits,
-                          color: const Color(0xFFFF4757),
-                        ),
-                      ),
                     ],
+                  ),
+                  SizedBox(height: 2.h),
+                  // Spread Cost
+                  Text(
+                    '\$${spread.toStringAsFixed(digits.clamp(1, 4))}',
+                    style: TextStyle(
+                      color: const Color(0xFF22C55E),
+                      fontSize: 9.5.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -675,117 +697,6 @@ class _FlagIcon extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _SideButton extends StatelessWidget {
-  final String label;
-  final double price;
-  final int digits;
-  final Color color;
-  const _SideButton({
-    required this.label,
-    required this.price,
-    required this.digits,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final dec = digits.clamp(0, 5);
-    return Container(
-      height: 38.h,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 10.sp,
-              color: Colors.white,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          Text(
-            price.toStringAsFixed(dec),
-            style: AppTextStyles.bodyText.copyWith(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w400,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IquoteSparkline extends StatelessWidget {
-  final List<double> history;
-  final Color lineColor;
-  final int digits;
-  final double fallbackPrice;
-
-  const _IquoteSparkline({
-    required this.history,
-    required this.lineColor,
-    required this.digits,
-    required this.fallbackPrice,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    List<double> dataPoints = List<double>.from(history);
-    if (dataPoints.length < 2) {
-      final base = fallbackPrice > 0 ? fallbackPrice : 1.0;
-      dataPoints = [base, base];
-    }
-
-    final spots = <FlSpot>[];
-    for (int i = 0; i < dataPoints.length; i++) {
-      spots.add(FlSpot(i.toDouble(), dataPoints[i]));
-    }
-
-    var minY = spots.map((s) => s.y).reduce(math.min);
-    var maxY = spots.map((s) => s.y).reduce(math.max);
-    if ((maxY - minY).abs() < 1e-9) {
-      minY -= 0.01;
-      maxY += 0.01;
-    }
-
-    final gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [lineColor.withOpacity(0.3), lineColor.withOpacity(0.0)],
-    );
-
-    return LineChart(
-      LineChartData(
-        minY: minY,
-        maxY: maxY,
-        minX: 0,
-        maxX: (dataPoints.length - 1).toDouble(),
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        lineTouchData: const LineTouchData(enabled: false),
-        titlesData: const FlTitlesData(show: false),
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: true,
-            barWidth: 1.5,
-            color: lineColor,
-            dotData: const FlDotData(show: false),
-            belowBarData: BarAreaData(show: true, gradient: gradient),
-          ),
-        ],
-      ),
-      duration: const Duration(milliseconds: 150),
     );
   }
 }

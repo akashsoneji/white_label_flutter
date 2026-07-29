@@ -42,7 +42,17 @@ abstract class FinanceRepository {
   });
 
   // Transactions
-  Future<ApiResponse> getTransactions({required String token});
+  Future<ApiResponse> getTransactions({
+    required String token,
+    int? page,
+    int? perPage,
+    String? transactionType,
+    String? dateFrom,
+    String? dateTo,
+    String? type,
+    String? status,
+    String? t,
+  });
 
   // Accounts (used by finance screens today)
   Future<ApiResponse> getMt5Accounts({required String token});

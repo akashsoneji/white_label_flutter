@@ -6,6 +6,8 @@ import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
 import 'package:crm_app/screens/wallet/data/repositories/wallet_repository.dart';
+import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
+import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart' show Data; 
 
 // --- Models ---
 class WalletResponse {
@@ -65,10 +67,10 @@ class UserMT5Account {
   factory UserMT5Account.fromJson(Map<String, dynamic> json) {
     return UserMT5Account(
       id: json['id'] ?? 0,
-      metaAccountNumber: json['meta_account_number'] ?? '',
-      metaAccountName: json['meta_account_name'] ?? '',
-      masterGroupId: json['master_group_id'] ?? '',
-      balance: json['balance'] ?? '0.0',
+      metaAccountNumber: json['meta_account_number']?.toString() ?? '',
+      metaAccountName: json['meta_account_name']?.toString() ?? '',
+      masterGroupId: json['master_group_id']?.toString() ?? '',
+      balance: json['balance']?.toString() ?? '0.0',
     );
   }
 }
@@ -89,9 +91,9 @@ class Wallet {
   factory Wallet.fromJson(Map<String, dynamic> json) {
     return Wallet(
       id: json['id'] ?? 0,
-      walletId: json['wallet_id'] ?? '',
-      walletStatus: json['wallet_status'] ?? '',
-      walletBalance: json['wallet_balance'] ?? '0.0',
+      walletId: json['wallet_id']?.toString() ?? '',
+      walletStatus: json['wallet_status']?.toString() ?? '',
+      walletBalance: json['wallet_balance']?.toString() ?? '0.0',
     );
   }
 }
@@ -121,6 +123,7 @@ class IbAccount {
 
 class WalletController extends GetxController {
   final WalletRepository _repo = Get.find<WalletRepository>();
+  final FinanceRepository _financeRepo = Get.find<FinanceRepository>();
   var walletId = 'PIPW008'.obs;
   var balance = ''.obs;
   var transferFromAccount = ''.obs;
@@ -149,6 +152,21 @@ class WalletController extends GetxController {
   final transferToController = TextEditingController();
   final amountController = TextEditingController(text: '0.00');
 
+  // History State
+  var isHistoryLoading = false.obs;
+  var isLoadingMore = false.obs;
+  var hasMore = true.obs;
+  var historyTransactions = <Data>[].obs;
+  var currentPage = 1.obs;
+  var lastPage = 1.obs;
+  var totalItems = 0.obs;
+  
+  // History Filters
+  var filterDateFrom = ''.obs;
+  var filterDateTo = ''.obs;
+  var filterType = 'All Types'.obs;
+  var filterStatus = 'All Status'.obs;
+
   // Sample account options for dropdown
   final List<String> accountOptions = [
     'MT5 Account Number',
@@ -161,13 +179,8 @@ class WalletController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Set default values
-    // transferFromAccount.value = accountOptions[0];
-    // transferFromController.text = accountOptions[0];
-    // transferToController.text = accountOptions[0];
-    // amountController.text = '\$500.00';
-    // amount.value = '\$500.00';
     fetchWalletData();
+    fetchWalletHistory();
   }
 
   void selectTransferFromAccount(String account) {
@@ -463,27 +476,47 @@ class WalletController extends GetxController {
       isLoading.value = true;
 
       final token = await SecureStorageService.getAuthToken();
-      // Add timestamp parameter as required by API
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final response = await _repo.getWalletData(
+
+      // 1. Fetch legacy wallet data (to get mt5Accounts and ibAccount for transfer screen)
+      final legacyResponse = await _repo.getWalletData(
         token: token ?? '',
         queryParameters: {'_t': timestamp.toString()},
       );
 
-      if (response.success && response.data != null) {
-        final parsed = WalletResponse.fromJson(response.data);
-        print(
-          "Wallet API Parsed Response: ${parsed.message},=======,${parsed.wallet.walletId}",
-        );
+      if (legacyResponse.success && legacyResponse.data != null) {
+        final parsed = WalletResponse.fromJson(legacyResponse.data);
         mt5Accounts.assignAll(parsed.userMT5Accounts);
-        wallet.value = parsed.wallet;
         ibAccount.value = parsed.ibAccount;
+        // Fallback wallet & balance
+        wallet.value = parsed.wallet;
         balance.value = parsed.wallet.walletBalance;
+      }
+
+      // 2. Fetch fresh wallet details from the new api/user/wallet endpoint
+      final freshResponse = await _repo.getWalletDetailsNew(
+        token: token ?? '',
+        queryParameters: {'_t': timestamp.toString()},
+      );
+
+      if (freshResponse.success && freshResponse.data != null) {
+        final freshData = freshResponse.data;
+        if (freshData['data'] != null) {
+          final walletMap = freshData['data'] as Map<String, dynamic>;
+          final walletIdStr = walletMap['wallet_id']?.toString() ?? '';
+          final balanceStr = walletMap['balance']?.toString() ?? '0.0';
+
+          wallet.value = Wallet(
+            id: wallet.value?.id ?? 0,
+            walletId: walletIdStr,
+            walletStatus: wallet.value?.walletStatus ?? 'active',
+            walletBalance: balanceStr,
+          );
+          balance.value = balanceStr;
+          print("Fetched wallet Details: ID = $walletIdStr, Balance = $balanceStr");
+        }
       } else {
-        print("Failed to fetch wallet data: ${response.message}");
-        CustomToastService.showError(
-          message: response.message ?? "Something went wrong",
-        );
+        print("Failed to fetch fresh wallet details: ${freshResponse.message}");
       }
     } catch (e) {
       print("Error fetching wallet data: $e");
@@ -527,6 +560,103 @@ class WalletController extends GetxController {
     ibAccount.refresh();
     balance.refresh();
 
-    print('WalletController: All wallet data cleared successfully');
+    print('WalletController: All data cleared.');
+  }
+
+  // --- History & Pagination Logic ---
+
+  Future<void> fetchWalletHistory({int page = 1}) async {
+    try {
+      print('DEBUG: fetchWalletHistory page = $page');
+      if (page == 1) {
+        isHistoryLoading.value = true;
+        hasMore.value = true;
+        historyTransactions.clear();
+      } else {
+        isLoadingMore.value = true;
+      }
+
+      final token = await SecureStorageService.getAuthToken();
+      
+      final typeQuery = filterType.value != 'All Types' ? filterType.value : '';
+      final statusQuery = filterStatus.value != 'All Status' ? filterStatus.value : '';
+      final fromQuery = filterDateFrom.value;
+      final toQuery = filterDateTo.value;
+
+      print('DEBUG: calling getTransactions with type: $typeQuery, status: $statusQuery');
+      final response = await _financeRepo.getTransactions(
+        token: token ?? '',
+        page: page,
+        perPage: 10,
+        transactionType: typeQuery,
+        type: typeQuery,
+        status: statusQuery,
+        dateFrom: fromQuery,
+        dateTo: toQuery,
+        t: DateTime.now().millisecondsSinceEpoch.toString(),
+      );
+
+      print('DEBUG: getTransactions response success = ${response.success}');
+      if (response.success && response.data != null) {
+        final data = response.data;
+        print('DEBUG: getTransactions data keys = ${data is Map ? data.keys : "Not a Map"}');
+        List<Data> newItems = [];
+        if (data['data'] != null) {
+          final List transactionsList = data['data'];
+          print('DEBUG: transactionsList length = ${transactionsList.length}');
+          newItems = transactionsList.map((e) => Data.fromJson(e)).toList();
+        }
+
+        if (data['pagination'] != null) {
+          currentPage.value = data['pagination']['current_page'] ?? page;
+          lastPage.value = data['pagination']['last_page'] ?? 1;
+          totalItems.value = data['pagination']['total'] ?? 0;
+          print('DEBUG: pagination: current = ${currentPage.value}, last = ${lastPage.value}');
+        }
+
+        if (page == 1) {
+          historyTransactions.assignAll(newItems);
+        } else {
+          historyTransactions.addAll(newItems);
+        }
+
+        if (newItems.isEmpty || currentPage.value >= lastPage.value) {
+          hasMore.value = false;
+        }
+      } else {
+        print('DEBUG: getTransactions failed with message: ${response.message}');
+        if (page == 1) {
+          hasMore.value = false;
+        }
+      }
+    } catch (e, stack) {
+      print("Error fetching wallet history: $e");
+      print(stack);
+      if (page == 1) {
+        hasMore.value = false;
+      }
+    } finally {
+      isHistoryLoading.value = false;
+      isLoadingMore.value = false;
+    }
+  }
+
+  void loadMoreTransactions() {
+    if (isHistoryLoading.value || isLoadingMore.value || !hasMore.value) {
+      return;
+    }
+    fetchWalletHistory(page: currentPage.value + 1);
+  }
+
+  void applyFilters() {
+    fetchWalletHistory(page: 1);
+  }
+
+  void clearFilters() {
+    filterDateFrom.value = '';
+    filterDateTo.value = '';
+    filterType.value = 'All Types';
+    filterStatus.value = 'All Status';
+    fetchWalletHistory(page: 1);
   }
 }

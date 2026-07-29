@@ -107,8 +107,8 @@ class Data {
 }
 
 class StageCompletion {
-  DateTime? mobileVerified;
-  DateTime? emailVerified;
+  bool? mobileVerified;
+  bool? emailVerified;
   bool? personalDetails;
   bool? identityVerified;
   bool? addressProofVerified;
@@ -122,8 +122,8 @@ class StageCompletion {
   });
 
   StageCompletion copyWith({
-    DateTime? mobileVerified,
-    DateTime? emailVerified,
+    bool? mobileVerified,
+    bool? emailVerified,
     bool? personalDetails,
     bool? identityVerified,
     bool? addressProofVerified,
@@ -154,8 +154,8 @@ class StageCompletion {
     );
 
     return StageCompletion(
-      mobileVerified: _parseDateTime(json["mobile_verified"]),
-      emailVerified: _parseDateTime(json["email_verified"]),
+      mobileVerified: _parseBool(json["mobile_verified"]),
+      emailVerified: _parseBool(json["email_verified"]),
       personalDetails: _parseBool(json["personal_details"]),
       identityVerified: _parseBool(json["identity_verified"]),
       addressProofVerified: _parseBool(json["address_proof_verified"]),
@@ -203,8 +203,8 @@ class StageCompletion {
   }
 
   Map<String, dynamic> toJson() => {
-    "mobile_verified": mobileVerified?.toIso8601String(),
-    "email_verified": emailVerified?.toIso8601String(),
+    "mobile_verified": mobileVerified,
+    "email_verified": emailVerified,
     "personal_details": personalDetails,
     "identity_verified": identityVerified,
     "address_proof_verified": addressProofVerified,

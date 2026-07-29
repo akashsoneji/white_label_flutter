@@ -511,6 +511,16 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 primaryColor,
                 isDark,
               ),
+              Obx(() {
+                final model = Get.find<MoreController>().dashboardModel.value;
+                final stage = model?.data?.stageCompletion;
+                final isVerified =
+                    (stage?.emailVerified != null) &&
+                    (stage?.mobileVerified != null) &&
+                    (stage?.personalDetails == true);
+                if (isVerified) return const SizedBox.shrink();
+                return const _VerifyAccountCard();
+              }),
               SizedBox(height: 16.h),
 
               // 3. Create Demo & Create Real Account Action Cards Grid
@@ -1394,3 +1404,114 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     );
   }
 }
+
+class _VerifyAccountCard extends StatelessWidget {
+  const _VerifyAccountCard();
+
+  static final _languageService = Get.isRegistered<LanguageService>()
+      ? Get.find<LanguageService>()
+      : null;
+  static final _moreController = Get.isRegistered<MoreController>()
+      ? Get.find<MoreController>()
+      : null;
+
+  int _calculateCompletion(StageCompletion? stage) {
+    if (stage == null) return 0;
+    int completion = 0;
+    if (stage.mobileVerified != null) completion += 20;
+    if (stage.emailVerified != null) completion += 20;
+    if (stage.personalDetails == true) completion += 20;
+    if (stage.identityVerified == true) completion += 20;
+    if (stage.addressProofVerified == true) completion += 20;
+    return completion;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final languageService = _languageService;
+    final moreController = _moreController;
+    if (moreController == null) return const SizedBox.shrink();
+
+    return GetBuilder<MoreController>(
+      builder: (controller) {
+        final model = controller.dashboardModel.value;
+        final stage = model?.data?.stageCompletion;
+        final completion = _calculateCompletion(stage);
+
+        return Card(
+          elevation: 0,
+          color: AppColors.primary.withValues(alpha: 0.08),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: InkWell(
+            onTap: () async {
+              final model = controller.dashboardModel.value;
+              final stage = model?.data?.stageCompletion;
+              await Get.toNamed(AppPages.KYC_INTRO, arguments: stage);
+              controller.loadMoreScreenData();
+            },
+            borderRadius: BorderRadius.circular(12.r),
+            child: Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          languageService?.tr('verify_account') ??
+                              'Verify Account',
+                          style: AppTextStyles.headingblack.copyWith(
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        color: AppColors.textPrimary,
+                        size: 14.r,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    languageService?.tr('complete_your_profile') ??
+                        'Complete your profile to unlock all features',
+                    style: AppTextStyles.labelOnChartPendingOrder.copyWith(
+                      fontSize: 12.sp,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    '$completion% ${languageService?.tr('completed') ?? 'Completed'}',
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(2.r),
+                    child: LinearProgressIndicator(
+                      value: completion / 100,
+                      minHeight: 3.h,
+                      backgroundColor: AppColors.border,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
