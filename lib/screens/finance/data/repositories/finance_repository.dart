@@ -51,6 +51,7 @@ abstract class FinanceRepository {
     String? dateTo,
     String? type,
     String? status,
+    String? t,
   });
 
   // Accounts (used by finance screens today)

@@ -72,6 +72,7 @@ class ApiConstants {
   static const String submitUnifiedKyc = '${ajax}kyc/submit-unified';
   static const String checkMobile = '${ajax}auth/google/check-mobile';
   static const String getWalletData = '${ajax}internaltransfer';
+  static const String getWalletDetailsNew = '${ajax}wallet';
   static const String currencyList = '${ajax}utility/currency-list';
   static const String withdrawalRequest = '${ajax}withdrawal';
   static const String withdrawalSendOTPRequest = '${ajax}withdrawal/sendOTP';
@@ -99,8 +100,15 @@ class ApiConstants {
   static const String ibSubIbSubIbs = '${ajax}ib/sub-ib-sub-ibs/';
   static const String ibSubIbStats = '${ajax}ib/sub-ib-stats/';
   static const String ibStructure = '${ajax}ib/structure';
-  static const String ibSubIbApprovalRequests =
-      '${ajax}ib/sub-ib-approval-requests';
+  static const String ibSubIbApprovalRequests = '${ajax}ib/approval/requests';
+  
+  // IB Transfer Endpoints
+  static const String ibTransferCreate = '${ajax}ib/transfer/create';
+  static const String ibTransferClientsSearch = '${ajax}ib/transfer/clients/search';
+  static const String ibTransferStore = '${ajax}ib/transfer/store';
+  static const String ibTransferHistory = '${ajax}ib/transfer/history';
+  static const String ibTransferCancel = '${ajax}ib/transfer/'; // Append {id}/cancel
+
   // Web-style IB requests list (datatable)
   static const String ibRequestList = '${ajax}ib/ib-request-list';
   static const String ibTrackVisit = '${ajax}ib/track-visit';

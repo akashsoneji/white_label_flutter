@@ -95,5 +95,31 @@ class IbRepositoryImpl implements IbRepository {
   }) {
     return _remote.updateIbStatusRequest(requestId: requestId, payload: payload);
   }
+
+  // IB Transfer Methods
+  @override
+  Future<ApiResponse> ibTransferInit() {
+    return _remote.ibTransferInit();
+  }
+
+  @override
+  Future<ApiResponse> searchIbTransferClients({required String query}) {
+    return _remote.searchIbTransferClients(query: query);
+  }
+
+  @override
+  Future<ApiResponse> storeIbTransfer({required Map<String, dynamic> payload}) {
+    return _remote.storeIbTransfer(payload: payload);
+  }
+
+  @override
+  Future<ApiResponse> getIbTransferHistory({Map<String, dynamic>? queryParameters}) {
+    return _remote.getIbTransferHistory(queryParameters: queryParameters);
+  }
+
+  @override
+  Future<ApiResponse> cancelIbTransfer({required int transferId}) {
+    return _remote.cancelIbTransfer(transferId: transferId);
+  }
 }
 

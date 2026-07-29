@@ -94,5 +94,34 @@ class IbRemoteDataSource {
   }) {
     return _api.post(endpoint: '${ApiConstants.ibUpdateStatus}$requestId', data: payload);
   }
+
+  // IB Transfer Methods
+  Future<ApiResponse> ibTransferInit() {
+    return _api.get(endpoint: ApiConstants.ibTransferCreate);
+  }
+
+  Future<ApiResponse> searchIbTransferClients({required String query}) {
+    return _api.get(
+      endpoint: ApiConstants.ibTransferClientsSearch,
+      queryParameters: {'search': query},
+    );
+  }
+
+  Future<ApiResponse> storeIbTransfer({required Map<String, dynamic> payload}) {
+    return _api.post(endpoint: ApiConstants.ibTransferStore, data: payload);
+  }
+
+  Future<ApiResponse> getIbTransferHistory({Map<String, dynamic>? queryParameters}) {
+    return _api.get(
+      endpoint: ApiConstants.ibTransferHistory,
+      queryParameters: queryParameters,
+    );
+  }
+
+  Future<ApiResponse> cancelIbTransfer({required int transferId}) {
+    // According to REST patterns and postman, it is usually POST or DELETE or just POST with _method=DELETE
+    // Depending on backend, let's use POST by default for /cancel, or GET. Wait, the curl says POST or GET. "https://dev.tenaxcodecrm.com/api/user/ib/transfer/1/cancel"
+    return _api.post(endpoint: '${ApiConstants.ibTransferCancel}$transferId/cancel');
+  }
 }
 

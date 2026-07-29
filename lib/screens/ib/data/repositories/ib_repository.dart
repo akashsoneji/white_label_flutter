@@ -44,5 +44,12 @@ abstract class IbRepository {
     required int requestId,
     required Map<String, dynamic> payload,
   });
+
+  // IB Transfer Methods
+  Future<ApiResponse> ibTransferInit();
+  Future<ApiResponse> searchIbTransferClients({required String query});
+  Future<ApiResponse> storeIbTransfer({required Map<String, dynamic> payload});
+  Future<ApiResponse> getIbTransferHistory({Map<String, dynamic>? queryParameters});
+  Future<ApiResponse> cancelIbTransfer({required int transferId});
 }
 

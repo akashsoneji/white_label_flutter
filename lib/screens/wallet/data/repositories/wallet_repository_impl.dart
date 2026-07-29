@@ -21,6 +21,18 @@ class WalletRepositoryImpl implements WalletRepository {
   }
 
   @override
+  Future<ApiResponse> getWalletDetailsNew({
+    required String token,
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _api.get(
+      endpoint: ApiConstants.getWalletDetailsNew,
+      token: token,
+      queryParameters: queryParameters,
+    );
+  }
+
+  @override
   Future<ApiResponse> checkBalance({
     required String token,
     required Map<String, dynamic> payload,

@@ -103,35 +103,24 @@ class FinanceRepositoryImpl implements FinanceRepository {
     String? dateTo,
     String? type,
     String? status,
+    String? t,
   }) {
-    final Map<String, dynamic> queryParams = {};
-    if (page != null) queryParams['page'] = page;
-    if (perPage != null) queryParams['perPage'] = perPage;
-    if (transactionType != null && transactionType.isNotEmpty) queryParams['transactionType'] = transactionType;
-    if (dateFrom != null && dateFrom.isNotEmpty) queryParams['dateFrom'] = dateFrom;
-    if (dateTo != null && dateTo.isNotEmpty) queryParams['dateTo'] = dateTo;
-    if (type != null && type.isNotEmpty) queryParams['type'] = type;
-    if (status != null && status.isNotEmpty) queryParams['status'] = status;
-    
-    // Convert to query string if ApiService supports queryParams, otherwise build URI.
-    // Assuming _api.get supports query parameters if we append them to endpoint, or pass them in a proper way.
-    // I need to check how `_api.get` handles query parameters.
-    // Let's look at `ApiService` first. Wait, I will just append them for now.
-    
-    final uri = Uri.parse(ApiConstants.getTransactions);
-    final endpointWithParams = Uri(
-      path: uri.path, // We shouldn't use Uri() to rebuild endpoint since endpoint is just a string without base URL.
-      queryParameters: queryParams.map((k, v) => MapEntry(k, v.toString())),
-    );
-    
-    // Instead of Uri(), let's manually append query string to endpoint string.
-    String finalEndpoint = ApiConstants.getTransactions;
-    if (queryParams.isNotEmpty) {
-      final queryString = Uri(queryParameters: queryParams.map((key, value) => MapEntry(key, value.toString()))).query;
-      finalEndpoint = '$finalEndpoint?$queryString';
-    }
+    final Map<String, dynamic> queryParams = {
+      'page': (page ?? 1).toString(),
+      'perPage': (perPage ?? 10).toString(),
+      'transactionType': transactionType ?? '',
+      'dateFrom': dateFrom ?? '',
+      'dateTo': dateTo ?? '',
+      'type': type ?? '',
+      'status': status ?? '',
+      '_t': t ?? DateTime.now().millisecondsSinceEpoch.toString(),
+    };
 
-    return _api.get(endpoint: finalEndpoint, token: token);
+    return _api.get(
+      endpoint: ApiConstants.getTransactions,
+      queryParameters: queryParams,
+      token: token,
+    );
   }
 
   @override
