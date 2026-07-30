@@ -49,7 +49,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
 
   /// `true`  → simple view mode (compact Symbol / Bid / Ask list, image #2)
   /// `false` → advanced view mode (full data per row, image #1)
-  bool _simpleView = false;
+  bool _simpleView = false; // default = rich view (image #1) by request
 
   @override
   void initState() {
@@ -456,30 +456,70 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
   }
 
   Widget _fractionPrice(BuildContext c, String value, Color color) {
+    if (value.isEmpty) {
+      return Text('—',
+          style: AppTextStyles.bodyText.copyWith(
+              color: color.withValues(alpha: 0.4),
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w100));
+    }
     if (value.length < 3) {
       return Text(value,
-          style: AppTextStyles.bodyText.copyWith(
-              color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
+          style: TextStyle(
+              color: color, fontSize: 15.sp, ));
     }
-    final dotIdx = value.indexOf('.');
-    if (dotIdx < 0 || dotIdx >= value.length - 2) {
+    // MT5 mobile rich view (image #1):
+    //   1.14 | 53 | ⁴   (FX, 5 decimals)
+    //   ─── leading normal ─── | ── last 2 bold ── | last 1 superscript
+    // For shorter values fall back to plain text.
+    if (value.length < 4) {
       return Text(value,
           style: AppTextStyles.bodyText.copyWith(
-              color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
+              color: color,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500));
     }
-    final head = value.substring(0, value.length - 2);
-    final tail = value.substring(value.length - 2);
-    return RichText(
-      text: TextSpan(children: [
-        TextSpan(
-            text: head,
+    final leading = value.substring(0, value.length - 3);
+    final bold2 = value.substring(value.length - 3, value.length - 1);
+    final superscript1 = value.substring(value.length - 1);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        // Leading (e.g. "1.14", "163.", "0.") — regular weight, SAME size.
+        Text(
+          leading,
+          style: TextStyle(
+              color: color,
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w500,
+              height: 1.0,
+              letterSpacing: -0.5),
+        ),
+        // Last 2 digits (e.g. "53", "51", "77") — bold, SAME size as leading.
+        Text(
+          bold2,
+          style: TextStyle(
+              color: color,
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              height: 1.0,
+              letterSpacing: 1),
+        ),
+        // Last digit (e.g. "⁴", "⁹") — small superscript on top.
+        Transform.translate(
+          offset: Offset(-1.w, -9.h),
+          child: Text(
+            superscript1,
             style: AppTextStyles.bodyText.copyWith(
-                color: color, fontSize: 13.sp, fontWeight: FontWeight.w400)),
-        TextSpan(
-            text: tail,
-            style: AppTextStyles.bodyText.copyWith(
-                color: color, fontSize: 16.sp, fontWeight: FontWeight.w500)),
-      ]),
+                color: color,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w700,
+                height: 1.0),
+          ),
+        ),
+      ],
     );
   }
 
