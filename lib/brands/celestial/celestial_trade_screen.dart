@@ -171,7 +171,14 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
 
   // ── Net P/L header ────────────────────────────────────────────────────────
   Widget _header(BuildContext c, double netPL) {
-    final col = netPL < 0 ? CelTheme.sell(c) : CelTheme.buy(c);
+    final Color col;
+    if (netPL > 0) {
+      col = CelTheme.tpGreen;
+    } else if (netPL < 0) {
+      col = CelTheme.sell(c);
+    } else {
+      col = CelTheme.mainText(c);
+    }
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
       child: Row(

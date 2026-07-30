@@ -2405,7 +2405,7 @@
   "celestial_chart_buy": "Buy",
   "celestial_history_title": "History",
   "celestial_history_no_period": "No history for $_periodLabel",
-  "celestial_history_open_close": "$open  →  $close",
+  "celestial_history_open_close": "{open}  →  {close}",
   "celestial_trade_trades": "Trades",
   "celestial_trade_net_pl": "Net P/L",
   "celestial_trade_count": "$count",

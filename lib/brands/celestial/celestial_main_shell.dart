@@ -27,11 +27,30 @@ class CelestialMainShell extends StatefulWidget {
 class _CelestialMainShellState extends State<CelestialMainShell> {
   int _index = 0;
 
+  /// GlobalKey to the History screen's State so we can invoke its
+  /// `refreshHistory()` directly when the user lands on the History
+  /// tab via the bottom nav. IndexedStack keeps it alive, so the
+  /// key is stable across rebuilds.
+  final GlobalKey _historyKey = GlobalKey();
+
+  /// Re-fetches history whenever the History tab becomes active. Safe
+  /// to call when the screen has not yet been mounted — the
+  /// IndexedStack only builds a tab lazily.
+  void _refreshHistoryIfPossible() {
+    final state = _historyKey.currentState as dynamic;
+    try {
+      state?.refreshHistory();
+    } catch (_) {
+      // Defensive: if the State API ever changes, swallow rather than
+      // crash the tab switch.
+    }
+  }
+
   List<Widget> get _screens => [
     CelestialWatchlistScreen(onSymbolTap: (_) => setState(() => _index = 1)),
     CelestialChartScreen(),
     CelestialTradeScreen(),
-    CelestialHistoryScreen(),
+    CelestialHistoryScreen(key: _historyKey),
     CelestialSettingsScreen(
       onNavigateToTab: (i) => setState(() => _index = i),
     ),
@@ -80,7 +99,14 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
             final inactive = isDark ? const Color(0xFF6B7280) : const Color(0xFF9AA5B5);
             return Expanded(
               child: InkWell(
-                onTap: () => setState(() => _index = i),
+                  onTap: () {
+                    setState(() => _index = i);
+                    if (i == 3) {
+                      // History tab — always re-fetch so the list is
+                      // fresh on arrival (mirrors Meta shell behavior).
+                      _refreshHistoryIfPossible();
+                    }
+                  },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

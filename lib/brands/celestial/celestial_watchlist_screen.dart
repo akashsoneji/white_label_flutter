@@ -199,9 +199,7 @@ class _CelestialWatchlistScreenState
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     _fractionPrice(
-                        c,
-                        price.bid.toStringAsFixed(digits),
-                        CelTheme.sell(c)),
+                        c, price.bid, digits, CelTheme.sell(c)),
                     SizedBox(height: 1.h),
                     Text(
                       'L: ${price.dayLow.toStringAsFixed(digits)}',
@@ -221,9 +219,7 @@ class _CelestialWatchlistScreenState
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     _fractionPrice(
-                        c,
-                        price.ask.toStringAsFixed(digits),
-                        CelTheme.tpGreen),
+                        c, price.ask, digits, CelTheme.tpGreen),
                     SizedBox(height: 1.h),
                     Text(
                       'H: ${price.dayHigh.toStringAsFixed(digits)}',
@@ -240,32 +236,48 @@ class _CelestialWatchlistScreenState
     });
   }
 
-  /// MT5-style: last 2 digits rendered bigger
-  Widget _fractionPrice(BuildContext c, String value, Color color) {
-    if (value.length < 3) {
-      return Text(value,
+  /// Mirrors crmapp instruments_screen.dart:_buildPriceTextSpans exactly.
+  /// Renders a price like "0.69796" as:
+  ///   "0." at 14sp/w500  (prefix = chars before last 2)
+  ///   "97" at 20sp/bold  (bigPart = last 2 chars)
+  ///   "6"  at 10sp raised-11 via WidgetSpan + Transform.translate (lastDigit)
+  Widget _fractionPrice(BuildContext c, dynamic price, int digits, Color color) {
+    final priceStr = price.toStringAsFixed(digits);
+
+    if (priceStr.length < 3) {
+      return Text(priceStr,
           style: AppTextStyles.bodyText.copyWith(
-              color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
+              color: color, fontSize: 15.sp, fontWeight: FontWeight.w500));
     }
-    final dotIdx = value.indexOf('.');
-    if (dotIdx < 0 || dotIdx >= value.length - 2) {
-      return Text(value,
-          style: AppTextStyles.bodyText.copyWith(
-              color: color, fontSize: 15.sp, fontWeight: FontWeight.w400));
-    }
-    final head = value.substring(0, value.length - 2);
-    final tail = value.substring(value.length - 2);
-    return RichText(
-      text: TextSpan(children: [
-        TextSpan(
-            text: head,
-            style: AppTextStyles.bodyText.copyWith(
-                color: color, fontSize: 13.sp, fontWeight: FontWeight.w400)),
-        TextSpan(
-            text: tail,
-            style: AppTextStyles.bodyText.copyWith(
-                color: color, fontSize: 16.sp, fontWeight: FontWeight.w500)),
-      ]),
+
+    final lastDigit = priceStr.substring(priceStr.length - 1);
+    final bigPart = priceStr.substring(priceStr.length - 3, priceStr.length - 1);
+    final prefix = priceStr.substring(0, priceStr.length - 3);
+
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+              text: prefix,
+              style: AppTextStyles.bodyText.copyWith(
+                  color: color, fontSize: 14.sp, fontWeight: FontWeight.w500)),
+          TextSpan(
+              text: bigPart,
+              style: AppTextStyles.bodyText.copyWith(
+                  color: color, fontSize: 20.sp, fontWeight: FontWeight.w700)),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.top,
+            child: Transform.translate(
+              offset: const Offset(0, -11),
+              child: Text(
+                lastDigit,
+                style: AppTextStyles.bodyText.copyWith(
+                    color: color, fontSize: 10.sp, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
