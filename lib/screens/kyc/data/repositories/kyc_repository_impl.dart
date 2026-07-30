@@ -60,6 +60,14 @@ class KycRepositoryImpl implements KycRepository {
   }
 
   @override
+  Future<ApiResponse> updateKycProfile({
+    required String token,
+    required Map<String, dynamic> payload,
+  }) {
+    return _api.post(endpoint: ApiConstants.kycProfileUpdate, token: token, data: payload);
+  }
+
+  @override
   Future<ApiResponse> submitRegulationDetails({
     required String token,
     required Map<String, dynamic> payload,

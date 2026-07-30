@@ -212,7 +212,7 @@ class _RiyadexCreateAccountScreenState
                     referCode: _referController.text.trim(),
                   );
                   if (otpVerified) {
-                    Get.offAllNamed(Routes.ACCOUNT_CREATED);
+                    Get.offAllNamed(Routes.TRADING);
                   }
                 },
               ),

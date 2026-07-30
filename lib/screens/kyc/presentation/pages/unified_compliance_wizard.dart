@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
@@ -26,6 +27,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
   late final ComplianceController controller;
   late final LanguageService languageService;
   final _formKey = GlobalKey<FormState>();
+
+  String _selectedCountryCode = "+971";
+  String _selectedCountryFlag = "🇦🇪";
 
   @override
   void initState() {
@@ -175,7 +179,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           actions: [
             Row(
               children: [
-                if (!(Get.find<BrandResolver>().activeBrand.value.value == 'riyadex' && _isComplianceForced)) ...[
+                if (controller.currentStep.value > 0 || !(Get.find<BrandResolver>().activeBrand.value.value == 'riyadex' && _isComplianceForced)) ...[
                   Expanded(
                     child: TextButton(
                       onPressed: () {
@@ -490,36 +494,34 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             title: 'Basic Profile Information',
             icon: Icons.person_pin_rounded,
             children: [
-              _buildFormRow(
-                _buildFormInput(
-                  'email',
-                  'Email Address',
-                  isRequired: true,
-                  readOnly: true,
-                  prefixIcon: Icons.email_outlined,
-                ),
-                _buildFormInput(
-                  'mobile',
-                  'Mobile Number',
-                  isRequired: true,
-                  isPhone: true,
-                  prefixIcon: Icons.phone_android_outlined,
-                ),
+              _buildFormInput(
+                'email',
+                'Email Address',
+                isRequired: true,
+                readOnly: true,
+                prefixIcon: Icons.email_outlined,
               ),
               SizedBox(height: 14.h),
-              _buildFormRow(
-                _buildFormInput(
-                  'first_name',
-                  'First Name',
-                  isRequired: true,
-                  prefixIcon: Icons.badge_outlined,
-                ),
-                _buildFormInput(
-                  'last_name',
-                  'Last Name',
-                  isRequired: true,
-                  prefixIcon: Icons.badge_outlined,
-                ),
+              _buildFormInput(
+                'mobile',
+                'Mobile Number',
+                isRequired: true,
+                isPhone: true,
+                prefixIcon: Icons.phone_android_outlined,
+              ),
+              SizedBox(height: 14.h),
+              _buildFormInput(
+                'first_name',
+                'First Name',
+                isRequired: true,
+                prefixIcon: Icons.badge_outlined,
+              ),
+              SizedBox(height: 14.h),
+              _buildFormInput(
+                'last_name',
+                'Last Name',
+                isRequired: true,
+                prefixIcon: Icons.badge_outlined,
               ),
               SizedBox(height: 14.h),
               _buildOptionsDropdownField(
@@ -565,6 +567,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 type: 'country',
                 prefixIcon: Icons.public_rounded,
                 isRequired: true,
+                readOnly: true,
               ),
               SizedBox(height: 14.h),
               _buildLocationDropdown(
@@ -670,13 +673,18 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
   // --- Dynamic Schema Mapping Renderers ---
   Widget _buildComplianceSchemaFields() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: controller.schemaFields.length,
-      itemBuilder: (context, index) {
-        final field = controller.schemaFields[index];
-        if (field is! Map<String, dynamic>) return const SizedBox.shrink();
+    return Obx(() {
+      // Register dependency on formAnswers so visibility recalculates when answers change
+      // ignore: unused_local_variable
+      final _deps = controller.formAnswers.values.toList();
+
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: controller.schemaFields.length,
+        itemBuilder: (context, index) {
+          final field = controller.schemaFields[index];
+          if (field is! Map<String, dynamic>) return const SizedBox.shrink();
 
         if (!controller.isFieldVisible(field)) {
           return const SizedBox.shrink();
@@ -892,6 +900,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 onChanged: (val) {
                   controller.formAnswers[key] = val;
                 },
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s\.,\-\/#@_]')),
+                ],
                 style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textPrimary,
                   fontSize: 13.sp,
@@ -946,6 +957,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         );
       },
     );
+    });
   }
 
   // SLEEK visual tab card selectors for choice/radios (Yes/No card selector)
@@ -2114,17 +2126,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     );
   }
 
-  // --- Row helper for Form Inputs ---
-  Widget _buildFormRow(Widget first, Widget second) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: first),
-        SizedBox(width: 12.w),
-        Expanded(child: second),
-      ],
-    );
-  }
+  // --- Form Input Builders ---
 
   Widget _buildFormInput(
     String key,
@@ -2146,10 +2148,18 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           onChanged: (val) {
             controller.formAnswers[key] = val;
             if (isMobileField) {
-              controller.checkMobileAvailability(val, "+971");
+              controller.checkMobileAvailability(val, _selectedCountryCode);
             }
           },
-          keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
+          keyboardType: isPhone
+              ? TextInputType.phone
+              : (key == 'postcode' ? TextInputType.number : TextInputType.text),
+          inputFormatters: [
+            if (key == 'postcode')
+              FilteringTextInputFormatter.digitsOnly
+            else if (!isPhone && !key.contains('email') && !key.contains('address'))
+              FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+          ],
           style: AppTextStyles.bodyText.copyWith(
             color: readOnly ? AppColors.textGrey : AppColors.textPrimary,
             fontSize: 13.sp,
@@ -2161,7 +2171,50 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
               color: AppColors.textSecondary,
               fontSize: 12.sp,
             ),
-            prefixIcon: Icon(prefixIcon, color: AppColors.primary, size: 18.w),
+            prefixIcon: isMobileField
+                ? InkWell(
+                    onTap: () {
+                      showCountryPicker(
+                        context: context,
+                        showPhoneCode: true,
+                        onSelect: (Country country) {
+                          setState(() {
+                            _selectedCountryCode = "+${country.phoneCode}";
+                            _selectedCountryFlag = country.flagEmoji;
+                          });
+                          final currentVal = controller.formAnswers[key]?.toString() ?? '';
+                          if (currentVal.isNotEmpty) {
+                            controller.checkMobileAvailability(currentVal, _selectedCountryCode);
+                          }
+                        },
+                      );
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_selectedCountryFlag, style: TextStyle(fontSize: 16.sp)),
+                          SizedBox(width: 4.w),
+                          Text(
+                            _selectedCountryCode,
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Icon(Icons.arrow_drop_down, color: AppColors.textGrey, size: 20.w),
+                          Container(
+                            height: 20.h,
+                            width: 1.w,
+                            color: AppColors.border,
+                            margin: EdgeInsets.only(left: 4.w, right: 4.w),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Icon(prefixIcon, color: AppColors.primary, size: 18.w),
             filled: true,
             fillColor: readOnly ? AppColors.surface : AppColors.textFieldBg,
             contentPadding: EdgeInsets.symmetric(
@@ -2510,6 +2563,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
     required String type,
     required IconData prefixIcon,
     required bool isRequired,
+    bool readOnly = false,
   }) {
     return Obx(() {
       String displayValue = '';
@@ -2518,7 +2572,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
       if (type == 'country') {
         displayValue =
             controller.dropdownService.selectedCountry.value?.name ?? '';
-        onTap = () => _showCountryOptions();
+        onTap = readOnly ? null : () => _showCountryOptions();
       } else if (type == 'nationality') {
         displayValue = controller.formAnswers['nationality']?.toString() ?? '';
         onTap = () => _showNationalityOptions();
@@ -2555,11 +2609,11 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
           _buildInputLabel(label, isRequired),
           SizedBox(height: 6.h),
           GestureDetector(
-            onTap: onTap,
+            onTap: readOnly ? null : onTap,
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               decoration: BoxDecoration(
-                color: AppColors.textFieldBg,
+                color: readOnly ? AppColors.surface : AppColors.textFieldBg,
                 borderRadius: BorderRadius.circular(10.r),
                 border: Border.all(color: AppColors.border),
               ),
@@ -2572,8 +2626,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       displayValue.isNotEmpty ? displayValue : 'Select...',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.5.sp,
-                        color:
-                            displayValue.isEmpty
+                        color: (displayValue.isEmpty || readOnly)
                                 ? AppColors.textSecondary
                                 : AppColors.textPrimary,
                         fontWeight:
@@ -2585,11 +2638,12 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Icon(
-                    Icons.arrow_drop_down_rounded,
-                    color: AppColors.textGrey,
-                    size: 20.w,
-                  ),
+                  if (!readOnly)
+                    Icon(
+                      Icons.arrow_drop_down_rounded,
+                      color: AppColors.textGrey,
+                      size: 20.w,
+                    ),
                 ],
               ),
             ),

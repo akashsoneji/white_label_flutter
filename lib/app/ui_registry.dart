@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:crm_app/flavor_config.dart';
+import 'package:get/get.dart';
+import 'package:crm_app/brands/brand_resolver.dart';
 
 import '../brands/meta/meta_main_shell.dart';
 import '../brands/celestial/celestial_main_shell.dart';
@@ -60,8 +62,12 @@ String get activeClient {
   }
 
   final flavorFromDefine =
-      String.fromEnvironment('FLAVOR', defaultValue: '').toLowerCase();
+      const String.fromEnvironment('FLAVOR', defaultValue: '').toLowerCase();
   if (flavorFromDefine.isNotEmpty) return flavorFromDefine;
+
+  if (Get.isRegistered<BrandResolver>()) {
+    return Get.find<BrandResolver>().activeBrand.value.value;
+  }
 
   return 'tenax';
 }
@@ -136,10 +142,13 @@ class UiRegistry implements UiSlots {
   String get _uiBrand => activeClient;
 
   /// Build-time-selected parent for the active brand (PARENT env-define
-  /// wins, otherwise the brand's default parent from `_uiParentByClient`).
+  /// wins, otherwise the brand's default parent from `BrandResolver`).
   String get _uiParent {
+    if (Get.isRegistered<BrandResolver>()) {
+      return Get.find<BrandResolver>().activeUiParent;
+    }
     final explicit =
-        String.fromEnvironment('PARENT', defaultValue: '').trim().toLowerCase();
+        const String.fromEnvironment('PARENT', defaultValue: '').trim().toLowerCase();
     if (explicit.isNotEmpty) return explicit;
     return _uiParentByClient[_uiBrand] ?? _uiBrand;
   }

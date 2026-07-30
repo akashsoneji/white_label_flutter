@@ -24,6 +24,11 @@ abstract class KycRepository {
   });
 
   Future<ApiResponse> getRegulationSchema({required String token});
+  
+  Future<ApiResponse> updateKycProfile({
+    required String token,
+    required Map<String, dynamic> payload,
+  });
 
   Future<ApiResponse> submitRegulationDetails({
     required String token,
