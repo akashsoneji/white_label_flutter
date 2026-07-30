@@ -3534,18 +3534,18 @@ class OpenAccountBottomSheet extends StatelessWidget {
               SizedBox(height: 8.h),
 
               // Subtitle
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40.w),
-                child: Text(
-                  languageService.tr('dashboard_open_account_subtitle'),
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 14.sp,
-                    color: AppColors.textGrey,
-                    height: 1.4,
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: 40.w),
+              //   child: Text(
+              //     languageService.tr('dashboard_open_account_subtitle'),
+              //     textAlign: TextAlign.center,
+              //     style: AppTextStyles.bodyText.copyWith(
+              //       fontSize: 14.sp,
+              //       color: AppColors.textGrey,
+              //       height: 1.4,
+              //     ),
+              //   ),
+              // ),
 
               SizedBox(height: 15.h),
 
