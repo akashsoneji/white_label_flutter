@@ -190,16 +190,17 @@ class StageCompletion {
   }
 
   static bool? _parseBool(dynamic value) {
-    if (value == null) return null;
+    if (value == null) return false;
     if (value is bool) return value;
+    if (value is int) return value > 0;
     if (value is String) {
-      if (value.toLowerCase() == 'true') return true;
-      if (value.toLowerCase() == 'false') return false;
+      String lower = value.toLowerCase().trim();
+      if (lower == 'false' || lower == '0' || lower == 'no' || lower == '' || lower == 'null') {
+        return false;
+      }
+      return true;
     }
-    if (value is int) {
-      return value == 1;
-    }
-    return null;
+    return false;
   }
 
   Map<String, dynamic> toJson() => {

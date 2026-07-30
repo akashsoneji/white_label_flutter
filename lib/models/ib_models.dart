@@ -73,12 +73,26 @@ class IBStageCompletion {
 
   factory IBStageCompletion.fromJson(Map<String, dynamic> json) {
     return IBStageCompletion(
-      mobileVerified: json['mobile_verified'],
-      emailVerified: json['email_verified'],
-      personalDetails: json['personal_details'],
-      identityVerified: json['identity_verified'],
-      addressProofVerified: json['address_proof_verified'],
+      mobileVerified: _parseBool(json['mobile_verified']),
+      emailVerified: _parseBool(json['email_verified']),
+      personalDetails: _parseBool(json['personal_details']),
+      identityVerified: _parseBool(json['identity_verified']),
+      addressProofVerified: _parseBool(json['address_proof_verified']),
     );
+  }
+
+  static bool _parseBool(dynamic value) {
+    if (value == null) return false;
+    if (value is bool) return value;
+    if (value is int) return value > 0;
+    if (value is String) {
+      String lower = value.toLowerCase().trim();
+      if (lower == 'false' || lower == '0' || lower == 'no' || lower == '' || lower == 'null') {
+        return false;
+      }
+      return true;
+    }
+    return false;
   }
 }
 
