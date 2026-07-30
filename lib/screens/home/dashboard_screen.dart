@@ -244,14 +244,19 @@ class DashboardScreen extends StatelessWidget {
     required String assetPath,
     required VoidCallback onPressed,
     EdgeInsets? margin,
+    String? label,
   }) {
+    // Label variant renders a wider pill so the full label fits without
+    // ellipsis (e.g. "Create Account"). Icon-only variant stays compact.
+    final double buttonW = label != null ? 96.w : 36.w;
+    final double buttonH = label != null ? 36.h : 36.h;
     return Container(
       margin: margin,
-      height: 40.h,
-      width: 40.w,
+      height: buttonH,
+      width: buttonW,
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(10.r),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,
@@ -260,16 +265,43 @@ class DashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: IconButton(
-        icon: AppSvgIcon(
-          assetPath: assetPath,
-          height: 20.h,
-          width: 20.w,
-          color: AppColors.primary,
-        ),
+      child: ElevatedButton(
         onPressed: onPressed,
-        padding: EdgeInsets.all(8.r),
-        constraints: const BoxConstraints(),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.whiteColor,
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
+          minimumSize: Size(buttonW, buttonH),
+          maximumSize: Size(buttonW, buttonH),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+          alignment: Alignment.center,
+          elevation: 0,
+        ),
+        child: label != null
+            ? Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.visible,
+                softWrap: false,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                  height: 1.0,
+                  letterSpacing: -0.3,
+                ),
+              )
+            : Center(
+                child: AppSvgIcon(
+                  assetPath: assetPath,
+                  height: 18.h,
+                  width: 18.w,
+                  color: AppColors.whiteColor,
+                ),
+              ),
       ),
     );
   }
@@ -1583,6 +1615,7 @@ class DashboardScreen extends StatelessWidget {
               // centerTitle: true,
               actions: [
                 _buildHeaderIconButton(
+                  label: 'Create Account',
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
                   margin: EdgeInsets.only(right: 16.w),
@@ -3519,105 +3552,114 @@ class OpenAccountBottomSheet extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 24.h),
+              SizedBox(height: 16.h),
 
-              // Title
-              Text(
-                languageService.tr('dashboard_open_account'),
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-
-              SizedBox(height: 8.h),
-
-              // Subtitle
-              // Padding(
-              //   padding: EdgeInsets.symmetric(horizontal: 40.w),
-              //   child: Text(
-              //     languageService.tr('dashboard_open_account_subtitle'),
-              //     textAlign: TextAlign.center,
-              //     style: AppTextStyles.bodyText.copyWith(
-              //       fontSize: 14.sp,
-              //       color: AppColors.textGrey,
-              //       height: 1.4,
-              //     ),
-              //   ),
-              // ),
-
-              SizedBox(height: 15.h),
-
-              // Real Account Button
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32.w),
-                child: GestureDetector(
-                  onTap: controller.openRealAccount,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      // color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 8.h),
-                    child: Center(
-                      child: Text(
-                        languageService.tr('dashboard_live'),
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.primary,
-                        ),
+              // Title row: title centered, close icon on the right.
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 48.w),
+                    child: Text(
+                      languageService.tr('dashboard_open_account'),
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
-                ),
-              ),
-
-              SizedBox(height: 8.h),
-
-              // Demo Account Button
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32.w),
-                child: GestureDetector(
-                  onTap: controller.openDemoAccount,
-                  child: Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 8.h),
-                    child: Center(
-                      child: Text(
-                        languageService.tr('dashboard_demo'),
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
+                 
+                 
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20.r),
+                      onTap: () => Get.back(),
+                      child: Container(
+                        width: 36.w,
+                        height: 36.h,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 22.r,
                           color: AppColors.textPrimary,
                         ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
 
-              SizedBox(height: 8.h),
+              SizedBox(height: 16.h),
 
-              // Cancel Button
-              GestureDetector(
-                onTap: () => Get.back(closeOverlays: true),
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 12.h),
-                  child: Center(
+              // Live Account — ElevatedButton (primary fill).
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.w),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48.h,
+                  child: ElevatedButton(
+                    onPressed: controller.openRealAccount,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.whiteColor,
+                      minimumSize: Size(double.infinity, 48.h),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      elevation: 2,
+                      alignment: Alignment.center,
+                    ),
                     child: Text(
-                      languageService.tr('navigation_cancel'),
+                      languageService.tr('dashboard_live'),
                       style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.red,
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.whiteColor,
                       ),
                     ),
                   ),
                 ),
               ),
+
+              SizedBox(height: 12.h),
+
+              // Demo Account — ElevatedButton (outlined).
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32.w),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48.h,
+                  child: ElevatedButton(
+                    onPressed: controller.openDemoAccount,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.whiteColor,
+                      foregroundColor: AppColors.textPrimary,
+                      minimumSize: Size(double.infinity, 48.h),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        side: BorderSide(color: AppColors.border),
+                      ),
+                      elevation: 1,
+                      alignment: Alignment.center,
+                    ),
+                    child: Text(
+                      languageService.tr('dashboard_demo'),
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 12.h),
             ],
           ),
         ),
