@@ -1087,7 +1087,7 @@ class WebViewUtils {
         final isTradingView =
             url.contains('tradingview.com') ||
             url.contains('s.tradingview.com');
-        final isPipze = url.contains('dev.tenaxcodecrm.com');
+        final isPipze = url.contains('my.pipze.com');
         final isLocal =
             url.startsWith('file://') ||
             url.startsWith('flutter-asset://') ||
