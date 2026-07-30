@@ -7,19 +7,30 @@ class IbRemoteDataSource {
   IbRemoteDataSource(this._api);
 
   Future<ApiResponse> getIbStatus({Map<String, dynamic>? queryParameters}) {
-    return _api.get(endpoint: ApiConstants.ibStatus, queryParameters: queryParameters);
+    return _api.get(
+      endpoint: ApiConstants.ibStatus,
+      queryParameters: queryParameters,
+    );
   }
 
-  Future<ApiResponse> submitIbApplication({required Map<String, dynamic> payload}) {
+  Future<ApiResponse> submitIbApplication({
+    required Map<String, dynamic> payload,
+  }) {
     return _api.post(endpoint: ApiConstants.ibApplication, data: payload);
   }
 
   Future<ApiResponse> getIbDashboard({Map<String, dynamic>? queryParameters}) {
-    return _api.get(endpoint: ApiConstants.ibDashboard, queryParameters: queryParameters);
+    return _api.get(
+      endpoint: ApiConstants.ibDashboard,
+      queryParameters: queryParameters,
+    );
   }
 
   Future<ApiResponse> getIbClients({Map<String, dynamic>? queryParameters}) {
-    return _api.get(endpoint: ApiConstants.ibClients, queryParameters: queryParameters);
+    return _api.get(
+      endpoint: ApiConstants.ibClients,
+      queryParameters: queryParameters,
+    );
   }
 
   Future<ApiResponse> getIbSubIbs({
@@ -27,16 +38,26 @@ class IbRemoteDataSource {
     Map<String, dynamic>? queryParameters,
   }) {
     final endpoint =
-        subIbId != null ? '${ApiConstants.ibSubIbSubIbs}$subIbId' : ApiConstants.ibSubIbs;
+        subIbId != null
+            ? '${ApiConstants.ibSubIbSubIbs}$subIbId'
+            : ApiConstants.ibSubIbs;
     return _api.get(endpoint: endpoint, queryParameters: queryParameters);
   }
 
-  Future<ApiResponse> getIbTradeHistory({Map<String, dynamic>? queryParameters}) {
-    return _api.get(endpoint: ApiConstants.ibTradeHistory, queryParameters: queryParameters);
+  Future<ApiResponse> getIbTradeHistory({
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _api.get(
+      endpoint: ApiConstants.ibTradeHistory,
+      queryParameters: queryParameters,
+    );
   }
 
   Future<ApiResponse> getIbStats({Map<String, dynamic>? queryParameters}) {
-    return _api.get(endpoint: ApiConstants.ibStats, queryParameters: queryParameters);
+    return _api.get(
+      endpoint: ApiConstants.ibStats,
+      queryParameters: queryParameters,
+    );
   }
 
   Future<ApiResponse> getIbSubIbStats({
@@ -50,7 +71,10 @@ class IbRemoteDataSource {
   }
 
   Future<ApiResponse> getIbStructure({Map<String, dynamic>? queryParameters}) {
-    return _api.get(endpoint: ApiConstants.ibStructure, queryParameters: queryParameters);
+    return _api.get(
+      endpoint: ApiConstants.ibStructure,
+      queryParameters: queryParameters,
+    );
   }
 
   Future<ApiResponse> getIbSubIbStructure({
@@ -63,8 +87,13 @@ class IbRemoteDataSource {
     );
   }
 
-  Future<ApiResponse> getIbApprovalRequests({Map<String, dynamic>? queryParameters}) {
-    return _api.get(endpoint: ApiConstants.ibRequestList, queryParameters: queryParameters);
+  Future<ApiResponse> getIbApprovalRequests({
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _api.get(
+      endpoint: ApiConstants.ibRequestList,
+      queryParameters: queryParameters,
+    );
   }
 
   Future<ApiResponse> getIbApprovalRequestsFallback({
@@ -76,11 +105,18 @@ class IbRemoteDataSource {
     );
   }
 
-  Future<ApiResponse> getCommissionGroups({Map<String, dynamic>? queryParameters}) {
-    return _api.get(endpoint: ApiConstants.ibCommissionGroups, queryParameters: queryParameters);
+  Future<ApiResponse> getCommissionGroups({
+    Map<String, dynamic>? queryParameters,
+  }) {
+    return _api.get(
+      endpoint: ApiConstants.ibCommissionGroups,
+      queryParameters: queryParameters,
+    );
   }
 
-  Future<ApiResponse> manageCommissionGroup({required Map<String, dynamic> payload}) {
+  Future<ApiResponse> manageCommissionGroup({
+    required Map<String, dynamic> payload,
+  }) {
     return _api.post(endpoint: ApiConstants.ibManage, data: payload);
   }
 
@@ -92,7 +128,10 @@ class IbRemoteDataSource {
     required int requestId,
     required Map<String, dynamic> payload,
   }) {
-    return _api.post(endpoint: '${ApiConstants.ibUpdateStatus}$requestId', data: payload);
+    return _api.post(
+      endpoint: '${ApiConstants.ibUpdateStatus}$requestId',
+      data: payload,
+    );
   }
 
   // IB Transfer Methods
@@ -111,7 +150,9 @@ class IbRemoteDataSource {
     return _api.post(endpoint: ApiConstants.ibTransferStore, data: payload);
   }
 
-  Future<ApiResponse> getIbTransferHistory({Map<String, dynamic>? queryParameters}) {
+  Future<ApiResponse> getIbTransferHistory({
+    Map<String, dynamic>? queryParameters,
+  }) {
     return _api.get(
       endpoint: ApiConstants.ibTransferHistory,
       queryParameters: queryParameters,
@@ -120,8 +161,9 @@ class IbRemoteDataSource {
 
   Future<ApiResponse> cancelIbTransfer({required int transferId}) {
     // According to REST patterns and postman, it is usually POST or DELETE or just POST with _method=DELETE
-    // Depending on backend, let's use POST by default for /cancel, or GET. Wait, the curl says POST or GET. "https://dev.tenaxcodecrm.com/api/user/ib/transfer/1/cancel"
-    return _api.post(endpoint: '${ApiConstants.ibTransferCancel}$transferId/cancel');
+    // Depending on backend, let's use POST by default for /cancel, or GET. Wait, the curl says POST or GET. "https://my.pipze.com/api/user/ib/transfer/1/cancel"
+    return _api.post(
+      endpoint: '${ApiConstants.ibTransferCancel}$transferId/cancel',
+    );
   }
 }
-

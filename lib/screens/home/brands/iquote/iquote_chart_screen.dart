@@ -1708,13 +1708,8 @@ class _CandleChartState extends State<_CandleChart> {
           ),
           // Default window: 1 candle (= 1 minute for 1m res).
           // Start zoomed to the newest bar; panned further back triggers loadOlderHistory.
-          initialVisibleMinimum: periodChanged && widget.ctrl.chartData.length > 1
-              ? widget.ctrl.chartData[widget.ctrl.chartData.length - 1].dateTime
-              : null,
-          initialVisibleMaximum:
-              periodChanged && widget.ctrl.chartData.isNotEmpty
-                  ? widget.ctrl.chartData.last.dateTime
-                  : null,
+          initialVisibleMinimum: null,
+          initialVisibleMaximum: null,
         ),
         onActualRangeChanged: (ActualRangeChangedArgs args) {
           // Ignore the first fire (the initial zoom animation); after that,

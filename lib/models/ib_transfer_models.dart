@@ -155,6 +155,16 @@ class IbTransferHistoryItem {
   String? updatedAt;
   IbTransferToClient? toClient;
 
+  String? get toClientName {
+    if (toClient == null) return null;
+    final first = toClient!.firstName ?? '';
+    final last = toClient!.lastName ?? '';
+    final full = '$first $last'.trim();
+    return full.isNotEmpty ? full : null;
+  }
+
+  String? get toClientEmail => toClient?.email;
+
   IbTransferHistoryItem({
     this.id,
     this.fromIbUserId,
@@ -174,7 +184,7 @@ class IbTransferHistoryItem {
       id: json['id'],
       fromIbUserId: json['from_ib_user_id'],
       toClientUserId: json['to_client_user_id'],
-      amount: json['amount'],
+      amount: json['amount']?.toString(),
       currency: json['currency'],
       status: json['status'],
       requestedAt: json['requested_at'],

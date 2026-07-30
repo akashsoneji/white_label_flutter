@@ -69,7 +69,7 @@ class IQuoteChartController extends GetxController {
   final chartData = <CandleData>[].obs;
   final isChartLoading = false.obs;
   final isLoadingOlder = false.obs;
-  final resolution = 1.obs; // Resolution in minutes (default 1M)
+  final resolution = 60.obs; // Resolution in minutes (default 60M for 12 hours period)
   final customFromDate = Rxn<DateTime>();
   final customToDate = Rxn<DateTime>();
 
@@ -121,6 +121,9 @@ class IQuoteChartController extends GetxController {
   void _bindLive() {
     _livePriceWorker?.dispose();
     final sym = symbol;
+    if (sym.isNotEmpty) {
+      _instruments.syncMarketWatchV2AfterFavoriteChange(sym, isFavoriteNow: true);
+    }
     // Live tick stream — keeps header + chart markers + Buy/Sell pills live.
     _livePriceWorker = ever<InstrumentPrice>(_instruments.priceRx(sym), _applyQuote);
   }
@@ -238,9 +241,9 @@ class IQuoteChartController extends GetxController {
         // Map standard timeframes to durations (fetching approx 500 bars)
         switch (period.value) {
           case '1m':
-            resVal = 1;
-            countVal = 1; // Default: last 1 minute (60 seconds)
-            fromEpoch = toEpoch - (countVal * 60);
+            resVal = 60; // 60-minute (1 hour) resolution => 12 candles for 12 hours
+            countVal = 12; // 12 candles total
+            fromEpoch = toEpoch - (12 * 60 * 60); // 12 hours of data
             break;
           case '5m':
             resVal = 5;

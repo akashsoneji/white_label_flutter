@@ -25,8 +25,8 @@ class IbTransferController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchInitData();
-    fetchHistory(refresh: true);
+    // Fetching is handled explicitly in the view's initState to ensure 
+    // it refreshes every time the screen is opened, not just on controller creation.
   }
 
   Future<void> fetchInitData() async {
@@ -102,7 +102,7 @@ class IbTransferController extends GetxController {
     try {
       isLoadingHistory.value = true;
       final ApiResponse response = await _repo.getIbTransferHistory(
-        queryParameters: {'page': currentHistoryPage.value},
+        queryParameters: {'page': currentHistoryPage.value.toString()},
       );
       if (response.success && response.data != null) {
         final parsed = IbTransferHistoryResponse.fromJson(response.data);
