@@ -339,6 +339,37 @@ class ComplianceController extends GetxController {
       payload['declarations'] = {'not_illegal': true};
       payload['acknowledgement'] = {'read_docs': true, 'info_true': true};
 
+      // 3.1 Send Profile Data first
+      final profilePayload = {
+        'first_name': formAnswers['first_name'] ?? '',
+        'last_name': formAnswers['last_name'] ?? '',
+        'mobile': formAnswers['mobile'] ?? '',
+        'title': formAnswers['title'] ?? 'Mr',
+        'gender': formAnswers['gender'] ?? 'other',
+        'dob': formAnswers['dob'] ?? '',
+        'nationality': formAnswers['nationality'] ?? '',
+        'country': int.tryParse(formAnswers['country']?.toString() ?? '') ?? formAnswers['country'],
+        'state': int.tryParse(formAnswers['state']?.toString() ?? '') ?? formAnswers['state'],
+        'city': int.tryParse(formAnswers['city']?.toString() ?? '') ?? formAnswers['city'],
+        'address_1': formAnswers['address_1'] ?? '',
+        'address_2': formAnswers['address_2'] ?? '',
+        'postcode': formAnswers['postcode'] ?? '',
+      };
+
+      final profileResponse = await _repo.updateKycProfile(
+        token: token,
+        payload: profilePayload,
+      );
+
+      if (!profileResponse.success) {
+        CustomToastService.showError(message: profileResponse.message ?? 'Failed to update profile details.');
+        isLoading.value = false;
+        return false;
+      }
+
+      // 3.2 Send Regulation Details
+
+
       final response = await _repo.submitRegulationDetails(
         token: token,
         payload: payload,

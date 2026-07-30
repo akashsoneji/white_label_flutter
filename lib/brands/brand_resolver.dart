@@ -60,7 +60,7 @@ class BrandResolver extends GetxService {
   );
   static const String _flavor = String.fromEnvironment(
     'FLAVOR',
-    defaultValue: 'tenax',
+    defaultValue: '',
   );
 
   final Rx<BrandId> activeBrand = BrandId.tenax.obs;
@@ -81,6 +81,14 @@ class BrandResolver extends GetxService {
 
   /// Returns brand details for a given brand name.
   BrandDetails? getBrandDetails(String brandName) => _brandDetails[brandName];
+
+  /// The resolved parent brand that should dictate UI screens.
+  /// Overridable via `--dart-define=PARENT=`.
+  String get activeUiParent {
+    final explicit = const String.fromEnvironment('PARENT', defaultValue: '').trim().toLowerCase();
+    if (explicit.isNotEmpty) return explicit;
+    return resolveUiBrand(activeBrand.value.value, _brandDetails);
+  }
 
   /// Returns the UI parent brand for a given brand.
   /// - Parent brands return themselves (they have their own screens).
@@ -136,7 +144,9 @@ class BrandResolver extends GetxService {
     // Build-time selection only (no runtime switching).
     //
     // Use: `--dart-define=CLIENT=tenax` / `--dart-define=CLIENT=vantage` / `--dart-define=CLIENT=celestial`
-    final selected = _client.trim().isNotEmpty ? _client : _flavor;
+    final selected = _client.trim().isNotEmpty
+        ? _client
+        : (_flavor.trim().isNotEmpty ? _flavor : _registry!.defaultBrand.value);
     final buildTime = BrandId.fromString(selected);
     final allowed = _registry!.brands.contains(buildTime)
         ? buildTime
