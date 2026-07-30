@@ -5,4 +5,4 @@ flutter_launcher_icons:
   image_path: "assets/brands/vantage/icon.png"
   min_sdk_android: 21
   adaptive_icon_background: "#5F259E"
-  adaptive_icon_foreground: "assets/brands/vantage/icon.png"
+  adaptive_icon_foreground: "assets/clients/vantage/ic_adaptive_foreground.png"

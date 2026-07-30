@@ -670,13 +670,18 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
 
   // --- Dynamic Schema Mapping Renderers ---
   Widget _buildComplianceSchemaFields() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: controller.schemaFields.length,
-      itemBuilder: (context, index) {
-        final field = controller.schemaFields[index];
-        if (field is! Map<String, dynamic>) return const SizedBox.shrink();
+    return Obx(() {
+      // Register dependency on formAnswers so visibility recalculates when answers change
+      // ignore: unused_local_variable
+      final _deps = controller.formAnswers.values.toList();
+
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: controller.schemaFields.length,
+        itemBuilder: (context, index) {
+          final field = controller.schemaFields[index];
+          if (field is! Map<String, dynamic>) return const SizedBox.shrink();
 
         if (!controller.isFieldVisible(field)) {
           return const SizedBox.shrink();
@@ -892,6 +897,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                 onChanged: (val) {
                   controller.formAnswers[key] = val;
                 },
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s\.,\-\/#@_]')),
+                ],
                 style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textPrimary,
                   fontSize: 13.sp,
@@ -946,6 +954,7 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
         );
       },
     );
+    });
   }
 
   // SLEEK visual tab card selectors for choice/radios (Yes/No card selector)
@@ -2150,6 +2159,10 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
             }
           },
           keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
+          inputFormatters: [
+            if (!isPhone && !key.contains('email'))
+              FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s\.,\-\/#@_]')),
+          ],
           style: AppTextStyles.bodyText.copyWith(
             color: readOnly ? AppColors.textGrey : AppColors.textPrimary,
             fontSize: 13.sp,

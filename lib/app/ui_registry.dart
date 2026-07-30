@@ -179,7 +179,7 @@ class UiRegistry implements UiSlots {
   @override
   Widget createAccount() {
     final flavorName = FlavorConfig.instance.flavor.name.toLowerCase();
-    if (flavorName == 'riyadex') {
+    if (flavorName == 'riyadex' || flavorName == 'vantage') {
       return const riyadex.RiyadexCreateAccountScreen();
     }
     if (_usesVantageUi || _usesIquoteUi) return vantage.VantageCreateAccountScreen();
