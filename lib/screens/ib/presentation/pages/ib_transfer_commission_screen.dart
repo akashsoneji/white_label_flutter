@@ -1,10 +1,10 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/models/ib_transfer_models.dart';
 import 'package:crm_app/screens/ib/data/repositories/ib_repository.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_transfer_create_screen.dart';
 import 'package:crm_app/screens/ib/view_models/ib_transfer_controller.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
-import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -30,6 +30,11 @@ class _IbTransferCommissionScreenState extends State<IbTransferCommissionScreen>
     } else {
       _controller = Get.put(IbTransferController(Get.find<IbRepository>()));
     }
+    
+    // Explicitly fetch data when screen is opened
+    // This ensures data is loaded even if the controller was already registered
+    _controller.fetchInitData();
+    _controller.fetchHistory(refresh: true);
     
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200.h) {
@@ -270,7 +275,7 @@ class _IbTransferCommissionScreenState extends State<IbTransferCommissionScreen>
     );
   }
 
-  Widget _buildHistoryCard(dynamic item) {
+  Widget _buildHistoryCard(IbTransferHistoryItem item) {
     Color statusColor;
     String status = item.status?.toLowerCase() ?? 'pending';
     switch (status) {
@@ -294,14 +299,14 @@ class _IbTransferCommissionScreenState extends State<IbTransferCommissionScreen>
     }
 
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: AppColors.cardBackGround,
-        borderRadius: BorderRadius.circular(16.r),
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
@@ -310,132 +315,205 @@ class _IbTransferCommissionScreenState extends State<IbTransferCommissionScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                'Transfer ID: #\${item.id}',
-                style: TextStyle(color: AppColors.textGrey, fontSize: 13.sp, fontWeight: FontWeight.w400),
-              ),
+              // Avatar or Icon based on status
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                height: 40.w,
+                width: 40.w,
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4.r),
+                  shape: BoxShape.circle,
                 ),
-                child: Text(
-                  status.toUpperCase(),
-                  style: TextStyle(color: statusColor, fontSize: 12.sp, fontWeight: FontWeight.w400),
+                child: Icon(
+                  status == 'completed' || status == 'approved'
+                      ? Icons.check_circle_outline
+                      : status == 'pending'
+                          ? Icons.access_time
+                          : Icons.cancel_outlined,
+                  color: statusColor,
+                  size: 20.sp,
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
+              SizedBox(width: 12.w),
+              // Main details
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Amount', style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp)),
-                    SizedBox(height: 4.h),
                     Text(
-                      '\$${item.amount?.toStringAsFixed(2) ?? "0.00"}',
-                      style: TextStyle(color: AppColors.textPrimary, fontSize: 18.sp, fontWeight: FontWeight.w400),
-                    ),
-                  ],
-                ),
-              ),
-              Container(width: 1.w, height: 30.h, color: AppColors.border.withOpacity(0.5)),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('To Client', style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp)),
-                    SizedBox(height: 4.h),
-                    Text(
-                      item.toClientName ?? '-',
-                      style: TextStyle(color: AppColors.textPrimary, fontSize: 16.sp, fontWeight: FontWeight.w400),
+                      item.toClientName ?? (item.toClientUserId != null ? 'Client #${item.toClientUserId}' : 'Unknown Client'),
+                      style: TextStyle(color: AppColors.textPrimary, fontSize: 14.sp, fontWeight: FontWeight.w600),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Text('#${item.id}', style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp)),
+                        SizedBox(width: 6.w),
+                        Container(width: 3.w, height: 3.w, decoration: BoxDecoration(color: AppColors.textGrey, shape: BoxShape.circle)),
+                        SizedBox(width: 6.w),
+                        Text(date, style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp)),
+                      ],
+                    ),
                   ],
                 ),
               ),
+              // Amount and Status
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '\$${item.amount != null ? (double.tryParse(item.amount!)?.toStringAsFixed(2) ?? item.amount!) : "0.00"}',
+                    style: TextStyle(color: AppColors.textPrimary, fontSize: 15.sp, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4.h),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        status.toUpperCase(),
+                        style: TextStyle(color: statusColor, fontSize: 10.sp, fontWeight: FontWeight.w500),
+                      ),
+                      if (status == 'pending') ...[
+                        SizedBox(width: 6.w),
+                        GestureDetector(
+                          onTap: () {
+                            Get.dialog(
+                              Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                backgroundColor: AppColors.card,
+                                surfaceTintColor: Colors.transparent,
+                                child: Padding(
+                                  padding: EdgeInsets.all(24.w),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(12.w),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red.withOpacity(0.1),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(Icons.cancel_outlined, color: Colors.red, size: 36.sp),
+                                      ),
+                                      SizedBox(height: 16.h),
+                                      Text(
+                                        'Cancel Transfer',
+                                        style: TextStyle(
+                                          color: AppColors.textPrimary,
+                                          fontSize: 20.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      SizedBox(height: 12.h),
+                                      Text(
+                                        'Are you sure you want to cancel this transfer request? This action cannot be undone.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: AppColors.textSecondary,
+                                          fontSize: 14.sp,
+                                        ),
+                                      ),
+                                      SizedBox(height: 24.h),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextButton(
+                                              onPressed: () => Get.back(),
+                                              style: TextButton.styleFrom(
+                                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(10.r),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'No, Keep It',
+                                                style: TextStyle(
+                                                  color: AppColors.textGrey,
+                                                  fontSize: 15.sp,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 12.w),
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                Get.back();
+                                                _controller.cancelTransfer(item.id!);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.red,
+                                                elevation: 0,
+                                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(10.r),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'Yes, Cancel',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 15.sp,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                            child: Text('Cancel', style: TextStyle(color: Colors.red, fontSize: 10.sp, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
-          if (item.comment != null && item.comment!.isNotEmpty) ...[
-            SizedBox(height: 12.h),
+          // Comment Section (Compact)
+          if (item.ibComment != null && item.ibComment!.isNotEmpty) ...[
+            SizedBox(height: 10.h),
             Container(
-              padding: EdgeInsets.all(10.w),
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
               decoration: BoxDecoration(
                 color: AppColors.background.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(6.r),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.notes, color: AppColors.textGrey, size: 14.sp),
-                  SizedBox(width: 6.w),
+                  Icon(Icons.format_quote, color: AppColors.textGrey, size: 12.sp),
+                  SizedBox(width: 4.w),
                   Expanded(
                     child: Text(
-                      item.comment!,
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp, fontStyle: FontStyle.italic),
+                      item.ibComment!,
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 11.sp, fontStyle: FontStyle.italic),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
             ),
           ],
-          SizedBox(height: 12.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.access_time, color: AppColors.textGrey, size: 14.sp),
-                  SizedBox(width: 4.w),
-                  Text(date, style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp)),
-                ],
-              ),
-              if (status == 'pending')
-                GestureDetector(
-                  onTap: () {
-                    Get.dialog(
-                      AlertDialog(
-                        backgroundColor: AppColors.cardBackGround,
-                        title: Text('Cancel Transfer', style: TextStyle(color: AppColors.textPrimary, fontSize: 18.sp)),
-                        content: Text('Are you sure you want to cancel this transfer?', style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp)),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Get.back(),
-                            child: Text('No', style: TextStyle(color: AppColors.textGrey)),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Get.back();
-                              _controller.cancelTransfer(item.id!);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-                            ),
-                            child: const Text('Yes, Cancel', style: TextStyle(color: Colors.white)),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.red.withOpacity(0.5)),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Text('Cancel', style: TextStyle(color: Colors.red, fontSize: 14.sp, fontWeight: FontWeight.w400)),
-                  ),
-                ),
-            ],
-          ),
         ],
       ),
     );

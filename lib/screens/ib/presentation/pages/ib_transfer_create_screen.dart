@@ -28,6 +28,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
   void initState() {
     super.initState();
     _controller = Get.find<IbTransferController>();
+    _controller.fetchInitData();
   }
 
   @override
