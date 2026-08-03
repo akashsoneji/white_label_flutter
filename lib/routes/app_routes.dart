@@ -13,6 +13,7 @@ abstract class Routes {
   static const VERIFY_CODE = _Paths.VERIFY_CODE;
   static const CREATE_NEW_PASSWORD = _Paths.CREATE_NEW_PASSWORD;
   static const TRADING = _Paths.TRADING;
+  static const TOAST_DEMO = _Paths.TOAST_DEMO;
   static const LANGUAGE_SELECTOR = _Paths.LANGUAGE_SELECTOR;
   static const ACCOUNT_MANAGEMENT = _Paths.ACCOUNT_MANAGEMENT;
   static const EDIT_PROFILE = _Paths.EDIT_PROFILE;
@@ -53,6 +54,7 @@ abstract class Routes {
   static const TOOLS_EDUCATION = _Paths.TOOLS_EDUCATION;
   static const MORE = _Paths.MORE;
   static const PARTNERSHIP_PROGRAM = _Paths.PARTNERSHIP_PROGRAM;
+  static const BRAND_TEST = _Paths.BRAND_TEST;
   static const ORDER_CONFIRMATION = _Paths.ORDER_CONFIRMATION;
   static const TENAX_BROKER_SELECTION = _Paths.TENAX_BROKER_SELECTION;
   static const TENAX_BROKER_INFO = _Paths.TENAX_BROKER_INFO;
@@ -100,6 +102,7 @@ abstract class _Paths {
   static const VERIFY_CODE = '/verify-code';
   static const CREATE_NEW_PASSWORD = '/create-new-password';
   static const TRADING = '/trading';
+  static const TOAST_DEMO = '/toast-demo';
   static const LANGUAGE_SELECTOR = '/language-selector';
   static const ACCOUNT_MANAGEMENT = '/account-management';
   static const EDIT_PROFILE = '/edit-profile';
@@ -145,6 +148,7 @@ abstract class _Paths {
   static const MORE = '/more';
   static const PARTNERSHIP_PROGRAM = '/partnership-program';
   static const ORDER_CONFIRMATION = '/order-confirmation';
+  static const BRAND_TEST = '/brand-test';
   static const KYC_BANK = '/kyc-bank';
 
   static const PAYMENT_METHOD = '/payment-method';

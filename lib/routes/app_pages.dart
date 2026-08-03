@@ -107,6 +107,7 @@ class AppPages {
   static const VERIFY_CODE = _Paths.VERIFY_CODE;
   static const CREATE_NEW_PASSWORD = _Paths.CREATE_NEW_PASSWORD;
   static const TRADING = _Paths.TRADING;
+  static const TOAST_DEMO = _Paths.TOAST_DEMO;
   static const LANGUAGE_SELECTOR = _Paths.LANGUAGE_SELECTOR;
   static const ACCOUNT_MANAGEMENT = _Paths.ACCOUNT_MANAGEMENT;
   static const EDIT_PROFILE = _Paths.EDIT_PROFILE;
@@ -148,6 +149,7 @@ class AppPages {
   static const TOOLS_EDUCATION = _Paths.TOOLS_EDUCATION;
   static const MORE = _Paths.MORE;
   static const PARTNERSHIP_PROGRAM = _Paths.PARTNERSHIP_PROGRAM;
+  static const BRAND_TEST = _Paths.BRAND_TEST;
   static const KYC_BANK = _Paths.KYC_BANK;
   static const PAYMENT_METHOD = _Paths.PAYMENT_METHOD;
   static const DEPOSIT_INSTRUCTION_SCREEN = _Paths.DEPOSIT_INSTRUCTION_SCREEN;
@@ -202,10 +204,7 @@ class AppPages {
       page: () => UiRegistry.instance.getStarted(),
     ),
     GetPage(name: _Paths.KYC_BANK, page: () => KycBankScreen()),
-    GetPage(
-      name: _Paths.CHANGE_PASSWORD,
-      page: () => ChangePasswordScreen(),
-    ),
+    GetPage(name: _Paths.CHANGE_PASSWORD, page: () => ChangePasswordScreen()),
     GetPage(
       name: _Paths.TWO_FACTOR_AUTH,
       page: () => const TwoFactorAuthScreen(),
@@ -243,10 +242,7 @@ class AppPages {
       name: _Paths.PRIVACY_POLICY,
       page: () => const PrivacyPolicyScreen(),
     ),
-    GetPage(
-      name: _Paths.ACCOUNT_CREATED,
-      page: () => AccountCreatedScreen(),
-    ),
+    GetPage(name: _Paths.ACCOUNT_CREATED, page: () => AccountCreatedScreen()),
     GetPage(
       name: _Paths.FORGOT_PASSWORD,
       page: () => UiRegistry.instance.forgotPassword(),
@@ -289,10 +285,7 @@ class AppPages {
       binding: AccountBinding(),
     ),
     GetPage(name: _Paths.EDIT_PROFILE, page: () => EditProfile()),
-    GetPage(
-      name: _Paths.VIEW_PROFILE,
-      page: () => const ViewProfileScreen(),
-    ),
+    GetPage(name: _Paths.VIEW_PROFILE, page: () => const ViewProfileScreen()),
     GetPage(name: _Paths.WITHDRAWAL, page: () => const WithdrawalScreen()),
     GetPage(
       name: _Paths.DEPOSIT,
@@ -319,27 +312,15 @@ class AppPages {
       name: _Paths.KYC_INTRO,
       page: () => KycIntroScreen(stageCompletion: Get.arguments),
     ),
-    GetPage(
-      name: _Paths.KYC_DETAILS,
-      page: () => const KycDetailsScreen(),
-    ),
+    GetPage(name: _Paths.KYC_DETAILS, page: () => const KycDetailsScreen()),
     GetPage(name: _Paths.KYC_DOCS, page: () => const KycDocsScreen()),
-    GetPage(
-      name: _Paths.KYC_SUCCESS,
-      page: () => const KycSuccessScreen(),
-    ),
+    GetPage(name: _Paths.KYC_SUCCESS, page: () => const KycSuccessScreen()),
     GetPage(
       name: _Paths.COMPLIANCE_WIZARD,
       page: () => const UnifiedComplianceWizard(),
     ),
-    GetPage(
-      name: _Paths.CHAT_WITH_US,
-      page: () => const ChatWithUsScreen(),
-    ),
-    GetPage(
-      name: _Paths.OPEN_ACCOUNT,
-      page: () => const OpenAccountScreen(),
-    ),
+    GetPage(name: _Paths.CHAT_WITH_US, page: () => const ChatWithUsScreen()),
+    GetPage(name: _Paths.OPEN_ACCOUNT, page: () => const OpenAccountScreen()),
     GetPage(
       name: _Paths.CHOOSE_ACCOUNT,
       page: () {
@@ -350,10 +331,11 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.CREATE_APP_ACCOUNT,
-      page: () => CreateCrmAppAccountScreen(
-        accountType: Get.arguments ?? 'demo',
-        isDemo: false,
-      ),
+      page:
+          () => CreateCrmAppAccountScreen(
+            accountType: Get.arguments ?? 'demo',
+            isDemo: false,
+          ),
     ),
     GetPage(
       name: _Paths.INTERNAL_TRANSFER,
@@ -365,10 +347,7 @@ class AppPages {
     ),
     GetPage(name: _Paths.CHART, page: () => const ChartScreen()),
     GetPage(name: _Paths.FINANCE, page: () => const FinanceScreen()),
-    GetPage(
-      name: _Paths.IB_DASHBOARD,
-      page: () => const IbDashboardScreen(),
-    ),
+    GetPage(name: _Paths.IB_DASHBOARD, page: () => const IbDashboardScreen()),
     GetPage(name: _Paths.IB_MAIN, page: () => const IbMainScreen()),
     GetPage(
       name: _Paths.COPY_TRADING_MAIN,
@@ -383,10 +362,7 @@ class AppPages {
       page: () => const TraderDetailsScreen(),
     ),
     GetPage(name: _Paths.BONUS, page: () => const BonusScreen()),
-    GetPage(
-      name: _Paths.DEMO_CONTEST,
-      page: () => const DemoContestScreen(),
-    ),
+    GetPage(name: _Paths.DEMO_CONTEST, page: () => const DemoContestScreen()),
     GetPage(
       name: _Paths.DEMO_CONTEST_RULES,
       page: () => const ContestRulesScreen(),
@@ -456,6 +432,7 @@ class AppPages {
       name: _Paths.PARTNERSHIP_PROGRAM,
       page: () => const PartnershipProgramScreen(),
     ),
+
     GetPage(
       name: _Paths.ORDER_CONFIRMATION,
       page: () {
