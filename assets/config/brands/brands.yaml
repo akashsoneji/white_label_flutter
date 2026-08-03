@@ -230,7 +230,7 @@ brands:
     type: child
     inheritsFrom: iquote
     label: Skyriss
-    themeMode: dark
+    themeMode: both
  android:
  applicationId: "com.skyriss.app"
  appName: "Skyriss"

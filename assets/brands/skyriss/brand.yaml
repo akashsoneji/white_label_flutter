@@ -5,7 +5,7 @@ parents:
   - iquote
   - vantage
 label: Skyriss
-themeMode: dark
+themeMode: both
 
 android:
   applicationId: com.skyriss.app

@@ -1,21 +1,21 @@
 {
-  "default": "riyadex",
+  "default": "skyriss",
   "brands": [
-    "riyadex",
-    "vantage"
+    "skyriss",
+    "iquote"
   ],
   "brandDetails": [
     {
-      "name": "riyadex",
+      "name": "skyriss",
       "type": "child",
-      "inheritsFrom": "vantage",
-      "label": "Riyadex",
+      "inheritsFrom": "iquote",
+      "label": "Skyriss",
       "themeMode": "both"
     },
     {
-      "name": "vantage",
+      "name": "iquote",
       "type": "parent",
-      "label": "Vantage",
+      "label": "iQuote",
       "themeMode": "both"
     }
   ]

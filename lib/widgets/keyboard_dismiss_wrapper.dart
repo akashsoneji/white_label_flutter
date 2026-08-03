@@ -110,9 +110,9 @@ class _KeyboardDismissWrapperState extends State<KeyboardDismissWrapper>
 
     return Stack(
       children: [
-        Listener(
-          behavior: HitTestBehavior.translucent,
-          onPointerDown: (event) => _maybeDismissOnTap(event, mq),
+        TapRegion(
+          groupId: EditableText,
+          onTapOutside: (event) => _maybeDismissOnTap(event as PointerDownEvent, mq),
           child: widget.child,
         ),
         if (showDoneBar)
