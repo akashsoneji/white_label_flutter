@@ -58,7 +58,6 @@ import '../screens/finance/presentation/pages/transaction_history_screen.dart';
 import '../screens/home/order_confirmation_screen.dart';
 import '../screens/settings/presentation/pages/language_selector_screen.dart';
 import '../screens/settings/presentation/pages/account_management_screen.dart';
-import '../screens/brand_test_screen.dart';
 import '../screens/copy_trading/settings/wallet_screen.dart';
 import '../screens/copy_trading/finance/deposit_screen.dart';
 import '../screens/copy_trading/finance/payment_methods_screen.dart';
@@ -108,7 +107,6 @@ class AppPages {
   static const VERIFY_CODE = _Paths.VERIFY_CODE;
   static const CREATE_NEW_PASSWORD = _Paths.CREATE_NEW_PASSWORD;
   static const TRADING = _Paths.TRADING;
-  static const TOAST_DEMO = _Paths.TOAST_DEMO;
   static const LANGUAGE_SELECTOR = _Paths.LANGUAGE_SELECTOR;
   static const ACCOUNT_MANAGEMENT = _Paths.ACCOUNT_MANAGEMENT;
   static const EDIT_PROFILE = _Paths.EDIT_PROFILE;
@@ -150,7 +148,6 @@ class AppPages {
   static const TOOLS_EDUCATION = _Paths.TOOLS_EDUCATION;
   static const MORE = _Paths.MORE;
   static const PARTNERSHIP_PROGRAM = _Paths.PARTNERSHIP_PROGRAM;
-  static const BRAND_TEST = _Paths.BRAND_TEST;
   static const KYC_BANK = _Paths.KYC_BANK;
   static const PAYMENT_METHOD = _Paths.PAYMENT_METHOD;
   static const DEPOSIT_INSTRUCTION_SCREEN = _Paths.DEPOSIT_INSTRUCTION_SCREEN;
@@ -459,7 +456,6 @@ class AppPages {
       name: _Paths.PARTNERSHIP_PROGRAM,
       page: () => const PartnershipProgramScreen(),
     ),
-    GetPage(name: _Paths.BRAND_TEST, page: () => const BrandTestScreen()),
     GetPage(
       name: _Paths.ORDER_CONFIRMATION,
       page: () {

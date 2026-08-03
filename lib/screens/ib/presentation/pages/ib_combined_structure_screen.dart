@@ -1,10 +1,12 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_structure_screen.dart';
 import 'package:crm_app/screens/ib/presentation/pages/my_structure_screen.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 class IbCombinedStructureScreen extends StatelessWidget {
@@ -20,11 +22,21 @@ class IbCombinedStructureScreen extends StatelessWidget {
           scrolledUnderElevation: 0,
           backgroundColor: AppColors.tradeBackgroundCenterColor,
           elevation: 0,
-          leading: AppSvgBackButton(
-            onPressed: () => Get.back(closeOverlays: true),
-            iconWidth: 30.w,
-            iconHeight: 30.h,
+          leading: IconButton(
+            icon: SvgPicture.asset(
+              "assets/svg/ib_dashboard/home.svg",
+              colorFilter: ColorFilter.mode(
+                AppColors.textPrimary,
+                BlendMode.srcIn,
+              ),
+            ),
+            onPressed: () => Get.offAllNamed(AppPages.TRADING),
           ),
+          // leading: AppSvgBackButton(
+          //   onPressed: () => Get.back(closeOverlays: true),
+          //   iconWidth: 30.w,
+          //   iconHeight: 30.h,
+          // ),
           title: Text(
             'Structure',
             style: AppTextStyles.bodyText.copyWith(

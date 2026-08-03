@@ -6,13 +6,21 @@ import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart';
+import 'package:crm_app/services/chart_preload_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ChartInAppWebView extends StatefulWidget {
   final String url;
   final String symbol;
+  final VoidCallback? onReady;
 
-  const ChartInAppWebView({super.key, required this.url, required this.symbol});
+  const ChartInAppWebView({
+    super.key,
+    required this.url,
+    required this.symbol,
+    this.onReady,
+  });
 
   @override
   State<ChartInAppWebView> createState() => ChartInAppWebViewState();
@@ -23,13 +31,11 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   bool _isLoading = true;
   bool _hasError = false;
   bool _isReady = false;
-  String? _lastUrl;
   Timer? _loadingTimeout;
 
   @override
   void initState() {
     super.initState();
-    _lastUrl = widget.url;
     _startLoadingTimeout();
   }
 
@@ -37,19 +43,26 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   void didUpdateWidget(covariant ChartInAppWebView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.url != widget.url) {
-      _lastUrl = widget.url;
-      _isReady = false;
-      _hasError = false;
-      _isLoading = true;
-      _startLoadingTimeout();
-      _controller?.loadUrl(urlRequest: URLRequest(url: WebUri(widget.url)));
-      return;
-    }
-
-    // If only symbol changed, try JS update first (no reload).
-    if (oldWidget.symbol != widget.symbol) {
-      unawaited(updateSymbol(widget.symbol));
+    if (oldWidget.url != widget.url || oldWidget.symbol != widget.symbol) {
+      if (_isReady) {
+        // Try JS update first
+        updateSymbol(widget.symbol).then((success) {
+          if (!success) {
+            // JS update failed or not supported by the page. Fallback to full reload.
+            // Do NOT set _isLoading = true here to prevent flickering/spinner during switch.
+            _hasError = false;
+            _controller?.loadUrl(
+                urlRequest: URLRequest(url: WebUri(widget.url)));
+            if (mounted) setState(() {});
+          }
+        });
+      } else {
+        _isLoading = true;
+        _hasError = false;
+        _startLoadingTimeout();
+        _controller?.loadUrl(urlRequest: URLRequest(url: WebUri(widget.url)));
+        if (mounted) setState(() {});
+      }
     }
   }
 
@@ -71,15 +84,15 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     });
   }
 
-  Future<void> updateSymbol(String symbol) async {
-    if (_controller == null) return;
-    if (!_isReady) return;
+  Future<bool> updateSymbol(String symbol) async {
+    if (_controller == null) return false;
+    if (!_isReady) return false;
 
     final String chartSymbol =
         symbol.contains('.') ? symbol.substring(0, symbol.lastIndexOf('.')) : symbol;
 
     try {
-      await _controller!.evaluateJavascript(source: '''
+      final res = await _controller!.evaluateJavascript(source: '''
         (function() {
           try {
             if (typeof selectedSymbol !== 'undefined') {
@@ -92,18 +105,18 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
             if (typeof createTradingViewChart === 'function') {
               createTradingViewChart("$chartSymbol");
               return true;
-            }
+            // Fallback for Vue/React SPA: change URL via location.replace
+            var newUrl = window.location.pathname + "?symbol=" + "$chartSymbol" + "&theme=" + (new URLSearchParams(window.location.search).get("theme") || "light");
+            window.location.replace(newUrl);
+            return true;
           } catch (e) {}
           return false;
         })();
       ''');
+
+      return res == true || res == 'true';
     } catch (_) {
-      // If JS bridge fails, fallback to reload the URL (keeps app alive).
-      if (_lastUrl != null) {
-        await _controller!.loadUrl(
-          urlRequest: URLRequest(url: WebUri(_lastUrl!)),
-        );
-      }
+      return false;
     }
   }
 
@@ -129,6 +142,16 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     }
   }
 
+  Future<dynamic> evaluateJavascript(String source) async {
+    if (_controller == null || !_isReady) return null;
+    try {
+      return await _controller!.evaluateJavascript(source: source);
+    } catch (e) {
+      debugPrint('[Chart] JS Eval Error: $e');
+      return null;
+    }
+  }
+
   Future<void> _retry() async {
     if (_controller == null) return;
     setState(() {
@@ -148,6 +171,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
       child: Stack(
         children: [
           InAppWebView(
+            keepAlive: Get.isRegistered<ChartPreloadService>() ? Get.find<ChartPreloadService>().keepAlive : null,
             initialUrlRequest: URLRequest(url: WebUri(widget.url)),
             initialSettings: InAppWebViewSettings(
               javaScriptEnabled: true,
@@ -155,9 +179,27 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
               useShouldOverrideUrlLoading: true,
               mediaPlaybackRequiresUserGesture: false,
               allowsInlineMediaPlayback: true,
+              cacheEnabled: true,
+              clearCache: false,
+              domStorageEnabled: true,
+              databaseEnabled: true,
+              supportZoom: false,
             ),
-            onWebViewCreated: (controller) {
+            onWebViewCreated: (controller) async {
               _controller = controller;
+              // Check if we attached to a preloaded KeepAlive webview that's already finished loading
+              final progress = await controller.getProgress();
+              if (progress == 100) {
+                if (!mounted) return;
+                _loadingTimeout?.cancel();
+                setState(() {
+                  _isLoading = false;
+                  _hasError = false;
+                  _isReady = true;
+                });
+                widget.onReady?.call();
+                unawaited(updateSymbol(widget.symbol));
+              }
             },
             shouldOverrideUrlLoading: (controller, action) async {
               // Keep navigation inside the same webview.
@@ -165,11 +207,13 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
             },
             onLoadStart: (controller, url) {
               if (!mounted) return;
-              setState(() {
-                _isLoading = true;
-                _hasError = false;
-                _isReady = false;
-              });
+              // Only show loader if it's the first time loading
+              if (!_isReady) {
+                setState(() {
+                  _isLoading = true;
+                  _hasError = false;
+                });
+              }
             },
             onLoadStop: (controller, url) async {
               if (!mounted) return;
@@ -179,6 +223,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
                 _hasError = false;
                 _isReady = true;
               });
+              widget.onReady?.call();
               // Ensure symbol is set after load.
               unawaited(updateSymbol(widget.symbol));
             },

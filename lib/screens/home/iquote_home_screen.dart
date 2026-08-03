@@ -2,9 +2,7 @@ import 'dart:async';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/home/brands/iquote/iquote_chart_screen.dart';
 import 'package:crm_app/screens/home/brands/iquote/view_models/iquote_chart_controller.dart';
-import 'dart:math' as math;
 
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -16,16 +14,11 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
-import 'package:crm_app/screens/trading/view_models/account_controller.dart';
-import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
-import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
-
-const _kHomeSparklinePoints = 50;
 
 class IquoteHomeScreen extends StatefulWidget {
   final Function(int)? onNavigateToTab;
@@ -99,8 +92,6 @@ class IquoteHomeScreen extends StatefulWidget {
 
 class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
   late final InstrumentsController _ic;
-  StreamSubscription<Map<String, dynamic>>? _tickSub;
-  final Map<String, List<double>> _bidHistory = {};
 
   @override
   void initState() {
@@ -110,43 +101,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
     } else {
       _ic = Get.find<InstrumentsController>();
     }
-
-    if (Get.isRegistered<ChartSocketController>()) {
-      final socket = Get.find<ChartSocketController>();
-      _tickSub = socket.priceStream.listen(_onTick);
-    }
-
-    for (final e in _ic.instruments) {
-      final key = _stripSuffix(e.symbol);
-      if (e.bid > 0 && !_bidHistory.containsKey(key)) {
-        _bidHistory[key] = List<double>.filled(_kHomeSparklinePoints, e.bid);
-      }
-    }
   }
-
-  @override
-  void dispose() {
-    _tickSub?.cancel();
-    super.dispose();
-  }
-
-  void _onTick(Map<String, dynamic> m) {
-    final sym = m['symbol']?.toString();
-    if (sym == null || sym.isEmpty) return;
-    final raw = m['bid'] ?? m['Bid'];
-    if (raw == null) return;
-    final bid = raw is num ? raw.toDouble() : double.tryParse(raw.toString());
-    if (bid == null || bid <= 0) return;
-
-    final key = _stripSuffix(sym);
-    final hist = _bidHistory.putIfAbsent(key, () => <double>[]);
-    hist.add(bid);
-    if (hist.length > _kHomeSparklinePoints) hist.removeAt(0);
-    if (mounted) setState(() {});
-  }
-
-  static String _stripSuffix(String s) =>
-      s.contains('.') ? s.substring(0, s.lastIndexOf('.')) : s;
 
   void _openSearchSheet() {
     showModalBottomSheet(
@@ -437,15 +392,13 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
           crossAxisCount: 2,
           mainAxisSpacing: 10.h,
           crossAxisSpacing: 10.w,
-          childAspectRatio:
-              1.6, // Fits Symbol, % Change, Price, AND mini sparkline chart!
+          childAspectRatio: 2.2, 
         ),
         itemCount: displayList.length,
         itemBuilder: (context, index) {
           return _LiveTickerCard(
             instrument: displayList[index],
             controller: _ic,
-            bidHistory: _bidHistory,
             cardBg: cardBg,
             textPrimary: textPrimary,
             textSecondary: textSecondary,
@@ -528,7 +481,6 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
 class _LiveTickerCard extends StatelessWidget {
   final ListElement instrument;
   final InstrumentsController controller;
-  final Map<String, List<double>> bidHistory;
   final Color cardBg;
   final Color textPrimary;
   final Color textSecondary;
@@ -538,7 +490,6 @@ class _LiveTickerCard extends StatelessWidget {
   const _LiveTickerCard({
     required this.instrument,
     required this.controller,
-    required this.bidHistory,
     required this.cardBg,
     required this.textPrimary,
     required this.textSecondary,
@@ -552,25 +503,14 @@ class _LiveTickerCard extends StatelessWidget {
     final displaySym =
         sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
     final digits = instrument.digits;
-    final key =
-        sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
 
     return Obx(() {
       final livePrice = controller.priceRx(sym).value;
-      final hist = bidHistory[key] ?? <double>[];
-
-      if (livePrice.bid > 0) {
-        if (hist.isEmpty || (hist.last - livePrice.bid).abs() > 1e-7) {
-          final list = bidHistory.putIfAbsent(key, () => <double>[]);
-          list.add(livePrice.bid);
-          if (list.length > _kHomeSparklinePoints) list.removeAt(0);
-        }
-      }
 
       double currentBid =
           livePrice.bid > 0
               ? livePrice.bid
-              : (hist.isNotEmpty ? hist.last : instrument.bid);
+              : instrument.bid;
       if (currentBid <= 0) {
         currentBid =
             (instrument.dayLow != null && instrument.dayLow! > 0)
@@ -585,8 +525,6 @@ class _LiveTickerCard extends StatelessWidget {
       final isUp = changePct >= 0;
       final sign = isUp ? '+' : '';
 
-      final lineColor =
-          isUp ? const Color(0xFF2ED573) : const Color(0xFFFF4757);
       final changeColor =
           isUp ? const Color(0xFF2ED573) : const Color(0xFFFF4757);
       final changeStr = '$sign${changePct.abs().toStringAsFixed(2)}%';
@@ -653,17 +591,6 @@ class _LiveTickerCard extends StatelessWidget {
                   fontWeight: FontWeight.w400,
                 ),
               ),
-              SizedBox(height: 2.h),
-              SizedBox(
-                height: 22.h,
-                width: double.infinity,
-                child: _HomeSparkline(
-                  history: hist,
-                  lineColor: lineColor,
-                  digits: digits,
-                  fallbackPrice: currentBid,
-                ),
-              ),
             ],
           ),
         ),
@@ -672,200 +599,3 @@ class _LiveTickerCard extends StatelessWidget {
   }
 }
 
-class _HomeSparkline extends StatelessWidget {
-  final List<double> history;
-  final Color lineColor;
-  final int digits;
-  final double fallbackPrice;
-
-  const _HomeSparkline({
-    required this.history,
-    required this.lineColor,
-    required this.digits,
-    required this.fallbackPrice,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    List<double> dataPoints = List<double>.from(history);
-    if (dataPoints.length < 2) {
-      final base = fallbackPrice > 0 ? fallbackPrice : 1.0;
-      dataPoints = [base, base];
-    }
-
-    final spots = <FlSpot>[];
-    for (int i = 0; i < dataPoints.length; i++) {
-      spots.add(FlSpot(i.toDouble(), dataPoints[i]));
-    }
-
-    var minY = spots.map((s) => s.y).reduce(math.min);
-    var maxY = spots.map((s) => s.y).reduce(math.max);
-    if ((maxY - minY).abs() < 1e-9) {
-      minY -= 0.01;
-      maxY += 0.01;
-    }
-
-    final gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [lineColor.withOpacity(0.35), lineColor.withOpacity(0.0)],
-    );
-
-    return LineChart(
-      LineChartData(
-        minY: minY,
-        maxY: maxY,
-        minX: 0,
-        maxX: (dataPoints.length - 1).toDouble(),
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        lineTouchData: const LineTouchData(enabled: false),
-        titlesData: const FlTitlesData(show: false),
-        lineBarsData: [
-          LineChartBarData(
-            spots: spots,
-            isCurved: true,
-            barWidth: 1.5,
-            color: lineColor,
-            dotData: const FlDotData(show: false),
-            belowBarData: BarAreaData(show: true, gradient: gradient),
-          ),
-        ],
-      ),
-      duration: const Duration(milliseconds: 150),
-    );
-  }
-}
-
-class _ActiveAccountBar extends StatelessWidget {
-  final Color cardBg;
-  final Color textPrimary;
-  final Color textSecondary;
-  final bool isDark;
-
-  const _ActiveAccountBar({
-    required this.cardBg,
-    required this.textPrimary,
-    required this.textSecondary,
-    required this.isDark,
-  });
-
-  void _showAccountBottomSheet(BuildContext context) {
-    showDashboardBottomSheet(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!Get.isRegistered<AccountController>()) {
-      return const SizedBox.shrink();
-    }
-    final accountController = Get.find<AccountController>();
-
-    return Obx(() {
-      final activeAccount = accountController.activeMT5Account;
-      final accNumber = activeAccount?.metaAccountNumber ?? '------';
-      final accType = (activeAccount?.accountType ?? 'REAL').toUpperCase();
-      final equity = '\$${activeAccount?.equity ?? '0.00'}';
-      final pnl = '\$${activeAccount?.profit ?? '0.00'}';
-
-      return InkWell(
-        onTap: () => _showAccountBottomSheet(context),
-        borderRadius: BorderRadius.circular(14.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: AppColors.primary.withOpacity(0.2)),
-            boxShadow: [
-              if (!isDark)
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8.r),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.account_balance_wallet_outlined,
-                      color: AppColors.primary,
-                      size: 20.r,
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Account: #$accNumber',
-                            style: AppTextStyles.bodyText.copyWith(
-                              color: textPrimary,
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          SizedBox(width: 6.w),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 6.w,
-                              vertical: 1.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  accType == 'DEMO'
-                                      ? Colors.orange.withOpacity(0.2)
-                                      : Colors.green.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                            child: Text(
-                              accType,
-                              style: AppTextStyles.bodyText.copyWith(
-                                color:
-                                    accType == 'DEMO'
-                                        ? Colors.orange
-                                        : Colors.green,
-                                fontSize: 9.sp,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        'P&L: $pnl  |  Equity: $equity',
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: textSecondary,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: textSecondary,
-                size: 22.r,
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-  }
-}

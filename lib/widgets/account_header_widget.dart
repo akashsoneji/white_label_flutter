@@ -22,6 +22,7 @@ class AccountHeaderWidget extends StatelessWidget {
   final VoidCallback? onSearchTap;
   final bool showSearchIcon;
   final bool showMenuIcon;
+  final bool showBalance;
   final Widget? rightWidget;
   final EdgeInsets? padding;
   final double? floatingProfit;
@@ -36,6 +37,7 @@ class AccountHeaderWidget extends StatelessWidget {
     this.onSearchTap,
     this.showSearchIcon = true,
     this.showMenuIcon = false,
+    this.showBalance = true,
     this.rightWidget,
     this.padding,
     this.floatingProfit,
@@ -310,10 +312,12 @@ class AccountHeaderWidget extends StatelessWidget {
                     );
                   case AccountHeaderLayoutStyle.defaultLayout:
                     return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                          showBalance
+                              ? CrossAxisAlignment.start
+                              : CrossAxisAlignment.end,
                       children: [
-                        valueRow,
-                        SizedBox(height: 2.h),
+                        if (showBalance) ...[valueRow, SizedBox(height: 2.h)],
                         accountSelector,
                       ],
                     );

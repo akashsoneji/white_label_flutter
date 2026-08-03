@@ -20,22 +20,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:crm_app/widgets/chart_inapp_webview.dart';
+import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/constants/color.dart';
 
+import 'package:crm_app/brands/celestial/celestial_theme.dart';
 import 'package:crm_app/models/order_types.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
-import 'celestial_theme.dart';
 import 'package:crm_app/services/language_service.dart';
 
 // ── Resolution map ─────────────────────────────────────────────────────────
 const _tfMap = {
-  '1m': '1', '5m': '5', '15m': '15', '30m': '30',
-  '1h': '60', '4h': '240', '1d': 'D', '1w': 'W',
+  '1m': '1',
+  '5m': '5',
+  '15m': '15',
+  '30m': '30',
+  '1h': '60',
+  '4h': '240',
+  '1d': 'D',
+  '1w': 'W',
 };
-
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Widget
@@ -48,27 +55,28 @@ class CelestialChartScreen extends StatefulWidget {
   State<CelestialChartScreen> createState() => _CelestialChartScreenState();
 }
 
-class _CelestialChartScreenState extends State<CelestialChartScreen> {
+class _CelestialChartScreenState extends State<CelestialChartScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   // ── Controllers ────────────────────────────────────────────────────────
   ChartSocketController get _chart => Get.find<ChartSocketController>();
-  InstrumentsController get _inst  => Get.find<InstrumentsController>();
+  InstrumentsController get _inst => Get.find<InstrumentsController>();
 
-  LanguageService get languageService => Get.find<LanguageService>();  TradingController     get _trade => Get.find<TradingController>();
+  LanguageService get languageService => Get.find<LanguageService>();
+  TradingController get _trade => Get.find<TradingController>();
 
   // ── WebView ────────────────────────────────────────────────────────────
-  late final WebViewController _wvc;
+  final GlobalKey<ChartInAppWebViewState> _chartKey = GlobalKey();
   bool _widgetReady = false;
 
   // ── UI state ───────────────────────────────────────────────────────────
-  String _tf        = '1h';
-  double _lot       = 0.01;
-  bool   _tradeOpen = false;
-
-
+  String _tf = '1h';
+  double _lot = 0.01;
+  bool _tradeOpen = false;
 
   // ── Tick subscription ──────────────────────────────────────────────────
   StreamSubscription<Map<String, dynamic>>? _tickSub;
-  Worker? _symbolWorker;
 
   // ─────────────────────────────────────────────────────────────────────
   // Lifecycle
@@ -77,7 +85,6 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   @override
   void initState() {
     super.initState();
-    _initWebView();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_chart.currentSymbol.value.isEmpty) {
         _chart.currentSymbol.value = 'XAUUSD';
@@ -88,13 +95,8 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
       _tickSub = _chart.priceStream.listen(_onTick);
 
       // Re-render position/order lines when data changes
-      ever(_trade.marketPositionsRx, (_) { if (_widgetReady) _renderPositionLines(); });
-
-      // Sync symbol change → tell TradingView (index.html exposes updateSymbol())
-      _symbolWorker = ever(_chart.currentSymbol, (String sym) {
-        if (sym.isNotEmpty && _widgetReady) {
-          _callJS('updateSymbol("${_stripSuffix(sym)}");');
-        }
+      ever(_trade.marketPositionsRx, (_) {
+        if (_widgetReady) _renderPositionLines();
       });
     });
   }
@@ -102,53 +104,9 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   @override
   void dispose() {
     _tickSub?.cancel();
-    _symbolWorker?.dispose();
     _chart.stopWebSocket();
     super.dispose();
   }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // WebView init
-  // ─────────────────────────────────────────────────────────────────────
-
-  void _initWebView() {
-    _wvc = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.black)
-      ..addJavaScriptChannel('FlutterBridge', onMessageReceived: _onBridgeMessage)
-      ..setNavigationDelegate(NavigationDelegate(
-        onPageFinished: (_) => _onPageReady(),
-      ))
-      ..loadFlutterAsset('assets/chart/index.html');
-  }
-
-  Future<void> _onPageReady() async {
-    // index.html uses TradingView Widget (free CDN tv.js) — no charting_library needed.
-    // It reads window.__tv_theme and calls updateSymbol(sym) to init the chart.
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final sym    = _stripSuffix(
-        _chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value);
-
-    await _callJS('window.__tv_theme = "${isDark ? 'dark' : 'light'}";');
-    // Give tv.js a moment to load, then create the chart for the current symbol
-    await _callJS('setTimeout(function(){ updateSymbol("$sym"); }, 300);');
-
-    setState(() => _widgetReady = true);
-    _renderPositionLines();
-    _renderOrderLines();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // JS Bridge — not used by index.html (TradingView Widget, no datafeed)
-  // Kept for future charting_library migration.
-  // ─────────────────────────────────────────────────────────────────────
-
-  void _onBridgeMessage(JavaScriptMessage msg) {
-    // index.html (TradingView Widget) does not send FlutterBridge messages.
-    // This handler is a no-op but kept so the channel is registered.
-  }
-
-
 
   // ─────────────────────────────────────────────────────────────────────
   // Live tick → update price header (bid/ask lines not available in
@@ -165,28 +123,34 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   // ─────────────────────────────────────────────────────────────────────
 
   void _renderPositionLines() {
-    final sym   = _chart.currentSymbol.value;
-    final lines = _trade.marketPositions
-        .where((p) => _matchSymbol(p.symbol, sym))
-        .map((p) => {
-              'price':    double.tryParse(p.openPrice) ?? 0.0,
-              'text':     'P&L: ${p.profitLoss.toStringAsFixed(2)}',
-              'quantity': '${p.action}: ${p.volume}',
-              'color':    p.profitLoss >= 0 ? '#22C55E' : '#EF4444',
-            })
-        .toList();
+    final sym = _chart.currentSymbol.value;
+    final lines =
+        _trade.marketPositions
+            .where((p) => _matchSymbol(p.symbol, sym))
+            .map(
+              (p) => {
+                'price': double.tryParse(p.openPrice) ?? 0.0,
+                'text': 'P&L: ${p.profitLoss.toStringAsFixed(2)}',
+                'quantity': '${p.action}: ${p.volume}',
+                'color': p.profitLoss >= 0 ? '#22C55E' : '#EF4444',
+              },
+            )
+            .toList();
     _callJS('window.__renderPositionLines(${jsonEncode(lines)});');
   }
 
   void _renderOrderLines() {
-    final sym   = _chart.currentSymbol.value;
-    final lines = _trade.pendingPositions
-        .where((o) => _matchSymbol(o.symbol, sym))
-        .map((o) => {
-              'price':    double.tryParse(o.openPrice) ?? 0.0,
-              'quantity': '${o.action}: ${o.volume}',
-            })
-        .toList();
+    final sym = _chart.currentSymbol.value;
+    final lines =
+        _trade.pendingPositions
+            .where((o) => _matchSymbol(o.symbol, sym))
+            .map(
+              (o) => {
+                'price': double.tryParse(o.openPrice) ?? 0.0,
+                'quantity': '${o.action}: ${o.volume}',
+              },
+            )
+            .toList();
     _callJS('window.__renderOrderLines(${jsonEncode(lines)});');
   }
 
@@ -197,13 +161,16 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   void _placeOrder(String side) {
     // Get primary/active MT5 account
     final accountCtrl = Get.find<AccountController>();
-    final mt5Account  = accountCtrl.activeMT5Account?.metaAccountNumber;
+    final mt5Account = accountCtrl.activeMT5Account?.metaAccountNumber;
 
     if (mt5Account == null || mt5Account.isEmpty) {
       return;
     }
 
-    final sym  = _chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value;
+    final sym =
+        _chart.currentSymbol.value.isEmpty
+            ? 'XAUUSD'
+            : _chart.currentSymbol.value;
     final type = side == 'sell' ? OrderType.sellMarket : OrderType.buyMarket;
 
     HapticFeedback.mediumImpact();
@@ -211,9 +178,9 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
     // Success/error feedback is shown by the app's unified top popup inside
     // placeTradeOrder — no local spinner or bottom toast here.
     _trade.placeTradeOrder(
-      symbol:     sym,
-      volume:     _lot.toStringAsFixed(2),
-      orderType:  type,
+      symbol: sym,
+      volume: _lot.toStringAsFixed(2),
+      orderType: type,
       mt5Account: mt5Account,
     );
   }
@@ -223,11 +190,12 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   // ─────────────────────────────────────────────────────────────────────
 
   Future<void> _callJS(String js) async {
-    try { await _wvc.runJavaScript(js); }
-    catch (e) { debugPrint('[Chart] JS: $e'); }
+    try {
+      await _chartKey.currentState?.evaluateJavascript(js);
+    } catch (e) {
+      debugPrint('[Chart] JS: $e');
+    }
   }
-
-
 
   String _stripSuffix(String sym) =>
       sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
@@ -235,15 +203,13 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   bool _matchSymbol(String a, String b) =>
       a == b || _stripSuffix(a) == _stripSuffix(b);
 
-
-
-
   // ─────────────────────────────────────────────────────────────────────
   // Build
   // ─────────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: CelTheme.bg(context),
       body: SafeArea(
@@ -267,18 +233,31 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
         children: [
           // Symbol picker
           Obx(() {
-            final sym = _chart.currentSymbol.value.isEmpty
-                ? 'XAUUSD' : _chart.currentSymbol.value;
+            final sym =
+                _chart.currentSymbol.value.isEmpty
+                    ? 'XAUUSD'
+                    : _chart.currentSymbol.value;
             return GestureDetector(
               onTap: () => _pickSymbol(c),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Text(sym, style: AppTextStyles.bodyText.copyWith(
-                    color: CelTheme.mainText(c), fontSize: 15.sp,
-                    fontWeight: FontWeight.w800)),
-                SizedBox(width: 2.w),
-                Icon(Icons.keyboard_arrow_down,
-                    size: 16.sp, color: CelTheme.subText(c)),
-              ]),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    sym,
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: CelTheme.mainText(c),
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(width: 2.w),
+                  Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 16.sp,
+                    color: CelTheme.subText(c),
+                  ),
+                ],
+              ),
             );
           }),
           SizedBox(width: 10.w),
@@ -291,9 +270,14 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
                 color: CelTheme.softBg(c),
                 borderRadius: BorderRadius.circular(6.r),
               ),
-              child: Text(_tf, style: AppTextStyles.bodyText.copyWith(
-                  color: CelTheme.mainText(c), fontSize: 12.sp,
-                  fontWeight: FontWeight.w700)),
+              child: Text(
+                _tf,
+                style: AppTextStyles.bodyText.copyWith(
+                  color: CelTheme.mainText(c),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
           const Spacer(),
@@ -303,12 +287,17 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
               decoration: BoxDecoration(
-                color:   CelTheme.buyBlue ,
+                color: CelTheme.buyBlue,
                 borderRadius: BorderRadius.circular(6.r),
               ),
-              child: Text(Get.find<LanguageService>().tr('celestial_chart_trade'), style: AppTextStyles.bodyText.copyWith(
+              child: Text(
+                Get.find<LanguageService>().tr('celestial_chart_trade'),
+                style: AppTextStyles.bodyText.copyWith(
                   color: Colors.white,
-                  fontSize: 12.sp, fontWeight: FontWeight.w700)),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
           SizedBox(width: 4.w),
@@ -320,28 +309,37 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
   // ── Trade panel — plain inline row, no card/elevation/overlay ────────
   Widget _tradePanel(BuildContext c) {
     return Obx(() {
-      final sym   = _chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value;
+      final sym =
+          _chart.currentSymbol.value.isEmpty
+              ? 'XAUUSD'
+              : _chart.currentSymbol.value;
       final price = _inst.priceRx(sym).value;
-      final dig   = price.digits > 0 ? price.digits : 2;
+      final dig = price.digits > 0 ? price.digits : 2;
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-        child: Row(children: [
-          Expanded(child: _tradeBtn(
-            label: Get.find<LanguageService>().tr('celestial_chart_sell'),
-            sub:   price.bid.toStringAsFixed(dig),
-            color: CelTheme.sell(c),
-            onTap: () => _placeOrder('sell'),
-          )),
-          SizedBox(width: 6.w),
-          _lotStepper(c),
-          SizedBox(width: 6.w),
-          Expanded(child: _tradeBtn(
-            label: Get.find<LanguageService>().tr('celestial_chart_buy'),
-            sub:   price.ask.toStringAsFixed(dig),
-            color: CelTheme.buy(c),
-            onTap: () => _placeOrder('buy'),
-          )),
-        ]),
+        child: Row(
+          children: [
+            Expanded(
+              child: _tradeBtn(
+                label: Get.find<LanguageService>().tr('celestial_chart_sell'),
+                sub: price.bid.toStringAsFixed(dig),
+                color: CelTheme.sell(c),
+                onTap: () => _placeOrder('sell'),
+              ),
+            ),
+            SizedBox(width: 6.w),
+            _lotStepper(c),
+            SizedBox(width: 6.w),
+            Expanded(
+              child: _tradeBtn(
+                label: Get.find<LanguageService>().tr('celestial_chart_buy'),
+                sub: price.ask.toStringAsFixed(dig),
+                color: CelTheme.buy(c),
+                onTap: () => _placeOrder('buy'),
+              ),
+            ),
+          ],
+        ),
       );
     });
   }
@@ -356,7 +354,27 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.r),
-        child: WebViewWidget(controller: _wvc),
+        child: Obx(() {
+          final sym = _stripSuffix(
+            _chart.currentSymbol.value.isEmpty
+                ? 'XAUUSD'
+                : _chart.currentSymbol.value,
+          );
+          final url =
+              '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$sym&theme=${AppColors.chartTheme}';
+          return ChartInAppWebView(
+            key: _chartKey,
+            symbol: sym,
+            url: url,
+            onReady: () {
+              if (mounted) {
+                setState(() => _widgetReady = true);
+                _renderPositionLines();
+                _renderOrderLines();
+              }
+            },
+          );
+        }),
       ),
     );
   }
@@ -373,17 +391,32 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
         // Thicker buttons — matches image 2
         padding: EdgeInsets.symmetric(vertical: 2.h),
         decoration: BoxDecoration(
-            color: color, borderRadius: BorderRadius.circular(8.r)),
+          color: color,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
         alignment: Alignment.center,
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text(label, style: AppTextStyles.bodyText.copyWith(
-              color: Colors.white, fontSize: 15.sp,
-              fontWeight: FontWeight.w800)),
-          SizedBox(height: 2.h),
-          Text(sub, style: AppTextStyles.bodyText.copyWith(
-              color: Colors.white.withValues(alpha: 0.85),
-              fontSize: 11.sp, fontWeight: FontWeight.w500)),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: AppTextStyles.bodyText.copyWith(
+                color: Colors.white,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              sub,
+              style: AppTextStyles.bodyText.copyWith(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -396,40 +429,60 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: CelTheme.divider(c)),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        // Minus
-        GestureDetector(
-          onTap: () => setState(
-              () => _lot = (_lot - 0.01).clamp(0.01, double.infinity)),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-            child: Text('−', style: AppTextStyles.bodyText.copyWith(
-                color: CelTheme.mainText(c), fontSize: 18.sp,
-                fontWeight: FontWeight.w700)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Minus
+          GestureDetector(
+            onTap:
+                () => setState(
+                  () => _lot = (_lot - 0.01).clamp(0.01, double.infinity),
+                ),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+              child: Text(
+                '−',
+                style: AppTextStyles.bodyText.copyWith(
+                  color: CelTheme.mainText(c),
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
-        ),
-        // Tappable number — opens keyboard
-        GestureDetector(
-          onTap: () => _editLot(c),
-          child: Container(
-            width: 52.w,
-            alignment: Alignment.center,
-            child: Text(_lot.toStringAsFixed(2), style: AppTextStyles.bodyText.copyWith(
-                color: CelTheme.mainText(c), fontSize: 14.sp,
-                fontWeight: FontWeight.w800)),
+          // Tappable number — opens keyboard
+          GestureDetector(
+            onTap: () => _editLot(c),
+            child: Container(
+              width: 52.w,
+              alignment: Alignment.center,
+              child: Text(
+                _lot.toStringAsFixed(2),
+                style: AppTextStyles.bodyText.copyWith(
+                  color: CelTheme.mainText(c),
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
           ),
-        ),
-        // Plus
-        GestureDetector(
-          onTap: () => setState(() => _lot += 0.01),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-            child: Text('+', style: AppTextStyles.bodyText.copyWith(
-                color: CelTheme.mainText(c), fontSize: 18.sp,
-                fontWeight: FontWeight.w700)),
+          // Plus
+          GestureDetector(
+            onTap: () => setState(() => _lot += 0.01),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+              child: Text(
+                '+',
+                style: AppTextStyles.bodyText.copyWith(
+                  color: CelTheme.mainText(c),
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -438,42 +491,61 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
     final ctrl = TextEditingController(text: _lot.toStringAsFixed(2));
     showDialog(
       context: c,
-      builder: (_) => AlertDialog(
-        backgroundColor: CelTheme.card(c),
-        title: Text(Get.find<LanguageService>().tr('celestial_chart_enter_lot_size'),
-            style: AppTextStyles.cardTitle.copyWith(color: CelTheme.mainText(c), fontSize: 15.sp)),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          style: AppTextStyles.heading.copyWith(color: CelTheme.mainText(c), fontSize: 18.sp),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: CelTheme.softBg(c),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-              borderSide: BorderSide.none,
+      builder:
+          (_) => AlertDialog(
+            backgroundColor: CelTheme.card(c),
+            title: Text(
+              Get.find<LanguageService>().tr('celestial_chart_enter_lot_size'),
+              style: AppTextStyles.cardTitle.copyWith(
+                color: CelTheme.mainText(c),
+                fontSize: 15.sp,
+              ),
             ),
+            content: TextField(
+              controller: ctrl,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              style: AppTextStyles.heading.copyWith(
+                color: CelTheme.mainText(c),
+                fontSize: 18.sp,
+              ),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: CelTheme.softBg(c),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(c),
+                child: Text(
+                  Get.find<LanguageService>().tr('celestial_chart_cancel'),
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: CelTheme.subText(c),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  final v = double.tryParse(ctrl.text);
+                  if (v != null && v >= 0.01) setState(() => _lot = v);
+                  Navigator.pop(c);
+                },
+                child: Text(
+                  'OK',
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: CelTheme.buy(c),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(c),
-            child: Text(Get.find<LanguageService>().tr('celestial_chart_cancel'),
-                style: AppTextStyles.bodyText.copyWith(color: CelTheme.subText(c))),
-          ),
-          TextButton(
-            onPressed: () {
-              final v = double.tryParse(ctrl.text);
-              if (v != null && v >= 0.01) setState(() => _lot = v);
-              Navigator.pop(c);
-            },
-            child: Text('OK',
-                style: AppTextStyles.bodyText.copyWith(color: CelTheme.buy(c),
-                    fontWeight: FontWeight.w800)),
-          ),
-        ],
-      ),
     );
   }
 
@@ -483,21 +555,33 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
       context: c,
       backgroundColor: CelTheme.card(c),
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.r))),
-      builder: (_) => SafeArea(
-        child: Wrap(
-          children: _tfMap.entries.map((e) {
-            final active = e.key == _tf;
-            return ListTile(
-              title: Text(e.key, style: AppTextStyles.bodyText.copyWith(
-                  color: active ? CelTheme.buy(c) : CelTheme.mainText(c),
-                  fontWeight: active ? FontWeight.w800 : FontWeight.w500)),
-              trailing: active ? Icon(Icons.check, color: CelTheme.buy(c)) : null,
-              onTap: () {
-                setState(() => _tf = e.key);
-                if (_widgetReady) {
-                  // index.html uses TradingView Widget — recreate with new interval
-                  _callJS('''
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+      ),
+      builder:
+          (_) => SafeArea(
+            child: Wrap(
+              children:
+                  _tfMap.entries.map((e) {
+                    final active = e.key == _tf;
+                    return ListTile(
+                      title: Text(
+                        e.key,
+                        style: AppTextStyles.bodyText.copyWith(
+                          color:
+                              active ? CelTheme.buy(c) : CelTheme.mainText(c),
+                          fontWeight:
+                              active ? FontWeight.w800 : FontWeight.w500,
+                        ),
+                      ),
+                      trailing:
+                          active
+                              ? Icon(Icons.check, color: CelTheme.buy(c))
+                              : null,
+                      onTap: () {
+                        setState(() => _tf = e.key);
+                        if (_widgetReady) {
+                          // index.html uses TradingView Widget — recreate with new interval
+                          _callJS('''
                     if(chartWidget) {
                       try { chartWidget.remove(); } catch(e) {}
                       chartWidget = null;
@@ -524,13 +608,13 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
                       });
                     })();
                   ''');
-                }
-                Navigator.pop(c);
-              },
-            );
-          }).toList(),
-        ),
-      ),
+                        }
+                        Navigator.pop(c);
+                      },
+                    );
+                  }).toList(),
+            ),
+          ),
     );
   }
 
@@ -540,18 +624,20 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> {
       backgroundColor: CelTheme.card(c),
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.r))),
-      builder: (_) => _SymbolPicker(
-        instruments: _inst,
-        onSelected: (sym) {
-          _chart.currentSymbol.value = sym;
-          // Also tell chart directly in case ever() hasn't fired yet
-          if (_widgetReady) {
-            _callJS('updateSymbol("${_stripSuffix(sym)}");');
-          }
-          Navigator.pop(c);
-        },
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
+      builder:
+          (_) => _SymbolPicker(
+            instruments: _inst,
+            onSelected: (sym) {
+              _chart.currentSymbol.value = sym;
+              // Also tell chart directly in case ever() hasn't fired yet
+              if (_widgetReady) {
+                _callJS('updateSymbol("${_stripSuffix(sym)}");');
+              }
+              Navigator.pop(c);
+            },
+          ),
     );
   }
 }
@@ -576,37 +662,51 @@ class _SymbolPickerState extends State<_SymbolPicker> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(Get.find<LanguageService>().tr('celestial_chart_select_symbol'),
-              style: AppTextStyles.bodyText.copyWith(
-                  color: CelTheme.headerText(c),
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500)),
+          Text(
+            Get.find<LanguageService>().tr('celestial_chart_select_symbol'),
+            style: AppTextStyles.bodyText.copyWith(
+              color: CelTheme.headerText(c),
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           SizedBox(height: 8.h),
           TextField(
             decoration: InputDecoration(
-              hintText: Get.find<LanguageService>().tr('celestial_chart_search_hint'),
+              hintText: Get.find<LanguageService>().tr(
+                'celestial_chart_search_hint',
+              ),
               prefixIcon: Icon(Icons.search, size: 18),
               filled: true,
               fillColor: CelTheme.softBg(c),
               isDense: true,
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 6.h,
+                horizontal: 8.w,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(6.r),
                 borderSide: BorderSide.none,
               ),
             ),
-            style: AppTextStyles.bodyText.copyWith(color: CelTheme.mainText(c), fontSize: 13.sp),
+            style: AppTextStyles.bodyText.copyWith(
+              color: CelTheme.mainText(c),
+              fontSize: 13.sp,
+            ),
             onChanged: (v) => setState(() => _query = v.toLowerCase()),
           ),
           SizedBox(height: 4.h),
           ConstrainedBox(
             constraints: BoxConstraints(maxHeight: 0.55.sh),
             child: Obx(() {
-              final items = widget.instruments.instruments
-                  .where((i) => _query.isEmpty ||
-                      i.symbol.toLowerCase().contains(_query))
-                  .toList();
+              final items =
+                  widget.instruments.instruments
+                      .where(
+                        (i) =>
+                            _query.isEmpty ||
+                            i.symbol.toLowerCase().contains(_query),
+                      )
+                      .toList();
               return ListView.builder(
                 shrinkWrap: true,
                 padding: EdgeInsets.zero,
@@ -618,12 +718,17 @@ class _SymbolPickerState extends State<_SymbolPicker> {
                     onTap: () => widget.onSelected(item.symbol),
                     child: Padding(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 4.w, vertical: 6.h),
-                      child: Text(item.symbol,
-                          style: AppTextStyles.bodyText.copyWith(
-                              color: CelTheme.mainText(c),
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500)),
+                        horizontal: 4.w,
+                        vertical: 6.h,
+                      ),
+                      child: Text(
+                        item.symbol,
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: CelTheme.mainText(c),
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   );
                 },

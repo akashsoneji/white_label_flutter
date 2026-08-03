@@ -49,7 +49,7 @@ class MarketWatchV2Service extends GetxService {
     if (s.contains('.')) {
       s = s.substring(0, s.lastIndexOf('.'));
     }
-    return s;
+    return s.toUpperCase();
   }
 
   void _appendLog(String line) {

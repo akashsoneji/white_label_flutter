@@ -1,21 +1,13 @@
 {
-  "default": "skyriss",
+  "default": "celestial",
   "brands": [
-    "skyriss",
-    "iquote"
+    "celestial"
   ],
   "brandDetails": [
     {
-      "name": "skyriss",
-      "type": "child",
-      "inheritsFrom": "iquote",
-      "label": "Skyriss",
-      "themeMode": "both"
-    },
-    {
-      "name": "iquote",
+      "name": "celestial",
       "type": "parent",
-      "label": "iQuote",
+      "label": "Celestial",
       "themeMode": "both"
     }
   ]

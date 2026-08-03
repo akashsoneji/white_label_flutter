@@ -18,6 +18,7 @@ import 'package:crm_app/services/notification_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
+import 'package:crm_app/services/chart_preload_service.dart';
 import 'constants/color.dart';
 import 'constants/text_styles.dart';
 
@@ -342,6 +343,7 @@ Future<void> initServices() async {
   Get.put<TradingWebSocketService>(TradingWebSocketService(), permanent: true);
   Get.put<AccountWebSocketService>(AccountWebSocketService(), permanent: true);
   await PriceAlertService().initialize();
+  Get.put<ChartPreloadService>(ChartPreloadService(), permanent: true);
 
   // Initialize app notification controller for global notifications
   Get.put<AppNotificationController>(

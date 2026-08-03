@@ -56,7 +56,11 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
     for (final e in _ic.instruments) {
       final key = _stripSuffix(e.symbol);
       if (e.bid > 0 && !_bidHistory.containsKey(key)) {
-        _bidHistory[key] = List<double>.filled(_kSparklinePoints, e.bid);
+        _bidHistory[key] = List<double>.filled(
+          _kSparklinePoints,
+          e.bid,
+          growable: true,
+        );
       }
     }
 
@@ -486,8 +490,8 @@ class _IquoteInstrumentRow extends StatelessWidget {
                       child: Text(
                         _formatSymbolName(sym),
                         style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -507,7 +511,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.5.sp,
                       color: changeColor,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   SizedBox(height: 2.h),
@@ -537,7 +541,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                                   'Buy',
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.85),
-                                    fontSize: 8.5.sp,
+                                    fontSize: 10.sp,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
@@ -548,8 +552,8 @@ class _IquoteInstrumentRow extends StatelessWidget {
                                   ),
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 10.5.sp,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
@@ -574,7 +578,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                                   'Sell',
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.85),
-                                    fontSize: 8.5.sp,
+                                    fontSize: 10.sp,
                                     fontWeight: FontWeight.w400,
                                   ),
                                 ),
@@ -585,8 +589,8 @@ class _IquoteInstrumentRow extends StatelessWidget {
                                   ),
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 10.5.sp,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
@@ -617,8 +621,8 @@ class _IquoteInstrumentRow extends StatelessWidget {
                             spreadText,
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 8.5.sp,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -632,7 +636,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                     style: TextStyle(
                       color: const Color(0xFF22C55E),
                       fontSize: 9.5.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

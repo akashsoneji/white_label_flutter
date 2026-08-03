@@ -280,28 +280,29 @@ class DashboardScreen extends StatelessWidget {
           alignment: Alignment.center,
           elevation: 0,
         ),
-        child: label != null
-            ? Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.visible,
-                softWrap: false,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w700,
-                  height: 1.0,
-                  letterSpacing: -0.3,
+        child:
+            label != null
+                ? Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.visible,
+                  softWrap: false,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w700,
+                    height: 1.0,
+                    letterSpacing: -0.3,
+                  ),
+                )
+                : Center(
+                  child: AppSvgIcon(
+                    assetPath: assetPath,
+                    height: 18.h,
+                    width: 18.w,
+                    color: AppColors.whiteColor,
+                  ),
                 ),
-              )
-            : Center(
-                child: AppSvgIcon(
-                  assetPath: assetPath,
-                  height: 18.h,
-                  width: 18.w,
-                  color: AppColors.whiteColor,
-                ),
-              ),
       ),
     );
   }
@@ -544,28 +545,35 @@ class DashboardScreen extends StatelessWidget {
 
     return Obx(() {
       final activeAcc = accountController.activeMT5Account;
-      final isActive = (activeAcc?.metaAccountNumber == account.metaAccountNumber) || account.isPrimaryAccount;
+      final isActive =
+          (activeAcc?.metaAccountNumber == account.metaAccountNumber) ||
+          account.isPrimaryAccount;
       final isDemo = account.accountType.toLowerCase() == 'demo';
 
-      final accountInfo = dashboardController.getAccountInfo(account.metaAccountNumber);
-      final balance = accountInfo?.balance ?? double.tryParse(account.balance) ?? 0.0;
-      final equity = accountInfo?.equity ?? double.tryParse(account.equity) ?? balance;
+      final accountInfo = dashboardController.getAccountInfo(
+        account.metaAccountNumber,
+      );
+      final balance =
+          accountInfo?.balance ?? double.tryParse(account.balance) ?? 0.0;
+      final equity =
+          accountInfo?.equity ?? double.tryParse(account.equity) ?? balance;
       final pnl = accountInfo?.profit ?? double.tryParse(account.profit) ?? 0.0;
-      final leverage = account.leverageMax > 0 ? '1:${account.leverageMax}' : '1:500';
+      final leverage =
+          account.leverageMax > 0 ? '1:${account.leverageMax}' : '1:500';
 
-      final borderColor = isActive
-          ? AppColors.primary
-          : (isDark ? const Color(0xFF232A3B) : AppColors.border.withValues(alpha: 0.12));
+      final borderColor =
+          isActive
+              ? AppColors.primary
+              : (isDark
+                  ? const Color(0xFF232A3B)
+                  : AppColors.border.withValues(alpha: 0.12));
 
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 9.h),
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(
-            color: borderColor,
-            width: isActive ? 1.3 : 0.8,
-          ),
+          border: Border.all(color: borderColor, width: isActive ? 1.3 : 0.8),
           boxShadow: [
             if (!isDark)
               BoxShadow(
@@ -593,11 +601,15 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 6.w),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 5.w,
+                        vertical: 1.5.h,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDemo
-                            ? Colors.orange.withValues(alpha: 0.12)
-                            : Colors.green.withValues(alpha: 0.12),
+                        color:
+                            isDemo
+                                ? Colors.orange.withValues(alpha: 0.12)
+                                : Colors.green.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(3.r),
                       ),
                       child: Text(
@@ -612,7 +624,10 @@ class DashboardScreen extends StatelessWidget {
                     if (isActive) ...[
                       SizedBox(width: 5.w),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 5.w,
+                          vertical: 1.5.h,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(3.r),
@@ -681,7 +696,10 @@ class DashboardScreen extends StatelessWidget {
                     Text(
                       'P&L: ${pnl >= 0 ? '+' : '-'}\$${pnl.abs().toStringAsFixed(2)}',
                       style: AppTextStyles.bodyText.copyWith(
-                        color: pnl >= 0 ? const Color(0xFF2ED573) : const Color(0xFFFF4757),
+                        color:
+                            pnl >= 0
+                                ? const Color(0xFF2ED573)
+                                : const Color(0xFFFF4757),
                         fontSize: 10.5.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -705,8 +723,12 @@ class DashboardScreen extends StatelessWidget {
                 // Trade Icon Button
                 InkWell(
                   onTap: () async {
-                    await accountController.setActiveMT5Account(account.metaAccountNumber);
-                    if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                    await accountController.setActiveMT5Account(
+                      account.metaAccountNumber,
+                    );
+                    if (FlavorConfig.usesIquoteUi() &&
+                        Get.context != null &&
+                        Navigator.of(Get.context!).canPop()) {
                       Navigator.of(Get.context!).pop();
                     }
                     if (onNavigateToTab != null) {
@@ -715,11 +737,18 @@ class DashboardScreen extends StatelessWidget {
                   },
                   borderRadius: BorderRadius.circular(6.r),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 5.h,
+                    ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+                      color: AppColors.primary.withValues(
+                        alpha: isDark ? 0.15 : 0.08,
+                      ),
                       borderRadius: BorderRadius.circular(6.r),
-                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Icon(
                       Icons.candlestick_chart_outlined,
@@ -737,7 +766,9 @@ class DashboardScreen extends StatelessWidget {
                       if (isDemo) {
                         controller.onDeposit(account.metaAccountNumber);
                       } else {
-                        controller.onDepositRealAccount(account.metaAccountNumber);
+                        controller.onDepositRealAccount(
+                          account.metaAccountNumber,
+                        );
                       }
                     },
                     borderRadius: BorderRadius.circular(6.r),
@@ -747,7 +778,11 @@ class DashboardScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xFF2ED573).withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6.r),
-                        border: Border.all(color: const Color(0xFF2ED573).withValues(alpha: 0.25)),
+                        border: Border.all(
+                          color: const Color(
+                            0xFF2ED573,
+                          ).withValues(alpha: 0.25),
+                        ),
                       ),
                       child: Text(
                         languageService.tr('dashboard_deposit'),
@@ -777,14 +812,20 @@ class DashboardScreen extends StatelessWidget {
                       height: 28.h,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: isDemo
-                            ? AppColors.primary.withValues(alpha: 0.12)
-                            : const Color(0xFFFF4757).withValues(alpha: 0.12),
+                        color:
+                            isDemo
+                                ? AppColors.primary.withValues(alpha: 0.12)
+                                : const Color(
+                                  0xFFFF4757,
+                                ).withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(6.r),
                         border: Border.all(
-                          color: isDemo
-                              ? AppColors.primary.withValues(alpha: 0.25)
-                              : const Color(0xFFFF4757).withValues(alpha: 0.25),
+                          color:
+                              isDemo
+                                  ? AppColors.primary.withValues(alpha: 0.25)
+                                  : const Color(
+                                    0xFFFF4757,
+                                  ).withValues(alpha: 0.25),
                         ),
                       ),
                       child: Text(
@@ -792,7 +833,10 @@ class DashboardScreen extends StatelessWidget {
                             ? languageService.tr('more_settings')
                             : languageService.tr('dashboard_withdraw'),
                         style: AppTextStyles.bodyText.copyWith(
-                          color: isDemo ? AppColors.primary : const Color(0xFFFF4757),
+                          color:
+                              isDemo
+                                  ? AppColors.primary
+                                  : const Color(0xFFFF4757),
                           fontSize: 10.5.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -810,7 +854,9 @@ class DashboardScreen extends StatelessWidget {
                         accountController
                             .setActiveMT5Account(account.metaAccountNumber)
                             .then((_) {
-                              if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                              if (FlavorConfig.usesIquoteUi() &&
+                                  Get.context != null &&
+                                  Navigator.of(Get.context!).canPop()) {
                                 Navigator.of(Get.context!).pop();
                               }
                             });
@@ -822,7 +868,9 @@ class DashboardScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(6.r),
-                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Text(
                           'Switch',
@@ -1114,13 +1162,13 @@ class DashboardScreen extends StatelessWidget {
                       await accountController.setActiveMT5Account(
                         account.metaAccountNumber,
                       );
-                      if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                      if (FlavorConfig.usesIquoteUi() &&
+                          Get.context != null &&
+                          Navigator.of(Get.context!).canPop()) {
                         Navigator.of(Get.context!).pop();
                       }
                       if (onNavigateToTab != null) {
-                        onNavigateToTab!(
-                          FlavorConfig.isVantage() ? 2 : 2,
-                        );
+                        onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 2);
                       }
                     },
                   ),
@@ -1179,7 +1227,9 @@ class DashboardScreen extends StatelessWidget {
                       accountController
                           .setActiveMT5Account(account.metaAccountNumber)
                           .then((_) {
-                            if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                            if (FlavorConfig.usesIquoteUi() &&
+                                Get.context != null &&
+                                Navigator.of(Get.context!).canPop()) {
                               Navigator.of(Get.context!).pop();
                             }
                           })
@@ -1588,7 +1638,7 @@ class DashboardScreen extends StatelessWidget {
             )
             : AppBar(
               scrolledUnderElevation: 0,
-              backgroundColor: AppColors.tradeBackgroundCenterColor,
+              backgroundColor: AppColors.background,
               elevation: 0,
               automaticallyImplyLeading: false,
               leadingWidth: 220.w,
@@ -1626,7 +1676,8 @@ class DashboardScreen extends StatelessWidget {
     // ── iQuote full-screen scaffold ─────────────────────────────────────
     if (FlavorConfig.usesIquoteUi()) {
       final isDark = AppColors.isDarkMode;
-      final bgColor = isDark ? const Color(0xFF0F1421) : const Color(0xFFF4F6F9);
+      final bgColor =
+          isDark ? const Color(0xFF0F1421) : const Color(0xFFF4F6F9);
       return Scaffold(
         backgroundColor: bgColor,
         appBar: appBar,
@@ -1907,13 +1958,13 @@ class DashboardScreen extends StatelessWidget {
                         await accountController.setActiveMT5Account(
                           account.metaAccountNumber,
                         );
-                        if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                        if (FlavorConfig.usesIquoteUi() &&
+                            Get.context != null &&
+                            Navigator.of(Get.context!).canPop()) {
                           Navigator.of(Get.context!).pop();
                         }
                         if (onNavigateToTab != null) {
-                          onNavigateToTab!(
-                            FlavorConfig.isVantage() ? 2 : 2,
-                          );
+                          onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 2);
                         }
                       },
                       borderRadius: BorderRadius.circular(12.r),
@@ -2035,7 +2086,9 @@ class DashboardScreen extends StatelessWidget {
                       await accountController.setActiveMT5Account(
                         account.metaAccountNumber,
                       );
-                      if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                      if (FlavorConfig.usesIquoteUi() &&
+                          Get.context != null &&
+                          Navigator.of(Get.context!).canPop()) {
                         Navigator.of(Get.context!).pop();
                       }
                       if (onNavigateToTab != null) {
@@ -2156,7 +2209,9 @@ class DashboardScreen extends StatelessWidget {
                   accountController
                       .setActiveMT5Account(account.metaAccountNumber)
                       .then((_) {
-                        if (FlavorConfig.usesIquoteUi() && Get.context != null && Navigator.of(Get.context!).canPop()) {
+                        if (FlavorConfig.usesIquoteUi() &&
+                            Get.context != null &&
+                            Navigator.of(Get.context!).canPop()) {
                           Navigator.of(Get.context!).pop();
                         }
                       })
@@ -2733,8 +2788,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
     r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#\$%\^&\*\(\)_\+\-=\[\]\{\};:,.<>/?\\|`~]).{8,16}$',
   );
 
-  bool _isPasswordComplex(String pwd) =>
-      _passwordComplexityRe.hasMatch(pwd);
+  bool _isPasswordComplex(String pwd) => _passwordComplexityRe.hasMatch(pwd);
 
   bool _isChangeFormValid(String newPwd, String confirmPwd) {
     if (newPwd.isEmpty || confirmPwd.isEmpty) return false;
@@ -2917,9 +2971,10 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         width: double.infinity,
                         height: 46.h,
                         child: ElevatedButton(
-                          onPressed: (isLoading.value || !isValid.value)
-                              ? null
-                              : () async {
+                          onPressed:
+                              (isLoading.value || !isValid.value)
+                                  ? null
+                                  : () async {
                                     if (formKey.currentState!.validate()) {
                                       isLoading.value = true;
                                       try {
@@ -3052,8 +3107,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          insetPadding:
-              EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+          insetPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
           child: Container(
             constraints: BoxConstraints(maxWidth: 400),
             padding: EdgeInsets.all(20),
@@ -3084,21 +3138,23 @@ class AccountMenuBottomSheet extends StatelessWidget {
                           hintText: 'Enter new investor password (8-16 chars)',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: AppColors.border),
+                            borderSide: BorderSide(color: AppColors.border),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: AppColors.border),
+                            borderSide: BorderSide(color: AppColors.border),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(
-                                color: AppColors.primary, width: 1.5),
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
                           ),
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 14),
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
                           suffixIcon: IconButton(
                             icon: Icon(
                               obscurePassword.value
@@ -3106,8 +3162,10 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                   : Icons.visibility,
                               color: AppColors.textGrey,
                             ),
-                            onPressed: () =>
-                                obscurePassword.value = !obscurePassword.value,
+                            onPressed:
+                                () =>
+                                    obscurePassword.value =
+                                        !obscurePassword.value,
                           ),
                         ),
                         style: AppTextStyles.bodyText.copyWith(
@@ -3150,21 +3208,23 @@ class AccountMenuBottomSheet extends StatelessWidget {
                           hintText: 'Confirm new investor password',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: AppColors.border),
+                            borderSide: BorderSide(color: AppColors.border),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide:
-                                BorderSide(color: AppColors.border),
+                            borderSide: BorderSide(color: AppColors.border),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(
-                                color: AppColors.primary, width: 1.5),
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
                           ),
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 14),
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
                           suffixIcon: IconButton(
                             icon: Icon(
                               obscureConfirmPassword.value
@@ -3172,8 +3232,10 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                   : Icons.visibility,
                               color: AppColors.textGrey,
                             ),
-                            onPressed: () => obscureConfirmPassword.value =
-                                !obscureConfirmPassword.value,
+                            onPressed:
+                                () =>
+                                    obscureConfirmPassword.value =
+                                        !obscureConfirmPassword.value,
                           ),
                         ),
                         style: AppTextStyles.bodyText.copyWith(
@@ -3211,67 +3273,72 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         width: double.infinity,
                         height: 46.h,
                         child: ElevatedButton(
-                          onPressed: (isLoading.value || !isValid.value)
-                              ? null
-                              : () async {
-                                  if (formKey.currentState!.validate()) {
-                                    isLoading.value = true;
-                                    try {
-                                      final response = await authService
-                                          .resetInvestorPassword(
-                                        mt5Account:
-                                            account.metaAccountNumber,
-                                        newPassword:
-                                            passwordController.text.trim(),
-                                      );
-                                      if (response.success) {
-                                        CustomToastService.showSuccess(
-                                          message:
-                                              response.data?['message'] ??
-                                                  'Investor password reset successfully',
-                                        );
-                                        Get.back(closeOverlays: true);
-                                      } else {
+                          onPressed:
+                              (isLoading.value || !isValid.value)
+                                  ? null
+                                  : () async {
+                                    if (formKey.currentState!.validate()) {
+                                      isLoading.value = true;
+                                      try {
+                                        final response = await authService
+                                            .resetInvestorPassword(
+                                              mt5Account:
+                                                  account.metaAccountNumber,
+                                              newPassword:
+                                                  passwordController.text
+                                                      .trim(),
+                                            );
+                                        if (response.success) {
+                                          CustomToastService.showSuccess(
+                                            message:
+                                                response.data?['message'] ??
+                                                'Investor password reset successfully',
+                                          );
+                                          Get.back(closeOverlays: true);
+                                        } else {
+                                          CustomToastService.showError(
+                                            message:
+                                                response.message ??
+                                                'Failed to reset investor password',
+                                          );
+                                        }
+                                      } catch (e) {
                                         CustomToastService.showError(
-                                          message: response.message ??
-                                              'Failed to reset investor password',
+                                          message: 'Error: $e',
                                         );
+                                      } finally {
+                                        isLoading.value = false;
                                       }
-                                    } catch (e) {
-                                      CustomToastService.showError(
-                                          message: 'Error: $e');
-                                    } finally {
-                                      isLoading.value = false;
                                     }
-                                  }
-                                },
+                                  },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
-                            disabledBackgroundColor:
-                                AppColors.primary.withOpacity(0.4),
+                            disabledBackgroundColor: AppColors.primary
+                                .withOpacity(0.4),
                             foregroundColor: Colors.white,
                             disabledForegroundColor: Colors.white70,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: isLoading.value
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2.0,
+                          child:
+                              isLoading.value
+                                  ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.0,
+                                    ),
+                                  )
+                                  : Text(
+                                    'Reset Password',
+                                    style: AppTextStyles.bodyText.copyWith(
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                )
-                              : Text(
-                                  'Reset Password',
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
                         ),
                       ),
                     ),
@@ -3314,22 +3381,18 @@ class AccountMenuBottomSheet extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               ListTile(
-                leading:
-                    Icon(Icons.lock_outline, color: AppColors.primary),
+                leading: Icon(Icons.lock_outline, color: AppColors.primary),
                 title: Text('Change Master Password'),
-                trailing:
-                    const Icon(Icons.chevron_right, color: Colors.grey),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: () {
                   Get.back();
                   _showMT5ChangePasswordDialog();
                 },
               ),
               ListTile(
-                leading: Icon(Icons.vpn_key_outlined,
-                    color: AppColors.primary),
+                leading: Icon(Icons.vpn_key_outlined, color: AppColors.primary),
                 title: Text('Reset Investor Password'),
-                trailing:
-                    const Icon(Icons.chevron_right, color: Colors.grey),
+                trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: () {
                   Get.back();
                   _showMT5ResetInvestorPasswordDialog();
@@ -3570,8 +3633,7 @@ class OpenAccountBottomSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                 
-                 
+
                   Align(
                     alignment: Alignment.topLeft,
                     child: InkWell(

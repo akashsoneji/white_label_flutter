@@ -22,18 +22,14 @@
 // every sub-widget without dropping live data.
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/services/theme_service.dart';
-import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/account_header_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
-import 'package:crm_app/screens/home/brands/iquote/iquote_position_screen.dart';
 import 'package:crm_app/screens/home/brands/iquote/view_models/iquote_chart_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
@@ -44,9 +40,6 @@ import 'package:crm_app/flavor_config.dart';
 // functional indicator colors (like TradingView's), not surface colors.
 const _kBullColor = Color(0xFF22C55E);
 const _kBearColor = Color(0xFFE74C3C);
-const _kMa5Color = Color(0xFF3478F6);
-const _kMa10Color = Color(0xFFF5A623);
-const _kMa30Color = Color(0xFFD91CAC);
 
 class _ChartPalette {
   const _ChartPalette({
@@ -127,8 +120,17 @@ class IQuoteChartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ensure the controller is registered and its symbol matches the requested one.
+    // If the controller is already in memory from a previous screen, it might still have the old symbol.
+    final ctrl = Get.put(IQuoteChartController(symbol ?? 'XAUUSD.c'));
+    if (symbol != null) {
+      // Synchronously force the switch to ensure websocket and state are up-to-date
+      // before the widgets even build, avoiding initial broken UI states.
+      ctrl.forceSwitchSymbol(symbol!);
+    }
+
     return GetBuilder<IQuoteChartController>(
-      init: IQuoteChartController(symbol ?? 'XAUUSD.c'),
+      init: ctrl,
       builder: (ctrl) {
         final palette = _ChartPalette.of(context);
         return Scaffold(
@@ -138,10 +140,15 @@ class IQuoteChartScreen extends StatelessWidget {
             child: Column(
               children: [
                 _Header(ctrl: ctrl, palette: palette),
-                _SymbolRow(ctrl: ctrl, palette: palette),
-                _Toolbar(ctrl: ctrl, palette: palette),
-                _MaStrip(ctrl: ctrl, palette: palette),
-                Expanded(child: _CandleChart(ctrl: ctrl, palette: palette)),
+                Expanded(
+                  child: Obx(
+                    () => ChartInAppWebView(
+                      symbol: ctrl.symbol,
+                      url:
+                          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=${ctrl.symbol}&theme=${AppColors.chartTheme}',
+                    ),
+                  ),
+                ),
                 _BottomBar(ctrl: ctrl, palette: palette),
               ],
             ),
@@ -162,104 +169,19 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: palette.bg,
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      padding: EdgeInsets.fromLTRB(8.w, 4.h, 12.w, 4.h),
       child: Row(
         children: [
           if (Navigator.canPop(context))
             AppBackButton(onPressed: () => Get.back<void>())
           else
-            SizedBox(width: 12.w),
-          Expanded(
-            child: AccountHeaderWidget(
-              showSearchIcon: false,
-              showMenuIcon: false,
-              layoutStyle: AccountHeaderLayoutStyle.defaultLayout,
-            ),
-          ),
-          SizedBox(width: 8.w),
-          IconButton(
-            icon: Icon(
-              Icons.fullscreen_outlined,
-              color: AppColors.textPrimary,
-              size: 26.sp,
-            ),
-            onPressed: () {
-              Get.to(() => IQuoteFullscreenChartScreen(symbol: ctrl.symbol));
-            },
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AccountPill extends StatelessWidget {
-  const _AccountPill({required this.ctrl});
-  final IQuoteChartController ctrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final isDemo = ctrl.isDemoAccount;
-      final color = isDemo ? const Color(0xFF3B82F6) : const Color(0xFFEF4444);
-      final label = isDemo ? 'DEMO' : 'LIVE';
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.18),
-          borderRadius: BorderRadius.circular(4.r),
-          border: Border.all(color: color, width: 0.8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
-            ),
             SizedBox(width: 4.w),
-            Icon(Icons.keyboard_arrow_down, size: 14.sp, color: color),
-          ],
-        ),
-      );
-    });
-  }
-}
-
-// ── symbol row (XAU/USD + bell + calc + more) ──────────────────────────────
-class _SymbolRow extends StatelessWidget {
-  const _SymbolRow({required this.ctrl, required this.palette});
-  final IQuoteChartController ctrl;
-  final _ChartPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
-      child: Row(
-        children: [
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => _showFavoritesBottomSheet(context, ctrl),
             child: Row(
               children: [
-                Container(
-                  width: 18.w,
-                  height: 12.h,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E40AF),
-                    borderRadius: BorderRadius.circular(1.r),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text('🇺🇸', style: TextStyle(fontSize: 11.sp)),
-                ),
+                _FlagIcon(symbol: ctrl.symbol.replaceAll('.c', '')),
                 SizedBox(width: 6.w),
                 Obx(
                   () => Text(
@@ -280,334 +202,20 @@ class _SymbolRow extends StatelessWidget {
               ],
             ),
           ),
-          const Spacer(),
-          // Obx(() {
-          //   final bid = ctrl.lastBid.value;
-          //   final digits = ctrl.priceDigits.value;
-          //   final pct = ctrl.priceChangePct.value ?? 0.0;
-          //   final isUp = pct >= 0;
-          //   final changeColor = isUp ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
-          //   final sign = isUp ? '+' : '';
-
-          //   if (bid == null || bid == 0) {
-          //     return const SizedBox.shrink();
-          //   }
-
-          //   return Column(
-          //     crossAxisAlignment: CrossAxisAlignment.end,
-          //     mainAxisSize: MainAxisSize.min,
-          //     children: [
-          //       Text(
-          //         bid.toStringAsFixed(digits),
-          //         style: TextStyle(
-          //           color: AppColors.textPrimary,
-          //           fontSize: 16.sp,
-          //           fontWeight: FontWeight.w800,
-          //         ),
-          //       ),
-          //       SizedBox(height: 2.h),
-          //       Text(
-          //         '$sign${pct.toStringAsFixed(2)}%',
-          //         style: TextStyle(
-          //           color: changeColor,
-          //           fontSize: 11.sp,
-          //           fontWeight: FontWeight.w600,
-          //         ),
-          //       ),
-          //     ],
-          //   );
-          // }),
+          Expanded(
+            child: AccountHeaderWidget(
+              showSearchIcon: false,
+              showMenuIcon: false,
+              showBalance: false,
+              layoutStyle: AccountHeaderLayoutStyle.defaultLayout,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _CircleIcon extends StatelessWidget {
-  const _CircleIcon({required this.svg, this.onTap});
-  final String svg;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 28.w,
-        height: 28.w,
-        alignment: Alignment.center,
-        child: SvgPicture.asset(
-          svg,
-          width: 18.w,
-          height: 18.w,
-          color: AppColors.textPrimary,
-        ),
-      ),
-    );
-  }
-}
-
-// ── toolbar (period selector + extra action icons) ─────────────────────────
-class _Toolbar extends StatelessWidget {
-  const _Toolbar({required this.ctrl, required this.palette});
-  final IQuoteChartController ctrl;
-  final _ChartPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 4.h),
-      child: Row(
-        children: [
-          Text(
-            'Period',
-            style: TextStyle(color: palette.axisText, fontSize: 13.sp),
-          ),
-          SizedBox(width: 14.w),
-          ...IQuoteChartController.kPeriods.map(
-            (p) => Padding(
-              padding: EdgeInsets.only(right: 14.w),
-              child: GestureDetector(
-                onTap: () {
-                  if (p == 'More') {
-                    _showCustomRangePicker(context, ctrl);
-                  } else {
-                    ctrl.changePeriod(p);
-                  }
-                },
-                child: Obx(() {
-                  final active = ctrl.period.value == p;
-                  return Text(
-                    p,
-                    style: TextStyle(
-                      color: active ? AppColors.textPrimary : palette.axisText,
-                      fontSize: 13.sp,
-                      fontWeight: active ? FontWeight.w700 : FontWeight.normal,
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-          // const Spacer(),
-          // Icon(
-          //   Icons.calendar_today_outlined,
-          //   size: 18.sp,
-          //   color: palette.axisText,
-          // ),
-          // SizedBox(width: 14.w),
-          // Icon(Icons.tune, size: 18.sp, color: palette.axisText),
-          // SizedBox(width: 14.w),
-          // Icon(Icons.aspect_ratio, size: 18.sp, color: palette.axisText),
-        ],
-      ),
-    );
-  }
-}
-
-// ── MA strip ───────────────────────────────────────────────────────────────
-class _MaStrip extends StatelessWidget {
-  const _MaStrip({required this.ctrl, required this.palette});
-  final IQuoteChartController ctrl;
-  final _ChartPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-      child: Obx(
-        () => Row(
-          children: [
-            _MaLabel(text: ctrl.ma5Label, color: _kMa5Color),
-            SizedBox(width: 14.w),
-            _MaLabel(text: ctrl.ma10Label, color: _kMa10Color),
-            SizedBox(width: 14.w),
-            _MaLabel(text: ctrl.ma30Label, color: _kMa30Color),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MaLabel extends StatelessWidget {
-  const _MaLabel({required this.text, required this.color});
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: color,
-        fontSize: 12.sp,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}
-
-// ── candle area placeholder ────────────────────────────────────────────────
-// Static area sized to fit the rest of the screen, with the live bid/ask
-// horizontal marker lines and the right-axis price scale rendered so the page
-// still looks correct before the real chart hook lands.
-class _ChartPlaceholder extends StatelessWidget {
-  const _ChartPlaceholder({required this.palette});
-  final _ChartPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    final ctrl = Get.find<IQuoteChartController>();
-    return Container(
-      width: double.infinity,
-      color: palette.chartAreaBg,
-      child: Obx(() {
-        final hi = ctrl.chartScaleHigh.value;
-        final lo = ctrl.chartScaleLow.value;
-        final bid = ctrl.chartBidLine.value;
-        final ask = ctrl.chartAskLine.value;
-        final d = ctrl.priceDigits.value;
-
-        final ticks = <double>[];
-        if (hi != null && lo != null && hi > lo) {
-          for (var i = 0; i < 5; i++) {
-            final t = lo + (hi - lo) * (i / 4.0);
-            ticks.add(t);
-          }
-        }
-
-        double yFor(double price) {
-          if (hi == null || lo == null || hi <= lo) return 0;
-          final frac = (price - lo) / (hi - lo);
-          return 1 - frac;
-        }
-
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: palette.divider, width: 1),
-                    bottom: BorderSide(color: palette.divider, width: 1),
-                  ),
-                ),
-              ),
-            ),
-            ...List.generate(5, (i) {
-              return Positioned(
-                left: 0,
-                right: 0,
-                top:
-                    MediaQuery.of(context).size.height * 0 +
-                    (i + 1) *
-                        (1 / 6.0) *
-                        (MediaQuery.of(context).size.height * 0.42),
-                child: Divider(color: palette.divider, height: 1),
-              );
-            }),
-            ...ticks.map((price) {
-              return Positioned(
-                right: 8.w,
-                top:
-                    MediaQuery.of(context).size.height * 0 +
-                    yFor(price).clamp(0.0, 1.0) *
-                        (MediaQuery.of(context).size.height * 0.42) -
-                    8,
-                child: Text(
-                  price.toStringAsFixed(d),
-                  style: TextStyle(color: palette.axisText, fontSize: 11.sp),
-                ),
-              );
-            }),
-            if (ask != null && hi != null && lo != null && hi > lo)
-              Positioned(
-                left: 0,
-                right: 0,
-                top:
-                    MediaQuery.of(context).size.height * 0 +
-                    yFor(ask).clamp(0.0, 1.0) *
-                        (MediaQuery.of(context).size.height * 0.42),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: _kBullColor.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w),
-                      color: _kBullColor,
-                      child: Text(
-                        ask.toStringAsFixed(d),
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            if (bid != null && hi != null && lo != null && hi > lo)
-              Positioned(
-                left: 0,
-                right: 0,
-                top:
-                    MediaQuery.of(context).size.height * 0 +
-                    yFor(bid).clamp(0.0, 1.0) *
-                        (MediaQuery.of(context).size.height * 0.42),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: _kBearColor.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w),
-                      color: _kBearColor,
-                      child: Text(
-                        bid.toStringAsFixed(d),
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.show_chart,
-                    size: 36.sp,
-                    color: palette.emptyHintIcon.withValues(alpha: 0.6),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    'Live chart placeholder',
-                    style: TextStyle(color: palette.axisText, fontSize: 12.sp),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      }),
-    );
-  }
-}
-
-// ── bottom bar (candle icon + icon-only Team/Position + Buy/Sell) ──────────
 class _BottomBar extends StatelessWidget {
   const _BottomBar({required this.ctrl, required this.palette});
   final IQuoteChartController ctrl;
@@ -624,11 +232,10 @@ class _BottomBar extends StatelessWidget {
         ),
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         child: Obx(() {
-          final positionCount = ctrl.openPositionCount.value;
-          final pendingCount = ctrl.pendingOrderCount.value;
           final bid = ctrl.lastBid.value;
           final ask = ctrl.lastAsk.value;
           final d = ctrl.priceDigits.value;
+          print("📊 [IQuoteChartScreen] _BottomBar rebuilding: bid=$bid, ask=$ask");
 
           return Column(
             children: [
@@ -674,7 +281,7 @@ class _BottomBar extends StatelessWidget {
                       color: _kBullColor,
                       icon: Icons.trending_up,
                       label: 'Buy',
-                      price: ask != null ? ask.toStringAsFixed(d) : '—',
+                      price: ask != null && ask > 0 ? ask.toStringAsFixed(d) : '—',
                       onTap: () => _openNewOrderSheet(context, side: 'buy'),
                     ),
                   ),
@@ -685,7 +292,7 @@ class _BottomBar extends StatelessWidget {
                       color: _kBearColor,
                       icon: Icons.trending_down,
                       label: 'Sell',
-                      price: bid != null ? bid.toStringAsFixed(d) : '—',
+                      price: bid != null && bid > 0 ? bid.toStringAsFixed(d) : '—',
                       onTap: () => _openNewOrderSheet(context, side: 'sell'),
                     ),
                   ),
@@ -721,70 +328,6 @@ class _BottomBar extends StatelessWidget {
 
 /// Icon-only badge (no "Team"/"Position" text), with a small red counter on
 /// top-right when count > 0. Sized to match the candle button on the left.
-class _IconOnlyBadge extends StatelessWidget {
-  const _IconOnlyBadge({
-    required this.icon,
-    required this.badge,
-    required this.palette,
-    required this.onTap,
-  });
-  final IconData icon;
-  final int badge;
-  final _ChartPalette palette;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 36.w,
-        height: 36.w,
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 36.w,
-              height: 36.w,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: palette.sheetFieldBg,
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-              child: Icon(icon, size: 18.sp, color: AppColors.textPrimary),
-            ),
-            if (badge > 0)
-              Positioned(
-                right: -2.w,
-                top: -2.h,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.error,
-                    borderRadius: BorderRadius.circular(999.r),
-                    border: Border.all(color: palette.sheetBg, width: 1.2),
-                  ),
-                  constraints: BoxConstraints(minWidth: 16.w),
-                  alignment: Alignment.center,
-                  child: Text(
-                    badge > 99 ? '99+' : '$badge',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w700,
-                      height: 1.0,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _ActionPill extends StatelessWidget {
   const _ActionPill({
     required this.color,
@@ -1425,401 +968,6 @@ class _SummaryRow extends StatelessWidget {
 }
 
 // ── Custom range picker dialog ──────────────────────────────────────────────
-void _showCustomRangePicker(BuildContext context, IQuoteChartController ctrl) {
-  DateTime selectedFrom =
-      ctrl.customFromDate.value ??
-      DateTime.now().subtract(const Duration(days: 1));
-  DateTime selectedTo = ctrl.customToDate.value ?? DateTime.now();
-  int selectedRes = ctrl.resolution.value;
-
-  showDialog(
-    context: context,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          final dialogBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-          final textColor = isDark ? Colors.white : Colors.black87;
-          final labelColor = isDark ? Colors.white70 : Colors.black54;
-
-          Future<void> pickDateTime(bool isFrom) async {
-            final initial = isFrom ? selectedFrom : selectedTo;
-            final date = await showDatePicker(
-              context: context,
-              initialDate: initial,
-              firstDate: DateTime.now().subtract(const Duration(days: 365)),
-              lastDate: DateTime.now(),
-            );
-            if (date != null) {
-              final time = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.fromDateTime(initial),
-              );
-              if (time != null) {
-                setState(() {
-                  final newDt = DateTime(
-                    date.year,
-                    date.month,
-                    date.day,
-                    time.hour,
-                    time.minute,
-                  );
-                  if (isFrom) {
-                    selectedFrom = newDt;
-                  } else {
-                    selectedTo = newDt;
-                  }
-                });
-              }
-            }
-          }
-
-          return AlertDialog(
-            backgroundColor: dialogBg,
-            title: Text(
-              'Select Custom Range',
-              style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'From Date & Time:',
-                  style: TextStyle(color: labelColor, fontSize: 12.sp),
-                ),
-                SizedBox(height: 4.h),
-                InkWell(
-                  onTap: () => pickDateTime(true),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.5),
-                      ),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          selectedFrom.toString().split('.')[0],
-                          style: TextStyle(color: textColor),
-                        ),
-                        Icon(
-                          Icons.calendar_today,
-                          size: 16.sp,
-                          color: labelColor,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  'To Date & Time:',
-                  style: TextStyle(color: labelColor, fontSize: 12.sp),
-                ),
-                SizedBox(height: 4.h),
-                InkWell(
-                  onTap: () => pickDateTime(false),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.5),
-                      ),
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          selectedTo.toString().split('.')[0],
-                          style: TextStyle(color: textColor),
-                        ),
-                        Icon(
-                          Icons.calendar_today,
-                          size: 16.sp,
-                          color: labelColor,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  'Resolution:',
-                  style: TextStyle(color: labelColor, fontSize: 12.sp),
-                ),
-                SizedBox(height: 4.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey.withValues(alpha: 0.5),
-                    ),
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: selectedRes,
-                      dropdownColor: dialogBg,
-                      isExpanded: true,
-                      style: TextStyle(color: textColor),
-                      items: const [
-                        DropdownMenuItem(value: 1, child: Text('1 Minute')),
-                        DropdownMenuItem(value: 5, child: Text('5 Minutes')),
-                        DropdownMenuItem(value: 15, child: Text('15 Minutes')),
-                        DropdownMenuItem(value: 30, child: Text('30 Minutes')),
-                        DropdownMenuItem(value: 60, child: Text('1 Hour')),
-                        DropdownMenuItem(value: 1440, child: Text('1 Day')),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() {
-                            selectedRes = val;
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: TextStyle(color: labelColor)),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                ),
-                onPressed: () {
-                  if (selectedFrom.isAfter(selectedTo)) {
-                    CustomToastService.showError(
-                      message: 'From Date cannot be after To Date.',
-                    );
-                    return;
-                  }
-                  ctrl.customFromDate.value = selectedFrom;
-                  ctrl.customToDate.value = selectedTo;
-                  ctrl.resolution.value = selectedRes;
-                  ctrl.changePeriod('More');
-                  ctrl.fetchHistoryData();
-                  Navigator.pop(context);
-                },
-                child: const Text(
-                  'Apply',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-// ── Native Candlestick Chart ───────────────────────────────────────────────
-class _CandleChart extends StatefulWidget {
-  const _CandleChart({required this.ctrl, required this.palette});
-  final IQuoteChartController ctrl;
-  final _ChartPalette palette;
-
-  @override
-  State<_CandleChart> createState() => _CandleChartState();
-}
-
-class _CandleChartState extends State<_CandleChart> {
-  ChartSeriesController? _seriesController;
-  String? _lastPeriod;
-  bool _didInitialRange = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      if (widget.ctrl.isChartLoading.value) {
-        return Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        );
-      }
-
-      if (widget.ctrl.chartData.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.insert_chart_outlined,
-                size: 48.sp,
-                color: widget.palette.axisText,
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                'No chart data available',
-                style: TextStyle(
-                  color: widget.palette.axisText,
-                  fontSize: 14.sp,
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
-      final isDark = Theme.of(context).brightness == Brightness.dark;
-      final gridColor =
-          isDark
-              ? Colors.white.withValues(alpha: 0.05)
-              : Colors.black.withValues(alpha: 0.05);
-
-      // Reset initial range only if period has changed
-      final bool periodChanged = _lastPeriod != widget.ctrl.period.value;
-      if (periodChanged) {
-        _lastPeriod = widget.ctrl.period.value;
-        _didInitialRange = false;
-      }
-
-      return SfCartesianChart(
-        backgroundColor: widget.palette.chartAreaBg,
-        plotAreaBorderWidth: 0,
-        margin: EdgeInsets.zero,
-        primaryXAxis: DateTimeCategoryAxis(
-          dateFormat:
-              widget.ctrl.resolution.value >= 1440
-                  ? DateFormat('MMM dd')
-                  : widget.ctrl.resolution.value >= 60
-                  ? DateFormat('MMM dd HH:mm')
-                  : DateFormat('HH:mm'),
-          majorGridLines: MajorGridLines(color: gridColor, width: 0.5),
-          axisLine: AxisLine(color: widget.palette.divider, width: 0.5),
-          labelStyle: TextStyle(
-            color: widget.palette.axisText,
-            fontSize: 10.sp,
-          ),
-          // Default window: 1 candle (= 1 minute for 1m res).
-          // Start zoomed to the newest bar; panned further back triggers loadOlderHistory.
-          initialVisibleMinimum: null,
-          initialVisibleMaximum: null,
-        ),
-        onActualRangeChanged: (ActualRangeChangedArgs args) {
-          // Ignore the first fire (the initial zoom animation); after that,
-          // if the user has panned to the left edge, pull older candles.
-          if (_didInitialRange) {
-            final ctrl = widget.ctrl;
-            if (!ctrl.isLoadingOlder.value && ctrl.chartData.isNotEmpty) {
-              // visibleMin for DateTime axes is DateTime (fallback via epoch).
-              final Object? rawMin = args.visibleMin;
-              final DateTime? visibleMin = rawMin is DateTime
-                  ? rawMin
-                  : rawMin != null
-                      ? DateTime.fromMillisecondsSinceEpoch(
-                          (rawMin as num).toInt(),
-                        )
-                      : null;
-              if (visibleMin != null) {
-                final oldestLoaded = ctrl.chartData.first.dateTime;
-                // Trigger if the user has panned within 2 candles of the left edge.
-                final edge = oldestLoaded.add(
-                  Duration(minutes: ctrl.resolution.value * 2),
-                );
-                if (visibleMin.isBefore(edge)) {
-                  ctrl.loadOlderHistory();
-                }
-              }
-            }
-          } else {
-            _didInitialRange = true;
-          }
-        },
-        primaryYAxis: NumericAxis(
-          opposedPosition: true, // Right-axis scale
-          majorGridLines: MajorGridLines(color: gridColor, width: 0.5),
-          minorGridLines: const MinorGridLines(width: 0),
-          axisLine: AxisLine(color: widget.palette.divider, width: 0.5),
-          labelStyle: TextStyle(
-            color: widget.palette.axisText,
-            fontSize: 10.sp,
-          ),
-          anchorRangeToVisiblePoints: true,
-          plotBands: <PlotBand>[
-            if (widget.ctrl.lastAsk.value != null &&
-                widget.ctrl.lastAsk.value! > 0)
-              PlotBand(
-                start: widget.ctrl.lastAsk.value,
-                end: widget.ctrl.lastAsk.value,
-                borderWidth: 0.8,
-                borderColor: _kBullColor,
-                dashArray: const <double>[4, 4],
-                text:
-                    'Ask: ${widget.ctrl.lastAsk.value!.toStringAsFixed(widget.ctrl.priceDigits.value)}',
-                textStyle: TextStyle(color: _kBullColor, fontSize: 9.sp),
-                horizontalTextAlignment: TextAnchor.start,
-              ),
-            if (widget.ctrl.lastBid.value != null &&
-                widget.ctrl.lastBid.value! > 0)
-              PlotBand(
-                start: widget.ctrl.lastBid.value,
-                end: widget.ctrl.lastBid.value,
-                borderWidth: 0.8,
-                borderColor: _kBearColor,
-                dashArray: const <double>[4, 4],
-                text:
-                    'Bid: ${widget.ctrl.lastBid.value!.toStringAsFixed(widget.ctrl.priceDigits.value)}',
-                textStyle: TextStyle(color: _kBearColor, fontSize: 9.sp),
-                horizontalTextAlignment: TextAnchor.start,
-              ),
-          ],
-        ),
-        trackballBehavior: TrackballBehavior(
-          enable: true,
-          activationMode: ActivationMode.singleTap,
-          tooltipSettings: InteractiveTooltip(
-            enable: true,
-            color: widget.palette.sheetBg,
-            textStyle: TextStyle(color: isDark ? Colors.white : Colors.black),
-          ),
-          lineType: TrackballLineType.vertical,
-          lineColor: widget.palette.axisText.withValues(alpha: 0.5),
-          lineWidth: 0.8,
-        ),
-        zoomPanBehavior: ZoomPanBehavior(
-          enablePanning: true,
-          enablePinching: true,
-          zoomMode: ZoomMode.x,
-        ),
-        series: <CartesianSeries<CandleData, DateTime>>[
-          CandleSeries<CandleData, DateTime>(
-            key: ValueKey(widget.ctrl.period.value),
-            animationDuration: 600,
-            onRendererCreated: (ChartSeriesController controller) {
-              _seriesController = controller;
-            },
-            dataSource: widget.ctrl.chartData,
-            xValueMapper: (CandleData candle, _) => candle.dateTime,
-            lowValueMapper: (CandleData candle, _) => candle.low,
-            highValueMapper: (CandleData candle, _) => candle.high,
-            openValueMapper: (CandleData candle, _) => candle.open,
-            closeValueMapper: (CandleData candle, _) => candle.close,
-            bearColor: _kBearColor,
-            bullColor: _kBullColor,
-            enableSolidCandles: true,
-          ),
-        ],
-      );
-    });
-  }
-}
-
 // ── Favorites Bottom Sheet WATCHLIST ──────────────────────────────────────────
 void _showFavoritesBottomSheet(
   BuildContext context,
@@ -2000,6 +1148,62 @@ class IQuoteFullscreenChartScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(child: ChartInAppWebView(symbol: symbol, url: chartUrl)),
+    );
+  }
+}
+
+class _FlagIcon extends StatelessWidget {
+  final String symbol;
+  const _FlagIcon({required this.symbol});
+
+  @override
+  Widget build(BuildContext context) {
+    String clean =
+        symbol.contains('.')
+            ? symbol.substring(0, symbol.lastIndexOf('.'))
+            : symbol;
+    String primaryCurr =
+        clean.length >= 3
+            ? clean.substring(0, 3).toLowerCase()
+            : clean.toLowerCase();
+
+    final flagPath1 = 'assets/svg/flags/${clean.toLowerCase()}.svg';
+    final flagPath2 = 'assets/svg/flags/$primaryCurr.svg';
+
+    return SizedBox(
+      width: 24.w,
+      height: 24.w,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.1),
+          shape: BoxShape.circle,
+        ),
+        child: ClipOval(
+          child: Padding(
+            padding: EdgeInsets.all(3.r),
+            child: SvgPicture.asset(
+              flagPath1,
+              fit: BoxFit.cover,
+              placeholderBuilder:
+                  (_) => SvgPicture.asset(
+                    flagPath2,
+                    fit: BoxFit.cover,
+                    placeholderBuilder:
+                        (_) => Center(
+                          child: Text(
+                            clean.isNotEmpty ? clean[0].toUpperCase() : '?',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                  ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

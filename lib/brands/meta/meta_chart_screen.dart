@@ -20,8 +20,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:crm_app/widgets/chart_inapp_webview.dart';
+import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/constants/color.dart';
 
+import 'package:crm_app/brands/meta/meta_theme.dart';
 import 'package:crm_app/models/order_types.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
@@ -48,7 +51,10 @@ class MetaChartScreen extends StatefulWidget {
   State<MetaChartScreen> createState() => _MetaChartScreenState();
 }
 
-class _MetaChartScreenState extends State<MetaChartScreen> {
+class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   // ── Controllers ────────────────────────────────────────────────────────
   ChartSocketController get _chart => Get.find<ChartSocketController>();
   InstrumentsController get _inst  => Get.find<InstrumentsController>();
@@ -56,7 +62,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
   LanguageService       get languageService => Get.find<LanguageService>();
 
   // ── WebView ────────────────────────────────────────────────────────────
-  late final WebViewController _wvc;
+  final GlobalKey<ChartInAppWebViewState> _chartKey = GlobalKey();
   bool _widgetReady = false;
 
   // ── UI state ───────────────────────────────────────────────────────────
@@ -68,7 +74,6 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
 
   // ── Tick subscription ──────────────────────────────────────────────────
   StreamSubscription<Map<String, dynamic>>? _tickSub;
-  Worker? _symbolWorker;
 
   // ────────────────────────────────────────────────�────────────────────
   // Lifecycle
@@ -77,7 +82,6 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
   @override
   void initState() {
     super.initState();
-    _initWebView();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_chart.currentSymbol.value.isEmpty) {
         _chart.currentSymbol.value = 'XAUUSD';
@@ -89,63 +93,14 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
 
       // Re-render position/order lines when data changes
       ever(_trade.marketPositionsRx, (_) { if (_widgetReady) _renderPositionLines(); });
-
-      // Sync symbol change → tell TradingView (index.html exposes updateSymbol())
-      _symbolWorker = ever(_chart.currentSymbol, (String sym) {
-        if (sym.isNotEmpty && _widgetReady) {
-          _callJS('updateSymbol("${_stripSuffix(sym)}");');
-        }
-      });
     });
   }
 
   @override
   void dispose() {
     _tickSub?.cancel();
-    _symbolWorker?.dispose();
     _chart.stopWebSocket();
     super.dispose();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // WebView init
-  // ─────────────────────────────────────────────────────────────────────
-
-  void _initWebView() {
-    _wvc = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.black)
-      ..addJavaScriptChannel('FlutterBridge', onMessageReceived: _onBridgeMessage)
-      ..setNavigationDelegate(NavigationDelegate(
-        onPageFinished: (_) => _onPageReady(),
-      ))
-      ..loadFlutterAsset('assets/chart/index.html');
-  }
-
-  Future<void> _onPageReady() async {
-    // index.html uses TradingView Widget (free CDN tv.js) — no charting_library needed.
-    // It reads window.__tv_theme and calls updateSymbol(sym) to init the chart.
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final sym    = _stripSuffix(
-        _chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value);
-
-    await _callJS('window.__tv_theme = "${isDark ? 'dark' : 'light'}";');
-    // Give tv.js a moment to load, then create the chart for the current symbol
-    await _callJS('setTimeout(function(){ updateSymbol("$sym"); }, 300);');
-
-    setState(() => _widgetReady = true);
-    _renderPositionLines();
-    _renderOrderLines();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────
-  // JS Bridge — not used by index.html (TradingView Widget, no datafeed)
-  // Kept for future charting_library migration.
-  // ─────────────────────────────────────────────────────────────────────
-
-  void _onBridgeMessage(JavaScriptMessage msg) {
-    // index.html (TradingView Widget) does not send FlutterBridge messages.
-    // This handler is a no-op but kept so the channel is registered.
   }
 
 
@@ -223,7 +178,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
   // ─────────────────────────────────────────────────────────────────────
 
   Future<void> _callJS(String js) async {
-    try { await _wvc.runJavaScript(js); }
+    try { await _chartKey.currentState?.evaluateJavascript(js); }
     catch (e) { debugPrint('[Chart] JS: $e'); }
   }
 
@@ -244,6 +199,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: MetaTheme.bg(context),
       body: SafeArea(
@@ -404,7 +360,22 @@ class _MetaChartScreenState extends State<MetaChartScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.r),
-        child: WebViewWidget(controller: _wvc),
+        child: Obx(() {
+          final sym = _stripSuffix(_chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value);
+          final url = '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$sym&theme=${AppColors.chartTheme}';
+          return ChartInAppWebView(
+            key: _chartKey,
+            symbol: sym,
+            url: url,
+            onReady: () {
+              if (mounted) {
+                setState(() => _widgetReady = true);
+                _renderPositionLines();
+                _renderOrderLines();
+              }
+            },
+          );
+        }),
       ),
     );
   }

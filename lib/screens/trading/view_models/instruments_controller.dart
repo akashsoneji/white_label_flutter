@@ -34,8 +34,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   Timer? _scrollIdleTimer;
 
   Rx<InstrumentPrice> priceRx(String symbol) {
+    final normalized = MarketWatchV2Service.normalizeSymbol(symbol);
     return _priceBySymbol.putIfAbsent(
-      symbol,
+      normalized,
       () => InstrumentPrice.empty().obs,
     );
   }
@@ -1066,13 +1067,22 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
   }
 
   void _parseSingleInstrument(List item) {
-    final newItem = _parseInstrumentItem(item);
+    var newItem = _parseInstrumentItem(item);
     if (newItem != null) {
-      _applyPriceUpdate(newItem);
-      // Check if this symbol already exists
+      // Check if this symbol already exists (matching by base symbol to handle V2 ticks)
       final existingIndex = allInstruments.indexWhere(
-        (element) => element.symbol == newItem.symbol,
+        (element) =>
+            MarketWatchV2Service.normalizeSymbol(element.symbol) ==
+            MarketWatchV2Service.normalizeSymbol(newItem!.symbol),
       );
+
+      if (existingIndex != -1) {
+        // Map to true symbol (e.g. BTCUSD.c instead of BTCUSD)
+        final actualSymbol = allInstruments[existingIndex].symbol;
+        newItem = newItem.copyWith(symbol: actualSymbol);
+      }
+      
+      _applyPriceUpdate(newItem);
 
       if (existingIndex != -1) {
         // Price tick for an existing symbol.

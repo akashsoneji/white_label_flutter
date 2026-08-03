@@ -21,7 +21,9 @@ import 'package:crm_app/models/order_types.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
+import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/services/api_service.dart';
 
@@ -47,12 +49,33 @@ class IQuoteChartController extends GetxController {
   IQuoteChartController([String? initialSymbol]) {
     if (initialSymbol != null) {
       symbolRx.value = initialSymbol;
+    } else {
+      // Find the correct suffix for XAUUSD from the available instruments
+      final instCtrl = Get.isRegistered<InstrumentsController>() ? Get.find<InstrumentsController>() : null;
+      if (instCtrl != null) {
+        final match = instCtrl.allInstruments.firstWhereOrNull((e) =>
+          MarketWatchV2Service.normalizeSymbol(e.symbol) == 'XAUUSD'
+        );
+        symbolRx.value = match?.symbol ?? 'XAUUSD';
+      } else {
+        symbolRx.value = 'XAUUSD';
+      }
     }
   }
 
-  final symbolRx = 'XAUUSD.c'.obs;
+  final symbolRx = 'XAUUSD'.obs;
   String get symbol => symbolRx.value;
   set symbol(String value) => symbolRx.value = value;
+
+  void forceSwitchSymbol(String newSymbol) {
+    if (symbolRx.value != newSymbol) {
+      symbolRx.value = newSymbol;
+    } else {
+      // Force refresh if it's the same symbol but websocket is stuck
+      _hydrateInitial();
+      _bindLive();
+    }
+  }
 
   // ── header state ────────────────────────────────────────────────────────
   final currentPrice = Rxn<double>();
@@ -130,6 +153,7 @@ class IQuoteChartController extends GetxController {
 
   void _applyQuote(InstrumentPrice? quote) {
     if (quote == null) return;
+    print("📈 [IQuoteChartController] _applyQuote for $symbol: bid=${quote.bid}, ask=${quote.ask}");
     // InstrumentPrice has bid/ask/digits but no `last` field — derive a
     // mid-price for the header so the big number and MA labels stay live.
     final mid = quote.bid == 0 && quote.ask == 0
