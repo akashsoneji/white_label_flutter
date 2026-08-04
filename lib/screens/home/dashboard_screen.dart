@@ -643,11 +643,12 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ],
                   ],
+                  
                 ),
                 Row(
                   children: [
                     Text(
-                      '\$${balance.toStringAsFixed(2)}',
+                      '${account.isCentAccount ? '¢' : '\$'}${balance.toStringAsFixed(2)}',
                       style: AppTextStyles.bodyText.copyWith(
                         color: textPrimary,
                         fontSize: 14.sp,
@@ -680,7 +681,7 @@ class DashboardScreen extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'Eq: \$${equity.toStringAsFixed(2)}',
+                      'Eq: ${account.isCentAccount ? '¢' : '\$'}${equity.toStringAsFixed(2)}',
                       style: AppTextStyles.bodyText.copyWith(
                         color: textSecondary,
                         fontSize: 10.5.sp,

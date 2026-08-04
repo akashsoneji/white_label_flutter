@@ -19,6 +19,9 @@ class MT5Account {
   final int commission;
   final int swap;
   final String tradingServer;
+  final String currency;
+  final bool isActive;
+  final bool isCentAccount;
   final String? tradingPlatform;
   final double minimumTradeSize;
   final double maxLotSize;
@@ -28,6 +31,7 @@ class MT5Account {
   final List<int> leverageOptions;
 
   MT5Account({
+    required this.isActive,
     required this.userId,
     required this.metaAccountNumber,
     required this.mt5NickName,
@@ -48,6 +52,8 @@ class MT5Account {
     required this.commission,
     required this.swap,
     required this.tradingServer,
+    required this.currency,
+    required this.isCentAccount,
     this.tradingPlatform,
     this.minimumTradeSize = 0.01,
     this.maxLotSize = 100.0,
@@ -79,6 +85,9 @@ class MT5Account {
       commission: _parseInt(json['commission']) ?? 0,
       swap: _parseInt(json['swap']) ?? 0,
       tradingServer: json['trading_server']?.toString() ?? '',
+      currency: json['currency']?.toString() ?? 'USD',
+      isActive: json['is_active'] ?? false,
+      isCentAccount: json['is_cent_account'] ?? false,
       tradingPlatform: json['trading_platform']?.toString(),
       minimumTradeSize: _parseDouble(json['minimum_trade_size']) ?? 0.01,
       maxLotSize: _parseDouble(json['max_lot_size']) ?? 100.0,
@@ -135,6 +144,9 @@ class MT5Account {
       'commission': commission,
       'swap': swap,
       'trading_server': tradingServer,
+      'currency': currency,
+      'is_active': isActive,
+      'is_cent_account': isCentAccount,
       'trading_platform': tradingPlatform,
       'minimum_trade_size': minimumTradeSize,
       'max_lot_size': maxLotSize,
