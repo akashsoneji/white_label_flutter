@@ -74,7 +74,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       if (isIquote) {
         _onTabChanged(2); // Charts tab is index 2
         if (Get.isRegistered<IQuoteChartController>()) {
-          Get.find<IQuoteChartController>().symbolRx.value = symbol;
+          Get.find<IQuoteChartController>().forceSwitchSymbol(symbol);
         } else {
           Get.put(IQuoteChartController(symbol));
         }
@@ -110,7 +110,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
     if (isIquote) {
       _screens = [
-        KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged)), // 0. Home
+        KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged, onNavigateToChart: _switchToChartTab)), // 0. Home
         KeepAliveWrapper(child: IquoteMarketScreen(onNavigateToChart: (sym) {
           _symbolSelectionService.setSymbol(sym);
           _switchToChartTab(sym);

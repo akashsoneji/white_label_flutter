@@ -901,7 +901,8 @@ Placing Order:
     setState(() {
       selectedSymbol = newSymbol;
       _datafeedSymbolForSelected = ''; // force prop change in ChartInAppWebView
-      _lastSymbolForDatafeedLookup = ''; // allow fresh datafeed lookup for new symbol
+      _lastSymbolForDatafeedLookup =
+          ''; // allow fresh datafeed lookup for new symbol
       _isFetchingDatafeedSymbol = false;
     });
     symbolSelectionService.setSymbol(newSymbol);
@@ -1080,7 +1081,9 @@ Placing Order:
                   children: [
                     Text(
                       'Symbol: $selectedSymbol',
-                      style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     SizedBox(height: 8),
                     Text(
@@ -1099,7 +1102,9 @@ Placing Order:
                     SizedBox(height: 16),
                     Text(
                       'Monitoring Status:',
-                      style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text('Active: ${status['isMonitoring']}'),
                     Text('Active Alerts: ${status['activeAlertsCount']}'),
@@ -1108,7 +1113,9 @@ Placing Order:
                         (status['alerts'] as List).isNotEmpty) ...[
                       Text(
                         'Active Alerts:',
-                        style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       ...(status['alerts'] as List).map(
                         (alert) => Padding(
@@ -1121,12 +1128,16 @@ Placing Order:
                     ] else
                       Text(
                         'No active alerts',
-                        style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: AppColors.textGrey,
+                        ),
                       ),
                     SizedBox(height: 16),
                     Text(
                       'Test Actions:',
-                      style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     SizedBox(height: 8),
                     Row(
@@ -1580,9 +1591,7 @@ Placing Order:
       // VantageChartLayout manages its own symbol-picker (favourites
       // dropdown first, falls back to SearchInstrumentsScreen when the
       // user has no favourites yet).
-      return VantageChartLayout(
-        onNavigateToTab: widget.onNavigateToTab,
-      );
+      return VantageChartLayout(onNavigateToTab: widget.onNavigateToTab);
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
@@ -1854,7 +1863,9 @@ Placing Order:
         setState(() {
           // If API value isn't available, fallback to display symbol.
           _datafeedSymbolForSelected =
-              resolvedDatafeedSymbol.isNotEmpty ? resolvedDatafeedSymbol : displaySymbol;
+              resolvedDatafeedSymbol.isNotEmpty
+                  ? resolvedDatafeedSymbol
+                  : displaySymbol;
           _isFetchingDatafeedSymbol = false;
         });
       });
@@ -1871,7 +1882,7 @@ Placing Order:
     // in-session symbol switches without a full reload (via didUpdateWidget).
     final chartUrl =
         '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$effectiveDatafeedSymbol&theme=${AppColors.chartTheme}';
-    
+
     print('Chart URL: $chartUrl');
 
     return Container(
@@ -1881,13 +1892,12 @@ Placing Order:
       margin: EdgeInsets.zero,
       child: ChartInAppWebView(
         key: _webViewKey,
-        symbol: effectiveDatafeedSymbol, // JS-updated for fast in-session switches
-        url: chartUrl,                   // includes symbol for correct initial server load
+        symbol:
+            effectiveDatafeedSymbol, // JS-updated for fast in-session switches
+        url: chartUrl, // includes symbol for correct initial server load
       ),
     );
   }
-
-
 
   /// Build notification stack overlay (only shown when one-click trading is enabled)
   /// NOTE: Notifications are now handled globally via AppNotificationStack in main.dart
@@ -2106,7 +2116,8 @@ Placing Order:
           child: ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
             child: SearchInstrumentsScreen(
-              favoritesOnly: true, // Only show favourites, hide segments & add button
+              favoritesOnly:
+                  true, // Only show favourites, hide segments & add button
               onNavigateToChart: (symbol) {
                 _onSymbolChanged(symbol);
               },
@@ -2116,7 +2127,6 @@ Placing Order:
       },
     );
   }
-
 
   Widget _buildInteractiveIcons() {
     return Padding(
@@ -3032,10 +3042,7 @@ Placing Order:
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: 8.0,
-                  horizontal: 14,
-                ),
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -3058,10 +3065,7 @@ Placing Order:
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: 8.0,
-                  horizontal: 14,
-                ),
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [

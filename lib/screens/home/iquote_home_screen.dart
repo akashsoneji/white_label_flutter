@@ -22,8 +22,9 @@ import 'package:crm_app/widgets/custom_toast.dart';
 
 class IquoteHomeScreen extends StatefulWidget {
   final Function(int)? onNavigateToTab;
+  final Function(String)? onNavigateToChart;
 
-  const IquoteHomeScreen({super.key, this.onNavigateToTab});
+  const IquoteHomeScreen({super.key, this.onNavigateToTab, this.onNavigateToChart});
 
   static Future<void> handleSwitchToIB() async {
     try {
@@ -404,6 +405,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
             textSecondary: textSecondary,
             isDark: isDark,
             onNavigateToTab: widget.onNavigateToTab,
+            onNavigateToChart: widget.onNavigateToChart,
           );
         },
       );
@@ -486,6 +488,7 @@ class _LiveTickerCard extends StatelessWidget {
   final Color textSecondary;
   final bool isDark;
   final Function(int)? onNavigateToTab;
+  final Function(String)? onNavigateToChart;
 
   const _LiveTickerCard({
     required this.instrument,
@@ -495,6 +498,7 @@ class _LiveTickerCard extends StatelessWidget {
     required this.textSecondary,
     required this.isDark,
     this.onNavigateToTab,
+    this.onNavigateToChart,
   });
 
   @override
@@ -531,10 +535,12 @@ class _LiveTickerCard extends StatelessWidget {
 
       return InkWell(
         onTap: () {
-          if (onNavigateToTab != null) {
+          if (onNavigateToChart != null) {
+            onNavigateToChart!(sym);
+          } else if (onNavigateToTab != null) {
             onNavigateToTab!(2);
             if (Get.isRegistered<IQuoteChartController>()) {
-              Get.find<IQuoteChartController>().symbolRx.value = sym;
+              Get.find<IQuoteChartController>().forceSwitchSymbol(sym);
             } else {
               Get.put(IQuoteChartController(sym));
             }
