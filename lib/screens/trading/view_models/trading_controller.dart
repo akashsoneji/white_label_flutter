@@ -2066,9 +2066,14 @@ class TradingController extends GetxController {
     _historyStartDate = DateTime(start.year, start.month, start.day);
     _historyEndDate = DateTime(now.year, now.month, now.day);
     _historyFilterInitialized = true;
+    update(['history_filter']);
+    
+    final fromTimestamp = _historyStartDate!.millisecondsSinceEpoch ~/ 1000;
+    final toTimestamp = _historyEndDate!.add(const Duration(days: 1)).millisecondsSinceEpoch ~/ 1000 - 1;
+    
     await loadTradeHistoryWithTimestamps(
-      fromTimestamp: _historyStartDate!.millisecondsSinceEpoch ~/ 1000,
-      toTimestamp: now.millisecondsSinceEpoch ~/ 1000,
+      fromTimestamp: fromTimestamp,
+      toTimestamp: toTimestamp,
       filterType: filterType,
       symbols: symbols,
     );

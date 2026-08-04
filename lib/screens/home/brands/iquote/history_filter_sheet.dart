@@ -39,29 +39,7 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
   late String _selectedPeriod;
   final Set<String> _selectedSymbols = <String>{};
 
-  /// Theme-aware palette derived from [AppColors].
-  _ThemePalette get _p {
-    if (AppColors.isDarkMode) {
-      return const _ThemePalette(
-        panel: Color(0xFF0E1424), // dark navy — matches screenshot
-        card: Color(0xFF1A2238), // darker than panel for the unselected chips
-        reset: Color(0xFF2D3568), // purple-blue — matches "Reset" in screenshot
-        textPrimary: Colors.white,
-        textSecondary: Color(0xFFB7BCD4),
-        accentForeground: Colors.white,
-        resetForeground: Colors.white,
-      );
-    }
-    return _ThemePalette(
-      panel: AppColors.background,
-      card: AppColors.card,
-      reset: const Color(0xFFE3E7EF),
-      textPrimary: AppColors.textPrimary,
-      textSecondary: AppColors.textSecondary,
-      accentForeground: Colors.white,
-      resetForeground: AppColors.textPrimary,
-    );
-  }
+
 
   /// Always-bright-orange accent, matching the brand [AppColors.primary]
   /// (which is `#FF6B1A` in the screenshot).
@@ -95,76 +73,72 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
   @override
   Widget build(BuildContext context) {
     final symbols = _availableSymbols();
-    final p = _p;
-    final mq = MediaQuery.of(context);
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 10, top: 16),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: mq.size.height),
-          child: Material(
-            color: p.panel,
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildHeader(p),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Data',
-                          style: TextStyle(
-                            color: p.textPrimary,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 10.h),
-                        _buildPeriodGrid(p),
-                        SizedBox(height: 20.h),
-                      ],
+    
+    return Material(
+      color: AppColors.background,
+      clipBehavior: Clip.antiAlias,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildHeader(),
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Data',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
+                    SizedBox(height: 10.h),
+                    _buildPeriodGrid(),
+                    if (symbols.isNotEmpty) ...[
+                      SizedBox(height: 20.h),
+                      _buildSymbolSection(symbols),
+                    ],
+                  ],
                 ),
-                Expanded(child: _buildActions(p)),
-              ],
-            ),
+              ),
+              _buildActions(),
+            ],
           ),
         ),
-      ),
-    );
+      );
   }
 
-  /// Sheet header: drag handle + "Filter" title. No back button — the sheet
-  /// is dismissed by swiping down or tapping the scrim, matching iOS-style
-  /// modal bottom sheet behavior.
-  Widget _buildHeader(_ThemePalette p) {
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 4.h),
-        child: Column(
-          children: [
-            Text(
-              'Filter',
-              style: TextStyle(
-                color: p.textPrimary,
-                fontSize: 17.sp,
-                fontWeight: FontWeight.w700,
-              ),
+  Widget _buildHeader() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 20.h, 16.w, 8.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Filter History',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
             ),
-            SizedBox(height: 6.h),
-          ],
-        ),
+          ),
+          IconButton(
+            icon: Icon(Icons.close, size: 22.sp, color: AppColors.textSecondary),
+            onPressed: () => Navigator.of(context).pop(),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildPeriodGrid(_ThemePalette p) {
+  Widget _buildPeriodGrid() {
     Widget chip(_PeriodOption opt) {
       final active = _selectedPeriod == opt.id;
       return InkWell(
@@ -173,14 +147,14 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 14.h),
           decoration: BoxDecoration(
-            color: active ? _accent : p.card,
+            color: active ? _accent : AppColors.card,
             borderRadius: BorderRadius.circular(8.r),
           ),
           alignment: Alignment.center,
           child: Text(
             opt.label,
             style: TextStyle(
-              color: active ? p.accentForeground : p.textSecondary,
+              color: active ? Colors.white : AppColors.textSecondary,
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
             ),
@@ -200,23 +174,22 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
     );
   }
 
-  Widget _buildSymbolSection(List<String> symbols, _ThemePalette p) {
+  Widget _buildSymbolSection(List<String> symbols) {
     final selectAllSelected = _selectedSymbols.contains('all');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InkWell(
-          onTap:
-              () => setState(() {
-                if (selectAllSelected) {
-                  _selectedSymbols.clear();
-                } else {
-                  _selectedSymbols
-                    ..clear()
-                    ..add('all')
-                    ..addAll(symbols);
-                }
-              }),
+          onTap: () => setState(() {
+            if (selectAllSelected) {
+              _selectedSymbols.clear();
+            } else {
+              _selectedSymbols
+                ..clear()
+                ..add('all')
+                ..addAll(symbols);
+            }
+          }),
           borderRadius: BorderRadius.circular(8.r),
           child: Container(
             width: double.infinity,
@@ -241,79 +214,79 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
           Wrap(
             spacing: 8.w,
             runSpacing: 8.h,
-            children:
-                symbols.map((s) {
-                  final selected = _selectedSymbols.contains(s);
-                  return InkWell(
-                    onTap:
-                        () => setState(() {
-                          _selectedSymbols.remove('all');
-                          if (selected) {
-                            _selectedSymbols.remove(s);
-                          } else {
-                            _selectedSymbols.add(s);
-                          }
-                        }),
+            children: symbols.map((s) {
+              final selected = _selectedSymbols.contains(s);
+              return InkWell(
+                onTap: () => setState(() {
+                  _selectedSymbols.remove('all');
+                  if (selected) {
+                    _selectedSymbols.remove(s);
+                  } else {
+                    _selectedSymbols.add(s);
+                  }
+                }),
+                borderRadius: BorderRadius.circular(16.r),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 7.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected ? _accent : AppColors.card,
                     borderRadius: BorderRadius.circular(16.r),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 7.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: selected ? _accent : p.card,
-                        borderRadius: BorderRadius.circular(16.r),
-                      ),
-                      child: Text(
-                        s,
-                        style: TextStyle(
-                          color:
-                              selected ? p.accentForeground : p.textSecondary,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  ),
+                  child: Text(
+                    s,
+                    style: TextStyle(
+                      color: selected ? Colors.white : AppColors.textSecondary,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
                     ),
-                  );
-                }).toList(),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ],
     );
   }
 
-  Widget _buildActions(_ThemePalette p) {
-    return Row(
-      children: [
-        Expanded(
-          child: Material(
-            color: p.reset,
-            child: InkWell(
-              onTap: () async {
+  Widget _buildActions() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () async {
                 await widget.onReset();
                 if (!mounted) return;
                 Navigator.of(context).pop();
               },
-              child: Container(
-                height: 56.h,
-                alignment: Alignment.center,
-                child: Text(
-                  'Reset',
-                  style: TextStyle(
-                    color: p.resetForeground,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  color: AppColors.textSecondary.withValues(alpha: 0.3),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                padding: EdgeInsets.symmetric(vertical: 14.h),
+              ),
+              child: Text(
+                'Reset',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ),
-        ),
-        Expanded(
-          child: Material(
-            color: _accent,
-            child: InkWell(
-              onTap: () async {
+          SizedBox(width: 16.w),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () async {
                 await widget.onConfirm(
                   _selectedPeriod,
                   _selectedSymbols.toList(),
@@ -321,47 +294,27 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
                 if (!mounted) return;
                 Navigator.of(context).pop();
               },
-              child: Container(
-                height: 56.h,
-                alignment: Alignment.center,
-                child: Text(
-                  'Confirm',
-                  style: TextStyle(
-                    color: p.accentForeground,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _accent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                padding: EdgeInsets.symmetric(vertical: 14.h),
+              ),
+              child: Text(
+                'Confirm',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
-}
-
-/// Immutable theme palette used by [HistoryFilterScreen]. Derived from
-/// [AppColors] — different values for dark vs light so the sheet looks
-/// correct in both themes.
-class _ThemePalette {
-  final Color panel;
-  final Color card;
-  final Color reset;
-  final Color textPrimary;
-  final Color textSecondary;
-  final Color accentForeground;
-  final Color resetForeground;
-
-  const _ThemePalette({
-    required this.panel,
-    required this.card,
-    required this.reset,
-    required this.textPrimary,
-    required this.textSecondary,
-    required this.accentForeground,
-    required this.resetForeground,
-  });
 }
 
 class _PeriodOption {
