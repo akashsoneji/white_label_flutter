@@ -122,31 +122,31 @@
             "preLaunchTask": "prepare-gtxprime"
         },
         {
-            "name": "iQuote (parent) (debug)",
+            "name": "iQuote (parent: Vantage) (debug)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": ["--flavor", "iquote", "--dart-define=CLIENT=iquote", "--dart-define=FLAVOR=iquote", "--dart-define=PARENT=iquote", "--no-enable-impeller"],
+            "args": ["--flavor", "iquote", "--dart-define=CLIENT=iquote", "--dart-define=FLAVOR=iquote", "--dart-define=PARENT=vantage", "--no-enable-impeller"],
             "flutterMode": "debug",
             "console": "terminal",
             "preLaunchTask": "prepare-iquote"
         },
         {
-            "name": "iQuote (parent) (profile)",
+            "name": "iQuote (parent: Vantage) (profile)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": ["--flavor", "iquote", "--dart-define=CLIENT=iquote", "--dart-define=FLAVOR=iquote", "--dart-define=PARENT=iquote"],
+            "args": ["--flavor", "iquote", "--dart-define=CLIENT=iquote", "--dart-define=FLAVOR=iquote", "--dart-define=PARENT=vantage"],
             "flutterMode": "profile",
             "console": "terminal",
             "preLaunchTask": "prepare-iquote"
         },
         {
-            "name": "iQuote (parent) (release)",
+            "name": "iQuote (parent: Vantage) (release)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": ["--flavor", "iquote", "--dart-define=CLIENT=iquote", "--dart-define=FLAVOR=iquote", "--dart-define=PARENT=iquote"],
+            "args": ["--flavor", "iquote", "--dart-define=CLIENT=iquote", "--dart-define=FLAVOR=iquote", "--dart-define=PARENT=vantage"],
             "flutterMode": "release",
             "console": "terminal",
             "preLaunchTask": "prepare-iquote"

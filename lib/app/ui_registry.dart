@@ -21,6 +21,8 @@ import 'package:crm_app/screens/trading/presentation/pages/trading_main_screen.d
 
 import 'package:crm_app/screens/auth/presentation/brands/riyadex/pages/riyadex_create_account_screen.dart'
     as riyadex;
+import 'package:crm_app/screens/auth/presentation/brands/iquote/pages/iquote_create_account_screen.dart'
+    as iquote;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/create_account_screen.dart'
     as vantage;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/create_new_password_screen.dart'
@@ -116,7 +118,7 @@ String get activeParent {
 const Map<String, String> _uiParentByClient = {
   // Parents
   'vantage': 'vantage',
-  'iquote': 'iquote',
+  'iquote': 'vantage',
   'celestial': 'celestial',
   'meta': 'meta',
   'tenax': 'tenax',
@@ -190,6 +192,9 @@ class UiRegistry implements UiSlots {
     final flavorName = FlavorConfig.instance.flavor.name.toLowerCase();
     if (flavorName == 'riyadex') {
       return const riyadex.RiyadexCreateAccountScreen();
+    }
+    if (flavorName == 'iquote') {
+      return const iquote.IquoteCreateAccountScreen();
     }
     if (_usesVantageUi || _usesIquoteUi) return vantage.VantageCreateAccountScreen();
     return CreateAccountScreen();

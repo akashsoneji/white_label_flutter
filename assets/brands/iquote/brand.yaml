@@ -1,5 +1,6 @@
 name: iquote
-type: parent
+inheritsFrom: vantage
+type: child
 label: iQuote
 themeMode: both
 
