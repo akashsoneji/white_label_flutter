@@ -79,7 +79,8 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
           Get.put(IQuoteChartController(symbol));
         }
       } else {
-        _onTabChanged(1);
+        final chartIndex = _isVantage ? 1 : 2;
+        _onTabChanged(chartIndex);
         ChartScreen.setSelectedSymbol(symbol);
       }
     } catch (e) {

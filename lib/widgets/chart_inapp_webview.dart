@@ -94,27 +94,81 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     try {
       final res = await _controller!.evaluateJavascript(source: '''
         (function() {
+          let status = 'not_found';
+
           try {
             if (typeof selectedSymbol !== 'undefined') {
               selectedSymbol = "$chartSymbol";
             }
-            if (typeof updateSymbol === 'function') {
-              updateSymbol("$chartSymbol");
-              return true;
+          } catch(e) {}
+
+          try {
+            if (typeof window.__setSymbol === 'function') {
+              window.__setSymbol("$chartSymbol");
+              return 'updated';
             }
-            if (typeof createTradingViewChart === 'function') {
-              createTradingViewChart("$chartSymbol");
-              return true;
-            // Fallback for Vue/React SPA: change URL via location.replace
-            var newUrl = window.location.pathname + "?symbol=" + "$chartSymbol" + "&theme=" + (new URLSearchParams(window.location.search).get("theme") || "light");
-            window.location.replace(newUrl);
-            return true;
-          } catch (e) {}
-          return false;
+          } catch(e) {
+            status = 'error';
+          }
+
+          if (status !== 'updated') {
+            try {
+              if (typeof chartWidget !== 'undefined' && chartWidget && typeof chartWidget.activeChart === 'function') {
+                chartWidget.activeChart().setSymbol("$chartSymbol");
+                return 'updated';
+              } else if (typeof tvWidget !== 'undefined' && tvWidget && typeof tvWidget.activeChart === 'function') {
+                tvWidget.activeChart().setSymbol("$chartSymbol");
+                return 'updated';
+              }
+            } catch(e) {
+              status = 'error';
+            }
+          }
+
+          if (status !== 'updated') {
+            try {
+              if (typeof updateSymbol === 'function') {
+                updateSymbol("$chartSymbol");
+                return 'updated';
+              }
+            } catch(e) {
+              status = 'error';
+            }
+          }
+
+          if (status !== 'updated') {
+            try {
+              if (typeof createTradingViewChart === 'function') {
+                createTradingViewChart("$chartSymbol");
+                return 'updated';
+              }
+            } catch(e) {
+              status = 'error';
+            }
+          }
+
+          return status;
         })();
       ''');
 
-      return res == true || res == 'true';
+      if (res == 'updated') return true;
+      if (res == 'error') {
+        // If it threw an error, it's likely because the layout is 0x0 during a tab transition.
+        // Wait 400ms for the layout to finish, then forcefully update again in JS without returning false to Dart.
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (mounted && _controller != null) {
+            _controller!.evaluateJavascript(source: '''
+              try {
+                if (typeof updateSymbol === 'function') updateSymbol("$chartSymbol");
+                else if (typeof createTradingViewChart === 'function') createTradingViewChart("$chartSymbol");
+              } catch(e) {}
+            ''');
+          }
+        });
+        return true; // Pretend it succeeded so we don't hard reload, the delayed future will fix it.
+      }
+      
+      return false; // not_found -> trigger loadUrl fallback
     } catch (_) {
       return false;
     }
