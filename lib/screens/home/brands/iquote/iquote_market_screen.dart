@@ -445,11 +445,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
               ? livePrice.spreadDiff
               : instrument.spreadDiff;
       final spreadText =
-          spread > 0
-              ? (spread > 1
-                  ? spread.toStringAsFixed(0)
-                  : spread.toStringAsFixed(digits > 3 ? 4 : 2))
-              : '0';
+          spread > 0 ? spread.toStringAsFixed(0) : '0';
 
       final dayLow =
           livePrice.dayLow > 0 ? livePrice.dayLow : (instrument.dayLow ?? 0.0);
