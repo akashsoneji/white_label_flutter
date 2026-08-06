@@ -17,7 +17,6 @@ import 'package:crm_app/widgets/exit_confirmation_wrapper.dart';
 import '../../widgets/trading_bottom_navigation.dart';
 import 'instruments_screen.dart';
 import 'chart_screen.dart';
-import 'chart_tab_host.dart';
 import 'more/more_screen.dart';
 import 'trade_screen.dart';
 import 'dashboard_screen.dart';
@@ -31,7 +30,6 @@ import '../../services/app_status/app_status_service.dart';
 import '../../services/symbol_selection_service.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
-import 'package:crm_app/screens/kyc/view_models/compliance_controller.dart';
 
 class TradingMainScreen extends StatefulWidget {
   const TradingMainScreen({super.key});
@@ -42,7 +40,6 @@ class TradingMainScreen extends StatefulWidget {
 
 class _TradingMainScreenState extends State<TradingMainScreen> {
   int _currentIndex = 0;
-  int _preChartIndex = 0;
   late List<Widget> _screens;
   late final bool _isVantage;
   late PageController _pageController;
@@ -242,9 +239,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
     setState(() {
       _currentIndex = index;
-      if (index == 1 && previousIndex != 1) {
-        _preChartIndex = previousIndex;
-      }
+
     });
 
     if (_pageController.hasClients && _pageController.page?.round() != index) {
@@ -356,10 +351,8 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       final profile = await authController.getProfile();
       if (profile != null) {
         final user = profile.data.user;
-        final details = user.userDetails;
         final forceRegulatedForm = user.forceRegulatedForm;
         final regulationSubmitted = user.regulationSubmitted;
-        final documentsSubmitted = details.documentsSubmitted;
 
         if (forceRegulatedForm == 1) {
           if (regulationSubmitted == 0) {
@@ -382,7 +375,6 @@ class PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isIquote = FlavorConfig.usesIquoteUi();
     return RTLWrapper(
       child: Scaffold(
         backgroundColor: AppColors.backgroundLight,
@@ -428,7 +420,6 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
     with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
-    final isIquote = FlavorConfig.usesIquoteUi();
     super.build(context);
     return widget.child;
   }
