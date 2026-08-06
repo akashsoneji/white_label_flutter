@@ -20,12 +20,17 @@ import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
 class IquoteHomeScreen extends StatefulWidget {
   final Function(int)? onNavigateToTab;
   final Function(String)? onNavigateToChart;
 
-  const IquoteHomeScreen({super.key, this.onNavigateToTab, this.onNavigateToChart});
+  const IquoteHomeScreen({
+    super.key,
+    this.onNavigateToTab,
+    this.onNavigateToChart,
+  });
 
   static Future<void> handleSwitchToIB() async {
     try {
@@ -135,292 +140,234 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Top Header: App Logo + Bold Title (brand primary)
+              // 1. Top Header: User Profile Icon (Left) + App Logo (60x60) Centered (Center)
               Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0.h),
+                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0.h),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ClipOval(
-                      child: BrandLogo(
-                        source: FlavorConfig.effectiveLogo,
-                        width: 32.w,
-                        height: 32.w,
-                        fit: BoxFit.contain,
+                    // Promotional button
+                    GestureDetector(
+                      onTap: () => Get.to(() => const PromotionalScreen()),
+                      child: CircleAvatar(
+                        radius: 18.r,
+                        backgroundColor: AppColors.primary.withValues(
+                          alpha: 0.12,
+                        ),
+                        child: Icon(
+                          Icons.card_giftcard,
+                          size: 18.r,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      appTitle,
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
+
+                    // Centered Logo (Text-free, no ClipOval)
+                    Expanded(
+                      child: Center(
+                        child: BrandLogo(
+                          source: FlavorConfig.effectiveLogo,
+                          width: 60.r,
+                          height: 60.r,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+
+                    // Switch account dashboard icon
+                    GestureDetector(
+                      onTap: () => showDashboardBottomSheet(context),
+                      child: CircleAvatar(
+                        radius: 18.r,
+                        backgroundColor: AppColors.primary.withValues(
+                          alpha: 0.12,
+                        ),
+                        child: Icon(
+                          Icons.dashboard_outlined,
+                          size: 18.r,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 14.h),
+              // SizedBox(height: 8.h),
 
-              // 2. Active Account Card with Switch Account Bottom Sheet
-              // _ActiveAccountBar(
-              //   cardBg: cardBg,
-              //   textPrimary: textPrimary,
-              //   textSecondary: textSecondary,
-              //   isDark: isDark,
-              // ),
-              // SizedBox(height: 14.h),
-
-              // 3. Banner: Profit & Bonus Ranking
-              Padding(
-                padding: EdgeInsets.fromLTRB(10.w, 12.h, 10.w, 0.h),
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(14.w),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors:
-                          isDark
-                              ? [const Color(0xFFC3F3A0), const Color(0xFFD6F6B8)]
-                              : [
-                                AppColors.primary.withOpacity(0.15),
-                                AppColors.primary.withOpacity(0.05),
-                              ],
-                    ),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border:
-                        isDark
-                            ? null
-                            : Border.all(
-                              color: AppColors.primary.withOpacity(0.2),
-                            ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.textPrimary.withOpacity(isDark ? 0.35 : 0.06),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Profit & Bonus Ranking',
-                              style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w400,
-                                color: isDark ? Colors.black : textPrimary,
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              'Data updated daily',
-                              style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w400,
-                                color: isDark ? Colors.black87 : textSecondary,
-                              ),
-                            ),
-                            SizedBox(height: 10.h),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 18.w,
-                                vertical: 6.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isDark ? Colors.black : AppColors.primary,
-                                borderRadius: BorderRadius.circular(20.r),
-                              ),
-                              child: Text(
-                                'View',
-                                style: AppTextStyles.bodyText.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(Icons.emoji_events, size: 64.r, color: Colors.orange),
-                    ],
-                  ),
-                ),
+              // 2. Promo Banner Carousel
+              _PromoCarousel(
+                textPrimary: textPrimary,
+                textSecondary: textSecondary,
+                isDark: isDark,
               ),
-              
-              SizedBox(height: 10.h),
+              // SizedBox(height: 8.h),
 
+              // 3. Quick Shortcuts Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal:10.0),
-                child: Card(
-                  child: Column(
-                    children: [
-                         SizedBox(height: 16.h),
-                  
-                        GridView.count(
-                          crossAxisCount: 4,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          mainAxisSpacing: 12.h,
-                          crossAxisSpacing: 8.w,
-                          children: [
-                            // 1. Demo
-                            _buildShortcutItem(
-                              icon: Icons.play_circle_outline,
-                              label: 'Demo',
-                              color: Colors.orangeAccent,
-                              textColor: textPrimary,
-                              onTap:
-                                  () => Get.toNamed(
-                                    AppPages.CHOOSE_ACCOUNT,
-                                    arguments: {'isDemo': true},
-                                  ),
-                            ),
-                            // 2. Real
-                            _buildShortcutItem(
-                              icon: Icons.account_balance_wallet_outlined,
-                              label: 'Real',
-                              color: Colors.greenAccent,
-                              textColor: textPrimary,
-                              onTap: () => Get.toNamed(AppPages.CHOOSE_ACCOUNT),
-                            ),
-                            // 3. IB
-                            _buildShortcutItem(
-                              icon: Icons.business_center_outlined,
-                              label: 'IB',
-                              color: Colors.purpleAccent,
-                              textColor: textPrimary,
-                              isHot: true,
-                              onTap: IquoteHomeScreen.handleSwitchToIB,
-                            ),
-                            // 4. PAMM
-                            _buildShortcutItem(
-                              icon: Icons.pie_chart_outline,
-                              label: 'PAMM',
-                              color: Colors.pinkAccent,
-                              textColor: textPrimary,
-                              isHot: true,
-                              onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
-                            ),
-                            // 5. Scratchcard
-                            _buildShortcutItem(
-                              icon: Icons.confirmation_number_outlined,
-                              label: 'Scratchcard',
-                              color: Colors.amber,
-                              textColor: textPrimary,
-                              onTap: () => Get.to(() => const PromotionalScreen()),
-                            ),
-                            // 6. Support Ticket
-                            _buildShortcutItem(
-                              icon: Icons.support_agent_outlined,
-                              label: 'Support Ticket',
-                              color: Colors.tealAccent,
-                              textColor: textPrimary,
-                              onTap: () => Get.toNamed(AppPages.TICKET_LIST),
-                            ),
-                            // 7. Deposit
-                            _buildShortcutItem(
-                              icon: Icons.add_circle_outline,
-                              label: 'Deposit',
-                              color: Colors.blueAccent,
-                              textColor: textPrimary,
-                              onTap:
-                                  () => Get.to(
-                                    () => PaymentMethodsScreen(accountNumber: ''),
-                                  ),
-                            ),
-                            // 8. Withdrawal
-                            _buildShortcutItem(
-                              icon: Icons.remove_circle_outline,
-                              label: 'Withdrawal',
-                              color: Colors.lightBlue,
-                              textColor: textPrimary,
-                              onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
-                            ),
-                          ],
-                        ),
-                               
-                    ],
-                  ),
-                ),
-              ),
-
-              // Divider(
-              //   thickness: 1,
-              //   color: AppColors.border,
-              //   height: 1,
-              // ),
-              // SizedBox(height: 16.h),
-
-              // 4. 8 Shortcuts Grid
-             // SizedBox(height: 16.h),
-
-              // Divider(
-              //   thickness: 1,
-              //   color: AppColors.border,
-              //   height: 1,
-              // ),
-              // SizedBox(height: 14.h),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal:10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 0.0),
                 child: Card(
                   elevation: 1,
-                  // shadowColor: AppColors.hint,
+                  margin: EdgeInsets.only(top: 2.h),
+                  color: isDark ? cardBg : Colors.white,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                   // 6. Favourites Section Header + Add Button
-                Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 0.h, 16.w, 0.h),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Favourites',
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: textPrimary,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700,
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 0.h),
+                        child: Text(
+                          'Quick Shortcuts',
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: textPrimary,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                      IconButton(
-                        onPressed: _openSearchSheet,
-                        icon: Icon(
-                          Icons.add_circle_outline_rounded,
-                          size: 20.r,
-                          color: AppColors.primary,
-                        ),
+                      SizedBox(height: 8.h),
+                      GridView.count(
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
+                        crossAxisCount: 4,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 10.h,
+                        crossAxisSpacing: 8.w,
+                        childAspectRatio: 1.3,
+                        children: [
+                          // 1. Demo
+                          _buildShortcutItem(
+                            icon: Icons.play_circle_outline,
+                            label: 'Demo',
+                            color: Colors.orangeAccent,
+                            textColor: textPrimary,
+                            onTap:
+                                () => Get.toNamed(
+                                  AppPages.CHOOSE_ACCOUNT,
+                                  arguments: {'isDemo': true},
+                                ),
+                          ),
+                          // 2. Real
+                          _buildShortcutItem(
+                            icon: Icons.account_balance_wallet_outlined,
+                            label: 'Real',
+                            color: Colors.greenAccent,
+                            textColor: textPrimary,
+                            onTap: () => Get.toNamed(AppPages.CHOOSE_ACCOUNT),
+                          ),
+                          // 3. IB
+                          _buildShortcutItem(
+                            icon: Icons.business_center_outlined,
+                            label: 'IB',
+                            color: Colors.purpleAccent,
+                            textColor: textPrimary,
+                            isHot: true,
+                            onTap: IquoteHomeScreen.handleSwitchToIB,
+                          ),
+                          // 4. PAMM
+                          _buildShortcutItem(
+                            icon: Icons.pie_chart_outline,
+                            label: 'PAMM',
+                            color: Colors.pinkAccent,
+                            textColor: textPrimary,
+                            isHot: true,
+                            onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
+                          ),
+                          // 5. Scratchcard
+                          _buildShortcutItem(
+                            icon: Icons.confirmation_number_outlined,
+                            label: 'Scratchcard',
+                            color: Colors.amber,
+                            textColor: textPrimary,
+                            onTap:
+                                () => Get.to(() => const PromotionalScreen()),
+                          ),
+                          // 6. Support Ticket
+                          _buildShortcutItem(
+                            icon: Icons.support_agent_outlined,
+                            label: 'Support Ticket',
+                            color: Colors.tealAccent,
+                            textColor: textPrimary,
+                            onTap: () => Get.toNamed(AppPages.TICKET_LIST),
+                          ),
+                          // 7. Deposit
+                          _buildShortcutItem(
+                            icon: Icons.add_circle_outline,
+                            label: 'Deposit',
+                            color: Colors.blueAccent,
+                            textColor: textPrimary,
+                            onTap:
+                                () => Get.to(
+                                  () => PaymentMethodsScreen(accountNumber: ''),
+                                ),
+                          ),
+                          // 8. Withdrawal
+                          _buildShortcutItem(
+                            icon: Icons.remove_circle_outline,
+                            label: 'Withdrawal',
+                            color: Colors.lightBlue,
+                            textColor: textPrimary,
+                            onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                
-                // Live Favourites Grid with Mini Sparkline Charts
-                Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0.h),
-                  child: _buildLiveFavouritesGrid(
-                    cardBg,
-                    textPrimary,
-                    textSecondary,
-                    isDark,
-                  ),
-                ),
-                SizedBox(height: 16.h),
+                      // SizedBox(height: 10.h),
                     ],
                   ),
                 ),
               ),
+              // SizedBox(height: 8.h),
 
-             
+              // 4. Favourites Card
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                child: Card(
+                  elevation: 1.3,
+                  margin: EdgeInsets.only(top: 2.h),
+                  color: isDark ? cardBg : Colors.white,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 0.h),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Favourites',
+                              style: AppTextStyles.bodyText.copyWith(
+                                color: textPrimary,
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: _openSearchSheet,
+                              icon: Icon(
+                                Icons.add_circle_outline_rounded,
+                                size: 20.r,
+                                color: AppColors.primary,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0.h),
+                        child: _buildLiveFavouritesGrid(
+                          cardBg,
+                          textPrimary,
+                          textSecondary,
+                          isDark,
+                        ),
+                      ),
+                      SizedBox(height: 10.h),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 12.h),
             ],
           ),
         ),
@@ -460,13 +407,14 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
       }
 
       return GridView.builder(
+        padding: EdgeInsets.zero,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           mainAxisSpacing: 10.h,
           crossAxisSpacing: 10.w,
-          childAspectRatio: 2.2, 
+          childAspectRatio: 2.2,
         ),
         itemCount: displayList.length,
         itemBuilder: (context, index) {
@@ -584,10 +532,7 @@ class _LiveTickerCard extends StatelessWidget {
     return Obx(() {
       final livePrice = controller.priceRx(sym).value;
 
-      double currentBid =
-          livePrice.bid > 0
-              ? livePrice.bid
-              : instrument.bid;
+      double currentBid = livePrice.bid > 0 ? livePrice.bid : instrument.bid;
       if (currentBid <= 0) {
         currentBid =
             (instrument.dayLow != null && instrument.dayLow! > 0)
@@ -625,7 +570,7 @@ class _LiveTickerCard extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
           decoration: BoxDecoration(
-            color: cardBg,
+            color: isDark ? cardBg : Colors.white,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: AppColors.border.withOpacity(0.15)),
             boxShadow: [
@@ -678,3 +623,190 @@ class _LiveTickerCard extends StatelessWidget {
   }
 }
 
+class _PromoCarousel extends StatefulWidget {
+  final Color textPrimary;
+  final Color textSecondary;
+  final bool isDark;
+
+  const _PromoCarousel({
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.isDark,
+  });
+
+  @override
+  State<_PromoCarousel> createState() => _PromoCarouselState();
+}
+
+class _PromoCarouselState extends State<_PromoCarousel> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  Timer? _timer;
+
+  final List<Map<String, dynamic>> _slides = [
+    {
+      'title': 'Profit & Bonus Ranking',
+      'subtitle': 'Data updated daily',
+      'btn': 'View',
+      'icon': Icons.emoji_events,
+      'iconColor': Colors.orange,
+      'action': () => Get.toNamed(AppPages.CHOOSE_ACCOUNT),
+    },
+    {
+      'title': 'Refer & Earn Program',
+      'subtitle': 'Invite friends, earn rebates',
+      'btn': 'Invite',
+      'icon': Icons.group_add_outlined,
+      'iconColor': Colors.blue,
+      'action': () => IquoteHomeScreen.handleSwitchToIB(),
+    },
+    {
+      'title': 'Exclusive Promotions',
+      'subtitle': 'Claim your trading bonuses',
+      'btn': 'Claim',
+      'icon': Icons.card_giftcard,
+      'iconColor': Colors.red,
+      'action': () => Get.to(() => const PromotionalScreen()),
+    },
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (_pageController.hasClients) {
+        final next = (_currentPage + 1) % _slides.length;
+        _pageController.animateToPage(
+          next,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(10.w, 2.h, 10.w, 0.h),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 124.h,
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (val) => setState(() => _currentPage = val),
+              itemCount: _slides.length,
+              itemBuilder: (context, i) {
+                final s = _slides[i];
+                return Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(14.w),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors:
+                          widget.isDark
+                              ? [
+                                const Color(0xFF2C344E),
+                                const Color(0xFF1E2436),
+                              ]
+                              : [
+                                AppColors.primary.withOpacity(0.08),
+                                AppColors.primary.withOpacity(0.02),
+                              ],
+                    ),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(
+                        widget.isDark ? 0.1 : 0.15,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              s['title'],
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                color: widget.textPrimary,
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              s['subtitle'],
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w400,
+                                color: widget.textSecondary,
+                              ),
+                            ),
+                            SizedBox(height: 10.h),
+                            GestureDetector(
+                              onTap: s['action'],
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 18.w,
+                                  vertical: 6.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                child: Text(
+                                  s['btn'],
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(s['icon'], size: 56.r, color: s['iconColor']),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              _slides.length,
+              (idx) => AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: EdgeInsets.symmetric(horizontal: 3.w),
+                width: _currentPage == idx ? 16.w : 6.w,
+                height: 6.h,
+                decoration: BoxDecoration(
+                  color:
+                      _currentPage == idx
+                          ? AppColors.primary
+                          : AppColors.primary.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(3.r),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

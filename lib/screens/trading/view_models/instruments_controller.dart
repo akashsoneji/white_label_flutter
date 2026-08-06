@@ -119,6 +119,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
   // Favorites management
   final RxList<String> favoriteInstruments = <String>[].obs;
+  final RxMap<String, String> favoriteNames = <String, String>{}.obs;
   final RxBool isLoadingFavorites = true.obs;
   final RxBool hasAttemptedInitialLoad = false.obs;
 
@@ -479,6 +480,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
           category: s.categoryName,
           dayLow: current.dayLow > 0 ? current.dayLow : null,
           dayHigh: current.dayHigh > 0 ? current.dayHigh : null,
+          name: s.name,
         );
         incomingAll.add(elem);
         if (isFavorite(s.displaySymbol)) {
@@ -1572,6 +1574,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       final favorites =
           await FavoritesStorageService.instance.getFavoriteInstruments();
       favoriteInstruments.assignAll(favorites);
+      
+      final names = await FavoritesStorageService.instance.getFavoriteNames();
+      favoriteNames.assignAll(names);
       // print('📱 Loaded ${favorites.length} favorite instruments: $favorites');
     } catch (e) {
       print('Error loading favorites: $e');
@@ -1585,6 +1590,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     String instrumentSymbol, {
     SearchSymbol? searchSymbol,
     bool hydrateAfterChange = true,
+    String? name,
   }) async {
     try {
       // Normalize symbol format - always store with .c suffix for consistency
@@ -1593,8 +1599,18 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
               ? instrumentSymbol
               : instrumentSymbol + '.c';
 
+      String? resolvedName = name;
+      if (resolvedName == null && searchSymbol != null) {
+        resolvedName = searchSymbol.name;
+      }
+      if (resolvedName == null) {
+        final existing = allInstruments.firstWhereOrNull((element) => element.symbol == instrumentSymbol);
+        resolvedName = existing?.name;
+      }
+
       final success = await FavoritesStorageService.instance.toggleFavorite(
         normalizedSymbol,
+        name: resolvedName,
       );
       if (success) {
         await _loadFavorites();
@@ -1636,6 +1652,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
           volumeReal: 0,
           logo: '',
           category: searchSymbol.categoryName,
+          name: searchSymbol.name,
         );
         allInstruments.add(item);
         _applyPriceUpdate(item);
@@ -1802,6 +1819,25 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
             filteredInstruments
                 .where((instrument) => isFavorite(instrument.symbol))
                 .toList();
+
+        // Sort priority index: XAUUSD -> XAGUSD -> GBPUSD -> EURUSD
+        final List<String> orderPriority = ['XAUUSD', 'XAGUSD', 'GBPUSD', 'EURUSD'];
+        filteredInstruments.sort((a, b) {
+          final cleanA = a.symbol.replaceAll('.c', '').replaceAll('.r', '').toUpperCase();
+          final cleanB = b.symbol.replaceAll('.c', '').replaceAll('.r', '').toUpperCase();
+
+          final indexA = orderPriority.indexOf(cleanA);
+          final indexB = orderPriority.indexOf(cleanB);
+
+          if (indexA != -1 && indexB != -1) {
+            return indexA.compareTo(indexB);
+          } else if (indexA != -1) {
+            return -1;
+          } else if (indexB != -1) {
+            return 1;
+          }
+          return 0;
+        });
       }
     }
 

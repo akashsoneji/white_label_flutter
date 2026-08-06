@@ -40,12 +40,16 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/services/market_watch_v2_service.dart';
 
 // ── palette ─────────────────────────────────────────────────────────────────
 // MA-line + bullish/bearish colors stay the same across themes — they're
 // functional indicator colors (like TradingView's), not surface colors.
-const _kBullColor = Color(0xFF22C55E);
-const _kBearColor = Color(0xFFE74C3C);
+const _kBullColor = Color(0xFF33b970);
+const _kBearColor = Color(0xFFE65366);
 
 class _ChartPalette {
   const _ChartPalette({
@@ -119,45 +123,67 @@ bool _isDark(BuildContext context) {
   return Theme.of(context).brightness == Brightness.dark;
 }
 
-class IQuoteChartScreen extends StatelessWidget {
+class IQuoteChartScreen extends StatefulWidget {
   const IQuoteChartScreen({super.key, this.symbol});
 
   final String? symbol;
 
   @override
-  Widget build(BuildContext context) {
-    // Ensure the controller is registered and its symbol matches the requested one.
-    // If the controller is already in memory from a previous screen, it might still have the old symbol.
-    final ctrl = Get.put(IQuoteChartController(symbol ?? 'XAUUSD.c'));
-    if (symbol != null) {
-      // Synchronously force the switch to ensure websocket and state are up-to-date
-      // before the widgets even build, avoiding initial broken UI states.
-      ctrl.forceSwitchSymbol(symbol!);
-    }
+  State<IQuoteChartScreen> createState() => _IQuoteChartScreenState();
+}
 
+class _IQuoteChartScreenState extends State<IQuoteChartScreen> {
+  final GlobalKey<ChartInAppWebViewState> _webViewKey =
+      GlobalKey<ChartInAppWebViewState>();
+  late final IQuoteChartController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensure the controller is registered and its symbol matches the requested one.
+    _ctrl = Get.put(IQuoteChartController(widget.symbol ?? 'XAUUSD.c'));
+    if (widget.symbol != null) {
+      _ctrl.forceSwitchSymbol(widget.symbol!);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant IQuoteChartScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.symbol != null && widget.symbol != oldWidget.symbol) {
+      _ctrl.forceSwitchSymbol(widget.symbol!);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return GetBuilder<IQuoteChartController>(
-      init: ctrl,
+      init: _ctrl,
       builder: (ctrl) {
         final palette = _ChartPalette.of(context);
         return Scaffold(
           backgroundColor: palette.bg,
           body: SafeArea(
             bottom: false,
-            child: Column(
-              children: [
-                _Header(ctrl: ctrl, palette: palette),
-                Expanded(
-                  child: Obx(
-                    () => ChartInAppWebView(
+            child: Obx(() {
+              // URL is FIXED — never embed ctrl.symbol in it.
+              // Only the `symbol` prop changes, keeping all redraws as JS-only updates.
+              final stableUrl =
+                  '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
+              return Column(
+                children: [
+                  _Header(ctrl: ctrl, palette: palette),
+                  Expanded(
+                    child: ChartInAppWebView(
+                      key: _webViewKey,
                       symbol: ctrl.symbol,
-                      url:
-                          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=${ctrl.symbol}&theme=${AppColors.chartTheme}',
+                      url: stableUrl,
                     ),
                   ),
-                ),
-                _BottomBar(ctrl: ctrl, palette: palette),
-              ],
-            ),
+                  _BottomBar(ctrl: ctrl, palette: palette),
+                ],
+              );
+            }),
           ),
         );
       },
@@ -227,6 +253,139 @@ class _BottomBar extends StatelessWidget {
   final IQuoteChartController ctrl;
   final _ChartPalette palette;
 
+  Future<void> _confirmCloseSymbolPositions(
+    BuildContext context,
+    TradingController tradingController,
+    List<TradePosition> targets,
+    String displaySymbol,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.55),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: AppColors.card,
+          insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Close $displaySymbol positions?',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  '${targets.length} position(s) will be closed at market price.',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13.sp,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 44.h,
+                        child: OutlinedButton(
+                          onPressed:
+                              () => Navigator.of(dialogContext).pop(false),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                              color: AppColors.primary,
+                              width: 1.2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: SizedBox(
+                        height: 44.h,
+                        child: ElevatedButton(
+                          onPressed:
+                              () => Navigator.of(dialogContext).pop(true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Confirm',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      try {
+        final accountController = Get.find<AccountController>();
+        final activeAccount = accountController.activeMT5Account;
+        if (activeAccount == null) {
+          CustomToastService.showError(
+            title: 'Error',
+            message: 'No active account found',
+          );
+          return;
+        }
+        for (final p in targets) {
+          final positionId = int.tryParse(p.orderId) ?? 0;
+          if (positionId == 0) continue;
+          await tradingController.closePositionById(
+            mt5Account: activeAccount.metaAccountNumber,
+            positionId: positionId,
+          );
+        }
+        CustomToastService.showSuccess(
+          title: 'Success',
+          message: 'Positions closed successfully',
+        );
+      } catch (e) {
+        CustomToastService.showError(
+          title: 'Error',
+          message: 'Failed to close positions: $e',
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -241,53 +400,184 @@ class _BottomBar extends StatelessWidget {
           final bid = ctrl.lastBid.value;
           final ask = ctrl.lastAsk.value;
           final d = ctrl.priceDigits.value;
-          print("📊 [IQuoteChartScreen] _BottomBar rebuilding: bid=$bid, ask=$ask");
+          print(
+            "📊 [IQuoteChartScreen] _BottomBar rebuilding: bid=$bid, ask=$ask",
+          );
+
+          final tradingController =
+              Get.isRegistered<TradingController>()
+                  ? Get.find<TradingController>()
+                  : null;
+
+          List<TradePosition> symbolPositions = [];
+          double totalVolume = 0.0;
+          double totalPL = 0.0;
+
+          if (tradingController != null) {
+            final symbolNorm = MarketWatchV2Service.normalizeSymbol(
+              ctrl.symbol,
+            );
+            symbolPositions =
+                tradingController.marketPositionsRx
+                    .where(
+                      (pos) =>
+                          MarketWatchV2Service.normalizeSymbol(pos.symbol) ==
+                          symbolNorm,
+                    )
+                    .toList();
+            totalVolume = symbolPositions.fold(
+              0.0,
+              (sum, pos) => sum + pos.volume,
+            );
+            totalPL = symbolPositions.fold(
+              0.0,
+              (sum, pos) => sum + pos.profitLoss,
+            );
+          }
+
+          final showWidget = symbolPositions.isNotEmpty;
 
           return Column(
             children: [
+              if (showWidget) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: palette.sheetFieldBg,
+                          borderRadius: BorderRadius.circular(6.r),
+                          border: Border.all(
+                            color: palette.sheetFieldBorder,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'ORDERS',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: palette.axisText,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  '${symbolPositions.length}',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(width: 24.w),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'VOLUME,LOT',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: palette.axisText,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  totalVolume.toStringAsFixed(2),
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'P/L',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: palette.axisText,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  '${totalPL >= 0 ? '+' : ''}${totalPL.toStringAsFixed(4)}',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color:
+                                        totalPL >= 0
+                                            ? _kBullColor
+                                            : _kBearColor,
+                                    fontFeatures: const [
+                                      FontFeature.tabularFigures(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap:
+                          () => _confirmCloseSymbolPositions(
+                            context,
+                            tradingController!,
+                            symbolPositions,
+                            ctrl.symbol.replaceAll('.c', '').toUpperCase(),
+                          ),
+                      child: Container(
+                        width: 44.h,
+                        height: 44.h,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: palette.sheetFieldBg,
+                          borderRadius: BorderRadius.circular(6.r),
+                          border: Border.all(
+                            color: palette.sheetFieldBorder,
+                            width: 1,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.cancel_outlined,
+                          color: _kBearColor,
+                          size: 24.sp,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+              ],
               Row(
                 children: [
-                  // Candle-type icon (left).
-                  // Container(
-                  //   width: 36.w,
-                  //   height: 36.w,
-                  //   alignment: Alignment.center,
-                  //   decoration: BoxDecoration(
-                  //     color: palette.sheetFieldBg,
-                  //     borderRadius: BorderRadius.circular(6.r),
-                  //   ),
-                  //   child: Icon(
-                  //     Icons.candlestick_chart_outlined,
-                  //     size: 18.sp,
-                  //     color: AppColors.textPrimary,
-                  //   ),
-                  // ),
-                  // SizedBox(width: 6.w),
-                  // // Team (open positions) — icon + badge only.
-                  // _IconOnlyBadge(
-                  //   icon: Icons.group_outlined,
-                  //   badge: positionCount,
-                  //   palette: palette,
-                  //   onTap:
-                  //       () => Get.to<void>(() => const IQuotePositionScreen()),
-                  // ),
-                  // SizedBox(width: 6.w),
-                  // // Position (pending orders) — icon + badge only.
-                  // _IconOnlyBadge(
-                  //   icon: Icons.assignment,
-                  //   badge: pendingCount,
-                  //   palette: palette,
-                  //   onTap:
-                  //       () => Get.to<void>(() => const IQuotePositionScreen()),
-                  // ),
-                  // const SizedBox(width: 6),
                   Expanded(
                     flex: 5,
                     child: _ActionPill(
                       color: _kBullColor,
                       icon: Icons.trending_up,
                       label: 'Buy',
-                      price: ask != null && ask > 0 ? ask.toStringAsFixed(d) : '—',
+                      price:
+                          ask != null && ask > 0 ? ask.toStringAsFixed(d) : '—',
                       onTap: () => _openNewOrderSheet(context, side: 'buy'),
                     ),
                   ),
@@ -298,7 +588,8 @@ class _BottomBar extends StatelessWidget {
                       color: _kBearColor,
                       icon: Icons.trending_down,
                       label: 'Sell',
-                      price: bid != null && bid > 0 ? bid.toStringAsFixed(d) : '—',
+                      price:
+                          bid != null && bid > 0 ? bid.toStringAsFixed(d) : '—',
                       onTap: () => _openNewOrderSheet(context, side: 'sell'),
                     ),
                   ),
@@ -410,7 +701,7 @@ class _NewOrderSheet extends StatefulWidget {
 class _NewOrderSheetState extends State<_NewOrderSheet> {
   static const _lots = [0.01, 0.10, 0.50, 1.00, 2.00, 5.00];
 
-  late double _volume;
+  late TextEditingController _volumeCtl;
   late TextEditingController _priceCtl;
   late TextEditingController _tpCtl;
   late TextEditingController _slCtl;
@@ -420,7 +711,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
   @override
   void initState() {
     super.initState();
-    _volume = 1.00;
+    _volumeCtl = TextEditingController(text: '0.01');
     _priceCtl = TextEditingController(
       text:
           widget.pricePreview > 0
@@ -435,12 +726,14 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
 
   @override
   void dispose() {
+    _volumeCtl.dispose();
     _priceCtl.dispose();
     _tpCtl.dispose();
     _slCtl.dispose();
     super.dispose();
   }
 
+  double get _volume => double.tryParse(_volumeCtl.text.trim()) ?? 0.01;
   double get _price => double.tryParse(_priceCtl.text.trim()) ?? 0;
   double get _margin {
     if (_price <= 0) return 0;
@@ -459,232 +752,110 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
     final palette = _ChartPalette.of(context);
     final fieldText = AppColors.textPrimary;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16.w,
-        right: 16.w,
-        top: 12.h,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 12.h,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: palette.axisText.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
-          ),
-          SizedBox(height: 12.h),
-          // Market / Limit tabs
-          Container(
-            decoration: BoxDecoration(
-              color: palette.inactiveTabBg,
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: palette.inactiveTabBorder),
-            ),
-            child: Row(
-              children: [
-                _TabButton(
-                  label: 'Market',
-                  active: _tab == 0,
-                  palette: palette,
-                  onTap: () => setState(() => _tab = 0),
-                ),
-                _TabButton(
-                  label: 'Limit',
-                  active: _tab == 1,
-                  palette: palette,
-                  onTap: () => setState(() => _tab = 1),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 16.h),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Volume(Lot)',
-                  style: TextStyle(color: fieldText, fontSize: 13.sp),
-                ),
-              ),
-              Text(
-                'Leverage',
-                style: TextStyle(color: fieldText, fontSize: 13.sp),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w),
-                  decoration: BoxDecoration(
-                    color: palette.sheetFieldBg,
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(color: palette.sheetFieldBorder),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _volume = (_volume - 0.01).clamp(0.01, 99.0);
-                          });
-                        },
-                        icon: Icon(Icons.remove, color: AppColors.textPrimary),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            _volume.toStringAsFixed(2),
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _volume = (_volume + 0.01).clamp(0.01, 99.0);
-                          });
-                        },
-                        icon: Icon(Icons.add, color: AppColors.textPrimary),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 16.w,
+          right: 16.w,
+          top: 12.h,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 12.h,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 4.h,
                 decoration: BoxDecoration(
-                  color: palette.sheetFieldBg,
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: palette.sheetFieldBorder),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '300X',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(width: 4.w),
-                    Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 16.sp,
-                      color: palette.axisText,
-                    ),
-                  ],
+                  color: palette.axisText.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Row(
-            children:
-                _lots
-                    .map(
-                      (lot) => Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(right: 6.w),
-                          child: GestureDetector(
-                            onTap: () => setState(() => _volume = lot),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 10.h),
-                              decoration: BoxDecoration(
-                                color:
-                                    (lot == _volume)
-                                        ? palette.tabAccent
-                                        : palette.sheetFieldBg,
-                                borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(
-                                  color: palette.sheetFieldBorder,
-                                ),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                lot.toStringAsFixed(2),
-                                style: TextStyle(
-                                  color:
-                                      (lot == _volume)
-                                          ? AppColors.whiteColor
-                                          : AppColors.textPrimary,
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-          ),
-          SizedBox(height: 14.h),
-          if (_tab == 1) ...[
+            ),
+            SizedBox(height: 12.h),
+            // Market / Limit tabs (Limit/Local hidden)
+            // Container(
+            //   decoration: BoxDecoration(
+            //     color: palette.inactiveTabBg,
+            //     borderRadius: BorderRadius.circular(8.r),
+            //     border: Border.all(color: palette.inactiveTabBorder),
+            //   ),
+            //   child: Row(
+            //     children: [
+            //       _TabButton(
+            //         label: 'Market',
+            //         active: _tab == 0,
+            //         palette: palette,
+            //         onTap: () => setState(() => _tab = 0),
+            //       ),
+            //       _TabButton(
+            //         label: 'Limit',
+            //         active: _tab == 1,
+            //         palette: palette,
+            //         onTap: () => setState(() => _tab = 1),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            // SizedBox(height: 16.h),
+            Text(
+              'Volume(Lot)',
+              style: TextStyle(color: fieldText, fontSize: 13.sp),
+            ),
+            SizedBox(height: 8.h),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+              padding: EdgeInsets.symmetric(horizontal: 8.w),
               decoration: BoxDecoration(
                 color: palette.sheetFieldBg,
                 borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(color: palette.sheetFieldBorder),
               ),
               child: Row(
                 children: [
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        final currentVol =
+                            double.tryParse(_volumeCtl.text) ?? 1.0;
+                        final nextVol = (currentVol - 0.01).clamp(0.01, 99.0);
+                        _volumeCtl.text = nextVol.toStringAsFixed(2);
+                      });
+                    },
+                    icon: Icon(Icons.remove, color: AppColors.textPrimary),
+                  ),
                   Expanded(
                     child: TextField(
-                      controller: _priceCtl,
+                      controller: _volumeCtl,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
                       ),
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
                         isCollapsed: true,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12.h),
                       ),
+                      onChanged: (val) {
+                        setState(() {});
+                      },
                     ),
                   ),
-                  Text(
-                    'USDT',
-                    style: TextStyle(color: palette.axisText, fontSize: 13.sp),
-                  ),
-                  SizedBox(width: 8.w),
                   IconButton(
                     onPressed: () {
                       setState(() {
-                        final p = _price - 0.01;
-                        _priceCtl.text = p.toStringAsFixed(d);
-                      });
-                    },
-                    icon: Icon(Icons.remove, color: AppColors.textPrimary),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        final p = _price + 0.01;
-                        _priceCtl.text = p.toStringAsFixed(d);
+                        final currentVol =
+                            double.tryParse(_volumeCtl.text) ?? 1.0;
+                        final nextVol = (currentVol + 0.01).clamp(0.01, 99.0);
+                        _volumeCtl.text = nextVol.toStringAsFixed(2);
                       });
                     },
                     icon: Icon(Icons.add, color: AppColors.textPrimary),
@@ -692,147 +863,260 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                 ],
               ),
             ),
-            SizedBox(height: 14.h),
-          ],
-          Row(
-            children: [
-              Text(
-                'TP/SL',
-                style: TextStyle(color: palette.axisText, fontSize: 13.sp),
-              ),
-              SizedBox(width: 6.w),
-              Icon(Icons.help_outline, size: 14.sp, color: palette.axisText),
-              const Spacer(),
-              Switch(
-                value: _tpSlEnabled,
-                activeColor: _kBullColor,
-                onChanged: (v) => setState(() => _tpSlEnabled = v),
-              ),
-            ],
-          ),
-          if (_tpSlEnabled) ...[
+            SizedBox(height: 8.h),
             Row(
-              children: [
-                Expanded(
-                  child: _Field(
-                    label: 'Take profit',
-                    controller: _tpCtl,
-                    palette: palette,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: _Field(
-                    label: 'Stop loss',
-                    controller: _slCtl,
-                    palette: palette,
-                  ),
-                ),
-              ],
+              children:
+                  _lots
+                      .map(
+                        (lot) => Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: 6.w),
+                            child: GestureDetector(
+                              onTap:
+                                  () => setState(
+                                    () =>
+                                        _volumeCtl.text = lot.toStringAsFixed(
+                                          2,
+                                        ),
+                                  ),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 10.h),
+                                decoration: BoxDecoration(
+                                  color:
+                                      (lot == _volume)
+                                          ? palette.tabAccent
+                                          : palette.sheetFieldBg,
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  lot.toStringAsFixed(2),
+                                  style: TextStyle(
+                                    color:
+                                        (lot == _volume)
+                                            ? AppColors.whiteColor
+                                            : AppColors.textPrimary,
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
             ),
-            SizedBox(height: 12.h),
-          ],
-          _SummaryRow(
-            label: 'Margin',
-            value: _margin.toStringAsFixed(4),
-            palette: palette,
-          ),
-          SizedBox(height: 6.h),
-          _SummaryRow(
-            label: 'Fee',
-            value: _fee.toStringAsFixed(4),
-            palette: palette,
-          ),
-          SizedBox(height: 6.h),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            SizedBox(height: 14.h),
+            if (_tab == 1) ...[
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: palette.sheetFieldBg,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: palette.sheetFieldBorder),
+                ),
+                child: Row(
                   children: [
-                    Text(
-                      'Total: ${_total.toStringAsFixed(4)}',
-                      style: AppTextStyles.heading.copyWith(
-                        fontSize: 17.sp,
-                        fontWeight: FontWeight.w800,
-                        color: fieldText,
+                    Expanded(
+                      child: TextField(
+                        controller: _priceCtl,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          isCollapsed: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                        ),
                       ),
                     ),
-                    SizedBox(height: 4.h),
                     Text(
-                      'Available:${_formatAvailable()}',
+                      'USDT',
                       style: TextStyle(
                         color: palette.axisText,
-                        fontSize: 12.sp,
+                        fontSize: 13.sp,
                       ),
+                    ),
+                    SizedBox(width: 8.w),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          final p = _price - 0.01;
+                          _priceCtl.text = p.toStringAsFixed(d);
+                        });
+                      },
+                      icon: Icon(Icons.remove, color: AppColors.textPrimary),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          final p = _price + 0.01;
+                          _priceCtl.text = p.toStringAsFixed(d);
+                        });
+                      },
+                      icon: Icon(Icons.add, color: AppColors.textPrimary),
                     ),
                   ],
                 ),
               ),
-              Flexible(
-                flex: 2,
-                child: SizedBox(
-                  height: 48.h,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: color,
-                      foregroundColor: AppColors.textPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                    onPressed: () => _submit(side),
-                    child: Obx(() {
-                      if (widget.ctrl.isLoading.value) {
-                        return SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            color: AppColors.textPrimary,
-                            strokeWidth: 2,
-                          ),
-                        );
+              SizedBox(height: 14.h),
+            ],
+            Row(
+              children: [
+                Text(
+                  'TP/SL',
+                  style: TextStyle(color: palette.axisText, fontSize: 13.sp),
+                ),
+                SizedBox(width: 6.w),
+                Icon(Icons.help_outline, size: 14.sp, color: palette.axisText),
+                const Spacer(),
+                Switch(
+                  value: _tpSlEnabled,
+                  activeColor: _kBullColor,
+                  onChanged: (v) {
+                    setState(() {
+                      _tpSlEnabled = v;
+                      if (v) {
+                        final activePrice = widget.side == 'buy'
+                            ? (widget.ctrl.lastAsk.value ??
+                                widget.ctrl.lastBid.value ??
+                                0.0)
+                            : (widget.ctrl.lastBid.value ??
+                                widget.ctrl.lastAsk.value ??
+                                0.0);
+                        final digits = widget.ctrl.priceDigits.value;
+                        if (activePrice > 0) {
+                          _tpCtl.text = activePrice.toStringAsFixed(digits);
+                          _slCtl.text = activePrice.toStringAsFixed(digits);
+                        }
                       }
-                      final px =
-                          _tab == 0
-                              ? (widget.ctrl.lastAsk.value ??
-                                  widget.ctrl.lastBid.value ??
-                                  0)
-                              : _price;
-                      final sideLabel = side == 'buy' ? 'Buy' : 'Sell';
-                      final kindLabel = _tab == 1 ? 'Limit' : 'Market';
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            '$sideLabel $kindLabel',
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
+                    });
+                  },
+                ),
+              ],
+            ),
+            if (_tpSlEnabled) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: _Field(
+                      label: 'Take profit',
+                      controller: _tpCtl,
+                      palette: palette,
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: _Field(
+                      label: 'Stop loss',
+                      controller: _slCtl,
+                      palette: palette,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.h),
+            ],
+            _SummaryRow(
+              label: 'Margin',
+              value: _margin.toStringAsFixed(4),
+              palette: palette,
+            ),
+            SizedBox(height: 6.h),
+            _SummaryRow(
+              label: 'Fee',
+              value: _fee.toStringAsFixed(4),
+              palette: palette,
+            ),
+            SizedBox(height: 6.h),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total: ${_total.toStringAsFixed(4)}',
+                        style: AppTextStyles.heading.copyWith(
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w800,
+                          color: fieldText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  flex: 2,
+                  child: SizedBox(
+                    height: 48.h,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: color,
+                        foregroundColor: AppColors.whiteColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      onPressed: () => _submit(side),
+                      child: Obx(() {
+                        if (widget.ctrl.isLoading.value) {
+                          return SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              color: AppColors.textPrimary,
+                              strokeWidth: 2,
                             ),
-                          ),
-                          if (px > 0) ...[
-                            SizedBox(width: 6.w),
+                          );
+                        }
+                        final px =
+                            _tab == 0
+                                ? (widget.ctrl.lastAsk.value ??
+                                    widget.ctrl.lastBid.value ??
+                                    0)
+                                : _price;
+                        final sideLabel = side == 'buy' ? 'Buy' : 'Sell';
+                        final kindLabel = _tab == 1 ? 'Limit' : 'Market';
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
                             Text(
-                              px.toStringAsFixed(d),
+                              '$sideLabel $kindLabel',
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
+                            if (px > 0) ...[
+                              SizedBox(width: 6.w),
+                              Text(
+                                px.toStringAsFixed(d),
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                            SizedBox(width: 6.w),
+                            Icon(Icons.trending_up, size: 16.sp),
                           ],
-                          SizedBox(width: 6.w),
-                          Icon(Icons.trending_up, size: 16.sp),
-                        ],
-                      );
-                    }),
+                        );
+                      }),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1200,7 +1484,8 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
               ),
               child: TextField(
                 controller: _searchCtl,
-                onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
+                onChanged:
+                    (v) => setState(() => _query = v.trim().toLowerCase()),
                 style: TextStyle(
                   color: isDark ? Colors.white : Colors.black,
                   fontSize: 13.sp,
@@ -1241,16 +1526,17 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
               ),
             ),
           ),
-// ── list ──────────────────────────────────────────────────
+          // ── list ──────────────────────────────────────────────────
           Divider(color: palette.divider, height: 1),
           Expanded(
             child: Obx(() {
               final all = ic.favoriteInstruments;
-              final filtered = all.where((sym) {
-                if (_query.isEmpty) return true;
-                return sym.toLowerCase().contains(_query) ||
-                    _stripSuffix(sym).toLowerCase().contains(_query);
-              }).toList();
+              final filtered =
+                  all.where((sym) {
+                    if (_query.isEmpty) return true;
+                    return sym.toLowerCase().contains(_query) ||
+                        _stripSuffix(sym).toLowerCase().contains(_query);
+                  }).toList();
               _sortList(filtered, ic);
               if (filtered.isEmpty) {
                 return _EmptyWatchlist(
@@ -1262,8 +1548,12 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
               return ListView.separated(
                 padding: EdgeInsets.symmetric(vertical: 4.h),
                 itemCount: filtered.length,
-                separatorBuilder: (_, __) =>
-                    Divider(color: palette.divider, height: 1, indent: 16.w),
+                separatorBuilder:
+                    (_, __) => Divider(
+                      color: palette.divider,
+                      height: 1,
+                      indent: 16.w,
+                    ),
                 itemBuilder: (_, i) {
                   final sym = filtered[i];
                   return _WatchlistTile(
@@ -1336,34 +1626,37 @@ class _SortMenu extends StatelessWidget {
       ),
       offset: Offset(0, 36.h),
       onSelected: onChanged,
-      itemBuilder: (_) => _WatchSort.values
-          .map(
-            (s) => PopupMenuItem<_WatchSort>(
-              value: s,
-              child: Row(
-                children: [
-                  Icon(
-                    s == current
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_off,
-                    color: s == current
-                        ? const Color(0xFFF97316)
-                        : palette.axisText,
-                    size: 16.sp,
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    s.label,
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black,
-                      fontSize: 13.sp,
+      itemBuilder:
+          (_) =>
+              _WatchSort.values
+                  .map(
+                    (s) => PopupMenuItem<_WatchSort>(
+                      value: s,
+                      child: Row(
+                        children: [
+                          Icon(
+                            s == current
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_off,
+                            color:
+                                s == current
+                                    ? const Color(0xFFF97316)
+                                    : palette.axisText,
+                            size: 16.sp,
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            s.label,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black,
+                              fontSize: 13.sp,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          )
-          .toList(),
+                  )
+                  .toList(),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
         decoration: BoxDecoration(
@@ -1481,22 +1774,22 @@ class _WatchlistTile extends StatelessWidget {
     return Obx(() {
       final p = ic.priceRx(symbol).value;
       final dayLow = p.dayLow;
-      final changePct = (p.bid > 0 && dayLow > 0)
-          ? ((p.bid - dayLow) / dayLow) * 100
-          : 0.0;
+      final changePct =
+          (p.bid > 0 && dayLow > 0) ? ((p.bid - dayLow) / dayLow) * 100 : 0.0;
       final isUp = changePct >= 0;
       final changeColor =
           p.bid <= 0
               ? palette.axisText
               : (isUp ? const Color(0xFF22C55E) : const Color(0xFFEF4444));
-// Tile is symbol-only on the left, sparkline + change% on the right.
-// The bid price and spread pill were removed; bid is still read for change%
-// but the bid/spread text strings are no longer displayed.
+      // Tile is symbol-only on the left, sparkline + change% on the right.
+      // The bid price and spread pill were removed; bid is still read for change%
+      // but the bid/spread text strings are no longer displayed.
 
       return Material(
-        color: isActive
-            ? const Color(0xFFF97316).withValues(alpha: 0.08)
-            : Colors.transparent,
+        color:
+            isActive
+                ? const Color(0xFFF97316).withValues(alpha: 0.08)
+                : Colors.transparent,
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,
@@ -1522,61 +1815,86 @@ class _WatchlistTile extends StatelessWidget {
                           letterSpacing: 0.3,
                         ),
                       ),
-// Only the symbol is shown on this side — the .c suffix and the sp X pill
-// were removed per request to keep the tile clean and symbol-focused.
+                      Builder(
+                        builder: (context) {
+                          final existing = ic.allInstruments.firstWhereOrNull(
+                            (element) => element.symbol == symbol,
+                          );
+                          final name =
+                              existing?.name ?? ic.favoriteNames[symbol];
+                          if (name != null && name.isNotEmpty) {
+                            return Padding(
+                              padding: EdgeInsets.only(top: 2.h),
+                              child: Text(
+                                name,
+                                style: TextStyle(
+                                  color: palette.axisText,
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                      // Only the symbol is shown on this side — the .c suffix and the sp X pill
+                      // were removed per request to keep the tile clean and symbol-focused.
                     ],
                   ),
                 ),
-//                 SizedBox(
-//                   width: 56.w,
-//                   height: 28.h,
-//                   child: CustomPaint(
-//                     painter: _SparklinePainter(
-//                       data: sparkData,
-//                       color: changeColor,
-//                     ),
-//                   ),
-//                 ),
-//                 SizedBox(width: 10.w),
-// // Change % pill only — price + chevron removed per request. The tile now
-// // shows: [Flag] [symbol] …… [sparkline] [±X.XX%].
-//                 Container(
-//                   padding: EdgeInsets.symmetric(
-//                     horizontal: 8.w,
-//                     vertical: 4.h,
-//                   ),
-//                   decoration: BoxDecoration(
-//                     color: changeColor.withValues(alpha: 0.15),
-//                     borderRadius: BorderRadius.circular(8.r),
-//                   ),
-//                   child: Row(
-//                     mainAxisSize: MainAxisSize.min,
-//                     children: [
-//                       Icon(
-//                         p.bid <= 0
-//                             ? Icons.remove
-//                             : (isUp
-//                                 ? Icons.arrow_drop_up
-//                                 : Icons.arrow_drop_down),
-//                         color: changeColor,
-//                         size: 14.sp,
-//                       ),
-//                       SizedBox(width: 2.w),
-//                       Text(
-//                         p.bid <= 0
-//                             ? '0.00%'
-//                             : '${isUp ? '+' : '-'}${changePct.abs().toStringAsFixed(2)}%',
-//                         style: TextStyle(
-//                           color: changeColor,
-//                           fontSize: 11.sp,
-//                           fontWeight: FontWeight.w700,
-//                           fontFeatures: const [FontFeature.tabularFigures()],
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//                 SizedBox(width: 8.w),
+                //                 SizedBox(
+                //                   width: 56.w,
+                //                   height: 28.h,
+                //                   child: CustomPaint(
+                //                     painter: _SparklinePainter(
+                //                       data: sparkData,
+                //                       color: changeColor,
+                //                     ),
+                //                   ),
+                //                 ),
+                //                 SizedBox(width: 10.w),
+                // // Change % pill only — price + chevron removed per request. The tile now
+                // // shows: [Flag] [symbol] …… [sparkline] [±X.XX%].
+                //                 Container(
+                //                   padding: EdgeInsets.symmetric(
+                //                     horizontal: 8.w,
+                //                     vertical: 4.h,
+                //                   ),
+                //                   decoration: BoxDecoration(
+                //                     color: changeColor.withValues(alpha: 0.15),
+                //                     borderRadius: BorderRadius.circular(8.r),
+                //                   ),
+                //                   child: Row(
+                //                     mainAxisSize: MainAxisSize.min,
+                //                     children: [
+                //                       Icon(
+                //                         p.bid <= 0
+                //                             ? Icons.remove
+                //                             : (isUp
+                //                                 ? Icons.arrow_drop_up
+                //                                 : Icons.arrow_drop_down),
+                //                         color: changeColor,
+                //                         size: 14.sp,
+                //                       ),
+                //                       SizedBox(width: 2.w),
+                //                       Text(
+                //                         p.bid <= 0
+                //                             ? '0.00%'
+                //                             : '${isUp ? '+' : '-'}${changePct.abs().toStringAsFixed(2)}%',
+                //                         style: TextStyle(
+                //                           color: changeColor,
+                //                           fontSize: 11.sp,
+                //                           fontWeight: FontWeight.w700,
+                //                           fontFeatures: const [FontFeature.tabularFigures()],
+                //                         ),
+                //                       ),
+                //                     ],
+                //                   ),
+                //                 ),
+                //                 SizedBox(width: 8.w),
                 Icon(
                   Icons.chevron_right,
                   size: 18.sp,
@@ -1602,11 +1920,7 @@ class _SparklinePainter extends CustomPainter {
     if (data.length < 2) {
       // Single-point placeholder: a small dot in the middle.
       final dot = Paint()..color = color.withValues(alpha: 0.5);
-      canvas.drawCircle(
-        Offset(size.width / 2, size.height / 2),
-        1.4,
-        dot,
-      );
+      canvas.drawCircle(Offset(size.width / 2, size.height / 2), 1.4, dot);
       return;
     }
     double minY = data.first;
@@ -1617,10 +1931,11 @@ class _SparklinePainter extends CustomPainter {
     }
     if ((maxY - minY).abs() < 1e-9) {
       // Flat line — draw a faint midline.
-      final mid = Paint()
-        ..color = color.withValues(alpha: 0.4)
-        ..strokeWidth = 1
-        ..style = PaintingStyle.stroke;
+      final mid =
+          Paint()
+            ..color = color.withValues(alpha: 0.4)
+            ..strokeWidth = 1
+            ..style = PaintingStyle.stroke;
       canvas.drawLine(
         Offset(0, size.height / 2),
         Offset(size.width, size.height / 2),
@@ -1639,13 +1954,14 @@ class _SparklinePainter extends CustomPainter {
         path.lineTo(x, y);
       }
     }
-    final stroke = Paint()
-      ..color = color
-      ..strokeWidth = 1.4
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..isAntiAlias = true;
+    final stroke =
+        Paint()
+          ..color = color
+          ..strokeWidth = 1.4
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
+          ..isAntiAlias = true;
     canvas.drawPath(path, stroke);
   }
 

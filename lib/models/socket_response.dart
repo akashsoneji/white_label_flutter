@@ -61,6 +61,7 @@ class ListElement {
   category; // Category from WebSocket (e.g., "Crypto", "Indices Spot")
   final double? dayHigh; // Day high price
   final double? dayLow; // Day low price
+  final String? name; // Instrument descriptive name
 
   ListElement({
     required this.symbol,
@@ -75,6 +76,7 @@ class ListElement {
     this.category,
     this.dayHigh,
     this.dayLow,
+    this.name,
   });
 
   ListElement copyWith({
@@ -90,6 +92,7 @@ class ListElement {
     String? category,
     double? dayHigh,
     double? dayLow,
+    String? name,
   }) => ListElement(
     symbol: symbol ?? this.symbol,
     digits: digits ?? this.digits,
@@ -103,6 +106,7 @@ class ListElement {
     category: category ?? this.category,
     dayHigh: dayHigh ?? this.dayHigh,
     dayLow: dayLow ?? this.dayLow,
+    name: name ?? this.name,
   );
 
   factory ListElement.fromJson(Map<String, dynamic> json) {
@@ -119,6 +123,7 @@ class ListElement {
       category: json['category'] ?? json['Category'],
       dayHigh: _parseNullableDoubleFlexible(json['day_high']),
       dayLow: _parseNullableDoubleFlexible(json['day_low']),
+      name: json['name'] ?? json['Name'],
     );
   }
 
@@ -136,6 +141,7 @@ class ListElement {
       'category': category,
       'day_high': dayHigh,
       'day_low': dayLow,
+      'name': name,
     };
   }
 }
