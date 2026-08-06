@@ -352,11 +352,11 @@ class _PmamInvestorPortalScreenState extends State<PmamInvestorPortalScreen>
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: Text('Withdraw'),
-          content: Text(
-            'Are you sure you want to withdraw from this plan? This will trigger proportional trade settlement.',
+          title: const Text('Unsubscribe'),
+          content: const Text(
+            'Are you sure you want to Unsubscribe from this plan? This will trigger proportional trade settlement.',
           ),
-          actions: [
+          actions: [ 
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
               child: Text('Cancel'),

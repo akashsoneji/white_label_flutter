@@ -502,14 +502,14 @@ class _IquoteInstrumentRow extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Change text
-                  Text(
-                    changeStr,
-                    style: AppTextStyles.bodyText.copyWith(
-                      fontSize: 10.5.sp,
-                      color: changeColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  // Text(
+                  //   changeStr,
+                  //   style: AppTextStyles.bodyText.copyWith(
+                  //     fontSize: 10.5.sp,
+                  //     color: changeColor,
+                  //     fontWeight: FontWeight.w500,
+                  //   ),
+                  // ),
                   SizedBox(height: 2.h),
                   // Buy/Sell side-by-side with overlapping center spread badge
                   Stack(
@@ -625,16 +625,16 @@ class _IquoteInstrumentRow extends StatelessWidget {
                       ),
                     ],
                   ),
-                  SizedBox(height: 2.h),
-                  // Spread Cost
-                  Text(
-                    '\$${spread.toStringAsFixed(digits.clamp(1, 4))}',
-                    style: TextStyle(
-                      color: const Color(0xFF22C55E),
-                      fontSize: 9.5.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  // SizedBox(height: 2.h),
+                  // // Spread Cost
+                  // Text(
+                  //   '\$${spread.toStringAsFixed(digits.clamp(1, 4))}',
+                  //   style: TextStyle(
+                  //     color: const Color(0xFF22C55E),
+                  //     fontSize: 9.5.sp,
+                  //     fontWeight: FontWeight.w500,
+                  //   ),
+                  // ),
                 ],
               ),
             ],

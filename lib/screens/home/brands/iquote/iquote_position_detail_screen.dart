@@ -38,7 +38,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/constants/color.dart';
-import 'package:crm_app/models/order_types.dart';
+
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
@@ -106,7 +106,7 @@ class _Palette {
   }
 }
 
-enum _DetailTab { tpsl, addPosition, reverse, close }
+enum _DetailTab { tpsl, close }
 
 class IQuotePositionDetailScreen extends StatefulWidget {
   const IQuotePositionDetailScreen({super.key, required this.position});
@@ -132,11 +132,6 @@ class _IQuotePositionDetailScreenState
   final FocusNode _tpFocus = FocusNode();
   final FocusNode _slFocus = FocusNode();
 
-  // ── Add-Position state ─────────────────────────────────────────────────
-  late TextEditingController _addVolumeCtl;
-  double _addVolume = 0.03;
-  bool _addIncludeVip = true;
-
   // ── Reverse-Order state is read-only (displays the existing + opposite) ─
 
   bool _busy = false;
@@ -145,8 +140,6 @@ class _IQuotePositionDetailScreenState
   void initState() {
     super.initState();
     final pos = widget.position;
-    _addVolumeCtl = TextEditingController(text: pos.volume.toStringAsFixed(2));
-    _addVolume = pos.volume;
     // Pre-fill TP/SL from the existing position if present.
     final sl = _priceStrToDouble(pos.stopLoss);
     final tp = _priceStrToDouble(pos.takeProfit);
@@ -160,7 +153,6 @@ class _IQuotePositionDetailScreenState
     _slCtl.dispose();
     _tpFocus.dispose();
     _slFocus.dispose();
-    _addVolumeCtl.dispose();
     super.dispose();
   }
 
@@ -187,16 +179,6 @@ class _IQuotePositionDetailScreenState
               sideColor: sideColor,
               palette: palette,
             ),
-            // Chart-area placeholder (reserves ~42% of screen height). The
-            // real chart will mount into this slot in a follow-up.
-            Expanded(
-              flex: 100,
-              child: _ChartPlaceholder(
-                symbol: pos.symbol,
-                digits: pos.digits,
-                palette: palette,
-              ),
-            ),
             _TabBar(
               current: _tab,
               onChange: (t) => setState(() => _tab = t),
@@ -215,24 +197,6 @@ class _IQuotePositionDetailScreenState
                       slFocus: _slFocus,
                       palette: palette,
                       key: const ValueKey('tpsl'),
-                    ),
-                  _DetailTab.addPosition => _AddPositionPanel(
-                      pos: pos,
-                      sideLabel: sideLabel,
-                      volumeCtl: _addVolumeCtl,
-                      volume: _addVolume,
-                      onVolumeChange: _onAddVolumeChange,
-                      includeVip: _addIncludeVip,
-                      onIncludeVipChange: (v) =>
-                          setState(() => _addIncludeVip = v),
-                      palette: palette,
-                      key: const ValueKey('add'),
-                    ),
-                  _DetailTab.reverse => _ReversePanel(
-                      pos: pos,
-                      sideLabel: sideLabel,
-                      palette: palette,
-                      key: const ValueKey('rev'),
                     ),
                   _DetailTab.close => _ClosePanel(
                       pos: pos,
@@ -258,24 +222,13 @@ class _IQuotePositionDetailScreenState
   }
 
   // ── Add-position stepper ───────────────────────────────────────────────
-  void _onAddVolumeChange(double v) {
-    setState(() {
-      _addVolume = v.clamp(0.01, 99.0);
-      _addVolumeCtl.text = _addVolume.toStringAsFixed(2);
-    });
-  }
+
 
   // ── primary button per tab ─────────────────────────────────────────────
   Future<void> _onPrimary(BuildContext context) async {
     switch (_tab) {
       case _DetailTab.tpsl:
         await _submitTpSl();
-        break;
-      case _DetailTab.addPosition:
-        await _submitAddPosition();
-        break;
-      case _DetailTab.reverse:
-        await _submitReverse();
         break;
       case _DetailTab.close:
         await _submitCloseWithConfirm(context);
@@ -311,97 +264,6 @@ class _IQuotePositionDetailScreenState
       } else {
         _toastError(_trading.errorMessage.isEmpty
             ? 'Failed to update TP/SL.'
-            : _trading.errorMessage);
-      }
-    } catch (e) {
-      _toastError(e.toString());
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _submitAddPosition() async {
-    final pos = widget.position;
-    final acct = _account.activeMT5AccountRx.value;
-    if (acct == null) {
-      _toastError('No active MT5 account selected.');
-      return;
-    }
-    if (_addVolume <= 0) {
-      _toastError('Volume must be greater than 0.');
-      return;
-    }
-    setState(() => _busy = true);
-    try {
-      final oppositeSide = _isBuy(pos) ? OrderType.sellMarket : OrderType.buyMarket;
-      final ok = await _trading.placeTradeOrder(
-        symbol: pos.symbol,
-        volume: _addVolume.toStringAsFixed(2),
-        orderType: oppositeSide,
-        price: '',
-        mt5Account: acct.metaAccountNumber,
-      );
-      if (ok) {
-        CustomToastService.showSuccess(
-          message:
-              'Opened ${oppositeSide == OrderType.buyMarket ? "Buy" : "Sell"} ${_addVolume.toStringAsFixed(2)} ${pos.symbol}',
-          title: 'Position opened',
-        );
-        await _trading.refreshTradeHistory();
-        if (mounted) Get.back<void>();
-      } else {
-        _toastError(_trading.errorMessage.isEmpty
-            ? 'Failed to open position.'
-            : _trading.errorMessage);
-      }
-    } catch (e) {
-      _toastError(e.toString());
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _submitReverse() async {
-    final pos = widget.position;
-    final acct = _account.activeMT5AccountRx.value;
-    if (acct == null) {
-      _toastError('No active MT5 account selected.');
-      return;
-    }
-    setState(() => _busy = true);
-    try {
-      // 1) Close the current position.
-      final closed = await _trading.closePositionById(
-        mt5Account: acct.metaAccountNumber,
-        positionId: int.tryParse(pos.orderId.toString()) ?? 0,
-        volume: pos.volume,
-      );
-      if (!closed) {
-        _toastError(_trading.errorMessage.isEmpty
-            ? 'Failed to close position.'
-            : _trading.errorMessage);
-        return;
-      }
-      // 2) Open the opposite one at the same volume.
-      final opposite = _isBuy(pos) ? OrderType.sellMarket : OrderType.buyMarket;
-      final opened = await _trading.placeTradeOrder(
-        symbol: pos.symbol,
-        volume: pos.volume.toStringAsFixed(2),
-        orderType: opposite,
-        price: '',
-        mt5Account: acct.metaAccountNumber,
-      );
-      if (opened) {
-        CustomToastService.showSuccess(
-          message:
-              'Reversed to ${opposite == OrderType.buyMarket ? "Buy" : "Sell"} ${pos.volume.toStringAsFixed(2)} ${pos.symbol}',
-          title: 'Order reversed',
-        );
-        await _trading.refreshTradeHistory();
-        if (mounted) Get.back<void>();
-      } else {
-        _toastError(_trading.errorMessage.isEmpty
-            ? 'Closed original position but failed to open opposite.'
             : _trading.errorMessage);
       }
     } catch (e) {
@@ -761,16 +623,63 @@ class _LivePrice extends StatelessWidget {
     final ctrl = Get.find<InstrumentsController>();
     return Obx(() {
       final q = ctrl.priceRx(symbol).value;
-      final px = (q == null || (q.bid == 0 && q.ask == 0))
-          ? null
-          : (q.bid + q.ask) / 2;
-      return Text(
-        px == null ? '—' : px.toStringAsFixed(digits),
-        style: TextStyle(
-          color: AppColors.statusGreen,
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w800,
-        ),
+      if (q == null || (q.bid == 0 && q.ask == 0)) {
+        return Text(
+          '—',
+          style: TextStyle(
+            color: AppColors.statusGreen,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w800,
+          ),
+        );
+      }
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Bid',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                q.bid.toStringAsFixed(digits),
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(width: 12.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'Ask',
+                style: TextStyle(
+                  color: AppColors.statusGreen,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                q.ask.toStringAsFixed(digits),
+                style: TextStyle(
+                  color: AppColors.statusGreen,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ],
       );
     });
   }
@@ -802,290 +711,6 @@ class _Pill extends StatelessWidget {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-// Chart-area placeholder — reserved slot for the real chart
-// ────────────────────────────────────────────────────────────────────────────
-class _ChartPlaceholder extends StatelessWidget {
-  const _ChartPlaceholder({
-    required this.symbol,
-    required this.digits,
-    required this.palette,
-  });
-  final String symbol;
-  final int digits;
-  final _Palette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    final instruments = Get.find<InstrumentsController>();
-    return Container(
-      width: double.infinity,
-      color: palette.chartAreaBg,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Period + action toolbar (faded, disabled — for layout parity only).
-          Container(
-            color: palette.bg,
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-            child: Row(
-              children: [
-                Text(
-                  'Period',
-                  style: TextStyle(color: palette.axisText, fontSize: 12.sp),
-                ),
-                SizedBox(width: 14.w),
-                ...['1M', '5M', '15M', '30M', 'More'].map(
-                  (p) => Padding(
-                    padding: EdgeInsets.only(right: 14.w),
-                    child: Text(
-                      p,
-                      style: TextStyle(
-                        color: palette.axisText,
-                        fontSize: 12.sp,
-                      ),
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16.sp,
-                  color: palette.axisText,
-                ),
-                SizedBox(width: 12.w),
-                Icon(Icons.tune, size: 16.sp, color: palette.axisText),
-                SizedBox(width: 12.w),
-                Icon(Icons.aspect_ratio, size: 16.sp, color: palette.axisText),
-              ],
-            ),
-          ),
-          // MA strip (faded).
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-            child: Row(
-              children: [
-                _MaText(
-                  text: 'MA5:${_fmt(instruments, digits, fallback: '—')}',
-                  color: AppColors.blue,
-                ),
-                SizedBox(width: 14.w),
-                _MaText(
-                  text: 'MA10:${_fmt(instruments, digits, fallback: '—')}',
-                  color: AppColors.warning,
-                ),
-                SizedBox(width: 14.w),
-                _MaText(
-                  text: 'MA30:${_fmt(instruments, digits, fallback: '—')}',
-                  color: AppColors.iconPurple,
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Obx(() {
-              final q = instruments.priceRx(symbol).value;
-              final bid = q?.bid;
-              final ask = q?.ask;
-              final px = (q == null || (q.bid == 0 && q.ask == 0))
-                  ? null
-                  : (q.bid + q.ask) / 2;
-              return _CandlePlaceholder(
-                digits: digits,
-                bid: bid,
-                ask: ask,
-                price: px,
-                palette: palette,
-              );
-            }),
-          ),
-          // Bottom MACD strip (faded band).
-          Container(
-            height: 32.h,
-            color: palette.chartAreaBg,
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'MACD(12,26,9)  MACD:—  DIF:—  DEA:—',
-              style: TextStyle(color: palette.axisText, fontSize: 11.sp),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _fmt(
-    InstrumentsController instruments,
-    int digits, {
-    required String fallback,
-  }) {
-    final q = instruments.priceRx(symbol).value;
-    if (q == null || (q.bid == 0 && q.ask == 0)) return fallback;
-    final px = (q.bid + q.ask) / 2;
-    return px.toStringAsFixed(digits);
-  }
-}
-
-class _MaText extends StatelessWidget {
-  const _MaText({required this.text, required this.color});
-  final String text;
-  final Color color;
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: color,
-        fontSize: 11.sp,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-}
-
-class _CandlePlaceholder extends StatelessWidget {
-  const _CandlePlaceholder({
-    required this.digits,
-    required this.bid,
-    required this.ask,
-    required this.price,
-    required this.palette,
-  });
-  final int digits;
-  final double? bid;
-  final double? ask;
-  final double? price;
-  final _Palette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    final samples = <double>[
-      if (bid != null) bid!,
-      if (ask != null) ask!,
-      if (price != null) price!,
-    ];
-    double? hi;
-    double? lo;
-    if (samples.isNotEmpty) {
-      hi = samples.reduce(math.max);
-      lo = samples.reduce(math.min);
-      final pad = (hi - lo).abs() * 0.4 + hi.abs() * 0.002;
-      hi = hi + pad;
-      lo = lo - pad;
-    }
-    final ticks = <double>[];
-    if (hi != null && lo != null && hi > lo) {
-      for (var i = 0; i < 5; i++) {
-        ticks.add(lo + (hi - lo) * (i / 4.0));
-      }
-    }
-    double yFrac(double p) {
-      if (hi == null || lo == null || hi <= lo) return 0;
-      return 1 - ((p - lo) / (hi - lo));
-    }
-
-    return LayoutBuilder(
-      builder: (context, c) {
-        return Stack(
-          children: [
-            // Border
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: palette.divider),
-                    bottom: BorderSide(color: palette.divider),
-                  ),
-                ),
-              ),
-            ),
-            // Right-axis ticks
-            ...ticks.map(
-              (t) => Positioned(
-                right: 8.w,
-                top: yFrac(t).clamp(0.0, 1.0) * c.maxHeight - 8,
-                child: Text(
-                  t.toStringAsFixed(digits),
-                  style: TextStyle(
-                    color: palette.axisText,
-                    fontSize: 11.sp,
-                  ),
-                ),
-              ),
-            ),
-            // Ask marker line (green)
-            if (ask != null && hi != null && lo != null && hi > lo)
-              Positioned(
-                left: 0,
-                right: 0,
-                top: yFrac(ask!).clamp(0.0, 1.0) * c.maxHeight,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: AppColors.statusGreen.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w),
-                      color: AppColors.statusGreen,
-                      child: Text(
-                        ask!.toStringAsFixed(digits),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            // Bid marker line (red)
-            if (bid != null && hi != null && lo != null && hi > lo)
-              Positioned(
-                left: 0,
-                right: 0,
-                top: yFrac(bid!).clamp(0.0, 1.0) * c.maxHeight,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: AppColors.error.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w),
-                      color: AppColors.error,
-                      child: Text(
-                        bid!.toStringAsFixed(digits),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            // Hint icon
-            Center(
-              child: Icon(
-                Icons.show_chart,
-                size: 28.sp,
-                color: palette.axisText.withValues(alpha: 0.5),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
 // ────────────────────────────────────────────────────────────────────────────
 // Tab bar (TP/SL | Add Position | Reverse Order)
 // ────────────────────────────────────────────────────────────────────────────
@@ -1101,8 +726,6 @@ class _TabBar extends StatelessWidget {
 
   static const _labels = {
     _DetailTab.tpsl: 'TP/SL',
-    _DetailTab.addPosition: 'Add Position',
-    _DetailTab.reverse: 'Reverse Order',
     _DetailTab.close: 'Close Position',
   };
 
@@ -1174,29 +797,25 @@ class _TpSlPanel extends StatelessWidget {
   final FocusNode slFocus;
   final _Palette palette;
 
-  static const List<double> _quickAdd = [0.5, 1, 2, 5];
 
   void _bump(TextEditingController c, double delta, int digits) {
     final raw = c.text.trim();
-    final current = double.tryParse(raw) ?? 0;
-    final next = (current + delta).clamp(0.0, double.infinity);
+    double current = double.tryParse(raw) ?? 0;
+    if (current == 0) {
+      final ctrl = Get.find<InstrumentsController>();
+      final q = ctrl.priceRx(pos.symbol.toUpperCase()).value;
+      if (q.bid > 0 || q.ask > 0) {
+        current = (q.bid + q.ask) / 2;
+      }
+    }
+    final tick = math.pow(10, -digits).toDouble();
+    final next = (current + (delta * tick)).clamp(0.0, double.infinity);
     c.text = next == 0 ? '' : next.toStringAsFixed(digits);
     c.selection = TextSelection.fromPosition(
       TextPosition(offset: c.text.length),
     );
   }
 
-  void _setTo(TextEditingController c, double v, int digits) {
-    c.text = v.toStringAsFixed(digits);
-    c.selection = TextSelection.fromPosition(
-      TextPosition(offset: c.text.length),
-    );
-  }
-
-  void _clear(TextEditingController c) {
-    c.text = '';
-    c.selection = const TextSelection.collapsed(offset: 0);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1212,30 +831,10 @@ class _TpSlPanel extends StatelessWidget {
     final triggerColor = AppColors.statusGreen;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 12.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Rule hint row.
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: palette.surface,
-                borderRadius: BorderRadius.circular(4.r),
-                border: Border.all(color: palette.fieldBorder),
-              ),
-              child: Text(
-                'Rule ?',
-                style: TextStyle(
-                  color: palette.axisText,
-                  fontSize: 11.sp,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 12.h),
           // Take profit row.
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1261,17 +860,6 @@ class _TpSlPanel extends StatelessWidget {
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () => _clear(tpCtl),
-                child: Text(
-                  'Clear',
-                  style: TextStyle(
-                    color: AppColors.tabAccent,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
             ],
           ),
           SizedBox(height: 6.h),
@@ -1288,39 +876,6 @@ class _TpSlPanel extends StatelessWidget {
                 ? 'When Mark Price reaches —, it will trigger Take Profit Market order to close this position. Estimated PNL will be \$${_formatPnl(0)}.'
                 : 'When Mark Price reaches —, it will trigger Take Profit Market order to close this position. Estimated PNL will be \$${_formatPnl(0)}.',
             style: TextStyle(color: palette.axisText, fontSize: 11.sp),
-          ),
-          SizedBox(height: 4.h),
-          // Quick-pick chips for TP.
-          Row(
-            children: _quickAdd
-                .map(
-                  (v) => Padding(
-                    padding: EdgeInsets.only(right: 6.w),
-                    child: GestureDetector(
-                      onTap: () => _setTo(tpCtl, v, d),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: palette.fieldBg,
-                          borderRadius: BorderRadius.circular(4.r),
-                          border: Border.all(color: palette.fieldBorder),
-                        ),
-                        child: Text(
-                          '\$${v.toStringAsFixed(0)}',
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
           ),
           SizedBox(height: 18.h),
           // Stop loss row.
@@ -1347,17 +902,6 @@ class _TpSlPanel extends StatelessWidget {
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () => _clear(slCtl),
-                child: Text(
-                  'Clear',
-                  style: TextStyle(
-                    color: AppColors.tabAccent,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
             ],
           ),
           SizedBox(height: 6.h),
@@ -1372,38 +916,6 @@ class _TpSlPanel extends StatelessWidget {
           Text(
             'When Mark Price reaches —, it will trigger Stop Market order to close this position. Estimated PNL will be \$${_formatPnl(0)}.',
             style: TextStyle(color: palette.axisText, fontSize: 11.sp),
-          ),
-          SizedBox(height: 4.h),
-          Row(
-            children: _quickAdd
-                .map(
-                  (v) => Padding(
-                    padding: EdgeInsets.only(right: 6.w),
-                    child: GestureDetector(
-                      onTap: () => _setTo(slCtl, v, d),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: palette.fieldBg,
-                          borderRadius: BorderRadius.circular(4.r),
-                          border: Border.all(color: palette.fieldBorder),
-                        ),
-                        child: Text(
-                          '\$${v.toStringAsFixed(0)}',
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
           ),
           SizedBox(height: 8.h),
           // Symbol legend, hidden — kept for parity with reference (subtitle).
@@ -1469,24 +981,6 @@ class _StepperField extends StatelessWidget {
             ),
           ),
           _StepperButton(icon: Icons.add, onTap: onPlus, palette: palette),
-          SizedBox(width: 4.w),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: palette.bg,
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(8.r),
-                bottomRight: Radius.circular(8.r),
-              ),
-            ),
-            child: Text(
-              r'$ 1',
-              style: TextStyle(
-                color: palette.axisText,
-                fontSize: 12.sp,
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -1515,385 +1009,6 @@ class _StepperButton extends StatelessWidget {
   }
 }
 
-// ────────────────────────────────────────────────────────────────────────────
-// Add Position panel — volume stepper + quick-pick chips
-// ────────────────────────────────────────────────────────────────────────────
-class _AddPositionPanel extends StatelessWidget {
-  const _AddPositionPanel({
-    required this.pos,
-    required this.sideLabel,
-    required this.volumeCtl,
-    required this.volume,
-    required this.onVolumeChange,
-    required this.includeVip,
-    required this.onIncludeVipChange,
-    required this.palette,
-    super.key,
-  });
-
-  final TradePosition pos;
-  final String sideLabel;
-  final TextEditingController volumeCtl;
-  final double volume;
-  final ValueChanged<double> onVolumeChange;
-  final bool includeVip;
-  final ValueChanged<bool> onIncludeVipChange;
-  final _Palette palette;
-
-  static const List<double> _quickLots = [0.01, 0.1, 0.5, 1, 2, 5];
-
-  @override
-  Widget build(BuildContext context) {
-    final sym = pos.symbol.toUpperCase();
-    final d = pos.digits;
-    final instruments = Get.find<InstrumentsController>();
-    final px = (() {
-      final q = instruments.priceRx(sym).value;
-      if (q == null || (q.bid == 0 && q.ask == 0)) return 0.0;
-      return (q.bid + q.ask) / 2;
-    })();
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Summary card — Sell 0.03Lot 3XAU 300X  ........ 4084.65
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: palette.surface,
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: palette.fieldBorder),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    _Pill(text: sideLabel, color: AppColors.error),
-                    SizedBox(width: 8.w),
-                    Text(
-                      '${volume.toStringAsFixed(2)}Lot',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    _Pill(
-                      text:
-                          '${(volume * 100).toStringAsFixed(0)}${sym.substring(0, math.min(sym.length, 3))}',
-                      color: AppColors.blue,
-                    ),
-                    const Spacer(),
-                    Text(
-                      px.toStringAsFixed(d),
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 6.h),
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 6.w,
-                        vertical: 2.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.tabAccent,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Text(
-                        'V',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 4.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 4.w,
-                        vertical: 2.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.tabAccent,
-                        borderRadius: BorderRadius.circular(2.r),
-                      ),
-                      child: Text(
-                        'VIP 0',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8.sp,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 6.w),
-                    Text(
-                      'Cashback',
-                      style: TextStyle(
-                        color: palette.axisText,
-                        fontSize: 11.sp,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      '0.0000',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 14.h),
-          // Volume stepper + Lot label.
-          Container(
-            decoration: BoxDecoration(
-              color: palette.fieldBg,
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: palette.fieldBorder),
-            ),
-            child: Row(
-              children: [
-                _StepperButton(
-                  icon: Icons.remove,
-                  onTap: () => onVolumeChange(volume - 0.01),
-                  palette: palette,
-                ),
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      volume.toStringAsFixed(2),
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-                _StepperButton(
-                  icon: Icons.add,
-                  onTap: () => onVolumeChange(volume + 0.01),
-                  palette: palette,
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 14.w,
-                    vertical: 14.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: palette.surface,
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(8.r),
-                      bottomRight: Radius.circular(8.r),
-                    ),
-                    border: Border(
-                      left: BorderSide(color: palette.fieldBorder),
-                    ),
-                  ),
-                  child: Text(
-                    'Lot',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  '= ${(volume * 100).toStringAsFixed(0)}${sym.substring(0, math.min(sym.length, 3))}',
-                  style: TextStyle(
-                    color: palette.axisText,
-                    fontSize: 12.sp,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-              ],
-            ),
-          ),
-          SizedBox(height: 12.h),
-          // Quick-lot chips.
-          Row(
-            children: _quickLots
-                .map(
-                  (lot) => Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 6.w),
-                      child: GestureDetector(
-                        onTap: () => onVolumeChange(lot),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 8.h),
-                          decoration: BoxDecoration(
-                            color: (lot == volume)
-                                ? AppColors.tabAccent
-                                : palette.fieldBg,
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: palette.fieldBorder),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            lot.toStringAsFixed(2),
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-          SizedBox(height: 12.h),
-          // Warning row.
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: 2.h),
-                child: Icon(
-                  Icons.warning_amber_rounded,
-                  size: 14.sp,
-                  color: AppColors.tabAccent,
-                ),
-              ),
-              SizedBox(width: 6.w),
-              Expanded(
-                child: Text(
-                  'The system will open positions at the market counterpart price',
-                  style: TextStyle(color: palette.axisText, fontSize: 11.sp),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// Reverse Order panel — summary of (close current + open opposite)
-// ────────────────────────────────────────────────────────────────────────────
-class _ReversePanel extends StatelessWidget {
-  const _ReversePanel({
-    required this.pos,
-    required this.sideLabel,
-    required this.palette,
-    super.key,
-  });
-  final TradePosition pos;
-  final String sideLabel;
-  final _Palette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    final sym = pos.symbol.toUpperCase();
-    final d = pos.digits;
-    final isSell = _isBuy(pos) == false;
-    final opposite = isSell ? 'Buy' : 'Sell';
-    final instruments = Get.find<InstrumentsController>();
-    final px = (() {
-      final q = instruments.priceRx(sym).value;
-      if (q == null || (q.bid == 0 && q.ask == 0)) return 0.0;
-      return (q.bid + q.ask) / 2;
-    })();
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Close Order',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          _OrderSummaryCard(
-            sideLabel: sideLabel,
-            sideColor: isSell ? AppColors.error : AppColors.statusGreen,
-            volume: pos.volume,
-            symbol: sym,
-            price: _priceStrToDouble(pos.entryPrice) ?? 0.0,
-            palette: palette,
-            showCashback: false,
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            'Open Order',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          _OrderSummaryCard(
-            sideLabel: opposite,
-            sideColor: isSell ? AppColors.statusGreen : AppColors.error,
-            volume: pos.volume,
-            symbol: sym,
-            price: px,
-            palette: palette,
-            showCashback: true,
-          ),
-          SizedBox(height: 12.h),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: 2.h),
-                child: Icon(
-                  Icons.warning_amber_rounded,
-                  size: 14.sp,
-                  color: AppColors.tabAccent,
-                ),
-              ),
-              SizedBox(width: 6.w),
-              Expanded(
-                child: Text(
-                  'The system will close your current order and open a position in the opposite direction',
-                  style: TextStyle(color: palette.axisText, fontSize: 11.sp),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Digits: $d',
-            style: TextStyle(color: palette.axisText, fontSize: 10.sp),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────────
-// Close Position panel — summary card + dialog prompt.
-// The bottom bar primary button shows a confirm dialog before firing the API.
 // ────────────────────────────────────────────────────────────────────────────
 class _ClosePanel extends StatelessWidget {
   const _ClosePanel({
@@ -2171,8 +1286,6 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final label = switch (tab) {
       _DetailTab.tpsl => 'Confirm',
-      _DetailTab.addPosition => 'Open Order',
-      _DetailTab.reverse => 'Reverse',
       _DetailTab.close => 'Close Order',
     };
     return Container(

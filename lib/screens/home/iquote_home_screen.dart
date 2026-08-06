@@ -373,7 +373,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal:10.0),
                 child: Card(
                   elevation: 1,
-                  shadowColor: AppColors.hint,
+                  // shadowColor: AppColors.hint,
                   child: Column(
                     children: [
                    // 6. Favourites Section Header + Add Button

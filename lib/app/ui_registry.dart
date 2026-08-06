@@ -21,6 +21,8 @@ import 'package:crm_app/screens/trading/presentation/pages/trading_main_screen.d
 
 import 'package:crm_app/screens/auth/presentation/brands/riyadex/pages/riyadex_create_account_screen.dart'
     as riyadex;
+import 'package:crm_app/screens/auth/presentation/brands/riyadex/pages/riyadex_get_started_screen.dart'
+    as riyadex;
 import 'package:crm_app/screens/auth/presentation/brands/iquote/pages/iquote_create_account_screen.dart'
     as iquote;
 import 'package:crm_app/screens/auth/presentation/brands/vantage/pages/create_account_screen.dart'
@@ -177,6 +179,8 @@ class UiRegistry implements UiSlots {
 
   @override
   Widget getStarted() {
+    final flavorName = FlavorConfig.instance.flavor.name.toLowerCase();
+    if (flavorName == 'riyadex') return const riyadex.RiyadexGetStartedScreen();
     if (_usesVantageUi || _usesIquoteUi) return vantage.VantageGetStartedScreen();
     return GetStartedScreen();
   }

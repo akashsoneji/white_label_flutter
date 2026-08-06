@@ -203,7 +203,8 @@ class SecureStorageService {
     }
   }
 
-  // Clear all authentication data
+  // Clear all authentication and user-scoped data
+  // Called on logout so the next login starts from a clean state.
   static Future<void> clearAuthData() async {
     try {
       await Future.wait([
@@ -212,6 +213,8 @@ class SecureStorageService {
         _storage.delete(key: _userDataKey),
         _storage.delete(key: _isLoggedInKey),
         _storage.delete(key: _selectedSymbolKey),
+        _storage.delete(key: _biometricEnabledKey),
+        _storage.delete(key: _biometricUserKey),
       ]);
       print('SecureStorage: All authentication data cleared');
     } catch (e) {

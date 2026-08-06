@@ -62,7 +62,6 @@ import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
-import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/services/account_websocket_service.dart';
 import 'services/auth_service.dart';
 import 'services/google_otp_service.dart';
@@ -647,6 +646,50 @@ ThemeData _buildDarkTheme() {
   );
 }
 
+// ─── Persistent chart webview host ──────────────────────────────────────────
+// A single offstage InAppWebView that lives above the entire app UI for the
+// full process lifetime. ChartPreloadService creates (or reuses) this webview
+// and preloads the chart page on first open. When the user later opens the
+// chart tab, the webview is simply moved offstage→onstage — zero network,
+// zero reload, sub-second switch.
+//
+// Memory cost: one full WebView (≈30-50 MB RAM) kept offstage.
+// CPU: zero when offstage (FlutterInAppWebView pauses rendering).
+// Network: one hit per symbol after the first load (webview cache).
+
+class _PersistentChartHost extends StatelessWidget {
+  const _PersistentChartHost();
+
+  @override
+  Widget build(BuildContext context) {
+    return Offstage(
+      offstage: true,
+      child: TickerMode(
+        enabled: false,
+        child: _ChartWebViewShell(),
+      ),
+    );
+  }
+}
+
+class _ChartWebViewShell extends StatefulWidget {
+  const _ChartWebViewShell();
+
+  @override
+  State<_ChartWebViewShell> createState() => _ChartWebViewShellState();
+}
+
+class _ChartWebViewShellState extends State<_ChartWebViewShell> {
+  @override
+  Widget build(BuildContext context) {
+    // The service's _PersistentChartWebView (a StatelessWidget containing
+    // the real InAppWebView) is the persistent widget. It rebuilds when
+    // currentSymbol changes, keyed on the symbol — forcing a URL reload
+    // without destroying the WebView state.
+    return ChartPreloadService.instance.persistentWebView;
+  }
+}
+
 class MyGetXApp extends StatelessWidget {
   const MyGetXApp({super.key});
 
@@ -698,6 +741,9 @@ class MyGetXApp extends StatelessWidget {
                         const ConnectivityOverlay(),
                         // Global app lock overlay
                         const AppLockOverlay(),
+                        // Persistent offstage chart webview (keeps last-used
+                        // chart page alive across tab switches / navigations)
+                        const _PersistentChartHost(),
                       ],
                     );
                   },
@@ -940,5 +986,9 @@ Future<void> _initializeFlavor() async {
   }
 }
 
+// ─── Persistent chart webview host ──────────────────────────────────────────
+// A single offstage InAppWebView that lives above the entire app UI for the
+// full process lifetime. ChartPreloadService creates (or reuses) this webview
+// and preloads the chart page on first open. When the user later opens the
 // adb --version
 // flutter doctor

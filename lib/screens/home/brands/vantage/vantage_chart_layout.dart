@@ -652,30 +652,32 @@ class _ChartArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final useNew = FlavorConfig.instance.useNewChart;
-    final sym = Get.find<SymbolSelectionService>().currentSymbol;
-    final raw =
-        sym.contains('.')
-            ? sym.substring(0, sym.lastIndexOf('.'))
-            : (sym.isEmpty ? 'XAUUSD' : sym);
+    return Obx(() {
+      final useNew = FlavorConfig.instance.useNewChart;
+      final sym = Get.find<SymbolSelectionService>().currentSymbol;
+      final raw =
+          sym.contains('.')
+              ? sym.substring(0, sym.lastIndexOf('.'))
+              : (sym.isEmpty ? 'XAUUSD' : sym);
 
-    if (useNew) {
-      return AdvancedChartInAppWebView(
-        key: ValueKey('vantage_adv_$raw'),
+      if (useNew) {
+        return AdvancedChartInAppWebView(
+          key: ValueKey('vantage_adv_$raw'),
+          symbol: raw,
+          theme: isDark ? 'dark' : 'light',
+        );
+      }
+      // Match the URL pattern used in chart_screen.dart so the same
+      // server-side mobile-chart loader picks up the symbol on first paint.
+      final url =
+          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$raw&theme=${isDark ? 'dark' : 'light'}';
+      print('Chart URL: $url');
+      return ChartInAppWebView(
+        key: ValueKey('vantage_chart_$raw'),
         symbol: raw,
-        theme: isDark ? 'dark' : 'light',
+        url: url,
       );
-    }
-    // Match the URL pattern used in chart_screen.dart so the same
-    // server-side mobile-chart loader picks up the symbol on first paint.
-    final url =
-        '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$raw&theme=${isDark ? 'dark' : 'light'}';
-    print('Chart URL: $url');
-    return ChartInAppWebView(
-      key: ValueKey('vantage_chart_$raw'),
-      symbol: raw,
-      url: url,
-    );
+    });
   }
 }
 

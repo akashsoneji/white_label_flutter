@@ -25,7 +25,7 @@ import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 
 import 'package:crm_app/widgets/custom_toast.dart';
-import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/chart_preload_service.dart';
 
 class CandleData {
   final DateTime dateTime;
@@ -65,7 +65,12 @@ class IQuoteChartController extends GetxController {
 
   final symbolRx = 'XAUUSD'.obs;
   String get symbol => symbolRx.value;
-  set symbol(String value) => symbolRx.value = value;
+  set symbol(String value) {
+    if (symbolRx.value != value) {
+      symbolRx.value = value;
+      _notifyPersistentWebview(value);
+    }
+  }
 
   void forceSwitchSymbol(String newSymbol) {
     if (symbolRx.value != newSymbol) {
@@ -74,6 +79,19 @@ class IQuoteChartController extends GetxController {
       // Force refresh if it's the same symbol but websocket is stuck
       _hydrateInitial();
       _bindLive();
+    }
+    _notifyPersistentWebview(newSymbol);
+  }
+
+  /// Always called after [symbolRx] is updated so the persistent offstage
+  /// webview (managed by ChartPreloadService) is told the new symbol.
+  /// Called from both the [symbol] setter AND [forceSwitchSymbol] so the
+  /// persistent webview stays in sync regardless of how the symbol changed.
+  Future<void> _notifyPersistentWebview(String sym) async {
+    try {
+      await ChartPreloadService.setSymbol(sym);
+    } catch (_) {
+      // Never block UI — webview load is best-effort
     }
   }
 
@@ -128,7 +146,11 @@ class IQuoteChartController extends GetxController {
     );
 
     // Re-fetch and re-bind if the symbol changes!
-    ever(symbolRx, (_) {
+    String? _prevSymbol;
+    ever<String>(symbolRx, (String next) {
+      if (_prevSymbol == next) return;
+      _prevSymbol = next;
+      _notifyPersistentWebview(next);
       _hydrateInitial();
       _bindLive();
       fetchHistoryData();
@@ -241,189 +263,17 @@ class IQuoteChartController extends GetxController {
     chartAskLine.value = ask;
   }
 
-  Future<void> fetchHistoryData() async {
-    try {
-      isChartLoading.value = true;
-      final sym = symbol; // Preserve case!
-      
-      int resVal = resolution.value;
-      int countVal = 500; // Safe count of bars (fits server retention bounds)
-      
-      // Calculate from and to timestamps
-      int toEpoch = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      int fromEpoch;
-      
-      if (period.value == 'More') {
-        if (customFromDate.value == null || customToDate.value == null) {
-          isChartLoading.value = false;
-          return;
-        }
-        fromEpoch = customFromDate.value!.millisecondsSinceEpoch ~/ 1000;
-        toEpoch = customToDate.value!.millisecondsSinceEpoch ~/ 1000;
-        countVal = 1000; // Allow larger custom range requests
-      } else {
-        // Map standard timeframes to durations (fetching approx 500 bars)
-        switch (period.value) {
-          case '1m':
-            resVal = 60; // 60-minute (1 hour) resolution => 12 candles for 12 hours
-            countVal = 12; // 12 candles total
-            fromEpoch = toEpoch - (12 * 60 * 60); // 12 hours of data
-            break;
-          case '5m':
-            resVal = 5;
-            countVal = 500;
-            fromEpoch = toEpoch - (countVal * 5 * 60); // 2500 minutes ago (~41.6 hours)
-            break;
-          case '15m':
-            resVal = 15;
-            countVal = 500;
-            fromEpoch = toEpoch - (countVal * 15 * 60); // 7500 minutes ago (~5.2 days)
-            break;
-          case '30m':
-            resVal = 30;
-            countVal = 500;
-            fromEpoch = toEpoch - (countVal * 30 * 60); // 15000 minutes ago (~10.4 days)
-            break;
-          default:
-            resVal = 15;
-            countVal = 500;
-            fromEpoch = toEpoch - (countVal * 15 * 60);
-        }
-        resolution.value = resVal;
-      }
-      
-      final Map<String, String> queryParams = {
-        'symbol': sym,
-        'from': fromEpoch.toString(),
-        'to': toEpoch.toString(),
-        'count': countVal.toString(),
-        'resolution': resVal.toString(),
-      };
-      
-      print('📈 iQuote Chart: Fetching market history for $sym: $queryParams');
-      final response = await ApiService.get(
-        endpoint: 'market/history',
-        queryParameters: queryParams,
-      );
-      
-      print('📈 iQuote Chart API Success: ${response.success}, HasData: ${response.data != null}');
-      if (response.success && response.data != null) {
-        final data = response.data;
-        if (data is Map<String, dynamic> && data['s'] == 'ok') {
-          final tList = data['t'] as List<dynamic>?;
-          final oList = data['o'] as List<dynamic>?;
-          final hList = data['h'] as List<dynamic>?;
-          final lList = data['l'] as List<dynamic>?;
-          final cList = data['c'] as List<dynamic>?;
-          final vList = data['v'] as List<dynamic>?;
-          
-          if (tList != null && oList != null && hList != null && lList != null && cList != null) {
-            final List<CandleData> parsed = [];
-            for (var i = 0; i < tList.length; i++) {
-              final int timestamp = (tList[i] as num).toInt();
-              final double open = (oList[i] as num).toDouble();
-              final double high = (hList[i] as num).toDouble();
-              final double low = (lList[i] as num).toDouble();
-              final double close = (cList[i] as num).toDouble();
-              final double volume = (vList != null && i < vList.length) 
-                  ? (vList[i] as num).toDouble() 
-                  : 0.0;
-              
-              parsed.add(CandleData(
-                dateTime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
-                open: open,
-                high: high,
-                low: low,
-                close: close,
-                volume: volume,
-              ));
-            }
-            chartData.value = parsed;
-            print('📈 iQuote Chart: Loaded ${parsed.length} candles.');
-          }
-        } else {
-          print('📈 iQuote Chart API response error: $data');
-        }
-      } else {
-        print('📈 iQuote Chart API failed or no response: ${response.message}');
-      }
-    } catch (e) {
-      print('📈 iQuote Chart Error fetching market history: $e');
-    } finally {
-      isChartLoading.value = false;
-    }
-  }
+  /// Intentionally a no-op. Historical bars are rendered by the persistent
+  /// ChartPreloadService WebView (TradingView widget), which fetches its own
+  /// data server-side. The previous /api/market/history REST call fired on
+  /// every symbol switch and was redundant + slow. Call sites in onInit,
+  /// the symbol-change listener, and changePeriod are kept untouched.
+  Future<void> fetchHistoryData() async {}
 
   // ── load older history on pan-to-start ────────────────────────────────
-  Future<void> loadOlderHistory() async {
-    if (isLoadingOlder.value) return;
-    if (chartData.isEmpty) return;
-    if (symbol.isEmpty) return;
-
-    isLoadingOlder.value = true;
-    try {
-      int resVal = 1;
-      int countVal = 500;
-      final earliestMs = chartData.first.dateTime.millisecondsSinceEpoch;
-      // For resolution=1 (1-minute), step back by `countVal * 60` seconds.
-      // (Matches the multipliers used in fetchHistoryData.)
-      final fromEpoch = (earliestMs ~/ 1000) - (countVal * 60);
-      final toEpoch = (earliestMs ~/ 1000);
-
-      final queryParams = <String, String>{
-        'symbol': symbol,
-        'resolution': resVal.toString(),
-        'from': fromEpoch.toString(),
-        'to': toEpoch.toString(),
-      };
-
-      print('📈 iQuote Chart: Fetching older market history for $symbol: $queryParams');
-      final response = await ApiService.get(
-        endpoint: 'market/history',
-        queryParameters: queryParams,
-      );
-
-      if (response.success && response.data != null) {
-        final data = response.data;
-        if (data is Map<String, dynamic> && data['s'] == 'ok') {
-          final tList = data['t'] as List<dynamic>?;
-          final oList = data['o'] as List<dynamic>?;
-          final hList = data['h'] as List<dynamic>?;
-          final lList = data['l'] as List<dynamic>?;
-          final cList = data['c'] as List<dynamic>?;
-          final vList = data['v'] as List<dynamic>?;
-
-          if (tList != null && tList.isNotEmpty &&
-              oList != null && hList != null && lList != null && cList != null) {
-            final List<CandleData> older = [];
-            for (var i = 0; i < tList.length; i++) {
-              final int timestamp = (tList[i] as num).toInt();
-              // Skip if not strictly older than our current earliest.
-              if (timestamp * 1000 >= earliestMs) continue;
-              older.add(CandleData(
-                dateTime: DateTime.fromMillisecondsSinceEpoch(timestamp * 1000),
-                open: (oList[i] as num).toDouble(),
-                high: (hList[i] as num).toDouble(),
-                low: (lList[i] as num).toDouble(),
-                close: (cList[i] as num).toDouble(),
-                volume: (vList != null && i < vList.length)
-                    ? (vList[i] as num).toDouble()
-                    : 0.0,
-              ));
-            }
-            if (older.isNotEmpty) {
-              chartData.value = [...older, ...chartData];
-              print('📈 iQuote Chart: Prepended ${older.length} older candles.');
-            }
-          }
-        }
-      }
-    } catch (e) {
-      print('📈 iQuote Chart Error loading older history: $e');
-    } finally {
-      isLoadingOlder.value = false;
-    }
-  }
+  /// Intentionally a no-op — see [fetchHistoryData] for rationale. The
+  /// TradingView WebView handles older history loading on its own.
+  Future<void> loadOlderHistory() async {}
 
   // ── account helpers (typed) ────────────────────────────────────────────
   MT5Account? get activeAccount => _account.activeMT5AccountRx.value;

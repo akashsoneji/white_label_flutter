@@ -35,6 +35,7 @@ import 'package:crm_app/screens/auth/data/usecases/send_otp.dart';
 import 'package:crm_app/screens/auth/data/usecases/verify_password_reset_otp.dart';
 import 'package:crm_app/services/google_otp_service.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
+import 'package:crm_app/services/chart_preload_service.dart';
 
 class AuthController extends GetxController {
   GoogleOtpService get _googleOtpService => Get.find<GoogleOtpService>();
@@ -1042,6 +1043,10 @@ class AuthController extends GetxController {
     await SecureStorageService.clearBiometricState();
     await AccountCacheService.clearCache();
     print('AuthController: Cleared secure storage and account cache');
+
+    // 1b. Clear chart preload cache so next login starts with a fresh chart
+    await ChartPreloadService.clearCache();
+    print('AuthController: Cleared chart preload cache');
 
     // 2. Clear WebSocketEndpointHelper cache
     WebSocketEndpointHelper.setPrimaryAccount(null);

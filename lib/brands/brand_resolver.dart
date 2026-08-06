@@ -163,6 +163,22 @@ class BrandResolver extends GetxService {
 
     // Initialize FlavorConfig from build-time client defaults early.
     FlavorConfig.activateByName(allowed.value);
+
+    // If --dart-define=PARENT=<parent> is set, overlay the parent brand's
+    // config values (colors, URLs, icons) onto FlavorConfig so the child
+    // inherits the parent's branding — not just the parent's screen tree.
+    final explicitParent = const String.fromEnvironment('PARENT', defaultValue: '').trim().toLowerCase();
+    if (explicitParent.isNotEmpty && explicitParent != allowed.value) {
+      try {
+        final configPath = 'assets/clients/$explicitParent/brand.yaml';
+        final yamlStr = await rootBundle.loadString(configPath);
+        final flat = BrandResolver._parseBrandYamlFlat(yamlStr);
+        FlavorConfig.applyBranding(config: flat);
+        debugPrint('[BrandResolver] PARENT=$explicitParent branding applied on ${allowed.value}');
+      } catch (e) {
+        debugPrint('[BrandResolver] No parent config for PARENT=$explicitParent ($e)');
+      }
+    }
   }
 
   Future<void> setActiveBrand(BrandId id) async {
@@ -180,6 +196,50 @@ class BrandResolver extends GetxService {
 
     // Trigger global rebuilds (GetMaterialApp is wrapped by Obx in main.dart).
     Get.forceAppUpdate();
+  }
+
+  static Map<String, dynamic> _parseBrandYamlFlat(String yaml) {
+    final out = <String, dynamic>{};
+    String? section;
+    for (final raw in yaml.split('\n')) {
+      final line = raw.replaceAll('"', '').replaceAll("'", '').trim();
+      if (line.isEmpty || line.startsWith('#')) continue;
+      if (raw.startsWith('  ') || raw.startsWith('\t')) {
+        final colon = line.indexOf(':');
+        if (colon < 0) continue;
+        final k = line.substring(0, colon).trim();
+        final v = line.substring(colon + 1).trim();
+        if (section == 'colors') {
+          if (k == 'primary') out['primaryColor'] = v;
+          if (k == 'secondary') out['secondaryColor'] = v;
+          if (k == 'accent') out['accentColor'] = v;
+        } else if (section == 'urls') {
+          if (k == 'api') out['apiBaseUrl'] = v;
+          if (k == 'websocket') out['websocketUrl'] = v;
+          if (k == 'chart') out['chartBaseUrl'] = v;
+        } else if (section == 'assets') {
+          if (k == 'appIcon') out['appIconPath'] = v;
+          if (k == 'logo') out['logoSvgPath'] = v;
+          if (k == 'splashLogo') out['splashLogoPath'] = v;
+        }
+        continue;
+      }
+      if (line.endsWith(':')) {
+        section = line.substring(0, line.length - 1);
+        continue;
+      }
+      if (section == null) {
+        final colon = line.indexOf(':');
+        if (colon < 0) continue;
+        final k = line.substring(0, colon).trim();
+        final v = line.substring(colon + 1).trim();
+        if (k == 'appName') {
+          out['appName'] = v;
+          out['appTitle'] = v;
+        }
+      }
+    }
+    return out;
   }
 }
 
