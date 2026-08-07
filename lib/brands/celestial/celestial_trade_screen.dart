@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -826,12 +827,13 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder:
-          (_) => _OrderTicket(
+          (_) => CelestialOrderTicket(
             symbol: symbol,
+            canChangeSymbol: true,
             bid: _d(p?.entryPrice),
             ask: _d(p?.currentPrice),
             digits: p?.digits ?? 2,
-            onSubmit: (isSell, type, volume, price, tp, sl) {
+            onSubmit: (selectedSymbol, isSell, type, volume, price, tp, sl) {
               final activeAccount = accountController.activeMT5Account;
               if (activeAccount == null ||
                   activeAccount.metaAccountNumber.isEmpty) {
@@ -845,7 +847,7 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
               }
               return _c.placeTradeOrder(
                 mt5Account: activeAccount.metaAccountNumber,
-                symbol: symbol,
+                symbol: selectedSymbol,
                 volume: volume.toStringAsFixed(2),
                 orderType: type,
                 price: price,
@@ -1706,8 +1708,9 @@ class _ModifySheetState extends State<_ModifySheet> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Order ticket
 // ─────────────────────────────────────────────────────────────────────────────
-typedef _Submit =
+typedef CelestialSubmitOrder =
     Future<bool> Function(
+      String symbol,
       bool isSell,
       OrderType type,
       double vol,
@@ -1716,14 +1719,16 @@ typedef _Submit =
       String? sl,
     );
 
-class _OrderTicket extends StatefulWidget {
+class CelestialOrderTicket extends StatefulWidget {
   final String symbol;
+  final bool canChangeSymbol;
   final double bid;
   final double ask;
   final int digits;
-  final _Submit onSubmit;
-  const _OrderTicket({
+  final CelestialSubmitOrder onSubmit;
+  const CelestialOrderTicket({
     required this.symbol,
+    this.canChangeSymbol = false,
     required this.bid,
     required this.ask,
     required this.digits,
@@ -1731,16 +1736,18 @@ class _OrderTicket extends StatefulWidget {
   });
 
   @override
-  State<_OrderTicket> createState() => _OrderTicketState();
+  State<CelestialOrderTicket> createState() => _CelestialOrderTicketState();
 }
 
-class _OrderTicketState extends State<_OrderTicket> {
+class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
   bool _isSell = true;
   int _orderIdx = 0; // 0 Market  1 Limit  2 Stop  3 Stop Limit
   bool _tp = false;
   bool _sl = false;
   double _vol = 0.01;
   bool _placing = false;
+  late String _currentSymbol;
+  late int _currentDigits;
   late final ChartSocketController _socketController;
   late final TextEditingController _priceController;
   late final TextEditingController _tpController;
@@ -1765,12 +1772,14 @@ class _OrderTicketState extends State<_OrderTicket> {
   @override
   void initState() {
     super.initState();
+    _currentSymbol = widget.symbol;
+    _currentDigits = widget.digits;
     _socketController = Get.find<ChartSocketController>();
-    _socketController.changeSymbol(widget.symbol);
+    _socketController.changeSymbol(_currentSymbol);
     _c = Get.find<TradingController>();
 
     _priceController = TextEditingController(
-      text: (_isSell ? widget.bid : widget.ask).toStringAsFixed(widget.digits),
+      text: (_isSell ? widget.bid : widget.ask).toStringAsFixed(_currentDigits),
     );
     _tpController = TextEditingController();
     _slController = TextEditingController();
@@ -1808,7 +1817,80 @@ class _OrderTicketState extends State<_OrderTicket> {
       tpPrice = entryPrice - (2 * risk);
     }
 
-    _tpController.text = tpPrice.toStringAsFixed(widget.digits);
+    _tpController.text = tpPrice.toStringAsFixed(_currentDigits);
+  }
+
+  void _showSymbolSelector() {
+    final instrumentsController = Get.find<InstrumentsController>();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: CelTheme.bg(context),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+      ),
+      builder: (BuildContext c) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(16.w),
+                child: Text(
+                  languageService.tr('celestial_select_symbol') ?? 'Select Symbol',
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: CelTheme.mainText(context),
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Divider(height: 1, color: CelTheme.divider(context)),
+              Expanded(
+                child: Obx(() {
+                  final favorites = instrumentsController.instruments.toList();
+                  if (favorites.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No favorites found',
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: CelTheme.subText(context),
+                        ),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    itemCount: favorites.length,
+                    itemBuilder: (context, index) {
+                      final item = favorites[index];
+                      return ListTile(
+                        title: Text(
+                          item.symbol,
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: CelTheme.mainText(context),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _currentSymbol = item.symbol;
+                            _currentDigits = item.digits;
+                            _socketController.changeSymbol(_currentSymbol);
+                            _priceController.clear();
+                            _tpController.clear();
+                            _slController.clear();
+                          });
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  );
+                }),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -1820,9 +1902,9 @@ class _OrderTicketState extends State<_OrderTicket> {
         final price = _isSell ? bid : ask;
 
         if (_orderIdx == 0) {
-          _priceController.text = price.toStringAsFixed(widget.digits);
+          _priceController.text = price.toStringAsFixed(_currentDigits);
         } else if (_priceController.text.isEmpty) {
-          _priceController.text = price.toStringAsFixed(widget.digits);
+          _priceController.text = price.toStringAsFixed(_currentDigits);
         }
 
         final color = _isSell ? CelTheme.sell(c) : CelTheme.buy(c);
@@ -1833,7 +1915,7 @@ class _OrderTicketState extends State<_OrderTicket> {
           if (ask.isNaN || ask.isInfinite || bid.isNaN || bid.isInfinite) {
             return 0.0;
           }
-          final delta = (ask - bid).abs() * pow10(widget.digits);
+          final delta = (ask - bid).abs() * pow10(_currentDigits);
           if (delta.isNaN || delta.isInfinite) return 0.0;
           return delta.round().toDouble();
         }
@@ -1854,23 +1936,27 @@ class _OrderTicketState extends State<_OrderTicket> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        widget.symbol,
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: CelTheme.mainText(c),
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w800,
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: widget.canChangeSymbol ? _showSymbolSelector : null,
+                    child: Row(
+                      children: [
+                        Text(
+                          _currentSymbol,
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: CelTheme.mainText(c),
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 2.w),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        color: CelTheme.subText(c),
-                        size: 18.sp,
-                      ),
-                      SizedBox(width: 8.w),
+                        SizedBox(width: 2.w),
+                        if (widget.canChangeSymbol)
+                          Icon(
+                            Icons.keyboard_arrow_down,
+                            color: CelTheme.subText(c),
+                            size: 18.sp,
+                          ),
+                        SizedBox(width: 8.w),
                       Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 7.w,
@@ -1887,6 +1973,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                       ),
                     ],
                   ),
+                  ),
                   SizedBox(height: 6.h),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -1894,14 +1981,14 @@ class _OrderTicketState extends State<_OrderTicket> {
                       _bidAsk(
                         c,
                         'BID',
-                        bid.toStringAsFixed(widget.digits),
+                        bid.toStringAsFixed(_currentDigits),
                         CelTheme.sell(c),
                       ),
                       SizedBox(width: 16.w),
                       _bidAsk(
                         c,
                         'ASK',
-                        ask.toStringAsFixed(widget.digits),
+                        ask.toStringAsFixed(_currentDigits),
                         CelTheme.buy(c),
                       ),
                     ],
@@ -2139,6 +2226,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                             : null;
 
                     final success = await widget.onSubmit(
+                      _currentSymbol,
                       _isSell,
                       _type,
                       _vol,
@@ -2308,9 +2396,9 @@ class _OrderTicketState extends State<_OrderTicket> {
                     if (newVal) {
                       final isBuy = !_isSell;
                       final isJPY =
-                          widget.symbol.contains('JPY') ||
-                          widget.symbol.contains('GOLD') ||
-                          widget.symbol.contains('XAU');
+                          _currentSymbol.contains('JPY') ||
+                          _currentSymbol.contains('GOLD') ||
+                          _currentSymbol.contains('XAU');
                       if (label == 'TP') {
                         final standardReward = isJPY ? 1.00 : 0.0100;
                         final defaultTP =

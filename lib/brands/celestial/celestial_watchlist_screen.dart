@@ -10,6 +10,10 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/screens/trading/view_models/search_instruments_controller.dart';
 import 'celestial_theme.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'celestial_trade_screen.dart';
 
 // SearchInstrumentsController is lazily registered here so the search sheet
 // can always find it via Get.find(), regardless of which route opened this screen.
@@ -156,6 +160,43 @@ class _CelestialWatchlistScreenState
 
       return InkWell(
         onTap: () => _onSymbolTap(item.symbol),
+        onLongPress: () {
+          final accountController = Get.find<AccountController>();
+          final tradingController = Get.find<TradingController>();
+          showModalBottomSheet(
+            context: c,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => CelestialOrderTicket(
+              symbol: item.symbol,
+              canChangeSymbol: false,
+              bid: price.bid,
+              ask: price.ask,
+              digits: digits,
+              onSubmit: (selectedSymbol, isSell, type, volume, priceStr, tp, sl) {
+                final activeAccount = accountController.activeMT5Account;
+                if (activeAccount == null || activeAccount.metaAccountNumber.isEmpty) {
+                  if (Get.isRegistered<AppNotificationController>()) {
+                    Get.find<AppNotificationController>().showError(
+                      title: 'Error',
+                      message: 'No active trading account found',
+                    );
+                  }
+                  return Future.value(false);
+                }
+                return tradingController.placeTradeOrder(
+                  mt5Account: activeAccount.metaAccountNumber,
+                  symbol: selectedSymbol,
+                  volume: volume.toStringAsFixed(2),
+                  orderType: type,
+                  price: priceStr,
+                  takeProfit: tp,
+                  stopLoss: sl,
+                );
+              },
+            ),
+          );
+        },
         child: Padding(
           padding:
               EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
