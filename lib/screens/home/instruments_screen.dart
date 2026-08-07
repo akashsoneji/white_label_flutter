@@ -610,15 +610,19 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                                   color: AppColors.textPrimary,
                                 ),
                           ),
-                          SizedBox(height: (isVantage ? 2.0 : 1.0).h),
-                          // ✅ PERFORMANCE FIX: Use pre-calculated time (passed as parameter)
+                           SizedBox(height: (isVantage ? 2.0 : 1.0).h),
+                          // Display name for favorites, otherwise fall back to currentTime
                           Text(
-                            currentTime,
+                            (isFavoriteFilter && (instrument.name ?? _controller.favoriteNames[instrument.symbol] ?? '').isNotEmpty)
+                                ? (instrument.name ?? _controller.favoriteNames[instrument.symbol]!)
+                                : currentTime,
                             style: AppTextStyles.caption.copyWith(
-                                                            fontSize: 10.sp,
+                              fontSize: 10.sp,
                               color: AppColors.textGrey,
                               height: 1.1,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           SizedBox(height: (isVantage ? 2.0 : 1.0).h),
                           Row(
@@ -701,6 +705,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                       isVantage ? EdgeInsets.zero : EdgeInsets.only(top: 1.h),
                   child: _FavoriteButton(
                     symbol: instrument.symbol,
+                    name: instrument.name,
                     controller: _controller,
                   ),
                 ),
@@ -1459,15 +1464,16 @@ class _AskPriceColumn extends StatelessWidget {
 
 class _FavoriteButton extends StatelessWidget {
   final String symbol;
+  final String? name;
   final InstrumentsController controller;
 
-  const _FavoriteButton({required this.symbol, required this.controller});
+  const _FavoriteButton({required this.symbol, this.name, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        controller.toggleFavorite(symbol);
+        controller.toggleFavorite(symbol, name: name);
       },
       child: Obx(() {
         final favs = controller.favoriteInstruments;

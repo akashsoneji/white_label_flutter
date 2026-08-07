@@ -87,6 +87,7 @@ class SearchSymbol {
   final int symbolId;
   final String displaySymbol;
   final String datafeedSymbol;
+  final String name;
   final int categoryId;
   final String categoryName;
   final int digits;
@@ -102,6 +103,7 @@ class SearchSymbol {
     required this.symbolId,
     required this.displaySymbol,
     required this.datafeedSymbol,
+    required this.name,
     required this.categoryId,
     required this.categoryName,
     required this.digits,
@@ -119,6 +121,7 @@ class SearchSymbol {
       symbolId: _parseIntFlexible(json['symbol_id']),
       displaySymbol: json['display_symbol']?.toString() ?? '',
       datafeedSymbol: json['datafeed_symbol']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
       categoryId: _parseIntFlexible(json['category_id']),
       categoryName: json['category_name']?.toString() ?? '',
       digits: _parseIntFlexible(json['digits']),

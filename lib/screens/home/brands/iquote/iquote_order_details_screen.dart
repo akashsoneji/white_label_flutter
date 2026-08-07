@@ -56,12 +56,12 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.shortcut, color: const Color(0xFFE88A4A), size: 22.sp),
-            onPressed: () {},
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.shortcut, color: const Color(0xFFE88A4A), size: 22.sp),
+        //     onPressed: () {},
+        //   ),
+        // ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -93,13 +93,13 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
               ]),
               SizedBox(height: 12.h),
               _cardContainer([
-                _actionRow(
-                  iconAsset: 'assets/svg/emailLogo.svg',
-                  iconData: Icons.telegram,
-                  iconColor: const Color(0xFF2EA6DA),
-                  title: t('telegram'),
-                  onTap: () {},
-                ),
+                // _actionRow(
+                //   iconAsset: 'assets/svg/emailLogo.svg',
+                //   iconData: Icons.telegram,
+                //   iconColor: const Color(0xFF2EA6DA),
+                //   title: t('telegram'),
+                //   onTap: () {},
+                // ),
                 _actionRow(
                   iconAsset: 'assets/svg/edit_profile.svg',
                   iconData: Icons.assignment_outlined,

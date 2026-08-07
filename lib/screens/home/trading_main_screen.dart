@@ -4,8 +4,8 @@ import 'brands/iquote/iquote_position_screen.dart';
 import 'brands/iquote/iquote_chart_screen.dart';
 import 'brands/iquote/view_models/iquote_chart_controller.dart';
 import 'dart:async';
-
-
+import 'dart:io' show Platform;
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -44,6 +44,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   late final bool _isVantage;
   late PageController _pageController;
   final SymbolSelectionService _symbolSelectionService = Get.put(SymbolSelectionService(), permanent: true);
+
+  HeadlessInAppWebView? _headlessChartWebView;
+  bool _headlessDisposed = false;
 
   // Get the instruments controller
   final InstrumentsController instrumentsController =
@@ -107,13 +110,19 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
     if (isIquote) {
       _screens = [
-        KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged, onNavigateToChart: _switchToChartTab)), // 0. Home
+        KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged, onNavigateToChart: (sym) {
+          _symbolSelectionService.setSymbol(sym);
+          _switchToChartTab(sym);
+        })), // 0. Home
         KeepAliveWrapper(child: IquoteMarketScreen(onNavigateToChart: (sym) {
           _symbolSelectionService.setSymbol(sym);
           _switchToChartTab(sym);
         })), // 1. Markets
         KeepAliveWrapper(child: IQuoteChartScreen()), // 2. Charts
-        KeepAliveWrapper(child: IQuotePositionScreen(onNavigateToChart: _switchToChartTab)), // 3. Position
+        KeepAliveWrapper(child: IQuotePositionScreen(onNavigateToChart: (sym) {
+          _symbolSelectionService.setSymbol(sym);
+          _switchToChartTab(sym);
+        })), // 3. Position
         const KeepAliveWrapper(child: MoreScreen()), // 4. Assets
       ];
     } else if (_isVantage) {
@@ -193,6 +202,11 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
       // Trigger background compliance check
       _checkCompliance();
+
+      // Android WebView pre-warming
+      if (Platform.isAndroid) {
+        _preloadChartWebViewAndroid();
+      }
     });
     
     // ✅ If initial tab is dashboard, refresh accounts (vantage index 3, default index 3)
@@ -215,7 +229,67 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    _disposeHeadlessWebView();
     super.dispose();
+  }
+
+  void _disposeHeadlessWebView() {
+    if (!_headlessDisposed && _headlessChartWebView != null) {
+      _headlessDisposed = true;
+      try {
+        _headlessChartWebView!.dispose();
+      } catch (_) {}
+      _headlessChartWebView = null;
+    }
+  }
+
+  Future<void> _preloadChartWebViewAndroid() async {
+    if (!Platform.isAndroid) return;
+    if (!mounted) return;
+
+    try {
+      String symbol = 'XAUUSD';
+      try {
+        if (Get.isRegistered<SymbolSelectionService>()) {
+          final svc = Get.find<SymbolSelectionService>();
+          await svc.ensureDefault();
+          if (svc.currentSymbol.isNotEmpty) symbol = svc.currentSymbol;
+        }
+      } catch (_) {}
+
+      final displaySymbol = symbol.contains('.')
+          ? symbol.substring(0, symbol.lastIndexOf('.'))
+          : symbol;
+
+      final chartUrl =
+          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart'
+          '?symbol=$displaySymbol&theme=${AppColors.chartTheme}';
+
+      print('📱 Android Chart Preload: Starting headless WebView for $chartUrl');
+
+      _headlessChartWebView = HeadlessInAppWebView(
+        initialUrlRequest: URLRequest(url: WebUri(chartUrl)),
+        initialSettings: InAppWebViewSettings(
+          javaScriptEnabled: true,
+          cacheEnabled: true,
+          cacheMode: CacheMode.LOAD_DEFAULT,
+          transparentBackground: true,
+        ),
+        onLoadStop: (controller, url) async {
+          print('📱 Android Chart Preload: Chart assets cached ✅ ($url)');
+          await Future.delayed(const Duration(seconds: 2));
+          _disposeHeadlessWebView();
+        },
+        onReceivedError: (controller, request, error) {
+          print('📱 Android Chart Preload: Error (non-critical): $error');
+          _disposeHeadlessWebView();
+        },
+      );
+
+      _headlessChartWebView?.run();
+    } catch (e) {
+      print('📱 Android Chart Preload: Failed starting headless WebView: $e');
+    }
   }
 
   // Ensure one-click trading is enabled (safety net)

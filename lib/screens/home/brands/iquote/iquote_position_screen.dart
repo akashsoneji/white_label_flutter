@@ -746,7 +746,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             itemCount:
                 positions.length +
                 (controller.hasMoreHistoryPages && selectedTab == 2 ? 1 : 0),
-            separatorBuilder: (_, __) => SizedBox(height: 10.h),
+            separatorBuilder: (_, __) => SizedBox(height: 4.h),
             itemBuilder: (context, index) {
               if (index >= positions.length) return _buildPaginationLoader();
               final position = positions[index];

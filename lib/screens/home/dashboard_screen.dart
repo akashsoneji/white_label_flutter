@@ -1678,7 +1678,7 @@ class DashboardScreen extends StatelessWidget {
     if (FlavorConfig.usesIquoteUi()) {
       final isDark = AppColors.isDarkMode;
       final bgColor =
-          isDark ? const Color(0xFF0F1421) : const Color(0xFFF4F6F9);
+          isDark ? const Color(0xFF0F1421) : Colors.white;
       return Scaffold(
         backgroundColor: bgColor,
         appBar: appBar,

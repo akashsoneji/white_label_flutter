@@ -2235,5 +2235,6 @@
   "withdrawal_terms": "Term & Condition.",
   "withdrawal_withdrawFrom": "Withdraw From",
   "withdrawal_withdrawalMethod": "Withdrawal Method",
-  "your_earning": "Your Earning"
+  "your_earning": "Your Earning",
+  "order_details_title": "Detalles del Pedido"
 }

@@ -25,7 +25,6 @@ import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 
 import 'package:crm_app/widgets/custom_toast.dart';
-import 'package:crm_app/services/chart_preload_service.dart';
 
 class CandleData {
   final DateTime dateTime;
@@ -88,11 +87,7 @@ class IQuoteChartController extends GetxController {
   /// Called from both the [symbol] setter AND [forceSwitchSymbol] so the
   /// persistent webview stays in sync regardless of how the symbol changed.
   Future<void> _notifyPersistentWebview(String sym) async {
-    try {
-      await ChartPreloadService.setSymbol(sym);
-    } catch (_) {
-      // Never block UI — webview load is best-effort
-    }
+    // Disabled to align with crmapp's clean single-instance WebView design.
   }
 
   // ── header state ────────────────────────────────────────────────────────

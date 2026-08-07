@@ -13,7 +13,7 @@ void showDashboardBottomSheet(BuildContext context) {
     barrierColor: Colors.black.withValues(alpha: 0.65),
     builder: (ctx) {
       final isDark = AppColors.isDarkMode;
-      final cardBg = isDark ? const Color(0xFF161B29) : AppColors.cardBackground;
+      final cardBg = isDark ? const Color(0xFF161B29) : Colors.white;
       final maxH = MediaQuery.of(ctx).size.height * 0.78;
 
       return Container(

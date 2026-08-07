@@ -444,8 +444,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
           livePrice.spreadDiff > 0
               ? livePrice.spreadDiff
               : instrument.spreadDiff;
-      final spreadText =
-          spread > 0 ? spread.toStringAsFixed(0) : '0';
+      final spreadText = spread > 0 ? spread.toStringAsFixed(0) : '0';
 
       final dayLow =
           livePrice.dayLow > 0 ? livePrice.dayLow : (instrument.dayLow ?? 0.0);
@@ -483,13 +482,39 @@ class _IquoteInstrumentRow extends StatelessWidget {
                     _FlagIcon(symbol: displaySym),
                     SizedBox(width: 10.w),
                     Expanded(
-                      child: Text(
-                        _formatSymbolName(sym),
-                        style: AppTextStyles.bodyText.copyWith(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _formatSymbolName(sym),
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Builder(
+                            builder: (context) {
+                              final name = instrument.name ?? controller.favoriteNames[sym];
+                              if (name != null && name.isNotEmpty) {
+                                return Padding(
+                                  padding: EdgeInsets.only(top: 2.h),
+                                  child: Text(
+                                    name,
+                                    style: AppTextStyles.caption.copyWith(
+                                      fontSize: 11.sp,
+                                      color: AppColors.textGrey,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -524,7 +549,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                             width: 68.w,
                             height: 34.h,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF22C55E),
+                              color: const Color(0xFF33b970),
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(6.r),
                                 bottomLeft: Radius.circular(6.r),
@@ -561,7 +586,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                             width: 68.w,
                             height: 34.h,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEF4444),
+                              color: const Color(0xFFE65366),
                               borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(6.r),
                                 bottomRight: Radius.circular(6.r),

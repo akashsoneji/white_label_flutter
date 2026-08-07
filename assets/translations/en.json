@@ -2492,5 +2492,6 @@
   "meta_modify_button": "MODIFY",
   "celestial_trade_current": "CURRENT",
   "celestial_trade_column_price": "PRICE",
-  "celestial_trade_column_volume": "VOLUME"
+  "celestial_trade_column_volume": "VOLUME",
+  "order_details_title": "Order Details"
 }
