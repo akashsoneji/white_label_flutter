@@ -419,7 +419,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              Get.find<LanguageService>().tr('meta_modify_position_label', {'id': '$p.orderId'}),
+              Get.find<LanguageService>().tr('meta_modify_position_label', {'id': '${p.orderId}'}),
               style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.mainText(c),
                 fontSize: 15.sp,

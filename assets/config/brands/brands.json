@@ -1,28 +1,13 @@
 {
-  "default": "pipze",
+  "default": "celestial",
   "brands": [
-    "pipze",
-    "iquote",
-    "vantage"
+    "celestial"
   ],
   "brandDetails": [
     {
-      "name": "pipze",
-      "type": "child",
-      "inheritsFrom": "iquote",
-      "label": "Pipze",
-      "themeMode": "both"
-    },
-    {
-      "name": "iquote",
+      "name": "celestial",
       "type": "parent",
-      "label": "iQuote",
-      "themeMode": "both"
-    },
-    {
-      "name": "vantage",
-      "type": "parent",
-      "label": "Vantage",
+      "label": "Celestial",
       "themeMode": "both"
     }
   ]
