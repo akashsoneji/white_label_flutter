@@ -216,20 +216,7 @@
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": [
-                "--flavor", "pipze",
-                "--dart-define=CLIENT=pipze",
-                "--dart-define=FLAVOR=pipze",
-                "--dart-define=PARENT=iquote",
-                "--dart-define=API_BASE_URL=https://my.pipze.com/api/",
-                "--dart-define=CHART_BASE_URL=https://my.pipze.com",
-                "--dart-define=WEBSOCKET_URL=wss://my.pipze.com/trade-engine",
-                "--dart-define=PRIMARY_COLOR=0xFF5F259E",
-                "--dart-define=SECONDARY_COLOR=0xFFF8F3FF",
-                "--dart-define=APP_ICON=assets/brands/pipze/icon.png",
-                "--dart-define=APP_NAME=Pipze",
-                "--no-enable-impeller"
-            ],
+            "args": ["--flavor", "pipze", "--dart-define=CLIENT=pipze", "--dart-define=FLAVOR=pipze", "--dart-define=PARENT=iquote", "--no-enable-impeller"],
             "flutterMode": "debug",
             "console": "terminal",
             "preLaunchTask": "prepare-pipze"
@@ -239,19 +226,7 @@
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": [
-                "--flavor", "pipze",
-                "--dart-define=CLIENT=pipze",
-                "--dart-define=FLAVOR=pipze",
-                "--dart-define=PARENT=iquote",
-                "--dart-define=API_BASE_URL=https://my.pipze.com/api/",
-                "--dart-define=CHART_BASE_URL=https://my.pipze.com",
-                "--dart-define=WEBSOCKET_URL=wss://my.pipze.com/trade-engine",
-                "--dart-define=PRIMARY_COLOR=0xFF5F259E",
-                "--dart-define=SECONDARY_COLOR=0xFFF8F3FF",
-                "--dart-define=APP_ICON=assets/brands/pipze/icon.png",
-                "--dart-define=APP_NAME=Pipze"
-            ],
+            "args": ["--flavor", "pipze", "--dart-define=CLIENT=pipze", "--dart-define=FLAVOR=pipze", "--dart-define=PARENT=iquote"],
             "flutterMode": "profile",
             "console": "terminal",
             "preLaunchTask": "prepare-pipze"
@@ -261,19 +236,7 @@
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
-            "args": [
-                "--flavor", "pipze",
-                "--dart-define=CLIENT=pipze",
-                "--dart-define=FLAVOR=pipze",
-                "--dart-define=PARENT=iquote",
-                "--dart-define=API_BASE_URL=https://my.pipze.com/api/",
-                "--dart-define=CHART_BASE_URL=https://my.pipze.com",
-                "--dart-define=WEBSOCKET_URL=wss://my.pipze.com/trade-engine",
-                "--dart-define=PRIMARY_COLOR=0xFF5F259E",
-                "--dart-define=SECONDARY_COLOR=0xFFF8F3FF",
-                "--dart-define=APP_ICON=assets/brands/pipze/icon.png",
-                "--dart-define=APP_NAME=Pipze"
-            ],
+            "args": ["--flavor", "pipze", "--dart-define=CLIENT=pipze", "--dart-define=FLAVOR=pipze", "--dart-define=PARENT=iquote"],
             "flutterMode": "release",
             "console": "terminal",
             "preLaunchTask": "prepare-pipze"
@@ -334,36 +297,6 @@
             "type": "dart",
             "program": "lib/main.dart",
             "args": ["--flavor", "riyadex", "--dart-define=CLIENT=riyadex", "--dart-define=FLAVOR=riyadex", "--dart-define=PARENT=vantage"],
-            "flutterMode": "release",
-            "console": "terminal",
-            "preLaunchTask": "prepare-riyadex"
-        },
-        {
-            "name": "Riyadex (parent: iQuote) (debug)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "riyadex", "--dart-define=CLIENT=riyadex", "--dart-define=FLAVOR=riyadex", "--dart-define=PARENT=iquote", "--no-enable-impeller"],
-            "flutterMode": "debug",
-            "console": "terminal",
-            "preLaunchTask": "prepare-riyadex"
-        },
-        {
-            "name": "Riyadex (parent: iQuote) (profile)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "riyadex", "--dart-define=CLIENT=riyadex", "--dart-define=FLAVOR=riyadex", "--dart-define=PARENT=iquote"],
-            "flutterMode": "profile",
-            "console": "terminal",
-            "preLaunchTask": "prepare-riyadex"
-        },
-        {
-            "name": "Riyadex (parent: iQuote) (release)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "riyadex", "--dart-define=CLIENT=riyadex", "--dart-define=FLAVOR=riyadex", "--dart-define=PARENT=iquote"],
             "flutterMode": "release",
             "console": "terminal",
             "preLaunchTask": "prepare-riyadex"

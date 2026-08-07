@@ -386,13 +386,13 @@ class DashboardScreen extends StatelessWidget {
                 width: 44.w,
                 height: 44.w,
                 decoration: BoxDecoration(
-                  color: CelTheme.buyTint(context),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 alignment: Alignment.center,
                 child: Icon(
                   Icons.account_balance_wallet_outlined,
-                  color: CelTheme.buyBlue,
+                  color: AppColors.whiteColor,
                   size: 22.sp,
                 ),
               ),
@@ -426,7 +426,7 @@ class DashboardScreen extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: controller.openRealAccount,
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: CelTheme.buyBlue, width: 1),
+                          side: BorderSide(color: AppColors.primary, width: 1),
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.r),
@@ -435,7 +435,7 @@ class DashboardScreen extends StatelessWidget {
                         child: Text(
                           languageService.tr('dashboard_open_real_account'),
                           style: AppTextStyles.bodyText.copyWith(
-                            color: CelTheme.buyBlue,
+                            color: AppColors.primary,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
                           ),
@@ -450,7 +450,7 @@ class DashboardScreen extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: controller.openDemoAccount,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: CelTheme.buyBlue,
+                          backgroundColor: AppColors.primary,
                           elevation: 0,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(

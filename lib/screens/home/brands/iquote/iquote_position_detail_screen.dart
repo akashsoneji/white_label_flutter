@@ -106,8 +106,6 @@ class _Palette {
   }
 }
 
-enum _DetailTab { tpsl, close }
-
 class IQuotePositionDetailScreen extends StatefulWidget {
   const IQuotePositionDetailScreen({super.key, required this.position});
 
@@ -123,14 +121,23 @@ class IQuotePositionDetailScreen extends StatefulWidget {
 
 class _IQuotePositionDetailScreenState
     extends State<IQuotePositionDetailScreen> {
-  _DetailTab _tab = _DetailTab.tpsl;
-
   // ── TP/SL state ────────────────────────────────────────────────────────
   // Two simple stepper values (USD) — empty/0 means "no change".
   final TextEditingController _tpCtl = TextEditingController();
   final TextEditingController _slCtl = TextEditingController();
   final FocusNode _tpFocus = FocusNode();
   final FocusNode _slFocus = FocusNode();
+  // Once a user has manually edited a field (typed, cleared, or used the
+  // explicit X button), stop auto-filling it on focus — they've expressed
+  // an explicit intent and we shouldn't clobber it.
+  bool _tpUserTouched = false;
+  bool _slUserTouched = false;
+  // Tracks the live value we last wrote to each controller so the
+  // TextEditingController listener can distinguish user edits from our
+  // own programmatic writes (auto-fill / pre-fill) and only set the
+  // "user touched" flag on the former.
+  String _tpLastWritten = '';
+  String _slLastWritten = '';
 
   // ── Reverse-Order state is read-only (displays the existing + opposite) ─
 
@@ -140,15 +147,95 @@ class _IQuotePositionDetailScreenState
   void initState() {
     super.initState();
     final pos = widget.position;
-    // Pre-fill TP/SL from the existing position if present.
-    final sl = _priceStrToDouble(pos.stopLoss);
-    final tp = _priceStrToDouble(pos.takeProfit);
-    if (sl != null && sl > 0) _slCtl.text = sl.toStringAsFixed(pos.digits);
-    if (tp != null && tp > 0) _tpCtl.text = tp.toStringAsFixed(pos.digits);
+    final d = pos.digits;
+    // Pre-fill from whatever the position already has on the server so
+    // reopening this screen shows the previously-set TP/SL values (the
+    // user may want to leave them unchanged, modify them, or clear them
+    // via the explicit × button). If the position has no TP/SL set, the
+    // fields stay blank — that's the "close the position" affordance.
+    final existingTp = _priceStrToDouble(pos.takeProfit);
+    final existingSl = _priceStrToDouble(pos.stopLoss);
+    if (existingTp != null && existingTp > 0) {
+      _tpCtl.text = existingTp.toStringAsFixed(d);
+      _tpLastWritten = _tpCtl.text;
+    }
+    if (existingSl != null && existingSl > 0) {
+      _slCtl.text = existingSl.toStringAsFixed(d);
+      _slLastWritten = _slCtl.text;
+    }
+    // Wire listeners. Focus listeners auto-fill only when the field is
+    // still empty AND the user hasn't manually edited it yet. Controller
+    // listeners distinguish user edits (keyboard, × clear) from our own
+    // programmatic writes (initState pre-fill, focus auto-fill) so the
+    // touched flag is only set on real user input.
+    _tpFocus.addListener(_handleTpFocusChange);
+    _slFocus.addListener(_handleSlFocusChange);
+    _tpCtl.addListener(_handleTpControllerChange);
+    _slCtl.addListener(_handleSlControllerChange);
+  }
+
+  void _handleTpControllerChange() {
+    if (_tpCtl.text == _tpLastWritten) return;
+    _tpLastWritten = _tpCtl.text;
+    _tpUserTouched = true;
+  }
+
+  void _handleSlControllerChange() {
+    if (_slCtl.text == _slLastWritten) return;
+    _slLastWritten = _slCtl.text;
+    _slUserTouched = true;
+  }
+
+  void _handleTpFocusChange() {
+    if (!_tpFocus.hasFocus) return;
+    if (_tpUserTouched) return;
+    if (_tpCtl.text.trim().isNotEmpty) return;
+    final pos = widget.position;
+    final d = pos.digits;
+    final entry = _priceStrToDouble(pos.entryPrice) ?? 0.0;
+    if (entry <= 0) return;
+    final isBuy = _isBuy(pos);
+    final isJpy = pos.symbol.contains('JPY');
+    final standardRisk = isJpy ? 0.50 : 0.0050;
+    final reward = standardRisk * 2; // 1:2 risk-reward
+    final tp = isBuy ? entry + reward : entry - reward;
+    _writeTp(tp.toStringAsFixed(d));
+  }
+
+  void _handleSlFocusChange() {
+    if (!_slFocus.hasFocus) return;
+    if (_slUserTouched) return;
+    if (_slCtl.text.trim().isNotEmpty) return;
+    final pos = widget.position;
+    final d = pos.digits;
+    final entry = _priceStrToDouble(pos.entryPrice) ?? 0.0;
+    if (entry <= 0) return;
+    final isBuy = _isBuy(pos);
+    final isJpy = pos.symbol.contains('JPY');
+    final standardRisk = isJpy ? 0.50 : 0.0050;
+    final sl = isBuy ? entry - standardRisk : entry + standardRisk;
+    _writeSl(sl.toStringAsFixed(d));
+  }
+
+  /// Programmatic write that updates the field and syncs the last-written
+  /// tracker so the controller listener doesn't mistakenly mark the field
+  /// as user-touched.
+  void _writeTp(String value) {
+    _tpLastWritten = value;
+    _tpCtl.text = value;
+    _tpCtl.selection = TextSelection.collapsed(offset: value.length);
+  }
+
+  void _writeSl(String value) {
+    _slLastWritten = value;
+    _slCtl.text = value;
+    _slCtl.selection = TextSelection.collapsed(offset: value.length);
   }
 
   @override
   void dispose() {
+    _tpFocus.removeListener(_handleTpFocusChange);
+    _slFocus.removeListener(_handleSlFocusChange);
     _tpCtl.dispose();
     _slCtl.dispose();
     _tpFocus.dispose();
@@ -179,36 +266,26 @@ class _IQuotePositionDetailScreenState
               sideColor: sideColor,
               palette: palette,
             ),
-            _TabBar(
-              current: _tab,
-              onChange: (t) => setState(() => _tab = t),
-              palette: palette,
-            ),
             Expanded(
               flex: 100,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 180),
-                child: switch (_tab) {
-                  _DetailTab.tpsl => _TpSlPanel(
-                      pos: pos,
-                      tpCtl: _tpCtl,
-                      slCtl: _slCtl,
-                      tpFocus: _tpFocus,
-                      slFocus: _slFocus,
-                      palette: palette,
-                      key: const ValueKey('tpsl'),
-                    ),
-                  _DetailTab.close => _ClosePanel(
-                      pos: pos,
-                      sideLabel: sideLabel,
-                      palette: palette,
-                      key: const ValueKey('close'),
-                    ),
-                },
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: _TpSlPanel(
+                  pos: pos,
+                  tpCtl: _tpCtl,
+                  slCtl: _slCtl,
+                  tpFocus: _tpFocus,
+                  slFocus: _slFocus,
+                  palette: palette,
+                ),
               ),
             ),
             _ActionRow(
-              tab: _tab,
+              // Empty fields → "Close Order" (close position). Any TP/SL
+              // value → "Confirm" (modify TP/SL).
+              primaryLabel: _isTpSlEmpty()
+                  ? 'Close Order'
+                  : 'Confirm',
               busy: _busy,
               onCancel: () => Get.back<void>(),
               onPrimary: () => _onPrimary(context),
@@ -226,14 +303,19 @@ class _IQuotePositionDetailScreenState
 
   // ── primary button per tab ─────────────────────────────────────────────
   Future<void> _onPrimary(BuildContext context) async {
-    switch (_tab) {
-      case _DetailTab.tpsl:
-        await _submitTpSl();
-        break;
-      case _DetailTab.close:
-        await _submitCloseWithConfirm(context);
-        break;
+    if (_isTpSlEmpty()) {
+      // Both TP and SL fields are blank — close the position instead.
+      await _submitCloseWithConfirm(context);
+    } else {
+      // User typed at least one TP/SL value — apply the modification.
+      await _submitTpSl();
     }
+  }
+
+  /// True when both TP and SL fields are blank (or contain only whitespace).
+  /// Drives the bottom action label and submit routing.
+  bool _isTpSlEmpty() {
+    return _tpCtl.text.trim().isEmpty && _slCtl.text.trim().isEmpty;
   }
 
   Future<void> _submitTpSl() async {
@@ -285,7 +367,7 @@ class _IQuotePositionDetailScreenState
     }
     if (_busy) return;
 
-    // Live close-price snapshot for the dialog body.
+    // Live close-price snapshot + live P/L for the dialog body.
     final instruments = Get.find<InstrumentsController>();
     final sym = pos.symbol.toUpperCase();
     final isBuy = _isBuy(pos);
@@ -296,6 +378,7 @@ class _IQuotePositionDetailScreenState
         : isBuy
             ? px.bid
             : px.ask;
+    final entryVal = _priceStrToDouble(pos.entryPrice);
     final digits = pos.digits;
 
     final confirmed = await showDialog<bool>(
@@ -337,10 +420,8 @@ class _IQuotePositionDetailScreenState
               SizedBox(height: 6.h),
               _DialogRow(
                 label: 'P/L',
-                value: pos.profitLoss == 0
-                    ? '0.00'
-                    : pos.profitLoss.toStringAsFixed(2),
-                valueColor: pos.profitLoss >= 0 ? AppColors.statusGreen : AppColors.error,
+                value: _computeLivePLDisplay(pos, closePx, entryVal, isBuy),
+                valueColor: _computeLivePLColor(pos, closePx, entryVal, isBuy),
               ),
               SizedBox(height: 8.h),
               _DialogRow(
@@ -472,6 +553,59 @@ class _IQuotePositionDetailScreenState
 
   void _toastError(String msg) =>
       CustomToastService.showError(message: msg);
+
+  /// Per-symbol contract size used to scale the client-side P/L formula.
+  /// The server already returns a correct `pos.profitLoss`; this helper is
+  /// only consulted when the close-confirm dialog recomputes P/L from
+  /// live bid/ask vs entry — the broker quotes different lot contracts
+  /// per asset class:
+  ///   - Standard forex: 1 lot = 100000 base units
+  ///   - Metals (XAUUSD, XAGUSD): 1 lot = 100 oz
+  ///   - Crypto (BTCUSD, ETHUSD, ...): 1 lot = 1 coin
+  static double _contractSizeFor(String symbol) {
+    final s = symbol.toUpperCase();
+    if (s.startsWith('XAU') ||
+        s.startsWith('XAG') ||
+        s.startsWith('XPT') ||
+        s.startsWith('XPD')) {
+      return 100.0; // metals: 1 lot = 100 oz
+    }
+    if (s.startsWith('BTC') ||
+        s.startsWith('ETH') ||
+        s.startsWith('LTC') ||
+        s.startsWith('XRP') ||
+        s.startsWith('EOS') ||
+        s.startsWith('DOT') ||
+        s.startsWith('DOG')) {
+      return 1.0; // crypto: 1 lot = 1 coin
+    }
+    return 100000.0; // standard forex
+  }
+
+  /// Compute the live P/L (in account currency units, approximate) using the
+  /// current bid/ask vs entry price, instead of the (possibly stale) value
+  /// attached to the position object. Falls back to pos.profitLoss when any
+  /// leg is missing so the dialog still shows *something*.
+  double _livePL(TradePosition pos, double? closePx, double? entryVal,
+      bool isBuy) {
+    if (closePx == null || entryVal == null || entryVal <= 0) {
+      return pos.profitLoss;
+    }
+    final delta = isBuy ? closePx - entryVal : entryVal - closePx;
+    return delta * pos.volume * _contractSizeFor(pos.symbol);
+  }
+
+  String _computeLivePLDisplay(
+      TradePosition pos, double? closePx, double? entryVal, bool isBuy) {
+    final v = _livePL(pos, closePx, entryVal, isBuy);
+    return v.toStringAsFixed(2);
+  }
+
+  Color _computeLivePLColor(
+      TradePosition pos, double? closePx, double? entryVal, bool isBuy) {
+    final v = _livePL(pos, closePx, entryVal, isBuy);
+    return v >= 0 ? AppColors.statusGreen : AppColors.error;
+  }
 
   static double? _parsePriceOrNull(String text) {
     if (text.trim().isEmpty) return null;
@@ -712,71 +846,6 @@ class _Pill extends StatelessWidget {
 
 // ────────────────────────────────────────────────────────────────────────────
 // ────────────────────────────────────────────────────────────────────────────
-// Tab bar (TP/SL | Add Position | Reverse Order)
-// ────────────────────────────────────────────────────────────────────────────
-class _TabBar extends StatelessWidget {
-  const _TabBar({
-    required this.current,
-    required this.onChange,
-    required this.palette,
-  });
-  final _DetailTab current;
-  final ValueChanged<_DetailTab> onChange;
-  final _Palette palette;
-
-  static const _labels = {
-    _DetailTab.tpsl: 'TP/SL',
-    _DetailTab.close: 'Close Position',
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: palette.bg,
-        border: Border(
-          top: BorderSide(color: palette.divider),
-          bottom: BorderSide(color: palette.divider),
-        ),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      child: Row(
-        children: _DetailTab.values.map((t) {
-          final active = t == current;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => onChange(t),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _labels[t]!,
-                    style: TextStyle(
-                      color: active ? AppColors.tabAccent : palette.axisText,
-                      fontSize: 13.sp,
-                      fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(height: 6.h),
-                  Container(
-                    height: 2,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: active ? AppColors.tabAccent : Colors.transparent,
-                      borderRadius: BorderRadius.circular(1.r),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────────
 // TP/SL panel — two steppers (Take profit / Stop loss)
 // ────────────────────────────────────────────────────────────────────────────
 class _TpSlPanel extends StatelessWidget {
@@ -816,121 +885,87 @@ class _TpSlPanel extends StatelessWidget {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final palette = this.palette;
-    final isBuy = _isBuy(pos);
-    final sym = pos.symbol.toUpperCase();
     final d = pos.digits;
 
-    // Reference values for the description text under each stepper.
-    final entry = _priceStrToDouble(pos.entryPrice) ?? 0.0;
-    final tpRef = entry > 0 ? entry * 1.01 : 0.0; // rough TP guide: +1%
-    final slRef = entry > 0 ? entry * 0.99 : 0.0; // rough SL guide: -1%
-    final triggerColor = AppColors.statusGreen;
-
     return SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 12.h),
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Take profit row.
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 13.sp,
-                    ),
-                    children: [
-                      const TextSpan(text: 'Take profit:'),
-                      if (tpRef > 0)
-                        TextSpan(
-                          text: '> \$${tpRef.toStringAsFixed(d)}',
-                          style: TextStyle(
-                            color: triggerColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          _TpSlSection(
+            label: 'Take profit',
+            field: _StepperField(
+              controller: tpCtl,
+              focusNode: tpFocus,
+              palette: palette,
+              onMinus: () => _bump(tpCtl, -1.0, d),
+              onPlus: () => _bump(tpCtl, 1.0, d),
+            ),
+            helper: 'When Mark Price reaches —, it will trigger '
+                'Take Profit Market order to close this position. '
+                'Estimated PNL will be \$---.',
+            helperColor: palette.axisText,
           ),
-          SizedBox(height: 6.h),
-          _StepperField(
-            controller: tpCtl,
-            focusNode: tpFocus,
-            palette: palette,
-            onMinus: () => _bump(tpCtl, -1.0, d),
-            onPlus: () => _bump(tpCtl, 1.0, d),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            isBuy
-                ? 'When Mark Price reaches —, it will trigger Take Profit Market order to close this position. Estimated PNL will be \$${_formatPnl(0)}.'
-                : 'When Mark Price reaches —, it will trigger Take Profit Market order to close this position. Estimated PNL will be \$${_formatPnl(0)}.',
-            style: TextStyle(color: palette.axisText, fontSize: 11.sp),
-          ),
-          SizedBox(height: 18.h),
-          // Stop loss row.
-          Row(
-            children: [
-              Expanded(
-                child: RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 13.sp,
-                    ),
-                    children: [
-                      const TextSpan(text: 'Stop loss:'),
-                      if (slRef > 0)
-                        TextSpan(
-                          text: '< \$${slRef.toStringAsFixed(d)}',
-                          style: TextStyle(
-                            color: AppColors.error,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 6.h),
-          _StepperField(
-            controller: slCtl,
-            focusNode: slFocus,
-            palette: palette,
-            onMinus: () => _bump(slCtl, -1.0, d),
-            onPlus: () => _bump(slCtl, 1.0, d),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'When Mark Price reaches —, it will trigger Stop Market order to close this position. Estimated PNL will be \$${_formatPnl(0)}.',
-            style: TextStyle(color: palette.axisText, fontSize: 11.sp),
-          ),
-          SizedBox(height: 8.h),
-          // Symbol legend, hidden — kept for parity with reference (subtitle).
-          Text(
-            sym,
-            style: TextStyle(color: palette.axisText, fontSize: 10.sp),
+          SizedBox(height: 16.h),
+          _TpSlSection(
+            label: 'Stop loss',
+            field: _StepperField(
+              controller: slCtl,
+              focusNode: slFocus,
+              palette: palette,
+              onMinus: () => _bump(slCtl, -1.0, d),
+              onPlus: () => _bump(slCtl, 1.0, d),
+            ),
+            helper: 'When Mark Price reaches —, it will trigger '
+                'Stop Market order to close this position. '
+                'Estimated PNL will be \$---.',
+            helperColor: palette.axisText,
           ),
         ],
       ),
     );
   }
+}
 
-  static String _formatPnl(double v) {
-    if (v == 0) return '---';
-    return v.toStringAsFixed(2);
+/// A single TP/SL block: inline suggested-value label, stepper field, helper.
+class _TpSlSection extends StatelessWidget {
+  const _TpSlSection({
+    required this.label,
+    required this.field,
+    required this.helper,
+    required this.helperColor,
+  });
+
+  final String label;
+  final Widget field;
+  final String helper;
+  final Color helperColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          '$label:',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 13.sp,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        field,
+        SizedBox(height: 4.h),
+        Text(
+          helper,
+          style: TextStyle(color: helperColor, fontSize: 11.sp),
+        ),
+      ],
+    );
   }
 }
 
@@ -950,11 +985,13 @@ class _StepperField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Borderless container: only the background + rounded corners; the
+    // minus/plus buttons sit inside the same rounded container so the field
+    // reads as a single pill with no visible dividing line.
     return Container(
       decoration: BoxDecoration(
         color: palette.fieldBg,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: palette.fieldBorder),
+        borderRadius: BorderRadius.circular(10.r),
       ),
       child: Row(
         children: [
@@ -972,7 +1009,6 @@ class _StepperField extends StatelessWidget {
               ),
               decoration: const InputDecoration(
                 border: InputBorder.none,
-                isCollapsed: true,
                 contentPadding: EdgeInsets.symmetric(vertical: 12),
               ),
               inputFormatters: [
@@ -999,10 +1035,12 @@ class _StepperButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Slightly tighter than the previous 14/14 so the button feels
+    // integrated with the field, not floating on top of it.
     return InkResponse(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         child: Icon(icon, size: 18.sp, color: AppColors.textPrimary),
       ),
     );
@@ -1268,14 +1306,14 @@ class _OrderSummaryCard extends StatelessWidget {
 // ────────────────────────────────────────────────────────────────────────────
 class _ActionRow extends StatelessWidget {
   const _ActionRow({
-    required this.tab,
+    required this.primaryLabel,
     required this.busy,
     required this.onCancel,
     required this.onPrimary,
     required this.sideColor,
     required this.palette,
   });
-  final _DetailTab tab;
+  final String primaryLabel;
   final bool busy;
   final VoidCallback onCancel;
   final VoidCallback onPrimary;
@@ -1284,10 +1322,7 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = switch (tab) {
-      _DetailTab.tpsl => 'Confirm',
-      _DetailTab.close => 'Close Order',
-    };
+    final label = primaryLabel;
     return Container(
       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h + MediaQuery.of(context).padding.bottom),
       decoration: BoxDecoration(
