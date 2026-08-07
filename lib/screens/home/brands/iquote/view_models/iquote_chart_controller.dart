@@ -24,6 +24,8 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 
+import 'package:crm_app/services/symbol_selection_service.dart';
+
 import 'package:crm_app/widgets/custom_toast.dart';
 
 class CandleData {
@@ -46,8 +48,12 @@ class CandleData {
 
 class IQuoteChartController extends GetxController {
   IQuoteChartController([String? initialSymbol]) {
+    final symService = Get.isRegistered<SymbolSelectionService>()
+        ? Get.find<SymbolSelectionService>()
+        : Get.put(SymbolSelectionService());
+
     if (initialSymbol != null) {
-      symbolRx.value = initialSymbol;
+      symService.setSymbol(initialSymbol);
     } else {
       // Find the correct suffix for XAUUSD from the available instruments
       final instCtrl = Get.isRegistered<InstrumentsController>() ? Get.find<InstrumentsController>() : null;
@@ -55,25 +61,32 @@ class IQuoteChartController extends GetxController {
         final match = instCtrl.allInstruments.firstWhereOrNull((e) =>
           MarketWatchV2Service.normalizeSymbol(e.symbol) == 'XAUUSD'
         );
-        symbolRx.value = match?.symbol ?? 'XAUUSD';
+        symService.setSymbol(match?.symbol ?? 'XAUUSD');
       } else {
-        symbolRx.value = 'XAUUSD';
+        symService.setSymbol('XAUUSD');
       }
     }
   }
 
-  final symbolRx = 'XAUUSD'.obs;
+  RxString get symbolRx => Get.isRegistered<SymbolSelectionService>()
+      ? Get.find<SymbolSelectionService>().lastSymbolRx
+      : Get.put(SymbolSelectionService()).lastSymbolRx;
+
   String get symbol => symbolRx.value;
   set symbol(String value) {
     if (symbolRx.value != value) {
-      symbolRx.value = value;
+      if (Get.isRegistered<SymbolSelectionService>()) {
+        Get.find<SymbolSelectionService>().setSymbol(value);
+      }
       _notifyPersistentWebview(value);
     }
   }
 
   void forceSwitchSymbol(String newSymbol) {
     if (symbolRx.value != newSymbol) {
-      symbolRx.value = newSymbol;
+      if (Get.isRegistered<SymbolSelectionService>()) {
+        Get.find<SymbolSelectionService>().setSymbol(newSymbol);
+      }
     } else {
       // Force refresh if it's the same symbol but websocket is stuck
       _hydrateInitial();
@@ -83,7 +96,7 @@ class IQuoteChartController extends GetxController {
   }
 
   /// Always called after [symbolRx] is updated so the persistent offstage
-  /// webview (managed by ChartPreloadService) is told the new symbol.
+  /// webview is told the new symbol.
   /// Called from both the [symbol] setter AND [forceSwitchSymbol] so the
   /// persistent webview stays in sync regardless of how the symbol changed.
   Future<void> _notifyPersistentWebview(String sym) async {
@@ -259,7 +272,7 @@ class IQuoteChartController extends GetxController {
   }
 
   /// Intentionally a no-op. Historical bars are rendered by the persistent
-  /// ChartPreloadService WebView (TradingView widget), which fetches its own
+  /// WebView (TradingView widget), which fetches its own
   /// data server-side. The previous /api/market/history REST call fired on
   /// every symbol switch and was redundant + slow. Call sites in onInit,
   /// the symbol-change listener, and changePeriod are kept untouched.

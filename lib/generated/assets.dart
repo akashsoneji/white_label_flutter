@@ -34,7 +34,6 @@ class Assets {
       'assets/svg/bottom_navigation/wallet.svg';
   static const String bottomNavigationWalletBold =
       'assets/svg/bottom_navigation/wallet_bold.svg';
-  static const String chartIndex = 'assets/chart/index.html';
   static const String chartScreenIconBegIcon =
       'assets/svg/chart_screen_icon/beg_icon.svg';
   static const String chartScreenIconBellIcon =

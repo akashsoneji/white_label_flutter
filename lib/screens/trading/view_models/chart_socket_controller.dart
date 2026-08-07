@@ -14,6 +14,7 @@ import 'package:crm_app/services/websocket_endpoint_helper.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:crm_app/utils/message_pack_decoder.dart';
 import 'package:crm_app/services/unified_websocket_service.dart';
+import 'package:crm_app/services/symbol_selection_service.dart';
 
 class ChartSocketController extends GetxController with WidgetsBindingObserver {
   // Connection state
@@ -44,6 +45,30 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
+
+    // Bind currentSymbol to SymbolSelectionService.lastSymbolRx
+    final symService = Get.isRegistered<SymbolSelectionService>()
+        ? Get.find<SymbolSelectionService>()
+        : Get.put(SymbolSelectionService());
+    
+    // Sync initially
+    if (symService.currentSymbol.isNotEmpty) {
+      currentSymbol.value = symService.currentSymbol;
+    }
+
+    // Listen to changes from SymbolSelectionService to update currentSymbol
+    ever(symService.lastSymbolRx, (String sym) {
+      if (sym.isNotEmpty && currentSymbol.value != sym) {
+        currentSymbol.value = sym;
+      }
+    });
+
+    // Listen to changes from currentSymbol (watchlist, selector) to update SymbolSelectionService
+    ever(currentSymbol, (String sym) {
+      if (sym.isNotEmpty && symService.currentSymbol != sym) {
+        symService.setSymbol(sym);
+      }
+    });
 
     // DON'T auto-connect - let screen decide when to start
     // Auto-(re)connect + subscribe when symbol changes

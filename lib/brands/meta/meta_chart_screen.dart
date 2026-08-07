@@ -362,7 +362,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
         borderRadius: BorderRadius.circular(8.r),
         child: Obx(() {
           final sym = _stripSuffix(_chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value);
-          final url = '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$sym&theme=${AppColors.chartTheme}';
+          final url = '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
           return ChartInAppWebView(
             key: _chartKey,
             symbol: sym,

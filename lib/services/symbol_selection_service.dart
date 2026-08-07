@@ -9,7 +9,20 @@ class SymbolSelectionService extends GetxService {
   final RxBool _hasUserSelection = false.obs;
   bool _initialized = false;
 
+  @override
+  void onInit() {
+    super.onInit();
+    _ensureInitialized();
+    ever(_lastSymbol, (String symbol) {
+      if (symbol.isNotEmpty) {
+        _hasUserSelection.value = true;
+        SecureStorageService.saveSelectedSymbol(symbol);
+      }
+    });
+  }
+
   String get currentSymbol => _lastSymbol.value;
+  RxString get lastSymbolRx => _lastSymbol;
   bool get hasUserSelection => _hasUserSelection.value;
 
   /// Update the current symbol and mark that the user made an explicit choice.

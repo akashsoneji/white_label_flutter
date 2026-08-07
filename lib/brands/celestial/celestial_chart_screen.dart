@@ -14,15 +14,15 @@
 // ============================================================
 
 import 'dart:async';
-import 'package:crm_app/constants/text_styles.dart';
 import 'dart:convert';
+import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/flavor_config.dart';
-import 'package:crm_app/constants/color.dart';
 
 import 'package:crm_app/brands/celestial/celestial_theme.dart';
 import 'package:crm_app/models/order_types.dart';
@@ -360,8 +360,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> with Automa
                 ? 'XAUUSD'
                 : _chart.currentSymbol.value,
           );
-          final url =
-              '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$sym&theme=${AppColors.chartTheme}';
+          final url = '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
           return ChartInAppWebView(
             key: _chartKey,
             symbol: sym,

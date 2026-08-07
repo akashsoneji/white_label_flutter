@@ -72,6 +72,7 @@ class VantageChartLayout extends StatefulWidget {
 }
 
 class _VantageChartLayoutState extends State<VantageChartLayout> {
+  final GlobalKey<ChartInAppWebViewState> _webViewKey = GlobalKey<ChartInAppWebViewState>();
   double _volume = 0.01;
 
   /// Editable backing field for the quantity TextField. Keeps the
@@ -522,7 +523,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
             ),
             // hairline divider exactly as in the TRADYN reference
             Container(height: 1, color: const Color(0x14000000)),
-            Expanded(child: _ChartArea(isDark: isDark)),
+            Expanded(child: _ChartArea(isDark: isDark, webViewKey: _webViewKey)),
             Container(height: 1, color: const Color(0x14000000)),
             _BottomDock(
               primary: primary,
@@ -648,7 +649,8 @@ class _Header extends StatelessWidget {
 // ────────────────────────────────────────────────────────────────────
 class _ChartArea extends StatelessWidget {
   final bool isDark;
-  const _ChartArea({required this.isDark});
+  final GlobalKey<ChartInAppWebViewState> webViewKey;
+  const _ChartArea({required this.isDark, required this.webViewKey});
 
   @override
   Widget build(BuildContext context) {
@@ -667,13 +669,12 @@ class _ChartArea extends StatelessWidget {
           theme: isDark ? 'dark' : 'light',
         );
       }
-      // Match the URL pattern used in chart_screen.dart so the same
-      // server-side mobile-chart loader picks up the symbol on first paint.
+      // Use stable URL and stable webViewKey to prevent full page reloads on symbol change
       final url =
-          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$raw&theme=${isDark ? 'dark' : 'light'}';
+          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${isDark ? 'dark' : 'light'}';
       print('Chart URL: $url');
       return ChartInAppWebView(
-        key: ValueKey('vantage_chart_$raw'),
+        key: webViewKey,
         symbol: raw,
         url: url,
       );

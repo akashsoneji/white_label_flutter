@@ -1283,7 +1283,7 @@ void _showFavoritesBottomSheet(
       return _FavoritesWatchlistSheet(
         activeSymbol: ctrl.symbol,
         onPickSymbol: (sym) {
-          ctrl.symbolRx.value = sym;
+          ctrl.symbol = sym;
           Navigator.of(sheetCtx).pop();
         },
       );
