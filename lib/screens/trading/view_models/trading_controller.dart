@@ -1821,7 +1821,14 @@ class TradingController extends GetxController {
       _isLoadingHistory.value = true;
       _clearError();
 
-      // Get active MT5 account
+      // Get active MT5 account. The trade-history endpoint requires
+      // mt5_account to be a real account number — sending an empty
+      // string makes the broker reply with
+      // "Account number is required. Please provide login,
+      // trading_account, or mt5_account parameter" and returns an
+      // empty list, which the screen then renders as
+      // "No history for <period>". Skip the call and surface a clear
+      // message instead.
       String mt5Account = '';
       try {
         final accountController = Get.find<AccountController>();
@@ -1829,6 +1836,18 @@ class TradingController extends GetxController {
         mt5Account = activeAccount?.metaAccountNumber ?? '';
       } catch (e) {
         // Error getting active account
+      }
+
+      if (mt5Account.isEmpty) {
+        if (refresh || page == 1) {
+          _tradeHistory.clear();
+          _paginationInfo.value = null;
+          _tradeHistoryTotals.value = null;
+          _tradeHistorySummary.value = null;
+          update(['account_info']);
+        }
+        _setError('No active trading account.');
+        return;
       }
 
       // Build query parameters matching the API format:

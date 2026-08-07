@@ -1,7 +1,7 @@
 // GENERATED — Do not edit manually. Regenerate with:
-//   dart run scripts/prepare_flavor.dart meta
-// Active flavor: meta
-PRODUCT_BUNDLE_IDENTIFIER=com.meta.app
-BRAND_DISPLAY_NAME=Meta
+//   dart run scripts/prepare_flavor.dart celestial
+// Active flavor: celestial
+PRODUCT_BUNDLE_IDENTIFIER=com.celestial.app
+BRAND_DISPLAY_NAME=Celestial
 FLUTTER_TARGET=lib/main.dart
-DART_DEFINES=Q0xJRU5UPW1ldGE=,RkxBVk9SPW1ldGE=
+DART_DEFINES=Q0xJRU5UPWNlbGVzdGlhbA==,RkxBVk9SPWNlbGVzdGlhbA==

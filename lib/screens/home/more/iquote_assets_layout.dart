@@ -1462,8 +1462,7 @@ class _VerifyAccountCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          languageService?.tr('verify_account') ??
-                              'Verify Account',
+                          'Verify Account',
                           style: AppTextStyles.headingblack.copyWith(
                             fontSize: 14.sp,
                           ),
@@ -1478,8 +1477,7 @@ class _VerifyAccountCard extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    languageService?.tr('complete_your_profile') ??
-                        'Complete your profile to unlock all features',
+                    'Complete your profile to unlock all features',
                     style: AppTextStyles.labelOnChartPendingOrder.copyWith(
                       fontSize: 12.sp,
                     ),
