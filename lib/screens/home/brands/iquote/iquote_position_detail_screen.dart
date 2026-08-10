@@ -57,6 +57,16 @@ String _sideFor(TradePosition p) {
 
 bool _isBuy(TradePosition p) => _sideFor(p) == 'Buy';
 
+/// Per-symbol pip size, mirroring TradingController._updatePipValues:
+///   JPY pairs → 0.01 | Gold/Silver metals → 0.01 / 0.001 | else → 0.0001.
+double _pipForSymbol(String symbol) {
+  final s = symbol.toUpperCase();
+  if (s.contains('JPY')) return 0.01;
+  if (s.startsWith('XAU') || s.startsWith('GOLD')) return 0.01;
+  if (s.startsWith('XAG') || s.startsWith('SILVER')) return 0.001;
+  return 0.0001;
+}
+
 double? _priceStrToDouble(String s) {
   final v = double.tryParse(s.trim());
   if (v == null || v <= 0) return null;
@@ -138,6 +148,11 @@ class _IQuotePositionDetailScreenState
   // "user touched" flag on the former.
   String _tpLastWritten = '';
   String _slLastWritten = '';
+  // Snapshot of the TP/SL values as they arrived from the server. Used
+  // to detect whether the user has actually modified a field (dirty)
+  // vs. the field still reflecting the server state.
+  late final double? _origTp;
+  late final double? _origSl;
 
   // ── Reverse-Order state is read-only (displays the existing + opposite) ─
 
@@ -155,6 +170,8 @@ class _IQuotePositionDetailScreenState
     // fields stay blank — that's the "close the position" affordance.
     final existingTp = _priceStrToDouble(pos.takeProfit);
     final existingSl = _priceStrToDouble(pos.stopLoss);
+    _origTp = existingTp;
+    _origSl = existingSl;
     if (existingTp != null && existingTp > 0) {
       _tpCtl.text = existingTp.toStringAsFixed(d);
       _tpLastWritten = _tpCtl.text;
@@ -172,16 +189,29 @@ class _IQuotePositionDetailScreenState
     _slFocus.addListener(_handleSlFocusChange);
     _tpCtl.addListener(_handleTpControllerChange);
     _slCtl.addListener(_handleSlControllerChange);
+
+    // Force one rebuild after first frame so _isTpSlEmpty() in build()
+    // re-evaluates against the pre-filled controller text (TP/SL values
+    // restored from the server). The controller listener above does NOT
+    // fire for pre-fills because the text matches _tpLastWritten /
+    // _slLastWritten — so without this the first build could snapshot
+    // an empty _isTpSlEmpty() result and the Close Order / Confirm
+    // button label would be stuck until the user types something.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   void _handleTpControllerChange() {
     if (_tpCtl.text == _tpLastWritten) return;
+    setState(() {});
     _tpLastWritten = _tpCtl.text;
     _tpUserTouched = true;
   }
 
   void _handleSlControllerChange() {
     if (_slCtl.text == _slLastWritten) return;
+    setState(() {});
     _slLastWritten = _slCtl.text;
     _slUserTouched = true;
   }
@@ -192,13 +222,16 @@ class _IQuotePositionDetailScreenState
     if (_tpCtl.text.trim().isNotEmpty) return;
     final pos = widget.position;
     final d = pos.digits;
-    final entry = _priceStrToDouble(pos.entryPrice) ?? 0.0;
-    if (entry <= 0) return;
     final isBuy = _isBuy(pos);
-    final isJpy = pos.symbol.contains('JPY');
-    final standardRisk = isJpy ? 0.50 : 0.0050;
-    final reward = standardRisk * 2; // 1:2 risk-reward
-    final tp = isBuy ? entry + reward : entry - reward;
+    const slPips = 50;
+    final pip = _pipForSymbol(pos.symbol);
+    final q = Get.find<InstrumentsController>()
+        .priceRx(pos.symbol.toUpperCase())
+        .value;
+    final anchor = isBuy ? q.ask : q.bid;
+    final profitDir = isBuy ? 1 : -1;
+    final slGap = slPips * pip;
+    final tp = anchor + profitDir * slGap * 2;
     _writeTp(tp.toStringAsFixed(d));
   }
 
@@ -208,12 +241,15 @@ class _IQuotePositionDetailScreenState
     if (_slCtl.text.trim().isNotEmpty) return;
     final pos = widget.position;
     final d = pos.digits;
-    final entry = _priceStrToDouble(pos.entryPrice) ?? 0.0;
-    if (entry <= 0) return;
     final isBuy = _isBuy(pos);
-    final isJpy = pos.symbol.contains('JPY');
-    final standardRisk = isJpy ? 0.50 : 0.0050;
-    final sl = isBuy ? entry - standardRisk : entry + standardRisk;
+    const slPips = 50;
+    final pip = _pipForSymbol(pos.symbol);
+    final q = Get.find<InstrumentsController>()
+        .priceRx(pos.symbol.toUpperCase())
+        .value;
+    final anchor = isBuy ? q.ask : q.bid;
+    final slGap = slPips * pip;
+    final sl = anchor + (isBuy ? -slGap : slGap);
     _writeSl(sl.toStringAsFixed(d));
   }
 
@@ -283,9 +319,9 @@ class _IQuotePositionDetailScreenState
             _ActionRow(
               // Empty fields → "Close Order" (close position). Any TP/SL
               // value → "Confirm" (modify TP/SL).
-              primaryLabel: _isTpSlEmpty()
-                  ? 'Close Order'
-                  : 'Confirm',
+              primaryLabel: _isTpSlDirty()
+                  ? 'Confirm'
+                  : 'Close Order',
               busy: _busy,
               onCancel: () => Get.back<void>(),
               onPrimary: () => _onPrimary(context),
@@ -303,19 +339,36 @@ class _IQuotePositionDetailScreenState
 
   // ── primary button per tab ─────────────────────────────────────────────
   Future<void> _onPrimary(BuildContext context) async {
-    if (_isTpSlEmpty()) {
-      // Both TP and SL fields are blank — close the position instead.
-      await _submitCloseWithConfirm(context);
-    } else {
-      // User typed at least one TP/SL value — apply the modification.
+    if (_isTpSlDirty()) {
+      // User modified TP/SL from server values — apply the modification.
       await _submitTpSl();
+    } else {
+      // No changes — close the position instead.
+      await _submitCloseWithConfirm(context);
     }
   }
 
-  /// True when both TP and SL fields are blank (or contain only whitespace).
-  /// Drives the bottom action label and submit routing.
-  bool _isTpSlEmpty() {
-    return _tpCtl.text.trim().isEmpty && _slCtl.text.trim().isEmpty;
+  /// True when the current TP/SL values differ numerically from the
+  /// server originals captured in initState. Non-numeric input is
+  /// treated as dirty. Drives the bottom action label and submit
+  /// routing: "Confirm" when values diverge, "Close Order" otherwise.
+  /// True iff either TP or SL field text differs from the server's
+  /// pre-fill for this position. Compared as raw trimmed strings so
+  /// partial / unparseable input (e.g. user typed "42" or "4,250.6"
+  /// mid-entry) still flips the button to "Confirm" the moment the
+  /// text no longer matches the original. Numeric precision / parsing
+  /// errors are reported by the submit path, not by this helper.
+  bool _isTpSlDirty() {
+    final curTpText = _tpCtl.text.trim();
+    final curSlText = _slCtl.text.trim();
+    // Both empty → nothing to update.
+    if (curTpText.isEmpty && curSlText.isEmpty) return false;
+
+    // Original text the screen was opened with ('' if server had none).
+    final origTpText = (_origTp == null || _origTp! <= 0) ? '' : _origTp!.toString();
+    final origSlText = (_origSl == null || _origSl! <= 0) ? '' : _origSl!.toString();
+
+    return curTpText != origTpText || curSlText != origSlText;
   }
 
   Future<void> _submitTpSl() async {
@@ -867,18 +920,72 @@ class _TpSlPanel extends StatelessWidget {
   final _Palette palette;
 
 
-  void _bump(TextEditingController c, double delta, int digits) {
+  /// Stepper bump for TP / SL fields. Each press moves the value by
+  /// [slPips] PIPs for the symbol (same scale as the auto-fill defaults),
+  /// not by a single decimal tick. SL uses 50 pips; TP uses 100 pips (1:2).
+  /// Falls back to the live mid-market if the field is empty, so the
+  /// user immediately sees a starting point on first press.
+  /// Stepper bump for TP / SL fields.
+  ///
+  /// Behaviour:
+  /// - First press on a BLANK field → place value at `pos.entryPrice`
+  ///   ± 50 pips (SL) / ± 100 pips (TP). Same as the focus auto-fill.
+  ///   This gives the user a clean starting point that lines up with
+  ///   what the server-side validation expects.
+  /// - Subsequent presses on a NON-blank field → move by a single tick
+  ///   for the symbol (one last-digit increment). So XAUUSD moves in
+  ///   0.01 steps, EURUSD in 0.00001, USDJPY in 0.001, BTCUSD in 1.00.
+  ///   The pip magnitude is read from `_pipForSymbol` so it matches the
+  ///   server-side pip definition.
+  void _bump(TextEditingController c, double delta, int digits,
+      {required int slPips, required TradePosition position}) {
+    final pos = position;
     final raw = c.text.trim();
+    final wasBlank = raw.isEmpty;
+    // For Sell positions, flip `delta` so the button semantics match Buy:
+    // "minus" always moves the value further from entry, "plus" closer.
+    // The focus listener already does this for the blank-field branch;
+    // we do it here so the non-blank (tick-step) branch behaves the same.
+    final d = _isBuy(pos) ? delta : -delta;
     double current = double.tryParse(raw) ?? 0;
-    if (current == 0) {
-      final ctrl = Get.find<InstrumentsController>();
-      final q = ctrl.priceRx(pos.symbol.toUpperCase()).value;
-      if (q.bid > 0 || q.ask > 0) {
-        current = (q.bid + q.ask) / 2;
-      }
+    if (wasBlank) {
+      // First press from blank: anchor to the LIVE price the user
+      // actually traded at — not the historical entryPrice.
+      //   Buy  → Ask  (what the user paid to open)
+      //   Sell → Bid  (what the user received when opening)
+      // TP is placed in the PROFIT direction from that anchor;
+      // SL is placed in the LOSS direction.
+      final q = Get.find<InstrumentsController>()
+          .priceRx(pos.symbol.toUpperCase())
+          .value;
+      current = _isBuy(pos) ? q.ask : q.bid;
+      // Use the symbol pip magnitude for the 50/100-pip offset (so
+      // BTCUSD gets a 50 USD step, XAUUSD gets a 0.50 step, etc.).
+      // TP and SL are anchored relative to entry, each on the correct
+      // side for the position direction:
+      //   Buy  → TP = entry + 100 pips,  SL = entry − 50 pips
+      //   Sell → TP = entry − 100 pips,  SL = entry + 50 pips
+      // `_isBuy ? 1 : -1` is the profit-side direction; negating it
+      // (`-(...)`) gives the loss-side direction.
+      final pip = _pipForSymbol(pos.symbol);
+      final profitDir = _isBuy(pos) ? 1 : -1;
+      // Whether we are on the profit or loss side depends on the caller:
+      // TP passes slPips=100 (profit side), SL passes slPips=50 (loss side).
+      // We detect which side by comparing abs(slPips) to the known values.
+      final isTpSide = (slPips == 100);
+      final dir = isTpSide ? profitDir : -profitDir;
+      current = current + (dir * (slPips.abs()) * pip);
+    } else {
+      // Subsequent presses: move by one LAST-DIGIT increment (the
+      // tick), NOT by one pip. Tick is read from `pos.digits` so the
+      // step is always 0.01 for digits=2 (XAUUSD, XAGUSD, JPY, BTCUSD),
+      // 0.0001 for digits=4 (some forex / 4-digit metals), 0.00001 for
+      // digits=5 (5-digit forex). This matches the per-symbol last
+      // digit the user sees in the field.
+      final tick = math.pow(10, -digits).toDouble();
+      current = current + (d * tick);
     }
-    final tick = math.pow(10, -digits).toDouble();
-    final next = (current + (delta * tick)).clamp(0.0, double.infinity);
+    final next = current.clamp(0.0, double.infinity);
     c.text = next == 0 ? '' : next.toStringAsFixed(digits);
     c.selection = TextSelection.fromPosition(
       TextPosition(offset: c.text.length),
@@ -896,14 +1003,14 @@ class _TpSlPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _TpSlSection(
+            _TpSlSection(
             label: 'Take profit',
             field: _StepperField(
               controller: tpCtl,
               focusNode: tpFocus,
               palette: palette,
-              onMinus: () => _bump(tpCtl, -1.0, d),
-              onPlus: () => _bump(tpCtl, 1.0, d),
+              onMinus: () => _bump(tpCtl, -1.0, d, slPips: 100, position: pos),
+              onPlus:  () => _bump(tpCtl,  1.0, d, slPips: 100, position: pos),
             ),
             helper: 'When Mark Price reaches —, it will trigger '
                 'Take Profit Market order to close this position. '
@@ -911,14 +1018,14 @@ class _TpSlPanel extends StatelessWidget {
             helperColor: palette.axisText,
           ),
           SizedBox(height: 16.h),
-          _TpSlSection(
+            _TpSlSection(
             label: 'Stop loss',
             field: _StepperField(
               controller: slCtl,
               focusNode: slFocus,
               palette: palette,
-              onMinus: () => _bump(slCtl, -1.0, d),
-              onPlus: () => _bump(slCtl, 1.0, d),
+              onMinus: () => _bump(slCtl, -1.0, d, slPips: 50, position: pos),
+              onPlus:  () => _bump(slCtl,  1.0, d, slPips: 50, position: pos),
             ),
             helper: 'When Mark Price reaches —, it will trigger '
                 'Stop Market order to close this position. '
