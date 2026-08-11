@@ -384,8 +384,10 @@ class _IQuotePositionDetailScreenState
       _toastError('No active MT5 account selected.');
       return;
     }
-    final tp = _parsePriceOrNull(_tpCtl.text);
-    final sl = _parsePriceOrNull(_slCtl.text);
+    // Blank field means "remove TP/SL" → send 0.0 (not null) so the
+    // server clears the value instead of treating it as a no-op.
+    final tp = _parsePriceOrNull(_tpCtl.text) ?? 0.0;
+    final sl = _parsePriceOrNull(_slCtl.text) ?? 0.0;
     setState(() => _busy = true);
     try {
       final ok = await _trading.updateTPSL(
