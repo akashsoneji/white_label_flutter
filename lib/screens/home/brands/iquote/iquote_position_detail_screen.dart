@@ -361,12 +361,18 @@ class _IQuotePositionDetailScreenState
   bool _isTpSlDirty() {
     final curTpText = _tpCtl.text.trim();
     final curSlText = _slCtl.text.trim();
-    // Both empty → nothing to update.
-    if (curTpText.isEmpty && curSlText.isEmpty) return false;
 
     // Original text the screen was opened with ('' if server had none).
     final origTpText = (_origTp == null || _origTp! <= 0) ? '' : _origTp!.toString();
     final origSlText = (_origSl == null || _origSl! <= 0) ? '' : _origSl!.toString();
+
+    // Short-circuit: only skip when nothing was ever set and user hasn't
+    // touched either field. Clearing a field that originally had a value
+    // (i.e. removing TP or SL) IS a change → must show Confirm.
+    if (origTpText.isEmpty && origSlText.isEmpty
+        && curTpText.isEmpty && curSlText.isEmpty) {
+      return false;
+    }
 
     return curTpText != origTpText || curSlText != origSlText;
   }
