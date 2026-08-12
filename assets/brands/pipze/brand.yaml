@@ -32,8 +32,8 @@ urls:
 
 assets:
   appIcon: icon.png
-  logo: icon.png
-  splashLogo: splash_logo.svg
+  logo: logo.svg
+  splashLogo: home_icon.png
 
 features:
  useNewChart: false

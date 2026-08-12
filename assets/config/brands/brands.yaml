@@ -194,8 +194,8 @@ brands:
  chart: "https://my.pipze.com"
  assets:
  appIcon: "assets/brands/pipze/icon.png"
- logo: "assets/brands/pipze/icon.png"
- splashLogo: "assets/brands/pipze/splash_logo.svg"
+ logo: "assets/brands/pipze/logo.svg"
+ splashLogo: "assets/brands/pipze/home_icon.png"
  features:
  useNewChart: "false"
 
