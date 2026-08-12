@@ -76,7 +76,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
         child: Column(
           children: [
             // Instructional Text
-            _buildInstructionalText(),
+            // _buildInstructionalText(),
 
             // Account Cards with proper spacing
             Expanded(
@@ -222,11 +222,11 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
                     'Maximum leverage',
                     accountType.leverage ?? "",
                   ),
-                  _buildDivider(),
-                  _buildSpecificationRow(
-                    'Margin call',
-                    accountType.marginCallLevel ?? "-",
-                  ),
+                  // _buildDivider(),
+                  // _buildSpecificationRow(
+                  //   'Margin call',
+                  //   accountType.marginCallLevel ?? "-",
+                  // ),
                   _buildDivider(),
                   _buildSpecificationRow(
                     'Stop Out level',

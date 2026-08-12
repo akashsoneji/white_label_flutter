@@ -967,40 +967,41 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
               ),
               SizedBox(height: 14.h),
             ],
-            Row(
-              children: [
-                Text(
-                  'TP/SL',
-                  style: TextStyle(color: palette.axisText, fontSize: 13.sp),
-                ),
-                SizedBox(width: 6.w),
-                Icon(Icons.help_outline, size: 14.sp, color: palette.axisText),
-                const Spacer(),
-                Switch(
-                  value: _tpSlEnabled,
-                  activeColor: _kBullColor,
-                  onChanged: (v) {
-                    setState(() {
-                      _tpSlEnabled = v;
-                      if (v) {
-                        final activePrice = widget.side == 'buy'
-                            ? (widget.ctrl.lastAsk.value ??
-                                widget.ctrl.lastBid.value ??
-                                0.0)
-                            : (widget.ctrl.lastBid.value ??
-                                widget.ctrl.lastAsk.value ??
-                                0.0);
-                        final digits = widget.ctrl.priceDigits.value;
-                        if (activePrice > 0) {
-                          _tpCtl.text = activePrice.toStringAsFixed(digits);
-                          _slCtl.text = activePrice.toStringAsFixed(digits);
-                        }
-                      }
-                    });
-                  },
-                ),
-              ],
-            ),
+            // TP SL HIDDEN
+            // Row(
+            //   children: [
+            //     Text(
+            //       'TP/SL',
+            //       style: TextStyle(color: palette.axisText, fontSize: 13.sp),
+            //     ),
+            //     SizedBox(width: 6.w),
+            //     Icon(Icons.help_outline, size: 14.sp, color: palette.axisText),
+            //     const Spacer(),
+            //     Switch(
+            //       value: _tpSlEnabled,
+            //       activeColor: _kBullColor,
+            //       onChanged: (v) {
+            //         setState(() {
+            //           _tpSlEnabled = v;
+            //           if (v) {
+            //             final activePrice = widget.side == 'buy'
+            //                 ? (widget.ctrl.lastAsk.value ??
+            //                     widget.ctrl.lastBid.value ??
+            //                     0.0)
+            //                 : (widget.ctrl.lastBid.value ??
+            //                     widget.ctrl.lastAsk.value ??
+            //                     0.0);
+            //             final digits = widget.ctrl.priceDigits.value;
+            //             if (activePrice > 0) {
+            //               _tpCtl.text = activePrice.toStringAsFixed(digits);
+            //               _slCtl.text = activePrice.toStringAsFixed(digits);
+            //             }
+            //           }
+            //         });
+            //       },
+            //     ),
+            //   ],
+            // ),
             if (_tpSlEnabled) ...[
               Row(
                 children: [

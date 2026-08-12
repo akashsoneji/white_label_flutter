@@ -106,9 +106,9 @@ brands:
  splashColor: "#5F259E"
  launcherBackground: "#5F259E"
  urls:
- api: "https://dev.tenaxcodecrm.com/api/"
- websocket: "wss://dev.tenaxcodecrm.com/trade-engine"
- chart: "https://dev.tenaxcodecrm.com"
+ api: "https://my.pipze.com/api/"
+ websocket: "wss://my.pipze.com/trade-engine"
+ chart: "https://my.pipze.com"
  assets:
  appIcon: "assets/brands/iquote/icon.png"
  logo: "assets/brands/iquote/logo.svg"
@@ -161,9 +161,9 @@ brands:
  splashColor: "#3283ff"
  launcherBackground: "#3283ff"
  urls:
- api: "https://dev.tenaxcodecrm.com/api/"
- websocket: "wss://dev.tenaxcodecrm.com/trade-engine"
- chart: "https://dev.tenaxcodecrm.com"
+ api: "https://my.pipze.com/api/"
+ websocket: "wss://my.pipze.com/trade-engine"
+ chart: "https://my.pipze.com"
  assets:
  appIcon: "assets/brands/meta/icon.png"
  logo: "assets/brands/meta/logo.svg"
@@ -189,9 +189,9 @@ brands:
  splashColor: "#5F259E"
  launcherBackground: "#5F259E"
  urls:
- api: "https://dev.tenaxcodecrm.com/api/"
- websocket: "wss://dev.tenaxcodecrm.com/trade-engine"
- chart: "https://dev.tenaxcodecrm.com"
+ api: "https://my.pipze.com/api/"
+ websocket: "wss://my.pipze.com/trade-engine"
+ chart: "https://my.pipze.com"
  assets:
  appIcon: "assets/brands/pipze/icon.png"
  logo: "assets/brands/pipze/icon.png"
