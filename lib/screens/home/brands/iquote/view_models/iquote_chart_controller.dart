@@ -183,7 +183,7 @@ class IQuoteChartController extends GetxController {
 
   void _applyQuote(InstrumentPrice? quote) {
     if (quote == null) return;
-    print("📈 [IQuoteChartController] _applyQuote for $symbol: bid=${quote.bid}, ask=${quote.ask}");
+    // print("📈 [IQuoteChartController] _applyQuote for $symbol: bid=${quote.bid}, ask=${quote.ask}");
     // InstrumentPrice has bid/ask/digits but no `last` field — derive a
     // mid-price for the header so the big number and MA labels stay live.
     final mid = quote.bid == 0 && quote.ask == 0

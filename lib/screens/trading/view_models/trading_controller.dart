@@ -10,6 +10,7 @@ import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/utils/app_logger.dart';
 import 'account_controller.dart';
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
 import 'package:crm_app/services/audio_service.dart';
 
@@ -1349,6 +1350,73 @@ class TradingController extends GetxController {
     }
   }
 
+  /// Update Take Profit, Stop Loss, and Price for a Pending Order
+  Future<bool> updatePendingOrderTPSL({
+    required String mt5Account,
+    required int orderId,
+    double? price,
+    double? stopLoss,
+    double? takeProfit,
+    int? digits,
+  }) async {
+    try {
+      _setLoading(true);
+      _clearError();
+
+      // Validate inputs
+      if (mt5Account.isEmpty) {
+        _setError('MT5 account is required');
+        return false;
+      }
+      if (orderId <= 0) {
+        _setError('Invalid order ID');
+        return false;
+      }
+
+      // Prepare payload
+      final payload = {'mt5_account': mt5Account, 'order_id': orderId};
+
+      if (price != null) {
+        payload['price'] = price == 0
+            ? 0
+            : (digits != null
+                ? PrecisionHelper.round(price, decimals: digits)
+                : price);
+      }
+      if (stopLoss != null) {
+        payload['stop_loss'] = stopLoss == 0
+            ? 0
+            : (digits != null
+                ? PrecisionHelper.round(stopLoss, decimals: digits)
+                : stopLoss);
+      }
+      if (takeProfit != null) {
+        payload['take_profit'] = takeProfit == 0
+            ? 0
+            : (digits != null
+                ? PrecisionHelper.round(takeProfit, decimals: digits)
+                : takeProfit);
+      }
+
+      // Call the API to update Pending Order TP/SL/Price
+      final response = await _tradingRepo.updatePendingOrderTPSL(data: payload);
+
+      if (response.success) {
+        return true;
+      } else {
+        _setError(
+          response.message ?? 'Failed to update Pending Order',
+        );
+        return false;
+      }
+    } catch (e) {
+      _setError('Failed to update Pending Order: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   // New methods for closing different types of positions
   Future<void> _bulkClose({
     required String? mt5Account,
@@ -1619,7 +1687,7 @@ class TradingController extends GetxController {
   }
 
   /// Cancel order with immediate UI update (for pending orders)
-  Future<void> cancelOrderWithImmediateUpdate({
+  Future<bool> cancelOrderWithImmediateUpdate({
     required String mt5Account,
     required int orderId,
   }) async {
@@ -1665,25 +1733,29 @@ class TradingController extends GetxController {
         update();
 
         _setSuccess('Order cancelled successfully');
+        return true;
       } else {
         // Check if error is "not found" - means order was already closed
         final errorMessage = response.message?.toLowerCase() ?? '';
         if (errorMessage.contains('not found') ||
             errorMessage.contains('already closed') ||
             errorMessage.contains('does not exist')) {
-          // It's effectively successfully gone
           _pendingPositions.removeWhere((p) => p.orderId == orderId.toString());
           _pendingPositions.refresh();
           update();
+          _cancellingOrderIds.remove(orderId);
+          return true;
         } else {
-          // Real error: Un-mark as deleted
           _deletedPendingOrderIds.remove(orderId);
           _setError(response.message ?? 'Failed to cancel order');
+          _cancellingOrderIds.remove(orderId);
+          return false;
         }
       }
     } catch (e) {
-      // Error: Un-mark as deleted
+      _cancellingOrderIds.remove(orderId);
       _deletedPendingOrderIds.remove(orderId);
+      
       final errorString = e.toString().toLowerCase();
       if (errorString.contains('not found') ||
           errorString.contains('already closed') ||
@@ -1691,8 +1763,10 @@ class TradingController extends GetxController {
         _pendingPositions.removeWhere((p) => p.orderId == orderId.toString());
         _pendingPositions.refresh();
         update();
+        return true;
       } else {
         _setError('Failed to cancel order: $e');
+        return false;
       }
     } finally {
       // Remove from tracking set after a short delay
@@ -2466,11 +2540,25 @@ class TradingController extends GetxController {
       }
 
       // Validate SL/TP
-      final entryPrice =
-          price ??
-          (orderType.isBuyOrder
-              ? currentAskPrice.toString()
-              : currentBidPrice.toString());
+      double actualBid = currentBidPrice;
+      double actualAsk = currentAskPrice;
+
+      if (actualBid == 0.0 || actualAsk == 0.0) {
+        if (Get.isRegistered<InstrumentsController>()) {
+          final instCtrl = Get.find<InstrumentsController>();
+          final quote = instCtrl.priceRx(symbol).value;
+          if (quote != null) {
+            actualBid = quote.bid;
+            actualAsk = quote.ask;
+          }
+        }
+      }
+
+      final entryPrice = (price != null && price.isNotEmpty)
+          ? price
+          : (orderType.isBuyOrder
+              ? actualAsk.toString()
+              : actualBid.toString());
 
       final sltpValidation = validateSLTP(
         stopLoss ?? '',
@@ -2502,14 +2590,14 @@ class TradingController extends GetxController {
       // Add optional parameters
       if (price != null && price.isNotEmpty) {
         payload['price'] = price;
-      } else {
-        payload['price'] = '';
       }
       if (takeProfit != null && takeProfit.isNotEmpty) {
         payload['take_profit'] = takeProfit;
+        payload['tp'] = takeProfit;
       }
       if (stopLoss != null && stopLoss.isNotEmpty) {
         payload['stop_loss'] = stopLoss;
+        payload['sl'] = stopLoss;
       }
       if (stopLimitPrice != null && stopLimitPrice.isNotEmpty) {
         payload['stop_limit_price'] = stopLimitPrice;

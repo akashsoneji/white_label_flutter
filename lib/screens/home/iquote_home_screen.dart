@@ -768,7 +768,7 @@ class _PromoCarouselState extends State<_PromoCarousel> {
                                 child: Text(
                                   s['btn'],
                                   style: AppTextStyles.bodyText.copyWith(
-                                    color: Colors.white,
+                                    color: AppColors.whiteColor,
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w600,
                                   ),

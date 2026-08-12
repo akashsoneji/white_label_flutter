@@ -11,6 +11,11 @@ abstract class TradingRepository {
     required Map<String, dynamic> data,
   });
 
+  Future<ApiResponse> updatePendingOrderTPSL({
+    String? token,
+    required Map<String, dynamic> data,
+  });
+
   Future<ApiResponse> closePendingOrder({
     String? token,
     required Map<String, dynamic> data,

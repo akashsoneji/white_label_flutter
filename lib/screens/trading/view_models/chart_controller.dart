@@ -252,15 +252,24 @@ class ChartController extends GetxController {
         return {'success': false, 'error': 'Authentication token not found'};
       }
 
-      final requestData = {
+      final requestData = <String, dynamic>{
         "mt5_account": mt5Account,
         "symbol": symbol,
         "volume": volume,
         "type": type,
-        "pricesl": priceSl,
-        "pricetp": priceTp,
-        "price": (price == null || price.isEmpty) ? '' : price,
       };
+
+      if (price != null && price.isNotEmpty) {
+        requestData["price"] = price;
+      }
+      if (priceSl != null && priceSl.isNotEmpty) {
+        requestData["stop_loss"] = priceSl;
+        requestData["sl"] = priceSl;
+      }
+      if (priceTp != null && priceTp.isNotEmpty) {
+        requestData["take_profit"] = priceTp;
+        requestData["tp"] = priceTp;
+      }
 
       print(
         '🚀 ChartController: Making API call to ${ApiConstants.placeOrder}',

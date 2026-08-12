@@ -2754,10 +2754,10 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
         final priceOrder = double.tryParse(message[7].toString()) ?? 0.0;
         final priceCurrent = double.tryParse(message[8].toString()) ?? 0.0;
         // Parse price_sl and price_tp - handle empty strings, null, or "0" values
-        // Index 9 is TP and Index 10 is SL from backend
-        final priceTPStr =
-            message.length > 9 ? message[9].toString().trim() : '0';
+        // Index 9 is SL and Index 10 is TP from backend for pending orders
         final priceSLStr =
+            message.length > 9 ? message[9].toString().trim() : '0';
+        final priceTPStr =
             message.length > 10 ? message[10].toString().trim() : '0';
         final priceSL =
             (priceSLStr.isEmpty ||

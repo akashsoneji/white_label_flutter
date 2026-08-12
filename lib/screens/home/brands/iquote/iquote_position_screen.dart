@@ -864,8 +864,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         } else {
           // Open the full position-detail screen so the user can manage
           // TP/SL, Add Position, or Reverse Order for this open position.
+          final isPending = tradingController.selectedTab == 1;
           Get.to<void>(
-            () => IQuotePositionDetailScreen(position: position),
+            () => IQuotePositionDetailScreen(position: position, isPending: isPending),
             transition: Transition.cupertino,
           );
         }
@@ -1568,6 +1569,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
+                              color: AppColors.whiteColor
                             ),
                           ),
                         ),

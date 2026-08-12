@@ -33,6 +33,18 @@ class TradingRepositoryImpl implements TradingRepository {
   }
 
   @override
+  Future<ApiResponse> updatePendingOrderTPSL({
+    String? token,
+    required Map<String, dynamic> data,
+  }) {
+    return _api.post(
+      endpoint: ApiConstants.updatePendingOrderTPSL,
+      token: token,
+      data: data,
+    );
+  }
+
+  @override
   Future<ApiResponse> closePendingOrder({
     String? token,
     required Map<String, dynamic> data,

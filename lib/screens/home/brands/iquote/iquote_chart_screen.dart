@@ -400,9 +400,9 @@ class _BottomBar extends StatelessWidget {
           final bid = ctrl.lastBid.value;
           final ask = ctrl.lastAsk.value;
           final d = ctrl.priceDigits.value;
-          print(
-            "📊 [IQuoteChartScreen] _BottomBar rebuilding: bid=$bid, ask=$ask",
-          );
+          // print(
+          //   "📊 [IQuoteChartScreen] _BottomBar rebuilding: bid=$bid, ask=$ask",
+          // );
 
           final tradingController =
               Get.isRegistered<TradingController>()
@@ -778,30 +778,30 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
             ),
             SizedBox(height: 12.h),
             // Market / Limit tabs (Limit/Local hidden)
-            // Container(
-            //   decoration: BoxDecoration(
-            //     color: palette.inactiveTabBg,
-            //     borderRadius: BorderRadius.circular(8.r),
-            //     border: Border.all(color: palette.inactiveTabBorder),
-            //   ),
-            //   child: Row(
-            //     children: [
-            //       _TabButton(
-            //         label: 'Market',
-            //         active: _tab == 0,
-            //         palette: palette,
-            //         onTap: () => setState(() => _tab = 0),
-            //       ),
-            //       _TabButton(
-            //         label: 'Limit',
-            //         active: _tab == 1,
-            //         palette: palette,
-            //         onTap: () => setState(() => _tab = 1),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            // SizedBox(height: 16.h),
+            Container(
+              decoration: BoxDecoration(
+                color: palette.inactiveTabBg,
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: palette.inactiveTabBorder),
+              ),
+              child: Row(
+                children: [
+                  _TabButton(
+                    label: 'Market',
+                    active: _tab == 0,
+                    palette: palette,
+                    onTap: () => setState(() => _tab = 0),
+                  ),
+                  _TabButton(
+                    label: 'Pending',
+                    active: _tab == 1,
+                    palette: palette,
+                    onTap: () => setState(() => _tab = 1),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 16.h),
             Text(
               'Volume(Lot)',
               style: TextStyle(color: fieldText, fontSize: 13.sp),
@@ -884,7 +884,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                                 decoration: BoxDecoration(
                                   color:
                                       (lot == _volume)
-                                          ? palette.tabAccent
+                                          ? AppColors.primary
                                           : palette.sheetFieldBg,
                                   borderRadius: BorderRadius.circular(8.r),
                                 ),
@@ -936,8 +936,9 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                         ),
                       ),
                     ),
+                    SizedBox(width: 8.w),
                     Text(
-                      'USDT',
+                      'USD',
                       style: TextStyle(
                         color: palette.axisText,
                         fontSize: 13.sp,
@@ -968,40 +969,41 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
               SizedBox(height: 14.h),
             ],
             // TP SL HIDDEN
-            // Row(
-            //   children: [
-            //     Text(
-            //       'TP/SL',
-            //       style: TextStyle(color: palette.axisText, fontSize: 13.sp),
-            //     ),
-            //     SizedBox(width: 6.w),
-            //     Icon(Icons.help_outline, size: 14.sp, color: palette.axisText),
-            //     const Spacer(),
-            //     Switch(
-            //       value: _tpSlEnabled,
-            //       activeColor: _kBullColor,
-            //       onChanged: (v) {
-            //         setState(() {
-            //           _tpSlEnabled = v;
-            //           if (v) {
-            //             final activePrice = widget.side == 'buy'
-            //                 ? (widget.ctrl.lastAsk.value ??
-            //                     widget.ctrl.lastBid.value ??
-            //                     0.0)
-            //                 : (widget.ctrl.lastBid.value ??
-            //                     widget.ctrl.lastAsk.value ??
-            //                     0.0);
-            //             final digits = widget.ctrl.priceDigits.value;
-            //             if (activePrice > 0) {
-            //               _tpCtl.text = activePrice.toStringAsFixed(digits);
-            //               _slCtl.text = activePrice.toStringAsFixed(digits);
-            //             }
-            //           }
-            //         });
-            //       },
-            //     ),
-            //   ],
-            // ),
+            Row(
+              children: [
+                Text(
+                  'TP/SL',
+                  style: TextStyle(color: palette.axisText, fontSize: 13.sp),
+                ),
+                SizedBox(width: 6.w),
+                Icon(Icons.help_outline, size: 14.sp, color: palette.axisText),
+                const Spacer(),
+                Switch(
+                  value: _tpSlEnabled,
+                  activeColor: _kBullColor,
+                  onChanged: (v) {
+                    setState(() {
+                      _tpSlEnabled = v;
+                      if (v) {
+                        final activePrice =
+                            widget.side == 'buy'
+                                ? (widget.ctrl.lastAsk.value ??
+                                    widget.ctrl.lastBid.value ??
+                                    0.0)
+                                : (widget.ctrl.lastBid.value ??
+                                    widget.ctrl.lastAsk.value ??
+                                    0.0);
+                        final digits = widget.ctrl.priceDigits.value;
+                        if (activePrice > 0) {
+                          _tpCtl.text = activePrice.toStringAsFixed(digits);
+                          _slCtl.text = activePrice.toStringAsFixed(digits);
+                        }
+                      }
+                    });
+                  },
+                ),
+              ],
+            ),
             if (_tpSlEnabled) ...[
               Row(
                 children: [
@@ -1024,98 +1026,190 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
               ),
               SizedBox(height: 12.h),
             ],
-            _SummaryRow(
-              label: 'Margin',
-              value: _margin.toStringAsFixed(4),
-              palette: palette,
-            ),
-            SizedBox(height: 6.h),
-            _SummaryRow(
-              label: 'Fee',
-              value: _fee.toStringAsFixed(4),
-              palette: palette,
-            ),
-            SizedBox(height: 6.h),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Total: ${_total.toStringAsFixed(4)}',
-                        style: AppTextStyles.heading.copyWith(
-                          fontSize: 17.sp,
-                          fontWeight: FontWeight.w800,
-                          color: fieldText,
+            if (_tab == 0) ...[
+              _SummaryRow(
+                label: 'Margin',
+                value: _margin.toStringAsFixed(4),
+                palette: palette,
+              ),
+              SizedBox(height: 6.h),
+              _SummaryRow(
+                label: 'Fee',
+                value: _fee.toStringAsFixed(4),
+                palette: palette,
+              ),
+              SizedBox(height: 6.h),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Total: ${_total.toStringAsFixed(4)}',
+                          style: AppTextStyles.heading.copyWith(
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.w800,
+                            color: fieldText,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                Flexible(
-                  flex: 2,
-                  child: SizedBox(
-                    height: 48.h,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: color,
-                        foregroundColor: AppColors.whiteColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.r),
+                  Flexible(
+                    flex: 2,
+                    child: SizedBox(
+                      height: 48.h,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: color,
+                          foregroundColor: AppColors.whiteColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
                         ),
-                      ),
-                      onPressed: () => _submit(side),
-                      child: Obx(() {
-                        if (widget.ctrl.isLoading.value) {
-                          return SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              color: AppColors.textPrimary,
-                              strokeWidth: 2,
-                            ),
-                          );
-                        }
-                        final px =
-                            _tab == 0
-                                ? (widget.ctrl.lastAsk.value ??
-                                    widget.ctrl.lastBid.value ??
-                                    0)
-                                : _price;
-                        final sideLabel = side == 'buy' ? 'Buy' : 'Sell';
-                        final kindLabel = _tab == 1 ? 'Limit' : 'Market';
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '$sideLabel $kindLabel',
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w700,
+                        onPressed: () => _submit(side),
+                        child: Obx(() {
+                          if (widget.ctrl.isLoading.value) {
+                            return SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                color: AppColors.textPrimary,
+                                strokeWidth: 2,
                               ),
-                            ),
-                            if (px > 0) ...[
-                              SizedBox(width: 6.w),
+                            );
+                          }
+                          final px =
+                              widget.ctrl.lastAsk.value ??
+                              widget.ctrl.lastBid.value ??
+                              0;
+                          final sideLabel = side == 'buy' ? 'Buy' : 'Sell';
+                          final kindLabel = 'Market';
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                               Text(
-                                px.toStringAsFixed(d),
+                                '$sideLabel $kindLabel',
                                 style: TextStyle(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
+                              if (px > 0) ...[
+                                SizedBox(width: 6.w),
+                                Text(
+                                  px.toStringAsFixed(d),
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                              SizedBox(width: 6.w),
+                              Icon(Icons.trending_up, size: 16.sp),
                             ],
-                            SizedBox(width: 6.w),
-                            Icon(Icons.trending_up, size: 16.sp),
-                          ],
-                        );
-                      }),
+                          );
+                        }),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ] else ...[
+              Obx(() {
+                final currentBid = widget.ctrl.lastBid.value ?? 0.0;
+                final currentAsk = widget.ctrl.lastAsk.value ?? 0.0;
+                final isSellStop = _price < currentBid;
+                final isBuyLimit = _price < currentAsk;
+
+                final sellLabel = isSellStop ? 'SELL STOP' : 'SELL LIMIT';
+                final buyLabel = isBuyLimit ? 'BUY LIMIT' : 'BUY STOP';
+
+                return Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 48.h,
+                        child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _kBearColor,
+                          foregroundColor: AppColors.whiteColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                          onPressed: () => _submit('sell'),
+                          child:
+                              widget.ctrl.isLoading.value
+                                  ? SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      color: _kBearColor,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(width: 6.w),
+                                      Text(
+                                        sellLabel,
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: SizedBox(
+                        height: 48.h,
+                        child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _kBullColor,
+                          foregroundColor: AppColors.whiteColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                          onPressed: () => _submit('buy'),
+                          child:
+                              widget.ctrl.isLoading.value
+                                  ? SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      color: _kBullColor,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        buyLabel,
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      SizedBox(width: 6.w),
+                                    ],
+                                  ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ],
           ],
         ),
       ),
@@ -1170,7 +1264,7 @@ class _TabButton extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
-            color: active ? palette.tabAccent : Colors.transparent,
+            color: active ? AppColors.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(8.r),
           ),
           alignment: Alignment.center,

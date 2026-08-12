@@ -117,12 +117,17 @@ class _Palette {
 }
 
 class IQuotePositionDetailScreen extends StatefulWidget {
-  const IQuotePositionDetailScreen({super.key, required this.position});
+  const IQuotePositionDetailScreen({
+    super.key,
+    required this.position,
+    this.isPending = false,
+  });
 
   /// The open position to display. Symbol/side/volume/sl/tp/price are all
   /// pulled from this object; live bid/ask is layered on top for the price
   /// header + chart markers.
   final TradePosition position;
+  final bool isPending;
 
   @override
   State<IQuotePositionDetailScreen> createState() =>
@@ -390,13 +395,23 @@ class _IQuotePositionDetailScreenState
     final sl = _parsePriceOrNull(_slCtl.text) ?? 0.0;
     setState(() => _busy = true);
     try {
-      final ok = await _trading.updateTPSL(
-        mt5Account: acct.metaAccountNumber,
-        positionId: int.tryParse(pos.orderId.toString()) ?? 0,
-        stopLoss: sl,
-        takeProfit: tp,
-        digits: pos.digits,
-      );
+      bool ok = false;
+      if (widget.isPending) {
+        ok = await _trading.updatePendingOrderTPSL(
+          mt5Account: acct.metaAccountNumber,
+          orderId: int.tryParse(pos.orderId.toString()) ?? 0,
+          stopLoss: sl,
+          takeProfit: tp,
+        );
+      } else {
+        ok = await _trading.updateTPSL(
+          mt5Account: acct.metaAccountNumber,
+          positionId: int.tryParse(pos.orderId.toString()) ?? 0,
+          stopLoss: sl,
+          takeProfit: tp,
+          digits: pos.digits,
+        );
+      }
       if (ok) {
         CustomToastService.showSuccess(
           message: 'TP/SL updated',
@@ -587,11 +602,19 @@ class _IQuotePositionDetailScreenState
   Future<void> _executeClose(TradePosition pos, String mt5Account) async {
     setState(() => _busy = true);
     try {
-      final closed = await _trading.closePositionById(
-        mt5Account: mt5Account,
-        positionId: int.tryParse(pos.orderId.toString()) ?? 0,
-        volume: pos.volume,
-      );
+      bool closed = false;
+      if (widget.isPending) {
+        closed = await _trading.cancelOrderWithImmediateUpdate(
+          mt5Account: mt5Account,
+          orderId: int.tryParse(pos.orderId) ?? 0,
+        );
+      } else {
+        closed = await _trading.closePositionById(
+          mt5Account: mt5Account,
+          positionId: int.tryParse(pos.orderId.toString()) ?? 0,
+          volume: pos.volume,
+        );
+      }
       if (closed) {
         CustomToastService.showSuccess(
           message:
