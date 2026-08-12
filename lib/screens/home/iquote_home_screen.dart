@@ -166,11 +166,13 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                     // Centered Logo (Text-free, no ClipOval)
                     Expanded(
                       child: Center(
-                        child: BrandLogo(
-                          source: FlavorConfig.effectiveLogo,
-                          width: 60.r,
-                          height: 60.r,
-                          fit: BoxFit.contain,
+                        child: ClipOval(
+                          child: BrandLogo(
+                            source: FlavorConfig.effectiveLogo,
+                            width: 60.r,
+                            height: 60.r,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                     ),

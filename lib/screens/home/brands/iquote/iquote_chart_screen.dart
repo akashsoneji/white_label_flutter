@@ -911,30 +911,20 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
             if (_tab == 1) ...[
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: palette.sheetFieldBg,
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: palette.sheetFieldBorder),
-                ),
+                // decoration: BoxDecoration(
+                //   color: palette.sheetFieldBg,
+                //   borderRadius: BorderRadius.circular(8.r),
+                //   border: Border.all(color: palette.sheetFieldBorder),
+                // ),
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        controller: _priceCtl,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          isCollapsed: true,
-                          contentPadding: EdgeInsets.symmetric(vertical: 12.h),
-                        ),
-                      ),
+                     child: _Field(
+                      label: 'Order Price',
+                      controller: _priceCtl,
+                      palette: palette,
+                    )
+                      
                     ),
                     SizedBox(width: 8.w),
                     Text(

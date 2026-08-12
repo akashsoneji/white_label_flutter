@@ -16,11 +16,11 @@ class PipzeConfig extends BaseClientConfig {
           secondaryColor: const Color(0xFFF8F3FF),
           accentColor: const Color(0xFFFFC93C),
           logoSvgPath: 'icon.png',
-          splashLogoPath: 'icon.png',
+          splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',
- apiBaseUrl: 'https://dev.tenaxcodecrm.com/api/',
- websocketUrl: 'wss://dev.tenaxcodecrm.com/trade-engine',
- chartBaseUrl: 'https://dev.tenaxcodecrm.com',
+ apiBaseUrl: 'https://my.pipze.com/api/',
+ websocketUrl: 'wss://my.pipze.com/trade-engine',
+ chartBaseUrl: 'https://my.pipze.com',
  useNewChart: false,
  );
 }
