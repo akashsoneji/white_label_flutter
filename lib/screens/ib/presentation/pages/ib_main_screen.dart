@@ -28,7 +28,6 @@ class _IbMainScreenState extends State<IbMainScreen> {
   DateTime? _lastResetTime;
   late final PageController _pageController;
 
-
   @override
   void initState() {
     super.initState();
@@ -119,7 +118,9 @@ class _IbMainScreenState extends State<IbMainScreen> {
         ),
       KeepAliveWrapper(
         key: ValueKey('transfer_commission_$_screenKey'),
-        child: const IbTransferCommissionScreen(),
+        child: IbTransferCommissionScreen(
+          isActive: _currentIndex == (isTraditional ? 3 : 4),
+        ),
       ),
     ];
   }
@@ -127,7 +128,8 @@ class _IbMainScreenState extends State<IbMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final ibType = ibController.ibStatusResponse.value?.data?.ibType ?? 'dynamic';
+      final ibType =
+          ibController.ibStatusResponse.value?.data?.ibType ?? 'dynamic';
       final isTraditional = ibType == 'traditional';
 
       return Scaffold(
@@ -192,4 +194,3 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
   @override
   bool get wantKeepAlive => true;
 }
-

@@ -98,42 +98,42 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
         title: Text('My Investments', style: AppTextStyles.screenTitle),
         automaticallyImplyLeading: false,
         actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 12.w),
-            child: TextButton.icon(
-              onPressed: () {
-                if (Get.isRegistered<CopyTradingHubController>()) {
-                  final hub = Get.find<CopyTradingHubController>();
-                  final isApprovedMaster =
-                      hub.masterStatus.value ==
-                      CopyTradingMasterApplicationStatus.approved;
-                  hub.currentTabIndex.value = isApprovedMaster ? 3 : 1;
-                } else {
-                  Get.back();
-                }
-              },
-              icon: Icon(
-                Icons.explore_outlined,
-                size: 16.r,
-                color: AppColors.primary,
-              ),
-              label: Text(
-                'Explore Masters',
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                backgroundColor: AppColors.primary.withOpacity(0.1),
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-              ),
-            ),
-          ),
+          // Padding(
+          //   padding: EdgeInsets.only(right: 12.w),
+          //   child: TextButton.icon(
+          //     onPressed: () {
+          //       if (Get.isRegistered<CopyTradingHubController>()) {
+          //         final hub = Get.find<CopyTradingHubController>();
+          //         final isApprovedMaster =
+          //             hub.masterStatus.value ==
+          //             CopyTradingMasterApplicationStatus.approved;
+          //         hub.currentTabIndex.value = isApprovedMaster ? 3 : 1;
+          //       } else {
+          //         Get.back();
+          //       }
+          //     },
+          //     icon: Icon(
+          //       Icons.explore_outlined,
+          //       size: 16.r,
+          //       color: AppColors.primary,
+          //     ),
+          //     label: Text(
+          //       'Explore Masters',
+          //       style: AppTextStyles.bodyText.copyWith(
+          //         fontSize: 12.sp,
+          //         fontWeight: FontWeight.w600,
+          //         color: AppColors.primary,
+          //       ),
+          //     ),
+          //     style: TextButton.styleFrom(
+          //       backgroundColor: AppColors.primary.withOpacity(0.1),
+          //       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(20.r),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
       body: Obx(() {
@@ -333,9 +333,7 @@ class _MyInvestmentsScreenState extends State<MyInvestmentsScreen>
       builder:
           (ctx) => AlertDialog(
             title: Text('Stop investment?'),
-            content: Text(
-              'This is permanent. You\'ll need to re-subscribe.',
-            ),
+            content: Text('This is permanent. You\'ll need to re-subscribe.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(ctx).pop(false),
@@ -747,7 +745,10 @@ class _InvestmentRow extends StatelessWidget {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [AppColors.brandPrimary, AppColors.brandPrimary.withOpacity(0.7)],
+                            colors: [
+                              AppColors.brandPrimary,
+                              AppColors.brandPrimary.withOpacity(0.7),
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(10.r),
                         ),
@@ -980,7 +981,10 @@ class _FieldChip extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textGrey),
+          style: AppTextStyles.bodyText.copyWith(
+            fontSize: 10.sp,
+            color: AppColors.textGrey,
+          ),
         ),
         SizedBox(height: 2.h),
         Text(
@@ -1449,7 +1453,11 @@ class _EmptyInvestmentsState extends StatelessWidget {
               icon: Icon(Icons.explore_outlined, size: 16.r),
               label: Text(
                 'Explore Masters',
-                style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w600,color: AppColors.whiteColor),
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.whiteColor,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 elevation: 0,

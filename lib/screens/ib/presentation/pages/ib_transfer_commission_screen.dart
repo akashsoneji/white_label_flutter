@@ -5,7 +5,6 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/ib/data/repositories/ib_repository.dart';
 import 'package:crm_app/screens/ib/presentation/pages/ib_transfer_create_screen.dart';
 import 'package:crm_app/screens/ib/view_models/ib_transfer_controller.dart';
-import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -13,7 +12,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class IbTransferCommissionScreen extends StatefulWidget {
-  const IbTransferCommissionScreen({super.key});
+  final bool isActive;
+  const IbTransferCommissionScreen({super.key, this.isActive = false});
 
   @override
   State<IbTransferCommissionScreen> createState() =>
@@ -46,6 +46,15 @@ class _IbTransferCommissionScreenState
         _controller.fetchHistory();
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant IbTransferCommissionScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      _controller.fetchInitData();
+      _controller.fetchHistory(refresh: true);
+    }
   }
 
   @override
@@ -94,94 +103,104 @@ class _IbTransferCommissionScreenState
                   _controller.isLoadingHistory.value &&
                   _controller.historyData.isEmpty;
 
-              return CustomScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  // 1. Balance Card
-                  SliverToBoxAdapter(child: _buildPremiumBalanceCard()),
+              return RefreshIndicator(
+                onRefresh: () async {
+                  await Future.wait([
+                    _controller.fetchInitData(),
+                    _controller.fetchHistory(refresh: true),
+                  ]);
+                },
+                color: AppColors.primary,
+                backgroundColor: AppColors.whiteColor,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    // 1. Balance Card
+                    SliverToBoxAdapter(child: _buildPremiumBalanceCard()),
 
-                  // 2. Initial Loading State
-                  if (isInitialLoading)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    )
-                  // 3. Empty State
-                  else if (_controller.historyData.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 40.w,
-                            vertical: 40.h,
+                    // 2. Initial Loading State
+                    if (isInitialLoading)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.history_toggle_off,
-                                size: 48.sp,
-                                color: AppColors.textSecondary.withOpacity(0.5),
-                              ),
-                              SizedBox(height: 16.h),
-                              Text(
-                                'No transfer history found',
-                                style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w400,
+                        ),
+                      )
+                    // 3. Empty State
+                    else if (_controller.historyData.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 40.w,
+                              vertical: 40.h,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.history_toggle_off,
+                                  size: 48.sp,
+                                  color: AppColors.textSecondary.withOpacity(0.5),
                                 ),
-                              ),
-                            ],
+                                SizedBox(height: 16.h),
+                                Text(
+                                  'No transfer history found',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
+                      )
+                    // 4. Transactions List
+                    else ...[
+                      SliverPadding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20.w,
+                          vertical: 8.h,
+                        ),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate((context, index) {
+                            final item = _controller.historyData[index];
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 12.h),
+                              child: _buildHistoryCard(item),
+                            );
+                          }, childCount: _controller.historyData.length),
+                        ),
                       ),
-                    )
-                  // 4. Transactions List
-                  else ...[
-                    SliverPadding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20.w,
-                        vertical: 8.h,
-                      ),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          final item = _controller.historyData[index];
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: 12.h),
-                            child: _buildHistoryCard(item),
-                          );
-                        }, childCount: _controller.historyData.length),
-                      ),
-                    ),
 
-                    // 5. Load More Loading / No More Items Indicator at bottom
-                    // SliverToBoxAdapter(
-                    //   child: Padding(
-                    //     padding: EdgeInsets.symmetric(vertical: 24.h),
-                    //     child: Center(
-                    //       child: _controller.isLoadingHistory.value
-                    //           ? CircularProgressIndicator(color: AppColors.primary)
-                    //           : !_controller.hasMoreHistory.value && _controller.historyData.isNotEmpty
-                    //               ? Text(
-                    //                   'No more history to show',
-                    //                   style: TextStyle(
-                    //                     color: AppColors.textSecondary,
-                    //                     fontSize: 11.sp,
-                    //                   ),
-                    //                 )
-                    //               : const SizedBox.shrink(),
-                    //     ),
-                    //   ),
-                    // ),
+                      // 5. Load More Loading / No More Items Indicator at bottom
+                      // SliverToBoxAdapter(
+                      //   child: Padding(
+                      //     padding: EdgeInsets.symmetric(vertical: 24.h),
+                      //     child: Center(
+                      //       child: _controller.isLoadingHistory.value
+                      //           ? CircularProgressIndicator(color: AppColors.primary)
+                      //           : !_controller.hasMoreHistory.value && _controller.historyData.isNotEmpty
+                      //               ? Text(
+                      //                   'No more history to show',
+                      //                   style: TextStyle(
+                      //                     color: AppColors.textSecondary,
+                      //                     fontSize: 11.sp,
+                      //                   ),
+                      //                 )
+                      //               : const SizedBox.shrink(),
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
                   ],
-                ],
+                ),
               );
             }),
           ),
