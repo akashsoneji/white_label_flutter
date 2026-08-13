@@ -2583,7 +2583,7 @@ class TradingController extends GetxController {
       final payload = {
         'symbol': symbol,
         'volume': volume,
-        'type': orderType.value,
+        'type': orderType.apiString,
         'mt5_account': accountToUse,
       };
 

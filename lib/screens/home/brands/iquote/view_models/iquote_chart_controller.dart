@@ -48,18 +48,22 @@ class CandleData {
 
 class IQuoteChartController extends GetxController {
   IQuoteChartController([String? initialSymbol]) {
-    final symService = Get.isRegistered<SymbolSelectionService>()
-        ? Get.find<SymbolSelectionService>()
-        : Get.put(SymbolSelectionService());
+    final symService =
+        Get.isRegistered<SymbolSelectionService>()
+            ? Get.find<SymbolSelectionService>()
+            : Get.put(SymbolSelectionService());
 
     if (initialSymbol != null) {
       symService.setSymbol(initialSymbol);
     } else {
       // Find the correct suffix for XAUUSD from the available instruments
-      final instCtrl = Get.isRegistered<InstrumentsController>() ? Get.find<InstrumentsController>() : null;
+      final instCtrl =
+          Get.isRegistered<InstrumentsController>()
+              ? Get.find<InstrumentsController>()
+              : null;
       if (instCtrl != null) {
-        final match = instCtrl.allInstruments.firstWhereOrNull((e) =>
-          MarketWatchV2Service.normalizeSymbol(e.symbol) == 'XAUUSD'
+        final match = instCtrl.allInstruments.firstWhereOrNull(
+          (e) => MarketWatchV2Service.normalizeSymbol(e.symbol) == 'XAUUSD',
         );
         symService.setSymbol(match?.symbol ?? 'XAUUSD');
       } else {
@@ -68,9 +72,10 @@ class IQuoteChartController extends GetxController {
     }
   }
 
-  RxString get symbolRx => Get.isRegistered<SymbolSelectionService>()
-      ? Get.find<SymbolSelectionService>().lastSymbolRx
-      : Get.put(SymbolSelectionService()).lastSymbolRx;
+  RxString get symbolRx =>
+      Get.isRegistered<SymbolSelectionService>()
+          ? Get.find<SymbolSelectionService>().lastSymbolRx
+          : Get.put(SymbolSelectionService()).lastSymbolRx;
 
   String get symbol => symbolRx.value;
   set symbol(String value) {
@@ -118,7 +123,8 @@ class IQuoteChartController extends GetxController {
   final chartData = <CandleData>[].obs;
   final isChartLoading = false.obs;
   final isLoadingOlder = false.obs;
-  final resolution = 60.obs; // Resolution in minutes (default 60M for 12 hours period)
+  final resolution =
+      60.obs; // Resolution in minutes (default 60M for 12 hours period)
   final customFromDate = Rxn<DateTime>();
   final customToDate = Rxn<DateTime>();
 
@@ -175,10 +181,16 @@ class IQuoteChartController extends GetxController {
     _livePriceWorker?.dispose();
     final sym = symbol;
     if (sym.isNotEmpty) {
-      _instruments.syncMarketWatchV2AfterFavoriteChange(sym, isFavoriteNow: true);
+      _instruments.syncMarketWatchV2AfterFavoriteChange(
+        sym,
+        isFavoriteNow: true,
+      );
     }
     // Live tick stream — keeps header + chart markers + Buy/Sell pills live.
-    _livePriceWorker = ever<InstrumentPrice>(_instruments.priceRx(sym), _applyQuote);
+    _livePriceWorker = ever<InstrumentPrice>(
+      _instruments.priceRx(sym),
+      _applyQuote,
+    );
   }
 
   void _applyQuote(InstrumentPrice? quote) {
@@ -186,9 +198,8 @@ class IQuoteChartController extends GetxController {
     // print("📈 [IQuoteChartController] _applyQuote for $symbol: bid=${quote.bid}, ask=${quote.ask}");
     // InstrumentPrice has bid/ask/digits but no `last` field — derive a
     // mid-price for the header so the big number and MA labels stay live.
-    final mid = quote.bid == 0 && quote.ask == 0
-        ? null
-        : (quote.bid + quote.ask) / 2;
+    final mid =
+        quote.bid == 0 && quote.ask == 0 ? null : (quote.bid + quote.ask) / 2;
     currentPrice.value = mid;
     priceDigits.value = quote.digits;
     lastBid.value = quote.bid;
@@ -230,8 +241,11 @@ class IQuoteChartController extends GetxController {
     } else {
       // Start a new candle aligned to the resolution minutes boundary
       final int minutesSinceEpoch = now.millisecondsSinceEpoch ~/ (60 * 1000);
-      final int alignedMinutes = (minutesSinceEpoch ~/ resolution.value) * resolution.value;
-      final alignedTime = DateTime.fromMillisecondsSinceEpoch(alignedMinutes * 60 * 1000);
+      final int alignedMinutes =
+          (minutesSinceEpoch ~/ resolution.value) * resolution.value;
+      final alignedTime = DateTime.fromMillisecondsSinceEpoch(
+        alignedMinutes * 60 * 1000,
+      );
 
       final newCandle = CandleData(
         dateTime: alignedTime,
@@ -308,12 +322,7 @@ class IQuoteChartController extends GetxController {
   /// [orderKind] = "market" | "limit"
   /// [price]    = required for limit orders; pass "" for market orders.
   /// Returns ({bool ok, String message, OrderType orderType}).
-  Future<
-      ({
-        bool ok,
-        String message,
-        OrderType orderType,
-      })> submitOrder({
+  Future<({bool ok, String message, OrderType orderType})> submitOrder({
     required String side,
     required String orderKind,
     required double volume,
@@ -339,7 +348,10 @@ class IQuoteChartController extends GetxController {
 
     final kind = orderKind.toLowerCase();
     final orderType = _orderType(side, kind);
-    if (orderType.requiresPrice && (price.isEmpty || double.tryParse(price) == null || double.parse(price) <= 0)) {
+    if (orderType.requiresPrice &&
+        (price.isEmpty ||
+            double.tryParse(price) == null ||
+            double.parse(price) <= 0)) {
       return (
         ok: false,
         message: 'Please enter a valid limit price.',
@@ -363,20 +375,24 @@ class IQuoteChartController extends GetxController {
         volume: volume.toStringAsFixed(2),
         orderType: orderType,
         price: orderType.requiresPrice ? price : '',
-        takeProfit: (takeProfit != null && takeProfit.isNotEmpty)
-            ? takeProfit
-            : null,
-        stopLoss: (stopLoss != null && stopLoss.isNotEmpty)
-            ? stopLoss
-            : null,
+        takeProfit:
+            (takeProfit != null && takeProfit.isNotEmpty) ? takeProfit : null,
+        stopLoss: (stopLoss != null && stopLoss.isNotEmpty) ? stopLoss : null,
         mt5Account: acct.metaAccountNumber,
       );
 
       if (ok) {
+        final cleanSymbol = symbol.split('.').first.toUpperCase();
+        final typeName = orderType.requiresPrice 
+            ? orderType.displayName 
+            : (orderType.isBuy ? 'Buy' : 'Sell');
+        
+        final titleStr = orderType.requiresPrice ? 'Pending order placed' : 'Market order placed';
+        final messageStr = '$cleanSymbol $typeName ${volume.toStringAsFixed(2)}';
+
         CustomToastService.showSuccess(
-          message:
-              '$orderType ${volume.toStringAsFixed(2)} ${symbol.toUpperCase()}',
-          title: 'Order placed',
+          message: messageStr,
+          title: titleStr,
         );
         // Refresh positions + pending orders so the bottom-bar counters
         // update immediately.
@@ -385,9 +401,10 @@ class IQuoteChartController extends GetxController {
         return (ok: true, message: 'Order placed', orderType: orderType);
       }
 
-      final errorMsg = _trading.errorMessage.isEmpty
-          ? 'Failed to place order.'
-          : _trading.errorMessage;
+      final errorMsg =
+          _trading.errorMessage.isEmpty
+              ? 'Failed to place order.'
+              : _trading.errorMessage;
       CustomToastService.showError(message: errorMsg);
       return (ok: false, message: errorMsg, orderType: orderType);
     } catch (e) {
@@ -399,11 +416,13 @@ class IQuoteChartController extends GetxController {
 
   static OrderType _orderType(String side, String kind) {
     final isBuy = side.toLowerCase() == 'buy';
-    final isLimit = kind == 'limit';
-    if (isBuy && isLimit) return OrderType.buyLimit;
-    if (!isBuy && isLimit) return OrderType.sellLimit;
-    if (isBuy) return OrderType.buyMarket;
-    return OrderType.sellMarket;
+    if (kind == 'limit') {
+      return isBuy ? OrderType.buyLimit : OrderType.sellLimit;
+    } else if (kind == 'stop') {
+      return isBuy ? OrderType.buyStop : OrderType.sellStop;
+    } else {
+      return isBuy ? OrderType.buyMarket : OrderType.sellMarket;
+    }
   }
 
   // ── MA labels (driven from the live price so the strip updates as the

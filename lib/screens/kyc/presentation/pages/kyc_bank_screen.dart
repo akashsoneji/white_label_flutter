@@ -186,9 +186,6 @@ class _KycBankScreenState extends State<KycBankScreen> {
                                     _buildAccountTypeField(),
                                     SizedBox(height: 8.h),
                                     _buildRelationShipTypeField(),
-                                    // Currency field
-                                    _buildCurrencyField(),
-                                    // SizedBox(height: 8.h),
 
                                     // Account Holder / Address Holder (common field)
                                     _buildFormField(
@@ -294,9 +291,6 @@ class _KycBankScreenState extends State<KycBankScreen> {
                                     _buildAccountTypeField(),
                                     SizedBox(height: 8.h),
                                     _buildRelationShipTypeField(),
-                                    // Currency field
-                                    _buildCurrencyField(),
-                                    // SizedBox(height: 8.h),
 
                                     // Account Holder Name (common field)
                                     _buildFormField(
@@ -434,54 +428,6 @@ class _KycBankScreenState extends State<KycBankScreen> {
         child: Center(
           child: Text(
             'Error loading account type field',
-            style: AppTextStyles.bodyText.copyWith(color: Colors.red),
-          ),
-        ),
-      );
-    }
-  }
-
-  // Currency field
-  Widget _buildCurrencyField() {
-    try {
-      return Padding(
-        padding: EdgeInsets.only(bottom: 16.h),
-        child: RTLHelper.rtlTextField(
-          readOnly: true,
-          onTap: _showCurrencyOptions,
-          controller: TextEditingController(
-            text: controller.selectedCurrency.value,
-          ),
-          labelText: 'Currency *',
-          suffixIcon: InkWell(
-            onTap: _showCurrencyOptions,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14),
-              child: RTLHelper.rtlIcon(
-                Icons.keyboard_arrow_down,
-                color: AppColors.icongrey,
-              ),
-            ),
-          ),
-          decoration: InputDecoration(
-            labelText: 'Currency *',
-            labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
-            floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
-          ),
-        ),
-      );
-    } catch (e) {
-      print('Error in _buildCurrencyField: $e');
-      return Container(
-        height: 50.h,
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            'Error loading currency field',
             style: AppTextStyles.bodyText.copyWith(color: Colors.red),
           ),
         ),
@@ -898,13 +844,10 @@ class _KycBankScreenState extends State<KycBankScreen> {
         }
       },
       onTap: () {
-        // When user taps on a box, select all text for easy replacement
-        if (_otpControllers[index].text.isNotEmpty) {
-          _otpControllers[index].selection = TextSelection(
-            baseOffset: 0,
-            extentOffset: _otpControllers[index].text.length,
-          );
-        }
+        _otpControllers[index].selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: _otpControllers[index].text.length,
+        );
       },
     );
   }
@@ -1249,25 +1192,10 @@ class _KycBankScreenState extends State<KycBankScreen> {
     );
   }
 
-  // Helper for Currency bottom sheet
-  void _showCurrencyOptions() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: _CurrencySelectionBottomSheet(controller: controller),
-        );
-      },
-    );
-  }
-
   // Helper for Crypto Network bottom sheet
   void _showCryptoNetworkBottomSheet() {
     showModalBottomSheet(
+      isScrollControlled: true,
       backgroundColor: AppColors.whiteColor,
       context: context,
       shape: RoundedRectangleBorder(
@@ -1289,35 +1217,48 @@ class _KycBankScreenState extends State<KycBankScreen> {
                   ),
                 ),
               ),
-              Obx(() => Column(
-                mainAxisSize: MainAxisSize.min,
-                children: controller.allowedCryptoNetworks.isEmpty
-                    ? [
-                        Padding(
-                          padding: EdgeInsets.all(24.w),
-                          child: Text(
-                            'No networks available',
-                            style: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary),
+              Obx(() {
+                final listHeight = (MediaQuery.of(context).size.height -
+                        MediaQuery.of(context).padding.top -
+                        MediaQuery.of(context).padding.bottom -
+                        MediaQuery.of(context).viewInsets.bottom -
+                        120)
+                    .clamp(200.0, 500.0);
+                return SizedBox(
+                  height: listHeight,
+                  child: controller.allowedCryptoNetworks.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24.w),
+                            child: Text(
+                              'No networks available',
+                              style: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary),
+                            ),
                           ),
                         )
-                      ]
-                    : controller.allowedCryptoNetworks.map((network) {
-                        return ListTile(
-                          title: Text(
-                            network.label ?? '',
-                            style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
-                          ),
-                          trailing:
-                              controller.selectedCryptoNetwork.value == network.slug
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: AlwaysScrollableScrollPhysics(),
+                          itemCount: controller.allowedCryptoNetworks.length,
+                          itemBuilder: (context, index) {
+                            final network = controller.allowedCryptoNetworks[index];
+                            return ListTile(
+                              title: Text(
+                                network.label ?? '',
+                                style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
+                              ),
+                              trailing: controller.selectedCryptoNetwork.value == network.slug
                                   ? Icon(Icons.check, color: AppColors.primary)
                                   : null,
-                          onTap: () {
-                            controller.selectedCryptoNetwork.value = network.slug ?? '';
-                            Navigator.pop(context);
+                              onTap: () {
+                                controller.selectedCryptoNetwork.value = network.slug ?? '';
+                                Navigator.pop(context);
+                              },
+                            );
                           },
-                        );
-                      }).toList(),
-              )),
+                        ),
+                );
+              }),
               SizedBox(height: 16.h),
             ],
           ),
@@ -1664,164 +1605,5 @@ class _KycBankScreenState extends State<KycBankScreen> {
       _accountNumbersMatch.value = false;
       return false;
     }
-  }
-}
-
-class _CurrencySelectionBottomSheet extends StatefulWidget {
-  final KycBankController controller;
-
-  const _CurrencySelectionBottomSheet({required this.controller});
-
-  @override
-  State<_CurrencySelectionBottomSheet> createState() =>
-      _CurrencySelectionBottomSheetState();
-}
-
-class _CurrencySelectionBottomSheetState
-    extends State<_CurrencySelectionBottomSheet> {
-  late TextEditingController searchController;
-  late List<String> filteredCurrencies;
-
-  @override
-  void initState() {
-    super.initState();
-    searchController = TextEditingController();
-    filteredCurrencies = List.from(widget.controller.currencies);
-  }
-
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
-  }
-
-  void _filterCurrencies(String value) {
-    setState(() {
-      if (value.length < 2) {
-        filteredCurrencies = List.from(widget.controller.currencies);
-      } else {
-        filteredCurrencies =
-            widget.controller.currencies
-                .where(
-                  (currency) =>
-                      currency.toUpperCase().contains(value.toUpperCase()),
-                )
-                .toList();
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final keyboardHeight = mediaQuery.viewInsets.bottom;
-    final screenHeight = mediaQuery.size.height;
-    final safeAreaTop = mediaQuery.padding.top;
-    final safeAreaBottom = mediaQuery.padding.bottom;
-
-    // Calculate available height: screen height - safe area insets - keyboard height
-    // When keyboard is visible, reduce the max height accordingly
-    final availableHeight =
-        screenHeight - safeAreaTop - safeAreaBottom - keyboardHeight;
-
-    // Limit to 75% of available height when keyboard is visible, 65% when not
-    // Ensure minimum height of 300 and maximum doesn't exceed available space
-    final heightPercentage = keyboardHeight > 0 ? 0.75 : 0.65;
-    final maxHeight = (availableHeight * heightPercentage).clamp(
-      300.0,
-      availableHeight - 20,
-    );
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: keyboardHeight),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: maxHeight, minHeight: 300.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Padding(
-              padding: EdgeInsets.all(16.w),
-              child: Text(
-                'Select Currency',
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            // Search field
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: TextField(
-                controller: searchController,
-                onChanged: _filterCurrencies,
-                decoration: InputDecoration(
-                  hintText: 'Search currency...',
-                  prefixIcon: Icon(Icons.search, color: AppColors.icongrey),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.primary, width: 2),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 16.w,
-                    vertical: 12.h,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 8.h),
-            // Currency list - use Flexible to take remaining space and ensure it's scrollable
-            Flexible(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // Calculate available height for list dynamically
-                  // Account for: title padding (16*2) + title text (~22) + search field (~60) + spacing (8)
-                  final headerSpace = (16.w * 2) + (18.sp * 1.2) + 60.h + 8.h;
-                  final listHeight = (constraints.maxHeight - headerSpace)
-                      .clamp(150.0, constraints.maxHeight);
-
-                  return SizedBox(
-                    height: listHeight > 0 ? listHeight : 200.0,
-                    child: ListView.builder(
-                      shrinkWrap: false,
-                      physics: AlwaysScrollableScrollPhysics(),
-                      itemCount: filteredCurrencies.length,
-                      itemBuilder: (context, index) {
-                        final currency = filteredCurrencies[index];
-                        return ListTile(
-                          title: Text(
-                            currency,
-                            style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
-                          ),
-                          trailing:
-                              widget.controller.selectedCurrency.value ==
-                                      currency
-                                  ? Icon(Icons.check, color: AppColors.primary)
-                                  : null,
-                          onTap: () {
-                            widget.controller.setCurrency(currency);
-                            Navigator.pop(context);
-                          },
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

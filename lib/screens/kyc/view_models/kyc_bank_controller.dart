@@ -40,7 +40,7 @@ class KycBankController extends GetxController {
       <WithdrawalMethods>[].obs;
   final RxList<AllowedCryptoNetwork> allowedCryptoNetworks =
       <AllowedCryptoNetwork>[].obs;
-  final RxString selectedCurrency = 'USD'.obs;
+  // final RxString selectedCurrency = 'USD'.obs;
   final RxString selectedIfscIban = 'IFSCs'.obs;
   final RxString selectedCryptoNetwork = ''.obs;
 
@@ -189,17 +189,18 @@ class KycBankController extends GetxController {
     // Reset OTP state when changing account type
     isOtpSent.value = false;
     otp.value = '';
-    _applyAccountTypeDefaults();
+    // _applyAccountTypeDefaults();
   }
 
-  void _applyAccountTypeDefaults() {
-    if (selectedAccountType.value.toLowerCase() == 'crypto') {
-      selectedCurrency.value = 'USDT';
-      _applyDefaultCryptoNetwork();
-    } else if (selectedCurrency.value == 'USDT') {
-      selectedCurrency.value = 'USD';
-    }
-  }
+  // void _applyAccountTypeDefaults() {
+  //   ifscIbanType.value = selectedAccountType.value.toLowerCase();
+  //   if (selectedAccountType.value.toLowerCase() == 'crypto') {
+  //     selectedCurrency.value = 'USDT';
+  //     _applyDefaultCryptoNetwork();
+  //   } else if (selectedCurrency.value == 'USDT') {
+  //     selectedCurrency.value = 'USD';
+  //   }
+  // }
 
   void _applyDefaultCryptoNetwork() {
     if (allowedCryptoNetworks.isNotEmpty) {
@@ -335,7 +336,8 @@ class KycBankController extends GetxController {
         // Reset form
         clearFormFields();
         selectedAccountType.value = 'Bank';
-        selectedCurrency.value = 'USD';
+        ifscIbanType.value = 'bank';
+        // selectedCurrency.value = 'USD';
 
         print('isBankList: ${isBankList.value}');
         if (isBankList.value) {
@@ -385,15 +387,15 @@ class KycBankController extends GetxController {
       return false;
     }
 
-    if (selectedCurrency.value.isEmpty) {
-      errorMessage.value = 'Please select currency';
-      if (Get.isRegistered<AppNotificationController>()) {
-        Get.find<AppNotificationController>().showError(
-          message: 'Please select currency',
-        );
-      }
-      return false;
-    }
+    // if (selectedCurrency.value.isEmpty) {
+    //   errorMessage.value = 'Please select currency';
+    //   if (Get.isRegistered<AppNotificationController>()) {
+    //     Get.find<AppNotificationController>().showError(
+    //       message: 'Please select currency',
+    //     );
+    //   }
+    //   return false;
+    // }
 
     if (accountHolderName.value.isEmpty) {
       errorMessage.value = 'Please enter account holder name';
@@ -546,7 +548,7 @@ class KycBankController extends GetxController {
     // Add common parameters
     params.addAll({
       "withdrawal_method": selectedAccountType.value.toLowerCase(),
-      "currency": selectedCurrency.value,
+      // "currency": selectedCurrency.value,
       "belogns_to": "",
       "relationship": selectedRelationship.value.toLowerCase(),
       "holder_name": accountHolderName.value,
@@ -650,9 +652,9 @@ class KycBankController extends GetxController {
   }
 
   // Set currency
-  void setCurrency(String currency) {
-    selectedCurrency.value = currency;
-  }
+  // void setCurrency(String currency) {
+  //   selectedCurrency.value = currency;
+  // }
 
   // Set IFSC/IBAN code
   void setIfscIbanCode(String ifscIbanCode) {
@@ -681,7 +683,8 @@ class KycBankController extends GetxController {
   void clearAllData() {
     clearFormFields();
     selectedAccountType.value = 'Bank';
-    selectedCurrency.value = 'USD';
+    ifscIbanType.value = 'bank';
+    // selectedCurrency.value = 'USD';
     currencies.clear();
     allowedCryptoNetworks.clear();
     errorMessage.value = '';

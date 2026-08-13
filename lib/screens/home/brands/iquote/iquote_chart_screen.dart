@@ -1214,11 +1214,24 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
   }
 
   Future<void> _submit(String side) async {
-    final isLimit = _tab == 1;
-    final price = isLimit ? _priceCtl.text.trim() : '';
+    final isLimitTab = _tab == 1;
+    final price = isLimitTab ? _priceCtl.text.trim() : '';
+
+    String orderKind = 'market';
+    if (isLimitTab) {
+      final currentBid = widget.ctrl.lastBid.value ?? 0.0;
+      final currentAsk = widget.ctrl.lastAsk.value ?? 0.0;
+      final priceVal = double.tryParse(price) ?? 0.0;
+      if (side == 'buy') {
+        orderKind = priceVal > currentAsk ? 'stop' : 'limit';
+      } else {
+        orderKind = priceVal < currentBid ? 'stop' : 'limit';
+      }
+    }
+
     final result = await widget.ctrl.submitOrder(
       side: side,
-      orderKind: isLimit ? 'limit' : 'market',
+      orderKind: orderKind,
       volume: _volume,
       price: price,
       takeProfit: _tpSlEnabled ? _tpCtl.text.trim() : null,
