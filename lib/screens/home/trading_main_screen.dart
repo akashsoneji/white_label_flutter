@@ -43,7 +43,10 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   late List<Widget> _screens;
   late final bool _isVantage;
   late PageController _pageController;
-  final SymbolSelectionService _symbolSelectionService = Get.put(SymbolSelectionService(), permanent: true);
+  final SymbolSelectionService _symbolSelectionService = Get.put(
+    SymbolSelectionService(),
+    permanent: true,
+  );
 
   HeadlessInAppWebView? _headlessChartWebView;
   bool _headlessDisposed = false;
@@ -93,7 +96,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     super.initState();
     _isVantage = FlavorConfig.isVantage();
     final isIquote = FlavorConfig.usesIquoteUi();
-    
+
     // ✅ FIX: Check for initial tab index from navigation arguments
     // This allows navigating directly to a specific tab (e.g., dashboard at index 3)
     final arguments = Get.arguments;
@@ -105,24 +108,37 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         print('TradingMainScreen: Initial tab set to index $arguments');
       }
     }
-    
+
     _pageController = PageController(initialPage: _currentIndex);
 
     if (isIquote) {
       _screens = [
-        KeepAliveWrapper(child: IquoteHomeScreen(onNavigateToTab: _onTabChanged, onNavigateToChart: (sym) {
-          _symbolSelectionService.setSymbol(sym);
-          _switchToChartTab(sym);
-        })), // 0. Home
-        KeepAliveWrapper(child: IquoteMarketScreen(onNavigateToChart: (sym) {
-          _symbolSelectionService.setSymbol(sym);
-          _switchToChartTab(sym);
-        })), // 1. Markets
+        KeepAliveWrapper(
+          child: IquoteHomeScreen(
+            onNavigateToTab: _onTabChanged,
+            onNavigateToChart: (sym) {
+              _symbolSelectionService.setSymbol(sym);
+              _switchToChartTab(sym);
+            },
+          ),
+        ), // 0. Home
+        KeepAliveWrapper(
+          child: IquoteMarketScreen(
+            onNavigateToChart: (sym) {
+              _symbolSelectionService.setSymbol(sym);
+              _switchToChartTab(sym);
+            },
+          ),
+        ), // 1. Markets
         KeepAliveWrapper(child: IQuoteChartScreen()), // 2. Charts
-        KeepAliveWrapper(child: IQuotePositionScreen(onNavigateToChart: (sym) {
-          _symbolSelectionService.setSymbol(sym);
-          _switchToChartTab(sym);
-        })), // 3. Position
+        KeepAliveWrapper(
+          child: IQuotePositionScreen(
+            onNavigateToChart: (sym) {
+              _symbolSelectionService.setSymbol(sym);
+              _switchToChartTab(sym);
+            },
+          ),
+        ), // 3. Position
         const KeepAliveWrapper(child: MoreScreen()), // 4. Assets
       ];
     } else if (_isVantage) {
@@ -137,7 +153,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       // so the bottom nav is naturally hidden while chart is open —
       // matching the existing watchlist → chart flow.
       _screens = [
-        KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _switchToChartTab)),
+        KeepAliveWrapper(
+          child: InstrumentsScreen(onNavigateToChart: _switchToChartTab),
+        ),
         KeepAliveWrapper(
           child: ChartScreen(
             onNavigateToTrade: (tabIndex) {
@@ -148,7 +166,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
             },
           ),
         ),
-        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _switchToChartTab)),
+        KeepAliveWrapper(
+          child: TradeScreen(onNavigateToChart: _switchToChartTab),
+        ),
         KeepAliveWrapper(
           child: DashboardScreen(
             onNavigateToTab: (index) {
@@ -161,7 +181,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     } else {
       // Non-Vantage (5-tab legacy): keep as-is.
       _screens = [
-        KeepAliveWrapper(child: InstrumentsScreen(onNavigateToChart: _switchToChartTab)),
+        KeepAliveWrapper(
+          child: InstrumentsScreen(onNavigateToChart: _switchToChartTab),
+        ),
         KeepAliveWrapper(
           child: ChartScreen(
             onNavigateToTrade: (tabIndex) {
@@ -172,7 +194,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
             },
           ),
         ),
-        KeepAliveWrapper(child: TradeScreen(onNavigateToChart: _switchToChartTab)),
+        KeepAliveWrapper(
+          child: TradeScreen(onNavigateToChart: _switchToChartTab),
+        ),
         KeepAliveWrapper(
           child: DashboardScreen(
             onNavigateToTab: (index) {
@@ -203,12 +227,10 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       // Trigger background compliance check
       _checkCompliance();
 
-      // Android WebView pre-warming
-      if (Platform.isAndroid) {
-        _preloadChartWebViewAndroid();
-      }
+      // WebView pre-warming for both iOS and Android
+      _preloadChartWebView();
     });
-    
+
     // ✅ If initial tab is dashboard, refresh accounts (vantage index 3, default index 3)
     final dashboardIndex = _isVantage ? 3 : 3;
     if (_currentIndex == dashboardIndex) {
@@ -243,8 +265,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     }
   }
 
-  Future<void> _preloadChartWebViewAndroid() async {
-    if (!Platform.isAndroid) return;
+  Future<void> _preloadChartWebView() async {
     if (!mounted) return;
 
     try {
@@ -257,15 +278,16 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         }
       } catch (_) {}
 
-      final displaySymbol = symbol.contains('.')
-          ? symbol.substring(0, symbol.lastIndexOf('.'))
-          : symbol;
+      final displaySymbol =
+          symbol.contains('.')
+              ? symbol.substring(0, symbol.lastIndexOf('.'))
+              : symbol;
 
       final chartUrl =
           '${FlavorConfig.instance.chartBaseUrl}/mobile-chart'
           '?symbol=$displaySymbol&theme=${AppColors.chartTheme}';
 
-      print('📱 Android Chart Preload: Starting headless WebView for $chartUrl');
+      print('📱 Chart Preload: Starting headless WebView for $chartUrl');
 
       _headlessChartWebView = HeadlessInAppWebView(
         initialUrlRequest: URLRequest(url: WebUri(chartUrl)),
@@ -276,32 +298,32 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
           transparentBackground: true,
         ),
         onLoadStop: (controller, url) async {
-          print('📱 Android Chart Preload: Chart assets cached ✅ ($url)');
-          await Future.delayed(const Duration(seconds: 2));
-          _disposeHeadlessWebView();
+          print('📱 Chart Preload: Chart assets cached ✅ ($url)');
         },
         onReceivedError: (controller, request, error) {
-          print('📱 Android Chart Preload: Error (non-critical): $error');
-          _disposeHeadlessWebView();
+          print('📱 Chart Preload: Error (non-critical): $error');
         },
       );
 
       _headlessChartWebView?.run();
     } catch (e) {
-      print('📱 Android Chart Preload: Failed starting headless WebView: $e');
+      print('📱 Chart Preload: Failed starting headless WebView: $e');
     }
   }
 
   // Ensure one-click trading is enabled (safety net)
   Future<void> _ensureOneClickTradingEnabled() async {
     try {
-      final isEnabled = await OneClickTradingService.instance.isOneClickTradingEnabled();
+      final isEnabled =
+          await OneClickTradingService.instance.isOneClickTradingEnabled();
       if (!isEnabled) {
         await OneClickTradingService.instance.setOneClickTradingEnabled(true);
         print('TradingMainScreen: One-click trading enabled by default');
       }
     } catch (e) {
-      print('TradingMainScreen: Error ensuring one-click trading is enabled: $e');
+      print(
+        'TradingMainScreen: Error ensuring one-click trading is enabled: $e',
+      );
     }
   }
 
@@ -313,7 +335,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
     setState(() {
       _currentIndex = index;
-
     });
 
     if (_pageController.hasClients && _pageController.page?.round() != index) {
@@ -329,7 +350,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     // Vantage UI brands (pipze, baazex, gtxprime, kantara, skyriss,
     // telifox, tenax, vantage): The Chart tab is now handled directly in the PageView
     // like other tabs, so we no longer push a new route on top.
-
 
     // Reset to Market tab when switching to Trade screen via bottom navigation
     if (index == tradeIndex && previousIndex != tradeIndex) {
@@ -385,7 +405,10 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       forceExitDialog: true,
       child: RTLWrapper(
         child: Scaffold(
-          backgroundColor: isIquote ? AppColors.background : AppColors.tradeBackgroundCenterColor,
+          backgroundColor:
+              isIquote
+                  ? AppColors.background
+                  : AppColors.tradeBackgroundCenterColor,
           body: SafeArea(
             child: PageView(
               controller: _pageController,
@@ -394,24 +417,28 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
               children: _screens,
             ),
           ),
-          bottomNavigationBar: isIquote
-              ? TradingBottomNavigation(
-                  currentIndex: _currentIndex,
-                  onTap: (index) {
-                    _onTabChanged(index);
-                  },
-                )
-              : null,
-          floatingActionButtonLocation: isIquote ? null : FloatingActionButtonLocation.centerDocked,
-          floatingActionButtonAnimator: isIquote ? null : FloatingActionButtonAnimator.scaling,
-          floatingActionButton: isIquote
-              ? null
-              : TradingBottomNavigation(
-                  currentIndex: _currentIndex,
-                  onTap: (index) {
-                    _onTabChanged(index);
-                  },
-                ),
+          bottomNavigationBar:
+              isIquote
+                  ? TradingBottomNavigation(
+                    currentIndex: _currentIndex,
+                    onTap: (index) {
+                      _onTabChanged(index);
+                    },
+                  )
+                  : null,
+          floatingActionButtonLocation:
+              isIquote ? null : FloatingActionButtonLocation.centerDocked,
+          floatingActionButtonAnimator:
+              isIquote ? null : FloatingActionButtonAnimator.scaling,
+          floatingActionButton:
+              isIquote
+                  ? null
+                  : TradingBottomNavigation(
+                    currentIndex: _currentIndex,
+                    onTap: (index) {
+                      _onTabChanged(index);
+                    },
+                  ),
         ),
       ),
     );
@@ -421,7 +448,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     try {
       if (!Get.isRegistered<AuthController>()) return;
       final authController = Get.find<AuthController>();
-      
+
       final profile = await authController.getProfile();
       if (profile != null) {
         final user = profile.data.user;
@@ -501,4 +528,3 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
   @override
   bool get wantKeepAlive => true;
 }
-
