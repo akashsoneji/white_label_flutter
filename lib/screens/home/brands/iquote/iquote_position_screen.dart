@@ -289,7 +289,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
               Row(
                 children: [
                   Text(
-                    balance.toStringAsFixed(4),
+                    balance.toStringAsFixed(2),
                     style: TextStyle(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w700,
@@ -298,7 +298,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                   const Spacer(),
                   Text(
-                    '${isProfitPositive ? '+' : '-'}${profit.abs().toStringAsFixed(4)} (${pnlPercent.toStringAsFixed(2)}%)',
+                    '${isProfitPositive ? '+' : '-'}${profit.abs().toStringAsFixed(2)} (${pnlPercent.toStringAsFixed(2)}%)',
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -614,7 +614,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
           // today's trades without requiring the user to open the dialog.
           if (!controller.historyFilterInitialized) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (Get.find<TradingController>().historyFilterInitialized) return;
+              if (Get.find<TradingController>().historyFilterInitialized)
+                return;
               Get.find<TradingController>().applyHistoryFilter();
             });
           }
@@ -627,77 +628,81 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
           final startDate = DateHelper.formatUtcDateTime(start);
           final endDate = DateHelper.formatUtcDateTime(end);
 
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        child: InkWell(
-          onTap: _openHistoryFilterSheet,
-          borderRadius: BorderRadius.circular(6.r),
-          child: Row(
-            children: [
-              Text(
-                'Start:',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 13.sp,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: _cardColor,
-                    borderRadius: BorderRadius.circular(6.r),
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            child: InkWell(
+              onTap: _openHistoryFilterSheet,
+              borderRadius: BorderRadius.circular(6.r),
+              child: Row(
+                children: [
+                  Text(
+                    'Start:',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13.sp,
+                    ),
                   ),
-                  child: Center(
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: _cardColor,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Center(
+                        child: Text(
+                          startDate,
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w),
                     child: Text(
-                      startDate,
+                      '—',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: AppColors.textSecondary,
                         fontSize: 13.sp,
                       ),
                     ),
                   ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.w),
-                child: Text(
-                  '—',
-                  style: TextStyle(
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: _cardColor,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Center(
+                        child: Text(
+                          endDate,
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Icon(
+                    Icons.history,
                     color: AppColors.textSecondary,
-                    fontSize: 13.sp,
+                    size: 24.sp,
                   ),
-                ),
+                ],
               ),
-              Expanded(
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: _cardColor,
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: Center(
-                    child: Text(
-                      endDate,
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 13.sp,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Icon(Icons.history, color: AppColors.textSecondary, size: 24.sp),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       );
-    },
-    );
-  });
-}
+    });
+  }
 
   void _openHistoryFilterSheet() {
     final controller = Get.find<TradingController>();
@@ -866,7 +871,10 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
           // TP/SL, Add Position, or Reverse Order for this open position.
           final isPending = tradingController.selectedTab == 1;
           Get.to<void>(
-            () => IQuotePositionDetailScreen(position: position, isPending: isPending),
+            () => IQuotePositionDetailScreen(
+              position: position,
+              isPending: isPending,
+            ),
             transition: Transition.cupertino,
           );
         }
@@ -959,28 +967,10 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                 ),
                 SizedBox(width: 8.w),
-                if (leverage.isNotEmpty)
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 4.w,
-                      vertical: 2.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _chipBgColor,
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                    child: Text(
-                      leverage,
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+
                 const Spacer(),
                 Text(
-                  '${isPositive ? '' : '-'}${position.profitLoss.abs().toStringAsFixed(4)}',
+                  '${isPositive ? '' : '-'}${position.profitLoss.abs().toStringAsFixed(2)}',
                   style: TextStyle(
                     color: isPositive ? _green : _red,
                     fontSize: 14.sp,
@@ -1077,7 +1067,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
   }
 
   String _formatSwap(double swap) {
-    final abs = swap.abs().toStringAsFixed(4);
+    final abs = swap.abs().toStringAsFixed(2);
     return swap >= 0 ? abs : '-$abs';
   }
 
@@ -1569,7 +1559,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.whiteColor
+                              color: AppColors.whiteColor,
                             ),
                           ),
                         ),

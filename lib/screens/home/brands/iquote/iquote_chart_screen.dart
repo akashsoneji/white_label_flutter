@@ -23,6 +23,7 @@
 // dart:ui provides FontFeature.tabularFigures() (used on the tile prices and
 // change% chip so digits stay column-aligned even when the value changes).
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -897,7 +898,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                                             ? AppColors.whiteColor
                                             : AppColors.textPrimary,
                                     fontSize: 13.sp,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
@@ -910,53 +911,71 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
             SizedBox(height: 14.h),
             if (_tab == 1) ...[
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 4.h),
                 // decoration: BoxDecoration(
                 //   color: palette.sheetFieldBg,
                 //   borderRadius: BorderRadius.circular(8.r),
                 //   border: Border.all(color: palette.sheetFieldBorder),
                 // ),
-                child: Row(
-                  children: [
-                    Expanded(
-                     child: _Field(
-                      label: 'Order Price',
-                      controller: _priceCtl,
-                      palette: palette,
-                    )
-                      
-                    ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      'USD',
-                      style: TextStyle(
-                        color: palette.axisText,
-                        fontSize: 13.sp,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          final p = _price - 0.01;
-                          _priceCtl.text = p.toStringAsFixed(d);
-                        });
-                      },
-                      icon: Icon(Icons.remove, color: AppColors.textPrimary),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          final p = _price + 0.01;
-                          _priceCtl.text = p.toStringAsFixed(d);
-                        });
-                      },
-                      icon: Icon(Icons.add, color: AppColors.textPrimary),
-                    ),
-                  ],
+                child: _Field(
+                  label: 'Order Price',
+                  controller: _priceCtl,
+                  palette: palette,
+                  prefix: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        final step = 1 / math.pow(10, d);
+                        final p = _price - step;
+                        _priceCtl.text = p.toStringAsFixed(d);
+                      });
+                    },
+                    icon: Icon(Icons.remove, color: AppColors.textPrimary),
+                  ),
+                  suffix: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        final step = 1 / math.pow(10, d);
+                        final p = _price + step;
+                        _priceCtl.text = p.toStringAsFixed(d);
+                      });
+                    },
+                    icon: Icon(Icons.add, color: AppColors.textPrimary),
+                  ),
                 ),
+
+                // child: Row(
+                //   children: [
+                //     Expanded(
+                //       child: _Field(
+                //         label: 'Order Price',
+                //         controller: _priceCtl,
+                //         palette: palette,
+                //         prefix: IconButton(
+                //           onPressed: () {
+                //             setState(() {
+                //               final p = _price - 0.01;
+                //               _priceCtl.text = p.toStringAsFixed(d);
+                //             });
+                //           },
+                //           icon: Icon(
+                //             Icons.remove,
+                //             color: AppColors.textPrimary,
+                //           ),
+                //         ),
+                //         suffix: IconButton(
+                //           onPressed: () {
+                //             setState(() {
+                //               final p = _price + 0.01;
+                //               _priceCtl.text = p.toStringAsFixed(d);
+                //             });
+                //           },
+                //           icon: Icon(Icons.add, color: AppColors.textPrimary),
+                //         ),
+                //       ),
+                //     ),
+                //   ],
+                // ),
               ),
-              SizedBox(height: 14.h),
             ],
             // TP SL HIDDEN
             Row(
@@ -1017,36 +1036,9 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
               SizedBox(height: 12.h),
             ],
             if (_tab == 0) ...[
-              _SummaryRow(
-                label: 'Margin',
-                value: _margin.toStringAsFixed(4),
-                palette: palette,
-              ),
-              SizedBox(height: 6.h),
-              _SummaryRow(
-                label: 'Fee',
-                value: _fee.toStringAsFixed(4),
-                palette: palette,
-              ),
-              SizedBox(height: 6.h),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Total: ${_total.toStringAsFixed(4)}',
-                          style: AppTextStyles.heading.copyWith(
-                            fontSize: 17.sp,
-                            fontWeight: FontWeight.w800,
-                            color: fieldText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   Flexible(
                     flex: 2,
                     child: SizedBox(
@@ -1123,13 +1115,13 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                       child: SizedBox(
                         height: 48.h,
                         child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _kBearColor,
-                          foregroundColor: AppColors.whiteColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _kBearColor,
+                            foregroundColor: AppColors.whiteColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
                           ),
-                        ),
                           onPressed: () => _submit('sell'),
                           child:
                               widget.ctrl.isLoading.value
@@ -1162,13 +1154,13 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                       child: SizedBox(
                         height: 48.h,
                         child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _kBullColor,
-                          foregroundColor: AppColors.whiteColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _kBullColor,
+                            foregroundColor: AppColors.whiteColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
                           ),
-                        ),
                           onPressed: () => _submit('buy'),
                           child:
                               widget.ctrl.isLoading.value
@@ -1290,10 +1282,14 @@ class _Field extends StatelessWidget {
     required this.label,
     required this.controller,
     required this.palette,
+    this.suffix,
+    this.prefix,
   });
   final String label;
   final TextEditingController controller;
   final _ChartPalette palette;
+  final Widget? suffix;
+  final Widget? prefix;
 
   @override
   Widget build(BuildContext context) {
@@ -1301,8 +1297,14 @@ class _Field extends StatelessWidget {
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       style: TextStyle(color: AppColors.textPrimary, fontSize: 14.sp),
+      textAlign:
+          prefix != null
+              ? TextAlign.center
+              : TextAlign.start, // 👈 This centers the text
       decoration: InputDecoration(
-        labelText: label,
+        labelText: prefix != null ? null : label,
+        prefixIcon: prefix,
+        suffixIcon: suffix,
         labelStyle: TextStyle(color: palette.axisText, fontSize: 12.sp),
         filled: true,
         fillColor: palette.sheetFieldBg,

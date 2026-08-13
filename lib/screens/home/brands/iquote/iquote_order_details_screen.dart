@@ -44,7 +44,11 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.textPrimary, size: 20.sp),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.textPrimary,
+            size: 20.sp,
+          ),
           onPressed: () => NavigationHelper.safeBack(),
         ),
         title: Text(
@@ -71,8 +75,11 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
               _summaryCard(context, t),
               SizedBox(height: 12.h),
               _cardContainer([
-                _row(t('order_no'), _d.orderNo, trailing: _copyButton(_d.orderNo)),
-                _row(t('closing_method'), _d.closingMethod, valueColor: const Color(0xFFE88A4A)),
+                _row(
+                  t('order_no'),
+                  _d.orderNo,
+                  trailing: _copyButton(_d.orderNo),
+                ),
                 _row(t('open_time'), _d.openTime),
                 _row(t('open_price'), _d.openPrice),
                 _row(t('close_time'), _d.closeTime),
@@ -124,16 +131,14 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12.r),
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 
   Widget _summaryCard(BuildContext context, String Function(String) t) {
     final isProfit = _d.profit.isNotEmpty && _d.profit[0] != '-';
     final isBuy = _d.buySell.toLowerCase() == 'buy';
-    
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 24.h),
@@ -158,12 +163,15 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
             children: [
               _pill(
                 _d.buySell,
-                bg: isBuy ? AppColors.statusGreen.withOpacity(0.15) : AppColors.statusRed.withOpacity(0.15),
+                bg:
+                    isBuy
+                        ? AppColors.statusGreen.withOpacity(0.15)
+                        : AppColors.statusRed.withOpacity(0.15),
                 fg: isBuy ? AppColors.statusGreen : AppColors.statusRed,
               ),
               SizedBox(width: 8.w),
               Text(
-                '${_d.lots}Lot  ${_d.contractSize}  ${_d.leverage}',
+                '${_d.lots}Lot',
                 style: AppTextStyles.bodyText.copyWith(
                   color: AppColors.textGrey,
                   fontSize: 13.sp,
@@ -204,7 +212,13 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _row(String label, String value, {Color? valueColor, Widget? trailing, bool showDivider = true}) {
+  Widget _row(
+    String label,
+    String value, {
+    Color? valueColor,
+    Widget? trailing,
+    bool showDivider = true,
+  }) {
     return Column(
       children: [
         Padding(
@@ -220,7 +234,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              if (trailing != null) 
+              if (trailing != null)
                 trailing
               else
                 Text(
@@ -254,7 +268,10 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
           titleText: const SizedBox.shrink(),
           messageText: Text(
             'Copied',
-            style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 12.sp),
+            style: AppTextStyles.bodyText.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 12.sp,
+            ),
           ),
         );
       },
@@ -303,8 +320,11 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded,
-                    color: AppColors.textGrey, size: 20.sp),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textGrey,
+                  size: 20.sp,
+                ),
               ],
             ),
           ),

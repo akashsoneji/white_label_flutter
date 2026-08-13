@@ -2236,5 +2236,18 @@
   "withdrawal_withdrawFrom": "Withdraw From",
   "withdrawal_withdrawalMethod": "Withdrawal Method",
   "your_earning": "Your Earning",
-  "order_details_title": "ऑर्डर विवरण"
+  "order_details_title": "ऑर्डर विवरण",
+  "order_no": "Order No.",
+  "closing_method": "Closing Method",
+  "open_time": "Open Time",
+  "open_price": "Open Price",
+  "close_time": "Close Time",
+  "close_price": "Close Price",
+  "take_profit": "Take Profit",
+  "stop_loss": "Stop Loss",
+  "fee": "Fee",
+  "swap": "Swap",
+  "order_type": "Order Type",
+  "dividend_amount": "Dividend Amount",
+  "dividend_target": "Dividend Target"
 }
