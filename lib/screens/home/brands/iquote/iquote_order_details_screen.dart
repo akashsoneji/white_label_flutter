@@ -30,6 +30,7 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
         closePrice: '4064.83',
         closingMethod: 'Closed by Trader',
         swap: '0.0000',
+        commission: "0",
       );
 
   @override
@@ -85,37 +86,31 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
                 _row(t('close_time'), _d.closeTime),
                 _row(t('close_price'), _d.closePrice),
                 _row(t('take_profit'), '---'),
-                _row(t('stop_loss'), '---', showDivider: false),
+                _row(t('stop_loss'), '---', showDivider: true),
               ]),
-              SizedBox(height: 12.h),
               _cardContainer([
-                _row(t('fee'), ''),
-                _row(t('swap'), _d.swap, showDivider: false),
+                _row(t('Commission'), _d.commission, showDivider: true),
+                _row(t('swap'), _d.swap, showDivider: true),
               ]),
-              SizedBox(height: 12.h),
-              _cardContainer([
-                _row(t('order_type'), '---'),
-                _row(t('dividend_amount'), '---'),
-                _row(t('dividend_target'), '---', showDivider: false),
-              ]),
-              SizedBox(height: 12.h),
-              _cardContainer([
-                // _actionRow(
-                //   iconAsset: 'assets/svg/emailLogo.svg',
-                //   iconData: Icons.telegram,
-                //   iconColor: const Color(0xFF2EA6DA),
-                //   title: t('telegram'),
-                //   onTap: () {},
-                // ),
-                _actionRow(
-                  iconAsset: 'assets/svg/edit_profile.svg',
-                  iconData: Icons.assignment_outlined,
-                  iconColor: const Color(0xFFE1B68C),
-                  title: t('feedback'),
-                  onTap: () => Get.toNamed(Routes.TICKET_LIST),
-                  showDivider: false,
-                ),
-              ]),
+
+              // SizedBox(height: 12.h),
+              // _cardContainer([
+              //   // _actionRow(
+              //   //   iconAsset: 'assets/svg/emailLogo.svg',
+              //   //   iconData: Icons.telegram,
+              //   //   iconColor: const Color(0xFF2EA6DA),
+              //   //   title: t('telegram'),
+              //   //   onTap: () {},
+              //   // ),
+              //   _actionRow(
+              //     iconAsset: 'assets/svg/edit_profile.svg',
+              //     iconData: Icons.assignment_outlined,
+              //     iconColor: const Color(0xFFE1B68C),
+              //     title: t('feedback'),
+              //     onTap: () => Get.toNamed(Routes.TICKET_LIST),
+              //     showDivider: false,
+              //   ),
+              // ]),
               SizedBox(height: 20.h),
             ],
           ),
@@ -354,7 +349,7 @@ class IQuoteOrderData {
   final String closePrice;
   final String closingMethod;
   final String swap;
-
+  final String commission;
   const IQuoteOrderData({
     required this.orderNo,
     required this.symbol,
@@ -369,5 +364,6 @@ class IQuoteOrderData {
     required this.closePrice,
     required this.closingMethod,
     required this.swap,
+    required this.commission,
   });
 }

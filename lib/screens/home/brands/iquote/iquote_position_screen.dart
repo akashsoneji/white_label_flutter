@@ -625,8 +625,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
               controller.historyStartDate ??
               DateTime(now.year, now.month, now.day);
           final end = controller.historyEndDate ?? now;
-          final startDate = DateHelper.formatUtcDateTime(start);
-          final endDate = DateHelper.formatUtcDateTime(end);
+          final startDate =
+              DateHelper.formatUtcDateTime(start).split(' ').first;
+          final endDate = DateHelper.formatUtcDateTime(end).split(' ').first;
 
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -636,7 +637,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
               child: Row(
                 children: [
                   Text(
-                    'Start:',
+                    'Date:',
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13.sp,
@@ -649,6 +650,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                       decoration: BoxDecoration(
                         color: _cardColor,
                         borderRadius: BorderRadius.circular(6.r),
+                        border: Border.all(color: AppColors.divider),
                       ),
                       child: Center(
                         child: Text(
@@ -677,6 +679,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                       decoration: BoxDecoration(
                         color: _cardColor,
                         borderRadius: BorderRadius.circular(6.r),
+                        border: Border.all(color: AppColors.divider),
                       ),
                       child: Center(
                         child: Text(
@@ -863,6 +866,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                 closingMethod:
                     position.closeTime.isNotEmpty ? 'Closed by Trader' : '',
                 swap: PrecisionHelper.formatPnL(position.swap),
+                commission: position.commission.toString(),
               ),
             ),
           );
