@@ -706,6 +706,7 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       try {
         // Clear dashboard cached account info so next stream is fresh
         _dashboardController.accountInfoMap.clear();
+        _dashboardController.ensureWebSocketInitialized();
       } catch (_) {}
 
       // Ensure disconnects complete before reconnecting with the new endpoints
@@ -722,7 +723,9 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       }
 
       // Reconnect all websockets after API so URLs and subscriptions are fresh
-      await _reconnectAllSockets(accountNumber, account);
+      _reconnectAllSockets(accountNumber, account).catchError((e) {
+        if (kDebugMode) print('AccountController: Error reconnecting sockets: $e');
+      });
 
       // ✅ Fetch and cache symbol details for the new account in background
       // This ensures contract sizes are available for P&L calculations

@@ -66,6 +66,7 @@ class RTLComponents {
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
+                        color: foregroundColor ?? AppColors.whiteColor,
                       ),
                     ),
                   ],
@@ -125,6 +126,7 @@ class RTLComponents {
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
+                        color: textColor ?? AppColors.primary,
                       ),
                     ),
                   ],
@@ -176,6 +178,7 @@ class RTLComponents {
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
+                        color: textColor ?? AppColors.primary,
                       ),
                     ),
                   ],

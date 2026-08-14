@@ -70,6 +70,9 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         _amountController.text = '0.00';
       }
     });
+    _amountController.addListener(() {
+      if (mounted) setState(() {});
+    });
     // Fetch wallet data when screen loads
     _fetchData();
   }
@@ -375,7 +378,29 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
     );
   }
 
+  double? _getTransferFromLimit() {
+    if (_selectedTransferFromAccount == null) return null;
+    if (_selectedTransferFromType == 'wallet') {
+      final wallet = _selectedTransferFromAccount as Wallet;
+      return double.tryParse(wallet.walletBalance);
+    } else if (_selectedTransferFromType == 'mt5' || _selectedTransferFromType == 'ib') {
+      final account = _selectedTransferFromAccount as UserMT5Account;
+      return account.availableForTransfer ?? double.tryParse(account.balance);
+    }
+    return null;
+  }
+
   Widget _buildAmountField() {
+    final limit = _getTransferFromLimit();
+    final raw = _amountController.text.trim();
+    String? error;
+    if (raw.isNotEmpty && raw != '0.00' && limit != null) {
+      final entered = double.tryParse(raw);
+      if (entered != null && entered > limit) {
+        error = 'Maximum transfer is \$${limit.toStringAsFixed(2)}';
+      }
+    }
+
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: RTLHelper.rtlTextField(
@@ -392,7 +417,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
           FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
           _SingleDecimalTextFormatter(),
         ],
-        keyboardType: TextInputType.numberWithOptions(
+        keyboardType: const TextInputType.numberWithOptions(
           signed: true,
           decimal: true,
         ),
@@ -400,6 +425,12 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
           labelText: 'Amount',
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
+          errorText: error,
+          errorStyle: TextStyle(color: AppColors.error, fontSize: 12.sp),
+          helperText: limit != null
+              ? 'Available for transfer: \$${limit.toStringAsFixed(2)}'
+              : null,
+          helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
@@ -1194,6 +1225,14 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
       if (parsedAmount == null || parsedAmount <= 0.0) {
         CustomToastService.showError(
           message: languageService.tr('internal_transfer_valid_amount'),
+        );
+        return;
+      }
+
+      final limit = _getTransferFromLimit();
+      if (limit != null && parsedAmount > limit) {
+        CustomToastService.showError(
+          message: 'Amount cannot exceed available limit of \$${limit.toStringAsFixed(2)}',
         );
         return;
       }

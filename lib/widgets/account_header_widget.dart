@@ -124,7 +124,7 @@ class AccountHeaderWidget extends StatelessWidget {
                 }
 
                 final double? resolvedFloatingProfit =
-                    floatingProfit ?? tradingProfit;
+                    floatingProfit ?? tradingProfit ?? accountInfo?.profit;
                 final bool useFloatingProfit = resolvedFloatingProfit != null;
                 final double displayValue =
                     useFloatingProfit ? resolvedFloatingProfit : displayEquity;
@@ -257,6 +257,8 @@ class AccountHeaderWidget extends StatelessWidget {
                   },
                 );
 
+                final double? liveProfit = accountInfo?.profit;
+
                 final valueRow = Row(
                   children: [
                     if (showLoading && !useFloatingProfit) ...[
@@ -278,6 +280,24 @@ class AccountHeaderWidget extends StatelessWidget {
                         maxLines: 1,
                       ),
                     ),
+                    if (!useFloatingProfit && liveProfit != null && liveProfit != 0.0) ...[
+                      SizedBox(width: 8.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: (liveProfit >= 0 ? AppColors.success : AppColors.error).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Text(
+                          '${liveProfit >= 0 ? '+' : ''}${PrecisionHelper.formatPnL(liveProfit)}',
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: liveProfit >= 0 ? AppColors.success : AppColors.error,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 );
 

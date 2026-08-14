@@ -9,7 +9,7 @@ import 'package:crm_app/models/trade_win/trade_win_leaderboard_entry_model.dart'
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/trade_win_format.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
-import 'package:crm_app/flavor_config.dart';
+
 
 class TradeWinLeaderboardTab extends StatefulWidget {
   const TradeWinLeaderboardTab({super.key});
@@ -192,7 +192,7 @@ class _PodiumColumn extends StatelessWidget {
             TradeWinFormat.lotsWithUnit(entry!.lots, lotsLabel),
             style: AppTextStyles.headingblack.copyWith(
               fontSize: 12.sp,
-              color: FlavorConfig.instance.primaryColor,
+              color: AppColors.primary,
             ),
             textAlign: TextAlign.center,
           ),

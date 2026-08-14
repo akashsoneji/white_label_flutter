@@ -17,6 +17,9 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
+import 'package:crm_app/utils/precision_helper.dart';
+import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 
 const _kSparklinePoints = 60;
 
@@ -99,8 +102,9 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
   static String _stripSuffix(String s) =>
       s.contains('.') ? s.substring(0, s.lastIndexOf('.')) : s;
 
-  String _selectedTab = 'Hot';
+  String _selectedTab = 'Favorites';
   static const _tabs = [
+    'Favorites',
     'Hot',
     'Crypto',
     'Commodity',
@@ -132,7 +136,9 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
         child: Column(
           children: [
             _buildTopBar(),
-            SizedBox(height: 6.h),
+            // SizedBox(height: 6.h),
+            // _buildTabBar(),
+            SizedBox(height: 10.h),
             Expanded(child: _buildList()),
           ],
         ),
@@ -157,6 +163,13 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
               final rawType = (active?.accountType ?? 'REAL').toUpperCase();
               final isDemo = rawType == 'DEMO';
               final badgeLabel = isDemo ? 'DEMO' : 'LIVE';
+
+              double? profit;
+              if (active != null && Get.isRegistered<DashboardController>()) {
+                final dashCtrl = Get.find<DashboardController>();
+                profit =
+                    dashCtrl.accountInfoMap[active.metaAccountNumber]?.profit;
+              }
 
               return Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
@@ -206,6 +219,28 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                         ),
                       ),
                     ),
+                    if (profit != null && profit != 0.0) ...[
+                      SizedBox(width: 6.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: (profit >= 0 ? Colors.green : Colors.red)
+                              .withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Text(
+                          '${profit >= 0 ? '+' : ''}${PrecisionHelper.formatPnL(profit)}',
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: profit >= 0 ? Colors.green : Colors.red,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
                     SizedBox(width: 4.w),
                     Icon(
                       Icons.keyboard_arrow_down_rounded,
@@ -292,10 +327,38 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
 
   Widget _buildList() {
     return Obx(() {
+      final isFavoritesTab = _selectedTab == 'Favorites';
       final list =
-          _ic.instruments.isNotEmpty ? _ic.instruments : _ic.allInstruments;
+          isFavoritesTab
+              ? _ic.instruments
+              : (_ic.instruments.isNotEmpty
+                  ? _ic.instruments
+                  : _ic.allInstruments);
 
       if (list.isEmpty) {
+        if (isFavoritesTab) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.star_outline_rounded,
+                  size: 48.r,
+                  color: AppColors.textSecondary.withOpacity(0.5),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'No favorites added yet',
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
         return Center(
           child: CommonLoadingWidget(
             message: 'Loading...',
@@ -305,14 +368,68 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
         );
       }
 
+      if (isFavoritesTab) {
+        return ReorderableListView.builder(
+          itemCount: list.length,
+          buildDefaultDragHandles: false,
+          onReorder: (oldIndex, newIndex) {
+            _ic.reorderFavorites(oldIndex, newIndex);
+          },
+          itemBuilder: (context, i) {
+            final item = list[i];
+            return Dismissible(
+              key: ValueKey('market_fav_${item.symbol}'),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                color: Colors.redAccent,
+                child: Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.white,
+                  size: 22.r,
+                ),
+              ),
+              onDismissed: (direction) {
+                _ic.removeFromFavorites(item.symbol);
+                CustomToastService.showSuccess(
+                  message:
+                      '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
+                );
+              },
+              child: _IquoteInstrumentRow(
+                key: ValueKey(item.symbol),
+                instrument: item,
+                bidHistory: _bidHistory,
+                controller: _ic,
+                showDragHandle: true,
+                dragHandleIndex: i,
+                onTap: (sym) {
+                  if (widget.onNavigateToChart != null) {
+                    widget.onNavigateToChart!(sym);
+                  } else {
+                    Get.to(() => IQuoteChartScreen(symbol: sym));
+                  }
+                },
+              ),
+            );
+          },
+        );
+      }
+
+      // For other tabs
       return ListView.builder(
-        // padding: EdgeInsets.only(top: 10.h, bottom: 10.h),
         itemCount: list.length,
         itemBuilder: (context, i) {
-          return _IquoteInstrumentRow(
-            instrument: list[i],
+          final item = list[i];
+          final isFav = _ic.isFavorite(item.symbol);
+
+          final row = _IquoteInstrumentRow(
+            key: ValueKey(item.symbol),
+            instrument: item,
             bidHistory: _bidHistory,
             controller: _ic,
+            showDragHandle: false,
             onTap: (sym) {
               if (widget.onNavigateToChart != null) {
                 widget.onNavigateToChart!(sym);
@@ -321,6 +438,33 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
               }
             },
           );
+
+          if (isFav) {
+            return Dismissible(
+              key: ValueKey('market_non_fav_${item.symbol}'),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                color: Colors.redAccent,
+                child: Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.white,
+                  size: 22.r,
+                ),
+              ),
+              onDismissed: (direction) {
+                _ic.removeFromFavorites(item.symbol);
+                CustomToastService.showSuccess(
+                  message:
+                      '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
+                );
+              },
+              child: row,
+            );
+          }
+
+          return row;
         },
       );
     });
@@ -379,12 +523,17 @@ class _IquoteInstrumentRow extends StatelessWidget {
   final Map<String, List<double>> bidHistory;
   final InstrumentsController controller;
   final void Function(String)? onTap;
+  final bool showDragHandle;
+  final int? dragHandleIndex;
 
   const _IquoteInstrumentRow({
+    super.key,
     required this.instrument,
     required this.bidHistory,
     required this.controller,
     this.onTap,
+    this.showDragHandle = false,
+    this.dragHandleIndex,
   });
 
   String _formatSymbolName(String sym) {
@@ -463,7 +612,12 @@ class _IquoteInstrumentRow extends StatelessWidget {
       return GestureDetector(
         onTap: () => onTap?.call(sym),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+          padding: EdgeInsets.fromLTRB(
+            showDragHandle ? 4.w : 14.w,
+            6.h,
+            14.w,
+            6.h,
+          ),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
@@ -479,6 +633,20 @@ class _IquoteInstrumentRow extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    if (showDragHandle && dragHandleIndex != null) ...[
+                      ReorderableDragStartListener(
+                        index: dragHandleIndex!,
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(4.w, 8.h, 2.w, 8.h),
+                          child: Icon(
+                            Icons.drag_handle_rounded,
+                            size: 20.r,
+                            color: AppColors.textSecondary.withOpacity(0.5),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 2.w),
+                    ],
                     _FlagIcon(symbol: displaySym),
                     SizedBox(width: 10.w),
                     Expanded(
@@ -496,7 +664,9 @@ class _IquoteInstrumentRow extends StatelessWidget {
                           ),
                           Builder(
                             builder: (context) {
-                              final name = instrument.name ?? controller.favoriteNames[sym];
+                              final name =
+                                  instrument.name ??
+                                  controller.favoriteNames[sym];
                               if (name != null && name.isNotEmpty) {
                                 return Padding(
                                   padding: EdgeInsets.only(top: 2.h),
@@ -680,13 +850,8 @@ class _FlagIcon extends StatelessWidget {
         symbol.contains('.')
             ? symbol.substring(0, symbol.lastIndexOf('.'))
             : symbol;
-    String primaryCurr =
-        clean.length >= 3
-            ? clean.substring(0, 3).toLowerCase()
-            : clean.toLowerCase();
 
-    final flagPath1 = 'assets/svg/flags/${clean.toLowerCase()}.svg';
-    final flagPath2 = 'assets/svg/flags/$primaryCurr.svg';
+    final flagPath = 'assets/svg/flags/${clean.toLowerCase()}.svg';
 
     return SizedBox(
       width: 32.w,
@@ -700,24 +865,18 @@ class _FlagIcon extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(3.r),
             child: SvgPicture.asset(
-              flagPath1,
+              flagPath,
               fit: BoxFit.cover,
-              placeholderBuilder:
-                  (_) => SvgPicture.asset(
-                    flagPath2,
-                    fit: BoxFit.cover,
-                    placeholderBuilder:
-                        (_) => Center(
-                          child: Text(
-                            clean.isNotEmpty ? clean[0].toUpperCase() : '?',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
+              placeholderBuilder: (_) => Center(
+                child: Text(
+                  clean.isNotEmpty ? clean[0].toUpperCase() : '?',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
                   ),
+                ),
+              ),
             ),
           ),
         ),

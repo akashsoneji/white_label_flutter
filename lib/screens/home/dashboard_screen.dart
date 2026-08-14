@@ -28,6 +28,7 @@ import 'package:crm_app/screens/home/brands/vantage/vantage_dashboard_layout.dar
 import 'package:crm_app/screens/home/brands/vantage/vantage_glass_tokens.dart';
 import 'package:crm_app/brands/celestial/celestial_theme.dart';
 import 'package:crm_app/widgets/app_svg_icon.dart';
+import 'trading_main_screen.dart';
 import 'package:crm_app/widgets/vantage/vantage_app_bar.dart';
 import 'package:crm_app/screens/wallet/view_models/wallet_controller.dart';
 
@@ -642,6 +643,39 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ),
                     ],
+                    if (account.isScratchCardAccount) ...[
+                      SizedBox(width: 5.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 5.w,
+                          vertical: 1.5.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(3.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppSvgIcon(
+                              assetPath: 'assets/svg/more/scratch.svg',
+                              height: 10.h,
+                              width: 10.w,
+                              color: Colors.purple,
+                            ),
+                            SizedBox(width: 3.w),
+                            Text(
+                              'SCRATCHCARD',
+                              style: AppTextStyles.bodyText.copyWith(
+                                color: Colors.purple,
+                                fontSize: 8.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                   
                 ),
@@ -723,18 +757,23 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 // Trade Icon Button
                 InkWell(
-                  onTap: () async {
-                    await accountController.setActiveMT5Account(
+                  onTap: () {
+                    accountController.setActiveMT5Account(
                       account.metaAccountNumber,
-                    );
-                    if (FlavorConfig.usesIquoteUi() &&
-                        Get.context != null &&
-                        Navigator.of(Get.context!).canPop()) {
-                      Navigator.of(Get.context!).pop();
-                    }
-                    if (onNavigateToTab != null) {
-                      onNavigateToTab!(2);
-                    }
+                    ).then((_) {
+                      if (Get.context != null &&
+                          Navigator.of(Get.context!).canPop()) {
+                        Navigator.of(Get.context!).pop();
+                      }
+                      final marketTabIndex = FlavorConfig.usesIquoteUi() ? 1 : 2;
+                      if (onNavigateToTab != null) {
+                        onNavigateToTab!(marketTabIndex);
+                      } else {
+                        TradingMainScreen.changeTab(marketTabIndex);
+                      }
+                    }).catchError((e) {
+                      if (kDebugMode) print('Account switch failed: $e');
+                    });
                   },
                   borderRadius: BorderRadius.circular(6.r),
                   child: Container(
@@ -855,11 +894,18 @@ class DashboardScreen extends StatelessWidget {
                         accountController
                             .setActiveMT5Account(account.metaAccountNumber)
                             .then((_) {
-                              if (FlavorConfig.usesIquoteUi() &&
-                                  Get.context != null &&
+                              if (Get.context != null &&
                                   Navigator.of(Get.context!).canPop()) {
                                 Navigator.of(Get.context!).pop();
                               }
+                              final marketTabIndex = FlavorConfig.usesIquoteUi() ? 1 : 2;
+                              if (onNavigateToTab != null) {
+                                onNavigateToTab!(marketTabIndex);
+                              } else {
+                                TradingMainScreen.changeTab(marketTabIndex);
+                              }
+                            }).catchError((e) {
+                              if (kDebugMode) print('Account switch failed: $e');
                             });
                       },
                       borderRadius: BorderRadius.circular(6.r),
@@ -974,14 +1020,37 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (account.masterGroupId.toLowerCase() ==
-                            'scratchcard') ...[
+                        if (account.isScratchCardAccount) ...[
                           SizedBox(width: 4.w),
-                          BrandLogo(
-                            source: 'assets/svg/more/scratch.svg',
-                            height: 14,
-                            width: 14,
-                            color: accentColor,
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 1.5.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(999.r),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                AppSvgIcon(
+                                  assetPath: 'assets/svg/more/scratch.svg',
+                                  height: 10.h,
+                                  width: 10.w,
+                                  color: Colors.purple,
+                                ),
+                                SizedBox(width: 3.w),
+                                Text(
+                                  'Scratchcard',
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    color: Colors.purple,
+                                    fontSize: 8.sp,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ],
@@ -1158,19 +1227,24 @@ class DashboardScreen extends StatelessWidget {
                     context,
                     icon: Icons.candlestick_chart_outlined,
                     color: CelTheme.buyBlue,
-                    onTap: () async {
+                    onTap: () {
                       final accountController = Get.find<AccountController>();
-                      await accountController.setActiveMT5Account(
+                      accountController.setActiveMT5Account(
                         account.metaAccountNumber,
-                      );
-                      if (FlavorConfig.usesIquoteUi() &&
-                          Get.context != null &&
-                          Navigator.of(Get.context!).canPop()) {
-                        Navigator.of(Get.context!).pop();
-                      }
-                      if (onNavigateToTab != null) {
-                        onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 2);
-                      }
+                      ).then((_) {
+                        if (Get.context != null &&
+                            Navigator.of(Get.context!).canPop()) {
+                          Navigator.of(Get.context!).pop();
+                        }
+                        final marketTabIndex = FlavorConfig.usesIquoteUi() ? 1 : 2;
+                        if (onNavigateToTab != null) {
+                          onNavigateToTab!(marketTabIndex);
+                        } else {
+                          TradingMainScreen.changeTab(marketTabIndex);
+                        }
+                      }).catchError((e) {
+                        if (kDebugMode) print('Account switch failed: $e');
+                      });
                     },
                   ),
                   SizedBox(width: 8.w),
@@ -1228,13 +1302,17 @@ class DashboardScreen extends StatelessWidget {
                       accountController
                           .setActiveMT5Account(account.metaAccountNumber)
                           .then((_) {
-                            if (FlavorConfig.usesIquoteUi() &&
-                                Get.context != null &&
+                            if (Get.context != null &&
                                 Navigator.of(Get.context!).canPop()) {
                               Navigator.of(Get.context!).pop();
                             }
-                          })
-                          .catchError((e) {
+                            final marketTabIndex = FlavorConfig.usesIquoteUi() ? 1 : 2;
+                            if (onNavigateToTab != null) {
+                              onNavigateToTab!(marketTabIndex);
+                            } else {
+                              TradingMainScreen.changeTab(marketTabIndex);
+                            }
+                          }).catchError((e) {
                             if (kDebugMode) {
                               print('Account switch failed: $e');
                             }
@@ -1838,14 +1916,34 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (account.masterGroupId.toLowerCase() ==
-                        'scratchcard') ...[
+                    if (account.isScratchCardAccount) ...[
                       SizedBox(width: 8),
-                      BrandLogo(
-                        source: "assets/svg/more/scratch.svg",
-                        height: 22,
-                        width: 22,
-                        color: AppColors.primary,
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            BrandLogo(
+                              source: "assets/svg/more/scratch.svg",
+                              height: 14,
+                              width: 14,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'SCRATCHCARD',
+                              style: AppTextStyles.bodyText.copyWith(
+                                color: AppColors.primary,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ],
@@ -1954,19 +2052,24 @@ class DashboardScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     InkWell(
-                      onTap: () async {
+                      onTap: () {
                         final accountController = Get.find<AccountController>();
-                        await accountController.setActiveMT5Account(
+                        accountController.setActiveMT5Account(
                           account.metaAccountNumber,
-                        );
-                        if (FlavorConfig.usesIquoteUi() &&
-                            Get.context != null &&
-                            Navigator.of(Get.context!).canPop()) {
-                          Navigator.of(Get.context!).pop();
-                        }
-                        if (onNavigateToTab != null) {
-                          onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 2);
-                        }
+                        ).then((_) {
+                          if (Get.context != null &&
+                              Navigator.of(Get.context!).canPop()) {
+                            Navigator.of(Get.context!).pop();
+                          }
+                          final marketTabIndex = FlavorConfig.usesIquoteUi() ? 1 : 2;
+                          if (onNavigateToTab != null) {
+                            onNavigateToTab!(marketTabIndex);
+                          } else {
+                            TradingMainScreen.changeTab(marketTabIndex);
+                          }
+                        }).catchError((e) {
+                          if (kDebugMode) print('Account switch failed: $e');
+                        });
                       },
                       borderRadius: BorderRadius.circular(12.r),
                       child: Container(
@@ -2081,20 +2184,25 @@ class DashboardScreen extends StatelessWidget {
                 children: [
                   // Trade icon with InkWell
                   InkWell(
-                    onTap: () async {
+                    onTap: () {
                       // Call setActiveMT5Account which handles socket reconnection
                       final accountController = Get.find<AccountController>();
-                      await accountController.setActiveMT5Account(
+                      accountController.setActiveMT5Account(
                         account.metaAccountNumber,
-                      );
-                      if (FlavorConfig.usesIquoteUi() &&
-                          Get.context != null &&
-                          Navigator.of(Get.context!).canPop()) {
-                        Navigator.of(Get.context!).pop();
-                      }
-                      if (onNavigateToTab != null) {
-                        onNavigateToTab!(FlavorConfig.isVantage() ? 2 : 2);
-                      }
+                      ).then((_) {
+                        if (Get.context != null &&
+                            Navigator.of(Get.context!).canPop()) {
+                          Navigator.of(Get.context!).pop();
+                        }
+                        final marketTabIndex = FlavorConfig.usesIquoteUi() ? 1 : 2;
+                        if (onNavigateToTab != null) {
+                          onNavigateToTab!(marketTabIndex);
+                        } else {
+                          TradingMainScreen.changeTab(marketTabIndex);
+                        }
+                      }).catchError((e) {
+                        if (kDebugMode) print('Account switch failed: $e');
+                      });
                     },
                     borderRadius: BorderRadius.circular(5.r),
                     child: Container(
@@ -2207,20 +2315,24 @@ class DashboardScreen extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () {
                   final accountController = Get.find<AccountController>();
-                  accountController
-                      .setActiveMT5Account(account.metaAccountNumber)
-                      .then((_) {
-                        if (FlavorConfig.usesIquoteUi() &&
-                            Get.context != null &&
-                            Navigator.of(Get.context!).canPop()) {
-                          Navigator.of(Get.context!).pop();
-                        }
-                      })
-                      .catchError((e) {
-                        if (kDebugMode) {
-                          print('Account switch failed: $e');
-                        }
-                      });
+                  accountController.setActiveMT5Account(
+                    account.metaAccountNumber,
+                  ).then((_) {
+                    if (Get.context != null &&
+                        Navigator.of(Get.context!).canPop()) {
+                      Navigator.of(Get.context!).pop();
+                    }
+                    final marketTabIndex = FlavorConfig.usesIquoteUi() ? 1 : 2;
+                    if (onNavigateToTab != null) {
+                      onNavigateToTab!(marketTabIndex);
+                    } else {
+                      TradingMainScreen.changeTab(marketTabIndex);
+                    }
+                  }).catchError((e) {
+                    if (kDebugMode) {
+                      print('Account switch failed: $e');
+                    }
+                  });
                 },
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: AppColors.primary),

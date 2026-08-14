@@ -424,6 +424,15 @@ class DashboardController extends GetxController {
         // Close loading indicator first
         isLoadingMT5Accounts.value = false;
 
+        // ✅ In-memory update of primary account status for instant accuracy
+        for (var i = 0; i < mt5Accounts.length; i++) {
+          final acc = mt5Accounts[i];
+          final isNewPrimary = acc.metaAccountNumber == accountNumber;
+          if ((acc.primaryAccount == 1) != isNewPrimary) {
+            mt5Accounts[i] = acc.copyWith(primaryAccount: isNewPrimary ? 1 : 0);
+          }
+        }
+
         // ✅ OPTIMIZATION: Make checkMT5Accounts() non-blocking (fire and forget)
         // It will update the UI in the background
         checkMT5Accounts().catchError((e) {
@@ -444,12 +453,16 @@ class DashboardController extends GetxController {
             );
             // This will reconnect all WebSockets (Account, Trading, Instruments, Chart)
             // and update the active account in AccountController
-            await accountController.reconnectAllSocketsForAccount(
+            accountController.reconnectAllSocketsForAccount(
               accountNumber,
-            );
+            ).catchError((e) {
+              if (kDebugMode) print('Error reconnecting sockets: $e');
+            });
 
             // Also refresh dashboard WebSocket
-            await unsubscribeAndResubscribe();
+            unsubscribeAndResubscribe().catchError((e) {
+              if (kDebugMode) print('Error resubscribing dashboard: $e');
+            });
 
             // ✅ FIX: Ensure account data is requested after account switch
             // Add a small delay to ensure WebSocket is ready before requesting data
@@ -1490,6 +1503,12 @@ class DashboardController extends GetxController {
             );
           }
           _initializeWebSocket();
+        }
+      });
+      // ✅ Start fetching accounts in the background so ever() can fire!
+      refreshMT5Accounts(force: true).catchError((e) {
+        if (kDebugMode) {
+          dev.log('Dashboard WS: Error fetching accounts: $e');
         }
       });
     }

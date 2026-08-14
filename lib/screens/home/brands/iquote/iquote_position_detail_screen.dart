@@ -57,15 +57,12 @@ String _sideFor(TradePosition p) {
 
 bool _isBuy(TradePosition p) => _sideFor(p) == 'Buy';
 
-/// Per-symbol pip size, mirroring TradingController._updatePipValues:
-///   JPY pairs → 0.01 | Gold/Silver metals → 0.01 / 0.001 | else → 0.0001.
 double _pipForSymbol(String symbol) {
-  final s = symbol.toUpperCase();
-  if (s.contains('JPY')) return 0.01;
-  if (s.startsWith('XAU') || s.startsWith('GOLD')) return 0.01;
-  if (s.startsWith('XAG') || s.startsWith('SILVER')) return 0.001;
-  return 0.0001;
+  final digits = Get.find<InstrumentsController>().priceRx(symbol).value.digits;
+  return math.pow(10, -digits).toDouble();
 }
+
+
 
 double? _priceStrToDouble(String s) {
   final v = double.tryParse(s.trim());

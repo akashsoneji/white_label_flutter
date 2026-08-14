@@ -45,6 +45,9 @@ import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
+import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
+import 'package:crm_app/utils/precision_helper.dart';
+import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
 // ── palette ─────────────────────────────────────────────────────────────────
 // MA-line + bullish/bearish colors stay the same across themes — they're
@@ -92,10 +95,10 @@ class _ChartPalette {
     divider: Color(0x22FFFFFF),
     axisText: Color(0xFFAAAACC),
     sheetBg: Color(0xFF111A2E),
-    sheetFieldBg: Color(0xFF1A2440),
+    sheetFieldBg: Color(0xFF333333),
     sheetFieldBorder: Color(0x33FFFFFF),
     emptyHintIcon: Color(0xFFAAAACC),
-    inactiveTabBg: Color(0xFF1A2440),
+    inactiveTabBg: Color(0xFF333333),
     inactiveTabBorder: Color(0x33FFFFFF),
     inactiveTabText: Color(0xFFAAAACC),
     tabAccent: Color(0xFFF97316),
@@ -235,13 +238,103 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(
-            child: AccountHeaderWidget(
-              showSearchIcon: false,
-              showMenuIcon: false,
-              showBalance: false,
-              layoutStyle: AccountHeaderLayoutStyle.defaultLayout,
-            ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () => showDashboardBottomSheet(context),
+            child: Obx(() {
+              final accountCtrl = Get.find<AccountController>();
+              final active = accountCtrl.activeMT5Account;
+              final accNumber = active?.metaAccountNumber ?? '------';
+              final rawType = (active?.accountType ?? 'REAL').toUpperCase();
+              final isDemo = rawType == 'DEMO';
+              final badgeLabel = isDemo ? 'DEMO' : 'LIVE';
+              final isDark = AppColors.isDarkMode;
+
+              double? profit;
+              if (active != null && Get.isRegistered<DashboardController>()) {
+                final dashCtrl = Get.find<DashboardController>();
+                profit = dashCtrl.accountInfoMap[active.metaAccountNumber]?.profit;
+              }
+
+              return Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color:
+                      isDark
+                          ? const Color(0xFF252C41)
+                          : AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(
+                    color:
+                        isDark
+                            ? Colors.white12
+                            : AppColors.primary.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '#$accNumber',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 6.w,
+                        vertical: 2.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            isDemo
+                                ? Colors.orange.withValues(alpha: 0.18)
+                                : Colors.green.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        badgeLabel,
+                        style: TextStyle(
+                          color: isDemo ? Colors.orange : Colors.green,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    if (profit != null && profit != 0.0) ...[
+                      SizedBox(width: 6.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: (profit >= 0 ? Colors.green : Colors.red).withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Text(
+                          '${profit >= 0 ? '+' : ''}${PrecisionHelper.formatPnL(profit)}',
+                          style: TextStyle(
+                            color: profit >= 0 ? Colors.green : Colors.red,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                    SizedBox(width: 4.w),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 18.r,
+                      color: AppColors.textSecondary,
+                    ),
+                  ],
+                ),
+              );
+            }),
           ),
         ],
       ),
@@ -706,6 +799,12 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
   late TextEditingController _priceCtl;
   late TextEditingController _tpCtl;
   late TextEditingController _slCtl;
+  late FocusNode _tpFocusNode;
+  late FocusNode _slFocusNode;
+  bool _isTpCustom = false;
+  bool _isSlCustom = false;
+  Worker? _askWorker;
+  Worker? _bidWorker;
   int _tab = 0; // 0 market, 1 limit
   bool _tpSlEnabled = false;
 
@@ -723,15 +822,82 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
     );
     _tpCtl = TextEditingController();
     _slCtl = TextEditingController();
+    _tpFocusNode = FocusNode();
+    _slFocusNode = FocusNode();
+
+    _tpCtl.addListener(() {
+      if (_tpFocusNode.hasFocus) {
+        _isTpCustom = true;
+      }
+    });
+    _slCtl.addListener(() {
+      if (_slFocusNode.hasFocus) {
+        _isSlCustom = true;
+      }
+    });
+
+    _askWorker = ever(widget.ctrl.lastAsk, (_) => _updateTpSlFromMarketPrice());
+    _bidWorker = ever(widget.ctrl.lastBid, (_) => _updateTpSlFromMarketPrice());
   }
 
   @override
   void dispose() {
+    _askWorker?.dispose();
+    _bidWorker?.dispose();
     _volumeCtl.dispose();
     _priceCtl.dispose();
     _tpCtl.dispose();
     _slCtl.dispose();
+    _tpFocusNode.dispose();
+    _slFocusNode.dispose();
     super.dispose();
+  }
+
+  void _updateTpSlFromMarketPrice() {
+    if (!_tpSlEnabled) return;
+    if (_tpFocusNode.hasFocus || _slFocusNode.hasFocus) return;
+
+    final activePrice =
+        widget.side == 'buy'
+            ? (widget.ctrl.lastAsk.value ??
+                widget.ctrl.lastBid.value ??
+                0.0)
+            : (widget.ctrl.lastBid.value ??
+                widget.ctrl.lastAsk.value ??
+                0.0);
+    final digits = widget.ctrl.priceDigits.value;
+    if (activePrice > 0) {
+      final double entryPrice = (_tab == 1 && _price > 0) ? _price : activePrice;
+      
+      final double offset;
+      if (digits <= 2 && entryPrice > 5000) {
+        offset = 100.0;
+      } else {
+        double multiplier = 1.0;
+        for (int i = 0; i < digits; i++) {
+          multiplier *= 10.0;
+        }
+        final pipSize = 1.0 / multiplier;
+        offset = 100.0 * pipSize;
+      }
+
+      final double tp;
+      final double sl;
+      if (widget.side == 'buy') {
+        tp = entryPrice + offset;
+        sl = entryPrice - offset;
+      } else {
+        tp = entryPrice - offset;
+        sl = entryPrice + offset;
+      }
+
+      if (!_isTpCustom && !_tpFocusNode.hasFocus) {
+        _tpCtl.text = tp.toStringAsFixed(digits);
+      }
+      if (!_isSlCustom && !_slFocusNode.hasFocus) {
+        _slCtl.text = sl.toStringAsFixed(digits);
+      }
+    }
   }
 
   double get _volume => double.tryParse(_volumeCtl.text.trim()) ?? 0.01;
@@ -994,19 +1160,9 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                     setState(() {
                       _tpSlEnabled = v;
                       if (v) {
-                        final activePrice =
-                            widget.side == 'buy'
-                                ? (widget.ctrl.lastAsk.value ??
-                                    widget.ctrl.lastBid.value ??
-                                    0.0)
-                                : (widget.ctrl.lastBid.value ??
-                                    widget.ctrl.lastAsk.value ??
-                                    0.0);
-                        final digits = widget.ctrl.priceDigits.value;
-                        if (activePrice > 0) {
-                          _tpCtl.text = activePrice.toStringAsFixed(digits);
-                          _slCtl.text = activePrice.toStringAsFixed(digits);
-                        }
+                        _isTpCustom = false;
+                        _isSlCustom = false;
+                        _updateTpSlFromMarketPrice();
                       }
                     });
                   },
@@ -1020,6 +1176,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                     child: _Field(
                       label: 'Take profit',
                       controller: _tpCtl,
+                      focusNode: _tpFocusNode,
                       palette: palette,
                     ),
                   ),
@@ -1028,6 +1185,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                     child: _Field(
                       label: 'Stop loss',
                       controller: _slCtl,
+                      focusNode: _slFocusNode,
                       palette: palette,
                     ),
                   ),
@@ -1046,7 +1204,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: color,
-                          foregroundColor: AppColors.whiteColor,
+                          foregroundColor: AppColors.pureWhite,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.r),
                           ),
@@ -1117,7 +1275,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _kBearColor,
-                            foregroundColor: AppColors.whiteColor,
+                            foregroundColor: AppColors.pureWhite,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.r),
                             ),
@@ -1156,7 +1314,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _kBullColor,
-                            foregroundColor: AppColors.whiteColor,
+                            foregroundColor: AppColors.pureWhite,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.r),
                             ),
@@ -1284,17 +1442,20 @@ class _Field extends StatelessWidget {
     required this.palette,
     this.suffix,
     this.prefix,
+    this.focusNode,
   });
   final String label;
   final TextEditingController controller;
   final _ChartPalette palette;
   final Widget? suffix;
   final Widget? prefix;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      focusNode: focusNode,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       style: TextStyle(color: AppColors.textPrimary, fontSize: 14.sp),
       textAlign:
@@ -2111,13 +2272,8 @@ class _FlagIcon extends StatelessWidget {
         symbol.contains('.')
             ? symbol.substring(0, symbol.lastIndexOf('.'))
             : symbol;
-    String primaryCurr =
-        clean.length >= 3
-            ? clean.substring(0, 3).toLowerCase()
-            : clean.toLowerCase();
 
-    final flagPath1 = 'assets/svg/flags/${clean.toLowerCase()}.svg';
-    final flagPath2 = 'assets/svg/flags/$primaryCurr.svg';
+    final flagPath = 'assets/svg/flags/${clean.toLowerCase()}.svg';
 
     return SizedBox(
       width: 24.w,
@@ -2131,24 +2287,18 @@ class _FlagIcon extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(3.r),
             child: SvgPicture.asset(
-              flagPath1,
+              flagPath,
               fit: BoxFit.cover,
-              placeholderBuilder:
-                  (_) => SvgPicture.asset(
-                    flagPath2,
-                    fit: BoxFit.cover,
-                    placeholderBuilder:
-                        (_) => Center(
-                          child: Text(
-                            clean.isNotEmpty ? clean[0].toUpperCase() : '?',
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
+              placeholderBuilder: (_) => Center(
+                child: Text(
+                  clean.isNotEmpty ? clean[0].toUpperCase() : '?',
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
                   ),
+                ),
+              ),
             ),
           ),
         ),

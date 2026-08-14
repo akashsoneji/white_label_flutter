@@ -1456,7 +1456,6 @@ class _EmptyInvestmentsState extends StatelessWidget {
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.whiteColor,
                 ),
               ),
               style: ElevatedButton.styleFrom(

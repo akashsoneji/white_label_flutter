@@ -221,6 +221,12 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                       final isDemo = rawType == 'DEMO';
                       final badgeLabel = isDemo ? 'DEMO' : 'LIVE';
 
+                      double? profit;
+                      if (active != null && Get.isRegistered<DashboardController>()) {
+                        final dashCtrl = Get.find<DashboardController>();
+                        profit = dashCtrl.accountInfoMap[active.metaAccountNumber]?.profit;
+                      }
+
                       return Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 10.w,
@@ -272,6 +278,27 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                                 ),
                               ),
                             ),
+                            if (profit != null && profit != 0.0) ...[
+                              SizedBox(width: 6.w),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 6.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: (profit >= 0 ? Colors.green : Colors.red).withValues(alpha: 0.18),
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Text(
+                                  '${profit >= 0 ? '+' : ''}${PrecisionHelper.formatPnL(profit)}',
+                                  style: TextStyle(
+                                    color: profit >= 0 ? Colors.green : Colors.red,
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
                             SizedBox(width: 4.w),
                             Icon(
                               Icons.keyboard_arrow_down_rounded,
@@ -1317,7 +1344,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                               () => Navigator.of(dialogContext).pop(true),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _accent,
-                            foregroundColor: Colors.white,
+                            foregroundColor: AppColors.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8.r),
                             ),
@@ -1382,202 +1409,187 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     TradingController tradingController,
     TradePosition position,
   ) async {
-    final symbol = _formatSymbol(position.symbol);
-    final leverage = _leverageLabel(position);
-    final isBuy = position.action.toLowerCase() == 'buy';
-    final isPositive = position.profitLoss >= 0;
-    final closePrice = isBuy ? position.currentPrice : position.currentPrice;
-
     await showDialog<void>(
       context: context,
       barrierColor: Colors.black.withOpacity(0.55),
       builder: (dialogContext) {
-        return Dialog(
-          backgroundColor: _cardColor,
-          insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Close $symbol positions at market price?',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                    height: 1.3,
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                // Side chip + symbol
-                Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 3.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: (isBuy ? _green : _red).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Text(
-                        isBuy ? 'Buy' : 'Sell',
-                        style: TextStyle(
-                          color: isBuy ? _green : _red,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      symbol,
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10.h),
-                // Lot + leverage • close price
-                Row(
+        return GetBuilder<TradingController>(
+          id: 'position_${position.orderId}',
+          builder: (controller) {
+            final fresh = controller.getMarketPositionById(position.orderId) ?? position;
+            final symbol = _formatSymbol(fresh.symbol);
+            final leverage = _leverageLabel(fresh);
+            final isBuy = fresh.action.toLowerCase() == 'buy';
+            final isPositive = fresh.profitLoss >= 0;
+            final closePrice = fresh.currentPrice;
+
+            return Dialog(
+              backgroundColor: _cardColor,
+              insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${position.volume}Lot',
+                      'Close $symbol positions at market price?',
                       style: TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    if (leverage.isNotEmpty) ...[
-                      SizedBox(width: 8.w),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 6.w,
-                          vertical: 2.h,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4.r),
-                          border: Border.all(
-                            color: AppColors.textSecondary,
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          leverage,
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                    const Spacer(),
-                    Text(
-                      closePrice,
-                      style: TextStyle(
-                        color: isPositive ? _green : _red,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
+                        height: 1.3,
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(height: 6.h),
-                // Cashback / swap row
-                // Row(
-                //   children: [
-                //     Text(
-                //       'Cashback',
-                //       style: TextStyle(
-                //         color: AppColors.textSecondary,
-                //         fontSize: 12.sp,
-                //       ),
-                //     ),
-                //     const Spacer(),
-                //     Text(
-                //       _formatSwap(position.swap),
-                //       style: TextStyle(
-                //         color: _accent,
-                //         fontSize: 13.sp,
-                //         fontWeight: FontWeight.w600,
-                //       ),
-                //     ),
-                //   ],
-                // ),
-                // SizedBox(height: 20.h),
-                // Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 44.h,
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: _accent, width: 1.2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
+                    SizedBox(height: 20.h),
+                    // Side chip + symbol
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 3.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: (isBuy ? _green : _red).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(4.r),
                           ),
                           child: Text(
-                            'Cancel',
+                            isBuy ? 'Buy' : 'Sell',
                             style: TextStyle(
-                              color: _accent,
-                              fontSize: 14.sp,
+                              color: isBuy ? _green : _red,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: SizedBox(
-                        height: 44.h,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop();
-                            _confirmClosePosition(tradingController, position);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _accent,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            elevation: 0,
+                        SizedBox(width: 8.w),
+                        Text(
+                          symbol,
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
                           ),
-                          child: Text(
-                            'Confirm',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.whiteColor,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10.h),
+                    // Lot + leverage • close price
+                    Row(
+                      children: [
+                        Text(
+                          '${fresh.volume}Lot',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        if (leverage.isNotEmpty) ...[
+                          SizedBox(width: 8.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 6.w,
+                              vertical: 2.h,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4.r),
+                              border: Border.all(
+                                color: AppColors.textSecondary,
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              leverage,
+                              style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                        const Spacer(),
+                        Text(
+                          closePrice,
+                          style: TextStyle(
+                            color: isPositive ? _green : _red,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20.h),
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 44.h,
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.of(dialogContext).pop(),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: _accent, width: 1.2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: _accent,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: SizedBox(
+                            height: 44.h,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop();
+                                _confirmClosePosition(tradingController, fresh);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _accent,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                'Confirm',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.whiteColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
   }
+
 
   Future<void> _confirmClosePosition(
     TradingController tradingController,
@@ -1696,7 +1708,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: _accent,
-                                foregroundColor: Colors.white,
+                                foregroundColor: AppColors.onPrimary,
                                 padding: EdgeInsets.symmetric(horizontal: 8.w),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8.r),

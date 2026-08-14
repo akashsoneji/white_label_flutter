@@ -2307,12 +2307,11 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
           final profit = double.tryParse(positionData[7].toString()) ?? 0.0;
 
           // Extract SL and TP if available (indices 8 and 9 for 10-element arrays)
-          // Index 8 is TP and Index 9 is SL from backend
-          final priceTP =
+          final priceSL =
               positionData.length >= 9
                   ? (double.tryParse(positionData[8].toString()) ?? 0.0)
                   : 0.0;
-          final priceSL =
+          final priceTP =
               positionData.length >= 10
                   ? (double.tryParse(positionData[9].toString()) ?? 0.0)
                   : 0.0;

@@ -316,7 +316,11 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
               ),
               SizedBox(height: 20.h),
 
-              _buildLabel('Transfer Amount (USD) *'),
+              _buildLabel(
+                data?.availableBalance != null
+                    ? 'Transfer Amount (USD) * (Available: \$${data!.availableBalance!.toStringAsFixed(2)})'
+                    : 'Transfer Amount (USD) *',
+              ),
               Row(
                 children: [
                   Expanded(
@@ -325,6 +329,26 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
+                      onChanged: (value) {
+                        if (data?.availableBalance != null) {
+                          final entered = double.tryParse(value);
+                          if (entered != null &&
+                              entered > data!.availableBalance!) {
+                            _amountController.text =
+                                data.availableBalance!.toStringAsFixed(2);
+                            _amountController.selection =
+                                TextSelection.fromPosition(
+                              TextPosition(
+                                offset: _amountController.text.length,
+                              ),
+                            );
+                            CustomToastService.showError(
+                              message:
+                                  'Amount cannot exceed available balance of \$${data.availableBalance!.toStringAsFixed(2)}',
+                            );
+                          }
+                        }
+                      },
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 18.sp,
@@ -355,29 +379,37 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                       ),
                     ),
                   ),
-                  // SizedBox(width: 10.w),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     if (data?.availableBalance != null) {
-                  //       _amountController.text = data!.availableBalance!.toStringAsFixed(2);
-                  //     }
-                  //   },
-                  //   child: Container(
-                  //     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-                  //     decoration: BoxDecoration(
-                  //       color: AppColors.primary.withValues(alpha: 0.1),
-                  //       borderRadius: BorderRadius.circular(10.r),
-                  //     ),
-                  //     child: Text(
-                  //       'MAX',
-                  //       style: TextStyle(
-                  //         color: AppColors.primary,
-                  //         fontWeight: FontWeight.w400,
-                  //         fontSize: 15.sp,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
+                  if (data?.availableBalance != null) ...[
+                    SizedBox(width: 10.w),
+                    GestureDetector(
+                      onTap: () {
+                        _amountController.text =
+                            data!.availableBalance!.toStringAsFixed(2);
+                        _amountController.selection =
+                            TextSelection.fromPosition(
+                          TextPosition(offset: _amountController.text.length),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 14.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Text(
+                          'MAX',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 15.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
               SizedBox(height: 20.h),

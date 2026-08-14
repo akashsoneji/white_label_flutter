@@ -4,6 +4,7 @@ import 'package:crm_app/screens/home/brands/iquote/iquote_chart_screen.dart';
 import 'package:crm_app/screens/home/brands/iquote/view_models/iquote_chart_controller.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
@@ -127,10 +128,6 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
     final textSecondary = AppColors.textSecondary;
     final isDark = AppColors.isDarkMode;
 
-    final appTitle =
-        FlavorConfig.instance.appTitle.isNotEmpty
-            ? FlavorConfig.instance.appTitle
-            : FlavorConfig.instance.appName;
 
     return Scaffold(
       backgroundColor: bgDark,
@@ -142,7 +139,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
             children: [
               // 1. Top Header: User Profile Icon (Left) + App Logo (60x60) Centered (Center)
               Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0.h),
+                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -166,20 +163,21 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                     // Centered Logo
                     Expanded(
                       child: Center(
-                        child: FlavorConfig.instance.flavor == Flavor.pipze
-                            ? BrandLogo(
-                                source: FlavorConfig.instance.splashLogoPath,
-                                height: 35.h,
-                                fit: BoxFit.contain,
-                              )
-                            : ClipOval(
-                                child: BrandLogo(
-                                  source: FlavorConfig.effectiveLogo,
-                                  width: 60.r,
-                                  height: 60.r,
+                        child:
+                            FlavorConfig.instance.flavor == Flavor.pipze
+                                ? BrandLogo(
+                                  source: FlavorConfig.instance.splashLogoPath,
+                                  height: 28.h,
                                   fit: BoxFit.contain,
+                                )
+                                : ClipOval(
+                                  child: BrandLogo(
+                                    source: FlavorConfig.effectiveLogo,
+                                    width: 42.r,
+                                    height: 42.r,
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
-                              ),
                       ),
                     ),
 
@@ -201,28 +199,34 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                   ],
                 ),
               ),
-              // SizedBox(height: 8.h),
-
               // 2. Promo Banner Carousel
               _PromoCarousel(
                 textPrimary: textPrimary,
                 textSecondary: textSecondary,
                 isDark: isDark,
               ),
-              // SizedBox(height: 8.h),
 
               // 3. Quick Shortcuts Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                child: Card(
-                  elevation: 1,
-                  margin: EdgeInsets.only(top: 2.h),
-                  color: isDark ? cardBg : Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? cardBg : Colors.white,
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: AppColors.border.withOpacity(0.08)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 0.h),
+                        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0.h),
                         child: Text(
                           'Quick Shortcuts',
                           style: AppTextStyles.bodyText.copyWith(
@@ -232,110 +236,120 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 8.h),
-                      GridView.count(
-                        padding: EdgeInsets.zero,
-                        crossAxisCount: 4,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 10.h,
-                        crossAxisSpacing: 8.w,
-                        childAspectRatio: 1.3,
-                        children: [
-                          // 1. Demo
-                          _buildShortcutItem(
-                            icon: Icons.play_circle_outline,
-                            label: 'Demo',
-                            color: Colors.orangeAccent,
-                            textColor: textPrimary,
-                            onTap:
-                                () => Get.toNamed(
-                                  AppPages.CHOOSE_ACCOUNT,
-                                  arguments: {'isDemo': true},
-                                ),
-                          ),
-                          // 2. Real
-                          _buildShortcutItem(
-                            icon: Icons.account_balance_wallet_outlined,
-                            label: 'Real',
-                            color: Colors.greenAccent,
-                            textColor: textPrimary,
-                            onTap: () => Get.toNamed(AppPages.CHOOSE_ACCOUNT),
-                          ),
-                          // 3. IB
-                          _buildShortcutItem(
-                            icon: Icons.business_center_outlined,
-                            label: 'IB',
-                            color: Colors.purpleAccent,
-                            textColor: textPrimary,
-                            isHot: true,
-                            onTap: IquoteHomeScreen.handleSwitchToIB,
-                          ),
-                          // 4. PAMM
-                          _buildShortcutItem(
-                            icon: Icons.pie_chart_outline,
-                            label: 'PAMM',
-                            color: Colors.pinkAccent,
-                            textColor: textPrimary,
-                            isHot: true,
-                            onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
-                          ),
-                          // 5. Scratchcard
-                          _buildShortcutItem(
-                            icon: Icons.confirmation_number_outlined,
-                            label: 'Scratchcard',
-                            color: Colors.amber,
-                            textColor: textPrimary,
-                            onTap:
-                                () => Get.to(() => const PromotionalScreen()),
-                          ),
-                          // 6. Support Ticket
-                          _buildShortcutItem(
-                            icon: Icons.support_agent_outlined,
-                            label: 'Support Ticket',
-                            color: Colors.tealAccent,
-                            textColor: textPrimary,
-                            onTap: () => Get.toNamed(AppPages.TICKET_LIST),
-                          ),
-                          // 7. Deposit
-                          _buildShortcutItem(
-                            icon: Icons.add_circle_outline,
-                            label: 'Deposit',
-                            color: Colors.blueAccent,
-                            textColor: textPrimary,
-                            onTap:
-                                () => Get.to(
-                                  () => PaymentMethodsScreen(accountNumber: ''),
-                                ),
-                          ),
-                          // 8. Withdrawal
-                          _buildShortcutItem(
-                            icon: Icons.remove_circle_outline,
-                            label: 'Withdrawal',
-                            color: Colors.lightBlue,
-                            textColor: textPrimary,
-                            onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
-                          ),
-                        ],
+                      SizedBox(height: 10.h),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(12.w, 0.h, 12.w, 12.h),
+                        child: GridView.count(
+                          padding: EdgeInsets.zero,
+                          crossAxisCount: 4,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          mainAxisSpacing: 8.h,
+                          crossAxisSpacing: 8.w,
+                          childAspectRatio: 0.88,
+                          children: [
+                            // 1. Demo
+                            _buildShortcutItem(
+                              icon: Icons.play_circle_outline,
+                              label: 'Demo',
+                              color: Colors.orangeAccent,
+                              textColor: textPrimary,
+                              onTap:
+                                  () => Get.toNamed(
+                                    AppPages.CHOOSE_ACCOUNT,
+                                    arguments: {'isDemo': true},
+                                  ),
+                            ),
+                            // 2. Real
+                            _buildShortcutItem(
+                              icon: Icons.account_balance_wallet_outlined,
+                              label: 'Real',
+                              color: Colors.greenAccent,
+                              textColor: textPrimary,
+                              onTap: () => Get.toNamed(AppPages.CHOOSE_ACCOUNT),
+                            ),
+                            // 3. IB
+                            _buildShortcutItem(
+                              icon: Icons.business_center_outlined,
+                              label: 'IB',
+                              color: Colors.purpleAccent,
+                              textColor: textPrimary,
+                              isHot: true,
+                              onTap: IquoteHomeScreen.handleSwitchToIB,
+                            ),
+                            // 4. PAMM
+                            _buildShortcutItem(
+                              icon: Icons.pie_chart_outline,
+                              label: 'PAMM',
+                              color: Colors.pinkAccent,
+                              textColor: textPrimary,
+                              isHot: true,
+                              onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
+                            ),
+                            // 5. Scratchcard
+                            _buildShortcutItem(
+                              icon: Icons.confirmation_number_outlined,
+                              label: 'Scratchcard',
+                              color: Colors.amber,
+                              textColor: textPrimary,
+                              onTap:
+                                  () => Get.to(() => const PromotionalScreen()),
+                            ),
+                            // 6. Support Ticket
+                            _buildShortcutItem(
+                              icon: Icons.support_agent_outlined,
+                              label: 'Support Ticket',
+                              color: Colors.tealAccent,
+                              textColor: textPrimary,
+                              onTap: () => Get.toNamed(AppPages.TICKET_LIST),
+                            ),
+                            // 7. Deposit
+                            _buildShortcutItem(
+                              icon: Icons.add_circle_outline,
+                              label: 'Deposit',
+                              color: Colors.blueAccent,
+                              textColor: textPrimary,
+                              onTap:
+                                  () => Get.to(
+                                    () => PaymentMethodsScreen(accountNumber: ''),
+                                  ),
+                            ),
+                            // 8. Withdrawal
+                            _buildShortcutItem(
+                              icon: Icons.remove_circle_outline,
+                              label: 'Withdrawal',
+                              color: Colors.lightBlue,
+                              textColor: textPrimary,
+                              onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
+                            ),
+                          ],
+                        ),
                       ),
-                      // SizedBox(height: 10.h),
                     ],
                   ),
                 ),
               ),
-              // SizedBox(height: 8.h),
 
               // 4. Favourites Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                child: Card(
-                  elevation: 1.3,
-                  margin: EdgeInsets.only(top: 2.h),
-                  color: isDark ? cardBg : Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? cardBg : Colors.white,
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: AppColors.border.withOpacity(0.08)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
                   child: Column(
                     children: [
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 0.h),
+                        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0.h),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -360,9 +374,9 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                           ],
                         ),
                       ),
-
+                      SizedBox(height: 4.h),
                       Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0.h),
+                        padding: EdgeInsets.fromLTRB(12.w, 0.h, 12.w, 12.h),
                         child: _buildLiveFavouritesGrid(
                           cardBg,
                           textPrimary,
@@ -370,7 +384,6 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                           isDark,
                         ),
                       ),
-                      SizedBox(height: 10.h),
                     ],
                   ),
                 ),
@@ -414,29 +427,53 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
         );
       }
 
-      return GridView.builder(
-        padding: EdgeInsets.zero,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 10.h,
-          crossAxisSpacing: 10.w,
-          childAspectRatio: 2.2,
-        ),
-        itemCount: displayList.length,
-        itemBuilder: (context, index) {
-          return _LiveTickerCard(
-            instrument: displayList[index],
-            controller: _ic,
-            cardBg: cardBg,
-            textPrimary: textPrimary,
-            textSecondary: textSecondary,
-            isDark: isDark,
-            onNavigateToTab: widget.onNavigateToTab,
-            onNavigateToChart: widget.onNavigateToChart,
+      return Column(
+        children: List.generate(displayList.length, (index) {
+          final item = displayList[index];
+          return Column(
+            children: [
+              Dismissible(
+                key: Key('fav_${item.symbol}'),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.white,
+                    size: 20.r,
+                  ),
+                ),
+                onDismissed: (direction) {
+                  _ic.removeFromFavorites(item.symbol);
+                  CustomToastService.showSuccess(
+                    message: '${item.symbol.replaceAll('.c', '').replaceAll('.r', '')} removed from favorites',
+                  );
+                },
+                child: _LiveTickerCard(
+                  instrument: item,
+                  controller: _ic,
+                  cardBg: cardBg,
+                  textPrimary: textPrimary,
+                  textSecondary: textSecondary,
+                  isDark: isDark,
+                  onNavigateToTab: widget.onNavigateToTab,
+                  onNavigateToChart: widget.onNavigateToChart,
+                ),
+              ),
+              if (index < displayList.length - 1)
+                Divider(
+                  height: 12.h,
+                  thickness: 0.5,
+                  color: AppColors.border.withOpacity(0.08),
+                ),
+            ],
           );
-        },
+        }),
       );
     });
   }
@@ -449,58 +486,75 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
     required VoidCallback onTap,
     bool isHot = false,
   }) {
+    final isDark = AppColors.isDarkMode;
+    final iconBg = isDark
+        ? color.withOpacity(0.15)
+        : color.withOpacity(0.10);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12.r),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Stack(
             clipBehavior: Clip.none,
             children: [
               Container(
-                height: 44.r,
-                width: 44.r,
+                height: 40.r,
+                width: 40.r,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.85),
-                  borderRadius: BorderRadius.circular(12.r),
+                  color: iconBg,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: color.withOpacity(0.18),
+                    width: 0.8,
+                  ),
                 ),
-                child: Icon(icon, color: Colors.white, size: 24.r),
+                child: Center(
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 20.r,
+                  ),
+                ),
               ),
               if (isHot)
                 Positioned(
-                  top: -4.h,
-                  right: -4.w,
+                  top: -2.h,
+                  right: -2.w,
                   child: Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 4.w,
                       vertical: 1.h,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(8.r),
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
-                      'Hot',
+                      'HOT',
                       style: AppTextStyles.bodyText.copyWith(
                         color: Colors.white,
-                        fontSize: 8.sp,
-                        fontWeight: FontWeight.w400,
+                        fontSize: 7.sp,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ),
                 ),
             ],
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 6.h),
           Text(
             label,
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: AppTextStyles.bodyText.copyWith(
               color: textColor,
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w400,
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+              height: 1.1,
             ),
           ),
         ],
@@ -536,6 +590,7 @@ class _LiveTickerCard extends StatelessWidget {
     final displaySym =
         sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
     final digits = instrument.digits;
+    final descName = instrument.name ?? '';
 
     return Obx(() {
       final livePrice = controller.priceRx(sym).value;
@@ -555,6 +610,10 @@ class _LiveTickerCard extends StatelessWidget {
       final isUp = changePct >= 0;
       final sign = isUp ? '+' : '';
 
+      final changeBg =
+          isUp
+              ? const Color(0xFF2ED573).withOpacity(0.12)
+              : const Color(0xFFFF4757).withOpacity(0.12);
       final changeColor =
           isUp ? const Color(0xFF2ED573) : const Color(0xFFFF4757);
       final changeStr = '$sign${changePct.abs().toStringAsFixed(2)}%';
@@ -574,60 +633,119 @@ class _LiveTickerCard extends StatelessWidget {
             Get.to(() => IQuoteChartScreen(symbol: sym));
           }
         },
-        borderRadius: BorderRadius.circular(12.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            color: isDark ? cardBg : Colors.white,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: AppColors.border.withOpacity(0.15)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.28 : 0.06),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-                spreadRadius: 0,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        borderRadius: BorderRadius.circular(8.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+          child: Row(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              _HomeFlagIcon(symbol: displaySym),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      displaySym,
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: textPrimary,
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (descName.isNotEmpty) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        descName,
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: textSecondary,
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              SizedBox(width: 4.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    displaySym,
+                    PrecisionHelper.formatPrice(currentBid, decimals: digits),
                     style: AppTextStyles.bodyText.copyWith(
                       color: textPrimary,
                       fontSize: 12.sp,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  Text(
-                    changeStr,
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: changeColor,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w400,
+                  SizedBox(height: 4.h),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                      color: changeBg,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Text(
+                      changeStr,
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: changeColor,
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],
-              ),
-              Text(
-                PrecisionHelper.formatPrice(currentBid, decimals: digits),
-                style: AppTextStyles.bodyText.copyWith(
-                  color: changeColor,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                ),
               ),
             ],
           ),
         ),
       );
     });
+  }
+}
+
+class _HomeFlagIcon extends StatelessWidget {
+  final String symbol;
+  const _HomeFlagIcon({required this.symbol});
+
+  @override
+  Widget build(BuildContext context) {
+    String clean =
+        symbol.contains('.')
+            ? symbol.substring(0, symbol.lastIndexOf('.'))
+            : symbol;
+
+    final flagPath = 'assets/svg/flags/${clean.toLowerCase()}.svg';
+
+    return SizedBox(
+      width: 24.w,
+      height: 24.w,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.08),
+          shape: BoxShape.circle,
+        ),
+        child: ClipOval(
+          child: Padding(
+            padding: EdgeInsets.all(2.r),
+            child: SvgPicture.asset(
+              flagPath,
+              fit: BoxFit.cover,
+              placeholderBuilder: (_) => Icon(
+                Icons.monetization_on_outlined,
+                size: 14.r,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -703,8 +821,9 @@ class _PromoCarouselState extends State<_PromoCarousel> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(10.w, 2.h, 10.w, 0.h),
-      child: Column(
+      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
+      child: Stack(
+        alignment: Alignment.bottomCenter,
         children: [
           SizedBox(
             height: 124.h,
@@ -716,7 +835,7 @@ class _PromoCarouselState extends State<_PromoCarousel> {
                 final s = _slides[i];
                 return Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(14.w),
+                  padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 20.h),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors:
@@ -793,22 +912,24 @@ class _PromoCarouselState extends State<_PromoCarousel> {
               },
             ),
           ),
-          SizedBox(height: 8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              _slides.length,
-              (idx) => AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: EdgeInsets.symmetric(horizontal: 3.w),
-                width: _currentPage == idx ? 16.w : 6.w,
-                height: 6.h,
-                decoration: BoxDecoration(
-                  color:
-                      _currentPage == idx
-                          ? AppColors.primary
-                          : AppColors.primary.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(3.r),
+          Positioned(
+            bottom: 8.h,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                _slides.length,
+                (idx) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: EdgeInsets.symmetric(horizontal: 3.w),
+                  width: _currentPage == idx ? 14.w : 5.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color:
+                        _currentPage == idx
+                            ? AppColors.primary
+                            : AppColors.primary.withOpacity(0.35),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
                 ),
               ),
             ),

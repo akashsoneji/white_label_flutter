@@ -129,6 +129,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         amountController.text = '0.00';
       }
     });
+    amountController.addListener(() {
+      if (mounted) setState(() {});
+    });
 
     // OTP handling is now done directly in _buildOtpBox and _buildOtpBoxAndroid methods
   }
@@ -625,41 +628,70 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
   }
 
   Widget _buildAmountField() {
-    return RTLHelper.rtlTextField(
-      style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w400),
-      controller: amountController,
-      focusNode: amountFocusNode,
-      keyboardType: TextInputType.numberWithOptions(
-        signed: true,
-        decimal: true,
-      ),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-        _SingleDecimalTextFormatter(),
-      ],
-      decoration: InputDecoration(
-        labelText: 'Amount',
-        labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
-        floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.border),
+    return Obx(() {
+      final m = controller.withdrawalMethodDetail.value?.data?.withdrawalMethod;
+      double? minLimit;
+      double? maxLimit;
+      if (m != null) {
+        minLimit = double.tryParse(m.minLimit?.toString() ?? '');
+        maxLimit = double.tryParse(m.maxLimit?.toString() ?? '');
+      }
+
+      final raw = amountController.text.trim();
+      String? error;
+      if (raw.isNotEmpty && raw != '0.00') {
+        final entered = double.tryParse(raw);
+        if (entered != null) {
+          if (minLimit != null && entered < minLimit) {
+            error = 'Minimum withdrawal is \$${minLimit.toStringAsFixed(2)}';
+          } else if (maxLimit != null && entered > maxLimit) {
+            error = 'Maximum withdrawal is \$${maxLimit.toStringAsFixed(2)}';
+          }
+        }
+      }
+
+      return RTLHelper.rtlTextField(
+        style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.w400),
+        controller: amountController,
+        focusNode: amountFocusNode,
+        keyboardType: const TextInputType.numberWithOptions(
+          signed: true,
+          decimal: true,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.border),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+          _SingleDecimalTextFormatter(),
+        ],
+        decoration: InputDecoration(
+          labelText: 'Amount',
+          labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+          floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
+          errorText: error,
+          errorStyle: TextStyle(color: AppColors.error, fontSize: 12.sp),
+          helperText: (minLimit != null && maxLimit != null)
+              ? 'Limit: \$${minLimit.toStringAsFixed(2)} - \$${maxLimit.toStringAsFixed(2)}'
+              : null,
+          helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.primary, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.error),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.error),
-        ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildConfirmationCheckbox() {
@@ -1058,6 +1090,22 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
       _validationMessage.value = 'Amount must be greater than 0';
       _showValidationError.value = true;
       return false;
+    }
+
+    final m = controller.withdrawalMethodDetail.value?.data?.withdrawalMethod;
+    if (m != null) {
+      final minLimit = double.tryParse(m.minLimit?.toString() ?? '');
+      final maxLimit = double.tryParse(m.maxLimit?.toString() ?? '');
+      if (minLimit != null && amount < minLimit) {
+        _validationMessage.value = 'Amount cannot be less than minimum limit of \$${minLimit.toStringAsFixed(2)}';
+        _showValidationError.value = true;
+        return false;
+      }
+      if (maxLimit != null && amount > maxLimit) {
+        _validationMessage.value = 'Amount cannot be more than maximum limit of \$${maxLimit.toStringAsFixed(2)}';
+        _showValidationError.value = true;
+        return false;
+      }
     }
 
     // Check OTP if OTP is sent

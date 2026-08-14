@@ -1728,6 +1728,36 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  // Helper to find the index of a symbol in favoriteInstruments
+  int _getFavoriteIndex(String symbol) {
+    int idx = favoriteInstruments.indexOf(symbol);
+    if (idx != -1) return idx;
+    idx = favoriteInstruments.indexOf('$symbol.c');
+    if (idx != -1) return idx;
+    idx = favoriteInstruments.indexOf(symbol.replaceAll('.c', '').replaceAll('.r', ''));
+    if (idx != -1) return idx;
+    return 9999;
+  }
+
+  // Reorder favorite instruments in memory and storage
+  Future<void> reorderFavorites(int oldIndex, int newIndex) async {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    if (oldIndex >= 0 && oldIndex < favoriteInstruments.length &&
+        newIndex >= 0 && newIndex < favoriteInstruments.length) {
+      final String item = favoriteInstruments.removeAt(oldIndex);
+      favoriteInstruments.insert(newIndex, item);
+      
+      // Save to storage
+      await FavoritesStorageService.instance.saveFavoriteInstruments(favoriteInstruments);
+      
+      // Sync local structures & update list
+      await hydrateFavoritesFromRest();
+      _updateFilteredInstruments();
+    }
+  }
+
   // Get favorites count
   int get favoritesCount => favoriteInstruments.length;
 
@@ -1820,23 +1850,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
                 .where((instrument) => isFavorite(instrument.symbol))
                 .toList();
 
-        // Sort priority index: XAUUSD -> XAGUSD -> GBPUSD -> EURUSD
-        final List<String> orderPriority = ['XAUUSD', 'XAGUSD', 'GBPUSD', 'EURUSD'];
+        // Sort based on their index in favoriteInstruments (custom ordering)
         filteredInstruments.sort((a, b) {
-          final cleanA = a.symbol.replaceAll('.c', '').replaceAll('.r', '').toUpperCase();
-          final cleanB = b.symbol.replaceAll('.c', '').replaceAll('.r', '').toUpperCase();
-
-          final indexA = orderPriority.indexOf(cleanA);
-          final indexB = orderPriority.indexOf(cleanB);
-
-          if (indexA != -1 && indexB != -1) {
-            return indexA.compareTo(indexB);
-          } else if (indexA != -1) {
-            return -1;
-          } else if (indexB != -1) {
-            return 1;
-          }
-          return 0;
+          final indexA = _getFavoriteIndex(a.symbol);
+          final indexB = _getFavoriteIndex(b.symbol);
+          return indexA.compareTo(indexB);
         });
       }
     }

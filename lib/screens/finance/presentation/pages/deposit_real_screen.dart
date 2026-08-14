@@ -331,43 +331,72 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
   }
 
   Widget _buildAmountField() {
-    return RTLHelper.rtlTextField(
-      style: AppTextStyles.bodyText.copyWith(
-        fontSize: 16.sp,
-        fontWeight: FontWeight.w400,
-        color: AppColors.textPrimary,
-      ),
-      controller: amountController,
-      focusNode: amountFocusNode,
-      keyboardType: TextInputType.numberWithOptions(
-        signed: true,
-        decimal: true,
-      ),
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-        _SingleDecimalTextFormatter(),
-      ],
-      decoration: InputDecoration(
-        labelText: _amountLabel(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.border),
+    return Obx(() {
+      final m = controller.depositMethod.value;
+      double? minLimit;
+      double? maxLimit;
+      if (m != null) {
+        minLimit = double.tryParse(m['min_limit']?.toString() ?? '');
+        maxLimit = double.tryParse(m['max_limit']?.toString() ?? '');
+      }
+
+      final raw = amountController.text.trim();
+      String? error;
+      if (raw.isNotEmpty && raw != '0.00') {
+        final entered = double.tryParse(raw);
+        if (entered != null) {
+          if (minLimit != null && entered < minLimit) {
+            error = 'Minimum deposit is \$${minLimit.toStringAsFixed(2)}';
+          } else if (maxLimit != null && entered > maxLimit) {
+            error = 'Maximum deposit is \$${maxLimit.toStringAsFixed(2)}';
+          }
+        }
+      }
+
+      return RTLHelper.rtlTextField(
+        style: AppTextStyles.bodyText.copyWith(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textPrimary,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.border),
+        controller: amountController,
+        focusNode: amountFocusNode,
+        keyboardType: const TextInputType.numberWithOptions(
+          signed: true,
+          decimal: true,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+          _SingleDecimalTextFormatter(),
+        ],
+        decoration: InputDecoration(
+          labelText: _amountLabel(),
+          errorText: error,
+          errorStyle: TextStyle(color: AppColors.error, fontSize: 12.sp),
+          helperText: (minLimit != null && maxLimit != null)
+              ? 'Limit: \$${minLimit.toStringAsFixed(2)} - \$${maxLimit.toStringAsFixed(2)}'
+              : null,
+          helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.primary, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: AppColors.error),
+          ),
         ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.error),
-        ),
-      ),
-    );
+      );
+    });
   }
 
   bool get _hasConversion {
@@ -491,11 +520,29 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
   }
 
   void _handleDeposit() async {
-    // Show loading
-
-    if (amountController.text.isEmpty || amountController.text == "0.00") {
+    final raw = amountController.text.trim();
+    final entered = double.tryParse(raw);
+    if (entered == null || entered <= 0) {
       CustomToastService.showError(message: 'Please enter a valid amount');
       return;
+    }
+
+    final m = controller.depositMethod.value;
+    if (m != null) {
+      final minLimit = double.tryParse(m['min_limit']?.toString() ?? '');
+      final maxLimit = double.tryParse(m['max_limit']?.toString() ?? '');
+      if (minLimit != null && entered < minLimit) {
+        CustomToastService.showError(
+          message: 'Amount cannot be less than minimum limit of \$${minLimit.toStringAsFixed(2)}',
+        );
+        return;
+      }
+      if (maxLimit != null && entered > maxLimit) {
+        CustomToastService.showError(
+          message: 'Amount cannot be more than maximum limit of \$${maxLimit.toStringAsFixed(2)}',
+        );
+        return;
+      }
     }
 
     // Get.toNamed(AppPages.DEPOSIT_INSTRUCTION_SCREEN,arguments: controller.depositMethod.value);

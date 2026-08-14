@@ -38,7 +38,7 @@ class AppPickerTheme {
     return DatePickerThemeData(
       backgroundColor: AppColors.card,
       headerBackgroundColor: AppColors.primary.withValues(alpha: 0.1),
-      headerForegroundColor: AppColors.onColoredBackground,
+      headerForegroundColor: isDark ? AppColors.textPrimary : AppColors.primary,
       weekdayStyle: AppTextStyles.bodyText.copyWith(
         color: AppColors.textGrey,
         fontWeight: FontWeight.w600,
@@ -71,7 +71,7 @@ class AppPickerTheme {
     required DateTime lastDate,
   }) {
     final isDark = AppColors.isDarkMode;
-    final surface = AppColors.primary.withValues(alpha: 0.1);
+    final surface = AppColors.card;
     final onSurface = AppColors.textPrimary;
 
     final colorScheme =

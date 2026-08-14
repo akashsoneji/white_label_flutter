@@ -34,6 +34,14 @@ import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 class TradingMainScreen extends StatefulWidget {
   const TradingMainScreen({super.key});
 
+  static void Function(int)? changeTabCallback;
+
+  static void changeTab(int index) {
+    if (changeTabCallback != null) {
+      changeTabCallback!(index);
+    }
+  }
+
   @override
   State<TradingMainScreen> createState() => _TradingMainScreenState();
 }
@@ -94,6 +102,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   @override
   void initState() {
     super.initState();
+    TradingMainScreen.changeTabCallback = _onTabChanged;
     _isVantage = FlavorConfig.isVantage();
     final isIquote = FlavorConfig.usesIquoteUi();
 
@@ -250,6 +259,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
   @override
   void dispose() {
+    if (TradingMainScreen.changeTabCallback == _onTabChanged) {
+      TradingMainScreen.changeTabCallback = null;
+    }
     _pageController.dispose();
     _disposeHeadlessWebView();
     super.dispose();

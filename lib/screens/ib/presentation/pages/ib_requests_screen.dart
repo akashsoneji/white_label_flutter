@@ -614,12 +614,27 @@ class _IBRequestsScreenState extends State<IBRequestsScreen> {
                           child: DropdownButton<CommissionGroup>(
                             isExpanded: true,
                             value: selectedGroup,
-                            hint: Text('Select Group'),
+                            dropdownColor: AppColors.card,
+                            iconEnabledColor: AppColors.textPrimary,
+                            style: AppTextStyles.bodyText.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                            hint: Text(
+                              'Select Group',
+                              style: AppTextStyles.bodyText.copyWith(
+                                color: AppColors.textGrey,
+                              ),
+                            ),
                             items:
                                 ibController.commissionGroups.map((group) {
                                   return DropdownMenuItem(
                                     value: group,
-                                    child: Text(group.groupName ?? 'N/A'),
+                                    child: Text(
+                                      group.groupName ?? 'N/A',
+                                      style: AppTextStyles.bodyText.copyWith(
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
                                   );
                                 }).toList(),
                             onChanged: (value) {
