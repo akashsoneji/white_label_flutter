@@ -15,17 +15,18 @@ class WebSocketTradingResponse {
   });
 
   factory WebSocketTradingResponse.fromJson(Map<String, dynamic> json) {
+    final openPositionsJson = json['openPositions'] ?? json['open_positions'];
+    final pendingOrdersJson = json['pendingOrders'] ?? json['pending_orders'];
+
     return WebSocketTradingResponse(
-      openPositions:
-          json['openPositions'] != null
-              ? OpenPositionsData.fromJson(json['openPositions'])
-              : null,
-      pendingOrders:
-          json['pendingOrders'] != null
-              ? PendingOrdersData.fromJson(json['pendingOrders'])
-              : null,
+      openPositions: openPositionsJson != null
+          ? OpenPositionsData.fromJson(openPositionsJson)
+          : null,
+      pendingOrders: pendingOrdersJson != null
+          ? PendingOrdersData.fromJson(pendingOrdersJson)
+          : null,
       realtime: json['realtime'] ?? false,
-      serverTimestamp: json['server_timestamp'] ?? 0,
+      serverTimestamp: json['server_timestamp'] ?? json['serverTimestamp'] ?? 0,
     );
   }
 
@@ -122,20 +123,45 @@ class PendingOrder {
   });
 
   factory PendingOrder.fromJson(Map<String, dynamic> json) {
+    final rawVolume = json['Volume'] ?? json['volume'];
+    final rawPriceOrder = json['PriceOrder'] ?? json['priceOrder'] ?? json['price_order'] ?? json['price'];
+    final rawPriceCurrent = json['PriceCurrent'] ?? json['priceCurrent'] ?? json['price_current'];
+    final rawPriceSL = json['PriceSL'] ?? json['priceSL'] ?? json['price_sl'] ?? json['stopLoss'] ?? json['stop_loss'];
+    final rawPriceTP = json['PriceTP'] ?? json['priceTP'] ?? json['price_tp'] ?? json['takeProfit'] ?? json['take_profit'];
+    final rawDigits = json['Digits'] ?? json['digits'];
+    final rawMt5Account = json['MT5Account'] ?? json['mt5Account'] ?? json['mt5_account'];
+    final rawOrder = json['Order'] ?? json['order'] ?? json['order_id'];
+
     return PendingOrder(
-      mt5Account: json['MT5Account'] ?? 0,
-      order: json['Order'] ?? 0,
-      action: json['Action'] ?? '',
-      symbol: json['Symbol'] ?? '',
-      priceOrder: (json['PriceOrder'] ?? 0.0).toDouble(),
-      priceCurrent: (json['PriceCurrent'] ?? 0.0).toDouble(),
-      volume: (json['Volume'] ?? 0.0).toDouble(),
-      priceSL: (json['PriceSL'] ?? 0.0).toDouble(),
-      priceTP: (json['PriceTP'] ?? 0.0).toDouble(),
-      timeCreate: json['TimeCreate'] ?? '',
-      state: json['State'] ?? '',
-      logo: json['Logo'] ?? '',
-      digits: json['Digits'] ?? 0,
+      mt5Account: rawMt5Account is num
+          ? rawMt5Account.toInt()
+          : (int.tryParse(rawMt5Account?.toString() ?? '') ?? 0),
+      order: rawOrder is num
+          ? rawOrder.toInt()
+          : (int.tryParse(rawOrder?.toString() ?? '') ?? 0),
+      action: json['Action'] ?? json['action'] ?? '',
+      symbol: json['Symbol'] ?? json['symbol'] ?? '',
+      priceOrder: rawPriceOrder is num
+          ? rawPriceOrder.toDouble()
+          : (double.tryParse(rawPriceOrder?.toString() ?? '') ?? 0.0),
+      priceCurrent: rawPriceCurrent is num
+          ? rawPriceCurrent.toDouble()
+          : (double.tryParse(rawPriceCurrent?.toString() ?? '') ?? 0.0),
+      volume: rawVolume is num
+          ? rawVolume.toDouble()
+          : (double.tryParse(rawVolume?.toString() ?? '') ?? 0.0),
+      priceSL: rawPriceSL is num
+          ? rawPriceSL.toDouble()
+          : (double.tryParse(rawPriceSL?.toString() ?? '') ?? 0.0),
+      priceTP: rawPriceTP is num
+          ? rawPriceTP.toDouble()
+          : (double.tryParse(rawPriceTP?.toString() ?? '') ?? 0.0),
+      timeCreate: json['TimeCreate'] ?? json['timeCreate'] ?? json['time_create'] ?? '',
+      state: json['State'] ?? json['state'] ?? '',
+      logo: json['Logo'] ?? json['logo'] ?? '',
+      digits: rawDigits is num
+          ? rawDigits.toInt()
+          : (int.tryParse(rawDigits?.toString() ?? '') ?? 0),
     );
   }
 

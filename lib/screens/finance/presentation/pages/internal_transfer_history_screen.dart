@@ -69,50 +69,47 @@ class _InternalTransferHistoryScreenState
         child: RefreshIndicator(
           color: AppColors.primary,
           onRefresh: controller.refreshHistory,
-          child: CustomScrollView(
-            controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
-                sliver: SliverToBoxAdapter(child: _buildFilterCard()),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
-                sliver: SliverToBoxAdapter(child: _buildSummaryHeader()),
-              ),
-              Obx(() {
-                if (controller.isLoading.value && controller.items.isEmpty) {
-                  return const SliverFillRemaining(
+          child: Obx(() {
+            return CustomScrollView(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+                  sliver: SliverToBoxAdapter(child: _buildFilterCard()),
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
+                  sliver: SliverToBoxAdapter(child: _buildSummaryHeader()),
+                ),
+                if (controller.isLoading.value && controller.items.isEmpty)
+                  const SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
                       child: CommonLoadingWidget(isFullScreen: true),
                     ),
-                  );
-                }
-
-                if (controller.items.isEmpty) {
-                  return SliverFillRemaining(
+                  )
+                else if (controller.items.isEmpty)
+                  SliverFillRemaining(
                     hasScrollBody: false,
                     child: _buildEmptyState(),
-                  );
-                }
-
-                return SliverPadding(
-                  padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 0),
-                  sliver: SliverList.separated(
-                    itemBuilder: (context, index) {
-                      final item = controller.items[index];
-                      return _buildTransferCard(item);
-                    },
-                    separatorBuilder: (_, _) => SizedBox(height: 12.h),
-                    itemCount: controller.items.length,
+                  )
+                else
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 0),
+                    sliver: SliverList.separated(
+                      itemBuilder: (context, index) {
+                        final item = controller.items[index];
+                        return _buildTransferCard(item);
+                      },
+                      separatorBuilder: (_, _) => SizedBox(height: 12.h),
+                      itemCount: controller.items.length,
+                    ),
                   ),
-                );
-              }),
-              SliverToBoxAdapter(child: _buildPaginationFooter()),
-            ],
-          ),
+                SliverToBoxAdapter(child: _buildPaginationFooter()),
+              ],
+            );
+          }),
         ),
       ),
     );

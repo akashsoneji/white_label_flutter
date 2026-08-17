@@ -7,7 +7,9 @@ import 'package:crm_app/screens/common/view_models/app_notification_controller.d
 import 'package:crm_app/screens/finance/presentation/pages/deposit_screen.dart';
 import 'package:crm_app/screens/wallet/data/repositories/wallet_repository.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
-import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart' show Data; 
+import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart' show Data;
+import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 
 // --- Models ---
 class WalletResponse {
@@ -26,25 +28,27 @@ class WalletResponse {
   });
 
   factory WalletResponse.fromJson(Map<String, dynamic> json) {
-    final ibaccountData = json['data']?['ibaccount'];
+    final rawData = json['data'];
+    final Map<String, dynamic> data = rawData is Map<String, dynamic> ? rawData : {};
+    final ibaccountData = data['ibaccount'];
 
     return WalletResponse(
       status: json['status'] ?? false,
       message: json['message'] ?? "",
       userMT5Accounts:
-          (json['data']?['userMT5Accounts'] as List? ?? [])
+          (data['userMT5Accounts'] as List? ?? [])
               .map((e) => UserMT5Account.fromJson(e))
               .toList(),
-      wallet: Wallet.fromJson(json['data']?['wallet'] ?? {}),
+      wallet: Wallet.fromJson(data['wallet'] is Map<String, dynamic> ? data['wallet'] : {}),
       ibAccount:
           ibaccountData is Map<String, dynamic>
               ? IbAccount.fromJson(ibaccountData)
               : IbAccount(
-                id: 0,
-                promotionTool: "",
-                status: "",
-                referenceLinkId: "",
-              ),
+                  id: 0,
+                  promotionTool: "",
+                  status: "",
+                  referenceLinkId: "",
+                ),
     );
   }
 }
@@ -482,44 +486,94 @@ class WalletController extends GetxController {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
 
       // 1. Fetch legacy wallet data (to get mt5Accounts and ibAccount for transfer screen)
-      final legacyResponse = await _repo.getWalletData(
-        token: token ?? '',
-        queryParameters: {'_t': timestamp.toString()},
-      );
+      try {
+        final legacyResponse = await _repo.getWalletData(
+          token: token ?? '',
+          queryParameters: {'_t': timestamp.toString()},
+        );
 
-      if (legacyResponse.success && legacyResponse.data != null) {
-        final parsed = WalletResponse.fromJson(legacyResponse.data);
-        mt5Accounts.assignAll(parsed.userMT5Accounts);
-        ibAccount.value = parsed.ibAccount;
-        // Fallback wallet & balance
-        wallet.value = parsed.wallet;
-        balance.value = parsed.wallet.walletBalance;
+        if (legacyResponse.success && legacyResponse.data != null) {
+          final parsed = WalletResponse.fromJson(legacyResponse.data);
+          mt5Accounts.assignAll(parsed.userMT5Accounts);
+          ibAccount.value = parsed.ibAccount;
+          // Fallback wallet & balance
+          wallet.value = parsed.wallet;
+          balance.value = parsed.wallet.walletBalance;
+        }
+      } catch (e, stack) {
+        print("WalletController: Error fetching legacy wallet data: $e\n$stack");
+      }
+
+      // Fallback: If mt5Accounts is empty, populate from DashboardController or AccountController
+      if (mt5Accounts.isEmpty) {
+        try {
+          if (Get.isRegistered<DashboardController>()) {
+            final dashCtrl = Get.find<DashboardController>();
+            if (dashCtrl.mt5Accounts.isNotEmpty) {
+              final mapped = dashCtrl.mt5Accounts.map((acc) {
+                return UserMT5Account(
+                  id: acc.primaryAccount,
+                  metaAccountNumber: acc.metaAccountNumber,
+                  metaAccountName: acc.mt5NickName,
+                  masterGroupId: acc.masterGroupId,
+                  balance: acc.balance,
+                );
+              }).toList();
+              mt5Accounts.assignAll(mapped);
+              print("WalletController: Populated ${mapped.length} mt5Accounts from DashboardController fallback");
+            }
+          }
+          if (mt5Accounts.isEmpty && Get.isRegistered<AccountController>()) {
+            final acctCtrl = Get.find<AccountController>();
+            if (acctCtrl.accounts.isNotEmpty) {
+              final mapped = acctCtrl.accounts
+                  .where((acc) => acc.type == 'REAL')
+                  .map((acc) {
+                return UserMT5Account(
+                  id: 0,
+                  metaAccountNumber: acc.id,
+                  metaAccountName: 'MT5 Account',
+                  masterGroupId: 'REAL',
+                  balance: acc.balance.toString(),
+                );
+              }).toList();
+              mt5Accounts.assignAll(mapped);
+              print("WalletController: Populated ${mapped.length} mt5Accounts from AccountController fallback");
+            }
+          }
+        } catch (e) {
+          print("WalletController fallback error: $e");
+        }
       }
 
       // 2. Fetch fresh wallet details from the new api/user/wallet endpoint
-      final freshResponse = await _repo.getWalletDetailsNew(
-        token: token ?? '',
-        queryParameters: {'_t': timestamp.toString()},
-      );
+      try {
+        final freshResponse = await _repo.getWalletDetailsNew(
+          token: token ?? '',
+          queryParameters: {'_t': timestamp.toString()},
+        );
 
-      if (freshResponse.success && freshResponse.data != null) {
-        final freshData = freshResponse.data;
-        if (freshData['data'] != null) {
-          final walletMap = freshData['data'] as Map<String, dynamic>;
-          final walletIdStr = walletMap['wallet_id']?.toString() ?? '';
-          final balanceStr = walletMap['balance']?.toString() ?? '0.0';
+        if (freshResponse.success && freshResponse.data != null) {
+          final freshData = freshResponse.data;
+          if (freshData['data'] != null) {
+            final walletMap = freshData['data'] as Map<String, dynamic>;
+            final walletIdStr = walletMap['wallet_id']?.toString() ?? '';
+            final balanceStr = walletMap['balance']?.toString() ?? '0.0';
 
-          wallet.value = Wallet(
-            id: wallet.value?.id ?? 0,
-            walletId: walletIdStr,
-            walletStatus: wallet.value?.walletStatus ?? 'active',
-            walletBalance: balanceStr,
-          );
-          balance.value = balanceStr;
-          print("Fetched wallet Details: ID = $walletIdStr, Balance = $balanceStr");
+            wallet.value = Wallet(
+              id: wallet.value?.id ?? 0,
+              walletId: walletIdStr,
+              walletStatus: wallet.value?.walletStatus ?? 'active',
+              walletBalance: balanceStr,
+            );
+            balance.value = balanceStr;
+            print("Fetched wallet Details: ID = $walletIdStr, Balance = $balanceStr");
+          }
+        } else {
+          print("Failed to fetch fresh wallet details: ${freshResponse.message}");
         }
-      } else {
-        print("Failed to fetch fresh wallet details: ${freshResponse.message}");
+      } catch (e, stack) {
+        print("WalletController: Error fetching fresh wallet details: $e\n$stack");
       }
     } catch (e) {
       print("Error fetching wallet data: $e");

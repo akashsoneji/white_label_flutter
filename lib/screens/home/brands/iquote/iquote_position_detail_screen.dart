@@ -44,6 +44,7 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/screens/home/close_position_screen.dart';
 
 
 // Module-private helpers — exposed to child StatelessWidgets so
@@ -140,10 +141,6 @@ class _IQuotePositionDetailScreenState
   final FocusNode _tpFocus = FocusNode();
   final FocusNode _slFocus = FocusNode();
 
-  bool _isPartialClose = false;
-  late final TextEditingController _closeVolumeCtl;
-  final FocusNode _volumeFocus = FocusNode();
-  String? _volumeError;
   // Once a user has manually edited a field (typed, cleared, or used the
   // explicit X button), stop auto-filling it on focus — they've expressed
   // an explicit intent and we shouldn't clobber it.
@@ -161,8 +158,6 @@ class _IQuotePositionDetailScreenState
   late final double? _origTp;
   late final double? _origSl;
 
-  // ── Reverse-Order state is read-only (displays the existing + opposite) ─
-
   bool _busy = false;
 
   @override
@@ -173,8 +168,7 @@ class _IQuotePositionDetailScreenState
     // Pre-fill from whatever the position already has on the server so
     // reopening this screen shows the previously-set TP/SL values (the
     // user may want to leave them unchanged, modify them, or clear them
-    // via the explicit × button). If the position has no TP/SL set, the
-    // fields stay blank — that's the "close the position" affordance.
+    // via the explicit × button).
     final existingTp = _priceStrToDouble(pos.takeProfit);
     final existingSl = _priceStrToDouble(pos.stopLoss);
     _origTp = existingTp;
@@ -196,10 +190,6 @@ class _IQuotePositionDetailScreenState
     _slFocus.addListener(_handleSlFocusChange);
     _tpCtl.addListener(_handleTpControllerChange);
     _slCtl.addListener(_handleSlControllerChange);
-
-    final halfVol = widget.position.volume / 2;
-    _closeVolumeCtl = TextEditingController(text: halfVol.toStringAsFixed(2));
-    _closeVolumeCtl.addListener(_validateCloseVolume);
 
     // Force one rebuild after first frame so _isTpSlEmpty() in build()
     // re-evaluates against the pre-filled controller text (TP/SL values
@@ -279,25 +269,6 @@ class _IQuotePositionDetailScreenState
     _slCtl.selection = TextSelection.collapsed(offset: value.length);
   }
 
-  void _validateCloseVolume() {
-    final vol = double.tryParse(_closeVolumeCtl.text.trim()) ?? 0.0;
-    final maxVol = widget.position.volume;
-    if (vol <= 0) {
-      setState(() => _volumeError = 'Volume must be greater than 0');
-    } else if (vol >= maxVol) {
-      setState(() => _volumeError = 'Volume must be less than total volume (${maxVol.toStringAsFixed(2)})');
-    } else {
-      setState(() => _volumeError = null);
-    }
-  }
-
-  void _bumpVolume(double delta) {
-    final cur = double.tryParse(_closeVolumeCtl.text.trim()) ?? 0.0;
-    final maxVol = widget.position.volume;
-    final next = (cur + delta).clamp(0.01, maxVol - 0.01);
-    _closeVolumeCtl.text = next.toStringAsFixed(2);
-  }
-
   @override
   void dispose() {
     _tpFocus.removeListener(_handleTpFocusChange);
@@ -306,8 +277,6 @@ class _IQuotePositionDetailScreenState
     _slCtl.dispose();
     _tpFocus.dispose();
     _slFocus.dispose();
-    _closeVolumeCtl.dispose();
-    _volumeFocus.dispose();
     super.dispose();
   }
 
@@ -345,25 +314,13 @@ class _IQuotePositionDetailScreenState
                   tpFocus: _tpFocus,
                   slFocus: _slFocus,
                   palette: palette,
-                  isPartialClose: _isPartialClose,
-                  onPartialCloseChanged: (val) {
-                    setState(() {
-                      _isPartialClose = val;
-                      _validateCloseVolume();
-                    });
-                  },
-                  closeVolumeCtl: _closeVolumeCtl,
-                  volumeFocus: _volumeFocus,
-                  onVolumeMinus: () => _bumpVolume(-0.01),
-                  onVolumePlus: () => _bumpVolume(0.01),
-                  volumeError: _volumeError,
                 ),
               ),
             ),
             _ActionRow(
-              primaryLabel: _isPartialClose
-                  ? (_volumeError != null ? 'Close Order' : 'Close ${_closeVolumeCtl.text} Lot')
-                  : (_isTpSlDirty() ? 'Confirm' : 'Close Order'),
+              primaryLabel: _isTpSlDirty()
+                  ? 'Confirm'
+                  : (widget.isPending ? 'Cancel Order' : 'Close Order'),
               busy: _busy,
               onCancel: () => Get.back<void>(),
               onPrimary: () => _onPrimary(context),
@@ -376,62 +333,43 @@ class _IQuotePositionDetailScreenState
     );
   }
 
-  // ── Add-position stepper ───────────────────────────────────────────────
-
-
   // ── primary button per tab ─────────────────────────────────────────────
   Future<void> _onPrimary(BuildContext context) async {
-    if (_isPartialClose) {
-      if (_volumeError != null) {
-        _toastError(_volumeError!);
-        return;
-      }
-      final pos = widget.position;
-      final acct = _account.activeMT5AccountRx.value;
-      if (acct == null) {
-        _toastError('No active MT5 account selected.');
-        return;
-      }
-      final vol = double.tryParse(_closeVolumeCtl.text.trim());
-      await _executeClose(pos, acct.metaAccountNumber, volume: vol);
-    } else if (_isTpSlDirty()) {
+    if (_isTpSlDirty()) {
       // User modified TP/SL from server values — apply the modification.
       await _submitTpSl();
     } else {
-      // No changes — close the position instead.
-      await _submitCloseWithConfirm(context);
+      // No changes — close/cancel instead.
+      if (widget.isPending) {
+        final acct = _account.activeMT5AccountRx.value;
+        if (acct == null) {
+          _toastError('No active MT5 account selected.');
+          return;
+        }
+        await _showCancelPendingDialog(context, acct.metaAccountNumber);
+      } else {
+        await _submitCloseWithConfirm(context);
+      }
     }
   }
 
   /// True when the current TP/SL values differ numerically from the
   /// server originals captured in initState. Non-numeric input is
-  /// treated as dirty. Drives the bottom action label and submit
-  /// routing: "Confirm" when values diverge, "Close Order" otherwise.
-  /// True iff either TP or SL field text differs from the server's
-  /// pre-fill for this position. Compared as raw trimmed strings so
-  /// partial / unparseable input (e.g. user typed "42" or "4,250.6"
-  /// mid-entry) still flips the button to "Confirm" the moment the
-  /// text no longer matches the original. Numeric precision / parsing
-  /// errors are reported by the submit path, not by this helper.
+  /// treated as dirty.
   bool _isTpSlDirty() {
-    final curTpText = _tpCtl.text.trim();
-    final curSlText = _slCtl.text.trim();
-
-    // Original text the screen was opened with ('' if server had none).
-    final origTpText = (_origTp == null || _origTp! <= 0) ? '' : _origTp!.toString();
-    final origSlText = (_origSl == null || _origSl! <= 0) ? '' : _origSl!.toString();
-
-    // Short-circuit: only skip when nothing was ever set and user hasn't
-    // touched either field. Clearing a field that originally had a value
-    // (i.e. removing TP or SL) IS a change → must show Confirm.
-    if (origTpText.isEmpty && origSlText.isEmpty
-        && curTpText.isEmpty && curSlText.isEmpty) {
-      return false;
-    }
-
-    return curTpText != origTpText || curSlText != origSlText;
+    final curTp = double.tryParse(_tpCtl.text.trim());
+    final curSl = double.tryParse(_slCtl.text.trim());
+    final tpOrig = (_origTp == null || _origTp == 0.0) ? null : _origTp;
+    final slOrig = (_origSl == null || _origSl == 0.0) ? null : _origSl;
+    return curTp != tpOrig || curSl != slOrig;
   }
 
+  /// Check whether the fields are blank (which means we should close).
+  bool _isTpSlEmpty() {
+    return _tpCtl.text.trim().isEmpty && _slCtl.text.trim().isEmpty;
+  }
+
+  /// Fire the modification APIs for TP/SL (positions or pending orders).
   Future<void> _submitTpSl() async {
     final pos = widget.position;
     final acct = _account.activeMT5AccountRx.value;
@@ -439,12 +377,15 @@ class _IQuotePositionDetailScreenState
       _toastError('No active MT5 account selected.');
       return;
     }
-    // Blank field means "remove TP/SL" → send 0.0 (not null) so the
-    // server clears the value instead of treating it as a no-op.
-    final tp = _parsePriceOrNull(_tpCtl.text) ?? 0.0;
-    final sl = _parsePriceOrNull(_slCtl.text) ?? 0.0;
-    setState(() => _busy = true);
+    if (_busy) return;
+    if (mounted) setState(() => _busy = true);
+
     try {
+      final rawTp = _tpCtl.text.trim();
+      final rawSl = _slCtl.text.trim();
+      final tp = rawTp.isEmpty ? 0.0 : (double.tryParse(rawTp) ?? 0.0);
+      final sl = rawSl.isEmpty ? 0.0 : (double.tryParse(rawSl) ?? 0.0);
+
       bool ok = false;
       if (widget.isPending) {
         ok = await _trading.updatePendingOrderTPSL(
@@ -462,93 +403,143 @@ class _IQuotePositionDetailScreenState
           digits: pos.digits,
         );
       }
+
       if (ok) {
-        CustomToastService.showSuccess(
-          message: 'TP/SL updated',
-          title: 'Position updated',
-        );
-        await _trading.refreshTradeHistory();
-        if (mounted) Get.back<void>();
+        Get.back<void>();
       } else {
-        _toastError(_trading.errorMessage.isEmpty
-            ? 'Failed to update TP/SL.'
-            : _trading.errorMessage);
+        final err = _trading.errorMessage;
+        _toastError(err.isNotEmpty ? err : 'Modification failed.');
       }
     } catch (e) {
-      _toastError(e.toString());
+      _toastError('An unexpected error occurred: $e');
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  /// Close-Position flow: shows a confirmation dialog FIRST, and only fires
-  /// the close API when the user explicitly taps "Close Order". This differs
-  /// from the TP/SL flow which calls the API directly on the primary button.
+  /// Close-Position flow: navigates to standard ClosePositionScreen.
   Future<void> _submitCloseWithConfirm(BuildContext context) async {
     final pos = widget.position;
-    final acct = _account.activeMT5AccountRx.value;
-    if (acct == null) {
-      _toastError('No active MT5 account selected.');
-      return;
-    }
-    if (_busy) return;
+    Get.to(() => ClosePositionScreen(position: pos));
+  }
 
-    final confirmed = await showDialog<bool>(
+  /// Cancel pending order confirmation dialog (matches iQuote design style).
+  Future<void> _showCancelPendingDialog(BuildContext context, String mt5Account) async {
+    final pos = widget.position;
+    final palette = _Palette.of(context);
+    
+    await showDialog<void>(
       context: context,
-      barrierDismissible: true,
-      builder: (dialogCtx) {
-        return AlertDialog(
-          backgroundColor: AppColors.isDarkMode
-              ? const Color(0xFF111A2E)
-              : Colors.white,
-          surfaceTintColor: Colors.transparent,
+      barrierColor: Colors.black.withOpacity(0.55),
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: palette.surface,
+          insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),
-          title: Text(
-            'Close Position',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: Text(
-            'Are you sure you want to close this position entirely?',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 13.sp,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(false),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.tabAccent,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6.r),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Title
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 14.h),
+                child: Center(
+                  child: Text(
+                    'Cancel pending',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
-              child: Text(
-                'Close Order',
-                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700),
+              Divider(color: palette.divider, height: 1),
+              Padding(
+                padding: EdgeInsets.fromLTRB(18.w, 16.h, 18.w, 16.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'You will cancel Pending Order',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 18.h),
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 44.h,
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.of(dialogContext).pop(),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: AppColors.primary, width: 1.2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: SizedBox(
+                            height: 44.h,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop();
+                                _executeClose(pos, mt5Account);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.onPrimary,
+                                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'Cancel pending',
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  overflow: TextOverflow.visible,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
-
-    if (confirmed != true) return;
-    await _executeClose(pos, acct.metaAccountNumber);
   }
 
   /// Fire the actual close API — only called after the user confirms the dialog.
@@ -571,15 +562,16 @@ class _IQuotePositionDetailScreenState
       if (closed) {
         final displayVolume = volume ?? pos.volume;
         CustomToastService.showSuccess(
-          message:
-              'Closed ${_sideFor(pos)} ${displayVolume.toStringAsFixed(2)} ${pos.symbol}',
-          title: 'Position closed',
+          message: widget.isPending
+              ? 'Cancelled pending order ${pos.symbol}'
+              : 'Closed ${_sideFor(pos)} ${displayVolume.toStringAsFixed(2)} ${pos.symbol}',
+          title: widget.isPending ? 'Order Cancelled' : 'Position closed',
         );
         await _trading.refreshTradeHistory();
         if (mounted) Get.back<void>();
       } else {
         _toastError(_trading.errorMessage.isEmpty
-            ? 'Failed to close position.'
+            ? (widget.isPending ? 'Failed to cancel order.' : 'Failed to close position.')
             : _trading.errorMessage);
       }
     } catch (e) {
@@ -894,13 +886,6 @@ class _TpSlPanel extends StatelessWidget {
     required this.tpFocus,
     required this.slFocus,
     required this.palette,
-    required this.isPartialClose,
-    required this.onPartialCloseChanged,
-    required this.closeVolumeCtl,
-    required this.volumeFocus,
-    required this.onVolumeMinus,
-    required this.onVolumePlus,
-    required this.volumeError,
     super.key,
   });
 
@@ -910,13 +895,6 @@ class _TpSlPanel extends StatelessWidget {
   final FocusNode tpFocus;
   final FocusNode slFocus;
   final _Palette palette;
-  final bool isPartialClose;
-  final ValueChanged<bool> onPartialCloseChanged;
-  final TextEditingController closeVolumeCtl;
-  final FocusNode volumeFocus;
-  final VoidCallback onVolumeMinus;
-  final VoidCallback onVolumePlus;
-  final String? volumeError;
 
   /// Stepper bump for TP / SL fields. Each press moves the value by
   /// [slPips] PIPs for the symbol (same scale as the auto-fill defaults),
@@ -1001,58 +979,6 @@ class _TpSlPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Close Partially toggle / switch row
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: palette.fieldBg,
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Close Partially',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Transform.scale(
-                  scale: 0.8,
-                  child: Switch(
-                    value: isPartialClose,
-                    activeColor: AppColors.primary,
-                    activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
-                    onChanged: onPartialCloseChanged,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (isPartialClose) ...[
-            SizedBox(height: 12.h),
-            _TpSlSection(
-              label: 'Close volume',
-              field: _StepperField(
-                controller: closeVolumeCtl,
-                focusNode: volumeFocus,
-                palette: palette,
-                onMinus: onVolumeMinus,
-                onPlus: onVolumePlus,
-              ),
-              helper: 'Specify the volume (lot size) to close.',
-              helperColor: palette.axisText,
-            ),
-            if (volumeError != null) ...[
-              SizedBox(height: 4.h),
-              Text(
-                volumeError!,
-                style: TextStyle(color: AppColors.error, fontSize: 11.sp),
-              ),
-            ],
-          ],
           SizedBox(height: 16.h),
           _TpSlSection(
             label: 'Take profit',
