@@ -197,7 +197,7 @@ brands:
  logo: "assets/brands/pipze/logo.svg"
  splashLogo: "assets/brands/pipze/home_icon.png"
  features:
- useNewChart: "true"
+ useNewChart: "false"
 
   - name: riyadex
     type: child
@@ -282,7 +282,7 @@ brands:
  logo: "assets/brands/telifox/icon.png"
  splashLogo: "assets/brands/telifox/icon.png"
  features:
- useNewChart: "true"
+ useNewChart: "false"
 
   - name: tenax
     type: child

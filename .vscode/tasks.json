@@ -31,7 +31,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart baazex && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart baazex && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -50,7 +50,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart celestial && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart celestial && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -69,7 +69,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart gtxprime && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart gtxprime && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -88,7 +88,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart iquote && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart iquote && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -107,7 +107,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart kantara && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart kantara && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -126,7 +126,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart meta && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart meta && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -145,7 +145,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart pipze && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart pipze && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -164,7 +164,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart riyadex && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart riyadex && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -183,7 +183,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart skyriss && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart skyriss && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -202,7 +202,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart telifox && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart telifox && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -221,7 +221,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart tenax && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart tenax && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -240,7 +240,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "dart run scripts/prepare_flavor.dart vantage && rm -rf .dart_tool/flutter_build"
+        "dart run scripts/prepare_flavor.dart vantage && flutter clean && flutter pub get"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

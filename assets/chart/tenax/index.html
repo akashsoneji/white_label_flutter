@@ -49,7 +49,12 @@
 
       // The UMD bundle defines TenaxChart; mounting replaces it with the
       // bridge handle the app talks to (receive / send / ui).
-      var mounted = TenaxChart.mountBridge(document.getElementById('app'), {
+      // IMPORTANT: Reassign window.TenaxChart to the mounted bridge instance.
+      // After mountBridge() runs, the real receive() / send() functions live on
+      // the returned object. The original window.TenaxChart is the UMD export
+      // (which has mountBridge but no receive). Dart calls
+      // window.TenaxChart.receive(...), so we must replace the reference here.
+      window.TenaxChart = TenaxChart.mountBridge(document.getElementById('app'), {
         symbol: q.get('symbol') || boot.symbol || 'BTCUSD',
         interval: q.get('interval') || boot.interval || '15m',
         // 'auto' follows the device's light/dark setting; the app can also
@@ -65,6 +70,7 @@
         orders: Object.assign({ contractSize: 1, allowDrag: true, allowClose: true }, boot.orders),
         persistence: Object.assign({ key: 'tenax.chart.mobile' }, boot.persistence),
       });
+      var mounted = window.TenaxChart;
 
       // The safe-area strip around the chart is page background, so it has to
       // change with the chart or a notch shows a dark band on a light screen.

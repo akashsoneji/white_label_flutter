@@ -36,4 +36,4 @@ assets:
   splashLogo: home_icon.png
 
 features:
- useNewChart: true
+ useNewChart: false

@@ -13,7 +13,17 @@ import 'package:get/get.dart';
 
 import 'package:crm_app/services/chart_datafeed_bridge.dart';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ChartInAppWebView
+//
+// Loads the broker's remote chart page (BASE_URL/mobile-chart?symbol=X&theme=Y).
+// Symbol switches go through JS first (zero flicker / no page reload).
+// Falls back to a URL reload with the new symbol only after 3 JS failures.
+// ─────────────────────────────────────────────────────────────────────────────
+
 class ChartInAppWebView extends StatefulWidget {
+  /// Stable base URL e.g. "https://my.pipze.com/mobile-chart?theme=dark"
+  /// (no symbol in it — symbol is appended on first load and updated via JS).
   final String url;
   final String symbol;
   final VoidCallback? onReady;
@@ -36,16 +46,25 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   bool _isReady = false;
   Timer? _loadingTimeout;
 
-  /// Symbol requested while the WebView wasn't ready yet.
-  /// Applied immediately after onLoadStop fires.
+  /// Symbol queued while the WebView was still loading.
   String? _pendingSymbol;
   Timer? _pendingSymbolTimer;
   int _retryCount = 0;
 
-  /// Datafeed bridge — mirrors the TradingView UDF Datafeed API so
-  /// `tradyn_chart.html`'s `__tradynDatafeed` shim can call Dart
-  /// (via FlutterBridge) for history + live ticks.
+  /// Datafeed bridge — history + live ticks for the chart page.
   final ChartDatafeedBridge _df = ChartDatafeedBridge();
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  /// Full initial URL with symbol baked in so the chart opens on the right symbol.
+  String _urlWithSymbol(String symbol) {
+    final base = widget.url.contains('?')
+        ? '${widget.url}&symbol=${Uri.encodeComponent(symbol)}'
+        : '${widget.url}?symbol=${Uri.encodeComponent(symbol)}';
+    return base;
+  }
+
+  // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   @override
   void initState() {
@@ -57,8 +76,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   void didUpdateWidget(covariant ChartInAppWebView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // ── Case 1: URL genuinely changed (e.g. user switched to a different brand/page).
-    // This is NOT triggered by symbol changes since the URL is now stable (no symbol in URL).
+    // Base URL changed (e.g. theme toggle) — reload.
     if (oldWidget.url != widget.url) {
       if (mounted) {
         setState(() {
@@ -70,11 +88,13 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
       _pendingSymbol = widget.symbol;
       _retryCount = 0;
       _startLoadingTimeout();
-      _controller?.loadUrl(urlRequest: URLRequest(url: WebUri(widget.url)));
+      _controller?.loadUrl(
+        urlRequest: URLRequest(url: WebUri(_urlWithSymbol(widget.symbol))),
+      );
       return;
     }
 
-    // ── Case 2: Symbol changed — try JS first (zero flicker)
+    // Symbol changed — try JS first (zero reload).
     if (oldWidget.symbol != widget.symbol) {
       _pendingSymbol = widget.symbol;
       _retryCount = 0;
@@ -88,42 +108,48 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   void dispose() {
     _loadingTimeout?.cancel();
     _pendingSymbolTimer?.cancel();
+    _df.dispose();
     super.dispose();
   }
 
-  /// Attempts to apply the pending symbol. If it fails (due to offscreen suspension
-  /// or TradingView initialization delay), it retries every 500ms up to 3 times,
-  /// then falls back to loading the symbol URL directly.
+  void _startLoadingTimeout() {
+    _loadingTimeout?.cancel();
+    _loadingTimeout = Timer(const Duration(seconds: 20), () {
+      if (!mounted || _isReady) return;
+      setState(() {
+        _hasError = true;
+        _isLoading = false;
+      });
+    });
+  }
+
+  // ─── Symbol switching ─────────────────────────────────────────────────────
+
   void _applyPendingSymbol() {
     _pendingSymbolTimer?.cancel();
-    if (_pendingSymbol == null) {
-      print('📊 WebView Retry: No pending symbol to apply.');
-      return;
-    }
-    if (!_isReady) {
-      print('📊 WebView Retry: WebView not ready yet.');
-      return;
-    }
-    if (_controller == null) {
-      print('📊 WebView Retry: Controller is null.');
-      return;
-    }
+    if (_pendingSymbol == null || !_isReady || _controller == null) return;
 
     final symbolToApply = _pendingSymbol!;
-    print('📊 WebView Retry: Attempting to apply symbol $symbolToApply (attempt ${_retryCount + 1})');
+    debugPrint('📊 Chart: applying symbol $symbolToApply (attempt ${_retryCount + 1})');
+
     unawaited(updateSymbol(symbolToApply).then((success) {
-      print('📊 WebView Retry: updateSymbol result for $symbolToApply was: $success');
+      if (!mounted) return;
+      debugPrint('📊 Chart: updateSymbol $symbolToApply → $success');
       if (success) {
         _pendingSymbol = null;
         _retryCount = 0;
       } else {
         _retryCount++;
         if (_retryCount >= 3) {
-          final symbolUrl = widget.url.contains('?')
-              ? '${widget.url}&symbol=${Uri.encodeComponent(symbolToApply)}'
-              : '${widget.url}?symbol=${Uri.encodeComponent(symbolToApply)}';
-          print('📊 WebView Retry: JS failed 3 times. Falling back to loadUrl: $symbolUrl');
-          _controller?.loadUrl(urlRequest: URLRequest(url: WebUri(symbolUrl)));
+          // Last resort: reload URL with new symbol.
+          debugPrint('📊 Chart: JS failed 3×, reloading URL for $symbolToApply');
+          if (mounted) {
+            setState(() { _isReady = false; _isLoading = true; _hasError = false; });
+          }
+          _startLoadingTimeout();
+          _controller?.loadUrl(
+            urlRequest: URLRequest(url: WebUri(_urlWithSymbol(symbolToApply))),
+          );
           _pendingSymbol = null;
           _retryCount = 0;
         } else {
@@ -137,122 +163,94 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     }));
   }
 
-  void _startLoadingTimeout() {
-    _loadingTimeout?.cancel();
-    _loadingTimeout = Timer(const Duration(seconds: 15), () {
-      if (!mounted) return;
-      if (_isReady) return;
-      setState(() {
-        _hasError = true;
-        _isLoading = false;
-      });
-    });
-  }
+  // ─── Public API ───────────────────────────────────────────────────────────
 
+  /// Switch symbol via JS — returns true if the chart accepted it.
   Future<bool> updateSymbol(String symbol) async {
-    if (_controller == null || symbol.isEmpty) {
-      print('📊 updateSymbol: controller null or symbol empty');
-      return false;
-    }
+    if (_controller == null || symbol.isEmpty) return false;
     if (!_isReady) {
-      print('📊 updateSymbol: WebView not ready');
       _pendingSymbol = symbol;
       return false;
     }
 
-    final sym = symbol;
-    final symClean = sym.contains('.') ? sym.substring(0, sym.lastIndexOf('.')) : sym;
+    // Strip broker suffix (.c / .m / .r) for fallback attempts.
+    final symClean = symbol.contains('.')
+        ? symbol.substring(0, symbol.lastIndexOf('.'))
+        : symbol;
 
-    // ── JS helper — tries every known TradingView widget API surface.
-    String _jsSource(String s) => '''
+    String jsSource(String s) => '''
       (function() {
         var sym = ${_jsStr(s)};
-        function trySet(t) {
-          try { if (typeof selectedSymbol!=='undefined') selectedSymbol=t; } catch(e) {}
-          try {
-            if (typeof window.__changeSymbol==='function') {
-              var res = window.__changeSymbol(t);
-              if (res === true || res === undefined) return true;
-            }
-          } catch(e) {}
-          try {
-            if (typeof window.__setSymbol==='function') {
-              var res = window.__setSymbol(t);
-              if (res === true || res === undefined) return true;
-            }
-          } catch(e) {}
-          
-          // Generic search for TradingView widget object inside window properties
-          for (var prop in window) {
-            try {
-              if (prop !== 'webkit' && window[prop] && typeof window[prop].setSymbol === 'function') {
-                window[prop].setSymbol(t, "5", function(){});
-                return true;
-              }
-            } catch(e) {}
+
+        // ── TradingView Advanced Charts widget ─────────────────────────────
+        try {
+          if (typeof window.__changeSymbol === 'function') {
+            var r = window.__changeSymbol(sym);
+            if (r === true || r === undefined) return 'ok';
           }
-          
-          try { if (typeof updateSymbol==='function') { updateSymbol(t); return true; } } catch(e) {}
-          try { if (typeof createTradingViewChart==='function') { createTradingViewChart(t); return true; } } catch(e) {}
-          return false;
+        } catch(e) {}
+        try {
+          if (typeof window.__setSymbol === 'function') {
+            var r = window.__setSymbol(sym);
+            if (r === true || r === undefined) return 'ok';
+          }
+        } catch(e) {}
+
+        // ── Scan window for TradingView widget object ──────────────────────
+        for (var prop in window) {
+          try {
+            if (prop !== 'webkit' && window[prop] &&
+                typeof window[prop].setSymbol === 'function') {
+              window[prop].setSymbol(sym, '5', function(){});
+              return 'ok';
+            }
+          } catch(e) {}
         }
-        if (trySet(sym)) return 'ok';
+
+        try { if (typeof selectedSymbol !== 'undefined') selectedSymbol = sym; } catch(e) {}
+        try { if (typeof updateSymbol === 'function') { updateSymbol(sym); return 'ok'; } } catch(e) {}
+        try { if (typeof createTradingViewChart === 'function') { createTradingViewChart(sym); return 'ok'; } } catch(e) {}
         return 'miss';
       })();
     ''';
 
     try {
-      print('📊 updateSymbol: Evaluating JS for $sym');
-      var res = await _controller!.evaluateJavascript(source: _jsSource(sym));
-      print('📊 updateSymbol: JS result for $sym: $res');
+      var res = await _controller!.evaluateJavascript(source: jsSource(symbol));
       if (res == 'ok') return true;
 
-      // Fallback to clean symbol (without suffix like .c / .m)
-      print('📊 updateSymbol: Evaluating JS for clean $symClean');
-      res = await _controller!.evaluateJavascript(source: _jsSource(symClean));
-      print('📊 updateSymbol: JS result for clean $symClean: $res');
+      res = await _controller!.evaluateJavascript(source: jsSource(symClean));
       if (res == 'ok') return true;
 
-      // Single retry after 300ms — handles cases where tab-switch animation
-      // is still running and the widget container is not yet visible/sized.
+      // One retry after 300 ms — handles tab-switch animation race.
       await Future.delayed(const Duration(milliseconds: 300));
       if (!mounted || _controller == null) return false;
 
-      print('📊 updateSymbol: Retrying JS for $sym');
-      res = await _controller!.evaluateJavascript(source: _jsSource(sym));
+      res = await _controller!.evaluateJavascript(source: jsSource(symbol));
       if (res == 'ok') return true;
-      res = await _controller!.evaluateJavascript(source: _jsSource(symClean));
+      res = await _controller!.evaluateJavascript(source: jsSource(symClean));
       return res == 'ok';
     } catch (e) {
-      print('📊 updateSymbol: Error: $e');
+      debugPrint('📊 Chart updateSymbol error: $e');
       return false;
     }
   }
 
-  /// Dart string → JS quoted string literal.
   static String _jsStr(String s) => '"${s.replaceAll('"', r'\"')}"';
 
-
-
   Future<void> updateNativeTrades(String tradesJson) async {
-    if (_controller == null) return;
-    if (!_isReady) return;
-
+    if (_controller == null || !_isReady) return;
     try {
       await _controller!.evaluateJavascript(source: '''
         (function() {
           try {
             if (typeof updateNativeTrades === 'function') {
-              updateNativeTrades($tradesJson);
-              return true;
+              updateNativeTrades($tradesJson); return true;
             }
-          } catch (e) {}
+          } catch(e) {}
           return false;
         })();
       ''');
-    } catch (_) {
-      // ignore
-    }
+    } catch (_) {}
   }
 
   Future<dynamic> evaluateJavascript(String source) async {
@@ -267,25 +265,15 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
 
   Future<void> _retry() async {
     if (_controller == null) return;
-    setState(() {
-      _hasError = false;
-      _isLoading = true;
-      _isReady = false;
-    });
+    setState(() { _hasError = false; _isLoading = true; _isReady = false; });
     _startLoadingTimeout();
-    // Load with symbol in URL for retry
-    final retryUrl = widget.symbol.isNotEmpty
-        ? (widget.url.contains('?')
-            ? '${widget.url}&symbol=${Uri.encodeComponent(widget.symbol)}'
-            : '${widget.url}?symbol=${Uri.encodeComponent(widget.symbol)}')
-        : widget.url;
-    await _controller!.loadUrl(urlRequest: URLRequest(url: WebUri(retryUrl)));
+    await _controller!.loadUrl(
+      urlRequest: URLRequest(url: WebUri(_urlWithSymbol(widget.symbol))),
+    );
   }
 
-  /// Registers the `FlutterBridge` JavaScript handler so `tradyn_chart.html`'s
-  /// `__tradynDatafeed` shim can call Dart for history (getBars), symbol
-  /// metadata (resolveSymbol), live ticks (subscribeBars), and unsubscribe.
-  /// Results are delivered back via `window.__resolveDfCallback(cbId, result)`.
+  // ─── Datafeed bridge ──────────────────────────────────────────────────────
+
   Future<void> _initDatafeedBridge(InAppWebViewController controller) async {
     controller.addJavaScriptHandler(
       handlerName: 'FlutterBridge',
@@ -310,11 +298,10 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
                     .activeMT5Account
                     ?.metaAccountNumber;
               }
-              final info = await _df.resolveSymbol(
+              result = await _df.resolveSymbol(
                 symbol: payload['sym']?.toString() ?? '',
                 accountNumber: accountNumber,
               );
-              result = info;
               break;
             case 'getBars':
               result = await _df.getBars(
@@ -342,9 +329,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
               result = {'ok': true};
               break;
             case 'unsubscribeBars':
-              _df.unsubscribeBars(
-                payload['uid']?.toString() ?? '',
-              );
+              _df.unsubscribeBars(payload['uid']?.toString() ?? '');
               result = {'ok': true};
               break;
             default:
@@ -374,6 +359,8 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     }
   }
 
+  // ─── Build ────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -382,32 +369,34 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
       child: Stack(
         children: [
           InAppWebView(
-
-            // Include symbol in initial URL so TradingView renders the right symbol on first load.
-            // After that, symbol changes go through JS-only updates — the URL never changes again.
-            initialUrlRequest: URLRequest(url: WebUri(
-              widget.symbol.isNotEmpty
-                  ? '${widget.url}&symbol=${Uri.encodeComponent(widget.symbol)}'
-                  : widget.url,
-            )),
+            // Symbol baked into initial URL so the chart opens on the right symbol.
+            initialUrlRequest: URLRequest(
+              url: WebUri(_urlWithSymbol(widget.symbol)),
+            ),
             initialSettings: InAppWebViewSettings(
               javaScriptEnabled: true,
               transparentBackground: true,
               useShouldOverrideUrlLoading: true,
               mediaPlaybackRequiresUserGesture: false,
               allowsInlineMediaPlayback: true,
+              // LOAD_CACHE_ELSE_NETWORK: serves from disk/memory cache when
+              // available (populated by ChartWebViewPrewarmer) and only falls
+              // back to network on a miss.  This is what cuts 4-6s → <1s.
               cacheEnabled: true,
-              cacheMode: CacheMode.LOAD_DEFAULT,
+              cacheMode: CacheMode.LOAD_CACHE_ELSE_NETWORK,
               domStorageEnabled: true,
               databaseEnabled: true,
               clearCache: false,
               supportZoom: false,
             ),
             onWebViewCreated: (controller) async {
+              final startTime = DateTime.now();
+              debugPrint('⏱️ Chart WebView: CREATED at ${startTime.toIso8601String()}');
               _controller = controller;
               await _initDatafeedBridge(controller);
-              // Check if we attached to a pre-warmed persistent webview that's already finished loading
+              // If pre-warmed WebView already finished loading:
               final progress = await controller.getProgress();
+              debugPrint('⏱️ Chart WebView: progress on create = $progress%');
               if (progress == 100) {
                 if (!mounted) return;
                 _loadingTimeout?.cancel();
@@ -424,6 +413,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
               return NavigationActionPolicy.ALLOW;
             },
             onLoadStart: (controller, url) {
+              debugPrint('⏱️ Chart WebView: LOAD START at ${DateTime.now().toIso8601String()} for url: $url');
               if (!mounted) return;
               if (!_isReady) {
                 setState(() {
@@ -433,6 +423,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
               }
             },
             onLoadStop: (controller, url) async {
+              debugPrint('⏱️ Chart WebView: LOAD STOP at ${DateTime.now().toIso8601String()} for url: $url');
               if (!mounted) return;
               _loadingTimeout?.cancel();
               setState(() {
@@ -441,8 +432,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
                 _isReady = true;
               });
               widget.onReady?.call();
-
-              // Apply the pending symbol if one was queued during loading
+              // Apply any symbol queued during load.
               if (_pendingSymbol != null) {
                 _applyPendingSymbol();
               }
@@ -459,9 +449,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
             },
             androidOnRenderProcessGone: (controller, detail) async {
               if (!mounted) return;
-              if (kDebugMode) {
-                debugPrint('Chart WebView renderer died: $detail');
-              }
+              if (kDebugMode) debugPrint('Chart WebView renderer died: $detail');
               setState(() {
                 _hasError = true;
                 _isLoading = false;
@@ -469,6 +457,8 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
               });
             },
           ),
+
+          // ── Loading overlay ─────────────────────────────────────────────
           if (_isLoading)
             Container(
               color: Colors.transparent,
@@ -480,6 +470,8 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
                 ),
               ),
             ),
+
+          // ── Error overlay ───────────────────────────────────────────────
           if (_hasError)
             Container(
               color: Colors.transparent,

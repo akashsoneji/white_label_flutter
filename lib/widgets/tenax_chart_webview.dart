@@ -333,12 +333,12 @@ class _PipzeTenaxApi extends TenaxChartApi {
 
     final data = jsonDecode(res.body);
     if (data is! Map || data['s'] == 'error') {
-      return [];
+      throw Exception(data['errmsg'] ?? 'API error');
     }
 
     final tList = data['t'] as List?;
     if (tList == null || tList.isEmpty) {
-      return [];
+      throw Exception('No candle data returned for $symbol/$res');
     }
 
     final oList = data['o'] as List;

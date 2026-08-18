@@ -179,6 +179,12 @@ class TenaxChartController {
     _symbol = symbol;
     if (resolution != null) _resolution = resolution;
 
+    // Cancel old tick subscription FIRST — prevents stale ticks from old symbol
+    // appearing on the new chart while candles are being fetched.
+    _tickCancel?.call();
+    _tickCancel = null;
+
+    // Tell the chart to switch symbol. The chart will reset its own canvas state.
     await _send({'type': 'symbol', 'symbol': symbol, 'interval': _resolution});
 
     try {
@@ -188,19 +194,17 @@ class TenaxChartController {
       _emitError('Failed to fetch candles for $symbol: $e');
     }
 
-    _tickCancel?.call();
+    // Subscribe to ticks after candles (or failure).
     _tickCancel = api.subscribeTicks(symbol, (tick) => pushTick(tick));
   }
 
   /// Change timeframe on the current symbol (reloads history).
   Future<void> setInterval(String resolution) async {
     _resolution = resolution;
+    // Use type:'interval' — this only changes the timeframe without resetting
+    // the chart's drawn lines or full state (unlike type:'symbol').
+    await _send({'type': 'interval', 'interval': resolution});
     if (_symbol != null) {
-      // The JS bundle might crash if it receives an isolated 'interval' message.
-      // We send a 'symbol' message with the same symbol and the new interval to
-      // properly reset the chart state and show the loading spinner.
-      await _send({'type': 'symbol', 'symbol': _symbol, 'interval': resolution});
-      
       try {
         final bars =
             await api.fetchCandles(symbol: _symbol!, resolution: resolution);

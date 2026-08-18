@@ -5,6 +5,7 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'dart:async';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
+import 'package:crm_app/services/chart_webview_prewarmer.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,6 +20,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    // Pre-warm the chart WebView engine and cache the HTML in parallel with the auth check.
+    if (!FlavorConfig.instance.useNewChart) {
+      ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+    }
     // No branded Flutter splash UI. Let native splash show background,
     // then immediately route based on persisted session.
     scheduleMicrotask(_checkAuthAndNavigate);
