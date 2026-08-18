@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # of the product and file versions while build-number is used as the build suffix.
 # version: 1.0.10+11
 
-version: 1.0.200+197
+version: 1.0.212+209
 
 # FOR STAGING
 # version: 1.0.99+96
@@ -132,6 +132,8 @@ dependencies:
   confetti: ^0.8.0
   encrypt: ^5.0.3
   fl_chart: ^1.2.0
+
+  # Removed external tenax_chart package in favor of local implementation
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -163,10 +165,10 @@ flutter:
   assets:
     # GENERATED ACTIVE CLIENT ASSETS - DO NOT EDIT BY HAND
     - assets/clients/pipze/
-    - assets/clients/iquote/
     - assets/clients/vantage/
     - assets/config/brands/brands.json
     # END GENERATED ACTIVE CLIENT ASSETS
+    - assets/chart/tenax/
 
     - assets/translations/
 

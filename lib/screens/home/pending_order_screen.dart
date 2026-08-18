@@ -22,6 +22,7 @@ import 'pending_order_content.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_pending_order_content.dart';
 import 'package:crm_app/screens/home/brands/vantage/vantage_pending_order_quote_pill.dart';
 import 'dart:async';
+import 'package:crm_app/widgets/tenax_chart_webview.dart';
 
 class PendingOrderScreen extends StatefulWidget {
   final String? symbol;
@@ -733,15 +734,22 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
                 padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 8.h),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.r),
-                  child: ChartInAppWebView(
-                    key: ValueKey(
-                      '${selectedSymbol}|${accountController.activeMT5Account?.metaAccountNumber ?? ''}|${_datafeedSymbolForSelected.isNotEmpty ? _datafeedSymbolForSelected : selectedSymbol}',
-                    ),
-                    symbol: _datafeedSymbolForSelected.isNotEmpty
-                        ? _datafeedSymbolForSelected
-                        : _removeSymbolSuffixForDisplay(selectedSymbol),
-                    url: _buildChartUrlWithDatafeedSymbol(),
-                  ),
+                  child: FlavorConfig.instance.useNewChart
+                      ? TenaxChartWebView(
+                          symbol: _datafeedSymbolForSelected.isNotEmpty
+                              ? _datafeedSymbolForSelected
+                              : selectedSymbol,
+                          isDark: AppColors.chartTheme == 'dark',
+                        )
+                      : ChartInAppWebView(
+                          key: ValueKey(
+                            '${selectedSymbol}|${accountController.activeMT5Account?.metaAccountNumber ?? ''}|${_datafeedSymbolForSelected.isNotEmpty ? _datafeedSymbolForSelected : selectedSymbol}',
+                          ),
+                          symbol: _datafeedSymbolForSelected.isNotEmpty
+                              ? _datafeedSymbolForSelected
+                              : _removeSymbolSuffixForDisplay(selectedSymbol),
+                          url: _buildChartUrlWithDatafeedSymbol(),
+                        ),
                 ),
               ),
             ),
@@ -869,15 +877,22 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
           // Chart WebView (only when chart is enabled)
           if (showChart)
             Expanded(
-              child: ChartInAppWebView(
-                key: ValueKey(
-                  '${selectedSymbol}|${accountController.activeMT5Account?.metaAccountNumber ?? ''}|${_datafeedSymbolForSelected.isNotEmpty ? _datafeedSymbolForSelected : selectedSymbol}',
-                ), // Force update when symbol/account changes
-                symbol: _datafeedSymbolForSelected.isNotEmpty
-                    ? _datafeedSymbolForSelected
-                    : _removeSymbolSuffixForDisplay(selectedSymbol),
-                url: _buildChartUrlWithDatafeedSymbol(),
-              ),
+              child: FlavorConfig.instance.useNewChart
+                  ? TenaxChartWebView(
+                      symbol: _datafeedSymbolForSelected.isNotEmpty
+                          ? _datafeedSymbolForSelected
+                          : selectedSymbol,
+                      isDark: AppColors.chartTheme == 'dark',
+                    )
+                  : ChartInAppWebView(
+                      key: ValueKey(
+                        '${selectedSymbol}|${accountController.activeMT5Account?.metaAccountNumber ?? ''}|${_datafeedSymbolForSelected.isNotEmpty ? _datafeedSymbolForSelected : selectedSymbol}',
+                      ), // Force update when symbol/account changes
+                      symbol: _datafeedSymbolForSelected.isNotEmpty
+                          ? _datafeedSymbolForSelected
+                          : _removeSymbolSuffixForDisplay(selectedSymbol),
+                      url: _buildChartUrlWithDatafeedSymbol(),
+                    ),
             ),
         ],
       ),

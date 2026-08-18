@@ -19,6 +19,7 @@ import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/widgets/tenax_chart_webview.dart';
 
 class EditOrderScreen extends StatefulWidget {
   final TradePosition position;
@@ -787,11 +788,16 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
           // Chart WebView (only when chart is enabled)
           if (showChart)
             Expanded(
-              child: ChartInAppWebView(
-                key: ValueKey(widget.position.symbol),
-                symbol: _removeSymbolSuffixForDisplay(widget.position.symbol),
-                url: _buildChartUrl(widget.position.symbol),
-              ),
+              child: FlavorConfig.instance.useNewChart
+                  ? TenaxChartWebView(
+                      symbol: widget.position.symbol,
+                      isDark: AppColors.chartTheme == 'dark',
+                    )
+                  : ChartInAppWebView(
+                      key: ValueKey(widget.position.symbol),
+                      symbol: _removeSymbolSuffixForDisplay(widget.position.symbol),
+                      url: _buildChartUrl(widget.position.symbol),
+                    ),
             ),
         ],
       ),

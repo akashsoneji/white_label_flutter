@@ -2,21 +2,14 @@
   "default": "pipze",
   "brands": [
     "pipze",
-    "iquote",
     "vantage"
   ],
   "brandDetails": [
     {
       "name": "pipze",
       "type": "child",
-      "inheritsFrom": "iquote",
+      "inheritsFrom": "vantage",
       "label": "Pipze",
-      "themeMode": "both"
-    },
-    {
-      "name": "iquote",
-      "type": "parent",
-      "label": "iQuote",
       "themeMode": "both"
     },
     {

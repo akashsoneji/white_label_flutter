@@ -568,8 +568,19 @@ Future<void> generateFlavorConfig(
   final enumValues = buildBrands
       .map((brand) => '  ${brand['name']},')
       .join('\n');
-  final vantageUiBrands = const <String>{'vantage', 'gtxprime', 'kantara', 'riyadex', 'telifox', 'tenax'}.map((n) => "'$n'").join(', ');
-  final iquoteUiBrands = const <String>{'iquote', 'pipze', 'skyriss', 'baazex'}.map((n) => "'$n'").join(', ');
+  final vantageUiSet = <String>{'vantage'};
+  final iquoteUiSet = <String>{'iquote'};
+  for (final b in brands) {
+    final bName = (b['name'] as String).toLowerCase();
+    final parent = (b['inheritsFrom'] as String?)?.toLowerCase();
+    if (parent == 'vantage' || bName == 'vantage') {
+      vantageUiSet.add(bName);
+    } else if (parent == 'iquote' || bName == 'iquote') {
+      iquoteUiSet.add(bName);
+    }
+  }
+  final vantageUiBrands = vantageUiSet.map((n) => "'$n'").join(', ');
+  final iquoteUiBrands = iquoteUiSet.map((n) => "'$n'").join(', ');
   final cases = buildBrands
       .map((brand) {
         final name = brand['name'] as String;

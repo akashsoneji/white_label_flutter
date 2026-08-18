@@ -49,6 +49,7 @@ import 'package:crm_app/services/favorites_storage_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/widgets/advanced_chart_inapp_webview.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
+import 'package:crm_app/widgets/tenax_chart_webview.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/price_alert_dialog.dart';
 
@@ -92,6 +93,8 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   ChartSocketController get _socket => Get.find<ChartSocketController>();
   AccountController get _account => Get.find<AccountController>();
 
+  StreamSubscription<String>? _symSub;
+
   @override
   void initState() {
     super.initState();
@@ -106,10 +109,18 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     _priceSub = _socket.priceStream.listen((_) {
       if (mounted) _tick.value++;
     });
+    // Listen to symbol changes from Prices/Watchlist/Search screens
+    _symSub = Get.find<SymbolSelectionService>().lastSymbolRx.listen((sym) {
+      if (mounted && sym.isNotEmpty) {
+        setState(() {});
+        _socket.changeSymbol(_rawSymbol());
+      }
+    });
   }
 
   @override
   void dispose() {
+    _symSub?.cancel();
     _priceSub?.cancel();
     _volumeController.dispose();
     super.dispose();
@@ -368,6 +379,9 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                           //     use (drives chart rebuild via ValueKey in
                           //     `_ChartArea`).
                           Get.find<SymbolSelectionService>().setSymbol(raw);
+                          // Immediately rebuild this layout so the Header
+                          // (top-left) shows the new symbol instantly.
+                          setState(() {});
                           // (b) flip the chart socket so the bottom dock
                           //     bid / ask / spread refresh for the new
                           //     symbol — same as the watchlist row tap
@@ -647,10 +661,65 @@ class _Header extends StatelessWidget {
 // ────────────────────────────────────────────────────────────────────
 //  Chart area  :  TradingView WebView (free widget if enabled)
 // ────────────────────────────────────────────────────────────────────
-class _ChartArea extends StatelessWidget {
+//
+// For Pipze: StatefulWidget that owns the TenaxChartWebView key locally
+// and subscribes to SymbolSelectionService directly (no GlobalKey
+// propagation through Obx parents). When the symbol changes, it calls
+// updateSymbol() on the TenaxChartWebView state directly — guaranteed
+// to reach the controller without any widget-tree matching ambiguity.
+// ────────────────────────────────────────────────────────────────────
+class _ChartArea extends StatefulWidget {
   final bool isDark;
   final GlobalKey<ChartInAppWebViewState> webViewKey;
-  const _ChartArea({required this.isDark, required this.webViewKey});
+
+  const _ChartArea({
+    required this.isDark,
+    required this.webViewKey,
+  });
+
+  @override
+  State<_ChartArea> createState() => _ChartAreaState();
+}
+
+class _ChartAreaState extends State<_ChartArea> {
+  // Local key owned by this State — never passed through Obx rebuild chains.
+  final _tenaxKey = GlobalKey<TenaxChartWebViewState>();
+
+  // The symbol the TenaxChartWebView was FIRST built with. Never changes so
+  // the WebView is never torn down. Symbol updates go through the controller.
+  String? _initialSymbol;
+
+  late SymbolSelectionService _symService;
+  StreamSubscription<String>? _symSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _symService = Get.find<SymbolSelectionService>();
+
+    // Seed the initial symbol synchronously.
+    _initialSymbol = _stripDot(_symService.currentSymbol);
+
+    // Listen for future symbol changes and push them into the chart
+    // controller directly — no rebuild of TenaxChartWebView needed.
+    _symSub = _symService.lastSymbolRx.listen(_onSymbolChanged);
+  }
+
+  @override
+  void dispose() {
+    _symSub?.cancel();
+    super.dispose();
+  }
+
+  void _onSymbolChanged(String newSym) {
+    final raw = _stripDot(newSym);
+    _initialSymbol = raw;
+    // Push the new symbol into the running WebView without rebuilding.
+    _tenaxKey.currentState?.updateSymbol(raw);
+  }
+
+  static String _stripDot(String s) =>
+      s.contains('.') ? s.substring(0, s.lastIndexOf('.')) : (s.isEmpty ? 'XAUUSD' : s);
 
   @override
   Widget build(BuildContext context) {
@@ -663,18 +732,17 @@ class _ChartArea extends StatelessWidget {
               : (sym.isEmpty ? 'XAUUSD' : sym);
 
       if (useNew) {
-        return AdvancedChartInAppWebView(
-          key: ValueKey('vantage_adv_$raw'),
-          symbol: raw,
-          theme: isDark ? 'dark' : 'light',
+        return TenaxChartWebView(
+          key: _tenaxKey,
+          symbol: _initialSymbol ?? 'XAUUSD',
+          isDark: widget.isDark,
         );
       }
-      // Use stable URL and stable webViewKey to prevent full page reloads on symbol change
+      
       final url =
-          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${isDark ? 'dark' : 'light'}';
-      print('Chart URL: $url');
+          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}';
       return ChartInAppWebView(
-        key: webViewKey,
+        key: widget.webViewKey,
         symbol: raw,
         url: url,
       );

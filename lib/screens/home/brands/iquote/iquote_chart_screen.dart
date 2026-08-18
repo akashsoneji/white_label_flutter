@@ -48,6 +48,7 @@ import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
+import 'package:crm_app/widgets/tenax_chart_webview.dart';
 
 // ── palette ─────────────────────────────────────────────────────────────────
 // MA-line + bullish/bearish colors stay the same across themes — they're
@@ -178,11 +179,16 @@ class _IQuoteChartScreenState extends State<IQuoteChartScreen> {
                 children: [
                   _Header(ctrl: ctrl, palette: palette),
                   Expanded(
-                    child: ChartInAppWebView(
-                      key: _webViewKey,
-                      symbol: ctrl.symbol,
-                      url: stableUrl,
-                    ),
+                    child: FlavorConfig.instance.useNewChart
+                        ? TenaxChartWebView(
+                            symbol: ctrl.symbol,
+                            isDark: AppColors.chartTheme == 'dark',
+                          )
+                        : ChartInAppWebView(
+                            key: _webViewKey,
+                            symbol: ctrl.symbol,
+                            url: stableUrl,
+                          ),
                   ),
                   _BottomBar(ctrl: ctrl, palette: palette),
                 ],
@@ -2257,7 +2263,14 @@ class IQuoteFullscreenChartScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: SafeArea(child: ChartInAppWebView(symbol: symbol, url: chartUrl)),
+      body: SafeArea(
+        child: FlavorConfig.instance.useNewChart
+            ? TenaxChartWebView(
+                symbol: symbol,
+                isDark: AppColors.chartTheme == 'dark',
+              )
+            : ChartInAppWebView(symbol: symbol, url: chartUrl),
+      ),
     );
   }
 }
