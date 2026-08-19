@@ -7,6 +7,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
+import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -255,9 +256,10 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
     return ElevatedButton(
       onPressed:
           _isApplicationSubmitted
-              ? () {
-                // Navigate to IB Main Screen
-                Navigator.of(context).pushReplacementNamed('/ib-main');
+              ? () async {
+                // Navigate using IBM Gatekeeper
+                final ibmController = Get.put(IbmController());
+                await ibmController.checkSystemAndNavigate();
               }
               : canSubmit
               ? _showIbApplicationDialog

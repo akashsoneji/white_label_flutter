@@ -65,6 +65,9 @@ import '../screens/copy_trading/finance/payment_methods_screen.dart';
 import '../screens/copy_trading/settings/invite_friend_screen.dart';
 import '../screens/copy_trading/finance/internal_transfer_screen.dart';
 import '../bindings/splash_binding.dart';
+// IBM screens
+import '../screens/ibm/presentation/pages/ibm_main_shell.dart';
+import '../screens/ibm/presentation/pages/ibm_application_screen.dart';
 // PMAM screens
 import '../screens/home/more/pmam/pmam_main_screen.dart';
 import '../screens/home/more/pmam/pmam_become_manager_screen.dart';
@@ -143,6 +146,11 @@ class AppPages {
   static const DEMO_CONTEST_HISTORY = _Paths.DEMO_CONTEST_HISTORY;
   static const DEMO_CONTEST_MY_STATS = _Paths.DEMO_CONTEST_MY_STATS;
   static const DEMO_CONTEST_WINNERS = _Paths.DEMO_CONTEST_WINNERS;
+  
+  // ── IBM ──
+  static const IBM_MANAGER_PORTAL = _Paths.IBM_MANAGER_PORTAL;
+  static const IBM_APPLICATION = _Paths.IBM_APPLICATION;
+  
   static const SETTING = _Paths.SETTING;
   static const SUPPORT = _Paths.SUPPORT;
   static const TICKET_LIST = _Paths.TICKET_LIST;
@@ -412,6 +420,17 @@ class AppPages {
       },
       binding: DemoContestBinding(),
     ),
+    
+    // ── IBM Routes ──
+    GetPage(
+      name: _Paths.IBM_MANAGER_PORTAL,
+      page: () => const IbmMainShell(),
+    ),
+    GetPage(
+      name: _Paths.IBM_APPLICATION,
+      page: () => const IbmApplicationScreen(),
+    ),
+    
     GetPage(name: _Paths.SETTING, page: () => const SettingScreen()),
     GetPage(name: _Paths.SUPPORT, page: () => const SupportScreen()),
     GetPage(
