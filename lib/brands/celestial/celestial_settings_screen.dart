@@ -22,7 +22,7 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
-import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/theme_bottom_sheet.dart';
 
@@ -184,56 +184,8 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
 
   Future<void> _handleSwitchToIB() async {
     try {
-      final IBController ibController = Get.isRegistered<IBController>()
-          ? Get.find<IBController>()
-          : Get.put(IBController());
-
-      Get.dialog(
-        Center(child: CommonLoadingWidget(size: 50.0, color: CelTheme.buyBlue)),
-        barrierDismissible: false,
-      );
-
-      final ibStatusResponse = await ibController.getIBStatus();
-      Get.back(closeOverlays: true);
-
-      if (ibStatusResponse != null && ibStatusResponse.status == true) {
-        final ibStatus = ibStatusResponse.data?.ibStatus;
-        final isApproved = ibStatusResponse.data?.isApproved ?? false;
-        final profileCompletion =
-            ibStatusResponse.data?.profileCompletion ?? 0;
-
-        if (ibStatus == 'rejected') {
-          CustomToastService.showError(
-            message:
-                'Your IB application has been rejected. Please contact support.',
-          );
-          return;
-        }
-        if (ibStatus == 'not_applied') {
-          Get.toNamed(AppPages.PARTNERSHIP_PROGRAM);
-        } else if (ibStatus == 'approved' && isApproved == true) {
-          if (!mounted) return;
-          Navigator.of(context).pushReplacementNamed('/ib-main');
-        } else if (profileCompletion == 100) {
-          Get.toNamed(AppPages.PARTNERSHIP_PROGRAM);
-        } else {
-          CustomToastService.showError(
-            duration: const Duration(seconds: 2),
-            message: ibStatusResponse.message ??
-                'Profile is not complete. Please complete your profile first.',
-          );
-        }
-      } else {
-        final errorMsg = ibStatusResponse?.message ??
-            (Get.isRegistered<IBController>()
-                ? Get.find<IBController>().errorMessage.value
-                : '') ;
-        CustomToastService.showError(
-          message: errorMsg.isNotEmpty
-              ? errorMsg
-              : 'Failed to check IB status. Please try again.',
-        );
-      }
+      final ibmController = Get.put(IbmController());
+      await ibmController.checkSystemAndNavigate();
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back(closeOverlays: true);
       CustomToastService.showError(message: 'Error checking IB status: $e');

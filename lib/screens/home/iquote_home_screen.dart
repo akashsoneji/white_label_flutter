@@ -15,11 +15,10 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
-import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
+import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/utils/precision_helper.dart';
-import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
@@ -35,61 +34,9 @@ class IquoteHomeScreen extends StatefulWidget {
 
   static Future<void> handleSwitchToIB() async {
     try {
-      IBController ibController;
-      if (Get.isRegistered<IBController>()) {
-        ibController = Get.find<IBController>();
-      } else {
-        ibController = Get.put(IBController());
-      }
-
-      Get.dialog(
-        Center(
-          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
-        ),
-        barrierDismissible: false,
-      );
-
-      final ibStatusResponse = await ibController.getIBStatus();
-
-      Get.back(closeOverlays: true);
-
-      if (ibStatusResponse != null && ibStatusResponse.status == true) {
-        final ibStatus = ibStatusResponse.data?.ibStatus;
-        final isApproved = ibStatusResponse.data?.isApproved ?? false;
-        final profileCompletion = ibStatusResponse.data?.profileCompletion ?? 0;
-
-        if (ibStatus == 'rejected') {
-          CustomToastService.showError(
-            message:
-                'Your IB application has been rejected. Please contact support for more information.',
-          );
-          return;
-        }
-        if (ibStatus == 'not_applied') {
-          Get.toNamed(AppPages.PARTNERSHIP_PROGRAM);
-        } else if (ibStatus == 'approved' && isApproved == true) {
-          Get.toNamed(AppPages.IB_MAIN);
-        } else if (profileCompletion == 100) {
-          Get.toNamed(AppPages.PARTNERSHIP_PROGRAM);
-        } else {
-          CustomToastService.showError(
-            duration: const Duration(seconds: 2),
-            message:
-                ibStatusResponse.message ??
-                'Profile is not complete. Please complete your profile first.',
-          );
-        }
-      } else {
-        String errorMsg =
-            ibStatusResponse?.message ?? ibController.errorMessage.value;
-        if (errorMsg.isEmpty)
-          errorMsg = 'Failed to check IB status. Please try again.';
-        CustomToastService.showError(message: errorMsg);
-      }
+      final ibmController = Get.put(IbmController());
+      await ibmController.checkSystemAndNavigate();
     } catch (e) {
-      if (Get.isDialogOpen ?? false) {
-        Get.back(closeOverlays: true);
-      }
       CustomToastService.showError(message: 'Error checking IB status: $e');
     }
   }

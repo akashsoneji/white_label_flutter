@@ -46,6 +46,11 @@ abstract class Routes {
   static const DEMO_CONTEST_LEADERBOARD = _Paths.DEMO_CONTEST_LEADERBOARD;
   static const DEMO_CONTEST_HISTORY = _Paths.DEMO_CONTEST_HISTORY;
   static const DEMO_CONTEST_WINNERS = _Paths.DEMO_CONTEST_WINNERS;
+  
+  // ── IBM Routes ──
+  static const IBM_MANAGER_PORTAL = _Paths.IBM_MANAGER_PORTAL;
+  static const IBM_APPLICATION = _Paths.IBM_APPLICATION;
+  
   static const SETTING = _Paths.SETTING;
   static const SUPPORT = _Paths.SUPPORT;
   static const TICKET_LIST = _Paths.TICKET_LIST;
@@ -139,6 +144,11 @@ abstract class _Paths {
   static const DEMO_CONTEST_LEADERBOARD = '/demo-contest/leaderboard';
   static const DEMO_CONTEST_HISTORY = '/demo-contest/history';
   static const DEMO_CONTEST_WINNERS = '/demo-contest/winners';
+  
+  // ── IBM Routes ──
+  static const IBM_MANAGER_PORTAL = '/ibm-manager-portal';
+  static const IBM_APPLICATION = '/ibm-application';
+  
   static const SETTING = '/setting';
   static const SUPPORT = '/support';
   static const TICKET_LIST = '/ticket-list';
