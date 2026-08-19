@@ -31,6 +31,7 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/language_service.dart';
+import 'package:crm_app/widgets/tenax_chart_webview.dart';
 
 // ── Resolution map ─────────────────────────────────────────────────────────
 const _tfMap = {
@@ -361,6 +362,14 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> with Automa
                 : _chart.currentSymbol.value,
           );
           final url = '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
+          
+          if (FlavorConfig.instance.useNewChart) {
+            return TenaxChartWebView(
+              symbol: sym,
+              isDark: AppColors.chartTheme == 'dark',
+            );
+          }
+
           return ChartInAppWebView(
             key: _chartKey,
             symbol: sym,

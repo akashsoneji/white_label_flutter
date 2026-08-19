@@ -317,18 +317,8 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
     // ✅ FIX: If already connected with same symbol, ensure resubscription
     if (isConnected.value && currentSymbol.value == symbol) {
-      Future.delayed(const Duration(milliseconds: 150), () {
-        if (isConnected.value && currentSymbol.value == symbol) {
-          getSocketData(); // Resubscribe to same symbol
-        }
-      });
+      getSocketData(); // Resubscribe to same symbol
       return;
-    }
-
-    // ✅ FIX: If connected with different symbol, disconnect first
-    if (isConnected.value) {
-      _disconnectWebSocket();
-      await Future.delayed(const Duration(milliseconds: 300));
     }
 
     currentSymbol.value = symbol;
@@ -337,9 +327,14 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     // by the next live tick for the new symbol — clearing it made the
     // chart sit empty until the first socket frame arrived.
     realTimePrice['symbol'] = symbol;
-    await Future.delayed(const Duration(milliseconds: 150));
 
-    if (!_isDisposed) initializeWebSocket();
+    // If connected with a different symbol, don't drop the entire TCP connection
+    // and wait 450ms. Just push the new subscription payload to the server.
+    if (isConnected.value) {
+      getSocketData();
+    } else {
+      if (!_isDisposed) initializeWebSocket();
+    }
   }
 
   Future<void> changeSymbol(String newSymbol) =>

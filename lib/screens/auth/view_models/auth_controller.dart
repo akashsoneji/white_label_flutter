@@ -33,6 +33,8 @@ import 'package:crm_app/screens/auth/data/usecases/reset_password.dart';
 import 'package:crm_app/screens/auth/data/usecases/reset_password_with_otp.dart';
 import 'package:crm_app/screens/auth/data/usecases/send_otp.dart';
 import 'package:crm_app/screens/auth/data/usecases/verify_password_reset_otp.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:crm_app/services/chart_webview_prewarmer.dart';
 import 'package:crm_app/services/google_otp_service.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
 
@@ -1169,6 +1171,15 @@ class AuthController extends GetxController {
         Get.find<AppLockService>().clearLock();
       }
     } catch (_) {}
+
+    // 6. Clear WebView cache and dispose prewarmer (for chart and other webviews)
+    try {
+      await ChartWebViewPrewarmer.instance.dispose();
+      await InAppWebViewController.clearAllCache();
+      print('AuthController: WebView cache cleared successfully');
+    } catch (e) {
+      print('AuthController: Error clearing WebView cache: $e');
+    }
 
     print('AuthController: All user data cleared successfully');
   }

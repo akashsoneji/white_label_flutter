@@ -4,7 +4,6 @@ import 'brands/iquote/iquote_position_screen.dart';
 import 'brands/iquote/iquote_chart_screen.dart';
 import 'brands/iquote/view_models/iquote_chart_controller.dart';
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,7 +26,8 @@ import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/flavor_config.dart';
 import '../../services/one_click_trading_service.dart';
 import '../../services/app_status/app_status_service.dart';
-import '../../services/symbol_selection_service.dart';
+import 'package:crm_app/services/symbol_selection_service.dart';
+import 'package:crm_app/services/chart_webview_prewarmer.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 
@@ -50,14 +50,11 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
   int _currentIndex = 0;
   late List<Widget> _screens;
   late final bool _isVantage;
-  late PageController _pageController;
   final SymbolSelectionService _symbolSelectionService = Get.put(
     SymbolSelectionService(),
     permanent: true,
   );
 
-  HeadlessInAppWebView? _headlessChartWebView;
-  bool _headlessDisposed = false;
 
   // Get the instruments controller
   final InstrumentsController instrumentsController =
@@ -106,6 +103,12 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     _isVantage = FlavorConfig.isVantage();
     final isIquote = FlavorConfig.usesIquoteUi();
 
+    // ✅ PERFORMANCE OPTIMIZATION: Pre-warm the chart WebView in background
+    // Start it at app launch (TradingMainScreen) rather than waiting for Chart tab.
+    if (!FlavorConfig.instance.useNewChart) {
+      ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+    }
+
     // ✅ FIX: Check for initial tab index from navigation arguments
     // This allows navigating directly to a specific tab (e.g., dashboard at index 3)
     final arguments = Get.arguments;
@@ -118,7 +121,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       }
     }
 
-    _pageController = PageController(initialPage: _currentIndex);
+
 
     if (isIquote) {
       _screens = [
@@ -236,8 +239,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       // Trigger background compliance check
       _checkCompliance();
 
-      // WebView pre-warming for both iOS and Android
-      _preloadChartWebView();
+
     });
 
     // ✅ If initial tab is dashboard, refresh accounts (vantage index 3, default index 3)
@@ -262,66 +264,11 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     if (TradingMainScreen.changeTabCallback == _onTabChanged) {
       TradingMainScreen.changeTabCallback = null;
     }
-    _pageController.dispose();
-    _disposeHeadlessWebView();
+
     super.dispose();
   }
 
-  void _disposeHeadlessWebView() {
-    if (!_headlessDisposed && _headlessChartWebView != null) {
-      _headlessDisposed = true;
-      try {
-        _headlessChartWebView!.dispose();
-      } catch (_) {}
-      _headlessChartWebView = null;
-    }
-  }
 
-  Future<void> _preloadChartWebView() async {
-    if (!mounted) return;
-
-    try {
-      String symbol = 'XAUUSD';
-      try {
-        if (Get.isRegistered<SymbolSelectionService>()) {
-          final svc = Get.find<SymbolSelectionService>();
-          await svc.ensureDefault();
-          if (svc.currentSymbol.isNotEmpty) symbol = svc.currentSymbol;
-        }
-      } catch (_) {}
-
-      final displaySymbol =
-          symbol.contains('.')
-              ? symbol.substring(0, symbol.lastIndexOf('.'))
-              : symbol;
-
-      final chartUrl =
-          '${FlavorConfig.instance.chartBaseUrl}/mobile-chart'
-          '?symbol=$displaySymbol&theme=${AppColors.chartTheme}';
-
-      print('📱 Chart Preload: Starting headless WebView for $chartUrl');
-
-      _headlessChartWebView = HeadlessInAppWebView(
-        initialUrlRequest: URLRequest(url: WebUri(chartUrl)),
-        initialSettings: InAppWebViewSettings(
-          javaScriptEnabled: true,
-          cacheEnabled: true,
-          cacheMode: CacheMode.LOAD_DEFAULT,
-          transparentBackground: true,
-        ),
-        onLoadStop: (controller, url) async {
-          print('📱 Chart Preload: Chart assets cached ✅ ($url)');
-        },
-        onReceivedError: (controller, request, error) {
-          print('📱 Chart Preload: Error (non-critical): $error');
-        },
-      );
-
-      _headlessChartWebView?.run();
-    } catch (e) {
-      print('📱 Chart Preload: Failed starting headless WebView: $e');
-    }
-  }
 
   // Ensure one-click trading is enabled (safety net)
   Future<void> _ensureOneClickTradingEnabled() async {
@@ -348,10 +295,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     setState(() {
       _currentIndex = index;
     });
-
-    if (_pageController.hasClients && _pageController.page?.round() != index) {
-      _pageController.jumpToPage(index);
-    }
 
     // Vantage 5-tab layout: Prices(0), Chart(1), Markets(2), Accounts(3), Settings(4).
     final isIquote = FlavorConfig.usesIquoteUi();
@@ -422,10 +365,8 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
                   ? AppColors.background
                   : AppColors.tradeBackgroundCenterColor,
           body: SafeArea(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: _onTabChanged,
-              physics: const NeverScrollableScrollPhysics(),
+            child: IndexedStack(
+              index: _currentIndex,
               children: _screens,
             ),
           ),

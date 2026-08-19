@@ -89,7 +89,7 @@ ext.brandFlavors = [
         splashColor: "#5F259E",
         launcherBackground: "#5F259E",
         type: "child",
-        inheritsFrom: "iquote",
+        inheritsFrom: "vantage",
     ],
     [
         name: "riyadex",

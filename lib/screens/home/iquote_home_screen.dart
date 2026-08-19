@@ -111,7 +111,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                     Expanded(
                       child: Center(
                         child:
-                            FlavorConfig.instance.flavor == Flavor.pipze
+                            FlavorConfig.instance.flavor.name == 'pipze'
                                 ? BrandLogo(
                                   source: FlavorConfig.instance.splashLogoPath,
                                   height: 28.h,

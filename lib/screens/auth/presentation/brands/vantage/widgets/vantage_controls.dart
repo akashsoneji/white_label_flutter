@@ -26,9 +26,8 @@ class VantagePrimaryButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: VantageAuthTheme.primary,
-          foregroundColor: AppColors.isDarkMode
-              ? AppColors.backgroundDarkAlt
-              : Colors.white,
+          foregroundColor:
+              AppColors.isDarkMode ? AppColors.backgroundDarkAlt : Colors.white,
           disabledBackgroundColor: VantageAuthTheme.primary.withValues(
             alpha: 0.4,
           ),
@@ -37,27 +36,29 @@ class VantagePrimaryButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(24.r),
           ),
         ),
-        child: isLoading
-            ? SizedBox(
-                height: 18.w,
-                width: 18.w,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.isDarkMode
-                        ? AppColors.backgroundDarkAlt
-                        : Colors.white,
+        child:
+            isLoading
+                ? SizedBox(
+                  height: 18.w,
+                  width: 18.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.isDarkMode
+                          ? AppColors.backgroundDarkAlt
+                          : Colors.white,
+                    ),
                   ),
-                ),
-              )
+                )
                 : Text(
                   text,
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.isDarkMode
-                        ? AppColors.textPrimaryLight
-                        : AppColors.textPrimaryDark,
+                    color:
+                        AppColors.isDarkMode
+                            ? AppColors.textPrimaryLight
+                            : AppColors.textPrimaryDark,
                   ),
                 ),
       ),
@@ -96,6 +97,7 @@ class VantageOutlinedButton extends StatelessWidget {
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
+            color: AppColors.primary,
           ),
         ),
       ),
@@ -147,4 +149,3 @@ class VantagePillTextField extends StatelessWidget {
     );
   }
 }
-

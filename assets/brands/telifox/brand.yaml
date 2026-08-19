@@ -30,4 +30,4 @@ assets:
  splashLogo: icon.png
 
 features:
- useNewChart: true
+ useNewChart: false

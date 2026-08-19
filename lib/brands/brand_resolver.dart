@@ -164,20 +164,13 @@ class BrandResolver extends GetxService {
     // Initialize FlavorConfig from build-time client defaults early.
     FlavorConfig.activateByName(allowed.value);
 
-    // If --dart-define=PARENT=<parent> is set, overlay the parent brand's
-    // config values (colors, URLs, icons) onto FlavorConfig so the child
-    // inherits the parent's branding — not just the parent's screen tree.
+    // If --dart-define=PARENT=<parent> is set, it is used by FlavorConfig.usesVantageUi()
+    // or usesIquoteUi() to determine which screen layout tree to use.
+    // We intentionally DO NOT overlay the parent's brand.yaml (colors/URLs) here,
+    // because child brands have their own distinct identities (colors, logos, etc).
     final explicitParent = const String.fromEnvironment('PARENT', defaultValue: '').trim().toLowerCase();
     if (explicitParent.isNotEmpty && explicitParent != allowed.value) {
-      try {
-        final configPath = 'assets/clients/$explicitParent/brand.yaml';
-        final yamlStr = await rootBundle.loadString(configPath);
-        final flat = BrandResolver._parseBrandYamlFlat(yamlStr);
-        FlavorConfig.applyBranding(config: flat);
-        debugPrint('[BrandResolver] PARENT=$explicitParent branding applied on ${allowed.value}');
-      } catch (e) {
-        debugPrint('[BrandResolver] No parent config for PARENT=$explicitParent ($e)');
-      }
+      debugPrint('[BrandResolver] Using UI layout tree of PARENT=$explicitParent for child=${allowed.value}');
     }
   }
 

@@ -21,6 +21,6 @@ class TelifoxConfig extends BaseClientConfig {
  apiBaseUrl: 'https://client.kantaracapital.io/api/',
  websocketUrl: 'wss://client.kantaracapital.io/trade-engine',
  chartBaseUrl: 'https://client.kantaracapital.io',
- useNewChart: true,
+ useNewChart: false,
  );
 }

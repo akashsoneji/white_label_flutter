@@ -10,6 +10,8 @@ import 'package:crm_app/models/instrument.dart';
 import 'package:crm_app/models/socket_response.dart';
 import 'package:crm_app/widgets/app_switch_tile.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
+import 'package:crm_app/widgets/tenax_chart_webview.dart';
+import 'package:crm_app/services/chart_webview_prewarmer.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'dart:convert';
@@ -1456,6 +1458,9 @@ Placing Order:
     // Clear notifications on dispose
     // Notifications are managed globally, no need to clear here
 
+    // Dispose chart WebView prewarmer
+    ChartWebViewPrewarmer.instance.dispose();
+
     super.dispose();
   }
 
@@ -1888,12 +1893,16 @@ Placing Order:
       height: MediaQuery.of(context).size.height * 0.4,
       padding: EdgeInsets.zero,
       margin: EdgeInsets.zero,
-      child: ChartInAppWebView(
-        key: _webViewKey,
-        symbol:
-            effectiveDatafeedSymbol, // JS-updated for fast in-session switches
-        url: chartUrl, // stable URL triggers fast JS updates under didUpdateWidget
-      ),
+      child: FlavorConfig.instance.useNewChart
+          ? TenaxChartWebView(
+              symbol: effectiveDatafeedSymbol,
+              isDark: AppColors.chartTheme == 'dark',
+            )
+          : ChartInAppWebView(
+              key: _webViewKey,
+              symbol: effectiveDatafeedSymbol, // JS-updated for fast in-session switches
+              url: chartUrl, // stable URL triggers fast JS updates under didUpdateWidget
+            ),
     );
   }
 

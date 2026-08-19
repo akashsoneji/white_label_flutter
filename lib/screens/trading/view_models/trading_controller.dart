@@ -457,6 +457,7 @@ class TradingController extends GetxController {
   RxList<TradePosition> get marketPositionsRx =>
       _marketPositions; // Expose observable for listeners
   List<TradePosition> get pendingPositions => _pendingPositions;
+  RxList<TradePosition> get pendingPositionsRx => _pendingPositions;
   List<TradePosition> get closedPositions => _closedPositions;
   List<HistoryEntry> get historyEntries => _historyEntries;
   WebSocketTradingResponse? get websocketData => _websocketData.value;

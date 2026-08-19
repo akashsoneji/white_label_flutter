@@ -32,6 +32,7 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'meta_theme.dart';
+import 'package:crm_app/widgets/tenax_chart_webview.dart';
 
 // ── Resolution map ─────────────────────────────────────────────────────────
 const _tfMap = {
@@ -363,6 +364,14 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
         child: Obx(() {
           final sym = _stripSuffix(_chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value);
           final url = '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
+          
+          if (FlavorConfig.instance.useNewChart) {
+            return TenaxChartWebView(
+              symbol: sym,
+              isDark: AppColors.chartTheme == 'dark',
+            );
+          }
+
           return ChartInAppWebView(
             key: _chartKey,
             symbol: sym,

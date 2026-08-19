@@ -14,6 +14,7 @@ import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
+import 'package:crm_app/services/chart_webview_prewarmer.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,6 +42,11 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tryBiometricLogin();
+      
+      // Pre-warm the chart WebView in background while user logs in
+      if (!FlavorConfig.instance.useNewChart) {
+        ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+      }
     });
   }
 
