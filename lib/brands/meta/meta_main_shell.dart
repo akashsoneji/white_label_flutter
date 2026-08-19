@@ -12,6 +12,8 @@ import 'meta_theme.dart';
 import 'meta_trade_screen.dart';
 import 'meta_new_order_screen.dart';
 import 'meta_watchlist_screen.dart';
+import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/chart_webview_prewarmer.dart';
 
 /// Meta — Main app shell with 5-tab bottom navigation
 /// (WatchList, Chart, Trade, History, Messages)
@@ -28,6 +30,15 @@ class MetaMainShell extends StatefulWidget {
 
 class _MetaMainShellState extends State<MetaMainShell> {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // ✅ PERFORMANCE OPTIMIZATION: Pre-warm the chart WebView in background
+    if (!FlavorConfig.instance.useNewChart) {
+      ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+    }
+  }
 
   /// GlobalKey to the History screen's State so we can invoke its
   /// `refreshHistory()` directly when the user lands on the History

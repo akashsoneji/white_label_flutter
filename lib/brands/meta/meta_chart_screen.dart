@@ -577,7 +577,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
           _chart.currentSymbol.value = sym;
           // Also tell chart directly in case ever() hasn't fired yet
           if (_widgetReady) {
-            _callJS('updateSymbol("${_stripSuffix(sym)}");');
+            _chartKey.currentState?.updateSymbol(_stripSuffix(sym));
           }
           Navigator.pop(c);
         },

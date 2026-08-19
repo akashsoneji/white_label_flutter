@@ -11,6 +11,8 @@ import 'celestial_settings_screen.dart';
 import 'celestial_theme.dart';
 import 'celestial_trade_screen.dart';
 import 'celestial_watchlist_screen.dart';
+import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/chart_webview_prewarmer.dart';
 
 /// Celestial — Main app shell with 5-tab bottom navigation
 /// (WatchList, Chart, Trade, History, Settings)
@@ -26,6 +28,15 @@ class CelestialMainShell extends StatefulWidget {
 
 class _CelestialMainShellState extends State<CelestialMainShell> {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // ✅ PERFORMANCE OPTIMIZATION: Pre-warm the chart WebView in background
+    if (!FlavorConfig.instance.useNewChart) {
+      ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+    }
+  }
 
   /// GlobalKey to the History screen's State so we can invoke its
   /// `refreshHistory()` directly when the user lands on the History
