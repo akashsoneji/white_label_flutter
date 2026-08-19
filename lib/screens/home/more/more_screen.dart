@@ -162,12 +162,14 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
 
   Future<void> _seedCurrentProfileIfMissing() async {
     final authController = Get.find<AuthController>();
-    final String rawEmail = authController.userEmail?.isNotEmpty == true 
-        ? authController.userEmail! 
-        : (authController.profileData?.data.user.email ?? '');
-    final String rawName = authController.userFullName?.isNotEmpty == true 
-        ? authController.userFullName! 
-        : (authController.profileData?.data.user.fullName ?? '');
+    final String rawEmail =
+        authController.userEmail?.isNotEmpty == true
+            ? authController.userEmail!
+            : (authController.profileData?.data.user.email ?? '');
+    final String rawName =
+        authController.userFullName?.isNotEmpty == true
+            ? authController.userFullName!
+            : (authController.profileData?.data.user.fullName ?? '');
 
     final email = rawEmail.trim().toLowerCase();
     final name = rawName.trim();
@@ -741,9 +743,16 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           Row(
                             children: [
                               Obx(() {
-                                final name = authController.userFullName?.isNotEmpty == true 
-                                    ? authController.userFullName! 
-                                    : (authController.profileData?.data.user.fullName ?? '');
+                                final name =
+                                    authController.userFullName?.isNotEmpty ==
+                                            true
+                                        ? authController.userFullName!
+                                        : (authController
+                                                .profileData
+                                                ?.data
+                                                .user
+                                                .fullName ??
+                                            '');
                                 return Text(
                                   name,
                                   style: AppTextStyles.bodyText.copyWith(
@@ -777,9 +786,15 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           ),
                           SizedBox(height: 2.h),
                           Obx(() {
-                            final email = authController.userEmail?.isNotEmpty == true 
-                                ? authController.userEmail! 
-                                : (authController.profileData?.data.user.email ?? '');
+                            final email =
+                                authController.userEmail?.isNotEmpty == true
+                                    ? authController.userEmail!
+                                    : (authController
+                                            .profileData
+                                            ?.data
+                                            .user
+                                            .email ??
+                                        '');
                             return Text(
                               email,
                               style: AppTextStyles.bodyText.copyWith(
@@ -971,6 +986,25 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                     ),
                   );
                 }
+                items.add(
+                  _MenuItem(
+                    icon: 'notification', // Fallback, not used when iconData is present
+                    iconData: Icons.notifications_none_outlined,
+                    label: languageService.trf(
+                      'general_notifications',
+                      'Notifications',
+                    ),
+                    onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
+                  ),
+                );
+
+                items.add(
+                  _MenuItem(
+                    icon: 'democontest-icon',
+                    label: languageService.tr('more_demo_contest'),
+                    onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
+                  ),
+                );
 
                 return _CardGroup(children: items);
               }),
@@ -1559,18 +1593,19 @@ class _MenuItem extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: iconData != null
-                      ? Icon(
-                        iconData,
-                        size: 20.sp,
-                        color: AppColors.primary,
-                      )
-                      : SvgPicture.asset(
-                        'assets/svg/more/$icon.svg',
-                        height: 18.h,
-                        width: 18.w,
-                        color: AppColors.primary,
-                      ),
+                  child:
+                      iconData != null
+                          ? Icon(
+                            iconData,
+                            size: 20.sp,
+                            color: AppColors.primary,
+                          )
+                          : SvgPicture.asset(
+                            'assets/svg/more/$icon.svg',
+                            height: 18.h,
+                            width: 18.w,
+                            color: AppColors.primary,
+                          ),
                 ),
               ),
               SizedBox(width: 14.w),

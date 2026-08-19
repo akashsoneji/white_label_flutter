@@ -8,6 +8,7 @@ import 'package:crm_app/widgets/app_back_button.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import '../../../../services/language_service.dart';
+import 'package:crm_app/routes/app_pages.dart';
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
@@ -56,7 +57,7 @@ class SettingScreen extends StatelessWidget {
                 icon: 'notifications',
                 label: languageService.tr('notifications'),
                 onTap: () {
-                  // Get.toNamed(AppPages.INTERNAL_TRANSFER);
+                  Get.toNamed(AppPages.NOTIFICATIONS);
                 },
                 color: AppColors.textPrimary,
               ),

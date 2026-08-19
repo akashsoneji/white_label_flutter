@@ -41,7 +41,7 @@ class TradeWinBottomNavigation extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
+        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 8.h),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32.r),
@@ -59,7 +59,7 @@ class TradeWinBottomNavigation extends StatelessWidget {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: AppColors.card,
                   borderRadius: BorderRadius.circular(32.r),
@@ -101,7 +101,7 @@ class TradeWinBottomNavigation extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOutCubic,
-          padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
+          padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 6.w),
           decoration: BoxDecoration(
             color:
                 selected
@@ -115,8 +115,8 @@ class TradeWinBottomNavigation extends StatelessWidget {
               AnimatedContainer(
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
-                width: selected ? 40.w : 34.w,
-                height: selected ? 40.w : 34.w,
+                width: selected ? 36.w : 30.w,
+                height: selected ? 36.w : 30.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient:
@@ -151,7 +151,7 @@ class TradeWinBottomNavigation extends StatelessWidget {
                 ),
                 child: Icon(
                   item.icon,
-                  size: selected ? 22.sp : 20.sp,
+                  size: selected ? 20.sp : 18.sp,
                   color: selected
                       ? (ThemeData.estimateBrightnessForColor(AppColors.primary) == Brightness.light
                           ? Colors.black
@@ -159,7 +159,7 @@ class TradeWinBottomNavigation extends StatelessWidget {
                       : AppColors.textPrimary,
                 ),
               ),
-              SizedBox(height: 6.h),
+              SizedBox(height: 4.h),
               Text(
                 label,
                 maxLines: 1,

@@ -107,8 +107,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<ApiResponse> logout({String? token}) {
-    return _api.post(endpoint: ApiConstants.logout, token: token);
+  Future<ApiResponse> logout({String? token, String? fcmToken}) {
+    final data = fcmToken != null ? {'fcm_token': fcmToken} : null;
+    return _api.post(endpoint: ApiConstants.logout, token: token, data: data);
   }
 
   @override

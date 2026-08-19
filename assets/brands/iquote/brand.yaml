@@ -5,11 +5,11 @@ label: iQuote
 themeMode: both
 
 android:
-  applicationId: com.iquote.app
+  applicationId: com.pipze.app
   appName: iQuote
 
 ios:
-  bundleId: com.iquote.app
+  bundleId: com.pipze.app
   appName: iQuote
 
 colors:

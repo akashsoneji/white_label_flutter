@@ -22,7 +22,7 @@ import 'package:crm_app/services/chart_datafeed_bridge.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class ChartInAppWebView extends StatefulWidget {
-  /// Stable base URL e.g. "https://my.pipze.com/mobile-chart?theme=dark"
+  /// Stable base URL e.g. "https://dev.tenaxcodecrm.com/mobile-chart?theme=dark"
   /// (no symbol in it — symbol is appended on first load and updated via JS).
   final String url;
   final String symbol;
@@ -58,9 +58,10 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
 
   /// Full initial URL with symbol baked in so the chart opens on the right symbol.
   String _urlWithSymbol(String symbol) {
-    final base = widget.url.contains('?')
-        ? '${widget.url}&symbol=${Uri.encodeComponent(symbol)}'
-        : '${widget.url}?symbol=${Uri.encodeComponent(symbol)}';
+    final base =
+        widget.url.contains('?')
+            ? '${widget.url}&symbol=${Uri.encodeComponent(symbol)}'
+            : '${widget.url}?symbol=${Uri.encodeComponent(symbol)}';
     return base;
   }
 
@@ -130,37 +131,49 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     if (_pendingSymbol == null || !_isReady || _controller == null) return;
 
     final symbolToApply = _pendingSymbol!;
-    debugPrint('📊 Chart: applying symbol $symbolToApply (attempt ${_retryCount + 1})');
+    debugPrint(
+      '📊 Chart: applying symbol $symbolToApply (attempt ${_retryCount + 1})',
+    );
 
-    unawaited(updateSymbol(symbolToApply).then((success) {
-      if (!mounted) return;
-      debugPrint('📊 Chart: updateSymbol $symbolToApply → $success');
-      if (success) {
-        _pendingSymbol = null;
-        _retryCount = 0;
-      } else {
-        _retryCount++;
-        if (_retryCount >= 3) {
-          // Last resort: reload URL with new symbol.
-          debugPrint('📊 Chart: JS failed 3×, reloading URL for $symbolToApply');
-          if (mounted) {
-            setState(() { _isReady = false; _isLoading = true; _hasError = false; });
-          }
-          _startLoadingTimeout();
-          _controller?.loadUrl(
-            urlRequest: URLRequest(url: WebUri(_urlWithSymbol(symbolToApply))),
-          );
+    unawaited(
+      updateSymbol(symbolToApply).then((success) {
+        if (!mounted) return;
+        debugPrint('📊 Chart: updateSymbol $symbolToApply → $success');
+        if (success) {
           _pendingSymbol = null;
           _retryCount = 0;
         } else {
-          _pendingSymbolTimer = Timer(const Duration(milliseconds: 500), () {
-            if (mounted && _pendingSymbol == symbolToApply) {
-              _applyPendingSymbol();
+          _retryCount++;
+          if (_retryCount >= 3) {
+            // Last resort: reload URL with new symbol.
+            debugPrint(
+              '📊 Chart: JS failed 3×, reloading URL for $symbolToApply',
+            );
+            if (mounted) {
+              setState(() {
+                _isReady = false;
+                _isLoading = true;
+                _hasError = false;
+              });
             }
-          });
+            _startLoadingTimeout();
+            _controller?.loadUrl(
+              urlRequest: URLRequest(
+                url: WebUri(_urlWithSymbol(symbolToApply)),
+              ),
+            );
+            _pendingSymbol = null;
+            _retryCount = 0;
+          } else {
+            _pendingSymbolTimer = Timer(const Duration(milliseconds: 500), () {
+              if (mounted && _pendingSymbol == symbolToApply) {
+                _applyPendingSymbol();
+              }
+            });
+          }
         }
-      }
-    }));
+      }),
+    );
   }
 
   // ─── Public API ───────────────────────────────────────────────────────────
@@ -174,9 +187,10 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     }
 
     // Strip broker suffix (.c / .m / .r) for fallback attempts.
-    final symClean = symbol.contains('.')
-        ? symbol.substring(0, symbol.lastIndexOf('.'))
-        : symbol;
+    final symClean =
+        symbol.contains('.')
+            ? symbol.substring(0, symbol.lastIndexOf('.'))
+            : symbol;
 
     String jsSource(String s) => '''
       (function() {
@@ -240,7 +254,8 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   Future<void> updateNativeTrades(String tradesJson) async {
     if (_controller == null || !_isReady) return;
     try {
-      await _controller!.evaluateJavascript(source: '''
+      await _controller!.evaluateJavascript(
+        source: '''
         (function() {
           try {
             if (typeof updateNativeTrades === 'function') {
@@ -249,7 +264,8 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
           } catch(e) {}
           return false;
         })();
-      ''');
+      ''',
+      );
     } catch (_) {}
   }
 
@@ -265,7 +281,11 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
 
   Future<void> _retry() async {
     if (_controller == null) return;
-    setState(() { _hasError = false; _isLoading = true; _isReady = false; });
+    setState(() {
+      _hasError = false;
+      _isLoading = true;
+      _isReady = false;
+    });
     _startLoadingTimeout();
     await _controller!.loadUrl(
       urlRequest: URLRequest(url: WebUri(_urlWithSymbol(widget.symbol))),
@@ -294,9 +314,10 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
             case 'resolveSymbol':
               String? accountNumber;
               if (Get.isRegistered<AccountController>()) {
-                accountNumber = Get.find<AccountController>()
-                    .activeMT5Account
-                    ?.metaAccountNumber;
+                accountNumber =
+                    Get.find<AccountController>()
+                        .activeMT5Account
+                        ?.metaAccountNumber;
               }
               result = await _df.resolveSymbol(
                 symbol: payload['sym']?.toString() ?? '',
@@ -391,7 +412,9 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
             ),
             onWebViewCreated: (controller) async {
               final startTime = DateTime.now();
-              debugPrint('⏱️ Chart WebView: CREATED at ${startTime.toIso8601String()}');
+              debugPrint(
+                '⏱️ Chart WebView: CREATED at ${startTime.toIso8601String()}',
+              );
               _controller = controller;
               await _initDatafeedBridge(controller);
               // If pre-warmed WebView already finished loading:
@@ -413,7 +436,9 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
               return NavigationActionPolicy.ALLOW;
             },
             onLoadStart: (controller, url) {
-              debugPrint('⏱️ Chart WebView: LOAD START at ${DateTime.now().toIso8601String()} for url: $url');
+              debugPrint(
+                '⏱️ Chart WebView: LOAD START at ${DateTime.now().toIso8601String()} for url: $url',
+              );
               if (!mounted) return;
               if (!_isReady) {
                 setState(() {
@@ -423,7 +448,9 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
               }
             },
             onLoadStop: (controller, url) async {
-              debugPrint('⏱️ Chart WebView: LOAD STOP at ${DateTime.now().toIso8601String()} for url: $url');
+              debugPrint(
+                '⏱️ Chart WebView: LOAD STOP at ${DateTime.now().toIso8601String()} for url: $url',
+              );
               if (!mounted) return;
               _loadingTimeout?.cancel();
               setState(() {
@@ -449,7 +476,8 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
             },
             androidOnRenderProcessGone: (controller, detail) async {
               if (!mounted) return;
-              if (kDebugMode) debugPrint('Chart WebView renderer died: $detail');
+              if (kDebugMode)
+                debugPrint('Chart WebView renderer died: $detail');
               setState(() {
                 _hasError = true;
                 _isLoading = false;
@@ -479,11 +507,17 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error_outline, size: 48.h, color: AppColors.textGrey),
+                    Icon(
+                      Icons.error_outline,
+                      size: 48.h,
+                      color: AppColors.textGrey,
+                    ),
                     SizedBox(height: 12.h),
                     Text(
                       'Chart unavailable',
-                      style: AppTextStyles.subheading.copyWith(color: AppColors.textGrey),
+                      style: AppTextStyles.subheading.copyWith(
+                        color: AppColors.textGrey,
+                      ),
                     ),
                     SizedBox(height: 12.h),
                     SizedBox(

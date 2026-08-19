@@ -736,6 +736,12 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
   List<_CelMenuItem> _accountItems(BuildContext c, AuthController auth) {
     return [
       _CelMenuItem(
+        icon: Icons.notifications_none_rounded,
+        label: languageService.trf('general_notifications', 'Notifications'),
+        color: const Color(0xFFE91E63),
+        onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
+      ),
+      _CelMenuItem(
         icon: Icons.support_agent_rounded,
         label: languageService.tr('settings_support_tickets'),
         color: const Color(0xFFE91E63),

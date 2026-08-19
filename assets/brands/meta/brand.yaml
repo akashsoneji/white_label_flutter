@@ -19,9 +19,9 @@ colors:
   launcherBackground: "#3283ff"
 
 urls:
-  api: https://my.pipze.com/api/
-  websocket: wss://my.pipze.com/trade-engine
-  chart: https://my.pipze.com
+  api: https://dev.tenaxcodecrm.com/api/
+  websocket: wss://dev.tenaxcodecrm.com/trade-engine
+  chart: https://dev.tenaxcodecrm.com
   # api: https://app.tenaxcode.com/api/
   # websocket: wss://app.tenaxcode.com/trade-engine
   # chart: https://app.tenaxcode.com

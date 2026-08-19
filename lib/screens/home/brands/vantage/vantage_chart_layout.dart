@@ -164,12 +164,13 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
       );
 
       if (!mounted) return;
-      CustomToastService.showInfo(
-        message:
-            ok
-                ? '${side.toUpperCase()} $_volume ${_rawSymbol()} placed.'
-                : 'Order failed. Please try again.',
-      );
+      if (ok) {
+        CustomToastService.showInfo(
+          message: '${side.toUpperCase()} $_volume ${_rawSymbol()} placed.',
+        );
+      }
+      // Error toast is already shown by TradingController._setError
+      // with the actual API message + account number
     } catch (e) {
       if (!mounted) return;
       CustomToastService.showError(message: 'Trade error: $e');
@@ -1010,11 +1011,11 @@ class _QuantityBar extends StatelessWidget {
           _QtyBtn(icon: Icons.add, color: primary, onTap: onPlus),
           // Pending order (pen + note) icon — opens the pending screen
           _QtyBtn(icon: Icons.edit_note, color: primary, onTap: onPending),
-          // _QtyBtn(
-          //   icon: Icons.notifications_none,
-          //   color: primary,
-          //   onTap: onBell,
-          // ),
+          _QtyBtn(
+            icon: Icons.notifications_none,
+            color: primary,
+            onTap: onBell,
+          ),
         ],
       ),
     );

@@ -29,6 +29,7 @@ class ApiConstants {
   static const String register = '${ajax}register';
   static const String registerFcmToken = '${ajax}register-fcm-token';
   static const String dashboard = '${ajax}dashboard';
+  static const String getNotifications = '${ajax}notifications';
   static const String priceAlerts = '${ajax}price-alerts';
   static const String profile = '${ajax}settings/profile';
   static const String getMT5Accounts = '${ajax}mt5accounts/get';
@@ -141,6 +142,10 @@ class ApiConstants {
   static String ticketReply(String ticketId) => '${ajax}tickets/$ticketId/reply';
   static String ticketClose(String ticketId) => '${ajax}tickets/$ticketId/close';
   static const String ticketAttachment = '${ajax}tickets/attachment';
+
+  // Demo Contest APIs
+  static const String demoContestContests = '${ajax}demo-contest/contests';
+  static const String demoContestMyStats = '${ajax}demo-contest/my-stats';
 
   // Trade & Win APIs
   static const String tradeWinProducts = 'v1/user/trade-win/products';

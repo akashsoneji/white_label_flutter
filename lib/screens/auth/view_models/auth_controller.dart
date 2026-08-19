@@ -656,6 +656,13 @@ class AuthController extends GetxController {
       _setLoading(true);
       _clearError();
 
+      // Inject FCM token into registration data
+      String? fcmToken = await SecureStorageService.getFcmToken();
+      if (fcmToken != null) {
+        data['fcm_token'] = fcmToken;
+        data['device_type'] = Platform.isIOS ? 'ios' : 'android';
+      }
+
       final response = await _registerUser(data: data);
 
       if (response.success && response.data != null) {
@@ -693,6 +700,13 @@ class AuthController extends GetxController {
     try {
       _setLoading(true);
       _clearError();
+
+      // Inject FCM token into registration data
+      String? fcmToken = await SecureStorageService.getFcmToken();
+      if (fcmToken != null) {
+        data['fcm_token'] = fcmToken;
+        data['device_type'] = Platform.isIOS ? 'ios' : 'android';
+      }
 
       final response = await _registerWithOtpVerification(data: data);
 
@@ -1189,8 +1203,9 @@ class AuthController extends GetxController {
       _setLoading(true);
       _clearError();
       final token = await SecureStorageService.getAuthToken();
+      final fcmToken = await SecureStorageService.getFcmToken();
 
-      final response = await _authRepo.logout(token: token);
+      final response = await _authRepo.logout(token: token, fcmToken: fcmToken);
 
       if (response.success && response.data != null) {
         await _clearAllUserData();

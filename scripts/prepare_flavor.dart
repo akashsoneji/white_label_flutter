@@ -287,22 +287,32 @@ Future<void> copyClientAssets(
 Future<void> copyGoogleServicesIfPresent(String flavor) async {
   print('\n🔥 Preparing Firebase config...');
 
-  final sourceFile = File(path.join('assets', 'brands', flavor, 'google-services.json'));
   final targetFile = File(path.join('android', 'app', 'src', flavor, 'google-services.json'));
+  File? sourceFile;
+  
+  final brandDir = Directory(path.join('assets', 'brands', flavor));
+  if (await brandDir.exists()) {
+    await for (final entity in brandDir.list()) {
+      if (entity is File && path.basename(entity.path).startsWith('google-services') && path.basename(entity.path).endsWith('.json')) {
+        sourceFile = entity;
+        break;
+      }
+    }
+  }
 
-  if (!await sourceFile.exists()) {
+  if (sourceFile == null || !await sourceFile.exists()) {
     if (await targetFile.exists()) {
       await targetFile.delete();
       print('  ✓ Removed stale android/app/src/$flavor/google-services.json');
     } else {
-      print('  ℹ️  No google-services.json for $flavor');
+      print('  ℹ️  No google-services configuration found for $flavor');
     }
     return;
   }
 
   await targetFile.parent.create(recursive: true);
   await sourceFile.copy(targetFile.path);
-  print('  ✓ Copied google-services.json to android/app/src/$flavor/google-services.json');
+  print('  ✓ Copied ${path.basename(sourceFile.path)} to android/app/src/$flavor/google-services.json');
 }
 
 Future<void> writeBuildBrandRegistry(

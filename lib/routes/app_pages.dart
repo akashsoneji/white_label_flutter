@@ -14,6 +14,7 @@ import 'package:crm_app/screens/demo_contest/presentation/pages/demo_contest_scr
 import 'package:crm_app/screens/demo_contest/presentation/pages/join_contest_screen.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/leaderboard_screen.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/my_contest_history_screen.dart';
+import 'package:crm_app/screens/demo_contest/presentation/pages/demo_contest_my_stats_screen.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/winners_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/finance_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
@@ -27,6 +28,8 @@ import 'package:crm_app/screens/home/more/ticket/ticket_list_screen.dart';
 import 'package:crm_app/screens/home/more/tools_education/tools_education_screen.dart';
 import 'package:crm_app/screens/home/more/partnership_program_screen.dart';
 import 'package:crm_app/screens/home/more/more_screen.dart';
+import 'package:crm_app/screens/notifications/presentation/pages/notifications_screen.dart';
+import 'package:crm_app/screens/notifications/bindings/notification_binding.dart';
 import 'package:crm_app/screens/home/open_account_screen.dart';
 import 'package:crm_app/screens/home/choose_account_screen.dart';
 import 'package:crm_app/screens/home/create_crm_app_account_screen.dart';
@@ -143,6 +146,7 @@ class AppPages {
   static const DEMO_CONTEST_DETAILS = _Paths.DEMO_CONTEST_DETAILS;
   static const DEMO_CONTEST_LEADERBOARD = _Paths.DEMO_CONTEST_LEADERBOARD;
   static const DEMO_CONTEST_HISTORY = _Paths.DEMO_CONTEST_HISTORY;
+  static const DEMO_CONTEST_MY_STATS = _Paths.DEMO_CONTEST_MY_STATS;
   static const DEMO_CONTEST_WINNERS = _Paths.DEMO_CONTEST_WINNERS;
   
   // ── IBM ──
@@ -156,6 +160,7 @@ class AppPages {
   static const TICKET_DETAIL = _Paths.TICKET_DETAIL;
   static const TOOLS_EDUCATION = _Paths.TOOLS_EDUCATION;
   static const MORE = _Paths.MORE;
+  static const NOTIFICATIONS = _Paths.NOTIFICATIONS;
   static const PARTNERSHIP_PROGRAM = _Paths.PARTNERSHIP_PROGRAM;
   static const BRAND_TEST = _Paths.BRAND_TEST;
   static const KYC_BANK = _Paths.KYC_BANK;
@@ -403,6 +408,14 @@ class AppPages {
       binding: DemoContestBinding(),
     ),
     GetPage(
+      name: _Paths.DEMO_CONTEST_MY_STATS,
+      page: () {
+        final id = Get.arguments as String?;
+        return DemoContestMyStatsScreen(contestId: id ?? '');
+      },
+      binding: DemoContestBinding(),
+    ),
+    GetPage(
       name: _Paths.DEMO_CONTEST_WINNERS,
       page: () {
         final id = Get.arguments as String?;
@@ -446,6 +459,11 @@ class AppPages {
       name: _Paths.MORE,
       page: () => const MoreScreen(),
       binding: MoreBinding(),
+    ),
+    GetPage(
+      name: _Paths.NOTIFICATIONS,
+      page: () => const NotificationsScreen(),
+      binding: NotificationBinding(),
     ),
     GetPage(
       name: _Paths.PARTNERSHIP_PROGRAM,

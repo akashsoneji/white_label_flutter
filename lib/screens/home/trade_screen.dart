@@ -1463,6 +1463,14 @@ class _TradeScreenState extends State<TradeScreen> {
                     color: AppColors.border.withOpacity(0.08),
                     width: 1,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 4,
+                      spreadRadius: 4,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 )
                 : BoxDecoration(
                   color: AppColors.whiteColor,
@@ -4279,7 +4287,10 @@ class _TradeScreenState extends State<TradeScreen> {
             children: [
               Text(
                 "$label1: ",
-                style: AppTextStyles.bodyText.copyWith(fontSize: 12, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 12,
+                  color: AppColors.textGrey,
+                ),
               ),
               Expanded(
                 child: FittedBox(
@@ -4307,7 +4318,10 @@ class _TradeScreenState extends State<TradeScreen> {
             children: [
               Text(
                 "$label2: ",
-                style: AppTextStyles.bodyText.copyWith(fontSize: 12, color: AppColors.textGrey),
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 12,
+                  color: AppColors.textGrey,
+                ),
               ),
               Expanded(
                 child: FittedBox(

@@ -43,7 +43,7 @@ ext.brandFlavors = [
     [
         name: "iquote",
         label: "iQuote",
-        appId: "com.iquote.app",
+        appId: "com.pipze.app",
         appName: "iQuote",
         primary: "#5F259E",
         secondary: "#F8F3FF",
@@ -146,7 +146,7 @@ ext.brandFlavors = [
     [
         name: "vantage",
         label: "Vantage",
-        appId: "com.vantage.app",
+        appId: "com.pipze.app",
         appName: "Vantage",
         primary: "#5F259E",
         secondary: "#F8F3FF",
