@@ -25,17 +25,19 @@ class IbmMainShell extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      body: Obx(() => IndexedStack(
-        index: controller.currentTabIndex.value,
-        children: pages,
-      )),
+      body: Obx(
+        () => IndexedStack(
+          index: controller.currentTabIndex.value,
+          children: pages,
+        ),
+      ),
       bottomNavigationBar: Obx(() {
         final pendingRequests = controller.requestsData['waiting_count'] ?? 0;
 
         return BottomNavigationBar(
           currentIndex: controller.currentTabIndex.value,
           onTap: controller.changeTab,
-          selectedItemColor: const Color(0xFF5F259E),
+          selectedItemColor: AppColors.primary,
           unselectedItemColor: AppColors.textGrey,
           backgroundColor: AppColors.whiteColor,
           type: BottomNavigationBarType.fixed,
@@ -48,12 +50,13 @@ class IbmMainShell extends StatelessWidget {
               label: languageService.tr('Dashboard'),
             ),
             BottomNavigationBarItem(
-              icon: pendingRequests > 0
-                  ? Badge(
-                      label: Text('$pendingRequests'),
-                      child: const Icon(Icons.people_outline),
-                    )
-                  : const Icon(Icons.people_outline),
+              icon:
+                  pendingRequests > 0
+                      ? Badge(
+                        label: Text('$pendingRequests'),
+                        child: const Icon(Icons.people_outline),
+                      )
+                      : const Icon(Icons.people_outline),
               activeIcon: const Icon(Icons.people),
               label: languageService.tr('Network'),
             ),
