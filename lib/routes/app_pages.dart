@@ -28,6 +28,8 @@ import 'package:crm_app/screens/home/more/ticket/ticket_list_screen.dart';
 import 'package:crm_app/screens/home/more/tools_education/tools_education_screen.dart';
 import 'package:crm_app/screens/home/more/partnership_program_screen.dart';
 import 'package:crm_app/screens/home/more/more_screen.dart';
+import 'package:crm_app/screens/notifications/presentation/pages/notifications_screen.dart';
+import 'package:crm_app/screens/notifications/bindings/notification_binding.dart';
 import 'package:crm_app/screens/home/open_account_screen.dart';
 import 'package:crm_app/screens/home/choose_account_screen.dart';
 import 'package:crm_app/screens/home/create_crm_app_account_screen.dart';
@@ -158,6 +160,7 @@ class AppPages {
   static const TICKET_DETAIL = _Paths.TICKET_DETAIL;
   static const TOOLS_EDUCATION = _Paths.TOOLS_EDUCATION;
   static const MORE = _Paths.MORE;
+  static const NOTIFICATIONS = _Paths.NOTIFICATIONS;
   static const PARTNERSHIP_PROGRAM = _Paths.PARTNERSHIP_PROGRAM;
   static const BRAND_TEST = _Paths.BRAND_TEST;
   static const KYC_BANK = _Paths.KYC_BANK;
@@ -456,6 +459,11 @@ class AppPages {
       name: _Paths.MORE,
       page: () => const MoreScreen(),
       binding: MoreBinding(),
+    ),
+    GetPage(
+      name: _Paths.NOTIFICATIONS,
+      page: () => const NotificationsScreen(),
+      binding: NotificationBinding(),
     ),
     GetPage(
       name: _Paths.PARTNERSHIP_PROGRAM,

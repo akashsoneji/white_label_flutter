@@ -51,9 +51,10 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
       _error = null;
     });
     try {
-      final controller = Get.isRegistered<DemoContestController>()
-          ? Get.find<DemoContestController>()
-          : null;
+      final controller =
+          Get.isRegistered<DemoContestController>()
+              ? Get.find<DemoContestController>()
+              : null;
       final contest = controller?.contestById(widget.contestId);
 
       if (contest == null) {
@@ -64,9 +65,10 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
         return;
       }
 
-      final c = Get.isRegistered<DemoContestController>()
-          ? Get.find<DemoContestController>()
-          : null;
+      final c =
+          Get.isRegistered<DemoContestController>()
+              ? Get.find<DemoContestController>()
+              : null;
       final fetched = c != null ? await c.fetchMyStats(widget.contestId) : null;
       setState(() {
         _stats = fetched;
@@ -101,76 +103,78 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
         leading: AppSvgBackButton(onPressed: () => Get.back()),
         centerTitle: true,
       ),
-      body: _loading
-          ? const Center(child: CommonLoadingWidget(size: 50.0))
-          : _error != null
+      body:
+          _loading
+              ? const Center(child: CommonLoadingWidget(size: 50.0))
+              : _error != null
               ? _buildError(isDark)
               : RefreshIndicator(
-                  color: AppColors.primary,
-                  onRefresh: _loadStats,
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.only(bottom: 32.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _RankingBanner(
+                color: AppColors.primary,
+                onRefresh: _loadStats,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.only(bottom: 32.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _RankingBanner(
+                        stats: _stats!,
+                        contest: contest,
+                        languageService: languageService,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+                        child: _ContestCard(
                           stats: _stats!,
                           contest: contest,
                           languageService: languageService,
+                          cardBg: cardBg,
+                          isDark: isDark,
                         ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                          child: _ContestCard(
-                            stats: _stats!,
-                            contest: contest,
-                            languageService: languageService,
-                            cardBg: cardBg,
-                            isDark: isDark,
-                          ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
+                        child: _StatsRow(
+                          stats: _stats!,
+                          languageService: languageService,
+                          cardBg: cardBg,
+                          isDark: isDark,
                         ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-                          child: _StatsRow(
-                            stats: _stats!,
-                            languageService: languageService,
-                            cardBg: cardBg,
-                            isDark: isDark,
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _PrizeStructureCard(
-                                languageService: languageService,
-                                cardBg: cardBg,
-                                isDark: isDark,
-                              ),
-                              SizedBox(height: 16.h),
-                              _ContestRulesCard(
-                                languageService: languageService,
-                                cardBg: cardBg,
-                                isDark: isDark,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                          child: _LeaderboardCta(
-                            onTap: () => Get.toNamed(
-                              AppPages.DEMO_CONTEST_LEADERBOARD,
-                              arguments: widget.contestId,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _PrizeStructureCard(
+                              languageService: languageService,
+                              cardBg: cardBg,
+                              isDark: isDark,
                             ),
-                            languageService: languageService,
-                          ),
+                            SizedBox(height: 16.h),
+                            _ContestRulesCard(
+                              languageService: languageService,
+                              cardBg: cardBg,
+                              isDark: isDark,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+                        child: _LeaderboardCta(
+                          onTap:
+                              () => Get.toNamed(
+                                AppPages.DEMO_CONTEST_LEADERBOARD,
+                                arguments: widget.contestId,
+                              ),
+                          languageService: languageService,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
     );
   }
 
@@ -181,11 +185,7 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 48.sp,
-              color: AppColors.textGrey,
-            ),
+            Icon(Icons.error_outline, size: 48.sp, color: AppColors.textGrey),
             SizedBox(height: 12.h),
             Text(
               _error ?? 'Something went wrong',
@@ -196,10 +196,7 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
               ),
             ),
             SizedBox(height: 16.h),
-            ElevatedButton(
-              onPressed: _loadStats,
-              child: const Text('Retry'),
-            ),
+            ElevatedButton(onPressed: _loadStats, child: const Text('Retry')),
           ],
         ),
       ),
@@ -223,6 +220,8 @@ class _RankingBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rank = stats.rank;
+    final isDark = AppColors.isDarkMode;
+    final textColor = isDark ? AppColors.pureBlack : Colors.white;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(20.w, 18.h, 18.w, 22.h),
@@ -241,7 +240,7 @@ class _RankingBanner extends StatelessWidget {
         children: [
           Row(
             children: [
-              _LivePill(languageService: languageService),
+              _LivePill(languageService: languageService, isDark: isDark),
               const Spacer(),
             ],
           ),
@@ -249,7 +248,7 @@ class _RankingBanner extends StatelessWidget {
           Text(
             'You are ranked $rank',
             style: AppTextStyles.bodyText.copyWith(
-              color: Colors.white,
+              color: textColor,
               fontSize: 22.sp,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.3,
@@ -259,7 +258,7 @@ class _RankingBanner extends StatelessWidget {
           Text(
             'Keep trading and maintain proper risk management to secure or improve your position!',
             style: AppTextStyles.bodyText.copyWith(
-              color: Colors.white.withValues(alpha: 0.92),
+              color: textColor.withValues(alpha: 0.92),
               fontSize: 12.sp,
               fontWeight: FontWeight.w400,
               height: 1.4,
@@ -273,16 +272,18 @@ class _RankingBanner extends StatelessWidget {
 
 class _LivePill extends StatelessWidget {
   final LanguageService languageService;
-  const _LivePill({required this.languageService});
+  final bool isDark;
+  const _LivePill({required this.languageService, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
+    final textColor = isDark ? AppColors.pureBlack : Colors.white;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.16),
+        color: textColor.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+        border: Border.all(color: textColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -299,7 +300,7 @@ class _LivePill extends StatelessWidget {
           Text(
             'LIVE',
             style: AppTextStyles.bodyText.copyWith(
-              color: Colors.white,
+              color: textColor,
               fontSize: 10.sp,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
@@ -333,21 +334,20 @@ class _ContestCard extends StatelessWidget {
     final dateFmt = DateFormat('d MMMM yyyy');
     final startsAt = contest?.startsAt as DateTime?;
     final endsAt = contest?.endsAt as DateTime?;
-    final dateRange = (startsAt != null && endsAt != null)
-        ? '${dateFmt.format(startsAt)} — ${dateFmt.format(endsAt)}'
-        : '3 August 2026 — 31 August 2026';
+    final dateRange =
+        (startsAt != null && endsAt != null)
+            ? '${dateFmt.format(startsAt)} — ${dateFmt.format(endsAt)}'
+            : '3 August 2026 — 31 August 2026';
 
     final title = contest?.title?.toString() ?? 'Contest One';
-    final description = contest?.description?.toString() ??
-        'Complete contest and win prizes';
+    final description =
+        contest?.description?.toString() ?? 'Complete contest and win prizes';
 
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.icongrey.withValues(alpha: 0.14),
-        ),
+        border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
       ),
       padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 16.h),
       child: Column(
@@ -451,15 +451,15 @@ class _StatsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = stats.participant;
     final returnColor =
-        p.returnPercent >= 0 ? const Color(0xFF22C55E) : const Color(0xFFEF4444);
+        p.returnPercent >= 0
+            ? const Color(0xFF22C55E)
+            : const Color(0xFFEF4444);
 
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.icongrey.withValues(alpha: 0.14),
-        ),
+        border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
       ),
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
       child: Column(
@@ -481,7 +481,10 @@ class _StatsRow extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.h),
-            child: Divider(color: AppColors.icongrey.withValues(alpha: 0.18), height: 1),
+            child: Divider(
+              color: AppColors.icongrey.withValues(alpha: 0.18),
+              height: 1,
+            ),
           ),
           Row(
             children: [
@@ -583,24 +586,32 @@ class _PrizeStructureCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contestObj = Get.find<DemoContestController>().contestById(Get.arguments?.toString() ?? '');
+    final contestObj = Get.find<DemoContestController>().contestById(
+      Get.arguments?.toString() ?? '',
+    );
 
     return _PanelCard(
       cardBg: cardBg,
       isDark: isDark,
-      iconBg: const Color(0xFFFFEDD5),
+      iconBg: isDark ? const Color(0xFF431407) : const Color(0xFFFFEDD5),
       iconEmoji: '🏆',
       iconColor: const Color(0xFFEA580C),
       title: 'Prize Structure',
       subtitle: 'Rewards for top-performing traders',
       children: [
         if (contestObj != null && contestObj.prizes.isNotEmpty)
-          ...contestObj.prizes.map((prize) => Column(
-            children: [
-              _PrizeRow(medal: '🏅', rank: prize.label, amount: '\$${prize.amount.toStringAsFixed(2)}'),
-              SizedBox(height: 8.h),
-            ],
-          ))
+          ...contestObj.prizes.map(
+            (prize) => Column(
+              children: [
+                _PrizeRow(
+                  medal: '🏅',
+                  rank: prize.label,
+                  amount: '\$${prize.amount.toStringAsFixed(2)}',
+                ),
+                SizedBox(height: 8.h),
+              ],
+            ),
+          )
         else
           const Text('No prizes available.'),
       ],
@@ -664,10 +675,13 @@ class _ContestRulesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contestObj = Get.find<DemoContestController>().contestById(Get.arguments?.toString() ?? '');
-    
+    final contestObj = Get.find<DemoContestController>().contestById(
+      Get.arguments?.toString() ?? '',
+    );
+
     final rules = [
-      if (contestObj != null) ...contestObj.rules.map((r) => (r.title, r.description))
+      if (contestObj != null)
+        ...contestObj.rules.map((r) => (r.title, r.description)),
     ];
 
     if (rules.isEmpty) {
@@ -691,11 +705,7 @@ class _ContestRulesCard extends StatelessWidget {
       children: [
         for (var i = 0; i < rules.length; i++) ...[
           if (i > 0) SizedBox(height: 8.h),
-          _RuleRow(
-            index: i + 1,
-            label: rules[i].$1,
-            value: rules[i].$2,
-          ),
+          _RuleRow(index: i + 1, label: rules[i].$1, value: rules[i].$2),
         ],
       ],
     );
@@ -798,9 +808,7 @@ class _PanelCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.icongrey.withValues(alpha: 0.14),
-        ),
+        border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
       ),
       padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 14.h),
       child: Column(
@@ -866,10 +874,7 @@ class _PanelCard extends StatelessWidget {
 class _LeaderboardCta extends StatelessWidget {
   final VoidCallback onTap;
   final LanguageService languageService;
-  const _LeaderboardCta({
-    required this.onTap,
-    required this.languageService,
-  });
+  const _LeaderboardCta({required this.onTap, required this.languageService});
 
   @override
   Widget build(BuildContext context) {
@@ -892,7 +897,8 @@ class _LeaderboardCta extends StatelessWidget {
             Text(
               'View Full Leaderboard',
               style: AppTextStyles.bodyText.copyWith(
-                color: Colors.white,
+                color:
+                    AppColors.isDarkMode ? AppColors.pureBlack : Colors.white,
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.2,

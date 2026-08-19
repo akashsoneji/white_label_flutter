@@ -59,6 +59,7 @@ abstract class Routes {
   static const TICKET_DETAIL = _Paths.TICKET_DETAIL;
   static const TOOLS_EDUCATION = _Paths.TOOLS_EDUCATION;
   static const MORE = _Paths.MORE;
+  static const NOTIFICATIONS = _Paths.NOTIFICATIONS;
   static const PARTNERSHIP_PROGRAM = _Paths.PARTNERSHIP_PROGRAM;
   static const BRAND_TEST = _Paths.BRAND_TEST;
   static const ORDER_CONFIRMATION = _Paths.ORDER_CONFIRMATION;
@@ -158,6 +159,7 @@ abstract class _Paths {
   static const TICKET_DETAIL = '/ticket-detail';
   static const TOOLS_EDUCATION = '/tools-education';
   static const MORE = '/more';
+  static const NOTIFICATIONS = '/notifications';
   static const PARTNERSHIP_PROGRAM = '/partnership-program';
   static const ORDER_CONFIRMATION = '/order-confirmation';
   static const BRAND_TEST = '/brand-test';

@@ -29,6 +29,7 @@ class ApiConstants {
   static const String register = '${ajax}register';
   static const String registerFcmToken = '${ajax}register-fcm-token';
   static const String dashboard = '${ajax}dashboard';
+  static const String getNotifications = '${ajax}notifications';
   static const String priceAlerts = '${ajax}price-alerts';
   static const String profile = '${ajax}settings/profile';
   static const String getMT5Accounts = '${ajax}mt5accounts/get';

@@ -161,7 +161,7 @@ class IbRemoteDataSource {
 
   Future<ApiResponse> cancelIbTransfer({required int transferId}) {
     // According to REST patterns and postman, it is usually POST or DELETE or just POST with _method=DELETE
-    // Depending on backend, let's use POST by default for /cancel, or GET. Wait, the curl says POST or GET. "https://my.pipze.com/api/user/ib/transfer/1/cancel"
+    // Depending on backend, let's use POST by default for /cancel, or GET. Wait, the curl says POST or GET. "https://dev.tenaxcodecrm.com/api/user/ib/transfer/1/cancel"
     return _api.post(
       endpoint: '${ApiConstants.ibTransferCancel}$transferId/cancel',
     );

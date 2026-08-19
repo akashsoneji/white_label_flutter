@@ -10,7 +10,6 @@ import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/home/more/one_click_trading_disclaimer_screen.dart';
 import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
-import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/services/biometric_service.dart';
@@ -740,6 +739,12 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
 
   List<_CelMenuItem> _accountItems(BuildContext c, AuthController auth) {
     return [
+      _CelMenuItem(
+        icon: Icons.notifications_none_rounded,
+        label: 'Notifications',
+        color: const Color(0xFFE91E63),
+        onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
+      ),
       _CelMenuItem(
         icon: Icons.support_agent_rounded,
         label: 'Support Tickets',

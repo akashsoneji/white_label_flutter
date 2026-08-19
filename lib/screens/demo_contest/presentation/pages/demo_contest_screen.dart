@@ -128,21 +128,22 @@ class _PillTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDarkMode;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF5A2A7A) : Colors.white,
+          color: isSelected ? AppColors.primary : (isDark ? AppColors.card : Colors.white),
           borderRadius: BorderRadius.circular(8.r),
-          border: isSelected ? null : Border.all(color: Colors.grey.withOpacity(0.2)),
+          border: isSelected ? null : Border.all(color: isDark ? Colors.white24 : Colors.grey.withOpacity(0.2)),
         ),
         child: Row(
           children: [
             Text(
               title,
               style: AppTextStyles.bodyText.copyWith(
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected ? (isDark ? AppColors.pureBlack : Colors.white) : AppColors.textPrimary,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 fontSize: 13.sp,
               ),
@@ -206,20 +207,24 @@ class _ContestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppColors.isDarkMode;
+    final cardBg = isDark ? AppColors.card : Colors.white;
     final dateFormat = DateFormat('d MMMM yyyy');
     final topPrize = contest.prizes.isNotEmpty ? contest.prizes.first.amount : 0.0;
     
     return Container(
       margin: EdgeInsets.only(bottom: 24.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(16.r),
+        border: isDark ? Border.all(color: Colors.white12) : null,
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            )
         ],
       ),
       child: Column(
@@ -326,7 +331,7 @@ class _ContestCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Column(
@@ -369,26 +374,26 @@ class _ContestCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('STARTS', style: TextStyle(fontSize: 10.sp, color: Colors.black87, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                        Text('STARTS', style: TextStyle(fontSize: 10.sp, color: AppColors.textPrimary, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                         SizedBox(height: 4.h),
-                        Text(dateFormat.format(contest.startsAt), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                        Text(dateFormat.format(contest.startsAt), style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.bold)),
                       ],
                     ),
                     Expanded(
                       child: Row(
                         children: [
-                          Expanded(child: Divider(color: Colors.grey.shade300, indent: 8.w, endIndent: 8.w)),
-                          Icon(Icons.calendar_month, color: Colors.grey.shade600, size: 16.sp),
-                          Expanded(child: Divider(color: Colors.grey.shade300, indent: 8.w, endIndent: 8.w)),
+                          Expanded(child: Divider(color: isDark ? Colors.white24 : Colors.grey.shade300, indent: 8.w, endIndent: 8.w)),
+                          Icon(Icons.calendar_month, color: isDark ? Colors.white60 : Colors.grey.shade600, size: 16.sp),
+                          Expanded(child: Divider(color: isDark ? Colors.white24 : Colors.grey.shade300, indent: 8.w, endIndent: 8.w)),
                         ],
                       ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('ENDS', style: TextStyle(fontSize: 10.sp, color: Colors.black87, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                        Text('ENDS', style: TextStyle(fontSize: 10.sp, color: AppColors.textPrimary, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                         SizedBox(height: 4.h),
-                        Text(dateFormat.format(contest.endsAt), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                        Text(dateFormat.format(contest.endsAt), style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ],
@@ -398,9 +403,9 @@ class _ContestCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.language, size: 14.sp, color: Colors.grey.shade600),
+                      Icon(Icons.language, size: 14.sp, color: isDark ? Colors.white60 : Colors.grey.shade600),
                       SizedBox(width: 4.w),
-                      Text('Dubai Time (UTC+4)', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700)),
+                      Text('Dubai Time (UTC+4)', style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey)),
                     ],
                   ),
                 ),
@@ -422,23 +427,23 @@ class _ContestCard extends StatelessWidget {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
+                      backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                       elevation: 0,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(contest.isEnrolled ? Icons.show_chart : Icons.arrow_forward, color: Colors.white, size: 18.sp),
+                        Icon(contest.isEnrolled ? Icons.show_chart : Icons.arrow_forward, color: isDark ? AppColors.pureBlack : Colors.white, size: 18.sp),
                         SizedBox(width: 8.w),
                         Text(
                           contest.isEnrolled ? 'Go to Dashboard' : 'Join Now',
-                          style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: isDark ? AppColors.pureBlack : Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
                         ),
                         if (contest.isEnrolled)
                           Padding(
                             padding: EdgeInsets.only(left: 4.w),
-                            child: Icon(Icons.arrow_forward, color: Colors.white, size: 16.sp),
+                            child: Icon(Icons.arrow_forward, color: isDark ? AppColors.pureBlack : Colors.white, size: 16.sp),
                           ),
                       ],
                     ),
@@ -487,7 +492,7 @@ class _InfoCell extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(fontSize: 8.sp, color: Colors.black87, fontWeight: FontWeight.w600, height: 1.2),
+                style: TextStyle(fontSize: 8.sp, color: AppColors.textPrimary, fontWeight: FontWeight.w600, height: 1.2),
               ),
               SizedBox(height: 2.h),
               Text(
