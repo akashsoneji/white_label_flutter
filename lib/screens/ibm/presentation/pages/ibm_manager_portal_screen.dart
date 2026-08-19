@@ -21,12 +21,19 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   String selectedScope = 'total'; // total, network, direct
   String selectedPeriod =
       'this_month'; // today, 7d, 30d, this_month, all, custom
+  String? customFrom;
+  String? customTo;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchDashboard(period: selectedPeriod, scope: selectedScope);
+      controller.fetchDashboard(
+        period: selectedPeriod,
+        scope: selectedScope,
+        from: customFrom,
+        to: customTo,
+      );
     });
   }
 
@@ -34,14 +41,64 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     setState(() {
       selectedScope = scope;
     });
-    controller.fetchDashboard(period: selectedPeriod, scope: selectedScope);
+    controller.fetchDashboard(
+      period: selectedPeriod,
+      scope: selectedScope,
+      from: customFrom,
+      to: customTo,
+    );
   }
 
-  void _onPeriodChanged(String period) {
-    setState(() {
-      selectedPeriod = period;
-    });
-    controller.fetchDashboard(period: selectedPeriod, scope: selectedScope);
+  void _onPeriodChanged(String period) async {
+    if (period == 'custom') {
+      final DateTimeRange? picked = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              platform: TargetPlatform.windows,
+              colorScheme: ColorScheme.light(
+                primary: AppColors.primary,
+                onPrimary: Colors.white,
+                onSurface: Colors.black,
+              ),
+            ),
+            child: child!,
+          );
+        },
+      );
+      if (picked != null) {
+        String fromStr =
+            "${picked.start.year}-${picked.start.month.toString().padLeft(2, '0')}-${picked.start.day.toString().padLeft(2, '0')}";
+        String toStr =
+            "${picked.end.year}-${picked.end.month.toString().padLeft(2, '0')}-${picked.end.day.toString().padLeft(2, '0')}";
+        setState(() {
+          selectedPeriod = period;
+          customFrom = fromStr;
+          customTo = toStr;
+        });
+        controller.fetchDashboard(
+          period: selectedPeriod,
+          scope: selectedScope,
+          from: customFrom,
+          to: customTo,
+        );
+      }
+    } else {
+      setState(() {
+        selectedPeriod = period;
+        customFrom = null;
+        customTo = null;
+      });
+      controller.fetchDashboard(
+        period: selectedPeriod,
+        scope: selectedScope,
+        from: customFrom,
+        to: customTo,
+      );
+    }
   }
 
   @override
@@ -77,6 +134,8 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                       () => controller.fetchDashboard(
                         period: selectedPeriod,
                         scope: selectedScope,
+                        from: customFrom,
+                        to: customTo,
                       ),
                   child: const Text('Retry'),
                 ),
@@ -98,10 +157,24 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         final Map<String, dynamic> firstCurrency =
             (currencies is List && currencies.isNotEmpty) ? currencies[0] : {};
 
-        final deposits = _parseDouble(firstCurrency['deposits']);
-        final withdrawals = _parseDouble(firstCurrency['withdrawals']);
-        final equity = _parseDouble(firstCurrency['equity']);
-        final commission = _parseDouble(firstCurrency['commission']);
+        final funding = firstCurrency['funding'] ?? {};
+        final deposits = _parseDouble(funding['deposits'] ?? funding['net']);
+        final withdrawals = _parseDouble(funding['withdrawals']);
+
+        final equityData = firstCurrency['equity'] ?? {};
+        final equity = _parseDouble(
+          equityData['equity'] ?? equityData['balance'],
+        );
+
+        final commData = firstCurrency['commission'] ?? {};
+        final commission = _parseDouble(commData['period'] ?? commData['mtd']);
+        final lots = _parseDouble(commData['lots']);
+        final trades = _parseDouble(commData['trades']).toInt();
+        final perLot = _parseDouble(commData['per_lot']);
+
+        // Merge dashboard wallet with separate wallet if needed
+        final dashboardWallet = firstCurrency['wallet'] ?? {};
+        final effectiveWallet = wallet.isEmpty ? dashboardWallet : wallet;
 
         return RefreshIndicator(
           color: AppColors.primary,
@@ -109,6 +182,8 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               () => controller.fetchDashboard(
                 period: selectedPeriod,
                 scope: selectedScope,
+                from: customFrom,
+                to: customTo,
               ),
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
@@ -122,9 +197,12 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 withdrawals,
                 equity,
                 commission,
+                lots,
+                trades,
+                perLot,
               ),
               SizedBox(height: 24.h),
-              _buildCommissionSummary(wallet),
+              _buildCommissionSummary(effectiveWallet),
               SizedBox(height: 24.h),
               _buildClientFunnel(funnel),
               SizedBox(height: 24.h),
@@ -199,7 +277,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.whiteColor,
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: Colors.grey.withOpacity(0.2)),
       ),
@@ -216,16 +294,16 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                     vertical: 6.h,
                   ),
                   decoration: BoxDecoration(
-                    color:
-                        isSelected
-                            ? const Color(0xFF5F259E)
-                            : Colors.transparent,
+                    color: isSelected ? AppColors.primary : AppColors.card,
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
                     e.value,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black87,
+                      color:
+                          isSelected
+                              ? AppColors.whiteColor
+                              : AppColors.textPrimary,
                       fontSize: 11.sp,
                       fontWeight:
                           isSelected ? FontWeight.bold : FontWeight.normal,
@@ -245,6 +323,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     double withdrawals,
     double equity,
     double commission,
+    double lots,
+    int trades,
+    double perLot,
   ) {
     return GridView.count(
       crossAxisCount: 2,
@@ -259,21 +340,21 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           value: '${clients['total'] ?? 0}',
           subtitle: '${clients['new_in_period'] ?? 0} new this month',
           icon: Icons.people,
-          color: Color(0xFF5F259E),
+          color: AppColors.primary,
         ),
         _buildStatCard(
           title: 'Active Traders',
           value: '${clients['active'] ?? 0}',
           subtitle: 'traded this month',
           icon: Icons.person,
-          color: Color(0xFF5F259E),
+          color: AppColors.primary,
         ),
         _buildStatCard(
           title: 'Sub-IBs',
           value: '${(partners['direct'] ?? 0) + (partners['network'] ?? 0)}',
           subtitle: '${partners['direct'] ?? 0} directly under you',
           icon: Icons.account_tree,
-          color: Color(0xFF5F259E),
+          color: AppColors.primary,
         ),
         _buildStatCard(
           title: 'Total Deposits',
@@ -295,35 +376,35 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           value: '\$${equity.toStringAsFixed(2)}',
           subtitle: 'right now',
           icon: Icons.account_balance_wallet,
-          color: Color(0xFF5F259E),
+          color: AppColors.primary,
         ),
         _buildStatCard(
           title: 'Total Lots',
-          value: '0.00',
-          subtitle: '0 trades',
+          value: lots.toStringAsFixed(2),
+          subtitle: '$trades trades',
           icon: Icons.bar_chart,
-          color: Color(0xFF5F259E),
+          color: AppColors.primary,
         ),
         _buildStatCard(
           title: 'Per Lot',
-          value: '\$0.00',
+          value: '\$${perLot.toStringAsFixed(2)}',
           subtitle: 'across everything',
           icon: Icons.percent,
-          color: Color(0xFF5F259E),
+          color: AppColors.primary,
         ),
         _buildStatCard(
           title: 'Avg Lot Size',
-          value: '0.00',
+          value: trades > 0 ? (lots / trades).toStringAsFixed(2) : '0.00',
           subtitle: 'this month',
           icon: Icons.pie_chart,
-          color: Color(0xFF5F259E),
+          color: AppColors.primary,
         ),
         _buildStatCard(
           title: 'Earned today',
           value: '\$${commission.toStringAsFixed(2)}',
           subtitle: '',
           icon: Icons.monetization_on,
-          color: Color(0xFF5F259E),
+          color: AppColors.primary,
         ),
       ],
     );
@@ -339,9 +420,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -368,7 +449,10 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 11.sp),
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 11.sp,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -380,12 +464,16 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             children: [
               Text(
                 value,
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
               if (subtitle.isNotEmpty)
                 Text(
                   subtitle,
-                  style: TextStyle(color: Colors.grey[500], fontSize: 10.sp),
+                  style: TextStyle(color: AppColors.textGrey, fontSize: 10.sp),
                 ),
             ],
           ),
@@ -395,12 +483,14 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   }
 
   Widget _buildCommissionSummary(Map wallet) {
-    // Assuming wallet structure has totals, if not we show 0
-    final sum = wallet['summary'] ?? {};
-    final earned = _parseDouble(sum['total_earned']);
-    final paid = _parseDouble(sum['total_paid']);
-    final pending = _parseDouble(sum['total_pending']);
-    final available = _parseDouble(sum['total_available']);
+    // If it has 'summary', it's from separate endpoint. Otherwise it's from dashboard.
+    final sum = wallet.containsKey('summary') ? wallet['summary'] : wallet;
+    final earned = _parseDouble(sum['lifetime_earned'] ?? sum['total_earned']);
+    final paid = _parseDouble(sum['lifetime_paid'] ?? sum['total_paid']);
+    final pending = _parseDouble(sum['pending_payout'] ?? sum['total_pending']);
+    final available = _parseDouble(
+      sum['unpaid_balance'] ?? sum['total_available'],
+    );
 
     return _buildSectionCard(
       'Commission Summary',
@@ -440,7 +530,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           _buildProgressBar(
             'Direct clients',
             0.5,
-            Color(0xFF5F259E),
+            AppColors.primary,
             '\$${(earned / 2).toStringAsFixed(2)} - 50%',
           ),
           SizedBox(height: 8.h),
@@ -456,21 +546,26 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   }
 
   Widget _buildClientFunnel(Map funnel) {
-    final linkClicks = funnel['link_clicks'] ?? 0;
-    final signUps = funnel['sign_ups'] ?? 0;
-    final accounts = funnel['accounts_opened'] ?? 0;
+    final visits = funnel['visits'] ?? 0;
+    final uniqueVisits = funnel['unique_visits'] ?? 0;
+    final signUps = funnel['signups'] ?? 0;
+    final accounts = funnel['accounts'] ?? 0;
     final funded = funnel['funded'] ?? 0;
+
+    // Calculate percentages
+    final uniquePercent = visits > 0 ? (uniqueVisits / visits * 100).toStringAsFixed(0) : '0';
+    final signupsPercent = uniqueVisits > 0 ? (signUps / uniqueVisits * 100).toStringAsFixed(0) : '0';
 
     return _buildSectionCard(
       'Client Funnel',
       'from your referral links',
       Row(
         children: [
-          Expanded(child: _buildSimpleStat('Link clicks', '$linkClicks')),
+          Expanded(child: _buildSimpleStat('Link clicks', '$visits')),
           Expanded(
-            child: _buildSimpleStat('Different people', '$linkClicks\n100%'),
+            child: _buildSimpleStat('Different people', '$uniqueVisits\n$uniquePercent%'),
           ),
-          Expanded(child: _buildSimpleStat('Signed up', '$signUps\n0%')),
+          Expanded(child: _buildSimpleStat('Signed up', '$signUps\n$signupsPercent%')),
           Expanded(child: _buildSimpleStat('Opened account', '$accounts')),
           Expanded(child: _buildSimpleStat('Funded it', '$funded')),
         ],
@@ -484,13 +579,17 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       return _buildSectionCard(
         'Sub-IB Performance',
         'View all',
-        Text('No Sub-IBs found.', style: TextStyle(color: Colors.grey)),
+        Text('No Sub-IBs found.', style: TextStyle(color: AppColors.textGrey)),
       );
     }
 
     final earner = earners.first;
     final name = earner['name'] ?? 'Unknown';
-    final earned = earner['commission'] ?? 0.0;
+    final earned = _parseDouble(earner['amount'] ?? earner['commission']);
+    final netDeposit = _parseDouble(earner['net_deposit'] ?? earner['deposit']);
+    final clients = earner['clients'] ?? 0;
+    final active = earner['active'] ?? 0;
+    final lots = _parseDouble(earner['lots']);
 
     return _buildSectionCard(
       'Sub-IB Performance',
@@ -498,7 +597,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          border: Border.all(color: AppColors.border),
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Column(
@@ -507,11 +606,14 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Color(0xFF5F259E),
+                  backgroundColor: AppColors.primary,
                   radius: 12.r,
                   child: Text(
                     name[0],
-                    style: TextStyle(color: Colors.white, fontSize: 10.sp),
+                    style: TextStyle(
+                      color: AppColors.whiteColor,
+                      fontSize: 10.sp,
+                    ),
                   ),
                 ),
                 SizedBox(width: 8.w),
@@ -520,6 +622,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13.sp,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 Spacer(),
@@ -545,13 +648,17 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                   children: [
                     Text(
                       'Net deposit',
-                      style: TextStyle(color: Colors.grey, fontSize: 10.sp),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 10.sp,
+                      ),
                     ),
                     Text(
-                      '\$0.00',
+                      '\$${netDeposit.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -561,13 +668,17 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                   children: [
                     Text(
                       'You earned',
-                      style: TextStyle(color: Colors.grey, fontSize: 10.sp),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 10.sp,
+                      ),
                     ),
                     Text(
                       '\$${earned.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -576,8 +687,8 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             ),
             SizedBox(height: 8.h),
             Text(
-              '0 clients   0 active   0.00 lots',
-              style: TextStyle(color: Colors.grey, fontSize: 10.sp),
+              '$clients clients   $active active   ${lots.toStringAsFixed(2)} lots',
+              style: TextStyle(color: AppColors.textGrey, fontSize: 10.sp),
             ),
           ],
         ),
@@ -615,7 +726,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             'Payouts',
             'you & your downline',
             'No payout has been taken yet.',
-            Color(0xFF5F259E),
+            AppColors.primary,
           ),
           _buildActivityCard(
             Icons.person_add,
@@ -650,9 +761,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       margin: EdgeInsets.only(right: 12.w),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -663,16 +774,23 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               SizedBox(width: 6.w),
               Text(
                 title,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12.sp,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ],
           ),
-          Text(subtitle, style: TextStyle(color: Colors.grey, fontSize: 10.sp)),
+          Text(
+            subtitle,
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 10.sp),
+          ),
           Spacer(),
           Center(
             child: Text(
               message,
-              style: TextStyle(color: Colors.grey, fontSize: 11.sp),
+              style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp),
               textAlign: TextAlign.center,
             ),
           ),
@@ -686,9 +804,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -702,7 +820,10 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               ),
               Text(
                 actionText,
-                style: TextStyle(color: Colors.grey, fontSize: 11.sp),
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 11.sp,
+                ),
               ),
             ],
           ),
@@ -717,7 +838,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     return Container(
       padding: EdgeInsets.all(8.w),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.05),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(8.r),
       ),
       child: Column(
@@ -726,7 +847,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           Text(
             label,
             style: TextStyle(
-              color: Colors.grey,
+              color: AppColors.textSecondary,
               fontSize: 10.sp,
               fontWeight: FontWeight.bold,
             ),
@@ -737,7 +858,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.bold,
-              color: valueColor ?? Colors.black87,
+              color: valueColor ?? AppColors.textPrimary,
             ),
           ),
         ],
@@ -757,7 +878,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           width: 80.w,
           child: Text(
             label,
-            style: TextStyle(color: Colors.grey, fontSize: 11.sp),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 11.sp),
           ),
         ),
         Expanded(
@@ -766,7 +887,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               Container(
                 height: 8.h,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.2),
+                  color: AppColors.divider,
                   borderRadius: BorderRadius.circular(4.r),
                 ),
               ),
@@ -786,7 +907,11 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         SizedBox(width: 8.w),
         Text(
           valueText,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.sp),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 11.sp,
+            color: AppColors.textPrimary,
+          ),
         ),
       ],
     );

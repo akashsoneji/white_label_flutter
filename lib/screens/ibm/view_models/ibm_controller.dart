@@ -196,12 +196,14 @@ class IbmController extends GetxController {
     }
   }
 
-  Future<void> fetchDashboard({String? period, String? scope}) async {
+  Future<void> fetchDashboard({String? period, String? scope, String? from, String? to}) async {
     try {
       isLoading.value = true;
       final response = await _apiProvider.getPortalDashboard(
         period: period ?? 'this_month',
         scope: scope ?? 'total',
+        from: from,
+        to: to,
       );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);

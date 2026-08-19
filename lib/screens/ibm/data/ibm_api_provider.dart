@@ -25,10 +25,15 @@ class IbmApiProvider {
   Future<ApiResponse> getPortalDashboard({
     String period = 'this_month',
     String scope = 'total',
+    String? from,
+    String? to,
   }) async {
+    final Map<String, dynamic> queryParams = {'period': period, 'scope': scope};
+    if (from != null && from.isNotEmpty) queryParams['from'] = from;
+    if (to != null && to.isNotEmpty) queryParams['to'] = to;
     return await ApiService.get(
       endpoint: 'ibm/portal/dashboard',
-      queryParameters: {'period': period, 'scope': scope},
+      queryParameters: queryParams,
     );
   }
 

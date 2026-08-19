@@ -26,9 +26,9 @@ urls:
   api: https://dev.tenaxcodecrm.com/api/
   websocket: wss://dev.tenaxcodecrm.com/trade-engine
   chart: https://dev.tenaxcodecrm.com
-  # api: https://dev.tenaxcodecrm.com/api/
-  # websocket: wss://dev.tenaxcodecrm.com/trade-engine
-  # chart: https://dev.tenaxcodecrm.com
+  # api: https://my.pipze.com/api/
+  # websocket: wss://my.pipze.com/trade-engine
+  # chart: https://my.pipze.com
 
 assets:
   appIcon: icon.png

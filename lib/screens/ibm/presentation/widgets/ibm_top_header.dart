@@ -37,7 +37,11 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
               onTap: () => Get.back(),
               child: Padding(
                 padding: EdgeInsets.only(right: 8.w),
-                child: Icon(Icons.arrow_back_ios_new, size: 18.w, color: AppColors.textPrimary),
+                child: Icon(
+                  Icons.arrow_back_ios_new,
+                  size: 18.w,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
           // Title with optional badge
@@ -73,81 +77,24 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
             ],
           ),
           const Spacer(),
-          // Client | IB Switcher Pill matching Web UI
-          Container(
-            padding: EdgeInsets.all(2.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1EEF8),
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    // Switch back to Client mode
-                    Get.back();
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.dashboard_outlined, size: 13.w, color: AppColors.textGrey),
-                        SizedBox(width: 3.w),
-                        Text(
-                          'Client',
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            color: AppColors.textGrey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF5F259E),
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.handshake, size: 13.w, color: Colors.white),
-                      SizedBox(width: 3.w),
-                      Text(
-                        'IB',
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8.w),
+
           // Wallet Balance Chip
           Obx(() {
             final balance = controller.walletData['balance'] ?? '0.00';
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF4F6F8),
+                color: AppColors.card,
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(color: AppColors.divider),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.account_balance_wallet_outlined, size: 14.w, color: AppColors.textPrimary),
+                  Icon(
+                    Icons.account_balance_wallet_outlined,
+                    size: 14.w,
+                    color: AppColors.textPrimary,
+                  ),
                   SizedBox(width: 4.w),
                   Text(
                     '\$$balance',
