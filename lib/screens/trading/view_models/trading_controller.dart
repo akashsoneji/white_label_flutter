@@ -2649,7 +2649,8 @@ API Response:
         return true;
       } else {
         AppLogger.error('Failed to place order: ${response.message}');
-        _setError(response.message ?? 'Failed to place order');
+        final accountLabel = accountToUse.isNotEmpty ? ' (A/C: $accountToUse)' : '';
+        _setError('${response.message ?? 'Failed to place order'}$accountLabel');
         return false;
       }
     } catch (e) {

@@ -113,6 +113,17 @@ class NotificationService {
     }
 
     try {
+      // Print FCM token for debugging
+      String? token = await FirebaseMessaging.instance.getToken();
+      debugPrint('\n=============================================');
+      debugPrint('🔔 FCM TOKEN FOR TESTING:');
+      debugPrint(token ?? 'Failed to get token');
+      debugPrint('=============================================\n');
+
+      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+        debugPrint('🔄 FCM TOKEN REFRESHED: $newToken');
+      });
+
     // 1. Configure iOS/macOS foreground visibility
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(

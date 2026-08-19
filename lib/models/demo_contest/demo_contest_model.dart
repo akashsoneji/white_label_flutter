@@ -88,6 +88,16 @@ class DemoContest {
 
   /// Whether the user can join right now. False for ended contests.
   final bool acceptingEntries;
+  final bool isEnrolled;
+  final int daysLeft;
+  final int myEnrollmentsCount;
+  final int maxParticipations;
+  final bool canParticipateAgain;
+  final bool isUpcoming;
+  final bool isEnded;
+  final String tradingMaxLeverage;
+  final String rankingBy;
+  final String enrollmentType;
 
   const DemoContest({
     required this.id,
@@ -107,6 +117,16 @@ class DemoContest {
     required this.rules,
     required this.requirements,
     required this.acceptingEntries,
+    this.isEnrolled = false,
+    this.daysLeft = 0,
+    this.myEnrollmentsCount = 0,
+    this.maxParticipations = 0,
+    this.canParticipateAgain = false,
+    this.isUpcoming = false,
+    this.isEnded = false,
+    this.tradingMaxLeverage = '',
+    this.rankingBy = '',
+    this.enrollmentType = 'free',
   });
 
   Duration get remaining {
@@ -133,39 +153,51 @@ class DemoContest {
   bool get hasEnded => DateTime.now().isAfter(endsAt);
 
   factory DemoContest.fromJson(Map<String, dynamic> json) {
+    final contestJson = json['contest'] is Map ? json['contest'] as Map<String, dynamic> : json;
+
     return DemoContest(
-      id: json['id']?.toString() ?? '',
-      title: json['title']?.toString() ?? '',
-      subtitle: json['subtitle']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
-      bannerEmoji: json['bannerEmoji']?.toString() ?? '🏆',
+      id: contestJson['id']?.toString() ?? '',
+      title: contestJson['name']?.toString() ?? contestJson['title']?.toString() ?? '',
+      subtitle: contestJson['tagline']?.toString() ?? contestJson['subtitle']?.toString() ?? '',
+      description: contestJson['terms_content']?.toString() ?? contestJson['description']?.toString() ?? '',
+      bannerEmoji: contestJson['bannerEmoji']?.toString() ?? '🏆',
       startingBalance:
-          (json['starting_balance'] as num?)?.toDouble() ?? 10000,
-      currency: json['currency']?.toString() ?? 'USD',
-      maxParticipants: (json['max_participants'] as num?)?.toInt() ?? 0,
+          (contestJson['starting_balance'] as num?)?.toDouble() ?? 10000,
+      currency: contestJson['currency']?.toString() ?? 'USD',
+      maxParticipants: (contestJson['max_participants'] as num?)?.toInt() ?? 0,
       joinedParticipants:
-          (json['joined_participants'] as num?)?.toInt() ?? 0,
-      startsAt: DateTime.tryParse(json['starts_at']?.toString() ?? '') ??
+          (contestJson['joined_participants'] as num?)?.toInt() ?? 0,
+      startsAt: DateTime.tryParse(contestJson['start_date']?.toString() ?? contestJson['starts_at']?.toString() ?? '') ??
           DateTime.now(),
-      endsAt: DateTime.tryParse(json['ends_at']?.toString() ?? '') ??
+      endsAt: DateTime.tryParse(contestJson['end_date']?.toString() ?? contestJson['ends_at']?.toString() ?? '') ??
           DateTime.now().add(const Duration(days: 7)),
       status: ContestStatus.values.firstWhere(
-        (s) => s.name == (json['status']?.toString() ?? 'upcoming'),
+        (s) => s.name == (contestJson['status']?.toString() ?? 'upcoming'),
         orElse: () => ContestStatus.upcoming,
       ),
-      entryFee: (json['entry_fee'] as num?)?.toDouble() ?? 0,
-      prizes: (json['prizes'] as List? ?? [])
+      entryFee: (contestJson['enrollment_fee'] as num?)?.toDouble() ?? (contestJson['entry_fee'] as num?)?.toDouble() ?? 0,
+      prizes: (contestJson['prizes'] as List? ?? [])
           .whereType<Map>()
           .map((e) => ContestPrize.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
-      rules: (json['rules'] as List? ?? [])
+      rules: (contestJson['rules'] as List? ?? [])
           .whereType<Map>()
           .map((e) => ContestRule.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
-      requirements: (json['requirements'] as List? ?? [])
+      requirements: (contestJson['requirements'] as List? ?? [])
           .map((e) => e.toString())
           .toList(),
-      acceptingEntries: json['accepting_entries'] as bool? ?? false,
+      acceptingEntries: json['registration_open'] as bool? ?? contestJson['accepting_entries'] as bool? ?? false,
+      isEnrolled: json['is_enrolled'] as bool? ?? false,
+      daysLeft: (json['days_left'] as num?)?.toInt() ?? 0,
+      myEnrollmentsCount: (json['my_enrollments_count'] as num?)?.toInt() ?? 0,
+      maxParticipations: (json['max_participations'] as num?)?.toInt() ?? 0,
+      canParticipateAgain: json['can_participate_again'] as bool? ?? false,
+      isUpcoming: json['is_upcoming'] as bool? ?? false,
+      isEnded: json['is_ended'] as bool? ?? false,
+      tradingMaxLeverage: contestJson['trading_max_leverage']?.toString() ?? '',
+      rankingBy: contestJson['ranking_by']?.toString() ?? '',
+      enrollmentType: contestJson['enrollment_type']?.toString() ?? 'free',
     );
   }
 }

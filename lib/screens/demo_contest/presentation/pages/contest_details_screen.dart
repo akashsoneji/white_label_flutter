@@ -582,6 +582,44 @@ class _MyEntryCard extends StatelessWidget {
               ),
             ],
           ),
+          SizedBox(height: 12.h),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {
+                Get.toNamed(
+                  AppPages.DEMO_CONTEST_MY_STATS,
+                  arguments: contest.id,
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: AppColors.primary, width: 1.2),
+                padding: EdgeInsets.symmetric(vertical: 10.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    languageService.tr('dc_view_my_stats'),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(width: 4.w),
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 14.sp,
+                    color: AppColors.primary,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

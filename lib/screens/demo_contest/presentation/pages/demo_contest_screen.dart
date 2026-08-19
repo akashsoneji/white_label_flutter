@@ -2,17 +2,15 @@ import 'package:crm_app/bindings/demo_contest_binding.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/demo_contest_controller.dart';
+import 'package:crm_app/models/demo_contest/demo_contest_model.dart';
 import 'package:crm_app/routes/app_pages.dart';
-import 'package:crm_app/screens/home/more/widgets/more_menu_widgets.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
-/// Top-level Demo Contest menu. Today it acts as a launcher for the
-/// four pillars of the module — Rules, Join, Leaderboard, History —
-/// and shows a "featured" contest highlight banner at the top.
 class DemoContestScreen extends StatefulWidget {
   const DemoContestScreen({super.key});
 
@@ -20,16 +18,24 @@ class DemoContestScreen extends StatefulWidget {
   State<DemoContestScreen> createState() => _DemoContestScreenState();
 }
 
-class _DemoContestScreenState extends State<DemoContestScreen> {
+class _DemoContestScreenState extends State<DemoContestScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     if (!Get.isRegistered<DemoContestController>()) {
       DemoContestBinding().dependencies();
     } else {
-      // Always re-fetch on enter so the highlight reflects the latest.
       Get.find<DemoContestController>().refreshAll();
     }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,63 +58,78 @@ class _DemoContestScreenState extends State<DemoContestScreen> {
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.contests.isEmpty) {
-          return Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          );
+          return Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.only(bottom: 32.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (controller.featured.isNotEmpty)
-                _FeaturedBanner(
-                  featuredContest: controller.featured.first,
-                  controller: controller,
-                ),
+        final allContests = controller.contests;
+        final myEnrollments = allContests.where((c) => c.isEnrolled).toList();
+        final activeNow = allContests.where((c) => c.status == ContestStatus.active).length;
+        final upcoming = allContests.where((c) => c.status == ContestStatus.upcoming).length;
 
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 8.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        return RefreshIndicator(
+          onRefresh: controller.refreshPull,
+          color: AppColors.primary,
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  child: Column(
+                    children: [
+                      // Header Stats
+                      Row(
+                        children: [
+                          Expanded(child: _StatCard(title: 'Contests Available', value: allContests.length.toString(), icon: Icons.emoji_events, iconColor: Colors.purple)),
+                          SizedBox(width: 8.w),
+                          Expanded(child: _StatCard(title: 'My Enrollments', value: myEnrollments.length.toString(), icon: Icons.person, iconColor: Colors.teal)),
+                        ],
+                      ),
+                      SizedBox(height: 8.h),
+                      Row(
+                        children: [
+                          Expanded(child: _StatCard(title: 'Active Now', value: activeNow.toString(), icon: Icons.bolt, iconColor: Colors.redAccent)),
+                          SizedBox(width: 8.w),
+                          Expanded(child: _StatCard(title: 'Upcoming', value: upcoming.toString(), icon: Icons.calendar_today, iconColor: Colors.blueAccent)),
+                        ],
+                      ),
+                      SizedBox(height: 20.h),
+                      
+                      // Tabs
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: TabBar(
+                          controller: _tabController,
+                          isScrollable: false,
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicator: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8.r),
+                            color: AppColors.primary,
+                          ),
+                          labelColor: Colors.white,
+                          unselectedLabelColor: AppColors.textPrimary,
+                          labelStyle: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.w600, fontSize: 13.sp),
+                          tabs: [
+                            Tab(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text('All Contests'), SizedBox(width: 4.w), _Badge(allContests.length.toString())])),
+                            Tab(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text('My Enrollments'), SizedBox(width: 4.w), _Badge(myEnrollments.length.toString())])),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                    ],
+                  ),
+                ),
+              ),
+              
+              // Content
+              SliverFillRemaining(
+                child: TabBarView(
+                  controller: _tabController,
                   children: [
-                    _SectionLabel(text: languageService.tr('dc_explore')),
-                    SizedBox(height: 10.h),
-                    MoreMenuCardGroup(
-                      children: [
-                        MoreMenuTile(
-                          iconAssetPath:
-                              'assets/svg/more/demo_contest/contest-rules.svg',
-                          label: languageService.tr('contest_rule'),
-                          onTap: () =>
-                              Get.toNamed(AppPages.DEMO_CONTEST_RULES),
-                        ),
-                        MoreMenuTile(
-                          iconAssetPath:
-                              'assets/svg/more/demo_contest/join-contest.svg',
-                          label: languageService.tr('join_contest'),
-                          onTap: () =>
-                              Get.toNamed(AppPages.DEMO_CONTEST_JOIN),
-                        ),
-                        MoreMenuTile(
-                          iconAssetPath:
-                              'assets/svg/more/demo_contest/demo-leaderboard.svg',
-                          label: languageService.tr('leaderboard'),
-                          onTap: () =>
-                              Get.toNamed(AppPages.DEMO_CONTEST_LEADERBOARD),
-                        ),
-                        MoreMenuTile(
-                          iconAssetPath:
-                              'assets/svg/more/demo_contest/my-contest-history.svg',
-                          label: languageService.tr('my_contest_history'),
-                          onTap: () =>
-                              Get.toNamed(AppPages.DEMO_CONTEST_HISTORY),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 18.h),
-                    _InfoBanner(languageService: languageService),
+                    _ContestList(contests: allContests, languageService: languageService),
+                    _ContestList(contests: myEnrollments, languageService: languageService),
                   ],
                 ),
               ),
@@ -120,216 +141,239 @@ class _DemoContestScreenState extends State<DemoContestScreen> {
   }
 }
 
-class _FeaturedBanner extends StatelessWidget {
-  final dynamic featuredContest;
-  final DemoContestController controller;
-  const _FeaturedBanner({required this.featuredContest, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    final languageService = Get.find<LanguageService>();
-    final contest = featuredContest;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(22.w, 14.h, 22.w, 4.h),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(18.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.r),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary.withValues(alpha: 0.95),
-              AppColors.primary.withValues(alpha: 0.6),
-            ],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8.w,
-                    vertical: 3.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.success,
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 6.w,
-                        height: 6.w,
-                        decoration: BoxDecoration(
-                          color: AppColors.whiteColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      SizedBox(width: 4.w),
-                      Text(
-                        languageService.tr('dc_featured'),
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: AppColors.whiteColor,
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Text(
-                    contest.subtitle ?? '',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: AppColors.whiteColor.withValues(alpha: 0.85),
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              contest.bannerEmoji ?? '🏆',
-              style: AppTextStyles.bodyText.copyWith(fontSize: 28.sp),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              contest.title ?? '',
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.whiteColor,
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              contest.description ?? '',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.whiteColor.withValues(alpha: 0.85),
-                fontSize: 12.sp,
-                height: 1.45,
-              ),
-            ),
-            SizedBox(height: 12.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Get.toNamed(
-                    AppPages.DEMO_CONTEST_DETAILS,
-                    arguments: contest.id,
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.whiteColor,
-                  foregroundColor: AppColors.primary,
-                  padding: EdgeInsets.symmetric(vertical: 10.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  controller.isJoined(contest.id)
-                      ? languageService.tr('dc_view_entry')
-                      : languageService.tr('dc_join_now'),
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13.sp,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
+class _Badge extends StatelessWidget {
   final String text;
-  const _SectionLabel({required this.text});
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 4.w, bottom: 6.h),
-      child: Text(
-        text.toUpperCase(),
-        style: AppTextStyles.bodyText.copyWith(
-          fontSize: 10.5.sp,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textGrey.withValues(alpha: 0.85),
-          letterSpacing: 1.0,
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoBanner extends StatelessWidget {
-  final LanguageService languageService;
-  const _InfoBanner({required this.languageService});
+  const _Badge(this.text);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(14.w),
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+      decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(10.r)),
+      child: Text(text, style: TextStyle(fontSize: 10.sp, color: Colors.white)),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color iconColor;
+
+  const _StatCard({required this.title, required this.value, required this.icon, required this.iconColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.18),
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: Offset(0, 4))],
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 32.w,
-            height: 32.w,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.18),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              'ℹ️',
-              style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp),
-            ),
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(color: iconColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8.r)),
+            child: Icon(icon, color: iconColor, size: 20.sp),
           ),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  languageService.tr('dc_how_to_play'),
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+                Text(title, style: AppTextStyles.bodyText.copyWith(fontSize: 11.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500)),
+                Text(value, style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class _ContestList extends StatelessWidget {
+  final List<DemoContest> contests;
+  final LanguageService languageService;
+
+  const _ContestList({required this.contests, required this.languageService});
+
+  @override
+  Widget build(BuildContext context) {
+    if (contests.isEmpty) {
+      return Center(child: Text("No contests available.", style: AppTextStyles.bodyText));
+    }
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      itemCount: contests.length,
+      itemBuilder: (context, index) {
+        final contest = contests[index];
+        return _ContestCard(contest: contest, languageService: languageService);
+      },
+    );
+  }
+}
+
+class _ContestCard extends StatelessWidget {
+  final DemoContest contest;
+  final LanguageService languageService;
+
+  const _ContestCard({required this.contest, required this.languageService});
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFormat = DateFormat('d MMMM yyyy');
+    final topPrize = contest.prizes.isNotEmpty ? contest.prizes.first.amount : 0;
+    
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: Offset(0, 4))],
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Image/Gradient
+          Container(
+            height: 100.h,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+              gradient: LinearGradient(colors: [Colors.purple.shade900, Colors.purple.shade500], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+            ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+                    child: Icon(Icons.workspace_premium, color: Colors.white, size: 40.sp),
                   ),
                 ),
+                Positioned(
+                  top: 12.h,
+                  right: 12.w,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    decoration: BoxDecoration(color: contest.status == ContestStatus.active ? Colors.green : Colors.orange, borderRadius: BorderRadius.circular(12.r)),
+                    child: Text(contest.status.name.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title and badges
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(contest.title, style: AppTextStyles.bodyText.copyWith(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                    ),
+                    if (contest.isEnrolled)
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                        decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(8.r)),
+                        child: Text('Enrolled (${contest.myEnrollmentsCount}/${contest.maxParticipations})', style: TextStyle(color: Colors.green, fontSize: 10.sp, fontWeight: FontWeight.bold)),
+                      ),
+                  ],
+                ),
                 SizedBox(height: 4.h),
-                Text(
-                  languageService.tr('dc_how_to_play_desc'),
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 12.sp,
-                    height: 1.4,
-                    color: AppColors.textPrimary,
+                Text(contest.subtitle, style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey)),
+                SizedBox(height: 16.h),
+                
+                // Grid details
+                Row(
+                  children: [
+                    Expanded(child: _InfoCell(label: 'STARTING BALANCE', value: '\$${contest.startingBalance.toStringAsFixed(2)}', icon: Icons.account_balance_wallet, iconColor: Colors.purple.shade100)),
+                    Expanded(child: _InfoCell(label: 'MAX LEVERAGE', value: contest.tradingMaxLeverage.isNotEmpty ? contest.tradingMaxLeverage : '-', icon: Icons.bolt, iconColor: Colors.purple.shade100)),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Expanded(child: _InfoCell(label: 'WIN CRITERIA', value: 'Highest Return %', icon: Icons.emoji_events, iconColor: Colors.purple.shade100)),
+                    Expanded(child: _InfoCell(label: 'ENTRY FEE', value: contest.enrollmentType == 'free' ? 'FREE' : '\$${contest.entryFee}', icon: Icons.card_giftcard, iconColor: Colors.green.shade100, valueColor: Colors.green)),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Icon(Icons.emoji_events, color: Colors.purple, size: 16.sp),
+                    SizedBox(width: 8.w),
+                    Text('Top Prize ', style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey)),
+                    Text('\$${topPrize.toStringAsFixed(2)}', style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                
+                Divider(height: 24.h, color: Colors.grey.withOpacity(0.2)),
+                
+                // Dates
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('STARTS', style: TextStyle(fontSize: 10.sp, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        Text(dateFormat.format(contest.startsAt), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                    Icon(Icons.date_range, color: Colors.grey, size: 16.sp),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('ENDS', style: TextStyle(fontSize: 10.sp, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        Text(dateFormat.format(contest.endsAt), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                Center(child: Text('Dubai Time (UTC+4)', style: TextStyle(fontSize: 10.sp, color: Colors.grey))),
+                SizedBox(height: 16.h),
+                
+                // Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 44.h,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (contest.isEnrolled) {
+                        Get.toNamed(AppPages.DEMO_CONTEST_MY_STATS, arguments: contest.id);
+                      } else {
+                        // In real app, this should join or go to join screen
+                        Get.find<DemoContestController>().joinContest(contest.id).then((_) {
+                           Get.toNamed(AppPages.DEMO_CONTEST_MY_STATS, arguments: contest.id);
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: contest.isEnrolled ? AppColors.success : AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                      elevation: 0,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(contest.isEnrolled ? Icons.dashboard : Icons.add_circle_outline, color: Colors.white, size: 18.sp),
+                        SizedBox(width: 8.w),
+                        Text(
+                          contest.isEnrolled ? 'Go to Dashboard' : 'Join Now',
+                          style: TextStyle(color: Colors.white, fontSize: 13.sp, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -337,6 +381,37 @@ class _InfoBanner extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _InfoCell extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color iconColor;
+  final Color? valueColor;
+
+  const _InfoCell({required this.label, required this.value, required this.icon, required this.iconColor, this.valueColor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(6.w),
+          decoration: BoxDecoration(color: iconColor, shape: BoxShape.circle),
+          child: Icon(icon, size: 14.sp, color: Colors.black54),
+        ),
+        SizedBox(width: 8.w),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(fontSize: 9.sp, color: Colors.grey, fontWeight: FontWeight.bold)),
+            Text(value, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: valueColor ?? AppColors.textPrimary)),
+          ],
+        )
+      ],
     );
   }
 }

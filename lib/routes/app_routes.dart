@@ -45,6 +45,7 @@ abstract class Routes {
   static const DEMO_CONTEST_DETAILS = _Paths.DEMO_CONTEST_DETAILS;
   static const DEMO_CONTEST_LEADERBOARD = _Paths.DEMO_CONTEST_LEADERBOARD;
   static const DEMO_CONTEST_HISTORY = _Paths.DEMO_CONTEST_HISTORY;
+  static const DEMO_CONTEST_MY_STATS = _Paths.DEMO_CONTEST_MY_STATS;
   static const DEMO_CONTEST_WINNERS = _Paths.DEMO_CONTEST_WINNERS;
   static const SETTING = _Paths.SETTING;
   static const SUPPORT = _Paths.SUPPORT;
@@ -138,6 +139,7 @@ abstract class _Paths {
   static const DEMO_CONTEST_DETAILS = '/demo-contest/details';
   static const DEMO_CONTEST_LEADERBOARD = '/demo-contest/leaderboard';
   static const DEMO_CONTEST_HISTORY = '/demo-contest/history';
+  static const DEMO_CONTEST_MY_STATS = '/demo-contest/my-stats';
   static const DEMO_CONTEST_WINNERS = '/demo-contest/winners';
   static const SETTING = '/setting';
   static const SUPPORT = '/support';

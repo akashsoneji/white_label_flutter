@@ -57,9 +57,9 @@ class SupportScreen extends StatelessWidget {
               ),
               _MenuItem(
                 icon: 'help-center',
-                label: languageService.tr('help_center'),
+                label: languageService.tr('ticket_title'),
                 onTap: () {
-                  // Get.toNamed(AppPages.WITHDRAWAL);
+                  Get.toNamed(AppPages.TICKET_LIST);
                 },
                 color: AppColors.textPrimary,
               ),

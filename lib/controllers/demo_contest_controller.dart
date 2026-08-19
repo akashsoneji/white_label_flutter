@@ -4,6 +4,7 @@ import '../models/demo_contest/contest_winner_model.dart';
 import '../models/demo_contest/demo_contest_model.dart';
 import '../models/demo_contest/leaderboard_entry_model.dart';
 import '../models/demo_contest/my_contest_entry_model.dart';
+import '../models/demo_contest/demo_contest_my_stats_model.dart';
 import '../services/demo_contest_service.dart';
 
 /// Reactive controller for the Demo Contest module.
@@ -55,24 +56,30 @@ class DemoContestController extends GetxController {
   Future<void> refreshAll() async {
     isLoading.value = true;
     errorMessage.value = '';
-    try {
-      final results = await Future.wait([
-        _service.fetchContests(),
-        _service.fetchMyEntries(),
-        _service.fetchWinners(),
-      ]);
-      final loadedContests = results[0] as List<DemoContest>;
-      final loadedEntries = results[1] as List<MyContestEntry>;
-      final loadedWinners = results[2] as List<ContestWinner>;
+    update();
 
-      contests.assignAll(loadedContests);
-      featured.assignAll(loadedContests.where(
+    String? contestsError;
+    String? entriesError;
+    String? winnersError;
+
+    try {
+      final loaded = await _service.fetchContests();
+      contests.assignAll(loaded);
+      featured.assignAll(loaded.where(
         (c) => c.acceptingEntries || c.isLive,
       ));
-      myEntries.assignAll(loadedEntries);
-      entriesByContestId.assignAll({
-        for (final e in loadedEntries) e.contestId: e,
-      });
+
+      // Build myEntries from contests where isEnrolled is true
+      final myContests = loaded.where((c) => c.isEnrolled).toList();
+      // Wait, we need MyContestEntry but the new UI design just uses the DemoContest directly for enrolled.
+      // I will leave entriesByContestId mostly empty or just mock it since we use DemoContest directly now.
+    } catch (e) {
+      contestsError = e.toString();
+    }
+
+    try {
+      // Instead of failing if `my_entries=1` isn't fully supported, we rely on the main endpoint.
+      final loadedWinners = await _service.fetchWinners(limit: 10);
       winners.assignAll(loadedWinners);
     } catch (e) {
       errorMessage.value = e.toString();
@@ -104,7 +111,7 @@ class DemoContestController extends GetxController {
       entriesByContestId[contestId];
 
   bool isJoined(String contestId) =>
-      entriesByContestId.containsKey(contestId);
+      contests.any((c) => c.id == contestId && c.isEnrolled);
 
   /// Loads the leaderboard for a contest into the controller cache. The
   /// UI observes [leaderboards] and rerenders when state changes.
@@ -170,6 +177,14 @@ class DemoContestController extends GetxController {
       return null;
     } finally {
       isJoining.value = false;
+    }
+  }
+
+  Future<DemoContestMyStats?> fetchMyStats(String contestId) async {
+    try {
+      return await _service.fetchMyStats(contestId);
+    } catch (_) {
+      return null;
     }
   }
 

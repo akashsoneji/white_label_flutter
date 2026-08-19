@@ -142,6 +142,10 @@ class ApiConstants {
   static String ticketClose(String ticketId) => '${ajax}tickets/$ticketId/close';
   static const String ticketAttachment = '${ajax}tickets/attachment';
 
+  // Demo Contest APIs
+  static const String demoContestContests = '${ajax}demo-contest/contests';
+  static const String demoContestMyStats = '${ajax}demo-contest/my-stats';
+
   // Trade & Win APIs
   static const String tradeWinProducts = 'v1/user/trade-win/products';
   static const String tradeWinPastWins = 'v1/user/trade-win/past-wins';

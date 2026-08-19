@@ -94,10 +94,10 @@ brands:
     label: iQuote
     themeMode: both
  android:
- applicationId: "com.iquote.app"
+ applicationId: "com.pipze.app"
  appName: "iQuote"
  ios:
- bundleId: "com.iquote.app"
+ bundleId: "com.pipze.app"
  appName: "iQuote"
  colors:
  primary: "#5F259E"
@@ -317,10 +317,10 @@ brands:
     label: Vantage
     themeMode: both
  android:
- applicationId: "com.vantage.app"
+ applicationId: "com.pipze.app"
  appName: "Vantage"
  ios:
- bundleId: "com.vantage.app"
+ bundleId: "com.pipze.app"
  appName: "Vantage"
  colors:
  primary: "#5F259E"

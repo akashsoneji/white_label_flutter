@@ -14,6 +14,7 @@ import 'package:crm_app/screens/demo_contest/presentation/pages/demo_contest_scr
 import 'package:crm_app/screens/demo_contest/presentation/pages/join_contest_screen.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/leaderboard_screen.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/my_contest_history_screen.dart';
+import 'package:crm_app/screens/demo_contest/presentation/pages/demo_contest_my_stats_screen.dart';
 import 'package:crm_app/screens/demo_contest/presentation/pages/winners_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/finance_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
@@ -140,6 +141,7 @@ class AppPages {
   static const DEMO_CONTEST_DETAILS = _Paths.DEMO_CONTEST_DETAILS;
   static const DEMO_CONTEST_LEADERBOARD = _Paths.DEMO_CONTEST_LEADERBOARD;
   static const DEMO_CONTEST_HISTORY = _Paths.DEMO_CONTEST_HISTORY;
+  static const DEMO_CONTEST_MY_STATS = _Paths.DEMO_CONTEST_MY_STATS;
   static const DEMO_CONTEST_WINNERS = _Paths.DEMO_CONTEST_WINNERS;
   static const SETTING = _Paths.SETTING;
   static const SUPPORT = _Paths.SUPPORT;
@@ -392,6 +394,14 @@ class AppPages {
     GetPage(
       name: _Paths.DEMO_CONTEST_HISTORY,
       page: () => const MyContestHistoryScreen(),
+      binding: DemoContestBinding(),
+    ),
+    GetPage(
+      name: _Paths.DEMO_CONTEST_MY_STATS,
+      page: () {
+        final id = Get.arguments as String?;
+        return DemoContestMyStatsScreen(contestId: id ?? '');
+      },
       binding: DemoContestBinding(),
     ),
     GetPage(

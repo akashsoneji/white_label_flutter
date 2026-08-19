@@ -4,11 +4,11 @@ label: Vantage
 themeMode: both
 
 android:
-  applicationId: com.vantage.app
+  applicationId: com.pipze.app
   appName: Vantage
 
 ios:
-  bundleId: com.vantage.app
+  bundleId: com.pipze.app
   appName: Vantage
 
 colors:

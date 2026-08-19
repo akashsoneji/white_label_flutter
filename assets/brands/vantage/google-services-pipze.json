@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "968577438247",
+    "project_id": "pipze-9a810",
+    "storage_bucket": "pipze-9a810.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:968577438247:android:ebce4fd31c4dc3f086f402",
+        "android_client_info": {
+          "package_name": "com.pipze.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAg_1Teg7K6gYLQH-wLqtAKG4ZshQmgBBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
