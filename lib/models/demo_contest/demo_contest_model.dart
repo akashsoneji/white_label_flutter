@@ -35,13 +35,23 @@ class ContestPrize {
     this.currency = 'USD',
     this.extra,
   });
-
   factory ContestPrize.fromJson(Map<String, dynamic> json) {
+    String labelText = json['label']?.toString() ?? '';
+    if (labelText.isEmpty) {
+      final rMin = json['rank_min']?.toString() ?? '';
+      final rMax = json['rank_max']?.toString() ?? '';
+      if (rMin.isNotEmpty && rMin == rMax) {
+        labelText = rMin == '1' ? '1st' : rMin == '2' ? '2nd' : rMin == '3' ? '3rd' : '${rMin}th';
+      } else if (rMin.isNotEmpty) {
+        labelText = '$rMin - $rMax';
+      }
+    }
+
     return ContestPrize(
-      label: json['label']?.toString() ?? '',
-      amount: (json['amount'] as num?)?.toDouble() ?? 0,
+      label: labelText,
+      amount: (json['amount'] as num?)?.toDouble() ?? (json['prize_amount'] as num?)?.toDouble() ?? 0,
       currency: json['currency']?.toString() ?? 'USD',
-      extra: json['extra']?.toString(),
+      extra: json['extra']?.toString() ?? json['prize_type']?.toString(),
     );
   }
 }

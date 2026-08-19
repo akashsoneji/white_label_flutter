@@ -140,23 +140,19 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
                         ),
                         Padding(
                           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Expanded(
-                                child: _PrizeStructureCard(
-                                  languageService: languageService,
-                                  cardBg: cardBg,
-                                  isDark: isDark,
-                                ),
+                              _PrizeStructureCard(
+                                languageService: languageService,
+                                cardBg: cardBg,
+                                isDark: isDark,
                               ),
-                              SizedBox(width: 12.w),
-                              Expanded(
-                                child: _ContestRulesCard(
-                                  languageService: languageService,
-                                  cardBg: cardBg,
-                                  isDark: isDark,
-                                ),
+                              SizedBox(height: 16.h),
+                              _ContestRulesCard(
+                                languageService: languageService,
+                                cardBg: cardBg,
+                                isDark: isDark,
                               ),
                             ],
                           ),
@@ -466,30 +462,41 @@ class _StatsRow extends StatelessWidget {
         ),
       ),
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
-      child: Row(
+      child: Column(
         children: [
-          _StatItem(
-            label: 'YOUR RANK',
-            value: '#${stats.rank}',
-            color: AppColors.textPrimary,
+          Row(
+            children: [
+              _StatItem(
+                label: 'YOUR RANK',
+                value: '#${stats.rank}',
+                color: AppColors.textPrimary,
+              ),
+              _Divider(isDark: isDark),
+              _StatItem(
+                label: 'YOUR RETURN',
+                value: p.returnDisplay,
+                color: returnColor,
+              ),
+            ],
           ),
-          _Divider(isDark: isDark),
-          _StatItem(
-            label: 'YOUR RETURN',
-            value: p.returnDisplay,
-            color: returnColor,
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.h),
+            child: Divider(color: AppColors.icongrey.withValues(alpha: 0.18), height: 1),
           ),
-          _Divider(isDark: isDark),
-          _StatItem(
-            label: 'YOUR EQUITY',
-            value: '\$${_money(p.currentEquity)}',
-            color: AppColors.textPrimary,
-          ),
-          _Divider(isDark: isDark),
-          _StatItem(
-            label: 'DAYS LEFT',
-            value: '${stats.daysLeft}',
-            color: AppColors.textPrimary,
+          Row(
+            children: [
+              _StatItem(
+                label: 'YOUR EQUITY',
+                value: '\$${_money(p.currentEquity)}',
+                color: AppColors.textPrimary,
+              ),
+              _Divider(isDark: isDark),
+              _StatItem(
+                label: 'DAYS LEFT',
+                value: '${stats.daysLeft}',
+                color: AppColors.textPrimary,
+              ),
+            ],
           ),
         ],
       ),
@@ -534,7 +541,7 @@ class _StatItem extends StatelessWidget {
             value,
             style: AppTextStyles.bodyText.copyWith(
               color: color,
-              fontSize: 13.sp,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w800,
             ),
             textAlign: TextAlign.center,

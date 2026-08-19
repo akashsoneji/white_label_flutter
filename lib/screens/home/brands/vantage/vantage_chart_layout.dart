@@ -1011,11 +1011,11 @@ class _QuantityBar extends StatelessWidget {
           _QtyBtn(icon: Icons.add, color: primary, onTap: onPlus),
           // Pending order (pen + note) icon — opens the pending screen
           _QtyBtn(icon: Icons.edit_note, color: primary, onTap: onPending),
-          // _QtyBtn(
-          //   icon: Icons.notifications_none,
-          //   color: primary,
-          //   onTap: onBell,
-          // ),
+          _QtyBtn(
+            icon: Icons.notifications_none,
+            color: primary,
+            onTap: onBell,
+          ),
         ],
       ),
     );

@@ -46,7 +46,7 @@ abstract class AuthRepository {
     required Map<String, dynamic> data,
   });
 
-  Future<ApiResponse> logout({String? token});
+  Future<ApiResponse> logout({String? token, String? fcmToken});
 
   Future<ApiResponse> deleteAccount({
     required String token,

@@ -1893,16 +1893,19 @@ Placing Order:
       height: MediaQuery.of(context).size.height * 0.4,
       padding: EdgeInsets.zero,
       margin: EdgeInsets.zero,
-      child: FlavorConfig.instance.useNewChart
-          ? TenaxChartWebView(
-              symbol: effectiveDatafeedSymbol,
-              isDark: AppColors.chartTheme == 'dark',
-            )
-          : ChartInAppWebView(
-              key: _webViewKey,
-              symbol: effectiveDatafeedSymbol, // JS-updated for fast in-session switches
-              url: chartUrl, // stable URL triggers fast JS updates under didUpdateWidget
-            ),
+      child:
+          FlavorConfig.instance.useNewChart
+              ? TenaxChartWebView(
+                symbol: effectiveDatafeedSymbol,
+                isDark: AppColors.chartTheme == 'dark',
+              )
+              : ChartInAppWebView(
+                key: _webViewKey,
+                symbol:
+                    effectiveDatafeedSymbol, // JS-updated for fast in-session switches
+                url:
+                    chartUrl, // stable URL triggers fast JS updates under didUpdateWidget
+              ),
     );
   }
 
@@ -2076,38 +2079,6 @@ Placing Order:
     }).toList();
   }
 
-  // Helper function to get flag emoji for symbol
-  // String _getFlagForSymbol(String symbol) {
-  //   // Currency pairs
-  //   if (symbol.contains('EUR')) return '🇪🇺';
-  //   if (symbol.contains('USD')) return '🇺🇸';
-  //   if (symbol.contains('GBP')) return '🇬🇧';
-  //   if (symbol.contains('JPY')) return '🇯🇵';
-  //   if (symbol.contains('CHF')) return '🇨🇭';
-  //   if (symbol.contains('CAD')) return '🇨🇦';
-  //   if (symbol.contains('AUD')) return '🇦🇺';
-  //   if (symbol.contains('NZD')) return '🇳🇿';
-
-  //   // Metals
-  //   if (symbol.contains('XAU')) return '🥇';
-  //   if (symbol.contains('XAG')) return '🥈';
-
-  //   // Indices
-  //   if (symbol.contains('AU200')) return '🇦🇺';
-  //   if (symbol.contains('DE40')) return '🇩🇪';
-  //   if (symbol.contains('ES35')) return '🇪🇸';
-  //   if (symbol.contains('EU50')) return '🇪🇺';
-  //   if (symbol.contains('FR40')) return '🇫🇷';
-  //   if (symbol.contains('HK50')) return '🇭🇰';
-
-  //   // Crypto
-  //   if (symbol.contains('BTC')) return '₿';
-  //   if (symbol.contains('ETH')) return 'Ξ';
-
-  //   // Default
-  //   return '📈';
-  // }
-
   void _showSymbolSelector() {
     showModalBottomSheet<void>(
       context: context,
@@ -2135,6 +2106,54 @@ Placing Order:
     );
   }
 
+  // void _showNotificationBottomSheet() {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (context) {
+  //       // TODO: Replace with the actual Notification Bottom Sheet widget since its exact name was not found.
+  //       return Container(
+  //         height: MediaQuery.of(context).size.height * 0.7,
+  //         decoration: BoxDecoration(
+  //           color: AppColors.tradeBackgroundCenterColor,
+  //           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+  //         ),
+  //         child: Column(
+  //           children: [
+  //             Padding(
+  //               padding: EdgeInsets.all(16.w),
+  //               child: Row(
+  //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                 children: [
+  //                   Text(
+  //                     languageService.tr('notifications') ?? 'Notifications',
+  //                     style: AppTextStyles.amountText.copyWith(fontSize: 18.sp),
+  //                   ),
+  //                   IconButton(
+  //                     icon: Icon(Icons.close, color: AppColors.primary),
+  //                     onPressed: () => Navigator.pop(context),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //             Expanded(
+  //               child: Center(
+  //                 child: Text(
+  //                   'No new notifications',
+  //                   style: AppTextStyles.labelOnTradeButton.copyWith(
+  //                     color: AppColors.secondaryText,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
   Widget _buildInteractiveIcons() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
@@ -2152,7 +2171,9 @@ Placing Order:
             },
             child: Container(
               height: 45.h,
-              width: Get.width / 1.25,
+              width:
+                  Get.width /
+                  1.5, // Reduced width to accommodate the new notification button
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(7.r),
@@ -2168,6 +2189,23 @@ Placing Order:
             ),
           ),
           Spacer(),
+
+          GestureDetector(
+            onTap: () {
+              _showPriceAlertDialog();
+            },
+            child: Container(
+              height: 45.h,
+              width: 45.w,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(7.r),
+                color: AppColors.cardBackGround,
+              ),
+              child: Icon(Icons.notifications_active, color: AppColors.primary),
+            ),
+          ),
+          SizedBox(width: 8.w),
 
           GestureDetector(
             onTap: () {

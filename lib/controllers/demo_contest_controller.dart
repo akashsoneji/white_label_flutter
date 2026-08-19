@@ -75,15 +75,8 @@ class DemoContestController extends GetxController {
       // I will leave entriesByContestId mostly empty or just mock it since we use DemoContest directly now.
     } catch (e) {
       contestsError = e.toString();
-    }
-
-    try {
-      // Instead of failing if `my_entries=1` isn't fully supported, we rely on the main endpoint.
-      final loadedWinners = await _service.fetchWinners(limit: 10);
-      winners.assignAll(loadedWinners);
-    } catch (e) {
-      errorMessage.value = e.toString();
     } finally {
+      errorMessage.value = contestsError ?? '';
       isLoading.value = false;
     }
   }
