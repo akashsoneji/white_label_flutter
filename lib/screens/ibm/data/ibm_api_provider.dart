@@ -183,4 +183,58 @@ class IbmApiProvider {
       },
     );
   }
+
+  // --- Network Profile APIs ---
+
+  /// Get Client Profile Overview
+  Future<ApiResponse> getClientOverview(int id, {String period = 'mtd'}) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/clients/$id',
+      queryParameters: {'period': period},
+    );
+  }
+
+  /// Get Client Trades
+  Future<ApiResponse> getClientTrades(
+    int id, {
+    String period = 'mtd',
+    int page = 1,
+    String? type,
+    String? symbol,
+  }) async {
+    final Map<String, String> params = {
+      'period': period,
+      'page': page.toString(),
+    };
+    if (type != null && type.isNotEmpty && type != 'All') params['type'] = type.toLowerCase();
+    if (symbol != null && symbol.isNotEmpty) params['symbol'] = symbol;
+
+    return await ApiService.get(
+      endpoint: 'ibm/portal/clients/$id/trades',
+      queryParameters: params,
+    );
+  }
+
+  /// Get Network Node (for Network tree tab)
+  Future<ApiResponse> getNetworkNode(int id, {String period = 'mtd'}) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network/$id/node',
+      queryParameters: {'period': period},
+    );
+  }
+
+  /// Get Symbol-wise Commission
+  Future<ApiResponse> getNetworkSymbols(int id, {String period = 'mtd'}) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network/$id/symbols',
+      queryParameters: {'period': period},
+    );
+  }
+
+  /// Get Commission Plan for a node
+  Future<ApiResponse> getNetworkPlan(int id) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network/$id/plan',
+    );
+  }
 }

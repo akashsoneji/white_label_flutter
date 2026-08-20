@@ -58,7 +58,7 @@ class CelestialChartScreen extends StatefulWidget {
 }
 
 class _CelestialChartScreenState extends State<CelestialChartScreen>
-    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -88,7 +88,6 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_chart.currentSymbol.value.isEmpty) {
         final symService =
@@ -113,21 +112,9 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _tickSub?.cancel();
     _chart.stopWebSocket();
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      // Force reload chart on resume to fetch missed historical data
-      // and recover from suspended JS/WebSocket engine state.
-      if (mounted && _widgetReady) {
-        _chartKey.currentState?.forceReload();
-      }
-    }
   }
 
   // ─────────────────────────────────────────────────────────────────────

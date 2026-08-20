@@ -240,6 +240,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildToggleGroup(
                 options: {
@@ -277,9 +278,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -302,7 +303,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                     style: TextStyle(
                       color:
                           isSelected
-                              ? AppColors.whiteColor
+                              ? Colors.white
                               : AppColors.textPrimary,
                       fontSize: 11.sp,
                       fontWeight:
@@ -497,32 +498,30 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       'USD - lifetime unless stated',
       Column(
         children: [
-          Row(
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            childAspectRatio: 2.0,
+            mainAxisSpacing: 16.h,
+            crossAxisSpacing: 16.w,
             children: [
-              Expanded(
-                child: _buildSimpleStat(
-                  'TOTAL EARNED',
-                  '\$${earned.toStringAsFixed(2)}',
-                ),
+              _buildSimpleStat(
+                'TOTAL EARNED',
+                '\$${earned.toStringAsFixed(2)}',
               ),
-              Expanded(
-                child: _buildSimpleStat(
-                  'PAID OUT',
-                  '\$${paid.toStringAsFixed(2)}',
-                ),
+              _buildSimpleStat(
+                'PAID OUT',
+                '\$${paid.toStringAsFixed(2)}',
               ),
-              Expanded(
-                child: _buildSimpleStat(
-                  'PENDING',
-                  '\$${pending.toStringAsFixed(2)}',
-                ),
+              _buildSimpleStat(
+                'PENDING',
+                '\$${pending.toStringAsFixed(2)}',
               ),
-              Expanded(
-                child: _buildSimpleStat(
-                  'AVAILABLE',
-                  '\$${available.toStringAsFixed(2)}',
-                  valueColor: Colors.green,
-                ),
+              _buildSimpleStat(
+                'AVAILABLE',
+                '\$${available.toStringAsFixed(2)}',
+                valueColor: Colors.green,
               ),
             ],
           ),
@@ -559,16 +558,33 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     return _buildSectionCard(
       'Client Funnel',
       'from your referral links',
-      Row(
-        children: [
-          Expanded(child: _buildSimpleStat('Link clicks', '$visits')),
-          Expanded(
-            child: _buildSimpleStat('Different people', '$uniqueVisits\n$uniquePercent%'),
-          ),
-          Expanded(child: _buildSimpleStat('Signed up', '$signUps\n$signupsPercent%')),
-          Expanded(child: _buildSimpleStat('Opened account', '$accounts')),
-          Expanded(child: _buildSimpleStat('Funded it', '$funded')),
-        ],
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Link clicks', '$visits'),
+            ),
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Different people', '$uniqueVisits\n$uniquePercent%'),
+            ),
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Signed up', '$signUps\n$signupsPercent%'),
+            ),
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Opened account', '$accounts'),
+            ),
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Funded it', '$funded'),
+            ),
+          ],
+        ),
       ),
     );
   }

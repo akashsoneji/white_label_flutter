@@ -6,6 +6,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/screens/ibm/presentation/pages/ibm_client_profile_screen.dart';
 
 class IbmClientsScreen extends StatefulWidget {
   const IbmClientsScreen({super.key});
@@ -43,57 +44,90 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(105.h),
-        child: Column(
-          children: [
-            const IbmTopHeader(title: 'Clients & Network', showBackButton: false),
-            Container(
-              color: AppColors.whiteColor,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+      appBar: AppBar(
+        backgroundColor: AppColors.isDarkMode ? AppColors.pureBlack : AppColors.whiteColor,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        titleSpacing: 16.w,
+        title: Text(
+          'Clients & Network',
+          style: AppTextStyles.heading.copyWith(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        actions: [
+          Obx(() {
+            final balance = controller.walletData['balance'] ?? '0.00';
+            return Padding(
+              padding: EdgeInsets.only(right: 16.w),
               child: Container(
-                height: 36.h,
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1EEF8),
-                  borderRadius: BorderRadius.circular(18.r),
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: AppColors.divider),
                 ),
-                child: TabBar(
-                  controller: _sectionTabController,
-                  indicator: BoxDecoration(
-                    color: const Color(0xFF5F259E),
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: AppColors.textGrey,
-                  labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
-                  tabs: [
-                    const Tab(text: 'My Clients'),
-                    Obx(() {
-                      final reqs = controller.requestsData['waiting_count'] ?? 0;
-                      return Tab(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('Sub-IB Requests'),
-                            if (reqs > 0) ...[
-                              SizedBox(width: 4.w),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
-                                decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
-                                child: Text('$reqs', style: TextStyle(fontSize: 9.sp, color: Colors.white, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ],
-                        ),
-                      );
-                    }),
+                child: Row(
+                  children: [
+                    Icon(Icons.account_balance_wallet_outlined, size: 14.w, color: AppColors.textPrimary),
+                    SizedBox(width: 4.w),
+                    Text('\$$balance', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                   ],
                 ),
               ),
+            );
+          }),
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(48.h),
+          child: Container(
+            color: AppColors.isDarkMode ? AppColors.pureBlack : AppColors.whiteColor,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+            child: Container(
+              height: 36.h,
+              decoration: BoxDecoration(
+                color: AppColors.isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF1EEF8),
+                borderRadius: BorderRadius.circular(18.r),
+              ),
+              child: TabBar(
+                controller: _sectionTabController,
+                indicator: BoxDecoration(
+                  color: const Color(0xFF5F259E),
+                  borderRadius: BorderRadius.circular(18.r),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                labelColor: Colors.white,
+                unselectedLabelColor: AppColors.textGrey,
+                labelStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                tabs: [
+                  const Tab(text: 'My Clients'),
+                  Tab(
+                    child: Obx(() {
+                      final reqs = controller.requestsData['waiting_count'] ?? 0;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Sub-IB Requests'),
+                          if (reqs > 0) ...[
+                            SizedBox(width: 4.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+                              decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
+                              child: Text('$reqs', style: TextStyle(fontSize: 9.sp, color: Colors.white, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ],
+                      );
+                    }),
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
       body: TabBarView(
@@ -152,38 +186,47 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
             ),
             SizedBox(height: 12.h),
 
-            // Date filter pills matching Screenshot 2
+            // Date filter pills (Sleek text style)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: _dateFilters.map((filter) {
                   final isSelected = _selectedDateFilter == filter;
-                  return Padding(
-                    padding: EdgeInsets.only(right: 8.w),
-                    child: ChoiceChip(
-                      label: Text(filter),
-                      selected: isSelected,
-                      selectedColor: const Color(0xFF5F259E),
-                      backgroundColor: AppColors.whiteColor,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
-                        fontSize: 12.sp,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() => _selectedDateFilter = filter);
+                      controller.fetchClients(period: _mapFilterToApi(filter));
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 20.w),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            filter,
+                            style: TextStyle(
+                              color: isSelected ? (AppColors.isDarkMode ? Colors.white : AppColors.textPrimary) : AppColors.textGrey,
+                              fontSize: 14.sp,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Container(
+                            width: 16.w,
+                            height: 3.h,
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFF5F259E) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(2.r),
+                            ),
+                          ),
+                        ],
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.r),
-                        side: BorderSide(color: isSelected ? const Color(0xFF5F259E) : AppColors.divider),
-                      ),
-                      onSelected: (val) {
-                        setState(() => _selectedDateFilter = filter);
-                        controller.fetchClients(period: _mapFilterToApi(filter));
-                      },
                     ),
                   );
                 }).toList(),
               ),
             ),
-            SizedBox(height: 14.h),
+            SizedBox(height: 16.h),
 
             // Direct Clients vs Network sub-tabs
             Row(
@@ -203,44 +246,57 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
                 ),
               ],
             ),
-            SizedBox(height: 14.h),
+            SizedBox(height: 16.h),
 
-            // 4 Metric Cards matching Screenshot 2
-            GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10.w,
-              mainAxisSpacing: 10.h,
-              childAspectRatio: 1.5,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+            // 4 Metric Cards Mobile Style (Compact Rows)
+            Column(
               children: [
-                _buildWebMetricCard(
-                  title: 'Total Clients',
-                  subtitle: 'assigned straight to you',
-                  value: '$totalClients',
-                  icon: Icons.people,
-                  color: const Color(0xFF5F259E),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildMobileMetricCard(
+                        title: 'Total Clients',
+                        subtitle: 'assigned to you',
+                        value: '$totalClients',
+                        icon: Icons.people_rounded,
+                        color: const Color(0xFF5F259E),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: _buildMobileMetricCard(
+                        title: 'Active',
+                        subtitle: 'traded this period',
+                        value: '$activeClients',
+                        icon: Icons.person_rounded,
+                        color: const Color(0xFF00C48C),
+                      ),
+                    ),
+                  ],
                 ),
-                _buildWebMetricCard(
-                  title: 'Active',
-                  subtitle: 'traded this period',
-                  value: '$activeClients',
-                  icon: Icons.person_outline,
-                  color: const Color(0xFF5F259E),
-                ),
-                _buildWebMetricCard(
-                  title: 'New',
-                  subtitle: 'joined this period',
-                  value: '$newClients',
-                  icon: Icons.person_add_outlined,
-                  color: const Color(0xFF5F259E),
-                ),
-                _buildWebMetricCard(
-                  title: 'You Earned',
-                  subtitle: 'from these clients',
-                  value: '\$${commission.toStringAsFixed(2)}',
-                  icon: Icons.monetization_on_outlined,
-                  color: const Color(0xFF5F259E),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildMobileMetricCard(
+                        title: 'New',
+                        subtitle: 'joined this period',
+                        value: '$newClients',
+                        icon: Icons.person_add_rounded,
+                        color: const Color(0xFF2D9CDB),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: _buildMobileMetricCard(
+                        title: 'Earned',
+                        subtitle: 'from these clients',
+                        value: '\$${commission.toStringAsFixed(2)}',
+                        icon: Icons.monetization_on_rounded,
+                        color: const Color(0xFFF2994A),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -250,7 +306,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
-                color: AppColors.whiteColor,
+                color: AppColors.card,
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(color: AppColors.divider),
               ),
@@ -305,20 +361,23 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF5F259E) : AppColors.whiteColor,
+          color: isSelected ? const Color(0xFF5F259E) : AppColors.card,
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: isSelected ? const Color(0xFF5F259E) : AppColors.divider),
+          boxShadow: isSelected && !AppColors.isDarkMode 
+              ? [BoxShadow(color: const Color(0xFF5F259E).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))] 
+              : [],
         ),
         child: Row(
           children: [
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : AppColors.textPrimary,
-                fontSize: 12.sp,
+                color: isSelected ? Colors.white : AppColors.textSecondary,
+                fontSize: 13.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
             ),
@@ -326,13 +385,13 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
             Container(
               padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withOpacity(0.2) : const Color(0xFFF1EEF8),
+                color: isSelected ? Colors.white.withOpacity(0.2) : (AppColors.isDarkMode ? AppColors.surface : const Color(0xFFF1EEF8)),
                 borderRadius: BorderRadius.circular(10.r),
               ),
               child: Text(
                 '$count',
                 style: TextStyle(
-                  color: isSelected ? Colors.white : const Color(0xFF5F259E),
+                  color: isSelected ? Colors.white : (AppColors.isDarkMode ? AppColors.textPrimary : const Color(0xFF5F259E)),
                   fontSize: 10.sp,
                   fontWeight: FontWeight.bold,
                 ),
@@ -344,7 +403,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
     );
   }
 
-  Widget _buildWebMetricCard({
+  Widget _buildMobileMetricCard({
     required String title,
     required String subtitle,
     required String value,
@@ -352,49 +411,55 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Icon(icon, size: 20.w, color: Colors.white),
+        border: AppColors.isDarkMode ? Border.all(color: AppColors.divider) : null,
+        boxShadow: AppColors.isDarkMode ? [] : [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(6.w),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 16.w, color: color),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
                   title,
-                  style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp),
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 11.sp, fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  subtitle,
-                  style: TextStyle(color: AppColors.textGrey, fontSize: 9.sp),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            value,
+            style: AppTextStyles.heading.copyWith(fontSize: 18.sp, fontWeight: FontWeight.bold, height: 1.0),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            subtitle,
+            style: TextStyle(color: AppColors.textGrey, fontSize: 9.sp),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -409,95 +474,99 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
     final lastLogin = r['last_login'] ?? '--';
     final accounts = r['accounts'] ?? 0;
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 18.r,
-                backgroundColor: const Color(0xFF5F259E),
-                child: Text(
-                  name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'C',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        final id = r['client_user_id'] ?? r['user_id'] ?? 0;
+        Get.to(() => IbmClientProfileScreen(clientId: id, clientName: name));
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: AppColors.isDarkMode ? [] : [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20.r,
+                  backgroundColor: const Color(0xFF5F259E).withOpacity(0.1),
+                  child: Text(
+                    name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'C',
+                    style: TextStyle(color: const Color(0xFF5F259E), fontWeight: FontWeight.bold, fontSize: 16.sp),
+                  ),
                 ),
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            name,
-                            style: AppTextStyles.heading.copyWith(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (isIb) ...[
-                          SizedBox(width: 6.w),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF5F259E).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6.r),
-                            ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
                             child: Text(
-                              'IB',
-                              style: TextStyle(color: const Color(0xFF5F259E), fontSize: 10.sp, fontWeight: FontWeight.bold),
+                              name,
+                              style: AppTextStyles.heading.copyWith(fontSize: 15.sp, fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (isIb) ...[
+                            SizedBox(width: 6.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                              decoration: BoxDecoration(color: const Color(0xFF5F259E), borderRadius: BorderRadius.circular(6.r)),
+                              child: Text('IB', style: TextStyle(color: Colors.white, fontSize: 9.sp, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                    if (email.isNotEmpty)
-                      Text(email, style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp)),
-                  ],
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(email.isNotEmpty ? email : lastLogin, style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp)),
+                    ],
+                  ),
                 ),
+                Icon(Icons.chevron_right, color: AppColors.divider, size: 20.w),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: AppColors.isDarkMode ? AppColors.surface : const Color(0xFFF8F9FA),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Accounts: $accounts', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600)),
-                  Text(lastLogin, style: TextStyle(color: AppColors.textGrey, fontSize: 10.sp)),
+                  _buildMiniMetricMobile('Accounts', '$accounts'),
+                  _buildMiniMetricMobile('Lots', '--'),
+                  _buildMiniMetricMobile('Earned', '\$0.00'),
                 ],
               ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Divider(color: AppColors.divider, height: 1.h),
-          SizedBox(height: 8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildMiniMetric('Deposits', '--'),
-              _buildMiniMetric('Withdrawals', '--'),
-              _buildMiniMetric('Lots', '--'),
-              _buildMiniMetric('Earned', '\$0.00'),
-              _buildMiniMetric('Equity', '--'),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildMiniMetric(String label, String value) {
+  Widget _buildMiniMetricMobile(String label, String value) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(value, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-        SizedBox(height: 2.h),
-        Text(label, style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey)),
+        Text(label, style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey)),
+        SizedBox(height: 4.h),
+        Text(value, style: AppTextStyles.heading.copyWith(fontSize: 13.sp, fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -525,72 +594,92 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
             Text('People asking to work as partners under you', style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp)),
             SizedBox(height: 14.h),
 
-            // 4 Status Summary Cards matching Screenshot 1
-            GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10.w,
-              mainAxisSpacing: 10.h,
-              childAspectRatio: 1.5,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+            // 4 Status Summary Cards Compact
+            Column(
               children: [
-                _buildWebMetricCard(
-                  title: 'Waiting on you',
-                  subtitle: 'needs your decision',
-                  value: '$waiting',
-                  icon: Icons.hourglass_top,
-                  color: const Color(0xFF8C531B),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildMobileMetricCard(
+                        title: 'Waiting on you',
+                        subtitle: 'needs your decision',
+                        value: '$waiting',
+                        icon: Icons.hourglass_top_rounded,
+                        color: const Color(0xFFF2994A),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: _buildMobileMetricCard(
+                        title: 'With the broker',
+                        subtitle: 'they sign off',
+                        value: '$withBroker',
+                        icon: Icons.account_balance_rounded,
+                        color: const Color(0xFF2D9CDB),
+                      ),
+                    ),
+                  ],
                 ),
-                _buildWebMetricCard(
-                  title: 'With the broker',
-                  subtitle: 'you said yes, they sign off',
-                  value: '$withBroker',
-                  icon: Icons.account_balance,
-                  color: const Color(0xFF4A3E6D),
-                ),
-                _buildWebMetricCard(
-                  title: 'Approved',
-                  subtitle: 'now partners under you',
-                  value: '$approved',
-                  icon: Icons.handshake,
-                  color: const Color(0xFF5F259E),
-                ),
-                _buildWebMetricCard(
-                  title: 'Declined',
-                  subtitle: 'they can ask again',
-                  value: '$declined',
-                  icon: Icons.cancel,
-                  color: const Color(0xFF9E2A2B),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildMobileMetricCard(
+                        title: 'Approved',
+                        subtitle: 'partners under you',
+                        value: '$approved',
+                        icon: Icons.handshake_rounded,
+                        color: const Color(0xFF00C48C),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: _buildMobileMetricCard(
+                        title: 'Declined',
+                        subtitle: 'they can ask again',
+                        value: '$declined',
+                        icon: Icons.cancel_rounded,
+                        color: const Color(0xFFEB5757),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
             SizedBox(height: 16.h),
 
-            // Request Filter Tabs
+            // Request Filter Tabs (Sleek text style)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: _requestTabs.map((tab) {
                   final isSelected = _selectedRequestTab == tab;
-                  return Padding(
-                    padding: EdgeInsets.only(right: 8.w),
-                    child: ChoiceChip(
-                      label: Text(tab),
-                      selected: isSelected,
-                      selectedColor: const Color(0xFF5F259E),
-                      backgroundColor: AppColors.whiteColor,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
-                        fontSize: 12.sp,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  return GestureDetector(
+                    onTap: () => setState(() => _selectedRequestTab = tab),
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 20.w),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            tab,
+                            style: TextStyle(
+                              color: isSelected ? (AppColors.isDarkMode ? Colors.white : AppColors.textPrimary) : AppColors.textGrey,
+                              fontSize: 14.sp,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Container(
+                            width: 16.w,
+                            height: 3.h,
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFF5F259E) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(2.r),
+                            ),
+                          ),
+                        ],
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.r),
-                        side: BorderSide(color: isSelected ? const Color(0xFF5F259E) : AppColors.divider),
-                      ),
-                      onSelected: (val) {
-                        setState(() => _selectedRequestTab = tab);
-                      },
                     ),
                   );
                 }).toList(),
@@ -622,11 +711,17 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(14.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.divider),
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: AppColors.isDarkMode ? [] : [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -634,73 +729,89 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
           Row(
             children: [
               CircleAvatar(
-                radius: 18.r,
+                radius: 20.r,
                 backgroundColor: const Color(0xFF5F259E).withOpacity(0.1),
-                child: Icon(Icons.person, color: const Color(0xFF5F259E), size: 18.w),
+                child: Icon(Icons.person_outline, color: const Color(0xFF5F259E), size: 20.w),
               ),
-              SizedBox(width: 10.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name, style: AppTextStyles.heading.copyWith(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                    Text(name, style: AppTextStyles.heading.copyWith(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 2.h),
                     if (email.isNotEmpty)
-                      Text(email, style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp)),
+                      Text(email, style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp)),
                   ],
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: status == 'approved'
-                      ? const Color(0xFF00C48C).withOpacity(0.1)
-                      : (status == 'pending' ? Colors.orange.withOpacity(0.1) : Colors.red.withOpacity(0.1)),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Text(
-                  status.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.bold,
-                    color: status == 'approved'
-                        ? const Color(0xFF00C48C)
-                        : (status == 'pending' ? Colors.orange : Colors.red),
-                  ),
-                ),
-              ),
+              _buildStatusPill(status),
             ],
           ),
           if (status == 'pending') ...[
-            SizedBox(height: 12.h),
+            SizedBox(height: 16.h),
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
+                  child: TextButton(
                     onPressed: () => _showRejectDialog(requestId),
-                    style: OutlinedButton.styleFrom(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      backgroundColor: Colors.redAccent.withOpacity(0.1),
                       foregroundColor: Colors.redAccent,
-                      side: const BorderSide(color: Colors.redAccent),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                     ),
-                    child: const Text('Decline'),
+                    child: Text('Decline', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
                   ),
                 ),
-                SizedBox(width: 10.w),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => _showApproveDialog(requestId),
                     style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
                       backgroundColor: const Color(0xFF5F259E),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                     ),
-                    child: const Text('Approve'),
+                    child: Text('Approve', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatusPill(String status) {
+    Color bgColor;
+    Color textColor;
+    if (status == 'approved') {
+      bgColor = const Color(0xFF00C48C).withOpacity(0.1);
+      textColor = const Color(0xFF00C48C);
+    } else if (status == 'pending') {
+      bgColor = Colors.orange.withOpacity(0.1);
+      textColor = Colors.orange;
+    } else {
+      bgColor = Colors.redAccent.withOpacity(0.1);
+      textColor = Colors.redAccent;
+    }
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Text(
+        status.toUpperCase(),
+        style: TextStyle(
+          fontSize: 10.sp,
+          fontWeight: FontWeight.bold,
+          color: textColor,
+        ),
       ),
     );
   }
@@ -713,7 +824,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen> with SingleTickerPr
     return Container(
       padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 20.w),
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.divider),
       ),
