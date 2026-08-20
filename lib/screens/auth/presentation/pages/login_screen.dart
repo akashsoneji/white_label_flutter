@@ -1,15 +1,17 @@
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/brand_logo.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/trl_helper.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
@@ -42,10 +44,21 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tryBiometricLogin();
-      
+
       // Pre-warm the chart WebView in background while user logs in
       if (!FlavorConfig.instance.useNewChart) {
-        ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+        final symService =
+            Get.isRegistered<SymbolSelectionService>()
+                ? Get.find<SymbolSelectionService>()
+                : Get.put(SymbolSelectionService());
+
+        symService.ensureDefault().then((_) {
+          final sym =
+              symService.currentSymbol.isNotEmpty
+                  ? symService.currentSymbol
+                  : 'XAUUSD';
+          ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
+        });
       }
     });
   }
@@ -132,7 +145,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       return SingleChildScrollView(
                         padding: EdgeInsets.symmetric(horizontal: 24),
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
                           child: IntrinsicHeight(
                             child: Form(
                               key: _formKey,
@@ -162,8 +177,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   SizedBox(height: 16.h),
                                   RTLHelper.rtlTextField(
                                     controller: emailController,
-                                    labelText: languageService.tr("register_email"),
-                                    hintText: languageService.tr("register_email"),
+                                    labelText: languageService.tr(
+                                      "register_email",
+                                    ),
+                                    hintText: languageService.tr(
+                                      "register_email",
+                                    ),
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return languageService.tr(
@@ -198,7 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         obscureText
                                             ? "assets/svg/eye-slash.svg"
                                             : "assets/svg/eye_icon.svg",
-                                            color: AppColors.textPrimary,
+                                        color: AppColors.textPrimary,
                                       ),
                                       onPressed: () {
                                         setState(() {
@@ -221,7 +240,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     },
                                     onChanged: (value) {
                                       setState(() {
-                                        isPasswordValid = _validatePassword(value);
+                                        isPasswordValid = _validatePassword(
+                                          value,
+                                        );
                                       });
                                     },
                                   ),
@@ -291,11 +312,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                           languageService.tr(
                                             'biometric_enable_checkbox',
                                           ),
-                                          style: AppTextStyles.bodyText.copyWith(
-                                            fontSize: 13.sp,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColors.textGrey,
-                                          ),
+                                          style: AppTextStyles.bodyText
+                                              .copyWith(
+                                                fontSize: 13.sp,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColors.textGrey,
+                                              ),
                                         ),
                                       ),
                                     ],
@@ -304,12 +326,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Obx(() {
                                     final isLoading = authController.isLoading;
                                     return ElevatedButton(
-                                      onPressed: isLoading ? null : _handleLogin,
+                                      onPressed:
+                                          isLoading ? null : _handleLogin,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: AppColors.primary,
-                                        minimumSize: Size(double.infinity, 40.h),
+                                        minimumSize: Size(
+                                          double.infinity,
+                                          40.h,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
                                       child: Text(
@@ -317,7 +345,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                         style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
-                                          color: AppColors.isDarkMode ? AppColors.textPrimaryLight : AppColors.textPrimaryDark,
+                                          color:
+                                              AppColors.isDarkMode
+                                                  ? AppColors.textPrimaryLight
+                                                  : AppColors.textPrimaryDark,
                                         ),
                                       ),
                                     );
@@ -341,8 +372,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: Text.rich(
                         TextSpan(
-                          text: "${languageService.tr("login_no_account_login")} ",
-                          style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
+                          text:
+                              "${languageService.tr("login_no_account_login")} ",
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: AppColors.textGrey,
+                          ),
                           children: [
                             TextSpan(
                               text: languageService.tr("login_register"),
@@ -360,9 +394,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
             Obx(
-              () => authController.isLoading
-                  ? Center(child: CommonLoadingWidget(isFullScreen: true))
-                  : const SizedBox.shrink(),
+              () =>
+                  authController.isLoading
+                      ? Center(child: CommonLoadingWidget(isFullScreen: true))
+                      : const SizedBox.shrink(),
             ),
           ],
         ),
@@ -370,4 +405,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

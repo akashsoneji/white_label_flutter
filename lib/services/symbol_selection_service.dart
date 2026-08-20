@@ -56,8 +56,10 @@ class SymbolSelectionService extends GetxService {
     try {
       final savedSymbol = await SecureStorageService.getSelectedSymbol();
       if (savedSymbol != null && savedSymbol.isNotEmpty) {
-        _lastSymbol.value = savedSymbol;
-        _hasUserSelection.value = true;
+        if (!_hasUserSelection.value) {
+          _lastSymbol.value = savedSymbol;
+          _hasUserSelection.value = true;
+        }
       } else if (_lastSymbol.value.isEmpty) {
         _lastSymbol.value = 'XAUUSD';
         SecureStorageService.saveSelectedSymbol(_lastSymbol.value);
@@ -73,4 +75,3 @@ class SymbolSelectionService extends GetxService {
     }
   }
 }
-

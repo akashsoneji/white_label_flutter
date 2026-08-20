@@ -57,7 +57,8 @@ class CelestialChartScreen extends StatefulWidget {
   State<CelestialChartScreen> createState() => _CelestialChartScreenState();
 }
 
-class _CelestialChartScreenState extends State<CelestialChartScreen> with AutomaticKeepAliveClientMixin {
+class _CelestialChartScreenState extends State<CelestialChartScreen>
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   @override
   bool get wantKeepAlive => true;
 
@@ -87,13 +88,16 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> with Automa
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_chart.currentSymbol.value.isEmpty) {
-        final symService = Get.isRegistered<SymbolSelectionService>()
-            ? Get.find<SymbolSelectionService>()
-            : null;
+        final symService =
+            Get.isRegistered<SymbolSelectionService>()
+                ? Get.find<SymbolSelectionService>()
+                : null;
         final persistedSym = symService?.currentSymbol ?? '';
-        _chart.currentSymbol.value = persistedSym.isNotEmpty ? persistedSym : 'XAUUSD';
+        _chart.currentSymbol.value =
+            persistedSym.isNotEmpty ? persistedSym : 'XAUUSD';
       }
       _chart.startWebSocket();
 
@@ -109,9 +113,21 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> with Automa
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tickSub?.cancel();
     _chart.stopWebSocket();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Force reload chart on resume to fetch missed historical data
+      // and recover from suspended JS/WebSocket engine state.
+      if (mounted && _widgetReady) {
+        _chartKey.currentState?.forceReload();
+      }
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -387,8 +403,9 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> with Automa
                 ? 'XAUUSD'
                 : _chart.currentSymbol.value,
           );
-          final url = '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
-          
+          final url =
+              '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
+
           if (FlavorConfig.instance.useNewChart) {
             return TenaxChartWebView(
               symbol: sym,

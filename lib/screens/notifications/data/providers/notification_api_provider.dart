@@ -19,7 +19,7 @@ class NotificationApiProvider {
   Future<NotificationResponse?> getAllNotifications(int page) async {
     try {
       final response = await ApiService.get(
-        endpoint: '${ApiConstants.getNotifications}/all',
+        endpoint: ApiConstants.getNotifications,
         queryParameters: {
           'page': page.toString(),
           '_t': DateTime.now().millisecondsSinceEpoch.toString(),

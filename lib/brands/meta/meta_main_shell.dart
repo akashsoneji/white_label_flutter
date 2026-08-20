@@ -14,6 +14,7 @@ import 'meta_new_order_screen.dart';
 import 'meta_watchlist_screen.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
+import 'package:crm_app/services/symbol_selection_service.dart';
 
 /// Meta — Main app shell with 5-tab bottom navigation
 /// (WatchList, Chart, Trade, History, Messages)
@@ -36,7 +37,18 @@ class _MetaMainShellState extends State<MetaMainShell> {
     super.initState();
     // ✅ PERFORMANCE OPTIMIZATION: Pre-warm the chart WebView in background
     if (!FlavorConfig.instance.useNewChart) {
-      ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+      final symService =
+          Get.isRegistered<SymbolSelectionService>()
+              ? Get.find<SymbolSelectionService>()
+              : Get.put(SymbolSelectionService());
+
+      symService.ensureDefault().then((_) {
+        final sym =
+            symService.currentSymbol.isNotEmpty
+                ? symService.currentSymbol
+                : 'XAUUSD';
+        ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
+      });
     }
   }
 
@@ -67,9 +79,7 @@ class _MetaMainShellState extends State<MetaMainShell> {
       onOpenNewOrder: (item) {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => MetaNewOrderScreen(
-              symbol: item.symbol,
-            ),
+            builder: (_) => MetaNewOrderScreen(symbol: item.symbol),
           ),
         );
       },
@@ -99,27 +109,42 @@ class _MetaMainShellState extends State<MetaMainShell> {
       // (index 4) instead of opening the side drawer.
       onHamburgerTap: () => setState(() => _index = 4),
     ),
-    MetaSettingsScreen(
-      onNavigateToTab: (i) => setState(() => _index = i),
-    ),
+    MetaSettingsScreen(onNavigateToTab: (i) => setState(() => _index = i)),
   ];
 
   List<_NavTab> get _tabs => <_NavTab>[
-    _NavTab(icon: Icons.swap_vert, activeIcon: Icons.swap_vert, label: Get.find<LanguageService>().tr('nav_tab_quotes')),
-    _NavTab(icon: Icons.bar_chart_outlined, activeIcon: Icons.bar_chart, label: Get.find<LanguageService>().tr('nav_tab_charts')),
-    _NavTab(icon: Icons.show_chart, activeIcon: Icons.trending_up, label: Get.find<LanguageService>().tr('nav_tab_trade')),
-    _NavTab(icon: Icons.history, activeIcon: Icons.history, label: Get.find<LanguageService>().tr('nav_tab_history')),
-    _NavTab(icon: Icons.settings_outlined, activeIcon: Icons.settings, label: Get.find<LanguageService>().tr('nav_tab_settings')),
+    _NavTab(
+      icon: Icons.swap_vert,
+      activeIcon: Icons.swap_vert,
+      label: Get.find<LanguageService>().tr('nav_tab_quotes'),
+    ),
+    _NavTab(
+      icon: Icons.bar_chart_outlined,
+      activeIcon: Icons.bar_chart,
+      label: Get.find<LanguageService>().tr('nav_tab_charts'),
+    ),
+    _NavTab(
+      icon: Icons.show_chart,
+      activeIcon: Icons.trending_up,
+      label: Get.find<LanguageService>().tr('nav_tab_trade'),
+    ),
+    _NavTab(
+      icon: Icons.history,
+      activeIcon: Icons.history,
+      label: Get.find<LanguageService>().tr('nav_tab_history'),
+    ),
+    _NavTab(
+      icon: Icons.settings_outlined,
+      activeIcon: Icons.settings,
+      label: Get.find<LanguageService>().tr('nav_tab_settings'),
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MetaTheme.bg(context),
-      body: IndexedStack(
-        index: _index,
-        children: _screens,
-      ),
+      body: _ChartFriendlyIndexedStack(index: _index, children: _screens),
       bottomNavigationBar: _buildBottomNav(context),
     );
   }
@@ -156,7 +181,8 @@ class _MetaMainShellState extends State<MetaMainShell> {
             final selected = i == _index;
             final tab = _tabs[i];
             final accent = MetaTheme.buyBlue;
-            final inactive = isDark ? const Color(0xFF65676B) : const Color(0xFF8A8D91);
+            final inactive =
+                isDark ? const Color(0xFF65676B) : const Color(0xFF8A8D91);
             return Expanded(
               child: InkWell(
                 onTap: () => _onTabTap(i),
@@ -166,11 +192,14 @@ class _MetaMainShellState extends State<MetaMainShell> {
                     SizedBox(height: 6.h),
                     Container(
                       padding: EdgeInsets.symmetric(
-                          horizontal: 8.w, vertical: 2.h),
+                        horizontal: 8.w,
+                        vertical: 2.h,
+                      ),
                       decoration: BoxDecoration(
-                        color: selected
-                            ? accent.withValues(alpha: 0.12)
-                            : Colors.transparent,
+                        color:
+                            selected
+                                ? accent.withValues(alpha: 0.12)
+                                : Colors.transparent,
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Icon(
@@ -185,7 +214,8 @@ class _MetaMainShellState extends State<MetaMainShell> {
                       style: AppTextStyles.bodyText.copyWith(
                         color: selected ? accent : inactive,
                         fontSize: 10.sp,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight:
+                            selected ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -209,4 +239,34 @@ class _NavTab {
     required this.activeIcon,
     required this.label,
   });
+}
+
+class _ChartFriendlyIndexedStack extends StatelessWidget {
+  final int index;
+  final List<Widget> children;
+
+  const _ChartFriendlyIndexedStack({
+    required this.index,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: List.generate(children.length, (i) {
+        final isSelected = index == i;
+        final child = TickerMode(enabled: isSelected, child: children[i]);
+
+        // Always keep the chart screen (index 1) mounted with full size, just invisible
+        if (i == 1) {
+          return IgnorePointer(
+            ignoring: !isSelected,
+            child: Opacity(opacity: isSelected ? 1.0 : 0.0, child: child),
+          );
+        }
+
+        return Offstage(offstage: !isSelected, child: child);
+      }),
+    );
+  }
 }

@@ -178,6 +178,12 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
 
   // ─── Public API ───────────────────────────────────────────────────────────
 
+  /// Forces a complete reload of the WebView URL.
+  /// Useful for recovering from deep sleep / background suspensions.
+  void forceReload() {
+    _retry();
+  }
+
   /// Switch symbol via JS — returns true if the chart accepted it.
   Future<bool> updateSymbol(String symbol) async {
     if (_controller == null || symbol.isEmpty) return false;
