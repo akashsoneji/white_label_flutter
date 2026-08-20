@@ -174,7 +174,6 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
         // Merge dashboard wallet with separate wallet if needed
         final dashboardWallet = firstCurrency['wallet'] ?? {};
-        final effectiveWallet = wallet.isEmpty ? dashboardWallet : wallet;
 
         return RefreshIndicator(
           color: AppColors.primary,
@@ -202,7 +201,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 perLot,
               ),
               SizedBox(height: 24.h),
-              _buildCommissionSummary(effectiveWallet),
+              _buildCommissionSummary(dashboardWallet),
               SizedBox(height: 24.h),
               _buildClientFunnel(funnel),
               SizedBox(height: 24.h),
@@ -239,7 +238,8 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         SizedBox(height: 16.h),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildToggleGroup(
                 options: {
@@ -250,7 +250,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 selectedValue: selectedScope,
                 onChanged: _onScopeChanged,
               ),
-              SizedBox(width: 12.w),
+              SizedBox(height: 12.w),
               _buildToggleGroup(
                 options: {
                   'today': 'Today',
@@ -531,14 +531,14 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             'Direct clients',
             0.5,
             AppColors.primary,
-            '\$${(earned / 2).toStringAsFixed(2)} - 50%',
+            '\$${(earned).toStringAsFixed(2)}',
           ),
           SizedBox(height: 8.h),
           _buildProgressBar(
             'Sub-IB network',
             0.5,
             Colors.green,
-            '\$${(earned / 2).toStringAsFixed(2)} - 50%',
+            '\$${(earned).toStringAsFixed(2)}',
           ),
         ],
       ),
@@ -553,21 +553,34 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     final funded = funnel['funded'] ?? 0;
 
     // Calculate percentages
-    final uniquePercent = visits > 0 ? (uniqueVisits / visits * 100).toStringAsFixed(0) : '0';
-    final signupsPercent = uniqueVisits > 0 ? (signUps / uniqueVisits * 100).toStringAsFixed(0) : '0';
+    final uniquePercent =
+        visits > 0 ? (uniqueVisits / visits * 100).toStringAsFixed(0) : '0';
+    final signupsPercent =
+        uniqueVisits > 0
+            ? (signUps / uniqueVisits * 100).toStringAsFixed(0)
+            : '0';
 
     return _buildSectionCard(
       'Client Funnel',
       'from your referral links',
-      Row(
+      Column(
         children: [
-          Expanded(child: _buildSimpleStat('Link clicks', '$visits')),
-          Expanded(
-            child: _buildSimpleStat('Different people', '$uniqueVisits\n$uniquePercent%'),
+          Row(
+            children: [
+              Expanded(child: _buildSimpleStat('Link clicks', '$visits')),
+              Expanded(
+                child: _buildSimpleStat('Different people', '$uniqueVisits'),
+              ),
+              Expanded(child: _buildSimpleStat('Signed up', '$signUps')),
+            ],
           ),
-          Expanded(child: _buildSimpleStat('Signed up', '$signUps\n$signupsPercent%')),
-          Expanded(child: _buildSimpleStat('Opened account', '$accounts')),
-          Expanded(child: _buildSimpleStat('Funded it', '$funded')),
+          Divider(color: AppColors.divider),
+          Row(
+            children: [
+              Expanded(child: _buildSimpleStat('Opened account', '$accounts')),
+              Expanded(child: _buildSimpleStat('Funded it', '$funded')),
+            ],
+          ),
         ],
       ),
     );
@@ -625,7 +638,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                Spacer(),
+                // Spacer(),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                   decoration: BoxDecoration(
@@ -786,7 +799,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             subtitle,
             style: TextStyle(color: AppColors.textSecondary, fontSize: 10.sp),
           ),
-          Spacer(),
+          // Spacer(),
           Center(
             child: Text(
               message,
@@ -794,7 +807,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               textAlign: TextAlign.center,
             ),
           ),
-          Spacer(),
+          // Spacer(),
         ],
       ),
     );

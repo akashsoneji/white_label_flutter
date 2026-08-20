@@ -45,38 +45,44 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
           // Title with optional badge
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.heading.copyWith(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              if (badgeCount != null && badgeCount! > 0) ...[
-                SizedBox(width: 4.w),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                  decoration: const BoxDecoration(
-                    color: Colors.redAccent,
-                    shape: BoxShape.circle,
-                  ),
+          Expanded(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
                   child: Text(
-                    '$badgeCount',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.bold,
+                    title,
+                    style: AppTextStyles.heading.copyWith(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (badgeCount != null && badgeCount! > 0) ...[
+                  SizedBox(width: 4.w),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                    decoration: const BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$badgeCount',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
-          const Spacer(),
+          SizedBox(width: 8.w),
 
           // Wallet Balance Chip
           Obx(() {

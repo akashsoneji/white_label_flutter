@@ -148,6 +148,11 @@ class IbmApiProvider {
     return await ApiService.get(endpoint: 'ibm/portal/partner-plans/template');
   }
 
+  /// Get details of an existing Partner Plan
+  Future<ApiResponse> getPartnerPlanDetail(int planId) async {
+    return await ApiService.get(endpoint: 'ibm/portal/partner-plans/$planId');
+  }
+
   /// Create a new Partner Plan
   Future<ApiResponse> createPartnerPlan(Map<String, dynamic> data) async {
     return await ApiService.post(
@@ -156,9 +161,30 @@ class IbmApiProvider {
     );
   }
 
+  /// Update an existing Partner Plan
+  Future<ApiResponse> updatePartnerPlan(int planId, Map<String, dynamic> data) async {
+    return await ApiService.put(
+      endpoint: 'ibm/portal/partner-plans/$planId',
+      data: data,
+    );
+  }
+
   /// Delete a Partner Plan
   Future<ApiResponse> deletePartnerPlan(int planId) async {
     return await ApiService.delete(endpoint: 'ibm/portal/partner-plans/$planId');
+  }
+
+  /// Get Assignable Sub-IBs for a plan
+  Future<ApiResponse> getAssignableSubIbs() async {
+    return await ApiService.get(endpoint: 'ibm/portal/partner-plans/sub-ibs');
+  }
+
+  /// Assign a plan to a Sub-IB
+  Future<ApiResponse> assignPartnerPlan(int planId, int partnerUserId) async {
+    return await ApiService.post(
+      endpoint: 'ibm/portal/partner-plans/$planId/assign',
+      data: {'partner_user_id': partnerUserId},
+    );
   }
 
   /// Get Referral Links
