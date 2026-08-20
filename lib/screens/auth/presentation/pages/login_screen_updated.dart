@@ -11,8 +11,10 @@ import 'package:crm_app/widgets/social_button.dart';
 import 'package:crm_app/services/toast_service.dart';
 import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:flutter/services.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
 
 class LoginScreenUpdated extends StatefulWidget {
@@ -39,10 +41,21 @@ class _LoginScreenUpdatedState extends State<LoginScreenUpdated> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _tryBiometricLogin();
-      
+
       // Pre-warm the chart WebView in background while user logs in
       if (!FlavorConfig.instance.useNewChart) {
-        ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+        final symService =
+            Get.isRegistered<SymbolSelectionService>()
+                ? Get.find<SymbolSelectionService>()
+                : Get.put(SymbolSelectionService());
+
+        symService.ensureDefault().then((_) {
+          final sym =
+              symService.currentSymbol.isNotEmpty
+                  ? symService.currentSymbol
+                  : 'XAUUSD';
+          ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
+        });
       }
     });
   }
@@ -321,4 +334,3 @@ class _LoginScreenUpdatedState extends State<LoginScreenUpdated> {
     );
   }
 }
-

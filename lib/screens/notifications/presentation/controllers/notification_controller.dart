@@ -22,7 +22,7 @@ class NotificationController extends GetxController {
   }
 
   void _scrollListener() {
-    if (scrollController.position.pixels == scrollController.position.maxScrollExtent) {
+    if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 50) {
       fetchMoreNotifications();
     }
   }

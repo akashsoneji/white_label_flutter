@@ -251,21 +251,45 @@ class _CelestialWatchlistScreenState
                 ),
               ),
 
-              SizedBox(width: 8.w),
-
-              // ── ASK column ────────────────────────────────────────────
+              // ── SPREAD & ASK column (Combined for visual centering) ───────────
               Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                flex: 4,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _fractionPrice(
-                        c, price.ask, digits, CelTheme.tpGreen),
-                    SizedBox(height: 1.h),
-                    Text(
-                      'H: ${price.dayHigh.toStringAsFixed(digits)}',
-                      style: AppTextStyles.bodyText.copyWith(
-                          color: CelTheme.subText(c), fontSize: 10.sp),
+                    // Spread text takes all available empty space and centers itself
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.bottomCenter,
+                        padding: EdgeInsets.only(top: 18.h),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: CelTheme.subText(c).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            price.spreadDiff.toInt().toString(),
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.bodyText.copyWith(
+                                color: CelTheme.subText(c), fontSize: 10.sp, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // ASK column shrink-wraps and stays on the right
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        _fractionPrice(
+                            c, price.ask, digits, CelTheme.tpGreen),
+                        SizedBox(height: 1.h),
+                        Text(
+                          'H: ${price.dayHigh.toStringAsFixed(digits)}',
+                          style: AppTextStyles.bodyText.copyWith(
+                              color: CelTheme.subText(c), fontSize: 10.sp),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -535,18 +559,19 @@ class _SearchSheetState extends State<_SearchSheet> {
         Navigator.of(c).pop();
         widget.onTap(symbol);
       },
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        child: Row(
-          children: [
-            // ── Add / Added circular toggle on the LEFT ───────────────
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => widget.ic.toggleFavorite(
-                symbol,
-                searchSymbol: s,
-                hydrateAfterChange: true,
-              ),
+      child: Row(
+        children: [
+          // ── Add / Added circular toggle on the LEFT ───────────────
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => widget.ic.toggleFavorite(
+              symbol,
+              searchSymbol: s,
+              hydrateAfterChange: true,
+            ),
+            child: Container(
+              padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 16.h, bottom: 16.h),
+              color: Colors.transparent,
               child: Obx(() {
                 final isFav = widget.ic.isFavorite(symbol);
                 if (isFav) {
@@ -563,12 +588,14 @@ class _SearchSheetState extends State<_SearchSheet> {
                   );
                 }
                 return Icon(Icons.add,
-                    color: CelTheme.subText(c), size: 22.sp);
+                    color: CelTheme.mainText(c).withValues(alpha: 0.8), size: 24.sp);
               }),
             ),
-            SizedBox(width: 12.w),
-            // ── Symbol + description ──────────────────────────────────
-            Expanded(
+          ),
+          // ── Symbol + description ──────────────────────────────────
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(right: 16.w, top: 12.h, bottom: 12.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -588,8 +615,8 @@ class _SearchSheetState extends State<_SearchSheet> {
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

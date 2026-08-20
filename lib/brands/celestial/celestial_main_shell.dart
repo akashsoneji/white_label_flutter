@@ -1,3 +1,4 @@
+import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,6 +12,8 @@ import 'celestial_settings_screen.dart';
 import 'celestial_theme.dart';
 import 'celestial_trade_screen.dart';
 import 'celestial_watchlist_screen.dart';
+import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/chart_webview_prewarmer.dart';
 
 /// Celestial — Main app shell with 5-tab bottom navigation
 /// (WatchList, Chart, Trade, History, Settings)
@@ -26,6 +29,26 @@ class CelestialMainShell extends StatefulWidget {
 
 class _CelestialMainShellState extends State<CelestialMainShell> {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // ✅ PERFORMANCE OPTIMIZATION: Pre-warm the chart WebView in background
+    if (!FlavorConfig.instance.useNewChart) {
+      final symService =
+          Get.isRegistered<SymbolSelectionService>()
+              ? Get.find<SymbolSelectionService>()
+              : Get.put(SymbolSelectionService());
+
+      symService.ensureDefault().then((_) {
+        final sym =
+            symService.currentSymbol.isNotEmpty
+                ? symService.currentSymbol
+                : 'XAUUSD';
+        ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
+      });
+    }
+  }
 
   /// GlobalKey to the History screen's State so we can invoke its
   /// `refreshHistory()` directly when the user lands on the History
@@ -51,27 +74,42 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
     CelestialChartScreen(),
     CelestialTradeScreen(),
     CelestialHistoryScreen(key: _historyKey),
-    CelestialSettingsScreen(
-      onNavigateToTab: (i) => setState(() => _index = i),
-    ),
+    CelestialSettingsScreen(onNavigateToTab: (i) => setState(() => _index = i)),
   ];
 
   List<_NavTab> get _tabs => <_NavTab>[
-    _NavTab(icon: Icons.grid_view_outlined, activeIcon: Icons.grid_view, label: Get.find<LanguageService>().tr('nav_tab_watchlist')),
-    _NavTab(icon: Icons.candlestick_chart_outlined, activeIcon: Icons.candlestick_chart, label: Get.find<LanguageService>().tr('nav_tab_charts')),
-    _NavTab(icon: Icons.show_chart, activeIcon: Icons.trending_up, label: Get.find<LanguageService>().tr('nav_tab_trade')),
-    _NavTab(icon: Icons.history, activeIcon: Icons.history, label: Get.find<LanguageService>().tr('nav_tab_history')),
-    _NavTab(icon: Icons.settings_outlined, activeIcon: Icons.settings, label: Get.find<LanguageService>().tr('nav_tab_settings')),
+    _NavTab(
+      icon: Icons.grid_view_outlined,
+      activeIcon: Icons.grid_view,
+      label: Get.find<LanguageService>().tr('nav_tab_watchlist'),
+    ),
+    _NavTab(
+      icon: Icons.candlestick_chart_outlined,
+      activeIcon: Icons.candlestick_chart,
+      label: Get.find<LanguageService>().tr('nav_tab_charts'),
+    ),
+    _NavTab(
+      icon: Icons.show_chart,
+      activeIcon: Icons.trending_up,
+      label: Get.find<LanguageService>().tr('nav_tab_trade'),
+    ),
+    _NavTab(
+      icon: Icons.history,
+      activeIcon: Icons.history,
+      label: Get.find<LanguageService>().tr('nav_tab_history'),
+    ),
+    _NavTab(
+      icon: Icons.settings_outlined,
+      activeIcon: Icons.settings,
+      label: Get.find<LanguageService>().tr('nav_tab_settings'),
+    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CelTheme.bg(context),
-      body: IndexedStack(
-        index: _index,
-        children: _screens,
-      ),
+      body: _ChartFriendlyIndexedStack(index: _index, children: _screens),
       bottomNavigationBar: _buildBottomNav(context),
     );
   }
@@ -96,26 +134,28 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
             final selected = i == _index;
             final tab = _tabs[i];
             final accent = CelTheme.buyBlue;
-            final inactive = isDark ? const Color(0xFF6B7280) : const Color(0xFF9AA5B5);
+            final inactive =
+                isDark ? const Color(0xFF6B7280) : const Color(0xFF9AA5B5);
             return Expanded(
               child: InkWell(
-                  onTap: () {
-                    setState(() => _index = i);
-                    if (i == 3) {
-                      // History tab — always re-fetch so the list is
-                      // fresh on arrival (mirrors Meta shell behavior).
-                      _refreshHistoryIfPossible();
-                    }
-                  },
+                onTap: () {
+                  setState(() => _index = i);
+                  if (i == 3) {
+                    // History tab — always re-fetch so the list is
+                    // fresh on arrival (mirrors Meta shell behavior).
+                    _refreshHistoryIfPossible();
+                  }
+                },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
                       width: 28.w,
                       height: 2.5.h,
-                      child: selected
-                          ? Container(color: accent)
-                          : const SizedBox.shrink(),
+                      child:
+                          selected
+                              ? Container(color: accent)
+                              : const SizedBox.shrink(),
                     ),
                     SizedBox(height: 4.h),
                     Icon(
@@ -129,7 +169,8 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
                       style: AppTextStyles.bodyText.copyWith(
                         color: selected ? accent : inactive,
                         fontSize: 10.sp,
-                        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight:
+                            selected ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
                   ],
@@ -152,4 +193,34 @@ class _NavTab {
     required this.activeIcon,
     required this.label,
   });
+}
+
+class _ChartFriendlyIndexedStack extends StatelessWidget {
+  final int index;
+  final List<Widget> children;
+
+  const _ChartFriendlyIndexedStack({
+    required this.index,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: List.generate(children.length, (i) {
+        final isSelected = index == i;
+        final child = TickerMode(enabled: isSelected, child: children[i]);
+
+        // Always keep the chart screen (index 1) mounted with full size, just invisible
+        if (i == 1) {
+          return IgnorePointer(
+            ignoring: !isSelected,
+            child: Opacity(opacity: isSelected ? 1.0 : 0.0, child: child),
+          );
+        }
+
+        return Offstage(offstage: !isSelected, child: child);
+      }),
+    );
+  }
 }

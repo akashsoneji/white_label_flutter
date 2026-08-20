@@ -1624,6 +1624,11 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         if (hydrateAfterChange) {
           await hydrateFavoritesFromRest();
         }
+
+        await syncMarketWatchV2AfterFavoriteChange(
+          instrumentSymbol,
+          isFavoriteNow: isFavorite(instrumentSymbol),
+        );
       }
     } catch (e) {
       print('Error toggling favorite for $instrumentSymbol: $e');

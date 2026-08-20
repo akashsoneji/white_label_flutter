@@ -174,6 +174,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
         // Merge dashboard wallet with separate wallet if needed
         final dashboardWallet = firstCurrency['wallet'] ?? {};
+        final effectiveWallet = wallet.isEmpty ? dashboardWallet : wallet;
 
         return RefreshIndicator(
           color: AppColors.primary,
@@ -201,7 +202,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 perLot,
               ),
               SizedBox(height: 24.h),
-              _buildCommissionSummary(dashboardWallet),
+              _buildCommissionSummary(effectiveWallet),
               SizedBox(height: 24.h),
               _buildClientFunnel(funnel),
               SizedBox(height: 24.h),
@@ -238,8 +239,8 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         SizedBox(height: 16.h),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _buildToggleGroup(
                 options: {
@@ -250,7 +251,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 selectedValue: selectedScope,
                 onChanged: _onScopeChanged,
               ),
-              SizedBox(height: 12.w),
+              SizedBox(width: 12.w),
               _buildToggleGroup(
                 options: {
                   'today': 'Today',
@@ -277,9 +278,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -302,7 +303,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                     style: TextStyle(
                       color:
                           isSelected
-                              ? AppColors.whiteColor
+                              ? Colors.white
                               : AppColors.textPrimary,
                       fontSize: 11.sp,
                       fontWeight:
@@ -497,32 +498,30 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       'USD - lifetime unless stated',
       Column(
         children: [
-          Row(
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            childAspectRatio: 2.0,
+            mainAxisSpacing: 16.h,
+            crossAxisSpacing: 16.w,
             children: [
-              Expanded(
-                child: _buildSimpleStat(
-                  'TOTAL EARNED',
-                  '\$${earned.toStringAsFixed(2)}',
-                ),
+              _buildSimpleStat(
+                'TOTAL EARNED',
+                '\$${earned.toStringAsFixed(2)}',
               ),
-              Expanded(
-                child: _buildSimpleStat(
-                  'PAID OUT',
-                  '\$${paid.toStringAsFixed(2)}',
-                ),
+              _buildSimpleStat(
+                'PAID OUT',
+                '\$${paid.toStringAsFixed(2)}',
               ),
-              Expanded(
-                child: _buildSimpleStat(
-                  'PENDING',
-                  '\$${pending.toStringAsFixed(2)}',
-                ),
+              _buildSimpleStat(
+                'PENDING',
+                '\$${pending.toStringAsFixed(2)}',
               ),
-              Expanded(
-                child: _buildSimpleStat(
-                  'AVAILABLE',
-                  '\$${available.toStringAsFixed(2)}',
-                  valueColor: Colors.green,
-                ),
+              _buildSimpleStat(
+                'AVAILABLE',
+                '\$${available.toStringAsFixed(2)}',
+                valueColor: Colors.green,
               ),
             ],
           ),
@@ -531,14 +530,14 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             'Direct clients',
             0.5,
             AppColors.primary,
-            '\$${(earned).toStringAsFixed(2)}',
+            '\$${(earned / 2).toStringAsFixed(2)} - 50%',
           ),
           SizedBox(height: 8.h),
           _buildProgressBar(
             'Sub-IB network',
             0.5,
             Colors.green,
-            '\$${(earned).toStringAsFixed(2)}',
+            '\$${(earned / 2).toStringAsFixed(2)} - 50%',
           ),
         ],
       ),
@@ -553,35 +552,39 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     final funded = funnel['funded'] ?? 0;
 
     // Calculate percentages
-    final uniquePercent =
-        visits > 0 ? (uniqueVisits / visits * 100).toStringAsFixed(0) : '0';
-    final signupsPercent =
-        uniqueVisits > 0
-            ? (signUps / uniqueVisits * 100).toStringAsFixed(0)
-            : '0';
+    final uniquePercent = visits > 0 ? (uniqueVisits / visits * 100).toStringAsFixed(0) : '0';
+    final signupsPercent = uniqueVisits > 0 ? (signUps / uniqueVisits * 100).toStringAsFixed(0) : '0';
 
     return _buildSectionCard(
       'Client Funnel',
       'from your referral links',
-      Column(
-        children: [
-          Row(
-            children: [
-              Expanded(child: _buildSimpleStat('Link clicks', '$visits')),
-              Expanded(
-                child: _buildSimpleStat('Different people', '$uniqueVisits'),
-              ),
-              Expanded(child: _buildSimpleStat('Signed up', '$signUps')),
-            ],
-          ),
-          Divider(color: AppColors.divider),
-          Row(
-            children: [
-              Expanded(child: _buildSimpleStat('Opened account', '$accounts')),
-              Expanded(child: _buildSimpleStat('Funded it', '$funded')),
-            ],
-          ),
-        ],
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Link clicks', '$visits'),
+            ),
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Different people', '$uniqueVisits\n$uniquePercent%'),
+            ),
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Signed up', '$signUps\n$signupsPercent%'),
+            ),
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Opened account', '$accounts'),
+            ),
+            SizedBox(
+              width: 120.w,
+              child: _buildSimpleStat('Funded it', '$funded'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -638,7 +641,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                // Spacer(),
+                Spacer(),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                   decoration: BoxDecoration(
@@ -799,7 +802,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             subtitle,
             style: TextStyle(color: AppColors.textSecondary, fontSize: 10.sp),
           ),
-          // Spacer(),
+          Spacer(),
           Center(
             child: Text(
               message,
@@ -807,7 +810,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               textAlign: TextAlign.center,
             ),
           ),
-          // Spacer(),
+          Spacer(),
         ],
       ),
     );

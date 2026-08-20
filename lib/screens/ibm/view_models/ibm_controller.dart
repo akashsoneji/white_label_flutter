@@ -467,4 +467,99 @@ class IbmController extends GetxController {
       return false;
     }
   }
+
+  // --- Network Profile Methods ---
+  
+  // Profile State
+  final RxMap<String, dynamic> currentClientOverview = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentClientTrades = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentNetworkNode = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentNetworkSymbols = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentNetworkPlan = <String, dynamic>{}.obs;
+  final RxBool isProfileLoading = false.obs;
+  final RxString profileErrorMessage = ''.obs;
+
+  Future<void> fetchClientOverview(int id, {String period = 'mtd'}) async {
+    try {
+      isProfileLoading.value = true;
+      profileErrorMessage.value = '';
+      final response = await _apiProvider.getClientOverview(id, period: period);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        currentClientOverview.assignAll(data);
+      } else {
+        profileErrorMessage.value = response.message ?? 'Error loading overview';
+      }
+    } catch (e) {
+      profileErrorMessage.value = e.toString();
+    } finally {
+      isProfileLoading.value = false;
+    }
+  }
+
+  Future<void> fetchClientTrades(int id, {String period = 'mtd', int page = 1, String? type, String? symbol}) async {
+    try {
+      isProfileLoading.value = true;
+      final response = await _apiProvider.getClientTrades(id, period: period, page: page, type: type, symbol: symbol);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        currentClientTrades.assignAll(data);
+      }
+    } catch (e) {
+      profileErrorMessage.value = e.toString();
+    } finally {
+      isProfileLoading.value = false;
+    }
+  }
+
+  Future<void> fetchNetworkNode(int id, {String period = 'mtd'}) async {
+    try {
+      isProfileLoading.value = true;
+      final response = await _apiProvider.getNetworkNode(id, period: period);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        currentNetworkNode.assignAll(data);
+      }
+    } catch (e) {
+      profileErrorMessage.value = e.toString();
+    } finally {
+      isProfileLoading.value = false;
+    }
+  }
+
+  Future<void> fetchNetworkSymbols(int id, {String period = 'mtd'}) async {
+    try {
+      isProfileLoading.value = true;
+      final response = await _apiProvider.getNetworkSymbols(id, period: period);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        currentNetworkSymbols.assignAll(data);
+      }
+    } catch (e) {
+      profileErrorMessage.value = e.toString();
+    } finally {
+      isProfileLoading.value = false;
+    }
+  }
+
+  Future<void> fetchNetworkPlan(int id) async {
+    try {
+      isProfileLoading.value = true;
+      final response = await _apiProvider.getNetworkPlan(id);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        currentNetworkPlan.assignAll(data);
+      }
+    } catch (e) {
+      profileErrorMessage.value = e.toString();
+    } finally {
+      isProfileLoading.value = false;
+    }
+  }
+
 }

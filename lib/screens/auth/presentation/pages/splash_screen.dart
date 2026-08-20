@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:crm_app/screens/auth/view_models/auth_view_model.dart';
 import 'package:crm_app/services/chart_webview_prewarmer.dart';
 
+import 'package:crm_app/services/symbol_selection_service.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -22,7 +24,18 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     // Pre-warm the chart WebView engine and cache the HTML in parallel with the auth check.
     if (!FlavorConfig.instance.useNewChart) {
-      ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+      final symService =
+          Get.isRegistered<SymbolSelectionService>()
+              ? Get.find<SymbolSelectionService>()
+              : Get.put(SymbolSelectionService());
+
+      symService.ensureDefault().then((_) {
+        final sym =
+            symService.currentSymbol.isNotEmpty
+                ? symService.currentSymbol
+                : 'XAUUSD';
+        ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
+      });
     }
     // No branded Flutter splash UI. Let native splash show background,
     // then immediately route based on persisted session.
@@ -34,7 +47,9 @@ class _SplashScreenState extends State<SplashScreen> {
       final isLoggedIn = await SecureStorageService.isUserLoggedIn();
 
       if (isLoggedIn) {
-        await authController.checkAuthStatus().timeout(const Duration(seconds: 8));
+        await authController.checkAuthStatus().timeout(
+          const Duration(seconds: 8),
+        );
         await Future.delayed(const Duration(milliseconds: 100));
 
         if (authController.isAuthenticated) {
@@ -68,4 +83,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-

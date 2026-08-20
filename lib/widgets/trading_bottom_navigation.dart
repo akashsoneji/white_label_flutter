@@ -31,9 +31,10 @@ class TradingBottomNavigation extends StatelessWidget {
       final bgColor = AppColors.scaffold;
 
       return Obx(() {
-        final openCount = Get.isRegistered<TradingController>()
-            ? Get.find<TradingController>().marketPositionsRx.length
-            : 0;
+        final openCount =
+            Get.isRegistered<TradingController>()
+                ? Get.find<TradingController>().marketPositionsRx.length
+                : 0;
 
         return Container(
           width: double.infinity,
@@ -58,10 +59,31 @@ class TradingBottomNavigation extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildIquoteNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
-              _buildIquoteNavItem(1, Icons.bar_chart_outlined, Icons.bar_chart, 'Markets'),
-              _buildIquoteNavItem(2, Icons.insert_chart_outlined, Icons.insert_chart, 'Charts'),
-              _buildIquoteNavItem(3, Icons.assignment_outlined, Icons.assignment, 'Position', badgeCount: openCount),
-              _buildIquoteNavItem(4, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, 'Assets'),
+              _buildIquoteNavItem(
+                1,
+                Icons.bar_chart_outlined,
+                Icons.bar_chart,
+                'Markets',
+              ),
+              _buildIquoteNavItem(
+                2,
+                Icons.insert_chart_outlined,
+                Icons.insert_chart,
+                'Charts',
+              ),
+              _buildIquoteNavItem(
+                3,
+                Icons.assignment_outlined,
+                Icons.assignment,
+                'Position',
+                badgeCount: openCount,
+              ),
+              _buildIquoteNavItem(
+                4,
+                Icons.account_balance_wallet_outlined,
+                Icons.account_balance_wallet,
+                'Assets',
+              ),
             ],
           ),
         );
@@ -70,96 +92,100 @@ class TradingBottomNavigation extends StatelessWidget {
 
     if (isVantage) {
       return Container(
-          height: 56.h,
-          margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 18.h),
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            color: AppColors.whiteColor,
-            borderRadius: BorderRadius.circular(32.r),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.textPrimary.withValues(alpha: AppColors.isDarkMode ? 0.18 : 0.15),
-                blurRadius: 22,
-                spreadRadius: 2,
-                offset: const Offset(2, 0),
+        height: 56.h,
+        margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 18.h),
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          color: AppColors.whiteColor,
+          borderRadius: BorderRadius.circular(32.r),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.textPrimary.withValues(
+                alpha: AppColors.isDarkMode ? 0.18 : 0.15,
+              ),
+              blurRadius: 22,
+              spreadRadius: 2,
+              offset: const Offset(2, 0),
+            ),
+          ],
+        ),
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildVantageNavItem(
+                0,
+                "assets/svg/bottom_navigation/trend-up.svg",
+                "assets/svg/bottom_navigation/trend-up_bold.svg",
+                'Prices',
+              ),
+              _buildVantageNavItem(
+                1,
+                "assets/svg/bottom_navigation/chart.svg",
+                "assets/svg/bottom_navigation/chart_bold.svg",
+                'Chart',
+              ),
+              _buildVantageNavItem(
+                2,
+                "assets/svg/bottom_navigation/candle.svg",
+                "assets/svg/bottom_navigation/candle_bold.svg",
+                'Position',
+              ),
+              _buildVantageNavItem(
+                3,
+                "assets/svg/bottom_navigation/wallet.svg",
+                "assets/svg/bottom_navigation/wallet_bold.svg",
+                'Accounts',
+              ),
+              _buildVantageNavItem(
+                4,
+                "assets/svg/copy_trading/bottom_navigation/dashboard.svg",
+                "assets/svg/copy_trading/bottom_navigation/dashboard_bold.svg",
+                'Dashboard',
               ),
             ],
           ),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildVantageNavItem(
-                  0,
-                  "assets/svg/bottom_navigation/trend-up.svg",
-                  "assets/svg/bottom_navigation/trend-up_bold.svg",
-                  'Prices',
-                ),
-                _buildVantageNavItem(
-                  1,
-                  "assets/svg/bottom_navigation/chart.svg",
-                  "assets/svg/bottom_navigation/chart_bold.svg",
-                  'Chart',
-                ),
-                _buildVantageNavItem(
-                  2,
-                  "assets/svg/bottom_navigation/candle.svg",
-                  "assets/svg/bottom_navigation/candle_bold.svg",
-                  'Markets',
-                ),
-                _buildVantageNavItem(
-                  3,
-                  "assets/svg/bottom_navigation/wallet.svg",
-                  "assets/svg/bottom_navigation/wallet_bold.svg",
-                  'Accounts',
-                ),
-                _buildVantageNavItem(
-                  4,
-                  "assets/svg/copy_trading/bottom_navigation/dashboard.svg",
-                  "assets/svg/copy_trading/bottom_navigation/dashboard_bold.svg",
-                  'Dashboard',
-                ),
-              ],
-            ),
-          ),
-        );
+        ),
+      );
     }
 
     return SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
-          child: Container(
-            height: 64.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32.r),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.textPrimary.withValues(alpha: AppColors.isDarkMode ? 0.22 : 0.15),
-                  blurRadius: 22,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 8),
+      child: Padding(
+        padding: EdgeInsets.only(left: 16.w, right: 16.w, bottom: 12.h),
+        child: Container(
+          height: 64.h,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32.r),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.textPrimary.withValues(
+                  alpha: AppColors.isDarkMode ? 0.22 : 0.15,
                 ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32.r),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: Container(
-                  height: 64.h,
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    // Glass effect
-                    color: AppColors.card,
-                    borderRadius: BorderRadius.circular(32.r),
-                    border: Border.all(
-                      color: AppColors.card.withOpacity(0.35),
-                      width: 1,
-                    ),
+                blurRadius: 22,
+                spreadRadius: 2,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32.r),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: Container(
+                height: 64.h,
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  // Glass effect
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(32.r),
+                  border: Border.all(
+                    color: AppColors.card.withOpacity(0.35),
+                    width: 1,
                   ),
-                  child: Row(
+                ),
+                child: Row(
                   children: [
                     Expanded(
                       child: _buildNavItem(
@@ -243,9 +269,10 @@ class TradingBottomNavigation extends StatelessWidget {
                 horizontal: isSelected ? 12.w : 8.w,
               ),
               decoration: BoxDecoration(
-                color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.12)
-                    : Colors.transparent,
+                color:
+                    isSelected
+                        ? AppColors.primary.withValues(alpha: 0.12)
+                        : Colors.transparent,
                 borderRadius: _tabCapsuleRadius,
               ),
               child: FittedBox(
@@ -256,9 +283,14 @@ class TradingBottomNavigation extends StatelessWidget {
                   children: [
                     AppSvgIcon(
                       assetPath: isSelected ? iconBold : icon,
-                      height: (isSelected ? _selectedIconSize : _unselectedIconSize).h,
-                      width: (isSelected ? _selectedIconSize : _unselectedIconSize).w,
-                      color: isSelected ? AppColors.primary : AppColors.textGrey,
+                      height:
+                          (isSelected ? _selectedIconSize : _unselectedIconSize)
+                              .h,
+                      width:
+                          (isSelected ? _selectedIconSize : _unselectedIconSize)
+                              .w,
+                      color:
+                          isSelected ? AppColors.primary : AppColors.textGrey,
                     ),
                     if (isSelected) ...[
                       SizedBox(width: 8.w),
@@ -283,8 +315,13 @@ class TradingBottomNavigation extends StatelessWidget {
     );
   }
 
-  
-  Widget _buildIquoteNavItem(int index, IconData icon, IconData activeIcon, String label, {int badgeCount = 0}) {
+  Widget _buildIquoteNavItem(
+    int index,
+    IconData icon,
+    IconData activeIcon,
+    String label, {
+    int badgeCount = 0,
+  }) {
     final isSelected = currentIndex == index;
     final activeColor = AppColors.primary;
     final inactiveColor = AppColors.textSecondary;
@@ -308,12 +345,18 @@ class TradingBottomNavigation extends StatelessWidget {
                   top: -4.h,
                   right: -8.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 4.w,
+                      vertical: 1.h,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(10.r),
                     ),
-                    constraints: BoxConstraints(minWidth: 14.w, minHeight: 14.h),
+                    constraints: BoxConstraints(
+                      minWidth: 14.w,
+                      minHeight: 14.h,
+                    ),
                     alignment: Alignment.center,
                     child: Text(
                       '$badgeCount',
@@ -341,7 +384,12 @@ class TradingBottomNavigation extends StatelessWidget {
     );
   }
 
-  Widget _buildVantageNavItem(int index, String icon, String iconBold, String label) {
+  Widget _buildVantageNavItem(
+    int index,
+    String icon,
+    String iconBold,
+    String label,
+  ) {
     final isSelected = currentIndex == index;
 
     return Material(
@@ -360,7 +408,8 @@ class TradingBottomNavigation extends StatelessWidget {
             vertical: 4.h,
           ),
           decoration: BoxDecoration(
-            color: isSelected ? _vantageSelectedCapsuleColor : Colors.transparent,
+            color:
+                isSelected ? _vantageSelectedCapsuleColor : Colors.transparent,
             borderRadius: _tabCapsuleRadius,
           ),
           child: Row(
@@ -392,5 +441,4 @@ class TradingBottomNavigation extends StatelessWidget {
       ),
     );
   }
-
 }

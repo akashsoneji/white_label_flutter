@@ -742,6 +742,12 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
         onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
       ),
       _CelMenuItem(
+        icon: Icons.emoji_events_outlined,
+        label: languageService.tr('more_demo_contest'),
+        color: const Color(0xFFFFC107),
+        onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
+      ),
+      _CelMenuItem(
         icon: Icons.support_agent_rounded,
         label: languageService.tr('settings_support_tickets'),
         color: const Color(0xFFE91E63),

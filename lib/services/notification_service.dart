@@ -135,7 +135,9 @@ class NotificationService {
     // 2. Listen to foreground messages and show heads-up notification manually if needed by Android
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint('Got a message whilst in the foreground!');
-      debugPrint('Message data: ${message.data}');
+      debugPrint('========== RAW FCM FOREGROUND PAYLOAD (JSON) ==========');
+      debugPrint(jsonEncode(message.toMap()));
+      debugPrint('=======================================================');
 
       if (message.notification != null) {
         debugPrint(

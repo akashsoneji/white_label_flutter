@@ -55,7 +55,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     permanent: true,
   );
 
-
   // Get the instruments controller
   final InstrumentsController instrumentsController =
       Get.find<InstrumentsController>();
@@ -106,7 +105,18 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     // ✅ PERFORMANCE OPTIMIZATION: Pre-warm the chart WebView in background
     // Start it at app launch (TradingMainScreen) rather than waiting for Chart tab.
     if (!FlavorConfig.instance.useNewChart) {
-      ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
+      final symService =
+          Get.isRegistered<SymbolSelectionService>()
+              ? Get.find<SymbolSelectionService>()
+              : Get.put(SymbolSelectionService());
+
+      symService.ensureDefault().then((_) {
+        final sym =
+            symService.currentSymbol.isNotEmpty
+                ? symService.currentSymbol
+                : 'XAUUSD';
+        ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
+      });
     }
 
     // ✅ FIX: Check for initial tab index from navigation arguments
@@ -120,8 +130,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         print('TradingMainScreen: Initial tab set to index $arguments');
       }
     }
-
-
 
     if (isIquote) {
       _screens = [
@@ -238,8 +246,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
       // Trigger background compliance check
       _checkCompliance();
-
-
     });
 
     // ✅ If initial tab is dashboard, refresh accounts (vantage index 3, default index 3)
@@ -267,8 +273,6 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
     super.dispose();
   }
-
-
 
   // Ensure one-click trading is enabled (safety net)
   Future<void> _ensureOneClickTradingEnabled() async {
@@ -365,7 +369,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
                   ? AppColors.background
                   : AppColors.tradeBackgroundCenterColor,
           body: SafeArea(
-            child: IndexedStack(
+            child: _ChartFriendlyIndexedStack(
               index: _currentIndex,
               children: _screens,
             ),
@@ -480,4 +484,35 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
 
   @override
   bool get wantKeepAlive => true;
+}
+
+class _ChartFriendlyIndexedStack extends StatelessWidget {
+  final int index;
+  final List<Widget> children;
+
+  const _ChartFriendlyIndexedStack({
+    required this.index,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: List.generate(children.length, (i) {
+        final isSelected = index == i;
+        final child = TickerMode(enabled: isSelected, child: children[i]);
+
+        // Always keep the chart screen (index 1) mounted with full size, just invisible
+        // This allows WebView/TradingView to initialize fully in the background
+        if (i == 1) {
+          return IgnorePointer(
+            ignoring: !isSelected,
+            child: Opacity(opacity: isSelected ? 1.0 : 0.0, child: child),
+          );
+        }
+
+        return Offstage(offstage: !isSelected, child: child);
+      }),
+    );
+  }
 }

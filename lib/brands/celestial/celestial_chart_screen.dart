@@ -17,6 +17,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -56,7 +57,8 @@ class CelestialChartScreen extends StatefulWidget {
   State<CelestialChartScreen> createState() => _CelestialChartScreenState();
 }
 
-class _CelestialChartScreenState extends State<CelestialChartScreen> with AutomaticKeepAliveClientMixin {
+class _CelestialChartScreenState extends State<CelestialChartScreen>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -88,7 +90,13 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> with Automa
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_chart.currentSymbol.value.isEmpty) {
-        _chart.currentSymbol.value = 'XAUUSD';
+        final symService =
+            Get.isRegistered<SymbolSelectionService>()
+                ? Get.find<SymbolSelectionService>()
+                : null;
+        final persistedSym = symService?.currentSymbol ?? '';
+        _chart.currentSymbol.value =
+            persistedSym.isNotEmpty ? persistedSym : 'XAUUSD';
       }
       _chart.startWebSocket();
 
@@ -329,7 +337,28 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> with Automa
               ),
             ),
             SizedBox(width: 6.w),
-            _lotStepper(c),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: CelTheme.subText(c).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: Text(
+                    price.spreadDiff.toInt().toString(),
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: CelTheme.subText(c),
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                _lotStepper(c),
+              ],
+            ),
             SizedBox(width: 6.w),
             Expanded(
               child: _tradeBtn(
@@ -361,8 +390,9 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> with Automa
                 ? 'XAUUSD'
                 : _chart.currentSymbol.value,
           );
-          final url = '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
-          
+          final url =
+              '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
+
           if (FlavorConfig.instance.useNewChart) {
             return TenaxChartWebView(
               symbol: sym,
@@ -641,7 +671,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen> with Automa
               _chart.currentSymbol.value = sym;
               // Also tell chart directly in case ever() hasn't fired yet
               if (_widgetReady) {
-                _callJS('updateSymbol("${_stripSuffix(sym)}");');
+                _chartKey.currentState?.updateSymbol(_stripSuffix(sym));
               }
               Navigator.pop(c);
             },

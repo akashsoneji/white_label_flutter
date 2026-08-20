@@ -25,81 +25,70 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
     final IbmController controller = Get.find<IbmController>();
 
     return AppBar(
-      backgroundColor: AppColors.whiteColor,
+      backgroundColor: AppColors.isDarkMode ? AppColors.card : AppColors.whiteColor,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       automaticallyImplyLeading: false,
-      titleSpacing: 12.w,
+      leading: showBackButton ? GestureDetector(
+        onTap: () => Get.back(),
+        child: Icon(
+          Icons.arrow_back_ios_new,
+          size: 18.w,
+          color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+        ),
+      ) : null,
+      titleSpacing: showBackButton ? 0 : 16.w,
       title: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          if (showBackButton)
-            GestureDetector(
-              onTap: () => Get.back(),
-              child: Padding(
-                padding: EdgeInsets.only(right: 8.w),
-                child: Icon(
-                  Icons.arrow_back_ios_new,
-                  size: 18.w,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-          // Title with optional badge
-          Expanded(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    title,
-                    style: AppTextStyles.heading.copyWith(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (badgeCount != null && badgeCount! > 0) ...[
-                  SizedBox(width: 4.w),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                    decoration: const BoxDecoration(
-                      color: Colors.redAccent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '$badgeCount',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+          Text(
+            title,
+            style: AppTextStyles.heading.copyWith(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
             ),
           ),
-          SizedBox(width: 8.w),
-
-          // Wallet Balance Chip
-          Obx(() {
-            final balance = controller.walletData['balance'] ?? '0.00';
-            return Container(
+          if (badgeCount != null && badgeCount! > 0) ...[
+            SizedBox(width: 4.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                '$badgeCount',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        // Wallet Balance Chip
+        Obx(() {
+          final balance = controller.walletData['balance'] ?? '0.00';
+          return Padding(
+            padding: EdgeInsets.only(right: 16.w),
+            child: Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: AppColors.isDarkMode ? Colors.grey[900] : AppColors.card,
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: AppColors.divider),
+                border: Border.all(color: AppColors.isDarkMode ? Colors.grey[800]! : AppColors.divider),
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.account_balance_wallet_outlined,
                     size: 14.w,
-                    color: AppColors.textPrimary,
+                    color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                   ),
                   SizedBox(width: 4.w),
                   Text(
@@ -107,15 +96,15 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                 ],
               ),
-            );
-          }),
-        ],
-      ),
+            ),
+          );
+        }),
+      ],
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(1.h),
         child: Container(color: AppColors.divider, height: 1.h),
