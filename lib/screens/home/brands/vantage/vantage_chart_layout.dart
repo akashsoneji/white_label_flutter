@@ -837,14 +837,27 @@ class _BottomDock extends StatelessWidget {
         // spreadDiff comes from the WS pre-converted to *points*
         // (the controller's // spread_points comment). Display
         // it as-is - no extra /pip math.
-        final bid =
+        var bid =
             priceMap['bid'] is num ? (priceMap['bid'] as num).toDouble() : null;
-        final ask =
+        var ask =
             priceMap['ask'] is num ? (priceMap['ask'] as num).toDouble() : null;
-        final spreadDiff =
+        var spreadDiff =
             priceMap['spreadDiff'] is num
                 ? (priceMap['spreadDiff'] as num).toDouble()
                 : null;
+
+        if ((bid == null || bid == 0.0 || ask == null || ask == 0.0) &&
+            Get.isRegistered<InstrumentsController>()) {
+          final sym = socket.currentSymbol.value.isNotEmpty
+              ? socket.currentSymbol.value
+              : Get.find<SymbolSelectionService>().currentSymbol;
+          final match = Get.find<InstrumentsController>().findInstrument(sym);
+          if (match != null && match.bid > 0) {
+            bid = match.bid;
+            ask = match.ask;
+            spreadDiff = match.spreadDiff;
+          }
+        }
 
         final bidStr =
             (bid != null && bid != 0.0) ? _trimTrailingZeros(bid) : '—';

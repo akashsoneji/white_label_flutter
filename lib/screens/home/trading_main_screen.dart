@@ -21,6 +21,7 @@ import 'dashboard_screen.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
+import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/flavor_config.dart';
 import '../../services/one_click_trading_service.dart';
@@ -247,6 +248,12 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
       try {
         if (Get.isRegistered<AppStatusService>()) {
           unawaited(Get.find<AppStatusService>().checkAppStatus());
+        }
+      } catch (_) {}
+
+      try {
+        if (Get.isRegistered<BannerController>()) {
+          Get.find<BannerController>().fetchBanners();
         }
       } catch (_) {}
 

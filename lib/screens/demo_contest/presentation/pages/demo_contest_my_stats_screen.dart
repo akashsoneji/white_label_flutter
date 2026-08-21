@@ -1,8 +1,10 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/demo_contest_controller.dart';
+import 'package:crm_app/models/demo_contest/demo_contest_model.dart';
 import 'package:crm_app/models/demo_contest/demo_contest_my_stats_model.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/demo_contest_service.dart';
 import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
@@ -11,20 +13,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-/// Mobile-friendly "My Contest Stats" screen.
-///
-/// Mirrors the web design at /user/demo-contest/my-stats but laid out
-/// vertically for small screens:
-///   • Ranking banner ("You are ranked #-") with LIVE pill
-///   • Contest card (status, dates, title, description)
-///   • 4-stat row (Rank / Return / Equity / Days Left)
-///   • Prize Structure card (1st / 2nd / 3rd)
-///   • Contest Rules card
-///   • CTA: "View Full Leaderboard"
-///
-/// Reads `participant` from the local DemoContestService mock today —
-/// once the backend endpoint is wired it can be swapped for the same
-/// shape via `fetchMyStats(contestId)`.
+/// Mobile "My Contest Stats" screen matching the web design at /user/demo-contest/my-stats
 class DemoContestMyStatsScreen extends StatefulWidget {
   final String contestId;
   const DemoContestMyStatsScreen({super.key, required this.contestId});
@@ -36,6 +25,7 @@ class DemoContestMyStatsScreen extends StatefulWidget {
 
 class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
   DemoContestMyStats? _stats;
+  DemoContest? _contest;
   bool _loading = true;
   String? _error;
 
@@ -50,31 +40,40 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
       _loading = true;
       _error = null;
     });
+
     try {
+      final service = DemoContestService.instance;
       final controller =
           Get.isRegistered<DemoContestController>()
               ? Get.find<DemoContestController>()
               : null;
-      final contest = controller?.contestById(widget.contestId);
 
+      // 1. Resolve contest from cache or API
+      DemoContest? contest = controller?.contestById(widget.contestId);
       if (contest == null) {
-        setState(() {
-          _loading = false;
-          _error = 'Contest not found';
-        });
-        return;
+        final all = await service.fetchContests();
+        if (controller != null) {
+          controller.contests.assignAll(all);
+        }
+        contest = all.firstWhereOrNull((c) => c.id == widget.contestId) ??
+            (all.isNotEmpty ? all.first : null);
       }
 
-      final c =
-          Get.isRegistered<DemoContestController>()
-              ? Get.find<DemoContestController>()
-              : null;
-      final fetched = c != null ? await c.fetchMyStats(widget.contestId) : null;
+      // 2. Fetch my-stats
+      final stats = await service.fetchMyStats(widget.contestId);
+
+      if (!mounted) return;
+
       setState(() {
-        _stats = fetched;
+        _contest = contest;
+        _stats = stats;
+        if (_stats == null) {
+          _error = 'Could not load your contest stats.';
+        }
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loading = false;
@@ -87,14 +86,12 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
     final languageService = Get.find<LanguageService>();
     final isDark = AppColors.isDarkMode;
     final cardBg = isDark ? AppColors.card : Colors.white;
-    final controller = Get.find<DemoContestController>();
-    final contest = controller.contestById(widget.contestId);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         scrolledUnderElevation: 0.0,
-        backgroundColor: AppColors.backgroundLight,
+        backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
         elevation: 0,
         title: Text(
           languageService.tr('more_demo_contest'),
@@ -103,78 +100,102 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
         leading: AppSvgBackButton(onPressed: () => Get.back()),
         centerTitle: true,
       ),
-      body:
-          _loading
-              ? const Center(child: CommonLoadingWidget(size: 50.0))
-              : _error != null
+      body: _loading
+          ? const Center(child: CommonLoadingWidget(size: 50.0))
+          : _error != null && _stats == null
               ? _buildError(isDark)
               : RefreshIndicator(
-                color: AppColors.primary,
-                onRefresh: _loadStats,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.only(bottom: 32.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _RankingBanner(
-                        stats: _stats!,
-                        contest: contest,
-                        languageService: languageService,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                        child: _ContestCard(
+                  color: AppColors.primary,
+                  onRefresh: _loadStats,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 32.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Back to all contests breadcrumb
+                        InkWell(
+                          onTap: () => Get.back(),
+                          borderRadius: BorderRadius.circular(6.r),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 6.h),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.arrow_back,
+                                  size: 14.sp,
+                                  color: AppColors.textGrey,
+                                ),
+                                SizedBox(width: 6.w),
+                                Text(
+                                  'Back to all contests',
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    color: AppColors.textGrey,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10.h),
+
+                        // 1. Ranking Top Banner
+                        _RankingBanner(
                           stats: _stats!,
-                          contest: contest,
-                          languageService: languageService,
+                          isDark: isDark,
+                        ),
+                        SizedBox(height: 12.h),
+
+                        // 2. Re-participation Banner
+                        if (_contest != null && _contest!.canParticipateAgain) ...[
+                          _ParticipateAgainBanner(
+                            contest: _contest!,
+                            cardBg: cardBg,
+                            isDark: isDark,
+                          ),
+                          SizedBox(height: 12.h),
+                        ],
+
+                        // 3. Hero Contest Card
+                        if (_contest != null) ...[
+                          _HeroContestCard(
+                            contest: _contest!,
+                            stats: _stats!,
+                            isDark: isDark,
+                          ),
+                          SizedBox(height: 14.h),
+                        ],
+
+                        // 4. 4-Stat Grid Cards
+                        _StatsGrid(
+                          stats: _stats!,
                           cardBg: cardBg,
                           isDark: isDark,
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0),
-                        child: _StatsRow(
-                          stats: _stats!,
-                          languageService: languageService,
+                        SizedBox(height: 14.h),
+
+                        // 5. Trading Rules Card
+                        _TradingRulesCard(
+                          contest: _contest,
                           cardBg: cardBg,
                           isDark: isDark,
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _PrizeStructureCard(
-                              languageService: languageService,
-                              cardBg: cardBg,
-                              isDark: isDark,
-                            ),
-                            SizedBox(height: 16.h),
-                            _ContestRulesCard(
-                              languageService: languageService,
-                              cardBg: cardBg,
-                              isDark: isDark,
-                            ),
-                          ],
+                        SizedBox(height: 14.h),
+
+                        // 6. Prize Structure Card
+                        _PrizeStructureCard(
+                          contest: _contest,
+                          contestId: widget.contestId,
+                          cardBg: cardBg,
+                          isDark: isDark,
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                        child: _LeaderboardCta(
-                          onTap:
-                              () => Get.toNamed(
-                                AppPages.DEMO_CONTEST_LEADERBOARD,
-                                arguments: widget.contestId,
-                              ),
-                          languageService: languageService,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
     );
   }
 
@@ -196,7 +217,17 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
               ),
             ),
             SizedBox(height: 16.h),
-            ElevatedButton(onPressed: _loadStats, child: const Text('Retry')),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              onPressed: _loadStats,
+              child: const Text('Retry'),
+            ),
           ],
         ),
       ),
@@ -204,64 +235,80 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
   }
 }
 
-// ────────────────────────── Ranking Banner ──────────────────────────
+// ────────────────────────── 1. Ranking Banner ──────────────────────────
 
 class _RankingBanner extends StatelessWidget {
   final DemoContestMyStats stats;
-  final dynamic contest;
-  final LanguageService languageService;
+  final bool isDark;
 
   const _RankingBanner({
     required this.stats,
-    required this.contest,
-    required this.languageService,
+    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final rank = stats.rank;
-    final isDark = AppColors.isDarkMode;
-    final textColor = isDark ? AppColors.pureBlack : Colors.white;
+    final bg = isDark
+        ? const Color(0xFF2A1535)
+        : const Color(0xFFFAF5FF);
+    final borderColor = isDark
+        ? const Color(0xFF581C87).withValues(alpha: 0.4)
+        : const Color(0xFFE9D5FF);
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20.w, 18.h, 18.w, 22.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary,
-            AppColors.primary.withValues(alpha: 0.78),
-          ],
-        ),
+        color: bg,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: borderColor),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              _LivePill(languageService: languageService, isDark: isDark),
-              const Spacer(),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            'You are ranked $rank',
-            style: AppTextStyles.bodyText.copyWith(
-              color: textColor,
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.3,
+          Container(
+            padding: EdgeInsets.all(7.w),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(
+              Icons.bolt_rounded,
+              color: AppColors.primary,
+              size: 20.sp,
             ),
           ),
-          SizedBox(height: 6.h),
-          Text(
-            'Keep trading and maintain proper risk management to secure or improve your position!',
-            style: AppTextStyles.bodyText.copyWith(
-              color: textColor.withValues(alpha: 0.92),
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              height: 1.4,
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'You are ranked #${stats.rank}',
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: isDark ? Colors.white : const Color(0xFF1E1B4B),
+                          fontSize: 14.5.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    _LivePill(isDark: isDark),
+                  ],
+                ),
+                SizedBox(height: 3.h),
+                Text(
+                  'Keep trading and maintain proper risk management to secure or improve your position!',
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.textGrey,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w400,
+                    height: 1.35,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -271,19 +318,17 @@ class _RankingBanner extends StatelessWidget {
 }
 
 class _LivePill extends StatelessWidget {
-  final LanguageService languageService;
   final bool isDark;
-  const _LivePill({required this.languageService, required this.isDark});
+  const _LivePill({required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isDark ? AppColors.pureBlack : Colors.white;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
       decoration: BoxDecoration(
-        color: textColor.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: textColor.withValues(alpha: 0.3)),
+        color: const Color(0xFF22C55E).withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFF22C55E).withValues(alpha: 0.35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -296,14 +341,14 @@ class _LivePill extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          SizedBox(width: 5.w),
+          SizedBox(width: 4.w),
           Text(
             'LIVE',
-            style: AppTextStyles.bodyText.copyWith(
-              color: textColor,
+            style: TextStyle(
+              color: const Color(0xFF16A34A),
               fontSize: 10.sp,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.6,
             ),
           ),
         ],
@@ -312,92 +357,107 @@ class _LivePill extends StatelessWidget {
   }
 }
 
-// ────────────────────────── Contest Card ──────────────────────────
+// ────────────────────────── 2. Re-Participation Banner ──────────────────────────
 
-class _ContestCard extends StatelessWidget {
-  final DemoContestMyStats stats;
-  final dynamic contest;
-  final LanguageService languageService;
+class _ParticipateAgainBanner extends StatelessWidget {
+  final DemoContest contest;
   final Color cardBg;
   final bool isDark;
 
-  const _ContestCard({
-    required this.stats,
+  const _ParticipateAgainBanner({
     required this.contest,
-    required this.languageService,
     required this.cardBg,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final dateFmt = DateFormat('d MMMM yyyy');
-    final startsAt = contest?.startsAt as DateTime?;
-    final endsAt = contest?.endsAt as DateTime?;
-    final dateRange =
-        (startsAt != null && endsAt != null)
-            ? '${dateFmt.format(startsAt)} — ${dateFmt.format(endsAt)}'
-            : '3 August 2026 — 31 August 2026';
-
-    final title = contest?.title?.toString() ?? 'Contest One';
-    final description =
-        contest?.description?.toString() ?? 'Complete contest and win prizes';
-
     return Container(
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
       ),
-      padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 16.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              _StatusBadge(label: 'ACTIVE', isDark: isDark),
-              const Spacer(),
-              Container(
-                width: 38.w,
-                height: 38.w,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4A0E4E),
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(Icons.refresh_rounded, color: Colors.white, size: 20.sp),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'You Can Participate Again!',
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.textPrimary,
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                alignment: Alignment.center,
-                child: Text('🏆', style: TextStyle(fontSize: 18.sp)),
+                SizedBox(height: 3.h),
+                RichText(
+                  text: TextSpan(
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.textGrey,
+                      fontSize: 11.sp,
+                    ),
+                    children: [
+                      const TextSpan(text: "You've used "),
+                      TextSpan(
+                        text: '${contest.myEnrollmentsCount} of ${contest.maxParticipations}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const TextSpan(text: ' allowed participations. '),
+                      TextSpan(
+                        text: contest.enrollmentType == 'free'
+                            ? 'This is a free re-entry.'
+                            : 'Entry fee applies.',
+                        style: TextStyle(
+                          color: contest.enrollmentType == 'free'
+                              ? const Color(0xFF16A34A)
+                              : AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 8.w),
+          ElevatedButton.icon(
+            onPressed: () {
+              Get.toNamed(AppPages.DEMO_CONTEST_JOIN, arguments: contest.id);
+            },
+            icon: Icon(Icons.add, size: 14.sp, color: Colors.white),
+            label: Text(
+              'Participate Again',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 11.sp,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Text(
-            dateRange,
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.textGrey,
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w500,
             ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            title.toLowerCase().contains('contest')
-                ? title
-                : 'contest ${title.toLowerCase()}',
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.textPrimary,
-              fontSize: 17.sp,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.2,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            description,
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.textGrey,
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              height: 1.4,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4A0E4E),
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              elevation: 0,
             ),
           ),
         ],
@@ -406,43 +466,254 @@ class _ContestCard extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
-  final String label;
+// ────────────────────────── 3. Hero Contest Card ──────────────────────────
+
+class _HeroContestCard extends StatelessWidget {
+  final DemoContest contest;
+  final DemoContestMyStats stats;
   final bool isDark;
-  const _StatusBadge({required this.label, required this.isDark});
+
+  const _HeroContestCard({
+    required this.contest,
+    required this.stats,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final dateFmt = DateFormat('d MMMM yyyy');
+    final dateRange =
+        '${dateFmt.format(contest.startsAt)} - ${dateFmt.format(contest.endsAt)}';
+
+    final totalParticipants =
+        contest.pool?['total_participants']?.toString() ??
+        '${contest.joinedParticipants}';
+    final maxParticipants = contest.maxParticipants > 0
+        ? '${contest.maxParticipants}'
+        : '1000';
+    final poolPrize = contest.pool?['total_prize_pool']?.toString() ?? '0.00';
+    final filledPercent = (contest.filledPercent * 100).toStringAsFixed(0);
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: isDark ? 0.22 : 0.1),
-        borderRadius: BorderRadius.circular(6.r),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.bodyText.copyWith(
-          color: AppColors.primary,
-          fontSize: 10.sp,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.6,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF4A0E4E),
+            Color(0xFF6B1570),
+            Color(0xFF531057),
+          ],
         ),
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF4A0E4E).withValues(alpha: 0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Badges row
+          Wrap(
+            spacing: 8.w,
+            runSpacing: 6.h,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.5.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF16A34A),
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Text(
+                  'ACTIVE',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 9.5.sp,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.5.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.calendar_today_outlined,
+                      size: 11.sp,
+                      color: Colors.white,
+                    ),
+                    SizedBox(width: 5.w),
+                    Text(
+                      dateRange,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10.5.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+
+          // Contest Title & Subtitle
+          Text(
+            contest.title,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+            ),
+          ),
+          if (contest.subtitle.isNotEmpty || contest.description.isNotEmpty) ...[
+            SizedBox(height: 4.h),
+            Text(
+              contest.subtitle.isNotEmpty ? contest.subtitle : contest.description,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+          SizedBox(height: 16.h),
+
+          // Divider
+          Divider(
+            color: Colors.white.withValues(alpha: 0.18),
+            height: 1,
+          ),
+          SizedBox(height: 12.h),
+
+          // 3 Metric Columns
+          Row(
+            children: [
+              Expanded(
+                child: _HeroMetric(
+                  icon: Icons.people_outline,
+                  label: 'PARTICIPANTS',
+                  value: '$totalParticipants / $maxParticipants',
+                  sub: '$filledPercent% Filled',
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 36.h,
+                color: Colors.white.withValues(alpha: 0.18),
+              ),
+              Expanded(
+                child: _HeroMetric(
+                  icon: Icons.emoji_events_outlined,
+                  label: 'PRIZE POOL',
+                  value: '\$$poolPrize',
+                  sub: 'Total Prize Pool',
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 36.h,
+                color: Colors.white.withValues(alpha: 0.18),
+              ),
+              Expanded(
+                child: _HeroMetric(
+                  icon: Icons.access_time_rounded,
+                  label: 'DAYS LEFT',
+                  value: '${stats.daysLeft} Days',
+                  sub: 'to go',
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-// ────────────────────────── Stats Row ──────────────────────────
+class _HeroMetric extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final String sub;
 
-class _StatsRow extends StatelessWidget {
+  const _HeroMetric({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.sub,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12.sp, color: Colors.white.withValues(alpha: 0.8)),
+            SizedBox(width: 4.w),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.75),
+                fontSize: 8.5.sp,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 3.h),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 13.5.sp,
+            fontWeight: FontWeight.w800,
+          ),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: 1.h),
+        Text(
+          sub,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 9.sp,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ────────────────────────── 4. 4-Stat Grid Cards ──────────────────────────
+
+class _StatsGrid extends StatelessWidget {
   final DemoContestMyStats stats;
-  final LanguageService languageService;
   final Color cardBg;
   final bool isDark;
 
-  const _StatsRow({
+  const _StatsGrid({
     required this.stats,
-    required this.languageService,
     required this.cardBg,
     required this.isDark,
   });
@@ -450,59 +721,71 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = stats.participant;
-    final returnColor =
-        p.returnPercent >= 0
-            ? const Color(0xFF22C55E)
-            : const Color(0xFFEF4444);
+    final isProfit = p.returnPercent >= 0;
+    final returnColor = isProfit ? const Color(0xFF16A34A) : const Color(0xFFDC2626);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _StatItem(
-                label: 'YOUR RANK',
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                cardBg: cardBg,
+                iconBg: isDark ? const Color(0xFF2A1535) : const Color(0xFFFAF5FF),
+                icon: Icons.military_tech_outlined,
+                iconColor: const Color(0xFF7C3AED),
+                label: 'Your Rank',
                 value: '#${stats.rank}',
-                color: AppColors.textPrimary,
+                valueColor: AppColors.textPrimary,
+                subtext: 'Current standing',
               ),
-              _Divider(isDark: isDark),
-              _StatItem(
-                label: 'YOUR RETURN',
-                value: p.returnDisplay,
-                color: returnColor,
-              ),
-            ],
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.h),
-            child: Divider(
-              color: AppColors.icongrey.withValues(alpha: 0.18),
-              height: 1,
             ),
-          ),
-          Row(
-            children: [
-              _StatItem(
-                label: 'YOUR EQUITY',
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _StatCard(
+                cardBg: cardBg,
+                iconBg: isDark ? const Color(0xFF064E3B).withValues(alpha: 0.3) : const Color(0xFFDCFCE7),
+                icon: isProfit ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+                iconColor: returnColor,
+                label: 'Your Return',
+                value: p.returnDisplay,
+                valueColor: returnColor,
+                subtext: 'Performance',
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                cardBg: cardBg,
+                iconBg: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                icon: Icons.account_balance_wallet_outlined,
+                iconColor: isDark ? Colors.white70 : const Color(0xFF334155),
+                label: 'Your Equity',
                 value: '\$${_money(p.currentEquity)}',
-                color: AppColors.textPrimary,
+                valueColor: AppColors.textPrimary,
+                subtext: 'Total account value',
               ),
-              _Divider(isDark: isDark),
-              _StatItem(
-                label: 'DAYS LEFT',
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _StatCard(
+                cardBg: cardBg,
+                iconBg: isDark ? const Color(0xFF1E1B4B) : const Color(0xFFEDE9FE),
+                icon: Icons.access_time_rounded,
+                iconColor: const Color(0xFF7C3AED),
+                label: 'Days Left',
                 value: '${stats.daysLeft}',
-                color: AppColors.textPrimary,
+                valueColor: AppColors.textPrimary,
+                subtext: 'Remaining time',
               ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -512,43 +795,81 @@ class _StatsRow extends StatelessWidget {
   }
 }
 
-class _StatItem extends StatelessWidget {
+class _StatCard extends StatelessWidget {
+  final Color cardBg;
+  final Color iconBg;
+  final IconData icon;
+  final Color iconColor;
   final String label;
   final String value;
-  final Color color;
-  const _StatItem({
+  final Color valueColor;
+  final String subtext;
+
+  const _StatCard({
+    required this.cardBg,
+    required this.iconBg,
+    required this.icon,
+    required this.iconColor,
     required this.label,
     required this.value,
-    required this.color,
+    required this.valueColor,
+    required this.subtext,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
+      ),
+      child: Row(
         children: [
-          Text(
-            label,
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.textGrey,
-              fontSize: 8.5.sp,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.4,
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(10.r),
             ),
-            textAlign: TextAlign.center,
+            child: Icon(icon, color: iconColor, size: 20.sp),
           ),
-          SizedBox(height: 4.h),
-          Text(
-            value,
-            style: AppTextStyles.bodyText.copyWith(
-              color: color,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w800,
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.textGrey,
+                    fontSize: 10.5.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  value,
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: valueColor,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 1.h),
+                Text(
+                  subtext,
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.textGrey.withValues(alpha: 0.8),
+                    fontSize: 9.5.sp,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
             ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -556,359 +877,363 @@ class _StatItem extends StatelessWidget {
   }
 }
 
-class _Divider extends StatelessWidget {
-  final bool isDark;
-  const _Divider({required this.isDark});
+// ────────────────────────── 5. Trading Rules Card ──────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 28.h,
-      color: AppColors.icongrey.withValues(alpha: 0.18),
-      margin: EdgeInsets.symmetric(horizontal: 4.w),
-    );
-  }
-}
-
-// ────────────────────────── Prize Structure Card ──────────────────────────
-
-class _PrizeStructureCard extends StatelessWidget {
-  final LanguageService languageService;
+class _TradingRulesCard extends StatelessWidget {
+  final DemoContest? contest;
   final Color cardBg;
   final bool isDark;
 
-  const _PrizeStructureCard({
-    required this.languageService,
+  const _TradingRulesCard({
+    required this.contest,
     required this.cardBg,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final contestObj = Get.find<DemoContestController>().contestById(
-      Get.arguments?.toString() ?? '',
-    );
-
-    return _PanelCard(
-      cardBg: cardBg,
-      isDark: isDark,
-      iconBg: isDark ? const Color(0xFF431407) : const Color(0xFFFFEDD5),
-      iconEmoji: '🏆',
-      iconColor: const Color(0xFFEA580C),
-      title: 'Prize Structure',
-      subtitle: 'Rewards for top-performing traders',
-      children: [
-        if (contestObj != null && contestObj.prizes.isNotEmpty)
-          ...contestObj.prizes.map(
-            (prize) => Column(
-              children: [
-                _PrizeRow(
-                  medal: '🏅',
-                  rank: prize.label,
-                  amount: '\$${prize.amount.toStringAsFixed(2)}',
-                ),
-                SizedBox(height: 8.h),
-              ],
-            ),
-          )
-        else
-          const Text('No prizes available.'),
-      ],
-    );
-  }
-}
-
-class _PrizeRow extends StatelessWidget {
-  final String medal;
-  final String rank;
-  final String amount;
-  const _PrizeRow({
-    required this.medal,
-    required this.rank,
-    required this.amount,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(medal, style: TextStyle(fontSize: 16.sp)),
-        SizedBox(width: 6.w),
-        Text(
-          '$rank:',
-          style: AppTextStyles.bodyText.copyWith(
-            color: AppColors.textPrimary,
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        SizedBox(width: 4.w),
-        Expanded(
-          child: Text(
-            '$amount CASH',
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.textPrimary,
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ────────────────────────── Contest Rules Card ──────────────────────────
-
-class _ContestRulesCard extends StatelessWidget {
-  final LanguageService languageService;
-  final Color cardBg;
-  final bool isDark;
-
-  const _ContestRulesCard({
-    required this.languageService,
-    required this.cardBg,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final contestObj = Get.find<DemoContestController>().contestById(
-      Get.arguments?.toString() ?? '',
-    );
-
-    final rules = [
-      if (contestObj != null)
-        ...contestObj.rules.map((r) => (r.title, r.description)),
+    final rules = contest?.rules ?? [];
+    final fallbackRules = [
+      ('Max Leverage', contest?.tradingMaxLeverage.isNotEmpty == true ? contest!.tradingMaxLeverage : '1:200'),
+      ('Min Trade Duration', '3 min'),
+      ('Max Open Positions', '5'),
+      ('Allowed Instruments', 'All Instruments'),
+      ('Max Lots Per Trade', '10'),
+      ('Timezone', 'Dubai Time (UTC+4)'),
     ];
 
-    if (rules.isEmpty) {
-      rules.addAll([
-        ('Min Trade Duration', '3 minutes — scalping not allowed'),
-        ('Max Leverage', '1:200 capped'),
-        ('Max Concurrent Positions', 'Capped at 5 positions'),
-        ('Max Lots Per Trade', 'Capped at 10 lots'),
-        ('Allowed Instruments', 'All Instruments'),
-      ]);
-    }
+    final displayRules = rules.isNotEmpty
+        ? rules.map((r) => (r.title, r.description)).toList()
+        : fallbackRules;
 
-    return _PanelCard(
-      cardBg: cardBg,
-      isDark: isDark,
-      iconBg: AppColors.primary.withValues(alpha: 0.12),
-      iconEmoji: '🛡️',
-      iconColor: AppColors.primary,
-      title: 'Contest Rules',
-      subtitle: 'Rules that apply during the contest period',
-      children: [
-        for (var i = 0; i < rules.length; i++) ...[
-          if (i > 0) SizedBox(height: 8.h),
-          _RuleRow(index: i + 1, label: rules[i].$1, value: rules[i].$2),
-        ],
-      ],
-    );
-  }
-}
-
-class _RuleRow extends StatelessWidget {
-  final int index;
-  final String label;
-  final String value;
-  const _RuleRow({
-    required this.index,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 16.w,
-          height: 16.w,
-          margin: EdgeInsets.only(top: 1.h),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            '$index',
-            style: AppTextStyles.bodyText.copyWith(
-              color: AppColors.primary,
-              fontSize: 9.sp,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        SizedBox(width: 6.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: AppTextStyles.bodyText.copyWith(
-                  color: AppColors.textPrimary,
-                  fontSize: 11.5.sp,
-                  fontWeight: FontWeight.w700,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              SizedBox(height: 1.h),
-              Text(
-                value,
-                style: AppTextStyles.bodyText.copyWith(
-                  color: AppColors.textGrey,
-                  fontSize: 10.5.sp,
-                  fontWeight: FontWeight.w400,
-                  height: 1.3,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ────────────────────────── Panel Card shell ──────────────────────────
-
-class _PanelCard extends StatelessWidget {
-  final Color cardBg;
-  final bool isDark;
-  final Color iconBg;
-  final String iconEmoji;
-  final Color iconColor;
-  final String title;
-  final String subtitle;
-  final List<Widget> children;
-
-  const _PanelCard({
-    required this.cardBg,
-    required this.isDark,
-    required this.iconBg,
-    required this.iconEmoji,
-    required this.iconColor,
-    required this.title,
-    required this.subtitle,
-    required this.children,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
       ),
-      padding: EdgeInsets.fromLTRB(12.w, 12.h, 12.w, 14.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Row(
             children: [
               Container(
-                width: 28.w,
-                height: 28.w,
+                padding: EdgeInsets.all(7.w),
                 decoration: BoxDecoration(
-                  color: iconBg,
-                  shape: BoxShape.circle,
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  iconEmoji,
-                  style: TextStyle(fontSize: 14.sp, color: iconColor),
+                child: Icon(
+                  Icons.settings_outlined,
+                  color: AppColors.primary,
+                  size: 18.sp,
                 ),
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: 10.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      'Trading Rules',
                       style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textPrimary,
-                        fontSize: 13.sp,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: -0.1,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 1.h),
                     Text(
-                      subtitle,
+                      'Rules that apply during the contest period.',
                       style: AppTextStyles.bodyText.copyWith(
                         color: AppColors.textGrey,
-                        fontSize: 9.5.sp,
-                        fontWeight: FontWeight.w400,
-                        height: 1.3,
+                        fontSize: 10.5.sp,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12.h),
-          ...children,
+          SizedBox(height: 16.h),
+
+          // Rules List
+          for (var i = 0; i < displayRules.length; i++) ...[
+            if (i > 0)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                child: Divider(
+                  color: AppColors.icongrey.withValues(alpha: 0.1),
+                  height: 1,
+                ),
+              ),
+            Row(
+              children: [
+                Icon(
+                  _ruleIcon(displayRules[i].$1),
+                  size: 15.sp,
+                  color: AppColors.textGrey,
+                ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    displayRules[i].$1,
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.textGrey,
+                      fontSize: 11.5.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Text(
+                  displayRules[i].$2,
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.textPrimary,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  IconData _ruleIcon(String title) {
+    final t = title.toLowerCase();
+    if (t.contains('leverage')) return Icons.trending_up_rounded;
+    if (t.contains('duration')) return Icons.timer_outlined;
+    if (t.contains('position')) return Icons.layers_outlined;
+    if (t.contains('instrument')) return Icons.format_list_bulleted_rounded;
+    if (t.contains('lot')) return Icons.balance_outlined;
+    if (t.contains('timezone')) return Icons.schedule_rounded;
+    return Icons.check_circle_outline_rounded;
+  }
+}
+
+// ────────────────────────── 6. Prize Structure Card ──────────────────────────
+
+class _PrizeStructureCard extends StatelessWidget {
+  final DemoContest? contest;
+  final String contestId;
+  final Color cardBg;
+  final bool isDark;
+
+  const _PrizeStructureCard({
+    required this.contest,
+    required this.contestId,
+    required this.cardBg,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final prizes = contest?.prizes ?? [];
+
+    final fallbackPrizes = [
+      ContestPrize(label: '1st Place', amount: 5000),
+      ContestPrize(label: '2nd Place', amount: 2500),
+      ContestPrize(label: '3rd Place', amount: 1000),
+    ];
+
+    final displayPrizes = prizes.isNotEmpty ? prizes : fallbackPrizes;
+
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(7.w),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Icon(
+                  Icons.emoji_events_outlined,
+                  color: AppColors.primary,
+                  size: 18.sp,
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Prize Structure',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: AppColors.textPrimary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 1.h),
+                    Text(
+                      'Rewards for top-performing traders.',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: AppColors.textGrey,
+                        fontSize: 10.5.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+
+          // Prize List
+          for (var i = 0; i < displayPrizes.length; i++) ...[
+            if (i > 0)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                child: Divider(
+                  color: AppColors.icongrey.withValues(alpha: 0.1),
+                  height: 1,
+                ),
+              ),
+            _PrizeItemRow(
+              index: i + 1,
+              label: displayPrizes[i].label.toLowerCase().contains('place')
+                  ? displayPrizes[i].label
+                  : '${displayPrizes[i].label} Place',
+              amount: displayPrizes[i].amount,
+            ),
+          ],
+          SizedBox(height: 18.h),
+
+          // View Full Leaderboard Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Get.toNamed(
+                  AppPages.DEMO_CONTEST_LEADERBOARD,
+                  arguments: contestId,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4A0E4E),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 13.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                elevation: 0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'View Full Leaderboard',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13.5.sp,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 16.sp,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-// ────────────────────────── Leaderboard CTA ──────────────────────────
+class _PrizeItemRow extends StatelessWidget {
+  final int index;
+  final String label;
+  final double amount;
 
-class _LeaderboardCta extends StatelessWidget {
-  final VoidCallback onTap;
-  final LanguageService languageService;
-  const _LeaderboardCta({required this.onTap, required this.languageService});
+  const _PrizeItemRow({
+    required this.index,
+    required this.label,
+    required this.amount,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14.r),
+    final fmt = NumberFormat('#,##0.00');
+
+    return Row(
+      children: [
+        Container(
+          width: 32.w,
+          height: 32.w,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xFF5B1065).withValues(alpha: 0.12),
+            border: Border.all(
+              color: const Color(0xFF5B1065).withValues(alpha: 0.4),
+              width: 1.5,
+            ),
           ),
-          elevation: 0,
+          alignment: Alignment.center,
+          child: Text(
+            index < 10 ? '0$index' : '$index',
+            style: TextStyle(
+              color: const Color(0xFF5B1065),
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTextStyles.bodyText.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              'View Full Leaderboard',
+              '\$${fmt.format(amount)}',
               style: AppTextStyles.bodyText.copyWith(
-                color:
-                    AppColors.isDarkMode ? AppColors.pureBlack : Colors.white,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.2,
+                color: AppColors.textPrimary,
+                fontSize: 13.5.sp,
+                fontWeight: FontWeight.w800,
               ),
             ),
-            SizedBox(width: 6.w),
-            Icon(Icons.arrow_forward, size: 16.sp, color: Colors.white),
+            Text(
+              'CASH',
+              style: AppTextStyles.bodyText.copyWith(
+                color: AppColors.textGrey,
+                fontSize: 9.sp,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
           ],
         ),
-      ),
+      ],
     );
   }
 }

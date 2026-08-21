@@ -15,6 +15,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:crm_app/utils/message_pack_decoder.dart';
 import 'package:crm_app/services/unified_websocket_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 
 class ChartSocketController extends GetxController with WidgetsBindingObserver {
   // Connection state
@@ -322,11 +323,19 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     }
 
     currentSymbol.value = symbol;
-    // ✅ KEEP last bid/ask so subscribers (e.g. MetaNativeChart) can
-    // render an immediate price line. The cached tick will be replaced
-    // by the next live tick for the new symbol — clearing it made the
-    // chart sit empty until the first socket frame arrived.
     realTimePrice['symbol'] = symbol;
+
+    // Immediately seed with cached/live price from InstrumentsController so
+    // Buy/Sell buttons and chart prices render INSTANTLY without showing '--' or '0.00'
+    if (Get.isRegistered<InstrumentsController>()) {
+      final match = Get.find<InstrumentsController>().findInstrument(symbol);
+      if (match != null && match.bid > 0) {
+        realTimePrice['bid'] = match.bid;
+        realTimePrice['ask'] = match.ask;
+        realTimePrice['spreadDiff'] = match.spreadDiff;
+        _priceStreamController.add(Map<String, dynamic>.from(realTimePrice));
+      }
+    }
 
     // If connected with a different symbol, don't drop the entire TCP connection
     // and wait 450ms. Just push the new subscription payload to the server.

@@ -7,11 +7,37 @@ class BannerResponse {
   BannerResponse({this.status, this.success, this.message, this.data});
 
   factory BannerResponse.fromJson(Map<String, dynamic> json) {
+    BannerData? bannerData;
+    if (json['data'] != null) {
+      if (json['data'] is Map<String, dynamic>) {
+        bannerData = BannerData.fromJson(json['data'] as Map<String, dynamic>);
+      } else if (json['data'] is List) {
+        bannerData = BannerData(
+          banners: List<BannerItem>.from(
+            (json['data'] as List).map(
+              (x) => BannerItem.fromJson(x is Map<String, dynamic> ? x : {}),
+            ),
+          ),
+        );
+      }
+    } else if (json['banners'] != null) {
+      bannerData = BannerData.fromJson(json);
+    }
+
+    final rawStatus = json['status'];
+    final rawSuccess = json['success'];
+    final bool isStatusTrue = rawStatus is bool
+        ? rawStatus
+        : (rawStatus?.toString().toLowerCase() == 'true' || rawStatus == 1);
+    final bool isSuccessTrue = rawSuccess is bool
+        ? rawSuccess
+        : (rawSuccess?.toString().toLowerCase() == 'true' || rawSuccess == 1);
+
     return BannerResponse(
-      status: json['status'],
-      success: json['success'],
-      message: json['message'],
-      data: json['data'] != null ? BannerData.fromJson(json['data']) : null,
+      status: isStatusTrue,
+      success: isSuccessTrue,
+      message: json['message']?.toString(),
+      data: bannerData,
     );
   }
 }

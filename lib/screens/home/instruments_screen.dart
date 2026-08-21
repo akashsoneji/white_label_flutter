@@ -23,6 +23,8 @@ import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/utils/svg_color_helper.dart';
 import '../../widgets/account_header_widget.dart';
 import '../../widgets/common_loading_widget.dart';
+import '../../widgets/dashboard_banner_carousel.dart';
+import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
 import 'chart_screen.dart';
 import 'dart:developer' as dev;
 import '../../services/symbol_selection_service.dart';
@@ -93,6 +95,11 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
 
     // ✅ FIX: Listen to account changes and refresh instruments
     _listenToAccountChanges();
+
+    final bannerController = Get.isRegistered<BannerController>()
+        ? Get.find<BannerController>()
+        : Get.put(BannerController(), permanent: true);
+    bannerController.fetchBanners();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _ensureMarketWatchV2ForTab();
@@ -187,15 +194,16 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
         child: Column(
           children: [
             _buildHeader(),
+            if (!_isSearching) const DashboardBannerCarousel(),
             _buildSearchAndFilters(),
             Expanded(
               child: Obx(() {
                 final controller = _controller;
                 final showInitialLoader =
-                    controller.isLoadingFavorites.value ||
-                    controller.isHydratingInstrumentCatalog.value ||
-                    (!controller.hasAttemptedInitialLoad.value &&
-                        controller.allInstruments.isEmpty);
+                    controller.allInstruments.isEmpty &&
+                    (controller.isLoadingFavorites.value ||
+                        controller.isHydratingInstrumentCatalog.value ||
+                        !controller.hasAttemptedInitialLoad.value);
                 // On lifecycle resume/reconnect, keep the existing list visible. Only
                 // show the full loader for first load / genuinely empty state.
                 if (showInitialLoader) {

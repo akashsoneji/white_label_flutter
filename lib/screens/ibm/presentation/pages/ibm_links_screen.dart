@@ -32,10 +32,15 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: const IbmTopHeader(title: 'Referral Links', showBackButton: false),
+      appBar: const IbmTopHeader(
+        title: 'Referral Links',
+        showBackButton: false,
+      ),
       body: Obx(() {
         if (controller.isLoading.value && controller.linksList.isEmpty) {
-          return Center(child: CommonLoadingWidget(size: 50.0, color: AppColors.primary));
+          return Center(
+            child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+          );
         }
 
         return RefreshIndicator(
@@ -63,7 +68,10 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                 _buildEmptyState()
               else
                 ...controller.linksList.map((rawLink) {
-                  final link = rawLink is Map ? Map<String, dynamic>.from(rawLink) : <String, dynamic>{};
+                  final link =
+                      rawLink is Map
+                          ? Map<String, dynamic>.from(rawLink)
+                          : <String, dynamic>{};
                   return _buildLinkCard(link);
                 }).toList(),
             ],
@@ -84,7 +92,10 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
             children: [
               Text(
                 'Referral Links',
-                style: AppTextStyles.heading.copyWith(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                style: AppTextStyles.heading.copyWith(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               SizedBox(height: 4.h),
               Text(
@@ -98,12 +109,17 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
         ElevatedButton.icon(
           onPressed: _showCreateLinkDialog,
           icon: Icon(Icons.add, size: 16.w),
-          label: Text('New link', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600)),
+          label: Text(
+            'New link',
+            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+          ),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF5F259E),
             foregroundColor: Colors.white,
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
           ),
         ),
       ],
@@ -127,7 +143,10 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
 
     for (var rawLink in controller.linksList) {
       final link = rawLink is Map ? Map<String, dynamic>.from(rawLink) : {};
-      final counts = link['counts'] is Map ? Map<String, dynamic>.from(link['counts']) : {};
+      final counts =
+          link['counts'] is Map
+              ? Map<String, dynamic>.from(link['counts'])
+              : {};
       totalSignedUp += _parseInt(counts['signups']);
       totalVisits += _parseInt(counts['visits']);
       totalOpened += _parseInt(counts['accounts']);
@@ -138,19 +157,49 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildSummaryCard(Icons.link, 'Links', '$totalLinks', '$totalLinks of your own', const Color(0xFF5F259E)),
+          _buildSummaryCard(
+            Icons.link,
+            'Links',
+            '$totalLinks',
+            '$totalLinks of your own',
+            const Color(0xFF5F259E),
+          ),
           SizedBox(width: 12.w),
-          _buildSummaryCard(Icons.person_add, 'Signed up', '$totalSignedUp', 'from $totalVisits visits', const Color(0xFF5F259E)),
+          _buildSummaryCard(
+            Icons.person_add,
+            'Signed up',
+            '$totalSignedUp',
+            'from $totalVisits visits',
+            const Color(0xFF5F259E),
+          ),
           SizedBox(width: 12.w),
-          _buildSummaryCard(Icons.account_balance_wallet, 'Opened an account', '$totalOpened', 'got as far as a trading account', const Color(0xFF5F259E)),
+          _buildSummaryCard(
+            Icons.account_balance_wallet,
+            'Opened an account',
+            '$totalOpened',
+            'got as far as a trading account',
+            const Color(0xFF5F259E),
+          ),
           SizedBox(width: 12.w),
-          _buildSummaryCard(Icons.arrow_downward, 'Funded', '$totalFunded', 'put money in', const Color(0xFF238644)),
+          _buildSummaryCard(
+            Icons.arrow_downward,
+            'Funded',
+            '$totalFunded',
+            'put money in',
+            const Color(0xFF238644),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryCard(IconData icon, String title, String value, String subtitle, Color iconColor) {
+  Widget _buildSummaryCard(
+    IconData icon,
+    String title,
+    String value,
+    String subtitle,
+    Color iconColor,
+  ) {
     return Container(
       width: 220.w,
       padding: EdgeInsets.all(16.w),
@@ -175,11 +224,30 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(color: AppColors.textSecondary, fontSize: 11.sp)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 11.sp,
+                  ),
+                ),
                 SizedBox(height: 4.h),
-                Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp, color: AppColors.textPrimary)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.sp,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
                 SizedBox(height: 4.h),
-                Text(subtitle, style: TextStyle(color: AppColors.textSecondary, fontSize: 10.sp)),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 10.sp,
+                  ),
+                ),
               ],
             ),
           ),
@@ -193,24 +261,29 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
     final label = link['label'] ?? 'General Link';
     final code = link['code'] ?? '';
     final isActive = link['is_active'] ?? true;
-    
+
     // Group string formatting
     final groups = link['groups'] is List ? (link['groups'] as List) : [];
-    final groupNames = groups.map((g) {
-      if (g is Map) return g['name']?.toString() ?? '';
-      return g.toString();
-    }).where((s) => s.isNotEmpty).join(' • ');
+    final groupNames = groups
+        .map((g) {
+          if (g is Map) return g['name']?.toString() ?? '';
+          return g.toString();
+        })
+        .where((s) => s.isNotEmpty)
+        .join(' • ');
 
     final baseUrl = 'https://dev.tenaxcodecrm.com/register';
     final fullUrl = '$baseUrl?ref=$code';
 
-    final counts = link['counts'] is Map ? Map<String, dynamic>.from(link['counts']) : {};
+    final counts =
+        link['counts'] is Map ? Map<String, dynamic>.from(link['counts']) : {};
     final visits = _parseInt(counts['visits']);
     final signups = _parseInt(counts['signups']);
     final accounts = _parseInt(counts['accounts']);
     final funded = _parseInt(counts['funded']);
-    
-    final conversion = visits > 0 ? ((signups / visits) * 100).toStringAsFixed(0) : '0';
+
+    final conversion =
+        visits > 0 ? ((signups / visits) * 100).toStringAsFixed(0) : '0';
 
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
@@ -230,7 +303,11 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
               Row(
@@ -239,9 +316,16 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                     // Update functionality can be added here
                   }),
                   SizedBox(width: 8.w),
-                  _buildActionButton(isActive ? Icons.toggle_on : Icons.toggle_off, isActive ? 'Switch off' : 'Switch on', () async {
-                    await controller.updateReferralLink(linkId: linkId, isActive: !isActive);
-                  }),
+                  _buildActionButton(
+                    isActive ? Icons.toggle_on : Icons.toggle_off,
+                    isActive ? 'Switch off' : 'Switch on',
+                    () async {
+                      await controller.updateReferralLink(
+                        linkId: linkId,
+                        isActive: !isActive,
+                      );
+                    },
+                  ),
                   SizedBox(width: 8.w),
                   GestureDetector(
                     onTap: () async {
@@ -249,10 +333,21 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                       bool? confirm = await Get.dialog<bool>(
                         AlertDialog(
                           title: const Text('Delete Link'),
-                          content: const Text('Are you sure you want to delete this referral link?'),
+                          content: const Text(
+                            'Are you sure you want to delete this referral link?',
+                          ),
                           actions: [
-                            TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
-                            TextButton(onPressed: () => Get.back(result: true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+                            TextButton(
+                              onPressed: () => Get.back(result: false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Get.back(result: true),
+                              child: const Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -266,7 +361,11 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                         border: Border.all(color: AppColors.border),
                         borderRadius: BorderRadius.circular(4.r),
                       ),
-                      child: Icon(Icons.delete_outline, color: Colors.red, size: 16.w),
+                      child: Icon(
+                        Icons.delete_outline,
+                        color: Colors.red,
+                        size: 16.w,
+                      ),
                     ),
                   ),
                 ],
@@ -292,7 +391,11 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                 Expanded(
                   child: Text(
                     fullUrl,
-                    style: TextStyle(color: AppColors.textPrimary, fontSize: 12.sp, overflow: TextOverflow.ellipsis),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 12.sp,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
                 SizedBox(width: 12.w),
@@ -302,7 +405,10 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                     CustomToastService.showSuccess(message: 'Link copied!');
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 6.h,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.whiteColor,
                       border: Border.all(color: AppColors.border),
@@ -310,9 +416,20 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.copy, size: 14.w, color: AppColors.textPrimary),
+                        Icon(
+                          Icons.copy,
+                          size: 14.w,
+                          color: AppColors.textPrimary,
+                        ),
                         SizedBox(width: 4.w),
-                        Text('Copy', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11.sp, color: AppColors.textPrimary)),
+                        Text(
+                          'Copy',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11.sp,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -359,7 +476,14 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
           children: [
             Icon(icon, size: 14.w, color: AppColors.textPrimary),
             SizedBox(width: 4.w),
-            Text(label, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11.sp, color: AppColors.textPrimary)),
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 11.sp,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ],
         ),
       ),
@@ -371,13 +495,30 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp, color: AppColors.textPrimary)),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16.sp,
+              color: AppColors.textPrimary,
+            ),
+          ),
           SizedBox(height: 4.h),
-          Text(label, style: TextStyle(color: AppColors.textGrey, fontSize: 10.sp)),
+          Text(
+            label,
+            style: TextStyle(color: AppColors.textGrey, fontSize: 10.sp),
+          ),
           if (subValue != null) ...[
             SizedBox(height: 2.h),
-            Text(subValue, style: TextStyle(color: const Color(0xFF5F259E), fontWeight: FontWeight.bold, fontSize: 10.sp)),
-          ]
+            Text(
+              subValue,
+              style: TextStyle(
+                color: const Color(0xFF5F259E),
+                fontWeight: FontWeight.bold,
+                fontSize: 10.sp,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -397,11 +538,21 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
       padding: EdgeInsets.symmetric(vertical: 40.h),
       child: Column(
         children: [
-          Icon(Icons.link, size: 56.w, color: AppColors.textGrey.withOpacity(0.4)),
+          Icon(
+            Icons.link,
+            size: 56.w,
+            color: AppColors.textGrey.withOpacity(0.4),
+          ),
           SizedBox(height: 12.h),
-          Text('No Referral Links Yet', style: AppTextStyles.heading.copyWith(fontSize: 16.sp)),
+          Text(
+            'No Referral Links Yet',
+            style: AppTextStyles.heading.copyWith(fontSize: 16.sp),
+          ),
           SizedBox(height: 6.h),
-          Text('Create your first link to start inviting clients.', style: TextStyle(color: AppColors.textGrey, fontSize: 13.sp)),
+          Text(
+            'Create your first link to start inviting clients.',
+            style: TextStyle(color: AppColors.textGrey, fontSize: 13.sp),
+          ),
         ],
       ),
     );
@@ -414,7 +565,9 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
 
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
         insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
         backgroundColor: AppColors.card,
         child: Container(
@@ -426,16 +579,34 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
             children: [
               // Header
               Padding(
-                padding: EdgeInsets.only(left: 20.w, right: 12.w, top: 16.h, bottom: 12.h),
+                padding: EdgeInsets.only(
+                  left: 20.w,
+                  right: 12.w,
+                  top: 16.h,
+                  bottom: 12.h,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('New link', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp, color: AppColors.textPrimary)),
+                        Text(
+                          'New link',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.sp,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                         SizedBox(height: 4.h),
-                        Text('Where you post it, and what it opens the door to', style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp)),
+                        Text(
+                          'Where you post it, and what it opens the door to',
+                          style: TextStyle(
+                            color: AppColors.textGrey,
+                            fontSize: 12.sp,
+                          ),
+                        ),
                       ],
                     ),
                     IconButton(
@@ -446,7 +617,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                 ),
               ),
               Divider(height: 1, color: AppColors.border),
-              
+
               Flexible(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.all(20.w),
@@ -454,7 +625,14 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Name Input
-                      Text('Name it', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp, color: AppColors.textPrimary)),
+                      Text(
+                        'Name it',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12.sp,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       SizedBox(height: 8.h),
                       TextField(
                         controller: labelController,
@@ -475,11 +653,24 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                         ),
                       ),
                       SizedBox(height: 6.h),
-                      Text('Only you see this. It is how you tell your links apart.', style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp)),
+                      Text(
+                        'Only you see this. It is how you tell your links apart.',
+                        style: TextStyle(
+                          color: AppColors.textGrey,
+                          fontSize: 11.sp,
+                        ),
+                      ),
                       SizedBox(height: 20.h),
 
                       // Code Input
-                      Text('Code (optional)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp, color: AppColors.textPrimary)),
+                      Text(
+                        'Code (optional)',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12.sp,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                       SizedBox(height: 8.h),
                       TextField(
                         controller: codeController,
@@ -500,33 +691,63 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                         ),
                       ),
                       SizedBox(height: 6.h),
-                      Text('Letters, numbers, dashes and underscores. It cannot be changed later.', style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp)),
+                      Text(
+                        'Letters, numbers, dashes and underscores. It cannot be changed later.',
+                        style: TextStyle(
+                          color: AppColors.textGrey,
+                          fontSize: 11.sp,
+                        ),
+                      ),
                       SizedBox(height: 24.h),
 
                       // Groups
-                      Text('GROUPS THIS LINK OFFERS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.sp, color: AppColors.textGrey, letterSpacing: 1.1)),
+                      Text(
+                        'GROUPS THIS LINK OFFERS',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11.sp,
+                          color: AppColors.textGrey,
+                          letterSpacing: 1.1,
+                        ),
+                      ),
                       SizedBox(height: 8.h),
-                      Text('A client who signs up here can open an account in these groups, and nothing else.', style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp)),
+                      Text(
+                        'A client who signs up here can open an account in these groups, and nothing else.',
+                        style: TextStyle(
+                          color: AppColors.textGrey,
+                          fontSize: 12.sp,
+                        ),
+                      ),
                       SizedBox(height: 16.h),
 
                       // Group List
                       Obx(() {
                         if (controller.planGroupsList.isEmpty) {
-                          return Text('No groups available.', style: TextStyle(color: AppColors.textSecondary));
+                          return Text(
+                            'No groups available.',
+                            style: TextStyle(color: AppColors.textSecondary),
+                          );
                         }
-                        
+
                         return ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: controller.planGroupsList.length,
                           itemBuilder: (context, index) {
                             final group = controller.planGroupsList[index];
-                            final int groupId = group['group_id'] ?? group['plan_group_id'] ?? 0;
+                            final int groupId =
+                                group['group_id'] ??
+                                group['plan_group_id'] ??
+                                0;
                             final String groupName = group['name'] ?? 'Unknown';
 
                             return Obx(() {
-                              final isSelected = selectedGroupIds.contains(groupId);
-                              final isFirst = selectedGroupIds.isNotEmpty && selectedGroupIds.first == groupId;
+                              final isSelected = selectedGroupIds.contains(
+                                groupId,
+                              );
+                              final isFirst =
+                                  selectedGroupIds.isNotEmpty &&
+                                  selectedGroupIds.first == groupId;
 
                               return GestureDetector(
                                 onTap: () {
@@ -538,21 +759,45 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                 },
                                 child: Container(
                                   margin: EdgeInsets.only(bottom: 12.h),
-                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w,
+                                    vertical: 12.h,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? const Color(0xFF5F259E).withOpacity(0.05) : AppColors.card,
-                                    border: Border.all(color: isSelected ? const Color(0xFF5F259E) : AppColors.border),
+                                    color:
+                                        isSelected
+                                            ? const Color(
+                                              0xFF5F259E,
+                                            ).withOpacity(0.05)
+                                            : AppColors.card,
+                                    border: Border.all(
+                                      color:
+                                          isSelected
+                                              ? const Color(0xFF5F259E)
+                                              : AppColors.border,
+                                    ),
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                   child: Row(
                                     children: [
                                       Icon(
-                                        isSelected ? Icons.check_box : Icons.check_box_outline_blank,
-                                        color: isSelected ? const Color(0xFF5F259E) : AppColors.textGrey,
+                                        isSelected
+                                            ? Icons.check_box
+                                            : Icons.check_box_outline_blank,
+                                        color:
+                                            isSelected
+                                                ? const Color(0xFF5F259E)
+                                                : AppColors.textGrey,
                                         size: 20.w,
                                       ),
                                       SizedBox(width: 12.w),
-                                      Icon(Icons.drag_indicator, color: AppColors.textGrey.withOpacity(0.5), size: 16.w),
+                                      Icon(
+                                        Icons.drag_indicator,
+                                        color: AppColors.textGrey.withOpacity(
+                                          0.5,
+                                        ),
+                                        size: 16.w,
+                                      ),
                                       SizedBox(width: 8.w),
                                       Text(
                                         groupName,
@@ -565,14 +810,25 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                       if (isFirst) ...[
                                         SizedBox(width: 12.w),
                                         Container(
-                                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 8.w,
+                                            vertical: 4.h,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: Colors.green.withOpacity(0.15),
-                                            borderRadius: BorderRadius.circular(12.r),
+                                            color: Colors.green.withOpacity(
+                                              0.15,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              12.r,
+                                            ),
                                           ),
                                           child: Text(
                                             'Shown first',
-                                            style: TextStyle(color: Colors.green, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                                            style: TextStyle(
+                                              color: Colors.green,
+                                              fontSize: 10.sp,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -588,7 +844,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                   ),
                 ),
               ),
-              
+
               Divider(height: 1, color: AppColors.border),
               // Footer
               Padding(
@@ -597,36 +853,62 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFC7A2E5), // secondary purple
+                        backgroundColor: const Color(
+                          0xFFC7A2E5,
+                        ), // secondary purple
                         foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24.w,
+                          vertical: 12.h,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
                       ),
                       onPressed: () async {
                         if (labelController.text.trim().isEmpty) {
-                          CustomToastService.showError(message: 'Please enter a label for the link.');
+                          CustomToastService.showError(
+                            message: 'Please enter a label for the link.',
+                          );
                           return;
                         }
-                        
-                        int? defaultGroupId = selectedGroupIds.isNotEmpty ? selectedGroupIds.first : null;
+
+                        int? defaultGroupId =
+                            selectedGroupIds.isNotEmpty
+                                ? selectedGroupIds.first
+                                : null;
 
                         Get.back(); // close dialog
                         await controller.createReferralLink(
                           label: labelController.text.trim(),
-                          code: codeController.text.trim().isNotEmpty ? codeController.text.trim() : null,
+                          code:
+                              codeController.text.trim().isNotEmpty
+                                  ? codeController.text.trim()
+                                  : null,
                           planGroupIds: selectedGroupIds.toList(),
                           defaultPlanGroupId: defaultGroupId,
                         );
                       },
-                      child: Text('Make link', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                      child: Text(
+                        'Make link',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
+                        ),
+                      ),
                     ),
                     SizedBox(width: 12.w),
                     OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.textPrimary,
                         side: BorderSide(color: AppColors.border),
-                        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24.w,
+                          vertical: 12.h,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
                       ),
                       onPressed: () => Get.back(),
                       child: Text('Cancel', style: TextStyle(fontSize: 14.sp)),

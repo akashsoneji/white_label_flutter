@@ -7,6 +7,8 @@
 /// share the same shapes.
 library;
 
+import 'contest_participant_model.dart';
+
 enum ContestStatus {
   upcoming,
   active,
@@ -108,6 +110,10 @@ class DemoContest {
   final String tradingMaxLeverage;
   final String rankingBy;
   final String enrollmentType;
+  final bool enrollmentStepsEnabled;
+  final bool termsEnabled;
+  final Map<String, dynamic>? pool;
+  final ContestParticipantModel? participant;
 
   const DemoContest({
     required this.id,
@@ -137,6 +143,10 @@ class DemoContest {
     this.tradingMaxLeverage = '',
     this.rankingBy = '',
     this.enrollmentType = 'free',
+    this.enrollmentStepsEnabled = false,
+    this.termsEnabled = false,
+    this.pool,
+    this.participant,
   });
 
   Duration get remaining {
@@ -165,6 +175,45 @@ class DemoContest {
   factory DemoContest.fromJson(Map<String, dynamic> json) {
     final contestJson = json['contest'] is Map ? json['contest'] as Map<String, dynamic> : json;
 
+    final rawRules = (contestJson['rules'] as List? ?? [])
+        .whereType<Map>()
+        .map((e) => ContestRule.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+
+    if (rawRules.isEmpty) {
+      final leverage = contestJson['trading_max_leverage']?.toString();
+      final duration = contestJson['trading_min_trade_duration_seconds'];
+      final maxPositions = contestJson['trading_max_open_positions'];
+      final allowedInstruments = contestJson['trading_allowed_instruments']?.toString();
+      final maxLots = contestJson['trading_max_lots_per_trade'];
+      final tz = contestJson['timezone']?.toString();
+
+      if (leverage != null && leverage.isNotEmpty) {
+        rawRules.add(ContestRule(title: 'Max Leverage', description: leverage));
+      }
+      if (duration != null) {
+        final durationMin = (duration is num) ? (duration / 60).round() : duration;
+        rawRules.add(ContestRule(title: 'Min Trade Duration', description: '$durationMin min'));
+      }
+      if (maxPositions != null) {
+        rawRules.add(ContestRule(title: 'Max Open Positions', description: '$maxPositions'));
+      }
+      if (allowedInstruments != null && allowedInstruments.isNotEmpty) {
+        rawRules.add(ContestRule(
+          title: 'Allowed Instruments',
+          description: allowedInstruments.toLowerCase() == 'all' ? 'All Instruments' : allowedInstruments,
+        ));
+      }
+      if (maxLots != null) {
+        final lotsNum = (maxLots is num) ? maxLots : double.tryParse(maxLots.toString());
+        final lotsStr = lotsNum != null ? (lotsNum == lotsNum.toInt() ? '${lotsNum.toInt()}' : '$lotsNum') : '$maxLots';
+        rawRules.add(ContestRule(title: 'Max Lots Per Trade', description: lotsStr));
+      }
+      if (tz != null && tz.isNotEmpty) {
+        rawRules.add(ContestRule(title: 'Timezone', description: tz));
+      }
+    }
+
     return DemoContest(
       id: contestJson['id']?.toString() ?? '',
       title: contestJson['name']?.toString() ?? contestJson['title']?.toString() ?? '',
@@ -176,7 +225,8 @@ class DemoContest {
       currency: contestJson['currency']?.toString() ?? 'USD',
       maxParticipants: (contestJson['max_participants'] as num?)?.toInt() ?? 0,
       joinedParticipants:
-          (contestJson['joined_participants'] as num?)?.toInt() ?? 0,
+          (contestJson['joined_participants'] as num?)?.toInt() ??
+          (contestJson['pool']?['total_participants'] as num?)?.toInt() ?? 0,
       startsAt: DateTime.tryParse(contestJson['start_date']?.toString() ?? contestJson['starts_at']?.toString() ?? '') ??
           DateTime.now(),
       endsAt: DateTime.tryParse(contestJson['end_date']?.toString() ?? contestJson['ends_at']?.toString() ?? '') ??
@@ -190,10 +240,7 @@ class DemoContest {
           .whereType<Map>()
           .map((e) => ContestPrize.fromJson(Map<String, dynamic>.from(e)))
           .toList(),
-      rules: (contestJson['rules'] as List? ?? [])
-          .whereType<Map>()
-          .map((e) => ContestRule.fromJson(Map<String, dynamic>.from(e)))
-          .toList(),
+      rules: rawRules,
       requirements: (contestJson['requirements'] as List? ?? [])
           .map((e) => e.toString())
           .toList(),
@@ -208,6 +255,10 @@ class DemoContest {
       tradingMaxLeverage: contestJson['trading_max_leverage']?.toString() ?? '',
       rankingBy: contestJson['ranking_by']?.toString() ?? '',
       enrollmentType: contestJson['enrollment_type']?.toString() ?? 'free',
+      enrollmentStepsEnabled: contestJson['enrollment_steps_enabled'] == true,
+      termsEnabled: contestJson['terms_enabled'] == true,
+      pool: contestJson['pool'] as Map<String, dynamic>?,
+      participant: json['participant'] != null ? ContestParticipantModel.fromJson(json['participant']) : null,
     );
   }
 }

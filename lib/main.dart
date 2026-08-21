@@ -11,6 +11,7 @@ import 'dart:ui';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/services/price_alert_service.dart';
 import 'package:crm_app/services/loading_service.dart';
@@ -342,6 +343,7 @@ Future<void> initServices() async {
   Get.put<InstrumentsController>(InstrumentsController(), permanent: true);
   Get.put<ChartSocketController>(ChartSocketController(), permanent: true);
   Get.put<TradingController>(TradingController(), permanent: true);
+  Get.put<BannerController>(BannerController(), permanent: true);
   Get.put<TradingWebSocketService>(TradingWebSocketService(), permanent: true);
   Get.put<AccountWebSocketService>(AccountWebSocketService(), permanent: true);
   await PriceAlertService().initialize();

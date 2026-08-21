@@ -30,6 +30,8 @@ import 'package:crm_app/brands/celestial/celestial_theme.dart';
 import 'package:crm_app/widgets/app_svg_icon.dart';
 import 'trading_main_screen.dart';
 import 'package:crm_app/widgets/vantage/vantage_app_bar.dart';
+import 'package:crm_app/widgets/dashboard_banner_carousel.dart';
+import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
 import 'package:crm_app/screens/wallet/view_models/wallet_controller.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -49,6 +51,14 @@ class DashboardScreen extends StatelessWidget {
               ? Get.find<WalletController>()
               : Get.put(WalletController());
       walletCtrl.fetchWalletData();
+    } catch (_) {}
+    // Refresh banners
+    try {
+      final bannerCtrl =
+          Get.isRegistered<BannerController>()
+              ? Get.find<BannerController>()
+              : Get.put(BannerController(), permanent: true);
+      bannerCtrl.fetchBanners();
     } catch (_) {}
     // Also request account data from WebSocket
     try {
@@ -326,6 +336,11 @@ class DashboardScreen extends StatelessWidget {
                 cacheExtent: 500,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
+                  const SliverToBoxAdapter(
+                    child: DashboardBannerCarousel(
+                      margin: EdgeInsets.fromLTRB(16, 4, 16, 8),
+                    ),
+                  ),
                   if (isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
@@ -1479,10 +1494,11 @@ class DashboardScreen extends StatelessWidget {
                 cacheExtent: 500,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  // Vantage renders its AppBar via the parent scaffold
-                  // (VantageDashboardLayout). Celestial renders a single
-                  // AppBar in this build() method (see below), so no inner
-                  // sliver AppBar is needed for either.
+                  const SliverToBoxAdapter(
+                    child: DashboardBannerCarousel(
+                      margin: EdgeInsets.fromLTRB(16, 4, 16, 8),
+                    ),
+                  ),
                   if (isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,

@@ -41,6 +41,34 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  /// Fast lookup of an instrument by symbol
+  ListElement? findInstrument(String symbol) {
+    if (symbol.isEmpty) return null;
+    final cleanSym = symbol.trim().toUpperCase();
+    final cleanWithoutDot = cleanSym.contains('.')
+        ? cleanSym.substring(0, cleanSym.indexOf('.'))
+        : cleanSym;
+
+    for (final e in instruments) {
+      final eUpper = e.symbol.toUpperCase();
+      if (eUpper == cleanSym ||
+          eUpper == cleanWithoutDot ||
+          (eUpper.contains('.') && eUpper.substring(0, eUpper.indexOf('.')) == cleanWithoutDot)) {
+        return e;
+      }
+    }
+
+    for (final e in allInstruments) {
+      final eUpper = e.symbol.toUpperCase();
+      if (eUpper == cleanSym ||
+          eUpper == cleanWithoutDot ||
+          (eUpper.contains('.') && eUpper.substring(0, eUpper.indexOf('.')) == cleanWithoutDot)) {
+        return e;
+      }
+    }
+    return null;
+  }
+
   double _preserveNonZero(double incoming, double current) {
     if (incoming != 0) return incoming;
     return current != 0 ? current : incoming;

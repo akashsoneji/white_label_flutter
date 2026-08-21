@@ -437,7 +437,11 @@ class _ContestCard extends StatelessWidget {
                         Icon(contest.isEnrolled ? Icons.show_chart : Icons.arrow_forward, color: isDark ? AppColors.pureBlack : Colors.white, size: 18.sp),
                         SizedBox(width: 8.w),
                         Text(
-                          contest.isEnrolled ? 'Go to Dashboard' : 'Join Now',
+                          contest.isEnrolled 
+                              ? 'View Dashboard' 
+                              : (contest.maxParticipations > 1 
+                                  ? 'Participate Now (${contest.myEnrollmentsCount}/${contest.maxParticipations})' 
+                                  : 'Participate Now'),
                           style: TextStyle(color: isDark ? AppColors.pureBlack : Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
                         ),
                         if (contest.isEnrolled)
