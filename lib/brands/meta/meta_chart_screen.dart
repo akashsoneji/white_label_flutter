@@ -31,7 +31,7 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/language_service.dart';
-import 'meta_theme.dart';
+import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/widgets/tenax_chart_webview.dart';
 
 // ── Resolution map ─────────────────────────────────────────────────────────
@@ -62,39 +62,49 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
   TradingController     get _trade => Get.find<TradingController>();
   LanguageService       get languageService => Get.find<LanguageService>();
 
-  // ── WebView ────────────────────────────────────────────────────────────
-  final GlobalKey<ChartInAppWebViewState> _chartKey = GlobalKey();
-  bool _widgetReady = false;
-
   // ── UI state ───────────────────────────────────────────────────────────
   String _tf        = '1h';
   double _lot       = 0.01;
   bool   _tradeOpen = false;
 
-
-
   // ── Tick subscription ──────────────────────────────────────────────────
   StreamSubscription<Map<String, dynamic>>? _tickSub;
 
-  // ────────────────────────────────────────────────�────────────────────
+  // ─────────────────────────────────────────────────────────────────────
   // Lifecycle
   // ─────────────────────────────────────────────────────────────────────
+
+  String _rawSymbol() {
+    if (Get.isRegistered<SymbolSelectionService>()) {
+      final s = Get.find<SymbolSelectionService>().currentSymbol;
+      if (s.isNotEmpty) return s;
+    }
+    if (_chart.currentSymbol.value.isNotEmpty) {
+      return _chart.currentSymbol.value;
+    }
+    if (Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>();
+      if (inst.instruments.isNotEmpty) {
+        return inst.instruments.first.symbol;
+      }
+    }
+    return 'XAUUSD';
+  }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_chart.currentSymbol.value.isEmpty) {
-        _chart.currentSymbol.value = 'XAUUSD';
-      }
-      _chart.startWebSocket();
+    final initial = _rawSymbol();
+    if (initial.isNotEmpty) {
+      _chart.changeSymbol(initial);
+    }
+    _chart.startWebSocket();
 
-      // Subscribe to live tick stream → push bar updates into WebView
-      _tickSub = _chart.priceStream.listen(_onTick);
+    // Subscribe to live tick stream → push bar updates into WebView
+    _tickSub = _chart.priceStream.listen(_onTick);
 
-      // Re-render position/order lines when data changes
-      ever(_trade.marketPositionsRx, (_) { if (_widgetReady) _renderPositionLines(); });
-    });
+    // Position/order lines are re-rendered from _MetaChartArea via its own key
+    ever(_trade.marketPositionsRx, (_) => setState(() {}));
   }
 
   @override
@@ -103,8 +113,6 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
     _chart.stopWebSocket();
     super.dispose();
   }
-
-
 
   // ─────────────────────────────────────────────────────────────────────
   // Live tick → update price header (bid/ask lines not available in
@@ -179,8 +187,8 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
   // ─────────────────────────────────────────────────────────────────────
 
   Future<void> _callJS(String js) async {
-    try { await _chartKey.currentState?.evaluateJavascript(js); }
-    catch (e) { debugPrint('[Chart] JS: $e'); }
+    // JS is sent via _MetaChartArea's key — no-op here.
+    debugPrint('[Chart] JS call skipped — webview owned by _MetaChartArea: $js');
   }
 
 
@@ -361,30 +369,8 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.r),
-        child: Obx(() {
-          final sym = _stripSuffix(_chart.currentSymbol.value.isEmpty ? 'XAUUSD' : _chart.currentSymbol.value);
-          final url = '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
-          
-          if (FlavorConfig.instance.useNewChart) {
-            return TenaxChartWebView(
-              symbol: sym,
-              isDark: AppColors.chartTheme == 'dark',
-            );
-          }
-
-          return ChartInAppWebView(
-            key: _chartKey,
-            symbol: sym,
-            url: url,
-            onReady: () {
-              if (mounted) {
-                setState(() => _widgetReady = true);
-                _renderPositionLines();
-                _renderOrderLines();
-              }
-            },
-          );
-        }),
+        // _MetaChartArea seeds the WebView symbol ONCE and updates via key
+        child: _MetaChartArea(isDark: AppColors.chartTheme == 'dark'),
       ),
     );
   }
@@ -525,7 +511,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
               trailing: active ? Icon(Icons.check, color: MetaTheme.buy(c)) : null,
               onTap: () {
                 setState(() => _tf = e.key);
-                if (_widgetReady) {
+                {
                   // index.html uses TradingView Widget — recreate with new interval
                   _callJS('''
                     if(chartWidget) {
@@ -574,14 +560,134 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
       builder: (_) => _SymbolPicker(
         instruments: _inst,
         onSelected: (sym) {
-          _chart.currentSymbol.value = sym;
-          // Also tell chart directly in case ever() hasn't fired yet
-          if (_widgetReady) {
-            _chartKey.currentState?.updateSymbol(_stripSuffix(sym));
+          // setSymbol notifies _MetaChartArea via its lastSymbolRx listener
+          if (Get.isRegistered<SymbolSelectionService>()) {
+            Get.find<SymbolSelectionService>().setSymbol(sym);
           }
+          _chart.changeSymbol(sym);
           Navigator.pop(c);
         },
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _MetaChartArea
+//
+// Vantage-pattern: seeds WebView symbol ONCE and pushes updates via key.
+// Eliminates Obx-triggered didUpdateWidget → XAUUSD race.
+// Fixed for app-kill (fallback detection) and device-lock (forceReload on resume).
+// ─────────────────────────────────────────────────────────────────────────────
+class _MetaChartArea extends StatefulWidget {
+  final bool isDark;
+  const _MetaChartArea({required this.isDark});
+  @override
+  State<_MetaChartArea> createState() => _MetaChartAreaState();
+}
+
+class _MetaChartAreaState extends State<_MetaChartArea>
+    with WidgetsBindingObserver {
+  final _webViewKey = GlobalKey<ChartInAppWebViewState>();
+  final _tenaxKey   = GlobalKey<TenaxChartWebViewState>();
+  late String _initialSymbol;
+  bool _wasSymbolFallback = false;
+  late SymbolSelectionService _symService;
+  StreamSubscription<String>? _symSub;
+
+  static String _strip(String s) {
+    if (s.contains('.')) return s.substring(0, s.lastIndexOf('.'));
+    if (s.isNotEmpty) return s;
+    if (Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>();
+      if (inst.instruments.isNotEmpty) {
+        final f = inst.instruments.first.symbol;
+        return f.contains('.') ? f.substring(0, f.lastIndexOf('.')) : f;
+      }
+    }
+    return 'XAUUSD';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _symService = Get.isRegistered<SymbolSelectionService>()
+        ? Get.find<SymbolSelectionService>()
+        : Get.put(SymbolSelectionService());
+    final stored = _strip(_symService.currentSymbol);
+    if (stored.isNotEmpty) {
+      _initialSymbol = stored;
+      _wasSymbolFallback = false;
+    } else {
+      _initialSymbol = _strip('');
+      _wasSymbolFallback = true;
+    }
+    _symSub = _symService.lastSymbolRx.listen(_onSymbolChanged);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _symSub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final sym = _strip(_symService.currentSymbol);
+      if (sym.isEmpty) return;
+      if (FlavorConfig.instance.useNewChart) {
+        _tenaxKey.currentState?.updateSymbol(sym);
+      } else {
+        _webViewKey.currentState?.updateSymbol(sym).then((success) {
+          if (!success && mounted) {
+            _webViewKey.currentState?.loadUrlWithSymbol(sym);
+          }
+        });
+      }
+    }
+  }
+
+  void _onSymbolChanged(String newSym) {
+    final clean = _strip(newSym);
+    if (!mounted || clean.isEmpty) return;
+    if (Get.isRegistered<ChartSocketController>()) {
+      Get.find<ChartSocketController>().changeSymbol(newSym);
+    }
+    if (FlavorConfig.instance.useNewChart) {
+      _tenaxKey.currentState?.updateSymbol(clean);
+      return;
+    }
+    if (_wasSymbolFallback) {
+      _wasSymbolFallback = false;
+      _initialSymbol = clean;
+      _webViewKey.currentState?.loadUrlWithSymbol(clean);
+      return;
+    }
+    _webViewKey.currentState?.updateSymbol(clean).then((success) {
+      if (!success && mounted) {
+        _webViewKey.currentState?.loadUrlWithSymbol(clean);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (FlavorConfig.instance.useNewChart) {
+      return TenaxChartWebView(
+        key: _tenaxKey,
+        symbol: _initialSymbol,
+        isDark: widget.isDark,
+      );
+    }
+    final url =
+        '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}';
+    return ChartInAppWebView(
+      key: _webViewKey,
+      symbol: _initialSymbol,
+      url: url,
     );
   }
 }

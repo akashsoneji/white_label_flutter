@@ -11,7 +11,7 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/screens/trading/view_models/search_instruments_controller.dart';
 import 'meta_theme.dart';
 import 'package:crm_app/services/language_service.dart';
-
+import 'package:crm_app/services/symbol_selection_service.dart';
 /// Meta — WatchList screen (screenshot-faithful).
 ///
 ///  • Top bar: hamburger | "Quotes" | + | ✎
@@ -68,7 +68,10 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
   void _openNewOrder(ListElement item) {
     final symbol = item.symbol;
     try {
-      Get.find<ChartSocketController>().currentSymbol.value = symbol;
+      if (Get.isRegistered<SymbolSelectionService>()) {
+        Get.find<SymbolSelectionService>().setSymbol(symbol);
+      }
+      Get.find<ChartSocketController>().changeSymbol(symbol);
     } catch (_) {}
     widget.onOpenNewOrder?.call(item);
   }
@@ -78,7 +81,10 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
   void _openChart(ListElement item) {
     final symbol = item.symbol;
     try {
-      Get.find<ChartSocketController>().currentSymbol.value = symbol;
+      if (Get.isRegistered<SymbolSelectionService>()) {
+        Get.find<SymbolSelectionService>().setSymbol(symbol);
+      }
+      Get.find<ChartSocketController>().changeSymbol(symbol);
     } catch (_) {}
     widget.onOpenChart?.call(item);
   }

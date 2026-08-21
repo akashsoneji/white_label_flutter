@@ -58,7 +58,7 @@ class CelestialChartScreen extends StatefulWidget {
 }
 
 class _CelestialChartScreenState extends State<CelestialChartScreen>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   @override
   bool get wantKeepAlive => true;
 
@@ -68,10 +68,6 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
 
   LanguageService get languageService => Get.find<LanguageService>();
   TradingController get _trade => Get.find<TradingController>();
-
-  // ── WebView ────────────────────────────────────────────────────────────
-  final GlobalKey<ChartInAppWebViewState> _chartKey = GlobalKey();
-  bool _widgetReady = false;
 
   // ── UI state ───────────────────────────────────────────────────────────
   String _tf = '1h';
@@ -85,36 +81,59 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
   // Lifecycle
   // ─────────────────────────────────────────────────────────────────────
 
+  String _rawSymbol() {
+    if (Get.isRegistered<SymbolSelectionService>()) {
+      final s = Get.find<SymbolSelectionService>().currentSymbol;
+      if (s.isNotEmpty) return s;
+    }
+    if (_chart.currentSymbol.value.isNotEmpty) {
+      return _chart.currentSymbol.value;
+    }
+    if (Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>();
+      if (inst.instruments.isNotEmpty) {
+        return inst.instruments.first.symbol;
+      }
+    }
+    return 'XAUUSD';
+  }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_chart.currentSymbol.value.isEmpty) {
-        final symService =
-            Get.isRegistered<SymbolSelectionService>()
-                ? Get.find<SymbolSelectionService>()
-                : null;
-        final persistedSym = symService?.currentSymbol ?? '';
-        _chart.currentSymbol.value =
-            persistedSym.isNotEmpty ? persistedSym : 'XAUUSD';
-      }
-      _chart.startWebSocket();
+    WidgetsBinding.instance.addObserver(this);
 
-      // Subscribe to live tick stream → push bar updates into WebView
-      _tickSub = _chart.priceStream.listen(_onTick);
+    final initial = _rawSymbol();
+    if (initial.isNotEmpty) {
+      _chart.changeSymbol(initial);
+    }
+    _chart.startWebSocket();
 
-      // Re-render position/order lines when data changes
-      ever(_trade.marketPositionsRx, (_) {
-        if (_widgetReady) _renderPositionLines();
-      });
-    });
+    // Subscribe to live tick stream → push bar updates into WebView
+    _tickSub = _chart.priceStream.listen(_onTick);
+
+    // Position/order lines are re-rendered from _CelChartArea via its own key
+    ever(_trade.marketPositionsRx, (_) => setState(() {}));
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _tickSub?.cancel();
     _chart.stopWebSocket();
     super.dispose();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Lifecycle Overrides
+  // ─────────────────────────────────────────────────────────────────────
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (!_chart.isConnected.value) {
+        _chart.handleAppRestart();
+      }
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────
@@ -178,7 +197,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
 
     final sym =
         _chart.currentSymbol.value.isEmpty
-            ? 'XAUUSD'
+            ? 'EURUSD'
             : _chart.currentSymbol.value;
     final type = side == 'sell' ? OrderType.sellMarket : OrderType.buyMarket;
 
@@ -199,11 +218,9 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
   // ─────────────────────────────────────────────────────────────────────
 
   Future<void> _callJS(String js) async {
-    try {
-      await _chartKey.currentState?.evaluateJavascript(js);
-    } catch (e) {
-      debugPrint('[Chart] JS: $e');
-    }
+    // JS is sent via _CelChartArea's key — no-op here (timeframe changes
+    // go through _CelChartArea which owns the WebView key).
+    debugPrint('[Chart] JS call skipped — webview owned by _CelChartArea: $js');
   }
 
   String _stripSuffix(String sym) =>
@@ -244,7 +261,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
           Obx(() {
             final sym =
                 _chart.currentSymbol.value.isEmpty
-                    ? 'XAUUSD'
+                    ? 'EURUSD'
                     : _chart.currentSymbol.value;
             return GestureDetector(
               onTap: () => _pickSymbol(c),
@@ -320,7 +337,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
     return Obx(() {
       final sym =
           _chart.currentSymbol.value.isEmpty
-              ? 'XAUUSD'
+              ? 'EURUSD'
               : _chart.currentSymbol.value;
       final price = _inst.priceRx(sym).value;
       final dig = price.digits > 0 ? price.digits : 2;
@@ -384,35 +401,11 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.r),
-        child: Obx(() {
-          final sym = _stripSuffix(
-            _chart.currentSymbol.value.isEmpty
-                ? 'XAUUSD'
-                : _chart.currentSymbol.value,
-          );
-          final url =
-              '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
-
-          if (FlavorConfig.instance.useNewChart) {
-            return TenaxChartWebView(
-              symbol: sym,
-              isDark: AppColors.chartTheme == 'dark',
-            );
-          }
-
-          return ChartInAppWebView(
-            key: _chartKey,
-            symbol: sym,
-            url: url,
-            onReady: () {
-              if (mounted) {
-                setState(() => _widgetReady = true);
-                _renderPositionLines();
-                _renderOrderLines();
-              }
-            },
-          );
-        }),
+        // ── _CelChartArea seeds the WebView symbol ONCE and updates it via
+        // its own GlobalKey — never causes ChartInAppWebView to rebuild.
+        child: _CelChartArea(
+          isDark: AppColors.chartTheme == 'dark',
+        ),
       ),
     );
   }
@@ -617,7 +610,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
                               : null,
                       onTap: () {
                         setState(() => _tf = e.key);
-                        if (_widgetReady) {
+                        {
                           // index.html uses TradingView Widget — recreate with new interval
                           _callJS('''
                     if(chartWidget) {
@@ -625,7 +618,7 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
                       chartWidget = null;
                     }
                     (function(){
-                      var sym = typeof selectedSymbol !== "undefined" ? selectedSymbol : "XAUUSD";
+                      var sym = typeof selectedSymbol !== "undefined" ? selectedSymbol : "EURUSD";
                       var theme = window.__tv_theme || "light";
                       var toolbarBg = theme === "dark" ? "#0F172A" : "#f1f3f6";
                       document.getElementById("chartContainer").innerHTML = "";
@@ -668,14 +661,165 @@ class _CelestialChartScreenState extends State<CelestialChartScreen>
           (_) => _SymbolPicker(
             instruments: _inst,
             onSelected: (sym) {
-              _chart.currentSymbol.value = sym;
-              // Also tell chart directly in case ever() hasn't fired yet
-              if (_widgetReady) {
-                _chartKey.currentState?.updateSymbol(_stripSuffix(sym));
+              // setSymbol notifies _CelChartArea via its lastSymbolRx listener
+              if (Get.isRegistered<SymbolSelectionService>()) {
+                Get.find<SymbolSelectionService>().setSymbol(sym);
               }
+              _chart.changeSymbol(sym);
               Navigator.pop(c);
             },
           ),
+    );
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _CelChartArea
+//
+// Vantage-pattern chart area: seeds the WebView symbol ONCE in initState
+// and subsequently pushes symbol changes via key.currentState?.updateSymbol().
+// ChartInAppWebView is NEVER torn down and rebuilt on symbol change — that
+// eliminates the "Obx triggers didUpdateWidget → XAUUSD reload" race.
+//
+// Fix for app-kill + watchlist-tap: if storage hasn't loaded yet (_initialSymbol
+// is a fallback), we listen for the first real symbol from SymbolSelectionService
+// and force-reload the WebView with the correct URL.
+//
+// Fix for device-lock (15min) + watchlist-tap: WebView may be blank after OS
+// suspension. _onSymbolChanged now force-reloads with the new URL when JS fails.
+// ─────────────────────────────────────────────────────────────────────────────
+class _CelChartArea extends StatefulWidget {
+  final bool isDark;
+  const _CelChartArea({required this.isDark});
+  @override
+  State<_CelChartArea> createState() => _CelChartAreaState();
+}
+
+class _CelChartAreaState extends State<_CelChartArea>
+    with WidgetsBindingObserver {
+  final _webViewKey = GlobalKey<ChartInAppWebViewState>();
+  final _tenaxKey   = GlobalKey<TenaxChartWebViewState>();
+
+  // The symbol the WebView was built with. May be updated on first storage read.
+  late String _initialSymbol;
+  // Whether the initial symbol was a fallback (storage not ready yet).
+  bool _wasSymbolFallback = false;
+
+  late SymbolSelectionService _symService;
+  StreamSubscription<String>? _symSub;
+
+  static String _strip(String s) {
+    if (s.contains('.')) return s.substring(0, s.lastIndexOf('.'));
+    if (s.isNotEmpty) return s;
+    if (Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>();
+      if (inst.instruments.isNotEmpty) {
+        final f = inst.instruments.first.symbol;
+        return f.contains('.') ? f.substring(0, f.lastIndexOf('.')) : f;
+      }
+    }
+    return 'XAUUSD';
+  }
+
+  String _buildUrl(String sym) =>
+      '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}&symbol=${Uri.encodeComponent(sym)}';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _symService = Get.isRegistered<SymbolSelectionService>()
+        ? Get.find<SymbolSelectionService>()
+        : Get.put(SymbolSelectionService());
+
+    final stored = _strip(_symService.currentSymbol);
+    if (stored.isNotEmpty) {
+      _initialSymbol = stored;
+      _wasSymbolFallback = false;
+    } else {
+      // Storage not loaded yet — use fallback and mark it so we reload
+      // when the real symbol arrives via the stream.
+      _initialSymbol = _strip('');
+      _wasSymbolFallback = true;
+    }
+
+    _symSub = _symService.lastSymbolRx.listen(_onSymbolChanged);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _symSub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final sym = _strip(_symService.currentSymbol);
+      if (sym.isEmpty) return;
+      if (FlavorConfig.instance.useNewChart) {
+        _tenaxKey.currentState?.updateSymbol(sym);
+      } else {
+        // Try JS symbol update. If it fails (e.g. WebView is blank after OS
+        // suspension), fall back to a full URL reload with the correct symbol.
+        _webViewKey.currentState?.updateSymbol(sym).then((success) {
+          if (!success && mounted) {
+            _webViewKey.currentState?.loadUrlWithSymbol(sym);
+          }
+        });
+      }
+    }
+  }
+
+  void _onSymbolChanged(String newSym) {
+    final clean = _strip(newSym);
+    if (!mounted || clean.isEmpty) return;
+
+    // Update socket
+    if (Get.isRegistered<ChartSocketController>()) {
+      Get.find<ChartSocketController>().changeSymbol(newSym);
+    }
+
+    if (FlavorConfig.instance.useNewChart) {
+      _tenaxKey.currentState?.updateSymbol(clean);
+      return;
+    }
+
+    // For InAppWebView:
+    // If this was the first real symbol arriving after a fallback initial load
+    // (app-kill scenario), force a full URL reload with the correct symbol.
+    if (_wasSymbolFallback) {
+      _wasSymbolFallback = false;
+      _initialSymbol = clean;
+      _webViewKey.currentState?.loadUrlWithSymbol(clean);
+      return;
+    }
+
+    // Otherwise try JS symbol switch first; fall back to URL reload if it fails
+    // (device lock / WebView blank after OS suspension).
+    _webViewKey.currentState?.updateSymbol(clean).then((success) {
+      if (!success && mounted) {
+        _webViewKey.currentState?.loadUrlWithSymbol(clean);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (FlavorConfig.instance.useNewChart) {
+      return TenaxChartWebView(
+        key: _tenaxKey,
+        symbol: _initialSymbol,
+        isDark: widget.isDark,
+      );
+    }
+    final url = _buildUrl(_initialSymbol);
+    return ChartInAppWebView(
+      key: _webViewKey,
+      symbol: _initialSymbol,
+      url: url,
     );
   }
 }

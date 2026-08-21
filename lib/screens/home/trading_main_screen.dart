@@ -4,7 +4,6 @@ import 'brands/iquote/iquote_position_screen.dart';
 import 'brands/iquote/iquote_chart_screen.dart';
 import 'brands/iquote/view_models/iquote_chart_controller.dart';
 import 'dart:async';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -111,10 +110,17 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
               : Get.put(SymbolSelectionService());
 
       symService.ensureDefault().then((_) {
+        String fallback = 'EURUSD';
+        if (Get.isRegistered<InstrumentsController>()) {
+          final instCtrl = Get.find<InstrumentsController>();
+          if (instCtrl.instruments.isNotEmpty) {
+            fallback = instCtrl.instruments.first.symbol;
+          }
+        }
         final sym =
             symService.currentSymbol.isNotEmpty
                 ? symService.currentSymbol
-                : 'XAUUSD';
+                : fallback;
         ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
       });
     }
@@ -369,7 +375,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
                   ? AppColors.background
                   : AppColors.tradeBackgroundCenterColor,
           body: SafeArea(
-            child: _ChartFriendlyIndexedStack(
+            child: IndexedStack(
               index: _currentIndex,
               children: _screens,
             ),
@@ -484,35 +490,4 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
 
   @override
   bool get wantKeepAlive => true;
-}
-
-class _ChartFriendlyIndexedStack extends StatelessWidget {
-  final int index;
-  final List<Widget> children;
-
-  const _ChartFriendlyIndexedStack({
-    required this.index,
-    required this.children,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: List.generate(children.length, (i) {
-        final isSelected = index == i;
-        final child = TickerMode(enabled: isSelected, child: children[i]);
-
-        // Always keep the chart screen (index 1) mounted with full size, just invisible
-        // This allows WebView/TradingView to initialize fully in the background
-        if (i == 1) {
-          return IgnorePointer(
-            ignoring: !isSelected,
-            child: Opacity(opacity: isSelected ? 1.0 : 0.0, child: child),
-          );
-        }
-
-        return Offstage(offstage: !isSelected, child: child);
-      }),
-    );
-  }
 }

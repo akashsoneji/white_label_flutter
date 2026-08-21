@@ -1,3 +1,4 @@
+import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -46,7 +47,12 @@ class _CelestialWatchlistScreenState
 
   void _onSymbolTap(String symbol) {
     try {
-      Get.find<ChartSocketController>().currentSymbol.value = symbol;
+      // 1. Update global selection service so other tabs (Trade) know the symbol
+      if (Get.isRegistered<SymbolSelectionService>()) {
+        Get.find<SymbolSelectionService>().setSymbol(symbol);
+      }
+      // 2. Properly change symbol in Chart WS (subscribes to new symbol ticks)
+      Get.find<ChartSocketController>().changeSymbol(symbol);
     } catch (_) {}
     widget.onSymbolTap?.call(symbol);
   }

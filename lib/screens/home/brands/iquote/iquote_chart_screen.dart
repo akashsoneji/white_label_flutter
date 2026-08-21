@@ -146,8 +146,8 @@ class _IQuoteChartScreenState extends State<IQuoteChartScreen> {
   void initState() {
     super.initState();
     // Ensure the controller is registered and its symbol matches the requested one.
-    _ctrl = Get.put(IQuoteChartController(widget.symbol ?? 'XAUUSD.c'));
-    if (widget.symbol != null) {
+    _ctrl = Get.put(IQuoteChartController(widget.symbol));
+    if (widget.symbol != null && widget.symbol!.isNotEmpty) {
       _ctrl.forceSwitchSymbol(widget.symbol!);
     }
   }

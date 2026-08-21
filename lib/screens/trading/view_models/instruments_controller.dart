@@ -1032,7 +1032,19 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       final existingSymbols = allInstruments.map((e) => e.symbol).toSet();
       bool structureChanged = false;
 
-      for (final newItem in incomingItems) {
+      for (var newItem in incomingItems) {
+        // Map to true symbol (e.g. BTCUSD.c instead of BTCUSD) to handle V2 ticks correctly
+        final existingIndex = allInstruments.indexWhere(
+          (element) =>
+              MarketWatchV2Service.normalizeSymbol(element.symbol) ==
+              MarketWatchV2Service.normalizeSymbol(newItem.symbol),
+        );
+
+        if (existingIndex != -1) {
+          final actualSymbol = allInstruments[existingIndex].symbol;
+          newItem = newItem.copyWith(symbol: actualSymbol);
+        }
+
         _applyPriceUpdate(newItem);
 
         if (!existingSymbols.contains(newItem.symbol)) {

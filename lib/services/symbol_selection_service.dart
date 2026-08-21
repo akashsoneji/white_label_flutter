@@ -5,7 +5,7 @@ import 'package:crm_app/services/secure_storage_service.dart';
 /// - Defaults to XAUUSD on first use.
 /// - Not persisted across app restarts.
 class SymbolSelectionService extends GetxService {
-  final RxString _lastSymbol = 'XAUUSD'.obs;
+  final RxString _lastSymbol = ''.obs;
   final RxBool _hasUserSelection = false.obs;
   bool _initialized = false;
 
@@ -37,17 +37,13 @@ class SymbolSelectionService extends GetxService {
   /// Ensure there is a default symbol when nothing has been set yet.
   Future<void> ensureDefault() async {
     await _ensureInitialized();
-    if (_lastSymbol.value.isEmpty) {
-      _lastSymbol.value = 'XAUUSD';
-      SecureStorageService.saveSelectedSymbol(_lastSymbol.value);
-    }
   }
 
   /// Reset back to default and clear the user selection flag.
   void resetToDefault() {
-    _lastSymbol.value = 'XAUUSD';
+    _lastSymbol.value = '';
     _hasUserSelection.value = false;
-    SecureStorageService.saveSelectedSymbol(_lastSymbol.value);
+    SecureStorageService.saveSelectedSymbol('');
   }
 
   Future<void> _ensureInitialized() async {
@@ -60,16 +56,9 @@ class SymbolSelectionService extends GetxService {
           _lastSymbol.value = savedSymbol;
           _hasUserSelection.value = true;
         }
-      } else if (_lastSymbol.value.isEmpty) {
-        _lastSymbol.value = 'XAUUSD';
-        SecureStorageService.saveSelectedSymbol(_lastSymbol.value);
       }
     } catch (_) {
-      // Fallback to default if storage fails
-      if (_lastSymbol.value.isEmpty) {
-        _lastSymbol.value = 'XAUUSD';
-        SecureStorageService.saveSelectedSymbol(_lastSymbol.value);
-      }
+      // Fallback to empty if storage fails
     } finally {
       _initialized = true;
     }

@@ -992,12 +992,10 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
   // Unsubscribe and resubscribe with new account (keeps socket active)
   Future<void> unsubscribeAndResubscribe(
     String newAccountNumber,
-    String symbol,
   ) async {
 
     // If not connected or symbol is empty, just initialize normally
-    if (!isConnected.value || symbol.isEmpty) {
-      currentSymbol.value = symbol;
+    if (!isConnected.value || currentSymbol.value.isEmpty) {
       realTimePrice.clear();
       if (!isConnected.value) {
         initializeWebSocket();
@@ -1031,10 +1029,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
       // Step 3: Clear price data and set symbol
       realTimePrice.clear();
-      // ✅ FIX: Preserve symbol if it hasn't changed, otherwise update it
-      if (currentSymbol.value != symbol) {
-        currentSymbol.value = symbol;
-      }
+      // No need to update currentSymbol, it is already current
 
       // Step 4: Resubscribe with new account
       final authid = await SecureStorageService.getAuthToken();
@@ -1042,7 +1037,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
         sendEvent({
           "authID": authid,
           "trading_account": newAccountNumber,
-          "symbol": symbol,
+          "symbol": currentSymbol.value,
         });
       } else {
       }
@@ -1050,7 +1045,6 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
       // Fallback: if unsubscribe/resubscribe fails, do full reconnect
       _disconnectWebSocket();
       await Future.delayed(const Duration(milliseconds: 100));
-      currentSymbol.value = symbol;
       realTimePrice.clear();
       initializeWebSocket();
     }

@@ -129,8 +129,12 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   // ── Symbol / price helpers ──────────────────────────────────────────
   String _rawSymbol() {
     final s = Get.find<SymbolSelectionService>().currentSymbol;
-    if (s.isEmpty) return 'XAUUSD';
-    return s;
+    if (s.isNotEmpty) return s;
+    if (Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>();
+      if (inst.instruments.isNotEmpty) return inst.instruments.first.symbol;
+    }
+    return 'XAUUSD';
   }
 
   String _displaySymbol() {
@@ -719,23 +723,29 @@ class _ChartAreaState extends State<_ChartArea> {
     _tenaxKey.currentState?.updateSymbol(raw);
   }
 
-  static String _stripDot(String s) =>
-      s.contains('.') ? s.substring(0, s.lastIndexOf('.')) : (s.isEmpty ? 'XAUUSD' : s);
+  static String _stripDot(String s) {
+    if (s.contains('.')) return s.substring(0, s.lastIndexOf('.'));
+    if (s.isNotEmpty) return s;
+    if (Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>();
+      if (inst.instruments.isNotEmpty) {
+        final f = inst.instruments.first.symbol;
+        return f.contains('.') ? f.substring(0, f.lastIndexOf('.')) : f;
+      }
+    }
+    return 'XAUUSD';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final useNew = FlavorConfig.instance.useNewChart;
-      final sym = Get.find<SymbolSelectionService>().currentSymbol;
-      final raw =
-          sym.contains('.')
-              ? sym.substring(0, sym.lastIndexOf('.'))
-              : (sym.isEmpty ? 'XAUUSD' : sym);
+      final raw = _stripDot(Get.find<SymbolSelectionService>().currentSymbol);
 
       if (useNew) {
         return TenaxChartWebView(
           key: _tenaxKey,
-          symbol: _initialSymbol ?? 'XAUUSD',
+          symbol: _initialSymbol ?? raw,
           isDark: widget.isDark,
         );
       }
