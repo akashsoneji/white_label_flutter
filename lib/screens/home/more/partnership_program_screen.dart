@@ -201,7 +201,10 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                                 ? Colors.orange
                                 : Colors.grey,
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.whiteColor, width: 2),
+                        border: Border.all(
+                          color: AppColors.whiteColor,
+                          width: 2,
+                        ),
                       ),
                       child: Center(
                         child: Icon(
@@ -383,8 +386,13 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                             ),
                             activeColor: AppColors.primary,
                             checkColor: AppColors.whiteColor,
-                            side: BorderSide(color: AppColors.textGrey, width: 1.5),
-                            fillColor: WidgetStateProperty.resolveWith((states) {
+                            side: BorderSide(
+                              color: AppColors.textGrey,
+                              width: 1.5,
+                            ),
+                            fillColor: WidgetStateProperty.resolveWith((
+                              states,
+                            ) {
                               if (states.contains(WidgetState.selected)) {
                                 return AppColors.primary;
                               }
@@ -486,22 +494,32 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
       );
 
       // Close loading dialog
-      Get.back(closeOverlays: true);
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
 
       if (success) {
-        // Update UI state
-        setState(() {
-          _isApplicationSubmitted = true;
-        });
+        // Wait briefly to allow the loading dialog pop animation to finish.
+        // This prevents Flutter Navigator from getting confused by simultaneous pops.
+        await Future.delayed(const Duration(milliseconds: 150));
 
-        // Navigate back (user needs to wait for admin approval)
-        // They can check status later by calling IB status API
-        Navigator.of(context).pop();
+        // Pop the IB application dialog
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+        } else {
+          Navigator.of(context).pop();
+        }
+
+        // Wait briefly again
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        // Navigate back to the settings screen
+        Get.back();
       }
     } catch (e) {
       // Close loading dialog if still open
       if (Get.isDialogOpen ?? false) {
-        Get.back(closeOverlays: true);
+        Get.back();
       }
       CustomToastService.showError(
         message: 'Error submitting IB application: $e',

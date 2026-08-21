@@ -1,0 +1,429 @@
+{
+  "info": {
+    "name": "IB Manager — Client Side API",
+    "description": "Client-facing IB Manager endpoints only (Partner Portal + Client). All routes come from Modules/IBManager/Routes/api.php. Auth is Sanctum bearer token. Portal endpoints wrap every response in {success, message, data}; ownership failures answer 404, validation 422.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://broker.example.com", "type": "string" },
+    { "key": "token", "value": "PASTE_SANCTUM_TOKEN", "type": "string" },
+    { "key": "partner_user_id", "value": "5", "type": "string" },
+    { "key": "client_user_id", "value": "10", "type": "string" },
+    { "key": "account_id", "value": "1", "type": "string" },
+    { "key": "plan_id", "value": "7", "type": "string" },
+    { "key": "link_id", "value": "3", "type": "string" },
+    { "key": "request_id", "value": "12", "type": "string" },
+    { "key": "payout_id", "value": "12", "type": "string" },
+    { "key": "material_id", "value": "5", "type": "string" },
+    { "key": "ref_code", "value": "ABC123", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ]
+  },
+  "item": [
+    {
+      "name": "Client (ordinary user) — /api/ibm/client",
+      "item": [
+        {
+          "name": "System resolve (draw-any-IB-screen gate)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/ibm/client/system", "host": ["{{base_url}}"], "path": ["api","ibm","client","system"] },
+            "description": "The one question the client app asks before rendering any IB screen. Returns whether the user is a partner, whether they can apply, and any open partner request."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/client/system" } },
+              "status": "OK", "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"System resolved.\",\n  \"data\": {\n    \"system\": \"ibm\",\n    \"is_partner\": false,\n    \"can_apply\": true,\n    \"partner_request\": { \"id\": 12, \"status\": \"pending\", \"requested_at\": \"2026-08-17 10:00:00\" },\n    \"in_both_systems\": false\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/client/system" } },
+              "status": "Unauthorized", "code": 401,
+              "body": "{\n  \"success\": false,\n  \"message\": \"Unauthorized.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Account groups (offered when referred client opens an account)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/ibm/client/account-groups", "host": ["{{base_url}}"], "path": ["api","ibm","client","account-groups"] },
+            "description": "Generic group names only — the MT5 path never leaves the backend. auto_select is true only when exactly one group. source = link | partner_default | none."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/client/account-groups" } },
+              "status": "OK", "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"\",\n  \"data\": {\n    \"groups\": [ { \"plan_group_id\": 10, \"name\": \"Standard\", \"is_default\": true } ],\n    \"auto_select\": false,\n    \"source\": \"link\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit partner request (become an IB)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"I would like to become a partner.\"\n}" },
+            "url": { "raw": "{{base_url}}/api/ibm/client/partner-request", "host": ["{{base_url}}"], "path": ["api","ibm","client","partner-request"] },
+            "description": "Target IB is taken from the client's own live assignment, NOT the body. Body: message (nullable, max 1000)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": { "method": "POST", "url": { "raw": "{{base_url}}/api/ibm/client/partner-request" } },
+              "status": "OK", "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"Your request has been submitted.\",\n  \"data\": { \"request_id\": 12, \"status\": \"pending\", \"requested_at\": \"2026-08-17 10:00:00\" }\n}"
+            },
+            {
+              "name": "422 Already a partner",
+              "originalRequest": { "method": "POST", "url": { "raw": "{{base_url}}/api/ibm/client/partner-request" } },
+              "status": "Unprocessable Entity", "code": 422,
+              "body": "{\n  \"success\": false,\n  \"message\": \"You are already a partner.\",\n  \"data\": null\n}"
+            },
+            {
+              "name": "409 Duplicate pending",
+              "originalRequest": { "method": "POST", "url": { "raw": "{{base_url}}/api/ibm/client/partner-request" } },
+              "status": "Conflict", "code": 409,
+              "body": "{\n  \"success\": false,\n  \"message\": \"You already have a request pending.\",\n  \"data\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Partner request status",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/ibm/client/partner-request", "host": ["{{base_url}}"], "path": ["api","ibm","client","partner-request"] }
+          },
+          "response": [
+            {
+              "name": "200 OK (has request)",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/client/partner-request" } },
+              "status": "OK", "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"\",\n  \"data\": {\n    \"has_request\": true,\n    \"request\": { \"request_id\": 12, \"status\": \"pending\", \"message\": \"…\", \"rejection_reason\": null, \"requested_at\": \"2026-08-17 10:00:00\", \"reviewed_at\": null }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Current referral (from ibm_ref cookie)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/ibm/client/referral", "host": ["{{base_url}}"], "path": ["api","ibm","client","referral"] },
+            "description": "Reads the ibm_ref cookie set by the public /r/{code} landing. Not a body/query field."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/client/referral" } },
+              "status": "OK", "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"\",\n  \"data\": { \"has_referral\": true, \"code\": \"ABC123\", \"label\": \"Summer promo\" }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Public referral landing (no auth)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/ibm/r/{{ref_code}}", "host": ["{{base_url}}"], "path": ["api","ibm","r","{{ref_code}}"] },
+            "description": "Records the click, sets ibm_visitor + ibm_ref cookies. With Accept: application/json it answers JSON; otherwise it redirects to registration. Throttled 60/min, unauthenticated."
+          },
+          "response": [
+            {
+              "name": "200 OK (JSON)",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/r/{{ref_code}}" } },
+              "status": "OK", "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"\",\n  \"data\": { \"code\": \"ABC123\", \"label\": \"Summer promo\" }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Portal — Dashboard",
+      "item": [
+        {
+          "name": "Dashboard overview",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/ibm/portal/dashboard?period=this_month&scope=total", "host": ["{{base_url}}"], "path": ["api","ibm","portal","dashboard"], "query": [ { "key": "period", "value": "this_month" }, { "key": "scope", "value": "total" } ] },
+            "description": "Query: period (today|7d|30d|mtd|this_month|all|custom + from/to), scope (direct|network|total)."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/dashboard" } },
+              "status": "OK", "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"\",\n  \"data\": {\n    \"period\": { \"key\": \"this_month\", \"from\": \"2026-08-01 00:00:00\", \"to\": \"2026-08-17 23:59:59\" },\n    \"scope\": \"total\",\n    \"currencies\": [ { \"currency\": \"USD\", \"deposits\": 0.0, \"withdrawals\": 0.0, \"equity\": 0.0, \"commission\": 0.0 } ],\n    \"equity_as_of\": \"2026-08-17 12:00:00\",\n    \"clients\": { \"total\": 42, \"active\": 12, \"new_in_period\": 3 },\n    \"partners\": { \"direct\": 3, \"network\": 9 },\n    \"funnel\": {},\n    \"top_earners\": [ { \"client_user_id\": 10, \"name\": \"John D\", \"commission\": 50.0 } ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Dashboard activity feed",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Accept", "value": "application/json" } ],
+            "url": { "raw": "{{base_url}}/api/ibm/portal/dashboard/activity", "host": ["{{base_url}}"], "path": ["api","ibm","portal","dashboard","activity"] },
+            "description": "Deposits, withdrawals, payouts and new accounts across the downline. Each event gets a name key injected."
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/dashboard/activity" } },
+              "status": "OK", "code": 200,
+              "body": "{\n  \"success\": true,\n  \"message\": \"\",\n  \"data\": {\n    \"deposits\": [ { \"user_id\": 10, \"name\": \"John D\", \"amount\": 500.0, \"currency\": \"USD\", \"at\": \"2026-08-17 09:00:00\" } ],\n    \"withdrawals\": [],\n    \"payouts\": [],\n    \"accounts\": [],\n    \"requests\": []\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Portal — Network / Sub-IBs",
+      "item": [
+        {
+          "name": "Network rows",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network?period=this_month&page=1&per_page=25", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network"], "query": [ { "key": "period", "value": "this_month" }, { "key": "page", "value": "1" }, { "key": "per_page", "value": "25" }, { "key": "parent_id", "value": "", "disabled": true } ] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/network" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"period\": { \"key\": \"this_month\", \"from\": \"…\", \"to\": \"…\" },\n    \"parent_id\": null,\n    \"equity_as_of\": \"…\",\n    \"rows\": [ { \"partner_user_id\": 5, \"name\": \"Demo Two\", \"status\": \"active\", \"has_partners\": true, \"clients\": 30, \"active_clients\": 8, \"currencies\": [ {} ] } ],\n    \"pagination\": { \"page\": 1, \"per_page\": 25, \"total\": 12, \"last_page\": 1 }\n  }\n}" } ]
+        },
+        {
+          "name": "Network summary (direct/network/total)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network/summary", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network","summary"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/network/summary" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"period\": { \"key\": \"this_month\", \"from\": \"…\", \"to\": \"…\" },\n    \"scopes\": {\n      \"direct\": { \"partners\": 3, \"clients\": 20, \"currencies\": [ {} ] },\n      \"network\": { \"partners\": 9, \"clients\": 50, \"currencies\": [ {} ] },\n      \"total\": { \"partners\": 12, \"clients\": 70, \"currencies\": [ {} ] }\n    }\n  }\n}" } ]
+        },
+        {
+          "name": "Network tree-summary",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network/tree-summary", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network","tree-summary"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/network/tree-summary" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": { \"ib_user_id\": 4, \"name\": \"You\", \"direct\": 3, \"total\": 9, \"clients\": 70 }\n}" } ]
+        },
+        {
+          "name": "Network performance (ranked)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network/performance?period=this_month&sort=commission&dir=desc&page=1&per_page=25", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network","performance"], "query": [ { "key": "period", "value": "this_month" }, { "key": "sort", "value": "commission" }, { "key": "dir", "value": "desc" }, { "key": "page", "value": "1" }, { "key": "per_page", "value": "25" } ] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/network/performance" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"period\": { \"key\": \"this_month\", \"from\": \"…\", \"to\": \"…\" },\n    \"currency\": \"USD\",\n    \"equity_as_of\": \"…\",\n    \"sort\": { \"key\": \"commission\", \"dir\": \"desc\" },\n    \"totals\": { \"partners\": 12, \"clients\": 70, \"active_clients\": 18, \"net\": 1234.5, \"commission\": 456.7 },\n    \"rows\": [ { \"partner_user_id\": 5, \"name\": \"…\", \"status\": \"active\", \"via_link\": \"Facebook\", \"via_link_is_mine\": true, \"via_link_owner\": \"You\", \"sub_partners\": 2, \"clients\": 30, \"active_clients\": 8, \"deposits\": 0.0, \"withdrawals\": 0.0, \"net\": 0.0, \"equity\": 0.0, \"lots\": 0.0, \"commission\": 0.0 } ],\n    \"pagination\": { \"page\": 1, \"per_page\": 25, \"total\": 12, \"last_page\": 1 }\n  }\n}" } ]
+        },
+        {
+          "name": "Partner detail (show)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network/{{partner_user_id}}", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network","{{partner_user_id}}"] }, "description": "Ownership guard: a not-yours id answers 404." },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/network/{{partner_user_id}}" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"period\": { \"key\": \"…\", \"from\": \"…\", \"to\": \"…\" },\n    \"upline\": [ { \"ib_user_id\": 4, \"name\": \"You\", \"is_you\": true } ],\n    \"partner\": { \"partner_user_id\": 5, \"name\": \"…\", \"email\": null, \"arrived_via\": null, \"status\": \"active\", \"depth\": 1, \"partner_since\": null, \"sub_partners\": 2 },\n    \"equity_as_of\": \"…\",\n    \"clients\": { \"own\": 10, \"branch\": 30, \"active\": 8 },\n    \"own\": [ {} ], \"branch\": [ {} ],\n    \"sub_partners\": { \"6\": \"Name\", \"7\": \"Name\" }\n  }\n}" } ]
+        },
+        {
+          "name": "Partner node (clients + sub-IBs)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network/{{partner_user_id}}/node", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network","{{partner_user_id}}","node"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/network/{{partner_user_id}}/node" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"period\": { \"key\": \"…\" },\n    \"ib_user_id\": 5, \"client_total\": 30, \"client_shown\": 8,\n    \"people\": [ {} ],\n    \"clients\": [ { \"client_user_id\": 10, \"name\": \"…\", \"email\": null, \"first_account\": \"12345\", \"balance\": 0, \"is_direct\": false, \"currencies\": [ {} ] } ],\n    \"sub_ibs\": [ { \"ib_user_id\": 6, \"name\": \"…\", \"email\": null, \"referral_code\": null, \"plan_name\": null, \"status\": \"active\", \"level\": 1, \"sub_ibs\": 2, \"clients_tree\": 15, \"currencies\": [ {} ] } ]\n  }\n}" } ]
+        },
+        {
+          "name": "Partner wallet (downline)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network/{{partner_user_id}}/wallet", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network","{{partner_user_id}}","wallet"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/network/{{partner_user_id}}/wallet" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"partner_user_id\": 5,\n    \"wallets\": [ { \"currency\": \"USD\", \"available\": 100.0, \"pending_payout\": 0.0, \"lifetime_earned\": 500.0, \"lifetime_paid\": 400.0, \"is_frozen\": false } ],\n    \"payouts\": [ { \"id\": 12, \"currency\": \"USD\", \"amount\": 50.0, \"status\": \"pending\", \"requested_at\": \"…\", \"paid_at\": null } ]\n  }\n}" } ]
+        },
+        {
+          "name": "Partner plan",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network/{{partner_user_id}}/plan", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network","{{partner_user_id}}","plan"] }, "description": "Rates only when the caller wrote the plan (is_yours=true)." }
+        },
+        {
+          "name": "Partner links",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network/{{partner_user_id}}/links", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network","{{partner_user_id}}","links"] } }
+        },
+        {
+          "name": "Partner symbols",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/network/{{partner_user_id}}/symbols", "host": ["{{base_url}}"], "path": ["api","ibm","portal","network","{{partner_user_id}}","symbols"] } }
+        }
+      ]
+    },
+    {
+      "name": "Portal — Clients",
+      "item": [
+        {
+          "name": "Clients list",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/clients?period=this_month&scope=direct&page=1&per_page=25", "host": ["{{base_url}}"], "path": ["api","ibm","portal","clients"], "query": [ { "key": "period", "value": "this_month" }, { "key": "scope", "value": "direct" }, { "key": "page", "value": "1" }, { "key": "per_page", "value": "25" } ] }, "description": "scope: direct|network|total. Also accepts under_ib, link_id, q filters." },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/clients" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"period\": { \"key\": \"this_month\", \"from\": \"…\", \"to\": \"…\" },\n    \"scope\": \"direct\",\n    \"summary\": { \"total\": 40, \"active\": 12, \"new_in_period\": 3, \"commission\": { \"USD\": 123.4 } },\n    \"partners\": [ { \"id\": 5, \"name\": \"…\" } ],\n    \"links\": [ { \"id\": 3, \"label\": \"Facebook\" } ],\n    \"rows\": [ { \"client_user_id\": 10, \"name\": \"…\", \"email\": \"…\", \"email_masked\": false, \"joined_at\": \"…\", \"is_direct\": true, \"is_active\": true, \"idle_days\": 5, \"accounts\": 2, \"account_logins\": [\"12345\"], \"is_ib\": false, \"currencies\": [ {} ] } ],\n    \"pagination\": { \"page\": 1, \"per_page\": 25, \"total\": 40, \"last_page\": 2 }\n  }\n}" } ]
+        },
+        {
+          "name": "Clients network-tree",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/clients/network-tree", "host": ["{{base_url}}"], "path": ["api","ibm","portal","clients","network-tree"] } }
+        },
+        {
+          "name": "Client detail (show)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}", "host": ["{{base_url}}"], "path": ["api","ibm","portal","clients","{{client_user_id}}"] } }
+        },
+        {
+          "name": "Client accounts",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/accounts", "host": ["{{base_url}}"], "path": ["api","ibm","portal","clients","{{client_user_id}}","accounts"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/accounts" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"client_user_id\": 10,\n    \"accounts\": [ { \"account_id\": 1, \"login\": \"12345\", \"group\": \"Standard\", \"currency\": \"USD\", \"balance\": 100.0, \"equity\": 98.0, \"equity_as_of\": \"…\", \"trades\": 10, \"lots\": 5.0, \"commission\": [ { \"currency\": \"USD\", \"amount\": 50.0 } ] } ]\n  }\n}" } ]
+        },
+        {
+          "name": "Client trades — one account",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/accounts/{{account_id}}/trades?page=1&per_page=50", "host": ["{{base_url}}"], "path": ["api","ibm","portal","clients","{{client_user_id}}","accounts","{{account_id}}","trades"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "50" } ] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/accounts/{{account_id}}/trades" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"account\": { \"account_id\": 1, \"login\": \"12345\", \"group\": \"Standard\", \"currency\": \"USD\" },\n    \"period\": { \"key\": \"…\" },\n    \"rows\": [ { \"trade_id\": 999, \"closed_at\": \"…\", \"symbol\": \"XAUUSD\", \"category\": null, \"lots\": 1.0, \"rate_per_lot\": 5.0, \"commission\": 5.0, \"currency\": \"USD\", \"split\": [ { \"is_you\": true, \"name\": \"You\", \"amount\": 5.0, \"currency\": \"USD\" } ], \"account\": \"12345\", \"side\": \"BUY\", \"open_price\": 1900.0, \"close_price\": 1910.0, \"opened_at\": \"…\", \"profit\": 10.0 } ],\n    \"totals\": [ { \"currency\": \"USD\", \"trades\": 10, \"lots\": 5.0, \"commission\": 50.0, \"profit\": 100.0 } ],\n    \"pagination\": { \"page\": 1, \"per_page\": 50, \"total\": 120, \"last_page\": 3 }\n  }\n}" } ]
+        },
+        {
+          "name": "Client trades — all accounts",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/clients/{{client_user_id}}/trades?page=1&per_page=50", "host": ["{{base_url}}"], "path": ["api","ibm","portal","clients","{{client_user_id}}","trades"], "query": [ { "key": "page", "value": "1" }, { "key": "per_page", "value": "50" } ] }, "description": "Same shape as one-account trades but account is null." }
+        }
+      ]
+    },
+    {
+      "name": "Portal — My Plan & Partner Plans",
+      "item": [
+        {
+          "name": "My plan",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/plan", "host": ["{{base_url}}"], "path": ["api","ibm","portal","plan"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/plan" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"plan\": { \"name\": \"…\", \"plan_name\": \"…\", \"description\": null, \"is_active\": true },\n    \"groups\": [ { \"plan_group_id\": 55, \"group_id\": 100, \"name\": \"Standard\", \"is_active\": true, \"rates\": [ { \"symbol_category_id\": 3, \"category\": \"Forex\", \"rate_per_lot\": 10.0 } ], \"symbol_overrides\": [ { \"symbol_id\": 12, \"symbol\": \"XAUUSD\", \"rate_per_lot\": 5.0 } ], \"blocked_symbols\": [ { \"symbol_id\": 13, \"symbol\": \"EURUSD\" } ] } ]\n  }\n}" } ]
+        },
+        {
+          "name": "My plan groups",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/plan/groups", "host": ["{{base_url}}"], "path": ["api","ibm","portal","plan","groups"] } }
+        },
+        {
+          "name": "Partner plans list",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans", "host": ["{{base_url}}"], "path": ["api","ibm","portal","partner-plans"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": { \"plans\": [ { \"plan_id\": 7, \"name\": \"Bronze\", \"description\": null, \"is_active\": true, \"partners_using\": 3, \"created_at\": \"…\" } ] }\n}" } ]
+        },
+        {
+          "name": "Partner plan template (for new plan)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans/template", "host": ["{{base_url}}"], "path": ["api","ibm","portal","partner-plans","template"] } }
+        },
+        {
+          "name": "Partner plan detail",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans/{{plan_id}}", "host": ["{{base_url}}"], "path": ["api","ibm","portal","partner-plans","{{plan_id}}"] } }
+        },
+        {
+          "name": "Create partner plan",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bronze\",\n  \"description\": \"Entry tier\",\n  \"groups\": [\n    { \"group_id\": 100, \"rates\": { \"3\": 10.0 }, \"symbol_rates\": { \"12\": 5.0 }, \"blocked_symbol_ids\": [13] }\n  ]\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans", "host": ["{{base_url}}"], "path": ["api","ibm","portal","partner-plans"] }, "description": "Cap violation → 422 with data:{caps, violations}." },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "POST", "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"Plan created.\",\n  \"data\": { \"plan_id\": 7, \"caps\": [ {} ] }\n}" } ]
+        },
+        {
+          "name": "Update partner plan",
+          "request": { "method": "PUT", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bronze\",\n  \"description\": \"Entry tier\",\n  \"groups\": [ { \"group_id\": 100, \"rates\": { \"3\": 10.0 }, \"symbol_rates\": {}, \"blocked_symbol_ids\": [] } ]\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans/{{plan_id}}", "host": ["{{base_url}}"], "path": ["api","ibm","portal","partner-plans","{{plan_id}}"] } }
+        },
+        {
+          "name": "Delete partner plan",
+          "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans/{{plan_id}}", "host": ["{{base_url}}"], "path": ["api","ibm","portal","partner-plans","{{plan_id}}"] }, "description": "422 when active sub-IB assignments exist." }
+        },
+        {
+          "name": "Assignable sub-IBs",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans/sub-ibs", "host": ["{{base_url}}"], "path": ["api","ibm","portal","partner-plans","sub-ibs"] } }
+        },
+        {
+          "name": "Assign plan to a sub-IB",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"partner_user_id\": 6\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/partner-plans/{{plan_id}}/assign", "host": ["{{base_url}}"], "path": ["api","ibm","portal","partner-plans","{{plan_id}}","assign"] }, "description": "403 not-your-sub-IB; 422 plan-over-cap {violations}; 422 already-on-plan." }
+        }
+      ]
+    },
+    {
+      "name": "Portal — Client Visibility",
+      "item": [
+        {
+          "name": "Get visibility",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/client-visibility", "host": ["{{base_url}}"], "path": ["api","ibm","portal","client-visibility"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/client-visibility" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"groups\": [ { \"plan_group_id\": 55, \"group_id\": 100, \"name\": \"Standard\", \"is_active\": true, \"is_visible\": true, \"is_default\": false } ],\n    \"default_plan_group_id\": 55,\n    \"visible_count\": 3\n  }\n}" } ]
+        },
+        {
+          "name": "Update visibility",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"plan_group_ids\": [55, 56],\n  \"default_plan_group_id\": 55\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/client-visibility", "host": ["{{base_url}}"], "path": ["api","ibm","portal","client-visibility"] }, "description": "422: empty list / not-on-plan {violations} / default-outside-visible." }
+        }
+      ]
+    },
+    {
+      "name": "Portal — Referral Links",
+      "item": [
+        {
+          "name": "List links",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/links", "host": ["{{base_url}}"], "path": ["api","ibm","portal","links"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/links" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"links\": [ { \"link_id\": 3, \"code\": \"ABC123\", \"label\": \"Facebook\", \"type\": \"generic\", \"is_default_link\": false, \"is_active\": true, \"expires_at\": null, \"groups\": null, \"counts\": { \"visits\": 0, \"unique_visits\": 0, \"signups\": 40, \"accounts\": 0, \"funded\": 12 } } ]\n  }\n}" } ]
+        },
+        {
+          "name": "Create link",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"label\": \"Summer promo\",\n  \"code\": \"SUMMER25\",\n  \"plan_group_ids\": [55, 56],\n  \"default_plan_group_id\": 55,\n  \"expires_at\": \"2026-12-31\"\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/links", "host": ["{{base_url}}"], "path": ["api","ibm","portal","links"] }, "description": "code is optional (auto-generated). 422 on taken code / bad default group." },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "POST", "url": { "raw": "{{base_url}}/api/ibm/portal/links" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"Link created.\",\n  \"data\": { \"link_id\": 3, \"code\": \"SUMMER25\" }\n}" } ]
+        },
+        {
+          "name": "Update link",
+          "request": { "method": "PUT", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"label\": \"Renamed\",\n  \"is_active\": true,\n  \"plan_group_ids\": [55],\n  \"default_plan_group_id\": 55,\n  \"expires_at\": null\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/links/{{link_id}}", "host": ["{{base_url}}"], "path": ["api","ibm","portal","links","{{link_id}}"] } }
+        },
+        {
+          "name": "Delete link",
+          "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/links/{{link_id}}", "host": ["{{base_url}}"], "path": ["api","ibm","portal","links","{{link_id}}"] }, "description": "422 for a generic/default link." }
+        },
+        {
+          "name": "Link stats",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/links/{{link_id}}/stats?period=30d", "host": ["{{base_url}}"], "path": ["api","ibm","portal","links","{{link_id}}","stats"], "query": [ { "key": "period", "value": "30d" } ] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/links/{{link_id}}/stats" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"link\": { \"link_id\": 3, \"code\": \"ABC123\", \"label\": \"Facebook\", \"type\": \"generic\", \"is_active\": true },\n    \"period\": { \"key\": \"30d\", \"from\": \"…\", \"to\": \"…\" },\n    \"counts\": { \"visits\": 0, \"unique_visits\": 0, \"signups\": 40, \"accounts\": 0, \"funded\": 12 },\n    \"earned\": [ { \"currency\": \"USD\", \"amount\": 123.4 } ],\n    \"daily\": [ { \"date\": \"2026-08-17\", \"visits\": 5, \"signups\": 1 } ]\n  }\n}" } ]
+        },
+        {
+          "name": "Link clients",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/links/{{link_id}}/clients?period=all", "host": ["{{base_url}}"], "path": ["api","ibm","portal","links","{{link_id}}","clients"], "query": [ { "key": "period", "value": "all" } ] } }
+        }
+      ]
+    },
+    {
+      "name": "Portal — Partner Requests (sub-IB approvals)",
+      "item": [
+        {
+          "name": "List requests",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/requests?status=pending", "host": ["{{base_url}}"], "path": ["api","ibm","portal","requests"], "query": [ { "key": "status", "value": "pending" } ] }, "description": "status: pending|approved|rejected|cancelled|all." },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/requests" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"status\": \"pending\",\n    \"requests\": [ { \"request_id\": 12, \"user_id\": 88, \"name\": \"Jane Doe\", \"email\": \"jane@x.com\", \"message\": \"let me in\", \"status\": \"pending\", \"plan_id\": 4, \"rejection_reason\": null, \"origin\": \"applied\", \"requested_at\": \"2026-08-17 10:00:00\", \"ib_approved_at\": null, \"reviewed_at\": null } ]\n  }\n}" } ]
+        },
+        {
+          "name": "Approve request",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"plan_id\": 4,\n  \"plan_group_ids\": [10, 11]\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/requests/{{request_id}}/approve", "host": ["{{base_url}}"], "path": ["api","ibm","portal","requests","{{request_id}}","approve"] }, "description": "Two success shapes: manual mode → {awaiting_admin:true}; automatic → {plan_id, plan_group_ids}. 422 already-decided / over-cap {violations}." },
+          "response": [
+            { "name": "200 Manual", "originalRequest": { "method": "POST", "url": { "raw": "{{base_url}}/api/ibm/portal/requests/{{request_id}}/approve" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"Sent to the broker for final approval.\",\n  \"data\": { \"request_id\": 12, \"user_id\": 88, \"awaiting_admin\": true }\n}" },
+            { "name": "200 Automatic", "originalRequest": { "method": "POST", "url": { "raw": "{{base_url}}/api/ibm/portal/requests/{{request_id}}/approve" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"Partner approved.\",\n  \"data\": { \"request_id\": 12, \"user_id\": 88, \"plan_id\": 4, \"plan_group_ids\": [10, 11] }\n}" }
+          ]
+        },
+        {
+          "name": "Reject request",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Insufficient volume\"\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/requests/{{request_id}}/reject", "host": ["{{base_url}}"], "path": ["api","ibm","portal","requests","{{request_id}}","reject"] } }
+        }
+      ]
+    },
+    {
+      "name": "Portal — Wallet & Payouts",
+      "item": [
+        {
+          "name": "Wallet overview",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/wallet", "host": ["{{base_url}}"], "path": ["api","ibm","portal","wallet"] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/wallet" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"minimum_payout_by_currency\": { \"USD\": 50.0, \"INR\": null },\n    \"methods\": [ {} ],\n    \"payouts\": [ { \"id\": 12, \"currency\": \"USD\", \"amount\": 50.0, \"status\": \"pending\", \"method_name\": null, \"beneficiary_label\": null, \"requested_at\": \"…\", \"paid_at\": null, \"payment_reference\": null, \"rejection_reason\": null, \"raised_by_broker\": false } ],\n    \"wallets\": [ { \"currency\": \"USD\", \"balance\": 100.0, \"pending_payout\": 0.0, \"lifetime_earned\": 500.0, \"lifetime_paid\": 400.0, \"is_frozen\": false, \"can_withdraw\": true, \"open_payout_status\": null, \"minimum_payout\": 50.0 } ]\n  }\n}" } ]
+        },
+        {
+          "name": "Wallet transactions (ledger)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/wallet/transactions?currency=USD&type=commission&page=1&per_page=25", "host": ["{{base_url}}"], "path": ["api","ibm","portal","wallet","transactions"], "query": [ { "key": "currency", "value": "USD" }, { "key": "type", "value": "commission" }, { "key": "page", "value": "1" }, { "key": "per_page", "value": "25" } ] }, "description": "type: commission|correction|payout|payout_reversal|adjustment|clawback." },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/wallet/transactions" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"filters\": { \"currency\": \"USD\", \"type\": \"commission\" },\n    \"transactions\": [ { \"id\": 1, \"currency\": \"USD\", \"type\": \"commission\", \"direction\": \"credit\", \"amount\": 5.0, \"balance_before\": 95.0, \"balance_after\": 100.0, \"description\": null, \"created_at\": \"2026-08-17 09:00:00\", \"trade\": { \"symbol\": \"XAUUSD\", \"account\": \"12345\", \"side\": \"BUY\", \"lots\": 1.0, \"entry_price\": 1900.0, \"exit_price\": 1910.0, \"closed_at\": \"…\", \"client_name\": \"John D\" } } ],\n    \"pagination\": { \"page\": 1, \"per_page\": 25, \"total\": 40, \"last_page\": 2 }\n  }\n}" } ]
+        },
+        {
+          "name": "Request withdrawal (payout)",
+          "request": { "method": "POST", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"currency\": \"USD\",\n  \"amount\": 100.0,\n  \"method_slug\": \"bank_transfer\",\n  \"withdrawal_method_id\": 3\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/wallet/withdraw", "host": ["{{base_url}}"], "path": ["api","ibm","portal","wallet","withdraw"] }, "description": "Body: currency (req, max 10), amount (req, >0), method_slug (nullable), withdrawal_method_id (nullable). 422 on invalid method / rejected payout." },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "POST", "url": { "raw": "{{base_url}}/api/ibm/portal/wallet/withdraw" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"Your payout request has been submitted.\",\n  \"data\": { \"payout_request_id\": 12, \"currency\": \"USD\", \"amount\": 100.0, \"balance\": 0.0, \"pending_payout\": 100.0 }\n}" } ]
+        },
+        {
+          "name": "Cancel own payout",
+          "request": { "method": "DELETE", "header": [ { "key": "Accept", "value": "application/json" }, { "key": "Content-Type", "value": "application/json" } ], "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Wrong amount\"\n}" }, "url": { "raw": "{{base_url}}/api/ibm/portal/wallet/payout/{{payout_id}}", "host": ["{{base_url}}"], "path": ["api","ibm","portal","wallet","payout","{{payout_id}}"] }, "description": "404 not found; 422 if broker-raised or non-cancellable." },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "DELETE", "url": { "raw": "{{base_url}}/api/ibm/portal/wallet/payout/{{payout_id}}" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"Your payout request has been withdrawn.\",\n  \"data\": { \"payout_request_id\": 12, \"balance\": 100.0, \"pending_payout\": 0.0 }\n}" } ]
+        }
+      ]
+    },
+    {
+      "name": "Portal — Marketing",
+      "item": [
+        {
+          "name": "Marketing materials",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/marketing?category=banners&q=", "host": ["{{base_url}}"], "path": ["api","ibm","portal","marketing"], "query": [ { "key": "category", "value": "banners" }, { "key": "q", "value": "" } ] } },
+          "response": [ { "name": "200 OK", "originalRequest": { "method": "GET", "url": { "raw": "{{base_url}}/api/ibm/portal/marketing" } }, "status": "OK", "code": 200, "body": "{\n  \"success\": true, \"message\": \"\",\n  \"data\": {\n    \"materials\": [ { \"material_id\": 5, \"title\": \"Banner A\", \"description\": \"…\", \"category\": \"banners\", \"category_label\": \"Banners\", \"category_icon\": \"fa-image\", \"language\": \"en\", \"dimensions\": \"728x90\", \"has_file\": true, \"file_name\": \"a.png\", \"file_size\": 20480, \"external_url\": null, \"thumbnail_url\": \"https://…/storage/…\", \"download_count\": 3, \"published_at\": \"2026-08-08 09:00:00\" } ],\n    \"categories\": [ { \"key\": \"banners\", \"label\": \"Banners\", \"icon\": \"fa-image\", \"count\": 4 } ]\n  }\n}" } ]
+        },
+        {
+          "name": "Download material (binary)",
+          "request": { "method": "GET", "header": [ { "key": "Accept", "value": "application/json" } ], "url": { "raw": "{{base_url}}/api/ibm/portal/marketing/{{material_id}}/download", "host": ["{{base_url}}"], "path": ["api","ibm","portal","marketing","{{material_id}}","download"] }, "description": "Success returns the file stream (NOT JSON). 404 JSON only on error." }
+        }
+      ]
+    }
+  ]
+}

@@ -38,8 +38,26 @@ class IbmApiProvider {
   }
 
   /// Get IBM Portal Dashboard Activity
-  Future<ApiResponse> getPortalDashboardActivity() async {
-    return await ApiService.get(endpoint: 'ibm/portal/dashboard/activity');
+  Future<ApiResponse> getPortalDashboardActivity({int limit = 5}) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/dashboard/activity',
+      queryParameters: {'limit': limit.toString()},
+    );
+  }
+
+  /// Get IBM Portal Network (Sub-IBs)
+  Future<ApiResponse> getPortalNetwork({
+    String period = 'mtd',
+    int page = 1,
+  }) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network',
+      queryParameters: {
+        'period': period,
+        'page': page.toString(),
+        'per_page': '5',
+      },
+    );
   }
 
   /// Get IBM Portal Clients
@@ -192,6 +210,11 @@ class IbmApiProvider {
     return await ApiService.get(endpoint: 'ibm/portal/links');
   }
 
+  /// Get Portal Plan Groups
+  Future<ApiResponse> getPortalPlanGroups() async {
+    return await ApiService.get(endpoint: 'ibm/portal/plan/groups');
+  }
+
   /// Create Referral Link
   Future<ApiResponse> createReferralLink({
     required String label,
@@ -208,6 +231,31 @@ class IbmApiProvider {
         if (defaultPlanGroupId != null) 'default_plan_group_id': defaultPlanGroupId,
       },
     );
+  }
+
+  /// Update Referral Link
+  Future<ApiResponse> updateReferralLink({
+    required int linkId,
+    String? label,
+    List<int>? planGroupIds,
+    int? defaultPlanGroupId,
+    bool? isActive,
+  }) async {
+    final Map<String, dynamic> data = {};
+    if (label != null) data['label'] = label;
+    if (planGroupIds != null) data['plan_group_ids'] = planGroupIds;
+    if (defaultPlanGroupId != null) data['default_plan_group_id'] = defaultPlanGroupId;
+    if (isActive != null) data['is_active'] = isActive;
+
+    return await ApiService.put(
+      endpoint: 'ibm/portal/links/$linkId',
+      data: data,
+    );
+  }
+
+  /// Delete Referral Link
+  Future<ApiResponse> deleteReferralLink(int linkId) async {
+    return await ApiService.delete(endpoint: 'ibm/portal/links/$linkId');
   }
 
   // --- Network Profile APIs ---

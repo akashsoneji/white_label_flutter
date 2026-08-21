@@ -172,9 +172,9 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         final trades = _parseDouble(commData['trades']).toInt();
         final perLot = _parseDouble(commData['per_lot']);
 
-        // Merge dashboard wallet with separate wallet if needed
-        final dashboardWallet = firstCurrency['wallet'] ?? {};
-        final effectiveWallet = wallet.isEmpty ? dashboardWallet : wallet;
+        // Use dashboard wallet data directly
+        final effectiveWallet = data['wallet'] ?? firstCurrency['wallet'] ?? {};
+        final network = controller.networkData;
 
         return RefreshIndicator(
           color: AppColors.primary,
@@ -206,7 +206,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               SizedBox(height: 24.h),
               _buildClientFunnel(funnel),
               SizedBox(height: 24.h),
-              _buildSubIbPerformance(data['top_earners']),
+              _buildSubIbPerformance(network['rows']),
               SizedBox(height: 24.h),
               _buildActivityRow(actData, requests),
               SizedBox(height: 40.h),
@@ -303,7 +303,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                     style: TextStyle(
                       color:
                           isSelected
-                              ? Colors.white
+                              ? AppColors.whiteColor
                               : AppColors.textPrimary,
                       fontSize: 11.sp,
                       fontWeight:
@@ -510,14 +510,8 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 'TOTAL EARNED',
                 '\$${earned.toStringAsFixed(2)}',
               ),
-              _buildSimpleStat(
-                'PAID OUT',
-                '\$${paid.toStringAsFixed(2)}',
-              ),
-              _buildSimpleStat(
-                'PENDING',
-                '\$${pending.toStringAsFixed(2)}',
-              ),
+              _buildSimpleStat('PAID OUT', '\$${paid.toStringAsFixed(2)}'),
+              _buildSimpleStat('PENDING', '\$${pending.toStringAsFixed(2)}'),
               _buildSimpleStat(
                 'AVAILABLE',
                 '\$${available.toStringAsFixed(2)}',
@@ -530,14 +524,14 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             'Direct clients',
             0.5,
             AppColors.primary,
-            '\$${(earned / 2).toStringAsFixed(2)} - 50%',
+            '\$${(earned).toStringAsFixed(2)}',
           ),
           SizedBox(height: 8.h),
           _buildProgressBar(
             'Sub-IB network',
             0.5,
             Colors.green,
-            '\$${(earned / 2).toStringAsFixed(2)} - 50%',
+            '\$${(earned).toStringAsFixed(2)}',
           ),
         ],
       ),
@@ -552,8 +546,12 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     final funded = funnel['funded'] ?? 0;
 
     // Calculate percentages
-    final uniquePercent = visits > 0 ? (uniqueVisits / visits * 100).toStringAsFixed(0) : '0';
-    final signupsPercent = uniqueVisits > 0 ? (signUps / uniqueVisits * 100).toStringAsFixed(0) : '0';
+    final uniquePercent =
+        visits > 0 ? (uniqueVisits / visits * 100).toStringAsFixed(0) : '0';
+    final signupsPercent =
+        uniqueVisits > 0
+            ? (signUps / uniqueVisits * 100).toStringAsFixed(0)
+            : '0';
 
     return _buildSectionCard(
       'Client Funnel',
@@ -569,11 +567,17 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             ),
             SizedBox(
               width: 120.w,
-              child: _buildSimpleStat('Different people', '$uniqueVisits\n$uniquePercent%'),
+              child: _buildSimpleStat(
+                'Different people',
+                '$uniqueVisits\n$uniquePercent%',
+              ),
             ),
             SizedBox(
               width: 120.w,
-              child: _buildSimpleStat('Signed up', '$signUps\n$signupsPercent%'),
+              child: _buildSimpleStat(
+                'Signed up',
+                '$signUps\n$signupsPercent%',
+              ),
             ),
             SizedBox(
               width: 120.w,
@@ -589,23 +593,33 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     );
   }
 
-  Widget _buildSubIbPerformance(dynamic topEarnersList) {
-    List earners = topEarnersList is List ? topEarnersList : [];
-    if (earners.isEmpty) {
+  Widget _buildSubIbPerformance(dynamic rowsList) {
+    List rows = rowsList is List ? rowsList : [];
+    if (rows.isEmpty) {
       return _buildSectionCard(
         'Sub-IB Performance',
         'View all',
-        Text('No Sub-IBs found.', style: TextStyle(color: AppColors.textGrey)),
+        Text(
+          'Nobody is below you yet.',
+          style: TextStyle(color: AppColors.textGrey),
+        ),
       );
     }
 
-    final earner = earners.first;
+    final earner = rows.first;
     final name = earner['name'] ?? 'Unknown';
-    final earned = _parseDouble(earner['amount'] ?? earner['commission']);
-    final netDeposit = _parseDouble(earner['net_deposit'] ?? earner['deposit']);
     final clients = earner['clients'] ?? 0;
-    final active = earner['active'] ?? 0;
-    final lots = _parseDouble(earner['lots']);
+    final active = earner['active_clients'] ?? earner['active'] ?? 0;
+
+    final List currencies =
+        earner['currencies'] is List ? earner['currencies'] : [];
+    final firstCurrency = currencies.isNotEmpty ? currencies.first : {};
+
+    final netDeposit = _parseDouble(
+      firstCurrency['net_funding'] ?? firstCurrency['deposits'],
+    );
+    final earned = _parseDouble(firstCurrency['commission']);
+    final lots = _parseDouble(firstCurrency['lots']);
 
     return _buildSectionCard(
       'Sub-IB Performance',
@@ -713,10 +727,15 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   }
 
   Widget _buildActivityRow(Map actData, Map requestsMap) {
-    // requests map has 'rows'
+    final deposits = actData['deposits'] is List ? actData['deposits'] : [];
+    final withdrawals =
+        actData['withdrawals'] is List ? actData['withdrawals'] : [];
+    final payouts = actData['payouts'] is List ? actData['payouts'] : [];
+    final accounts = actData['accounts'] is List ? actData['accounts'] : [];
+
     final List requestsList = requestsMap['rows'] ?? requestsMap['data'] ?? [];
     final pendingRequests =
-        requestsList.where((r) => r['status'] == 'pending').length;
+        requestsList.where((r) => r['status'] == 'pending').toList();
 
     return SizedBox(
       height: 140.h,
@@ -727,37 +746,47 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             Icons.arrow_downward,
             'Deposits',
             'pending & approved',
-            'No new deposits',
+            _buildActivityListContent(deposits, 'No new deposits', true),
             Colors.green,
           ),
           _buildActivityCard(
             Icons.arrow_upward,
             'Withdrawals',
             'pending & approved',
-            'Nobody has withdrawn.',
+            _buildActivityListContent(
+              withdrawals,
+              'Nobody has withdrawn.',
+              false,
+            ),
             Colors.red,
           ),
           _buildActivityCard(
             Icons.account_balance,
             'Payouts',
             'you & your downline',
-            'No payout has been taken yet.',
+            _buildActivityListContent(
+              payouts,
+              'No payout has been taken yet.',
+              false,
+            ),
             AppColors.primary,
           ),
           _buildActivityCard(
             Icons.person_add,
             'New accounts',
             'whole downline',
-            'No new accounts.',
+            _buildActivityListContent(accounts, 'No new accounts.', true),
             Colors.blue,
           ),
           _buildActivityCard(
             Icons.group,
             'Sub-IB requests',
             'waiting on you',
-            pendingRequests > 0
-                ? '$pendingRequests waiting'
-                : 'Nobody is waiting for an answer.',
+            _buildActivityListContent(
+              pendingRequests,
+              'Nobody is waiting for an answer.',
+              true,
+            ),
             Colors.grey,
           ),
         ],
@@ -769,11 +798,11 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     IconData icon,
     String title,
     String subtitle,
-    String message,
+    Widget content,
     Color color,
   ) {
     return Container(
-      width: 160.w,
+      width: 220.w,
       margin: EdgeInsets.only(right: 12.w),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
@@ -803,16 +832,141 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             style: TextStyle(color: AppColors.textSecondary, fontSize: 10.sp),
           ),
           Spacer(),
-          Center(
-            child: Text(
-              message,
-              style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp),
-              textAlign: TextAlign.center,
-            ),
-          ),
+          content,
           Spacer(),
         ],
       ),
+    );
+  }
+
+  Widget _buildActivityListContent(
+    List items,
+    String emptyMessage,
+    bool isPositive,
+  ) {
+    if (items.isEmpty) {
+      return Center(
+        child: Text(
+          emptyMessage,
+          style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          items.take(2).map((item) {
+            final name = item['name'] ?? 'Unknown';
+            final status = item['status'] ?? '';
+            final amount = _parseDouble(item['amount']);
+            final account = item['account'] ?? '';
+            final atStr = (item['at'] ?? '').toString();
+            final dateDisplay = atStr.isNotEmpty ? atStr.split(' ').first : '';
+
+            final amountStr =
+                amount > 0
+                    ? (isPositive
+                        ? '+\$${amount.toStringAsFixed(2)}'
+                        : '\$${amount.toStringAsFixed(2)}')
+                    : '';
+
+            return Padding(
+              padding: EdgeInsets.only(bottom: 8.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                name,
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            SizedBox(width: 4.w),
+                            if (status.isNotEmpty)
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  color:
+                                      status == 'approved' || status == 'opened'
+                                          ? Colors.green.withOpacity(0.2)
+                                          : Colors.orange.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Text(
+                                  status.isNotEmpty
+                                      ? status[0].toUpperCase() +
+                                          status.substring(1)
+                                      : status,
+                                  style: TextStyle(
+                                    fontSize: 8.sp,
+                                    color:
+                                        status == 'approved' ||
+                                                status == 'opened'
+                                            ? Colors.green
+                                            : Colors.orange,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (account.isNotEmpty)
+                          Text(
+                            'TA#$account',
+                            style: TextStyle(
+                              fontSize: 9.sp,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (amountStr.isNotEmpty)
+                        Text(
+                          amountStr,
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                isPositive
+                                    ? Colors.green
+                                    : AppColors.textPrimary,
+                          ),
+                        ),
+                      if (dateDisplay.isNotEmpty)
+                        Text(
+                          dateDisplay,
+                          style: TextStyle(
+                            fontSize: 8.sp,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:crm_app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/screens/ibm/presentation/widgets/verification_status_dialog.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 
 class IbmController extends GetxController {
@@ -19,31 +20,33 @@ class IbmController extends GetxController {
   final RxBool isPartner = false.obs;
   final RxBool canApply = false.obs;
   final RxMap<String, dynamic> partnerRequest = <String, dynamic>{}.obs;
-  
+
   // Dashboard state
   final RxMap<String, dynamic> dashboardData = <String, dynamic>{}.obs;
   final RxMap<String, dynamic> dashboardActivityData = <String, dynamic>{}.obs;
-  
+  final RxMap<String, dynamic> networkData = <String, dynamic>{}.obs;
+
   // Clients state
   final RxMap<String, dynamic> clientsData = <String, dynamic>{}.obs;
   final RxString clientPeriod = 'this_month'.obs;
   final RxString clientScope = 'direct'.obs;
-  
+
   // Requests state (Sub-IB requests)
   final RxMap<String, dynamic> requestsData = <String, dynamic>{}.obs;
   final RxString requestStatusFilter = 'all'.obs;
-  
+
   // Wallet & Transactions state
   final RxMap<String, dynamic> walletData = <String, dynamic>{}.obs;
   final RxList<dynamic> transactionsList = <dynamic>[].obs;
   final RxString transactionFilter = 'Everything'.obs;
-  
+
   // Commission Plans state
   final RxList<dynamic> plansList = <dynamic>[].obs;
   final RxMap<String, dynamic> planTemplate = <String, dynamic>{}.obs;
-  
+
   // Referral Links state
   final RxList<dynamic> linksList = <dynamic>[].obs;
+  final RxList<dynamic> planGroupsList = <dynamic>[].obs;
 
   // Shell Navigation
   final RxInt currentTabIndex = 0.obs;
@@ -60,52 +63,63 @@ class IbmController extends GetxController {
     try {
       Get.dialog(
         Center(
-          child: CommonLoadingWidget(
-            size: 50.0,
-            color: AppColors.primary,
-          ),
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
         ),
         barrierDismissible: false,
       );
 
       final response = await _apiProvider.getSystemStatus();
-      
+
       Get.back(closeOverlays: true);
 
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
 
         systemMode.value = data['system']?.toString() ?? 'none';
-        isPartner.value = (data['is_partner'] == true ||
-            data['is_partner'] == 1 ||
-            data['is_partner'] == '1' ||
-            data['is_partner'] == 'true');
-        canApply.value = (data['can_apply'] == true ||
-            data['can_apply'] == 1 ||
-            data['can_apply'] == '1' ||
-            data['can_apply'] == 'true');
+        isPartner.value =
+            (data['is_partner'] == true ||
+                data['is_partner'] == 1 ||
+                data['is_partner'] == '1' ||
+                data['is_partner'] == 'true');
+        canApply.value =
+            (data['can_apply'] == true ||
+                data['can_apply'] == 1 ||
+                data['can_apply'] == '1' ||
+                data['can_apply'] == 'true');
         if (data['partner_request'] != null && data['partner_request'] is Map) {
           partnerRequest.value = _toMap(data['partner_request']);
         } else {
           partnerRequest.clear();
         }
 
-        // Logic based on the provided flowchart & image
-        if (isPartner.value) {
-          if (systemMode.value == 'ibm') {
+        // Logic based on system mode
+        if (systemMode.value == 'ibm') {
+          if (isPartner.value) {
             Get.toNamed(Routes.IBM_MANAGER_PORTAL);
           } else {
-            // legacy mode
-            _navigateToLegacyIb();
+            if (partnerRequest.isNotEmpty) {
+              final status = partnerRequest['status'];
+              if (status == 'rejected') {
+                CustomToastService.showError(
+                  message:
+                      'Your IB application has been rejected. Please contact support for more information.',
+                );
+                return;
+              }
+            }
+            // If not partner and not rejected, go to application form
+            Get.toNamed(Routes.IBM_APPLICATION);
           }
         } else {
-          // If not partner, go to application form
-          Get.toNamed(Routes.IBM_APPLICATION);
+          // legacy mode handles all states (partner, not applied, rejected)
+          _navigateToLegacyIb();
         }
       } else {
         CustomToastService.showError(
-            message: response.message ?? 'Failed to get system status');
+          message: response.message ?? 'Failed to get system status',
+        );
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) {
@@ -125,12 +139,7 @@ class IbmController extends GetxController {
     }
 
     Get.dialog(
-      Center(
-        child: CommonLoadingWidget(
-          size: 50.0,
-          color: AppColors.primary,
-        ),
-      ),
+      Center(child: CommonLoadingWidget(size: 50.0, color: AppColors.primary)),
       barrierDismissible: false,
     );
 
@@ -150,6 +159,16 @@ class IbmController extends GetxController {
         );
         return;
       }
+      if (ibStatus == 'inreview') {
+        Get.dialog(
+          VerificationStatusDialog(
+            stageCompletion: ibStatusResponse.data?.stageCompletion,
+            ibStatus: ibStatus ?? 'inreview',
+          ),
+          barrierDismissible: true,
+        );
+        return;
+      }
       if (ibStatus == 'not_applied') {
         Get.toNamed(AppPages.PARTNERSHIP_PROGRAM);
       } else if (ibStatus == 'approved' && isApproved == true) {
@@ -159,7 +178,8 @@ class IbmController extends GetxController {
       } else {
         CustomToastService.showError(
           duration: const Duration(seconds: 2),
-          message: ibStatusResponse.message ??
+          message:
+              ibStatusResponse.message ??
               'Profile is not complete. Please complete your profile first.',
         );
       }
@@ -196,7 +216,12 @@ class IbmController extends GetxController {
     }
   }
 
-  Future<void> fetchDashboard({String? period, String? scope, String? from, String? to}) async {
+  Future<void> fetchDashboard({
+    String? period,
+    String? scope,
+    String? from,
+    String? to,
+  }) async {
     try {
       isLoading.value = true;
       final response = await _apiProvider.getPortalDashboard(
@@ -207,25 +232,46 @@ class IbmController extends GetxController {
       );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         dashboardData.assignAll(data);
       }
-      
-      final activityResponse = await _apiProvider.getPortalDashboardActivity();
+
+      final activityResponse = await _apiProvider.getPortalDashboardActivity(
+        limit: 5,
+      );
       if (activityResponse.success && activityResponse.data != null) {
         final Map<String, dynamic> root = _toMap(activityResponse.data);
-        final Map<String, dynamic> actData = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> actData =
+            root['data'] is Map ? _toMap(root['data']) : root;
         dashboardActivityData.assignAll(actData);
       }
 
       await fetchWallet();
       await fetchRequests();
-      
+      await fetchNetwork(period: period);
+
       update(['ibm_dashboard']);
     } catch (e) {
       errorMessage.value = e.toString();
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchNetwork({String? period}) async {
+    try {
+      final response = await _apiProvider.getPortalNetwork(
+        period: period ?? 'mtd',
+      );
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        networkData.assignAll(data);
+      }
+    } catch (e) {
+      // Silently catch error for dashboard network list
     }
   }
 
@@ -241,7 +287,8 @@ class IbmController extends GetxController {
       );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         clientsData.assignAll(data);
         update(['ibm_clients']);
       }
@@ -262,7 +309,8 @@ class IbmController extends GetxController {
       );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         requestsData.assignAll(data);
         update(['ibm_requests']);
       }
@@ -273,20 +321,32 @@ class IbmController extends GetxController {
     }
   }
 
-  Future<bool> approveSubIbRequest({required int requestId, required int planId}) async {
+  Future<bool> approveSubIbRequest({
+    required int requestId,
+    required int planId,
+  }) async {
     try {
       Get.dialog(
-        Center(child: CommonLoadingWidget(size: 50.0, color: AppColors.primary)),
+        Center(
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+        ),
         barrierDismissible: false,
       );
-      final response = await _apiProvider.approveRequest(requestId: requestId, planId: planId);
+      final response = await _apiProvider.approveRequest(
+        requestId: requestId,
+        planId: planId,
+      );
       Get.back(closeOverlays: true);
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Request approved successfully');
+        CustomToastService.showSuccess(
+          message: 'Request approved successfully',
+        );
         fetchRequests();
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to approve request');
+        CustomToastService.showError(
+          message: response.message ?? 'Failed to approve request',
+        );
         return false;
       }
     } catch (e) {
@@ -296,20 +356,30 @@ class IbmController extends GetxController {
     }
   }
 
-  Future<bool> rejectSubIbRequest({required int requestId, String? reason}) async {
+  Future<bool> rejectSubIbRequest({
+    required int requestId,
+    String? reason,
+  }) async {
     try {
       Get.dialog(
-        Center(child: CommonLoadingWidget(size: 50.0, color: AppColors.primary)),
+        Center(
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+        ),
         barrierDismissible: false,
       );
-      final response = await _apiProvider.rejectRequest(requestId: requestId, reason: reason);
+      final response = await _apiProvider.rejectRequest(
+        requestId: requestId,
+        reason: reason,
+      );
       Get.back(closeOverlays: true);
       if (response.success) {
         CustomToastService.showSuccess(message: 'Request rejected');
         fetchRequests();
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to reject request');
+        CustomToastService.showError(
+          message: response.message ?? 'Failed to reject request',
+        );
         return false;
       }
     } catch (e) {
@@ -325,7 +395,8 @@ class IbmController extends GetxController {
       final response = await _apiProvider.getPortalWallet();
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         walletData.assignAll(data);
         update(['ibm_wallet']);
       }
@@ -345,7 +416,8 @@ class IbmController extends GetxController {
       );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         final list = data['rows'] ?? data['data'] ?? [];
         if (list is List) {
           transactionsList.assignAll(list);
@@ -365,7 +437,8 @@ class IbmController extends GetxController {
       final response = await _apiProvider.getPartnerPlans();
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         final list = data['plans'] ?? data['data'] ?? [];
         if (list is List) {
           plansList.assignAll(list);
@@ -382,10 +455,17 @@ class IbmController extends GetxController {
   Future<void> fetchLinks() async {
     try {
       isLoading.value = true;
+
+      // Fetch plan groups alongside links
+      if (planGroupsList.isEmpty) {
+        fetchPlanGroups();
+      }
+
       final response = await _apiProvider.getReferralLinks();
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         final list = data['links'] ?? data['data'] ?? [];
         if (list is List) {
           linksList.assignAll(list);
@@ -399,20 +479,117 @@ class IbmController extends GetxController {
     }
   }
 
-  Future<bool> createReferralLink({required String label, String? code}) async {
+  Future<void> fetchPlanGroups() async {
+    try {
+      final response = await _apiProvider.getPortalPlanGroups();
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        final list = data['groups'] ?? data['data'] ?? [];
+        if (list is List) {
+          planGroupsList.assignAll(list);
+        }
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<bool> createReferralLink({
+    required String label,
+    String? code,
+    List<int>? planGroupIds,
+    int? defaultPlanGroupId,
+  }) async {
     try {
       Get.dialog(
-        Center(child: CommonLoadingWidget(size: 50.0, color: AppColors.primary)),
+        Center(
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+        ),
         barrierDismissible: false,
       );
-      final response = await _apiProvider.createReferralLink(label: label, code: code);
+      final response = await _apiProvider.createReferralLink(
+        label: label,
+        code: code,
+        planGroupIds: planGroupIds,
+        defaultPlanGroupId: defaultPlanGroupId,
+      );
       Get.back(closeOverlays: true);
       if (response.success) {
         CustomToastService.showSuccess(message: 'Referral link created!');
         fetchLinks();
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to create link');
+        CustomToastService.showError(
+          message: response.message ?? 'Failed to create link',
+        );
+        return false;
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back(closeOverlays: true);
+      CustomToastService.showError(message: 'Error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateReferralLink({
+    required int linkId,
+    String? label,
+    List<int>? planGroupIds,
+    int? defaultPlanGroupId,
+    bool? isActive,
+  }) async {
+    try {
+      Get.dialog(
+        Center(
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+        ),
+        barrierDismissible: false,
+      );
+      final response = await _apiProvider.updateReferralLink(
+        linkId: linkId,
+        label: label,
+        planGroupIds: planGroupIds,
+        defaultPlanGroupId: defaultPlanGroupId,
+        isActive: isActive,
+      );
+      Get.back(closeOverlays: true);
+      if (response.success) {
+        CustomToastService.showSuccess(message: 'Referral link updated!');
+        fetchLinks();
+        return true;
+      } else {
+        CustomToastService.showError(
+          message: response.message ?? 'Failed to update link',
+        );
+        return false;
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back(closeOverlays: true);
+      CustomToastService.showError(message: 'Error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteReferralLink(int linkId) async {
+    try {
+      Get.dialog(
+        Center(
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+        ),
+        barrierDismissible: false,
+      );
+      final response = await _apiProvider.deleteReferralLink(linkId);
+      Get.back(closeOverlays: true);
+      if (response.success) {
+        CustomToastService.showSuccess(message: 'Referral link deleted!');
+        fetchLinks();
+        return true;
+      } else {
+        CustomToastService.showError(
+          message: response.message ?? 'Failed to delete link',
+        );
         return false;
       }
     } catch (e) {
@@ -425,7 +602,9 @@ class IbmController extends GetxController {
   Future<bool> createPartnerPlan(Map<String, dynamic> planData) async {
     try {
       Get.dialog(
-        Center(child: CommonLoadingWidget(size: 50.0, color: AppColors.primary)),
+        Center(
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+        ),
         barrierDismissible: false,
       );
       final response = await _apiProvider.createPartnerPlan(planData);
@@ -435,7 +614,9 @@ class IbmController extends GetxController {
         fetchPlans();
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to create plan');
+        CustomToastService.showError(
+          message: response.message ?? 'Failed to create plan',
+        );
         return false;
       }
     } catch (e) {
@@ -448,7 +629,9 @@ class IbmController extends GetxController {
   Future<bool> deletePartnerPlan(int planId) async {
     try {
       Get.dialog(
-        Center(child: CommonLoadingWidget(size: 50.0, color: AppColors.primary)),
+        Center(
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+        ),
         barrierDismissible: false,
       );
       final response = await _apiProvider.deletePartnerPlan(planId);
@@ -458,7 +641,9 @@ class IbmController extends GetxController {
         fetchPlans();
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to delete plan');
+        CustomToastService.showError(
+          message: response.message ?? 'Failed to delete plan',
+        );
         return false;
       }
     } catch (e) {
@@ -469,7 +654,7 @@ class IbmController extends GetxController {
   }
 
   // --- Network Profile Methods ---
-  
+
   // Profile State
   final RxMap<String, dynamic> currentClientOverview = <String, dynamic>{}.obs;
   final RxMap<String, dynamic> currentClientTrades = <String, dynamic>{}.obs;
@@ -486,10 +671,12 @@ class IbmController extends GetxController {
       final response = await _apiProvider.getClientOverview(id, period: period);
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         currentClientOverview.assignAll(data);
       } else {
-        profileErrorMessage.value = response.message ?? 'Error loading overview';
+        profileErrorMessage.value =
+            response.message ?? 'Error loading overview';
       }
     } catch (e) {
       profileErrorMessage.value = e.toString();
@@ -498,13 +685,26 @@ class IbmController extends GetxController {
     }
   }
 
-  Future<void> fetchClientTrades(int id, {String period = 'mtd', int page = 1, String? type, String? symbol}) async {
+  Future<void> fetchClientTrades(
+    int id, {
+    String period = 'mtd',
+    int page = 1,
+    String? type,
+    String? symbol,
+  }) async {
     try {
       isProfileLoading.value = true;
-      final response = await _apiProvider.getClientTrades(id, period: period, page: page, type: type, symbol: symbol);
+      final response = await _apiProvider.getClientTrades(
+        id,
+        period: period,
+        page: page,
+        type: type,
+        symbol: symbol,
+      );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         currentClientTrades.assignAll(data);
       }
     } catch (e) {
@@ -520,7 +720,8 @@ class IbmController extends GetxController {
       final response = await _apiProvider.getNetworkNode(id, period: period);
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         currentNetworkNode.assignAll(data);
       }
     } catch (e) {
@@ -536,7 +737,8 @@ class IbmController extends GetxController {
       final response = await _apiProvider.getNetworkSymbols(id, period: period);
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         currentNetworkSymbols.assignAll(data);
       }
     } catch (e) {
@@ -552,7 +754,8 @@ class IbmController extends GetxController {
       final response = await _apiProvider.getNetworkPlan(id);
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
-        final Map<String, dynamic> data = root['data'] is Map ? _toMap(root['data']) : root;
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
         currentNetworkPlan.assignAll(data);
       }
     } catch (e) {
@@ -561,5 +764,4 @@ class IbmController extends GetxController {
       isProfileLoading.value = false;
     }
   }
-
 }

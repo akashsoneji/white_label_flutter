@@ -254,7 +254,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                         child: Text(
                           languageService?.tr('navigation_yes') ?? 'Yes',
                           style: AppTextStyles.bodyText.copyWith(
-                            color: Colors.white,
+                            color: AppColors.whiteColor,
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                           ),
@@ -335,12 +335,16 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 () => TextField(
                   controller: passwordController,
                   obscureText: true,
-                  style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary),
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
                   decoration: InputDecoration(
                     hintText:
                         languageService?.tr('delete_account_password_hint') ??
                         'Enter your password',
-                    hintStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textSecondary),
+                    hintStyle: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                       borderSide: BorderSide(
@@ -1258,14 +1262,17 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 
   String _toTitleCase(String text) {
     if (text.trim().isEmpty) return text;
-    return text.split(' ').map((word) {
-      if (word.isEmpty) return word;
-      if (word.contains('/')) {
-        return word.split('/').map((w) => _toTitleCase(w)).join(' / ');
-      }
-      if (word.toUpperCase() == word && word.length <= 3) return word;
-      return word[0].toUpperCase() + word.substring(1).toLowerCase();
-    }).join(' ');
+    return text
+        .split(' ')
+        .map((word) {
+          if (word.isEmpty) return word;
+          if (word.contains('/')) {
+            return word.split('/').map((w) => _toTitleCase(w)).join(' / ');
+          }
+          if (word.toUpperCase() == word && word.length <= 3) return word;
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
   }
 
   Widget _buildOptionItem({
@@ -1358,12 +1365,10 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 class _VerifyAccountCard extends StatelessWidget {
   const _VerifyAccountCard();
 
-  static final _languageService = Get.isRegistered<LanguageService>()
-      ? Get.find<LanguageService>()
-      : null;
-  static final _moreController = Get.isRegistered<MoreController>()
-      ? Get.find<MoreController>()
-      : null;
+  static final _languageService =
+      Get.isRegistered<LanguageService>() ? Get.find<LanguageService>() : null;
+  static final _moreController =
+      Get.isRegistered<MoreController>() ? Get.find<MoreController>() : null;
 
   int _calculateCompletion(StageCompletion? stage) {
     if (stage == null) return 0;
@@ -1462,4 +1467,3 @@ class _VerifyAccountCard extends StatelessWidget {
     );
   }
 }
-

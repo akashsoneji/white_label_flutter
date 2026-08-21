@@ -1,13 +1,21 @@
 {
-  "default": "celestial",
+  "default": "pipze",
   "brands": [
-    "celestial"
+    "pipze",
+    "vantage"
   ],
   "brandDetails": [
     {
-      "name": "celestial",
+      "name": "pipze",
+      "type": "child",
+      "inheritsFrom": "vantage",
+      "label": "Pipze",
+      "themeMode": "both"
+    },
+    {
+      "name": "vantage",
       "type": "parent",
-      "label": "Celestial",
+      "label": "Vantage",
       "themeMode": "both"
     }
   ]
