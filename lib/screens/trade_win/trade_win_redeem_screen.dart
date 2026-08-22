@@ -139,9 +139,7 @@ class _TradeWinRedeemScreenState extends State<TradeWinRedeemScreen> {
     final controller = _controller;
     if (!_initialized || controller == null) {
       return Scaffold(
-        appBar: AppBar(
-          leading: const AppBackButton(),
-        ),
+        appBar: AppBar(leading: const AppBackButton()),
         body: Center(
           child: Text(Get.find<LanguageService>().tr('tw_product_not_found')),
         ),
@@ -797,9 +795,11 @@ class _BottomActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final btnTextColor = ThemeData.estimateBrightnessForColor(AppColors.primary) == Brightness.light
-        ? Colors.black
-        : Colors.white;
+    final btnTextColor =
+        ThemeData.estimateBrightnessForColor(AppColors.primary) ==
+                Brightness.light
+            ? Colors.black
+            : Colors.white;
 
     return Obx(() {
       final step = controller.currentStep.value;
@@ -849,7 +849,9 @@ class _BottomActions extends StatelessWidget {
                     ),
                     child: Text(
                       languageService.tr('tw_continue'),
-                      style: AppTextStyles.bodyText.copyWith(color: btnTextColor),
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: btnTextColor,
+                      ),
                     ),
                   ),
                 ),
@@ -894,7 +896,9 @@ class _BottomActions extends StatelessWidget {
                             )
                             : Text(
                               languageService.tr('tw_submit_redemption'),
-                              style: AppTextStyles.bodyText.copyWith(color: btnTextColor),
+                              style: AppTextStyles.bodyText.copyWith(
+                                color: btnTextColor,
+                              ),
                             ),
                   ),
                 ),

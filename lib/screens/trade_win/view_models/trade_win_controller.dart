@@ -28,8 +28,14 @@ class TradeWinController extends GetxController {
   int pastWinsCurrentPage = 1;
   int pastWinsLastPage = 1;
 
+  final RxString selectedAvailability = 'all'.obs;
+  final RxString selectedAudience = 'ib'.obs;
+  final RxBool isProductsFiltering = false.obs;
+  final RxSet<String> allKnownCategories = <String>{'all'}.obs;
+
   List<String> get categories {
     final set = <String>{'all'};
+    set.addAll(allKnownCategories);
     for (final p in products) {
       if (p.category.isNotEmpty) set.add(p.category.toLowerCase());
     }
@@ -64,12 +70,22 @@ class TradeWinController extends GetxController {
   Future<void> fetchProducts({
     bool showLoader = true,
     bool loadMore = false,
+    String? category,
+    String? audience,
+    String? availability,
   }) async {
+    if (category != null) selectedCategory.value = category.toLowerCase();
+    if (availability != null) {
+      selectedAvailability.value = availability.toLowerCase();
+    }
+    if (audience != null) selectedAudience.value = audience.toLowerCase();
+
     if (loadMore) {
       if (isLoadingMoreProducts.value || !productsHasMore) return;
       isLoadingMoreProducts.value = true;
     } else {
       if (showLoader) isLoading.value = true;
+      isProductsFiltering.value = true;
     }
 
     errorMessage.value = '';
@@ -77,13 +93,17 @@ class TradeWinController extends GetxController {
     final page = loadMore ? productsCurrentPage + 1 : 1;
 
     try {
+      final queryParams = <String, dynamic>{
+        'page': '$page',
+        'category': selectedCategory.value,
+        'audience': selectedAudience.value,
+        'availability': selectedAvailability.value,
+        '_t': DateTime.now().millisecondsSinceEpoch.toString(),
+      };
+
       final response = await ApiService.get(
         endpoint: ApiConstants.tradeWinProducts,
-        queryParameters: {
-          'page': '$page',
-          'category': 'all',
-          '_t': DateTime.now().millisecondsSinceEpoch.toString(),
-        },
+        queryParameters: queryParams,
       );
 
       if (!response.success || response.data == null) {
@@ -105,6 +125,12 @@ class TradeWinController extends GetxController {
       productsCurrentPage = parsed.currentPage;
       productsLastPage = parsed.lastPage;
 
+      for (final p in parsed.items) {
+        if (p.category.isNotEmpty) {
+          allKnownCategories.add(p.category.toLowerCase());
+        }
+      }
+
       if (loadMore) {
         products.addAll(parsed.items);
       } else {
@@ -112,10 +138,11 @@ class TradeWinController extends GetxController {
       }
 
       final statsRaw = data['stats'];
-      stats.value =
-          statsRaw is Map
-              ? TradeWinStatsModel.fromJson(Map<String, dynamic>.from(statsRaw))
-              : null;
+      if (statsRaw is Map) {
+        stats.value = TradeWinStatsModel.fromJson(
+          Map<String, dynamic>.from(statsRaw),
+        );
+      }
 
       final leaderboardRaw = data['leaderboard'];
       if (leaderboardRaw is List) {
@@ -136,6 +163,7 @@ class TradeWinController extends GetxController {
       errorMessage.value = e.toString();
     } finally {
       if (showLoader) isLoading.value = false;
+      isProductsFiltering.value = false;
       isLoadingMoreProducts.value = false;
     }
   }

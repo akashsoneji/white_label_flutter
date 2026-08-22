@@ -35,11 +35,9 @@ class TradeWinProductModel {
     this.allowedSymbols,
   });
 
-  String get displayAllowedGroups =>
-      _nonEmptyOrAll(allowedGroups);
+  String get displayAllowedGroups => _nonEmptyOrAll(allowedGroups);
 
-  String get displayAllowedSymbols =>
-      _nonEmptyOrAll(allowedSymbols);
+  String get displayAllowedSymbols => _nonEmptyOrAll(allowedSymbols);
 
   static String _nonEmptyOrAll(String? value) {
     final trimmed = value?.trim() ?? '';
@@ -81,18 +79,20 @@ class TradeWinProductModel {
     }
     if (value is List) {
       if (value.isEmpty) return null;
-      final items = value
-          .map((e) => e?.toString().trim() ?? '')
-          .where((e) => e.isNotEmpty)
-          .toList();
+      final items =
+          value
+              .map((e) => e?.toString().trim() ?? '')
+              .where((e) => e.isNotEmpty)
+              .toList();
       return items.isEmpty ? null : items.join(', ');
     }
     if (value is Map) {
       if (value.isEmpty) return null;
-      final items = value.entries
-          .map((e) => e.value?.toString().trim() ?? '')
-          .where((e) => e.isNotEmpty)
-          .toList();
+      final items =
+          value.entries
+              .map((e) => e.value?.toString().trim() ?? '')
+              .where((e) => e.isNotEmpty)
+              .toList();
       return items.isEmpty ? null : items.join(', ');
     }
     final text = value.toString().trim();

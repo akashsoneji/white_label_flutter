@@ -280,18 +280,29 @@ class AccountHeaderWidget extends StatelessWidget {
                         maxLines: 1,
                       ),
                     ),
-                    if (!useFloatingProfit && liveProfit != null && liveProfit != 0.0) ...[
+                    if (!useFloatingProfit &&
+                        liveProfit != null &&
+                        liveProfit != 0.0) ...[
                       SizedBox(width: 8.w),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 6.w,
+                          vertical: 2.h,
+                        ),
                         decoration: BoxDecoration(
-                          color: (liveProfit >= 0 ? AppColors.success : AppColors.error).withOpacity(0.12),
+                          color: (liveProfit >= 0
+                                  ? AppColors.success
+                                  : AppColors.error)
+                              .withOpacity(0.12),
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                         child: Text(
                           '${liveProfit >= 0 ? '+' : ''}${PrecisionHelper.formatPnL(liveProfit)}',
                           style: AppTextStyles.bodyText.copyWith(
-                            color: liveProfit >= 0 ? AppColors.success : AppColors.error,
+                            color:
+                                liveProfit >= 0
+                                    ? AppColors.success
+                                    : AppColors.error,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
                           ),

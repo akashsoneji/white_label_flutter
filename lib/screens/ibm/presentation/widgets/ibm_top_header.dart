@@ -9,12 +9,14 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final int? badgeCount;
   final bool showBackButton;
+  final List<Widget>? extraActions;
 
   const IbmTopHeader({
     super.key,
     required this.title,
     this.badgeCount,
     this.showBackButton = true,
+    this.extraActions,
   });
 
   @override
@@ -29,15 +31,28 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       automaticallyImplyLeading: false,
-      leading: showBackButton ? GestureDetector(
-        onTap: () => Get.back(),
-        child: Icon(
-          Icons.arrow_back_ios_new,
-          size: 18.w,
-          color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
-        ),
-      ) : null,
-      titleSpacing: showBackButton ? 0 : 16.w,
+      leading: showBackButton
+          ? GestureDetector(
+              onTap: () => Get.back(),
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                size: 18.w,
+                color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+              ),
+            )
+          : Builder(
+              builder: (ctx) => IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  size: 22.w,
+                  color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
+                ),
+                onPressed: () {
+                  Scaffold.of(ctx).openDrawer();
+                },
+              ),
+            ),
+      titleSpacing: 0,
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -70,6 +85,7 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
+        if (extraActions != null) ...extraActions!,
         // Wallet Balance Chip
         Obx(() {
           final balance = controller.walletData['balance'] ?? '0.00';

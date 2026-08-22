@@ -4,50 +4,150 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/create_edit_plan_screen.dart';
-import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/assign_plan_bottom_sheet.dart';
-import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/ibm/data/ibm_api_provider.dart';
+import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
-class IbmWalletScreen extends StatelessWidget {
+class IbmWalletScreen extends StatefulWidget {
   const IbmWalletScreen({super.key});
 
   @override
+  State<IbmWalletScreen> createState() => _IbmWalletScreenState();
+}
+
+class _IbmWalletScreenState extends State<IbmWalletScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  final IbmController controller = Get.find<IbmController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchWallet();
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: const IbmTopHeader(title: 'Commission', showBackButton: false),
-        body: Column(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.whiteColor,
-                border: Border(
-                  bottom: BorderSide(color: AppColors.divider, width: 1),
+    return Scaffold(
+      backgroundColor: AppColors.tradeBackgroundCenterColor,
+      appBar: AppBar(
+        backgroundColor:
+            AppColors.isDarkMode ? AppColors.pureBlack : AppColors.whiteColor,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        leading: Builder(
+          builder:
+              (ctx) => IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  size: 22.w,
+                  color:
+                      AppColors.isDarkMode
+                          ? Colors.white
+                          : AppColors.textPrimary,
+                ),
+                onPressed: () {
+                  Scaffold.of(ctx).openDrawer();
+                },
+              ),
+        ),
+        titleSpacing: 0,
+        title: Text(
+          'Commission',
+          style: AppTextStyles.heading.copyWith(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        actions: [
+          Obx(() {
+            final balance = controller.walletData['balance'] ?? '0.00';
+            return Padding(
+              padding: EdgeInsets.only(right: 16.w),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: AppColors.divider),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.account_balance_wallet_outlined,
+                      size: 14.w,
+                      color: AppColors.textPrimary,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      '\$$balance',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+            );
+          }),
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(48.h),
+          child: Container(
+            color:
+                AppColors.isDarkMode
+                    ? AppColors.pureBlack
+                    : AppColors.whiteColor,
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+            child: Container(
+              height: 36.h,
+              decoration: BoxDecoration(
+                color:
+                    AppColors.isDarkMode
+                        ? const Color(0xFF1E1E1E)
+                        : const Color(0xFFF1EEF8),
+                borderRadius: BorderRadius.circular(18.r),
+              ),
               child: TabBar(
-                labelColor:
-                    Colors.purple, // Assuming purple is the primary brand color
-                unselectedLabelColor: AppColors.textSecondary,
-                indicatorColor: Colors.purple,
-                indicatorWeight: 3,
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(18.r),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                labelColor: AppColors.whiteColor,
+                unselectedLabelColor: AppColors.textGrey,
+                labelStyle: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                ),
                 tabs: const [
                   Tab(text: 'My Commission'),
                   Tab(text: 'Commission Plans'),
                 ],
               ),
             ),
-            const Expanded(
-              child: TabBarView(
-                children: [MyCommissionTab(), CommissionPlansTab()],
-              ),
-            ),
-          ],
+          ),
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [MyCommissionTab(), CommissionPlansTab()],
       ),
     );
   }
@@ -62,9 +162,13 @@ class MyCommissionTab extends StatefulWidget {
 
 class _MyCommissionTabState extends State<MyCommissionTab> {
   final IbmApiProvider _apiProvider = IbmApiProvider();
+  final IbmController _ibmController = Get.find<IbmController>();
   bool _isLoading = false;
   List<dynamic> _transactions = [];
   String? _error;
+
+  String _selectedSubTab = 'Earnings';
+  final List<String> _subTabs = ['Earnings', 'Payouts', 'My Commission Plan'];
 
   String _selectedFilter = 'Everything';
   String _selectedFilterValue = '';
@@ -138,276 +242,316 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'My Commission',
-            style: AppTextStyles.heading.copyWith(fontSize: 18.sp),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'What you have earned, what you have been paid, and what you are paid on',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
-          ),
-          SizedBox(height: 16.h),
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
-            children: [
-              _buildStatCard(
-                'Available now',
-                '\$0.09',
-                'ready to request',
-                Icons.account_balance_wallet,
-                Colors.purple,
-              ),
-              _buildStatCard(
-                'Pending payout',
-                '\$0.00',
-                'locked in an open request',
-                Icons.hourglass_empty,
-                Colors.orange,
-              ),
-              _buildStatCard(
-                'Earned all time',
-                '\$0.09',
-                'your share, since day one',
-                Icons.stacked_line_chart,
-                Colors.purple,
-              ),
-              _buildStatCard(
-                'Paid out',
-                '\$0.00',
-                'settled to you',
-                Icons.check_circle,
-                Colors.green,
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: AppColors.divider),
+    return Obx(() {
+      final wallet = _ibmController.walletData;
+      final availableBalance = wallet['balance']?.toString() ?? '0.00';
+      final pendingPayout = wallet['pending_payout']?.toString() ?? '0.00';
+      final earnedAllTime =
+          wallet['earned_all_time']?.toString() ??
+          wallet['total_earned']?.toString() ??
+          availableBalance;
+      final paidOut =
+          wallet['paid_out']?.toString() ??
+          wallet['total_paid']?.toString() ??
+          '0.00';
+
+      return SingleChildScrollView(
+        padding: EdgeInsets.all(16.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'My Commission',
+              style: AppTextStyles.heading.copyWith(fontSize: 18.sp),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            SizedBox(height: 4.h),
+            Text(
+              'What you have earned, what you have been paid, and what you are paid on',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+            ),
+            SizedBox(height: 16.h),
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '\$0.09 ready',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.sp,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        'The smallest payout is \$50.00.',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12.sp,
-                        ),
-                      ),
-                    ],
-                  ),
+                _buildStatCard(
+                  'Available now',
+                  '\$$availableBalance',
+                  'ready to request',
+                  Icons.account_balance_wallet,
+                  AppColors.primary,
                 ),
-                SizedBox(width: 8.w),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size.zero,
-                    backgroundColor: Colors.purple.withOpacity(0.5),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                  ),
-                  child: const Text('Request payout'),
+                _buildStatCard(
+                  'Pending payout',
+                  '\$$pendingPayout',
+                  'locked in an open request',
+                  Icons.hourglass_empty,
+                  Colors.orange,
+                ),
+                _buildStatCard(
+                  'Earned all time',
+                  '\$$earnedAllTime',
+                  'your share, since day one',
+                  Icons.stacked_line_chart,
+                  AppColors.primary,
+                ),
+                _buildStatCard(
+                  'Paid out',
+                  '\$$paidOut',
+                  'settled to you',
+                  Icons.check_circle,
+                  Colors.green,
                 ),
               ],
             ),
-          ),
-          SizedBox(height: 24.h),
-          // Sub tabs like design
-          Row(
-            children: [
-              Text(
-                'Earnings',
-                style: TextStyle(
-                  color: Colors.purple,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.sp,
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Text(
-                'Payouts',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14.sp,
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Text(
-                'My Commission Plan',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14.sp,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Divider(color: AppColors.divider),
-          SizedBox(height: 8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              PopupMenuButton<String>(
-                onSelected: _onFilterSelected,
-                offset: const Offset(0, 30),
+            SizedBox(height: 16.h),
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
                 color: AppColors.card,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                itemBuilder: (BuildContext context) {
-                  return _filterOptions.keys.map((String choice) {
-                    return PopupMenuItem<String>(
-                      value: choice,
-                      child: Row(
-                        children: [
-                          if (_selectedFilter == choice)
-                            Icon(
-                              Icons.check,
-                              size: 16.w,
-                              color: AppColors.textPrimary,
-                            )
-                          else
-                            SizedBox(width: 16.w),
-                          SizedBox(width: 8.w),
-                          Text(
-                            choice,
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppColors.textPrimary,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '\$$availableBalance ready',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.sp,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          'The smallest payout is \$50.00.',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size.zero,
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.whiteColor,
+                      elevation: 0,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 8.h,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                    ),
+                    child: const Text('Request payout'),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20.h),
+
+            // Rounded Sub-Tabs matching Network tab design
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children:
+                    _subTabs.map((tabName) {
+                      final isSelected = _selectedSubTab == tabName;
+                      return Padding(
+                        padding: EdgeInsets.only(right: 8.w),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _selectedSubTab = tabName;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(20.r),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 14.w,
+                              vertical: 6.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  isSelected
+                                      ? AppColors.primary
+                                      : (AppColors.isDarkMode
+                                          ? const Color(0xFF1E1E1E)
+                                          : const Color(0xFFF1EEF8)),
+                              borderRadius: BorderRadius.circular(20.r),
+                            ),
+                            child: Text(
+                              tabName,
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight:
+                                    isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                color:
+                                    isSelected
+                                        ? AppColors.whiteColor
+                                        : AppColors.textPrimary,
+                              ),
                             ),
                           ),
-                        ],
+                        ),
+                      );
+                    }).toList(),
+              ),
+            ),
+            SizedBox(height: 14.h),
+            Divider(color: AppColors.divider),
+            SizedBox(height: 10.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PopupMenuButton<String>(
+                  onSelected: _onFilterSelected,
+                  offset: const Offset(0, 30),
+                  color: AppColors.card,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  itemBuilder: (BuildContext context) {
+                    return _filterOptions.keys.map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Row(
+                          children: [
+                            if (_selectedFilter == choice)
+                              Icon(
+                                Icons.check,
+                                size: 16.w,
+                                color: AppColors.textPrimary,
+                              )
+                            else
+                              SizedBox(width: 16.w),
+                            SizedBox(width: 8.w),
+                            Text(
+                              choice,
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList();
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.divider),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Text(
+                      _selectedFilter,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: AppColors.textPrimary,
                       ),
-                    );
-                  }).toList();
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 6.h,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.divider),
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                  child: Text(
-                    _selectedFilter,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
-              ),
-              Text(
-                'Every line is one movement of this wallet.',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 10.sp,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
-          if (_isLoading)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 24.h),
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Colors.purple, // Theme primary color
-                ),
-              ),
-            )
-          else if (_error != null)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 24.h),
-              child: Center(
-                child: Text(
-                  _error!,
-                  style: TextStyle(color: Colors.red, fontSize: 14.sp),
-                ),
-              ),
-            )
-          else if (_transactions.isEmpty)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 24.h),
-              child: Center(
-                child: Text(
-                  'No transactions found',
+                Text(
+                  'Every line is one movement of this wallet.',
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 14.sp,
+                    fontSize: 10.sp,
                   ),
                 ),
-              ),
-            )
-          else
-            ..._transactions.map((tx) {
-              final trade = tx['trade'];
-              final symbol = trade?['symbol'] ?? tx['symbol'] ?? 'WALLET';
-              final type =
-                  trade?['side']?.toString().toUpperCase() ??
-                  tx['type']?.toString().toUpperCase() ??
-                  'UNKNOWN';
+              ],
+            ),
+            SizedBox(height: 16.h),
+            if (_isLoading)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 24.h),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primary, // Theme primary color
+                  ),
+                ),
+              )
+            else if (_error != null)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 24.h),
+                child: Center(
+                  child: Text(
+                    _error!,
+                    style: TextStyle(color: Colors.red, fontSize: 14.sp),
+                  ),
+                ),
+              )
+            else if (_transactions.isEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 24.h),
+                child: Center(
+                  child: Text(
+                    'No transactions found',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ),
+              )
+            else
+              ..._transactions.map((tx) {
+                final trade = tx['trade'];
+                final symbol = trade?['symbol'] ?? tx['symbol'] ?? 'WALLET';
+                final type =
+                    trade?['side']?.toString().toUpperCase() ??
+                    tx['type']?.toString().toUpperCase() ??
+                    'UNKNOWN';
 
-              String details = tx['description'] ?? 'Transaction details';
-              if (trade != null) {
-                final account = trade['account'] ?? '';
-                final lots = trade['lots']?.toString() ?? '';
-                final entryPrice = trade['entry_price']?.toString() ?? '';
-                final exitPrice = trade['exit_price']?.toString() ?? '';
-                details =
-                    'TA#$account - $lots lots - $entryPrice -> $exitPrice';
-              }
+                String details = tx['description'] ?? 'Transaction details';
+                if (trade != null) {
+                  final account = trade['account'] ?? '';
+                  final lots = trade['lots']?.toString() ?? '';
+                  final entryPrice = trade['entry_price']?.toString() ?? '';
+                  final exitPrice = trade['exit_price']?.toString() ?? '';
+                  details =
+                      'TA#$account - $lots lots - $entryPrice -> $exitPrice';
+                }
 
-              // Handle positive/negative amounts
-              final direction = tx['direction'] == 'credit' ? '+' : '-';
-              final amountValue = tx['amount']?.toString() ?? '0.00';
-              final amountStr = '$direction \$$amountValue';
+                // Handle positive/negative amounts
+                final direction = tx['direction'] == 'credit' ? '+' : '-';
+                final amountValue = tx['amount']?.toString() ?? '0.00';
+                final amountStr = '$direction \$$amountValue';
 
-              final balanceValue = tx['balance_after']?.toString() ?? '0.00';
-              final balanceStr = '\$$balanceValue';
+                final balanceValue = tx['balance_after']?.toString() ?? '0.00';
+                final balanceStr = '\$$balanceValue';
 
-              final date = tx['created_at'] ?? 'N/A';
+                final date = tx['created_at'] ?? 'N/A';
 
-              return _buildTransactionItem(
-                symbol,
-                type,
-                details,
-                amountStr,
-                balanceStr,
-                date,
-              );
-            }).toList(),
-        ],
-      ),
-    );
+                return _buildTransactionItem(
+                  symbol,
+                  type,
+                  details,
+                  amountStr,
+                  balanceStr,
+                  date,
+                );
+              }).toList(),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildStatCard(
@@ -438,7 +582,7 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                   color: iconColor,
                   borderRadius: BorderRadius.circular(6.r),
                 ),
-                child: Icon(icon, color: Colors.white, size: 16.w),
+                child: Icon(icon, color: AppColors.whiteColor, size: 16.w),
               ),
               SizedBox(width: 8.w),
               Expanded(
@@ -708,8 +852,8 @@ class _CommissionPlansTabState extends State<CommissionPlansTab> {
                 label: const Text('New Plan'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size.zero,
-                  backgroundColor: Colors.purple,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.whiteColor,
                   padding: EdgeInsets.symmetric(
                     horizontal: 12.w,
                     vertical: 8.h,
@@ -723,7 +867,7 @@ class _CommissionPlansTabState extends State<CommissionPlansTab> {
           ),
           SizedBox(height: 16.h),
           if (_isLoading)
-            const Center(child: CircularProgressIndicator(color: Colors.purple))
+            Center(child: CircularProgressIndicator(color: AppColors.primary))
           else if (_error != null)
             Center(
               child: Padding(

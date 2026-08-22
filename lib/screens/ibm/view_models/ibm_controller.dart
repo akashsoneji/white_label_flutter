@@ -201,17 +201,28 @@ class IbmController extends GetxController {
         fetchDashboard();
         break;
       case 1:
+        if (Get.isRegistered<IBController>()) {
+          // Promotion tab
+        }
+        break;
+      case 2:
         fetchClients();
         fetchRequests();
         fetchPlans();
         break;
-      case 2:
+      case 3:
         fetchWallet();
         fetchTransactions();
         fetchPlans();
         break;
-      case 3:
+      case 4:
         fetchLinks();
+        break;
+      case 5:
+        fetchMarketingMaterials();
+        break;
+      case 6:
+        fetchClientVisibility();
         break;
     }
   }
@@ -452,9 +463,11 @@ class IbmController extends GetxController {
     }
   }
 
+  final RxBool isLinksLoading = false.obs;
+
   Future<void> fetchLinks() async {
     try {
-      isLoading.value = true;
+      isLinksLoading.value = true;
 
       // Fetch plan groups alongside links
       if (planGroupsList.isEmpty) {
@@ -466,16 +479,25 @@ class IbmController extends GetxController {
         final Map<String, dynamic> root = _toMap(response.data);
         final Map<String, dynamic> data =
             root['data'] is Map ? _toMap(root['data']) : root;
-        final list = data['links'] ?? data['data'] ?? [];
+
+        dynamic list = data['links'] ?? data['data'] ?? data['rows'];
+        if (list == null && root['data'] is List) {
+          list = root['data'];
+        } else if (list == null && response.data is List) {
+          list = response.data;
+        }
+
         if (list is List) {
           linksList.assignAll(list);
         }
         update(['ibm_links']);
+      } else if (!response.success && response.message != null && response.message!.isNotEmpty) {
+        errorMessage.value = response.message!;
       }
     } catch (e) {
       errorMessage.value = e.toString();
     } finally {
-      isLoading.value = false;
+      isLinksLoading.value = false;
     }
   }
 
@@ -501,21 +523,28 @@ class IbmController extends GetxController {
     String? code,
     List<int>? planGroupIds,
     int? defaultPlanGroupId,
+    String? expiresAt,
+    bool showLoader = true,
   }) async {
     try {
-      Get.dialog(
-        Center(
-          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
-        ),
-        barrierDismissible: false,
-      );
+      if (showLoader) {
+        Get.dialog(
+          Center(
+            child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+          ),
+          barrierDismissible: false,
+        );
+      }
       final response = await _apiProvider.createReferralLink(
         label: label,
         code: code,
         planGroupIds: planGroupIds,
         defaultPlanGroupId: defaultPlanGroupId,
+        expiresAt: expiresAt,
       );
-      Get.back(closeOverlays: true);
+      if (showLoader && (Get.isDialogOpen ?? false)) {
+        Get.back();
+      }
       if (response.success) {
         CustomToastService.showSuccess(message: 'Referral link created!');
         fetchLinks();
@@ -527,7 +556,9 @@ class IbmController extends GetxController {
         return false;
       }
     } catch (e) {
-      if (Get.isDialogOpen ?? false) Get.back(closeOverlays: true);
+      if (showLoader && (Get.isDialogOpen ?? false)) {
+        Get.back();
+      }
       CustomToastService.showError(message: 'Error: $e');
       return false;
     }
@@ -539,24 +570,35 @@ class IbmController extends GetxController {
     List<int>? planGroupIds,
     int? defaultPlanGroupId,
     bool? isActive,
+    String? expiresAt,
+    bool showLoader = true,
   }) async {
     try {
-      Get.dialog(
-        Center(
-          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
-        ),
-        barrierDismissible: false,
-      );
+      if (showLoader) {
+        Get.dialog(
+          Center(
+            child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+          ),
+          barrierDismissible: false,
+        );
+      }
       final response = await _apiProvider.updateReferralLink(
         linkId: linkId,
         label: label,
         planGroupIds: planGroupIds,
         defaultPlanGroupId: defaultPlanGroupId,
         isActive: isActive,
+        expiresAt: expiresAt,
       );
-      Get.back(closeOverlays: true);
+      if (showLoader && (Get.isDialogOpen ?? false)) {
+        Get.back();
+      }
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Referral link updated!');
+        CustomToastService.showSuccess(
+          message: isActive != null
+              ? (isActive ? 'Link switched on!' : 'Link switched off!')
+              : 'Referral link updated!',
+        );
         fetchLinks();
         return true;
       } else {
@@ -566,7 +608,9 @@ class IbmController extends GetxController {
         return false;
       }
     } catch (e) {
-      if (Get.isDialogOpen ?? false) Get.back(closeOverlays: true);
+      if (showLoader && (Get.isDialogOpen ?? false)) {
+        Get.back();
+      }
       CustomToastService.showError(message: 'Error: $e');
       return false;
     }
@@ -581,7 +625,9 @@ class IbmController extends GetxController {
         barrierDismissible: false,
       );
       final response = await _apiProvider.deleteReferralLink(linkId);
-      Get.back(closeOverlays: true);
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
       if (response.success) {
         CustomToastService.showSuccess(message: 'Referral link deleted!');
         fetchLinks();
@@ -593,7 +639,9 @@ class IbmController extends GetxController {
         return false;
       }
     } catch (e) {
-      if (Get.isDialogOpen ?? false) Get.back(closeOverlays: true);
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
       CustomToastService.showError(message: 'Error: $e');
       return false;
     }
@@ -762,6 +810,207 @@ class IbmController extends GetxController {
       profileErrorMessage.value = e.toString();
     } finally {
       isProfileLoading.value = false;
+    }
+  }
+
+  // ==========================================
+  // --- Marketing Materials State & Methods ---
+  // ==========================================
+  final RxList<dynamic> materialsList = <dynamic>[].obs;
+  final RxList<dynamic> marketingCategories = <dynamic>[].obs;
+  final RxString selectedMarketingCategory = 'all'.obs;
+  final RxString marketingSearchQuery = ''.obs;
+  final RxBool isMarketingLoading = false.obs;
+
+  Future<void> fetchMarketingMaterials({String? category, String? q}) async {
+    try {
+      isMarketingLoading.value = true;
+      if (category != null) selectedMarketingCategory.value = category;
+      if (q != null) marketingSearchQuery.value = q;
+
+      final response = await _apiProvider.getMarketingMaterials(
+        category: selectedMarketingCategory.value,
+        q: marketingSearchQuery.value,
+      );
+
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+
+        final mats = data['materials'] ?? data['data'] ?? [];
+        if (mats is List) {
+          materialsList.assignAll(mats);
+        }
+
+        final cats = data['categories'] ?? [];
+        if (cats is List) {
+          marketingCategories.assignAll(cats);
+        }
+        update(['ibm_marketing']);
+      }
+    } catch (e) {
+      errorMessage.value = e.toString();
+    } finally {
+      isMarketingLoading.value = false;
+    }
+  }
+
+  // ==========================================
+  // --- Client Visibility State & Methods ---
+  // ==========================================
+  final RxList<dynamic> clientVisibilityGroups = <dynamic>[].obs;
+  final RxnInt defaultVisibilityGroupId = RxnInt();
+  final RxList<int> selectedVisibleGroupIds = <int>[].obs;
+  final RxBool isVisibilityLoading = false.obs;
+
+  Future<void> fetchClientVisibility() async {
+    try {
+      isVisibilityLoading.value = true;
+      final response = await _apiProvider.getClientVisibility();
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+
+        final groups = data['groups'] ?? [];
+        if (groups is List) {
+          clientVisibilityGroups.assignAll(groups);
+          final List<int> visible = [];
+          for (final g in groups) {
+            if (g is Map) {
+              final id = g['plan_group_id'] ?? g['group_id'] ?? g['id'];
+              final isVis = g['is_visible'] == true || g['is_visible'] == 1;
+              if (isVis && id != null) {
+                final intId = int.tryParse(id.toString());
+                if (intId != null) visible.add(intId);
+              }
+            }
+          }
+          selectedVisibleGroupIds.assignAll(visible);
+        }
+
+        final defaultId = data['default_plan_group_id'];
+        if (defaultId != null) {
+          defaultVisibilityGroupId.value = int.tryParse(defaultId.toString());
+        }
+        update(['ibm_visibility']);
+      }
+    } catch (e) {
+      errorMessage.value = e.toString();
+    } finally {
+      isVisibilityLoading.value = false;
+    }
+  }
+
+  void toggleGroupVisibility(int planGroupId) {
+    if (selectedVisibleGroupIds.contains(planGroupId)) {
+      if (selectedVisibleGroupIds.length > 1) {
+        selectedVisibleGroupIds.remove(planGroupId);
+        if (defaultVisibilityGroupId.value == planGroupId) {
+          defaultVisibilityGroupId.value = selectedVisibleGroupIds.first;
+        }
+      } else {
+        CustomToastService.showError(
+          message: 'At least one trading group must remain visible.',
+        );
+      }
+    } else {
+      selectedVisibleGroupIds.add(planGroupId);
+      if (defaultVisibilityGroupId.value == null) {
+        defaultVisibilityGroupId.value = planGroupId;
+      }
+    }
+  }
+
+  void setDefaultVisibilityGroup(int planGroupId) {
+    if (!selectedVisibleGroupIds.contains(planGroupId)) {
+      selectedVisibleGroupIds.add(planGroupId);
+    }
+    defaultVisibilityGroupId.value = planGroupId;
+  }
+
+  Future<bool> saveClientVisibility() async {
+    try {
+      if (selectedVisibleGroupIds.isEmpty) {
+        CustomToastService.showError(
+          message: 'Please select at least one visible group.',
+        );
+        return false;
+      }
+
+      Get.dialog(
+        Center(
+          child: CommonLoadingWidget(size: 50.0, color: AppColors.primary),
+        ),
+        barrierDismissible: false,
+      );
+
+      final response = await _apiProvider.updateClientVisibility(
+        planGroupIds: selectedVisibleGroupIds.toList(),
+        defaultPlanGroupId: defaultVisibilityGroupId.value,
+      );
+
+      Get.back(closeOverlays: true);
+
+      if (response.success) {
+        CustomToastService.showSuccess(
+          message: 'Client visibility updated successfully!',
+        );
+        fetchClientVisibility();
+        return true;
+      } else {
+        CustomToastService.showError(
+          message: response.message ?? 'Failed to update visibility',
+        );
+        return false;
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      CustomToastService.showError(message: 'Error saving visibility: $e');
+      return false;
+    }
+  }
+
+  // ==========================================
+  // --- Referral Link Extension Methods ---
+  // ==========================================
+  final RxMap<String, dynamic> currentLinkStats = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentLinkClients = <String, dynamic>{}.obs;
+
+  Future<bool> toggleLinkStatus(int linkId, bool currentStatus) async {
+    return await updateReferralLink(
+      linkId: linkId,
+      isActive: !currentStatus,
+      showLoader: false,
+    );
+  }
+
+  Future<void> fetchLinkStats(int linkId, {String period = '30d'}) async {
+    try {
+      final response = await _apiProvider.getLinkStats(linkId, period: period);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        currentLinkStats.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<void> fetchLinkClients(int linkId, {String period = 'all'}) async {
+    try {
+      final response = await _apiProvider.getLinkClients(linkId, period: period);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        currentLinkClients.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
     }
   }
 }

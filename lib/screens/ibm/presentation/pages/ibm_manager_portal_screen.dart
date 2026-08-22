@@ -146,7 +146,6 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
         final data = controller.dashboardData;
         final actData = controller.dashboardActivityData;
-        final wallet = controller.walletData;
         final requests = controller.requestsData;
 
         // Fallback structures if API is empty

@@ -221,6 +221,7 @@ class IbmApiProvider {
     String? code,
     List<int>? planGroupIds,
     int? defaultPlanGroupId,
+    String? expiresAt,
   }) async {
     return await ApiService.post(
       endpoint: 'ibm/portal/links',
@@ -229,6 +230,7 @@ class IbmApiProvider {
         if (code != null && code.isNotEmpty) 'code': code,
         if (planGroupIds != null) 'plan_group_ids': planGroupIds,
         if (defaultPlanGroupId != null) 'default_plan_group_id': defaultPlanGroupId,
+        if (expiresAt != null && expiresAt.isNotEmpty) 'expires_at': expiresAt,
       },
     );
   }
@@ -240,12 +242,14 @@ class IbmApiProvider {
     List<int>? planGroupIds,
     int? defaultPlanGroupId,
     bool? isActive,
+    String? expiresAt,
   }) async {
     final Map<String, dynamic> data = {};
     if (label != null) data['label'] = label;
     if (planGroupIds != null) data['plan_group_ids'] = planGroupIds;
     if (defaultPlanGroupId != null) data['default_plan_group_id'] = defaultPlanGroupId;
     if (isActive != null) data['is_active'] = isActive;
+    if (expiresAt != null) data['expires_at'] = expiresAt;
 
     return await ApiService.put(
       endpoint: 'ibm/portal/links/$linkId',
@@ -309,6 +313,71 @@ class IbmApiProvider {
   Future<ApiResponse> getNetworkPlan(int id) async {
     return await ApiService.get(
       endpoint: 'ibm/portal/network/$id/plan',
+    );
+  }
+
+  /// Get Client Visibility
+  Future<ApiResponse> getClientVisibility() async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/client-visibility',
+    );
+  }
+
+  /// Update Client Visibility
+  Future<ApiResponse> updateClientVisibility({
+    required List<int> planGroupIds,
+    int? defaultPlanGroupId,
+  }) async {
+    final Map<String, dynamic> data = {
+      'plan_group_ids': planGroupIds,
+    };
+    if (defaultPlanGroupId != null) {
+      data['default_plan_group_id'] = defaultPlanGroupId;
+    }
+    return await ApiService.post(
+      endpoint: 'ibm/portal/client-visibility',
+      data: data,
+    );
+  }
+
+  /// Get Marketing Materials
+  Future<ApiResponse> getMarketingMaterials({
+    String? category,
+    String? q,
+  }) async {
+    final Map<String, String> query = {};
+    if (category != null && category.isNotEmpty && category != 'all') {
+      query['category'] = category;
+    }
+    if (q != null && q.isNotEmpty) {
+      query['q'] = q;
+    }
+    return await ApiService.get(
+      endpoint: 'ibm/portal/marketing',
+      queryParameters: query.isNotEmpty ? query : null,
+    );
+  }
+
+  /// Download Marketing Material (stream URL or binary)
+  Future<ApiResponse> downloadMarketingMaterial(int materialId) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/marketing/$materialId/download',
+    );
+  }
+
+  /// Get Referral Link Stats
+  Future<ApiResponse> getLinkStats(int linkId, {String period = '30d'}) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/links/$linkId/stats',
+      queryParameters: {'period': period},
+    );
+  }
+
+  /// Get Referral Link Clients
+  Future<ApiResponse> getLinkClients(int linkId, {String period = 'all'}) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/links/$linkId/clients',
+      queryParameters: {'period': period},
     );
   }
 }

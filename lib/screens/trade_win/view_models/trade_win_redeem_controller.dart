@@ -31,14 +31,18 @@ class TradeWinRedeemController extends GetxController {
 
   double get balanceAfter {
     if (!Get.isRegistered<TradeWinController>()) return 0;
-    final current = Get.find<TradeWinController>().stats.value?.totalPoints ?? 0;
+    final current =
+        Get.find<TradeWinController>().stats.value?.totalPoints ?? 0;
     return (current - totalCost).clamp(0, double.infinity);
   }
 
   @override
   void onInit() {
     super.onInit();
-    quantity.value = initialQuantity.clamp(1, product.stock > 0 ? product.stock : 1);
+    quantity.value = initialQuantity.clamp(
+      1,
+      product.stock > 0 ? product.stock : 1,
+    );
   }
 
   static Future<TradeWinShippingDetailsModel> loadSavedAddress() async {
@@ -89,9 +93,7 @@ class TradeWinRedeemController extends GetxController {
       Get.back(closeOverlays: true);
       return;
     }
-    Get.until(
-      (route) => route.settings.name == AppPages.TRADE_WIN_MAIN,
-    );
+    Get.until((route) => route.settings.name == AppPages.TRADE_WIN_MAIN);
   }
 
   Future<void> submitRedemption({
@@ -113,7 +115,8 @@ class TradeWinRedeemController extends GetxController {
 
       if (!response.success) {
         CustomToastService.showError(
-          message: response.message ??
+          message:
+              response.message ??
               Get.find<LanguageService>().tr('tw_claim_failed'),
         );
         isSubmitting.value = false;
@@ -149,6 +152,7 @@ class TradeWinRedeemController extends GetxController {
         if (inner is Map) collect(inner);
       }
     }
+
     collect(raw);
     for (final m in maps) {
       for (final key in ['reference_no', 'reference', 'reference_number']) {

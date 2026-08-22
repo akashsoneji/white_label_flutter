@@ -78,16 +78,16 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
 
   void _parseData(dynamic data) {
     if (data is! Map<String, dynamic>) return;
-    
+
     final payload = data['data'] ?? data;
-    
+
     if (widget.planId != null) {
       final planData = payload['plan'] ?? {};
       _nameController.text = planData['name'] ?? '';
       _descController.text = planData['description'] ?? '';
       _isActive = planData['is_active'] == true || planData['is_active'] == 1;
     }
-    
+
     // Parse selected/draft groups
     final draftList = payload['draft'] ?? payload['groups'] ?? [];
     if (draftList is List) {
@@ -95,15 +95,24 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
         int groupId = group['group_id'] ?? group['id'] ?? 0;
         if (groupId != 0) {
           _selectedGroups[groupId] = {
-            'rates': group['rates'] is Map ? Map<String, dynamic>.from(group['rates']) : <String, dynamic>{},
-            'symbol_rates': group['symbol_rates'] is Map ? Map<String, dynamic>.from(group['symbol_rates']) : <String, dynamic>{},
-            'blocked': group['blocked_symbol_ids'] is List ? List<dynamic>.from(group['blocked_symbol_ids']) : <dynamic>[],
+            'rates':
+                group['rates'] is Map
+                    ? Map<String, dynamic>.from(group['rates'])
+                    : <String, dynamic>{},
+            'symbol_rates':
+                group['symbol_rates'] is Map
+                    ? Map<String, dynamic>.from(group['symbol_rates'])
+                    : <String, dynamic>{},
+            'blocked':
+                group['blocked_symbol_ids'] is List
+                    ? List<dynamic>.from(group['blocked_symbol_ids'])
+                    : <dynamic>[],
             'expanded': false,
           };
         }
       }
     }
-    
+
     // Parse available groups and maximum rates
     if (payload['caps'] is List) {
       _availableCaps = List.from(payload['caps']);
@@ -112,7 +121,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     // Construct groups payload
     List<Map<String, dynamic>> groupsPayload = [];
     _selectedGroups.forEach((groupId, data) {
@@ -136,13 +145,20 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
     });
 
     try {
-      final res = widget.planId == null
-          ? await IbmApiProvider().createPartnerPlan(payload)
-          : await IbmApiProvider().updatePartnerPlan(widget.planId!, payload);
+      final res =
+          widget.planId == null
+              ? await IbmApiProvider().createPartnerPlan(payload)
+              : await IbmApiProvider().updatePartnerPlan(
+                widget.planId!,
+                payload,
+              );
 
       if (res.success) {
         CustomToastService.show(
-          message: widget.planId == null ? 'Plan created successfully' : 'Plan updated successfully',
+          message:
+              widget.planId == null
+                  ? 'Plan created successfully'
+                  : 'Plan updated successfully',
         );
         Get.back(result: true);
       } else {
@@ -168,88 +184,115 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.whiteColor,
       appBar: AppBar(
         title: Text(
           widget.planId == null ? 'Create Partner Plan' : 'Edit Partner Plan',
           style: TextStyle(color: AppColors.textPrimary, fontSize: 18.sp),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.whiteColor,
         elevation: 1,
         iconTheme: IconThemeData(color: AppColors.textPrimary),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Colors.purple,
+          labelColor: AppColors.primary,
           unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: Colors.purple,
+          indicatorColor: AppColors.primary,
           tabs: const [
             Tab(text: '1 • Details'),
             Tab(text: '2 • Groups & Rates'),
           ],
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-          : _error != null
-              ? Center(child: Text(_error!, style: TextStyle(color: Colors.red)))
+      body:
+          _isLoading
+              ? Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )
+              : _error != null
+              ? Center(
+                child: Text(_error!, style: TextStyle(color: Colors.red)),
+              )
               : TabBarView(
-                  controller: _tabController,
-                  physics: const NeverScrollableScrollPhysics(), // Prevent swipe to force Next button usage if wanted
-                  children: [
-                    _buildDetailsTab(),
-                    _buildGroupsRatesTab(),
+                controller: _tabController,
+                physics:
+                    const NeverScrollableScrollPhysics(), // Prevent swipe to force Next button usage if wanted
+                children: [_buildDetailsTab(), _buildGroupsRatesTab()],
+              ),
+      bottomNavigationBar:
+          _isLoading || _error != null
+              ? null
+              : Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: AppColors.whiteColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
+                    ),
                   ],
                 ),
-      bottomNavigationBar: _isLoading || _error != null
-          ? null
-          : Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  )
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => Get.back(),
-                    style: TextButton.styleFrom(minimumSize: Size.zero),
-                    child: Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
-                  ),
-                  ElevatedButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () {
-                            if (_tabController.index == 0) {
-                              if (_formKey.currentState!.validate()) {
-                                _tabController.animateTo(1);
-                              }
-                            } else {
-                              _submit();
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size.zero, // Override global infinite width
-                      backgroundColor: Colors.purple,
-                      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () => Get.back(),
+                      style: TextButton.styleFrom(minimumSize: Size.zero),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
                     ),
-                    child: _isSubmitting
-                        ? SizedBox(width: 20.w, height: 20.w, child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : Text(
-                            _tabController.index == 0 ? 'Next: Groups & Rates' : 'Save Plan',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                  ),
-                ],
+                    ElevatedButton(
+                      onPressed:
+                          _isSubmitting
+                              ? null
+                              : () {
+                                if (_tabController.index == 0) {
+                                  if (_formKey.currentState!.validate()) {
+                                    _tabController.animateTo(1);
+                                  }
+                                } else {
+                                  _submit();
+                                }
+                              },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize:
+                            Size.zero, // Override global infinite width
+                        backgroundColor: AppColors.primary,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 24.w,
+                          vertical: 12.h,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      child:
+                          _isSubmitting
+                              ? SizedBox(
+                                width: 20.w,
+                                height: 20.w,
+                                child: CircularProgressIndicator(
+                                  color: AppColors.whiteColor,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : Text(
+                                _tabController.index == 0
+                                    ? 'Next: Groups & Rates'
+                                    : 'Save Plan',
+                                style: TextStyle(
+                                  color: AppColors.whiteColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                    ),
+                  ],
+                ),
               ),
-            ),
     );
   }
 
@@ -261,34 +304,58 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Plan name *', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+            Text(
+              'Plan name *',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+            ),
             SizedBox(height: 8.h),
             TextFormField(
               controller: _nameController,
               decoration: InputDecoration(
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(6.r)),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 12.h,
+                ),
               ),
-              validator: (val) => val == null || val.trim().isEmpty ? 'Required' : null,
+              validator:
+                  (val) =>
+                      val == null || val.trim().isEmpty ? 'Required' : null,
             ),
             SizedBox(height: 24.h),
-            Text('Description', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+            Text(
+              'Description',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+            ),
             SizedBox(height: 8.h),
             TextFormField(
               controller: _descController,
               maxLines: 4,
               decoration: InputDecoration(
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(6.r)),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 12.h,
+                ),
               ),
             ),
             SizedBox(height: 24.h),
-            Text('Status', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp)),
+            Text(
+              'Status',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+            ),
             SizedBox(height: 8.h),
             SwitchListTile(
-              title: Text(_isActive ? 'Active' : 'Inactive', style: TextStyle(fontSize: 14.sp)),
+              title: Text(
+                _isActive ? 'Active' : 'Inactive',
+                style: TextStyle(fontSize: 14.sp),
+              ),
               value: _isActive,
-              activeColor: Colors.purple,
+              activeColor: AppColors.primary,
               contentPadding: EdgeInsets.zero,
               onChanged: (val) {
                 setState(() {
@@ -314,38 +381,58 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
           ),
           child: Row(
             children: [
-              Icon(Icons.info_outline, size: 18.w, color: AppColors.textSecondary),
+              Icon(
+                Icons.info_outline,
+                size: 18.w,
+                color: AppColors.textSecondary,
+              ),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   'Rates shown in Parent cap are the maximum you can give. You can only use groups your master plan includes.',
-                  style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ],
           ),
         ),
         Expanded(
-          child: _availableCaps.isEmpty
-              ? Center(child: Text('No groups available', style: TextStyle(color: AppColors.textSecondary)))
-              : ListView.builder(
-                  itemCount: _availableCaps.length,
-                  itemBuilder: (context, index) {
-                    final cap = _availableCaps[index];
-                    final int groupId = cap['group_id'] ?? cap['id'] ?? 0;
-                    final String groupName = cap['group_name'] ?? cap['name'] ?? 'Group $groupId';
-                    final bool isAdded = _selectedGroups.containsKey(groupId);
+          child:
+              _availableCaps.isEmpty
+                  ? Center(
+                    child: Text(
+                      'No groups available',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                  )
+                  : ListView.builder(
+                    itemCount: _availableCaps.length,
+                    itemBuilder: (context, index) {
+                      final cap = _availableCaps[index];
+                      final int groupId = cap['group_id'] ?? cap['id'] ?? 0;
+                      final String groupName =
+                          cap['group_name'] ?? cap['name'] ?? 'Group $groupId';
+                      final bool isAdded = _selectedGroups.containsKey(groupId);
 
-                    return _buildGroupRow(groupId, groupName, cap, isAdded);
-                  },
-                ),
+                      return _buildGroupRow(groupId, groupName, cap, isAdded);
+                    },
+                  ),
         ),
       ],
     );
   }
 
-  Widget _buildGroupRow(int groupId, String groupName, dynamic cap, bool isAdded) {
-    final bool isExpanded = isAdded && _selectedGroups[groupId]!['expanded'] == true;
+  Widget _buildGroupRow(
+    int groupId,
+    String groupName,
+    dynamic cap,
+    bool isAdded,
+  ) {
+    final bool isExpanded =
+        isAdded && _selectedGroups[groupId]!['expanded'] == true;
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
@@ -360,7 +447,13 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
             child: Row(
               children: [
                 Expanded(
-                  child: Text(groupName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                  child: Text(
+                    groupName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                    ),
+                  ),
                 ),
                 if (isAdded)
                   Row(
@@ -373,8 +466,17 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                           });
                         },
                         style: TextButton.styleFrom(minimumSize: Size.zero),
-                        icon: Icon(isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, size: 16.w, color: AppColors.textPrimary),
-                        label: Text(isExpanded ? 'Close' : 'Set rates', style: TextStyle(color: AppColors.textPrimary)),
+                        icon: Icon(
+                          isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          size: 16.w,
+                          color: AppColors.textPrimary,
+                        ),
+                        label: Text(
+                          isExpanded ? 'Close' : 'Set rates',
+                          style: TextStyle(color: AppColors.textPrimary),
+                        ),
                       ),
                       TextButton.icon(
                         onPressed: () {
@@ -384,7 +486,10 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                         },
                         style: TextButton.styleFrom(minimumSize: Size.zero),
                         icon: Icon(Icons.close, size: 16.w, color: Colors.red),
-                        label: const Text('Remove', style: TextStyle(color: Colors.red)),
+                        label: const Text(
+                          'Remove',
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
                     ],
                   )
@@ -401,8 +506,15 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                       });
                     },
                     style: TextButton.styleFrom(minimumSize: Size.zero),
-                    icon: Icon(Icons.add, size: 16.w, color: AppColors.textPrimary),
-                    label: Text('Add', style: TextStyle(color: AppColors.textPrimary)),
+                    icon: Icon(
+                      Icons.add,
+                      size: 16.w,
+                      color: AppColors.textPrimary,
+                    ),
+                    label: Text(
+                      'Add',
+                      style: TextStyle(color: AppColors.textPrimary),
+                    ),
                   ),
               ],
             ),
@@ -417,7 +529,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
     // Attempt to extract categories / instruments
     List<dynamic> categories = cap['categories'] ?? cap['rates'] ?? [];
     List<dynamic> symbolRates = cap['symbol_rates'] ?? [];
-    
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -427,39 +539,87 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('REBATE PER INSTRUMENT TYPE', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11.sp, color: AppColors.textSecondary)),
+          Text(
+            'REBATE PER INSTRUMENT TYPE',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 11.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
           SizedBox(height: 12.h),
-          
+
           if (categories.isEmpty)
-            Text('No instrument categories found.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp))
+            Text(
+              'No instrument categories found.',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+            )
           else
             ...categories.map((cat) {
-              final String catId = (cat['symbol_category_id'] ?? cat['id'] ?? cat['category_id'] ?? '').toString();
-              final String name = cat['category'] ?? cat['name'] ?? cat['category_name'] ?? 'Category $catId';
-              final double parentCap = double.tryParse(cat['max_allowed']?.toString() ?? cat['max_rate']?.toString() ?? '0') ?? 0;
-              
+              final String catId =
+                  (cat['symbol_category_id'] ??
+                          cat['id'] ??
+                          cat['category_id'] ??
+                          '')
+                      .toString();
+              final String name =
+                  cat['category'] ??
+                  cat['name'] ??
+                  cat['category_name'] ??
+                  'Category $catId';
+              final double parentCap =
+                  double.tryParse(
+                    cat['max_allowed']?.toString() ??
+                        cat['max_rate']?.toString() ??
+                        '0',
+                  ) ??
+                  0;
+
               // Get current set rate
-              double currentRate = double.tryParse(_selectedGroups[groupId]!['rates'][catId]?.toString() ?? '0') ?? 0;
-              
+              double currentRate =
+                  double.tryParse(
+                    _selectedGroups[groupId]!['rates'][catId]?.toString() ??
+                        '0',
+                  ) ??
+                  0;
+
               return Padding(
                 padding: EdgeInsets.only(bottom: 12.h),
                 child: Row(
                   children: [
-                    Expanded(flex: 3, child: Text(name, style: TextStyle(fontSize: 13.sp))),
                     Expanded(
-                      flex: 2, 
-                      child: Text('\$$parentCap', style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp), textAlign: TextAlign.center),
+                      flex: 3,
+                      child: Text(name, style: TextStyle(fontSize: 13.sp)),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        '\$$parentCap',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     Expanded(
                       flex: 3,
                       child: TextFormField(
-                        initialValue: currentRate > 0 ? currentRate.toString() : '',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        initialValue:
+                            currentRate > 0 ? currentRate.toString() : '',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         decoration: InputDecoration(
                           hintText: '0.00',
                           isDense: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(4.r)),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 8.h,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
                         ),
                         onChanged: (val) {
                           double newRate = double.tryParse(val) ?? 0;
@@ -473,7 +633,10 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                       flex: 2,
                       child: Text(
                         (parentCap - currentRate).toStringAsFixed(2),
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.sp,
+                        ),
                         textAlign: TextAlign.right,
                       ),
                     ),
@@ -481,42 +644,82 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                 ),
               );
             }).toList(),
-            
+
           if (symbolRates.isNotEmpty) ...[
             SizedBox(height: 24.h),
-            Text('REBATE PER SYMBOL (OVERRIDES INSTRUMENT TYPE)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11.sp, color: AppColors.textSecondary)),
+            Text(
+              'REBATE PER SYMBOL (OVERRIDES INSTRUMENT TYPE)',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 11.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
             SizedBox(height: 12.h),
             ...symbolRates.map((sym) {
-              final String symId = (sym['symbol_id'] ?? sym['id'] ?? '').toString();
-              final String name = sym['name'] ?? sym['symbol_name'] ?? 'Symbol $symId';
-              final double parentCap = double.tryParse(sym['max_allowed']?.toString() ?? sym['max_rate']?.toString() ?? '0') ?? 0;
-              
+              final String symId =
+                  (sym['symbol_id'] ?? sym['id'] ?? '').toString();
+              final String name =
+                  sym['name'] ?? sym['symbol_name'] ?? 'Symbol $symId';
+              final double parentCap =
+                  double.tryParse(
+                    sym['max_allowed']?.toString() ??
+                        sym['max_rate']?.toString() ??
+                        '0',
+                  ) ??
+                  0;
+
               // Get current set symbol rate
-              double currentRate = double.tryParse(_selectedGroups[groupId]!['symbol_rates'][symId]?.toString() ?? '0') ?? 0;
-              
+              double currentRate =
+                  double.tryParse(
+                    _selectedGroups[groupId]!['symbol_rates'][symId]
+                            ?.toString() ??
+                        '0',
+                  ) ??
+                  0;
+
               return Padding(
                 padding: EdgeInsets.only(bottom: 12.h),
                 child: Row(
                   children: [
-                    Expanded(flex: 3, child: Text(name, style: TextStyle(fontSize: 13.sp))),
                     Expanded(
-                      flex: 2, 
-                      child: Text('\$$parentCap', style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp), textAlign: TextAlign.center),
+                      flex: 3,
+                      child: Text(name, style: TextStyle(fontSize: 13.sp)),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        '\$$parentCap',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                     Expanded(
                       flex: 3,
                       child: TextFormField(
-                        initialValue: currentRate > 0 ? currentRate.toString() : '',
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        initialValue:
+                            currentRate > 0 ? currentRate.toString() : '',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         decoration: InputDecoration(
                           hintText: '0.00',
                           isDense: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(4.r)),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 8.h,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
                         ),
                         onChanged: (val) {
                           double newRate = double.tryParse(val) ?? 0;
-                          _selectedGroups[groupId]!['symbol_rates'][symId] = newRate;
+                          _selectedGroups[groupId]!['symbol_rates'][symId] =
+                              newRate;
                           setState(() {});
                         },
                       ),
@@ -525,7 +728,10 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                       flex: 2,
                       child: Text(
                         (parentCap - currentRate).toStringAsFixed(2),
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13.sp,
+                        ),
                         textAlign: TextAlign.right,
                       ),
                     ),
@@ -534,13 +740,24 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
               );
             }).toList(),
           ],
-            
+
           SizedBox(height: 24.h),
-          Text('BLOCK SYMBOLS (SUB-IB WON\'T EARN ON THESE)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11.sp, color: AppColors.textSecondary)),
+          Text(
+            'BLOCK SYMBOLS (SUB-IB WON\'T EARN ON THESE)',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 11.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
           SizedBox(height: 8.h),
           Text(
             'This feature is complex and best handled via the desktop portal at this time.',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp, fontStyle: FontStyle.italic),
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12.sp,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
       ),
