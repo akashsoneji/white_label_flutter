@@ -146,6 +146,16 @@ class ApiConstants {
   // Demo Contest APIs
   static const String demoContestContests = '${ajax}demo-contest/contests';
   static const String demoContestMyStats = '${ajax}demo-contest/my-stats';
+  static String demoContestEnrollPreview(String contestId) => '${ajax}demo-contest/$contestId/enroll-preview';
+  static String demoContestSteps(String contestId) => '${ajax}demo-contest/$contestId/steps';
+  static String demoContestStepClick(String stepId) => '${ajax}demo-contest/step/$stepId/click';
+  static String demoContestTerms(String contestId) => '${ajax}demo-contest/$contestId/terms';
+  static String demoContestEnroll(String contestId) => '${ajax}demo-contest/$contestId/enroll';
+  static const String demoContestMyEnrollments = '${ajax}demo-contest/my-enrollments';
+  static String demoContestLeaderboard(String id) => '${ajax}demo-contest/$id/leaderboard';
+  static String demoContestTradingHistory(String contestId) => '${ajax}demo-contest/$contestId/trading-history';
+  static String demoContestRuleViolations(String contestId) => '${ajax}demo-contest/$contestId/rule-violations';
+  static const String demoContestClaim = '${ajax}demo-contest/claim';
 
   // Trade & Win APIs
   static const String tradeWinProducts = 'v1/user/trade-win/products';

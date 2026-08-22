@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:audioplayers/audioplayers.dart';
@@ -155,6 +158,38 @@ class NotificationService {
   }
 
   Future<void> _showLocalNotification(RemoteMessage message) async {
+    String? imageUrl;
+    
+    // Check various places for image URL in the payload
+    if (Platform.isAndroid && message.notification?.android?.imageUrl != null) {
+      imageUrl = message.notification!.android!.imageUrl;
+    } else if (Platform.isIOS && message.notification?.apple?.imageUrl != null) {
+      imageUrl = message.notification!.apple!.imageUrl;
+    } else if (message.data['image'] != null) {
+      imageUrl = message.data['image'];
+    }
+
+    String? bigPicturePath;
+    StyleInformation? styleInformation;
+    List<DarwinNotificationAttachment>? iosAttachments;
+
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      try {
+        bigPicturePath = await _downloadAndSaveFile(imageUrl, 'notification_image_${DateTime.now().millisecondsSinceEpoch}.jpg');
+        
+        if (Platform.isAndroid) {
+          styleInformation = BigPictureStyleInformation(
+            FilePathAndroidBitmap(bigPicturePath),
+            hideExpandedLargeIcon: false,
+          );
+        } else if (Platform.isIOS) {
+          iosAttachments = [DarwinNotificationAttachment(bigPicturePath)];
+        }
+      } catch (e) {
+        debugPrint('Error downloading notification image: $e');
+      }
+    }
+
     final AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
           'high_importance_channel', // id
@@ -164,12 +199,14 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
+          styleInformation: styleInformation,
         );
 
     final DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      attachments: iosAttachments,
     );
 
     final NotificationDetails notificationDetails = NotificationDetails(
@@ -178,12 +215,21 @@ class NotificationService {
     );
 
     await _notifications.show(
-      message.notification.hashCode,
+      message.notification?.hashCode ?? DateTime.now().millisecond,
       message.notification?.title,
       message.notification?.body,
       notificationDetails,
       payload: json.encode(message.data),
     );
+  }
+
+  Future<String> _downloadAndSaveFile(String url, String fileName) async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final String filePath = '${directory.path}/$fileName';
+    final http.Response response = await http.get(Uri.parse(url));
+    final File file = File(filePath);
+    await file.writeAsBytes(response.bodyBytes);
+    return filePath;
   }
 
   bool get hasPermission => _hasPermission;

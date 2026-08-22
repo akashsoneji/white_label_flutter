@@ -1547,9 +1547,9 @@ Placing Order:
         (instrument) => instrument.symbol == selectedSymbol,
       );
 
-      // ✅ FIX: If symbol is empty or not found in instruments, use preferred instrument
-      // Only when user hasn't made a selection in this session
-      if ((selectedSymbol.isEmpty || !isSymbolFromInstruments) &&
+      // Only set initial symbol if selectedSymbol AND currentSymbol are completely empty
+      if (selectedSymbol.isEmpty &&
+          symbolSelectionService.currentSymbol.isEmpty &&
           !symbolSelectionService.hasUserSelection) {
         final preferredInstrument = _findPreferredInstrument(
           instrumentsController.allInstruments,

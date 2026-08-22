@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 
 import 'package:crm_app/services/language_service.dart';
 
@@ -41,10 +42,18 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
               : Get.put(SymbolSelectionService());
 
       symService.ensureDefault().then((_) {
+        String fallback = 'EURUSD';
+        if (Get.isRegistered<InstrumentsController>()) {
+          final instCtrl = Get.find<InstrumentsController>();
+          if (instCtrl.instruments.isNotEmpty) {
+            fallback = instCtrl.instruments.first.symbol;
+          }
+        }
+        
         final sym =
             symService.currentSymbol.isNotEmpty
                 ? symService.currentSymbol
-                : 'XAUUSD';
+                : fallback;
         ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
       });
     }
@@ -69,10 +78,10 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
     }
   }
 
-  List<Widget> get _screens => [
+  late final List<Widget> _screens = [
     CelestialWatchlistScreen(onSymbolTap: (_) => setState(() => _index = 1)),
-    CelestialChartScreen(),
-    CelestialTradeScreen(),
+    const CelestialChartScreen(),
+    const CelestialTradeScreen(),
     CelestialHistoryScreen(key: _historyKey),
     CelestialSettingsScreen(onNavigateToTab: (i) => setState(() => _index = i)),
   ];
@@ -109,7 +118,7 @@ class _CelestialMainShellState extends State<CelestialMainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CelTheme.bg(context),
-      body: _ChartFriendlyIndexedStack(index: _index, children: _screens),
+      body: IndexedStack(index: _index, children: _screens),
       bottomNavigationBar: _buildBottomNav(context),
     );
   }
@@ -193,34 +202,4 @@ class _NavTab {
     required this.activeIcon,
     required this.label,
   });
-}
-
-class _ChartFriendlyIndexedStack extends StatelessWidget {
-  final int index;
-  final List<Widget> children;
-
-  const _ChartFriendlyIndexedStack({
-    required this.index,
-    required this.children,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: List.generate(children.length, (i) {
-        final isSelected = index == i;
-        final child = TickerMode(enabled: isSelected, child: children[i]);
-
-        // Always keep the chart screen (index 1) mounted with full size, just invisible
-        if (i == 1) {
-          return IgnorePointer(
-            ignoring: !isSelected,
-            child: Opacity(opacity: isSelected ? 1.0 : 0.0, child: child),
-          );
-        }
-
-        return Offstage(offstage: !isSelected, child: child);
-      }),
-    );
-  }
 }

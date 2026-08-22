@@ -129,8 +129,12 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   // ── Symbol / price helpers ──────────────────────────────────────────
   String _rawSymbol() {
     final s = Get.find<SymbolSelectionService>().currentSymbol;
-    if (s.isEmpty) return 'XAUUSD';
-    return s;
+    if (s.isNotEmpty) return s;
+    if (Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>();
+      if (inst.instruments.isNotEmpty) return inst.instruments.first.symbol;
+    }
+    return 'XAUUSD';
   }
 
   String _displaySymbol() {
@@ -719,23 +723,29 @@ class _ChartAreaState extends State<_ChartArea> {
     _tenaxKey.currentState?.updateSymbol(raw);
   }
 
-  static String _stripDot(String s) =>
-      s.contains('.') ? s.substring(0, s.lastIndexOf('.')) : (s.isEmpty ? 'XAUUSD' : s);
+  static String _stripDot(String s) {
+    if (s.contains('.')) return s.substring(0, s.lastIndexOf('.'));
+    if (s.isNotEmpty) return s;
+    if (Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>();
+      if (inst.instruments.isNotEmpty) {
+        final f = inst.instruments.first.symbol;
+        return f.contains('.') ? f.substring(0, f.lastIndexOf('.')) : f;
+      }
+    }
+    return 'XAUUSD';
+  }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final useNew = FlavorConfig.instance.useNewChart;
-      final sym = Get.find<SymbolSelectionService>().currentSymbol;
-      final raw =
-          sym.contains('.')
-              ? sym.substring(0, sym.lastIndexOf('.'))
-              : (sym.isEmpty ? 'XAUUSD' : sym);
+      final raw = _stripDot(Get.find<SymbolSelectionService>().currentSymbol);
 
       if (useNew) {
         return TenaxChartWebView(
           key: _tenaxKey,
-          symbol: _initialSymbol ?? 'XAUUSD',
+          symbol: _initialSymbol ?? raw,
           isDark: widget.isDark,
         );
       }
@@ -827,14 +837,27 @@ class _BottomDock extends StatelessWidget {
         // spreadDiff comes from the WS pre-converted to *points*
         // (the controller's // spread_points comment). Display
         // it as-is - no extra /pip math.
-        final bid =
+        var bid =
             priceMap['bid'] is num ? (priceMap['bid'] as num).toDouble() : null;
-        final ask =
+        var ask =
             priceMap['ask'] is num ? (priceMap['ask'] as num).toDouble() : null;
-        final spreadDiff =
+        var spreadDiff =
             priceMap['spreadDiff'] is num
                 ? (priceMap['spreadDiff'] as num).toDouble()
                 : null;
+
+        if ((bid == null || bid == 0.0 || ask == null || ask == 0.0) &&
+            Get.isRegistered<InstrumentsController>()) {
+          final sym = socket.currentSymbol.value.isNotEmpty
+              ? socket.currentSymbol.value
+              : Get.find<SymbolSelectionService>().currentSymbol;
+          final match = Get.find<InstrumentsController>().findInstrument(sym);
+          if (match != null && match.bid > 0) {
+            bid = match.bid;
+            ask = match.ask;
+            spreadDiff = match.spreadDiff;
+          }
+        }
 
         final bidStr =
             (bid != null && bid != 0.0) ? _trimTrailingZeros(bid) : '—';

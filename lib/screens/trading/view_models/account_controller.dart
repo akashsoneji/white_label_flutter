@@ -1101,7 +1101,6 @@ class AccountController extends GetxController with WidgetsBindingObserver {
               WebSocketEndpointHelper.logSwitchStep('Chart unsubscribe start');
               await chartSocketController.unsubscribeAndResubscribe(
                 accountNumber,
-                currentSymbol,
               );
               WebSocketEndpointHelper.logSwitchStep('Chart unsubscribe done');
             } else {

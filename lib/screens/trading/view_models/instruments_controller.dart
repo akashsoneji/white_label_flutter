@@ -41,6 +41,34 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  /// Fast lookup of an instrument by symbol
+  ListElement? findInstrument(String symbol) {
+    if (symbol.isEmpty) return null;
+    final cleanSym = symbol.trim().toUpperCase();
+    final cleanWithoutDot = cleanSym.contains('.')
+        ? cleanSym.substring(0, cleanSym.indexOf('.'))
+        : cleanSym;
+
+    for (final e in instruments) {
+      final eUpper = e.symbol.toUpperCase();
+      if (eUpper == cleanSym ||
+          eUpper == cleanWithoutDot ||
+          (eUpper.contains('.') && eUpper.substring(0, eUpper.indexOf('.')) == cleanWithoutDot)) {
+        return e;
+      }
+    }
+
+    for (final e in allInstruments) {
+      final eUpper = e.symbol.toUpperCase();
+      if (eUpper == cleanSym ||
+          eUpper == cleanWithoutDot ||
+          (eUpper.contains('.') && eUpper.substring(0, eUpper.indexOf('.')) == cleanWithoutDot)) {
+        return e;
+      }
+    }
+    return null;
+  }
+
   double _preserveNonZero(double incoming, double current) {
     if (incoming != 0) return incoming;
     return current != 0 ? current : incoming;
@@ -1032,7 +1060,19 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       final existingSymbols = allInstruments.map((e) => e.symbol).toSet();
       bool structureChanged = false;
 
-      for (final newItem in incomingItems) {
+      for (var newItem in incomingItems) {
+        // Map to true symbol (e.g. BTCUSD.c instead of BTCUSD) to handle V2 ticks correctly
+        final existingIndex = allInstruments.indexWhere(
+          (element) =>
+              MarketWatchV2Service.normalizeSymbol(element.symbol) ==
+              MarketWatchV2Service.normalizeSymbol(newItem.symbol),
+        );
+
+        if (existingIndex != -1) {
+          final actualSymbol = allInstruments[existingIndex].symbol;
+          newItem = newItem.copyWith(symbol: actualSymbol);
+        }
+
         _applyPriceUpdate(newItem);
 
         if (!existingSymbols.contains(newItem.symbol)) {

@@ -53,21 +53,17 @@ class IQuoteChartController extends GetxController {
             ? Get.find<SymbolSelectionService>()
             : Get.put(SymbolSelectionService());
 
-    if (initialSymbol != null) {
+    if (initialSymbol != null && initialSymbol.isNotEmpty) {
       symService.setSymbol(initialSymbol);
-    } else {
-      // Find the correct suffix for XAUUSD from the available instruments
+    } else if (symService.currentSymbol.isEmpty) {
       final instCtrl =
           Get.isRegistered<InstrumentsController>()
               ? Get.find<InstrumentsController>()
               : null;
-      if (instCtrl != null) {
-        final match = instCtrl.allInstruments.firstWhereOrNull(
-          (e) => MarketWatchV2Service.normalizeSymbol(e.symbol) == 'XAUUSD',
-        );
-        symService.setSymbol(match?.symbol ?? 'XAUUSD');
+      if (instCtrl != null && instCtrl.instruments.isNotEmpty) {
+        symService.setSymbol(instCtrl.instruments.first.symbol);
       } else {
-        symService.setSymbol('XAUUSD');
+        symService.setSymbol('EURUSD');
       }
     }
   }

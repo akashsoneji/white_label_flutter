@@ -1219,7 +1219,7 @@ Future<void> updateTasksJson(List<Map<String, dynamic>> brands) async {
       'command': 'bash',
       'args': [
         '-lc',
-        'dart run scripts/prepare_flavor.dart $name && flutter clean && flutter pub get',
+        'CLIENT=all dart run scripts/generate_brand_config.dart && dart run scripts/prepare_flavor.dart $name && flutter clean && flutter pub get',
       ],
       'options': {'cwd': '\${workspaceFolder}'},
       'problemMatcher': [],

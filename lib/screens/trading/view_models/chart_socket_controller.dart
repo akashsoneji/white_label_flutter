@@ -15,6 +15,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:crm_app/utils/message_pack_decoder.dart';
 import 'package:crm_app/services/unified_websocket_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 
 class ChartSocketController extends GetxController with WidgetsBindingObserver {
   // Connection state
@@ -322,11 +323,19 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     }
 
     currentSymbol.value = symbol;
-    // ✅ KEEP last bid/ask so subscribers (e.g. MetaNativeChart) can
-    // render an immediate price line. The cached tick will be replaced
-    // by the next live tick for the new symbol — clearing it made the
-    // chart sit empty until the first socket frame arrived.
     realTimePrice['symbol'] = symbol;
+
+    // Immediately seed with cached/live price from InstrumentsController so
+    // Buy/Sell buttons and chart prices render INSTANTLY without showing '--' or '0.00'
+    if (Get.isRegistered<InstrumentsController>()) {
+      final match = Get.find<InstrumentsController>().findInstrument(symbol);
+      if (match != null && match.bid > 0) {
+        realTimePrice['bid'] = match.bid;
+        realTimePrice['ask'] = match.ask;
+        realTimePrice['spreadDiff'] = match.spreadDiff;
+        _priceStreamController.add(Map<String, dynamic>.from(realTimePrice));
+      }
+    }
 
     // If connected with a different symbol, don't drop the entire TCP connection
     // and wait 450ms. Just push the new subscription payload to the server.
@@ -992,12 +1001,10 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
   // Unsubscribe and resubscribe with new account (keeps socket active)
   Future<void> unsubscribeAndResubscribe(
     String newAccountNumber,
-    String symbol,
   ) async {
 
     // If not connected or symbol is empty, just initialize normally
-    if (!isConnected.value || symbol.isEmpty) {
-      currentSymbol.value = symbol;
+    if (!isConnected.value || currentSymbol.value.isEmpty) {
       realTimePrice.clear();
       if (!isConnected.value) {
         initializeWebSocket();
@@ -1031,10 +1038,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
       // Step 3: Clear price data and set symbol
       realTimePrice.clear();
-      // ✅ FIX: Preserve symbol if it hasn't changed, otherwise update it
-      if (currentSymbol.value != symbol) {
-        currentSymbol.value = symbol;
-      }
+      // No need to update currentSymbol, it is already current
 
       // Step 4: Resubscribe with new account
       final authid = await SecureStorageService.getAuthToken();
@@ -1042,7 +1046,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
         sendEvent({
           "authID": authid,
           "trading_account": newAccountNumber,
-          "symbol": symbol,
+          "symbol": currentSymbol.value,
         });
       } else {
       }
@@ -1050,7 +1054,6 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
       // Fallback: if unsubscribe/resubscribe fails, do full reconnect
       _disconnectWebSocket();
       await Future.delayed(const Duration(milliseconds: 100));
-      currentSymbol.value = symbol;
       realTimePrice.clear();
       initializeWebSocket();
     }

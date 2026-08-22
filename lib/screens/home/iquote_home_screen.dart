@@ -17,6 +17,7 @@ import 'package:crm_app/screens/home/more/promotional/promotional_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
+import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -56,6 +57,10 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
     } else {
       _ic = Get.find<InstrumentsController>();
     }
+    final bannerController = Get.isRegistered<BannerController>()
+        ? Get.find<BannerController>()
+        : Get.put(BannerController(), permanent: true);
+    bannerController.fetchBanners();
   }
 
   void _openSearchSheet() {
@@ -715,8 +720,9 @@ class _PromoCarouselState extends State<_PromoCarousel> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   Timer? _timer;
+  late final BannerController _bannerController;
 
-  final List<Map<String, dynamic>> _slides = [
+  final List<Map<String, dynamic>> _fallbackSlides = [
     {
       'title': 'Profit & Bonus Ranking',
       'subtitle': 'Data updated daily',
@@ -746,14 +752,23 @@ class _PromoCarouselState extends State<_PromoCarousel> {
   @override
   void initState() {
     super.initState();
+    _bannerController = Get.isRegistered<BannerController>()
+        ? Get.find<BannerController>()
+        : Get.put(BannerController(), permanent: true);
+
     _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (_pageController.hasClients) {
-        final next = (_currentPage + 1) % _slides.length;
-        _pageController.animateToPage(
-          next,
-          duration: const Duration(milliseconds: 350),
-          curve: Curves.easeInOut,
-        );
+        final totalCount = _bannerController.banners.isNotEmpty
+            ? _bannerController.banners.length
+            : _fallbackSlides.length;
+        if (totalCount > 1) {
+          final next = (_currentPage + 1) % totalCount;
+          _pageController.animateToPage(
+            next,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOut,
+          );
+        }
       }
     });
   }
@@ -767,120 +782,212 @@ class _PromoCarouselState extends State<_PromoCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          SizedBox(
-            height: 124.h,
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (val) => setState(() => _currentPage = val),
-              itemCount: _slides.length,
-              itemBuilder: (context, i) {
-                final s = _slides[i];
-                return Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 20.h),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors:
-                          widget.isDark
-                              ? [
-                                const Color(0xFF2C344E),
-                                const Color(0xFF1E2436),
-                              ]
-                              : [
-                                AppColors.primary.withOpacity(0.08),
-                                AppColors.primary.withOpacity(0.02),
-                              ],
-                    ),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: AppColors.primary.withOpacity(
-                        widget.isDark ? 0.1 : 0.15,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              s['title'],
-                              style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: widget.textPrimary,
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              s['subtitle'],
-                              style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.w400,
-                                color: widget.textSecondary,
-                              ),
-                            ),
-                            SizedBox(height: 10.h),
-                            GestureDetector(
-                              onTap: s['action'],
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 18.w,
-                                  vertical: 6.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  borderRadius: BorderRadius.circular(20.r),
-                                ),
-                                child: Text(
-                                  s['btn'],
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    color: AppColors.whiteColor,
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
+    return Obx(() {
+      final banners = _bannerController.banners;
+      final hasApiBanners = banners.isNotEmpty;
+      final itemCount = hasApiBanners ? banners.length : _fallbackSlides.length;
+
+      return Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            SizedBox(
+              height: 124.h,
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (val) => setState(() => _currentPage = val),
+                itemCount: itemCount,
+                itemBuilder: (context, i) {
+                  if (hasApiBanners) {
+                    final banner = banners[i];
+                    final imageUrl = banner.imageUrl ?? '';
+
+                    return GestureDetector(
+                      onTap: () => _bannerController.handleBannerTap(banner),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: AppColors.border.withValues(alpha: 0.25),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.r),
+                          child: imageUrl.isNotEmpty
+                              ? Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.fill,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      _buildBannerFallback(banner),
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      color: widget.isDark
+                                          ? const Color(0xFF2C344E)
+                                          : AppColors.primary
+                                              .withValues(alpha: 0.06),
+                                      alignment: Alignment.center,
+                                      child: SizedBox(
+                                        width: 24.w,
+                                        height: 24.w,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            AppColors.primary,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : _buildBannerFallback(banner),
+                        ),
                       ),
-                      Icon(s['icon'], size: 56.r, color: s['iconColor']),
-                    ],
-                  ),
-                );
-              },
+                    );
+                  }
+
+                  final s = _fallbackSlides[i];
+                  return Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 20.h),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: widget.isDark
+                            ? [
+                                const Color(0xFF2C344E),
+                                const Color(0xFF1E2436),
+                              ]
+                            : [
+                                AppColors.primary.withValues(alpha: 0.08),
+                                AppColors.primary.withValues(alpha: 0.02),
+                              ],
+                      ),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(
+                          alpha: widget.isDark ? 0.1 : 0.15,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                s['title'],
+                                style: AppTextStyles.bodyText.copyWith(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: widget.textPrimary,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                s['subtitle'],
+                                style: AppTextStyles.bodyText.copyWith(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: widget.textSecondary,
+                                ),
+                              ),
+                              SizedBox(height: 10.h),
+                              GestureDetector(
+                                onTap: s['action'],
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 18.w,
+                                    vertical: 6.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(20.r),
+                                  ),
+                                  child: Text(
+                                    s['btn'],
+                                    style: AppTextStyles.bodyText.copyWith(
+                                      color: AppColors.whiteColor,
+                                      fontSize: 11.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(s['icon'], size: 56.r, color: s['iconColor']),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 8.h,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _slides.length,
-                (idx) => AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: EdgeInsets.symmetric(horizontal: 3.w),
-                  width: _currentPage == idx ? 14.w : 5.w,
-                  height: 4.h,
-                  decoration: BoxDecoration(
-                    color:
-                        _currentPage == idx
+            if (itemCount > 1)
+              Positioned(
+                bottom: 8.h,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    itemCount,
+                    (idx) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: EdgeInsets.symmetric(horizontal: 3.w),
+                      width: _currentPage == idx ? 14.w : 5.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: _currentPage == idx
                             ? AppColors.primary
-                            : AppColors.primary.withOpacity(0.35),
-                    borderRadius: BorderRadius.circular(2.r),
+                            : AppColors.primary.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
                   ),
                 ),
               ),
+          ],
+        ),
+      );
+    });
+  }
+
+  Widget _buildBannerFallback(dynamic banner) {
+    return Container(
+      color: widget.isDark
+          ? const Color(0xFF2C344E)
+          : AppColors.primary.withValues(alpha: 0.06),
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.campaign_rounded, color: AppColors.primary, size: 32.sp),
+          if (banner.title != null) ...[
+            SizedBox(height: 6.h),
+            Text(
+              banner.title!,
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: widget.textPrimary,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

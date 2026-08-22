@@ -1,3 +1,4 @@
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -43,10 +44,17 @@ class _MetaMainShellState extends State<MetaMainShell> {
               : Get.put(SymbolSelectionService());
 
       symService.ensureDefault().then((_) {
+        String fallback = 'EURUSD';
+        if (Get.isRegistered<InstrumentsController>()) {
+          final instCtrl = Get.find<InstrumentsController>();
+          if (instCtrl.instruments.isNotEmpty) {
+            fallback = instCtrl.instruments.first.symbol;
+          }
+        }
         final sym =
             symService.currentSymbol.isNotEmpty
                 ? symService.currentSymbol
-                : 'XAUUSD';
+                : fallback;
         ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
       });
     }
@@ -71,7 +79,7 @@ class _MetaMainShellState extends State<MetaMainShell> {
     }
   }
 
-  List<Widget> get _screens => [
+  late final List<Widget> _screens = [
     MetaWatchlistScreen(
       // "New Order" row-menu action: push the New Order screen on top.
       // Do NOT switch tabs here — the WatchList tab is still selected
@@ -93,7 +101,7 @@ class _MetaMainShellState extends State<MetaMainShell> {
       // (index 4) instead of opening the side drawer.
       onHamburgerTap: () => setState(() => _index = 4),
     ),
-    MetaChartScreen(),
+    const MetaChartScreen(),
     MetaTradeScreen(
       // "Chart" row-menu action on a position: switch the bottom nav
       // to the Chart tab. The trade screen already sets the chart
@@ -144,21 +152,9 @@ class _MetaMainShellState extends State<MetaMainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MetaTheme.bg(context),
-      body: _ChartFriendlyIndexedStack(index: _index, children: _screens),
+      body: IndexedStack(index: _index, children: _screens),
       bottomNavigationBar: _buildBottomNav(context),
     );
-  }
-
-  void _onTabTap(int i) {
-    setState(() => _index = i);
-    // Re-fetch history every time the user lands on the History tab
-    // via the bottom nav. The IndexedStack keeps the History screen
-    // alive across tab switches, so the GlobalKey's State is always
-    // available and `refreshHistory()` always fires the API.
-    // Initial mount is handled by `MetaHistoryScreen.initState` itself.
-    if (i == 3) {
-      _refreshHistoryIfPossible();
-    }
   }
 
   Widget _buildBottomNav(BuildContext c) {
@@ -167,46 +163,48 @@ class _MetaMainShellState extends State<MetaMainShell> {
       top: false,
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF242526) : Colors.white,
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           border: Border(
             top: BorderSide(
-              color: isDark ? const Color(0xFF3A3B3C) : const Color(0xFFE4E6EB),
+              color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFEEF1F5),
               width: 1,
             ),
           ),
         ),
-        height: 65.h,
+        height: 60.h,
         child: Row(
           children: List.generate(_tabs.length, (i) {
             final selected = i == _index;
             final tab = _tabs[i];
             final accent = MetaTheme.buyBlue;
             final inactive =
-                isDark ? const Color(0xFF65676B) : const Color(0xFF8A8D91);
+                isDark ? const Color(0xFF6B7280) : const Color(0xFF9AA5B5);
             return Expanded(
               child: InkWell(
-                onTap: () => _onTabTap(i),
+                onTap: () {
+                  setState(() => _index = i);
+                  if (i == 3) {
+                    // History tab — always re-fetch so the list is
+                    // fresh on arrival.
+                    _refreshHistoryIfPossible();
+                  }
+                },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(height: 6.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8.w,
-                        vertical: 2.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            selected
-                                ? accent.withValues(alpha: 0.12)
-                                : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Icon(
-                        selected ? tab.activeIcon : tab.icon,
-                        size: 22.sp,
-                        color: selected ? accent : inactive,
-                      ),
+                    SizedBox(
+                      width: 28.w,
+                      height: 2.5.h,
+                      child:
+                          selected
+                              ? Container(color: accent)
+                              : const SizedBox.shrink(),
+                    ),
+                    SizedBox(height: 4.h),
+                    Icon(
+                      selected ? tab.activeIcon : tab.icon,
+                      size: 22.sp,
+                      color: selected ? accent : inactive,
                     ),
                     SizedBox(height: 2.h),
                     Text(
@@ -218,7 +216,6 @@ class _MetaMainShellState extends State<MetaMainShell> {
                             selected ? FontWeight.w700 : FontWeight.w500,
                       ),
                     ),
-                    SizedBox(height: 4.h),
                   ],
                 ),
               ),
@@ -239,34 +236,4 @@ class _NavTab {
     required this.activeIcon,
     required this.label,
   });
-}
-
-class _ChartFriendlyIndexedStack extends StatelessWidget {
-  final int index;
-  final List<Widget> children;
-
-  const _ChartFriendlyIndexedStack({
-    required this.index,
-    required this.children,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: List.generate(children.length, (i) {
-        final isSelected = index == i;
-        final child = TickerMode(enabled: isSelected, child: children[i]);
-
-        // Always keep the chart screen (index 1) mounted with full size, just invisible
-        if (i == 1) {
-          return IgnorePointer(
-            ignoring: !isSelected,
-            child: Opacity(opacity: isSelected ? 1.0 : 0.0, child: child),
-          );
-        }
-
-        return Offstage(offstage: !isSelected, child: child);
-      }),
-    );
-  }
 }
