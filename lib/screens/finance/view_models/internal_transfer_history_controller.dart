@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -17,21 +18,43 @@ class InternalTransferHistoryResponse {
 
   factory InternalTransferHistoryResponse.fromJson(Map<String, dynamic> json) {
     final payload = json['data'];
-    final dataMap = payload is Map<String, dynamic> ? payload : json;
-    final rows = dataMap['data'];
-    final pagination = dataMap['pagination'];
+    dynamic rawRows;
+    Map<String, dynamic> paginationMap = {};
+
+    if (payload is List) {
+      rawRows = payload;
+      if (json['pagination'] is Map<String, dynamic>) {
+        paginationMap = json['pagination'] as Map<String, dynamic>;
+      } else {
+        paginationMap = json;
+      }
+    } else if (payload is Map<String, dynamic>) {
+      rawRows = payload['data'] ?? payload['items'] ?? payload['transfers'] ?? payload['rows'];
+      if (payload['pagination'] is Map<String, dynamic>) {
+        paginationMap = payload['pagination'] as Map<String, dynamic>;
+      } else if (json['pagination'] is Map<String, dynamic>) {
+        paginationMap = json['pagination'] as Map<String, dynamic>;
+      } else {
+        paginationMap = payload;
+      }
+    } else {
+      rawRows = json['data'] ?? json['transfers'] ?? json['items'] ?? [];
+      if (json['pagination'] is Map<String, dynamic>) {
+        paginationMap = json['pagination'] as Map<String, dynamic>;
+      } else {
+        paginationMap = json;
+      }
+    }
 
     return InternalTransferHistoryResponse(
       items:
-          rows is List
-              ? rows
+          rawRows is List
+              ? rawRows
                   .whereType<Map<String, dynamic>>()
                   .map(InternalTransferHistoryItem.fromJson)
                   .toList()
               : <InternalTransferHistoryItem>[],
-      pagination: InternalTransferHistoryPagination.fromJson(
-        pagination is Map<String, dynamic> ? pagination : const {},
-      ),
+      pagination: InternalTransferHistoryPagination.fromJson(paginationMap),
     );
   }
 }
@@ -64,16 +87,23 @@ class InternalTransferHistoryItem {
   });
 
   factory InternalTransferHistoryItem.fromJson(Map<String, dynamic> json) {
+    final rawAmount = json['amount'] ?? json['transfer_amount'] ?? json['requested_amount'] ?? 0;
+    final rawFrom = json['from_account'] ?? json['fromAccount'] ?? json['from'] ?? json['source_account'] ?? json['sender_account'];
+    final rawTo = json['to_account'] ?? json['toAccount'] ?? json['to'] ?? json['target_account'] ?? json['receiver_account'] ?? json['destination_account'];
+    final rawRef = json['reference'] ?? json['reference_id'] ?? json['txn_id'] ?? json['transaction_id'] ?? json['order_id'] ?? json['code'] ?? '';
+    final rawDate = json['created_at'] ?? json['date'] ?? json['date_time'] ?? json['created_date'] ?? '';
+    final rawComment = json['comment'] ?? json['notes'] ?? json['remark'] ?? json['description'] ?? '';
+
     return InternalTransferHistoryItem(
       id: _toInt(json['id']),
-      fromAccount: TransferAccount.fromDynamic(json['from_account']),
-      toAccount: TransferAccount.fromDynamic(json['to_account']),
-      amount: _toNum(json['amount']),
-      formattedAmount: json['formatted_amount']?.toString() ?? '',
-      comment: json['comment']?.toString() ?? '',
-      status: json['status']?.toString() ?? '',
-      reference: json['reference']?.toString() ?? '',
-      createdAt: json['created_at']?.toString() ?? '',
+      fromAccount: TransferAccount.fromDynamic(rawFrom),
+      toAccount: TransferAccount.fromDynamic(rawTo),
+      amount: _toNum(rawAmount),
+      formattedAmount: json['formatted_amount']?.toString() ?? json['amount_formatted']?.toString() ?? '',
+      comment: rawComment.toString(),
+      status: json['status']?.toString() ?? 'completed',
+      reference: rawRef.toString(),
+      createdAt: rawDate.toString(),
       dateOnly: json['date_only']?.toString() ?? '',
       timeOnly: json['time_only']?.toString() ?? '',
     );
@@ -103,16 +133,42 @@ class TransferAccount {
   });
 
   factory TransferAccount.fromJson(Map<String, dynamic> json) {
+    final type = json['type']?.toString() ?? json['account_type']?.toString() ?? '';
+    final number = json['number']?.toString() ?? json['account_number']?.toString() ?? json['login']?.toString() ?? json['id']?.toString() ?? '';
+    String displayName = json['display_name']?.toString() ?? json['name']?.toString() ?? json['title']?.toString() ?? '';
+
+    if (displayName.isEmpty) {
+      if (type.isNotEmpty && number.isNotEmpty) {
+        displayName = '$type - $number';
+      } else if (number.isNotEmpty) {
+        displayName = number;
+      } else if (type.isNotEmpty) {
+        displayName = type;
+      }
+    }
+
     return TransferAccount(
-      type: json['type']?.toString() ?? '',
-      number: json['number']?.toString() ?? '',
-      displayName: json['display_name']?.toString() ?? '',
+      type: type,
+      number: number,
+      displayName: displayName,
     );
   }
 
   static TransferAccount? fromDynamic(dynamic value) {
+    if (value == null) return null;
     if (value is Map<String, dynamic>) {
       return TransferAccount.fromJson(value);
+    }
+    if (value is Map) {
+      return TransferAccount.fromJson(Map<String, dynamic>.from(value));
+    }
+    final str = value.toString().trim();
+    if (str.isNotEmpty && str != 'null') {
+      return TransferAccount(
+        type: '',
+        number: str,
+        displayName: str,
+      );
     }
     return null;
   }
@@ -138,13 +194,31 @@ class InternalTransferHistoryPagination {
   factory InternalTransferHistoryPagination.fromJson(
     Map<String, dynamic> json,
   ) {
+    final total = _toInt(json['total']);
+    final perPage = _toInt(json['per_page'], fallback: 10);
+    final currentPage = _toInt(json['current_page'], fallback: 1);
+    final lastPage = _toInt(
+      json['last_page'],
+      fallback: (total > 0 && perPage > 0) ? (total / perPage).ceil() : 1,
+    );
+    final from = _toInt(
+      json['from'],
+      fallback: total > 0 ? ((currentPage - 1) * perPage + 1) : 0,
+    );
+    final to = _toInt(
+      json['to'],
+      fallback: total > 0
+          ? (currentPage * perPage > total ? total : currentPage * perPage)
+          : 0,
+    );
+
     return InternalTransferHistoryPagination(
-      currentPage: _toInt(json['current_page'], fallback: 1),
-      lastPage: _toInt(json['last_page'], fallback: 1),
-      perPage: _toInt(json['per_page'], fallback: 10),
-      total: _toInt(json['total']),
-      from: _toInt(json['from']),
-      to: _toInt(json['to']),
+      currentPage: currentPage < 1 ? 1 : currentPage,
+      lastPage: lastPage < 1 ? 1 : lastPage,
+      perPage: perPage < 1 ? 10 : perPage,
+      total: total,
+      from: from,
+      to: to,
     );
   }
 
@@ -177,6 +251,32 @@ class InternalTransferHistoryController extends GetxController {
   final toDate = Rxn<DateTime>();
   final selectedStatus =
       const InternalTransferStatusFilter(label: 'All Status', value: '').obs;
+  
+  late final ScrollController scrollController;
+
+  @override
+  void onInit() {
+    super.onInit();
+    scrollController = ScrollController();
+    scrollController.addListener(_onScroll);
+    fetchHistory();
+  }
+
+  @override
+  void onClose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
+    super.onClose();
+  }
+
+  void _onScroll() {
+    if (!scrollController.hasClients) return;
+    final maxScroll = scrollController.position.maxScrollExtent;
+    final currentScroll = scrollController.position.pixels;
+    if (currentScroll >= maxScroll - 200) {
+      loadNextPage();
+    }
+  }
   final pagination =
       const InternalTransferHistoryPagination(
         currentPage: 1,
@@ -231,9 +331,13 @@ class InternalTransferHistoryController extends GetxController {
         throw Exception(response.message ?? 'Failed to fetch transfer history');
       }
 
+      print('Internal Transfer History Raw Data: ${response.data}');
+
       final parsed = InternalTransferHistoryResponse.fromJson(
         response.data as Map<String, dynamic>,
       );
+
+      print('Internal Transfer History Parsed Items count: ${parsed.items.length}');
 
       if (page == 1) {
         items.assignAll(parsed.items);

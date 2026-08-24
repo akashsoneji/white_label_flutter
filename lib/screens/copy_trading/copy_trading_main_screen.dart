@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/constants/color.dart';
@@ -37,8 +36,11 @@ class _CopyTradingMainScreenState extends State<CopyTradingMainScreen> {
   @override
   void initState() {
     super.initState();
+    final initial = widget.initialIndex ??
+        ((Get.arguments is int) ? (Get.arguments as int) : 0);
     _hubController = Get.put(CopyTradingHubController());
-    _pageController = PageController(initialPage: widget.initialIndex ?? 0);
+    _hubController.currentTabIndex.value = initial;
+    _pageController = PageController(initialPage: initial);
 
     // Tap on the bottom nav → controller updates → worker scrolls PageView.
     // The clamp upper bound is read LIVE on every event so the navigation

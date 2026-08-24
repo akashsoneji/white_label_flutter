@@ -4,6 +4,7 @@ import 'package:crm_app/bindings/ticket_binding.dart';
 import 'package:crm_app/screens/kyc/presentation/pages/kyc_bank_screen.dart';
 import 'package:crm_app/screens/kyc/presentation/pages/bank_list_screen.dart';
 import 'package:crm_app/screens/bonus/presentation/pages/bonus_screen.dart';
+import 'package:crm_app/screens/bonus/presentation/pages/scratch_card_screen.dart';
 import 'package:crm_app/screens/home/more/copytrading/copy_trading_hub_screen.dart';
 import 'package:crm_app/screens/copy_trading/copy_trading_main_screen.dart';
 import 'package:crm_app/screens/copy_trading/trader_details_screen.dart';
@@ -140,6 +141,7 @@ class AppPages {
   static const COPY_TRADING_HUB = _Paths.COPY_TRADING_HUB;
   static const TRADER_DETAILS = _Paths.TRADER_DETAILS;
   static const BONUS = _Paths.BONUS;
+  static const SCRATCH_CARD = _Paths.SCRATCH_CARD;
   static const DEMO_CONTEST = _Paths.DEMO_CONTEST;
   static const DEMO_CONTEST_RULES = _Paths.DEMO_CONTEST_RULES;
   static const DEMO_CONTEST_JOIN = _Paths.DEMO_CONTEST_JOIN;
@@ -364,7 +366,11 @@ class AppPages {
     GetPage(name: _Paths.IB_MAIN, page: () => const IbMainScreen()),
     GetPage(
       name: _Paths.COPY_TRADING_MAIN,
-      page: () => const CopyTradingMainScreen(),
+      page: () {
+        final initialIndex =
+            (Get.arguments is int) ? (Get.arguments as int) : null;
+        return CopyTradingMainScreen(initialIndex: initialIndex);
+      },
     ),
     GetPage(
       name: _Paths.COPY_TRADING_HUB,
@@ -375,6 +381,10 @@ class AppPages {
       page: () => const TraderDetailsScreen(),
     ),
     GetPage(name: _Paths.BONUS, page: () => const BonusScreen()),
+    GetPage(
+      name: _Paths.SCRATCH_CARD,
+      page: () => const ScratchCardListScreen(),
+    ),
     GetPage(name: _Paths.DEMO_CONTEST, page: () => const DemoContestScreen()),
     GetPage(
       name: _Paths.DEMO_CONTEST_RULES,

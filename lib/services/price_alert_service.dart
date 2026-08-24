@@ -193,6 +193,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'package:crm_app/services/notification_service.dart';
 
 class PriceAlertService {
   static final PriceAlertService _instance = PriceAlertService._internal();
@@ -293,6 +294,11 @@ class PriceAlertService {
   void _onNotificationTapped(NotificationResponse response) {
     // Handle notification tap
     print('Notification tapped: ${response.payload}');
+    try {
+      NotificationService().handleNotificationResponse(response);
+    } catch (e) {
+      print('PriceAlertService: Error forwarding notification tap: $e');
+    }
   }
 
   Future<void> createPriceAlert({
