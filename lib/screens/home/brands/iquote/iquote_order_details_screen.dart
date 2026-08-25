@@ -85,8 +85,15 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
                 _row(t('open_price'), _d.openPrice),
                 _row(t('close_time'), _d.closeTime),
                 _row(t('close_price'), _d.closePrice),
-                _row(t('take_profit'), '---'),
-                _row(t('stop_loss'), '---', showDivider: true),
+                _row(
+                  t('take_profit'),
+                  _isMeaningful(_d.takeProfit) ? _d.takeProfit : '---',
+                ),
+                _row(
+                  t('stop_loss'),
+                  _isMeaningful(_d.stopLoss) ? _d.stopLoss : '---',
+                  showDivider: true,
+                ),
               ]),
               _cardContainer([
                 _row(t('Commission'), _d.commission, showDivider: true),
@@ -117,6 +124,17 @@ class IQuoteOrderDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Treat "", "0", "0.0", "0.00000", "-" as no-value so we don't render a
+  /// misleading "0.00000" in the Take Profit / Stop Loss rows.
+  bool _isMeaningful(String v) {
+    if (v.isEmpty) return false;
+    final trimmed = v.trim();
+    if (trimmed == '-' || trimmed == '---') return false;
+    final n = double.tryParse(trimmed.replaceAll(',', ''));
+    if (n == null) return true;
+    return n != 0;
   }
 
   Widget _cardContainer(List<Widget> children) {
@@ -350,6 +368,8 @@ class IQuoteOrderData {
   final String closingMethod;
   final String swap;
   final String commission;
+  final String takeProfit;
+  final String stopLoss;
   const IQuoteOrderData({
     required this.orderNo,
     required this.symbol,
@@ -365,5 +385,7 @@ class IQuoteOrderData {
     required this.closingMethod,
     required this.swap,
     required this.commission,
+    this.takeProfit = '',
+    this.stopLoss = '',
   });
 }

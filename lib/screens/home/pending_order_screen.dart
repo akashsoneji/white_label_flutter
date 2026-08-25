@@ -508,7 +508,10 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isVantage = FlavorConfig.isVantage();
+    // Both the Vantage and iQuote UI parents use the compact Vantage-style
+    // pending-order layout (dense chart + VantagePendingOrderContent).
+    final isVantage =
+        FlavorConfig.usesVantageUi() || FlavorConfig.usesIquoteUi();
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       resizeToAvoidBottomInset: true,
