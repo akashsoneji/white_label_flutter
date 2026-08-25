@@ -220,12 +220,26 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Dashboard',
-          style: AppTextStyles.heading.copyWith(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Dashboard',
+              style: AppTextStyles.heading.copyWith(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            _buildToggleGroup(
+                options: {
+                  'total': 'Total',
+                  'network': 'Network',
+                  'direct': 'Direct',
+                },
+                selectedValue: selectedScope,
+                onChanged: _onScopeChanged,
+              ),
+          ],
         ),
         SizedBox(height: 4.h),
         Text(
@@ -235,22 +249,15 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             fontSize: 13.sp,
           ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 6.h),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Row(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildToggleGroup(
-                options: {
-                  'total': 'Total',
-                  'network': 'Network',
-                  'direct': 'Direct',
-                },
-                selectedValue: selectedScope,
-                onChanged: _onScopeChanged,
-              ),
-              SizedBox(width: 12.w),
+              
+              SizedBox(height: 6.h),
+
               _buildToggleGroup(
                 options: {
                   'today': 'Today',

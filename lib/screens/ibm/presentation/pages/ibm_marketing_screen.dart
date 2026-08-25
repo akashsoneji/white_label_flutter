@@ -11,7 +11,10 @@ import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class IbmMarketingScreen extends StatefulWidget {
-  const IbmMarketingScreen({super.key});
+  /// When true the screen omits its own [IbmTopHeader] because it is being
+  /// hosted inside another screen (the More tab) that already shows a header.
+  final bool embedded;
+  const IbmMarketingScreen({super.key, this.embedded = false});
 
   @override
   State<IbmMarketingScreen> createState() => _IbmMarketingScreenState();
@@ -43,10 +46,12 @@ class _IbmMarketingScreenState extends State<IbmMarketingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: const IbmTopHeader(
-        title: 'Marketing Material',
-        showBackButton: false,
-      ),
+      appBar: widget.embedded
+          ? null
+          : const IbmTopHeader(
+              title: 'Marketing Material',
+              showBackButton: false,
+            ),
       body: Obx(() {
         final materials = controller.materialsList;
         final categories = controller.marketingCategories;

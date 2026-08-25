@@ -345,6 +345,7 @@ class ApiService {
   static Future<ApiResponse> delete({
     required String endpoint,
     String? token,
+    Map<String, dynamic>? data,
   }) async {
     _initializeLogging();
     try {
@@ -358,6 +359,7 @@ class ApiService {
       final httpClient = HttpClientService.instance;
       final headers = {
         'Accept': 'application/json',
+        if (data != null) 'Content-Type': 'application/json',
         ...httpClient.keepAliveHeaders,
         if (authToken != null && authToken.isNotEmpty)
           'Authorization': 'Bearer $authToken',
@@ -368,7 +370,11 @@ class ApiService {
       final uri = Uri.parse('${ApiConstants.baseUrl}$endpoint');
 
       final response = await httpClient.client
-          .delete(uri, headers: headers)
+          .delete(
+            uri,
+            headers: headers,
+            body: data != null ? jsonEncode(data) : null,
+          )
           .timeout(_timeout);
 
       _logResponse(response);

@@ -1046,7 +1046,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
                                       color:
                                           isSelected
                                               ? (AppColors.isDarkMode
-                                                  ? const Color(0xFF281C38)
+                                                  ? AppColors.card
                                                   : const Color(0xFFF7F2FA))
                                               : (AppColors.isDarkMode
                                                   ? AppColors.card

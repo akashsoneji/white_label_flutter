@@ -23,7 +23,7 @@ class IbmApiProvider {
 
   /// Get IBM Portal Dashboard
   Future<ApiResponse> getPortalDashboard({
-    String period = 'this_month',
+    String period = 'mtd',
     String scope = 'total',
     String? from,
     String? to,
@@ -62,18 +62,32 @@ class IbmApiProvider {
 
   /// Get IBM Portal Clients
   Future<ApiResponse> getPortalClients({
-    String period = 'this_month',
+    String period = 'mtd',
     String scope = 'direct',
     int page = 1,
+    int perPage = 25,
+    String? search,
+    String? status,
+    String? linkId,
+    String? from,
+    String? to,
   }) async {
+    final Map<String, String> query = {
+      'period': period,
+      'scope': scope,
+      'page': page.toString(),
+      'per_page': perPage.toString(),
+    };
+    if (search != null && search.isNotEmpty) query['search'] = search;
+    if (status != null && status.isNotEmpty && status != 'all') {
+      query['status'] = status;
+    }
+    if (linkId != null && linkId.isNotEmpty) query['link_id'] = linkId;
+    if (from != null && from.isNotEmpty) query['from'] = from;
+    if (to != null && to.isNotEmpty) query['to'] = to;
     return await ApiService.get(
       endpoint: 'ibm/portal/clients',
-      queryParameters: {
-        'period': period,
-        'scope': scope,
-        'page': page.toString(),
-        'per_page': '25',
-      },
+      queryParameters: query,
     );
   }
 
@@ -198,10 +212,10 @@ class IbmApiProvider {
   }
 
   /// Assign a plan to a Sub-IB
-  Future<ApiResponse> assignPartnerPlan(int planId, int partnerUserId) async {
+  Future<ApiResponse> assignPartnerPlan(int planId, int ibUserId) async {
     return await ApiService.post(
       endpoint: 'ibm/portal/partner-plans/$planId/assign',
-      data: {'partner_user_id': partnerUserId},
+      data: {'ib_user_id': ibUserId},
     );
   }
 
@@ -265,10 +279,18 @@ class IbmApiProvider {
   // --- Network Profile APIs ---
 
   /// Get Client Profile Overview
-  Future<ApiResponse> getClientOverview(int id, {String period = 'mtd'}) async {
+  Future<ApiResponse> getClientOverview(
+    int id, {
+    String period = 'mtd',
+    String? from,
+    String? to,
+  }) async {
+    final Map<String, String> query = {'period': period};
+    if (from != null && from.isNotEmpty) query['from'] = from;
+    if (to != null && to.isNotEmpty) query['to'] = to;
     return await ApiService.get(
       endpoint: 'ibm/portal/clients/$id',
-      queryParameters: {'period': period},
+      queryParameters: query,
     );
   }
 
@@ -276,6 +298,8 @@ class IbmApiProvider {
   Future<ApiResponse> getClientTrades(
     int id, {
     String period = 'mtd',
+    String? from,
+    String? to,
     int page = 1,
     String? type,
     String? symbol,
@@ -284,6 +308,8 @@ class IbmApiProvider {
       'period': period,
       'page': page.toString(),
     };
+    if (from != null && from.isNotEmpty) params['from'] = from;
+    if (to != null && to.isNotEmpty) params['to'] = to;
     if (type != null && type.isNotEmpty && type != 'All') params['type'] = type.toLowerCase();
     if (symbol != null && symbol.isNotEmpty) params['symbol'] = symbol;
 
@@ -294,18 +320,36 @@ class IbmApiProvider {
   }
 
   /// Get Network Node (for Network tree tab)
-  Future<ApiResponse> getNetworkNode(int id, {String period = 'mtd'}) async {
+  Future<ApiResponse> getNetworkNode(
+    int id, {
+    String period = 'mtd',
+    String? from,
+    String? to,
+  }) async {
+    final Map<String, String> query = {'period': period};
+    if (from != null && from.isNotEmpty) query['from'] = from;
+    if (to != null && to.isNotEmpty) query['to'] = to;
     return await ApiService.get(
       endpoint: 'ibm/portal/network/$id/node',
-      queryParameters: {'period': period},
+      queryParameters: query,
     );
   }
 
   /// Get Symbol-wise Commission
-  Future<ApiResponse> getNetworkSymbols(int id, {String period = 'mtd'}) async {
+  Future<ApiResponse> getNetworkSymbols(
+    int id, {
+    String period = 'mtd',
+    String? from,
+    String? to,
+    String? q,
+  }) async {
+    final Map<String, String> query = {'period': period};
+    if (from != null && from.isNotEmpty) query['from'] = from;
+    if (to != null && to.isNotEmpty) query['to'] = to;
+    if (q != null && q.isNotEmpty) query['q'] = q;
     return await ApiService.get(
       endpoint: 'ibm/portal/network/$id/symbols',
-      queryParameters: {'period': period},
+      queryParameters: query,
     );
   }
 
@@ -362,6 +406,141 @@ class IbmApiProvider {
   Future<ApiResponse> downloadMarketingMaterial(int materialId) async {
     return await ApiService.get(
       endpoint: 'ibm/portal/marketing/$materialId/download',
+    );
+  }
+
+  /// Get IBM Portal Network Summary (direct / network / total scopes)
+  Future<ApiResponse> getPortalNetworkSummary({String period = 'this_month'}) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network/summary',
+      queryParameters: {'period': period},
+    );
+  }
+
+  /// Get IBM Portal Network Tree Summary
+  Future<ApiResponse> getPortalNetworkTreeSummary({String? period}) async {
+    final Map<String, String> query = {};
+    if (period != null && period.isNotEmpty) query['period'] = period;
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network/tree-summary',
+      queryParameters: query.isNotEmpty ? query : null,
+    );
+  }
+
+  /// Get IBM Portal Network Performance (Ranked Partners)
+  Future<ApiResponse> getPortalNetworkPerformance({
+    String period = 'mtd',
+    String? sort,
+    String? dir,
+    String? q,
+    String? from,
+    String? to,
+    int page = 1,
+    int perPage = 25,
+  }) async {
+    final Map<String, String> query = {
+      'period': period,
+      'page': page.toString(),
+      'per_page': perPage.toString(),
+    };
+    if (sort != null && sort.isNotEmpty) query['sort'] = sort;
+    if (dir != null && dir.isNotEmpty) query['dir'] = dir;
+    if (q != null && q.isNotEmpty) query['q'] = q;
+    if (from != null && from.isNotEmpty) query['from'] = from;
+    if (to != null && to.isNotEmpty) query['to'] = to;
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network/performance',
+      queryParameters: query,
+    );
+  }
+
+  /// Get Partner Detail (Show)
+  Future<ApiResponse> getPartnerDetail(int partnerUserId, {String? period}) async {
+    final Map<String, String> query = {};
+    if (period != null && period.isNotEmpty) query['period'] = period;
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network/$partnerUserId',
+      queryParameters: query.isNotEmpty ? query : null,
+    );
+  }
+
+  /// Get Partner Wallet
+  Future<ApiResponse> getPartnerWallet(
+    int partnerUserId, {
+    String? period,
+  }) async {
+    final Map<String, String> query = {};
+    if (period != null && period.isNotEmpty) query['period'] = period;
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network/$partnerUserId/wallet',
+      queryParameters: query.isNotEmpty ? query : null,
+    );
+  }
+
+  /// Get Partner Referral Links
+  Future<ApiResponse> getPartnerLinks(int partnerUserId) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/network/$partnerUserId/links',
+    );
+  }
+
+  /// Get Clients Network Tree
+  Future<ApiResponse> getClientsNetworkTree({
+    String period = 'today',
+    String? from,
+    String? to,
+  }) async {
+    final Map<String, String> query = {};
+    if (period.isNotEmpty) query['period'] = period;
+    if (from != null && from.isNotEmpty) query['from'] = from;
+    if (to != null && to.isNotEmpty) query['to'] = to;
+    return await ApiService.get(
+      endpoint: 'ibm/portal/clients/network-tree',
+      queryParameters: query.isNotEmpty ? query : null,
+    );
+  }
+
+  /// Get Client Accounts
+  Future<ApiResponse> getClientAccounts(int clientId) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/clients/$clientId/accounts',
+    );
+  }
+
+  /// Get Client Trades for a specific account
+  Future<ApiResponse> getClientAccountTrades(
+    int clientId,
+    int accountId, {
+    int page = 1,
+    int perPage = 50,
+  }) async {
+    return await ApiService.get(
+      endpoint: 'ibm/portal/clients/$clientId/accounts/$accountId/trades',
+      queryParameters: {
+        'page': page.toString(),
+        'per_page': perPage.toString(),
+      },
+    );
+  }
+
+  /// Move Client under a different Sub-IB
+  Future<ApiResponse> moveClient(int clientId, int targetIbId) async {
+    return await ApiService.post(
+      endpoint: 'ibm/portal/clients/$clientId/move',
+      data: {'target_ib_id': targetIbId},
+    );
+  }
+
+  /// Get My Commission Plan
+  Future<ApiResponse> getMyPlan() async {
+    return await ApiService.get(endpoint: 'ibm/portal/plan');
+  }
+
+  /// Cancel Payout Request
+  Future<ApiResponse> cancelPayout(int payoutId, {String? reason}) async {
+    return await ApiService.delete(
+      endpoint: 'ibm/portal/wallet/payout/$payoutId',
+      data: (reason != null && reason.isNotEmpty) ? {'reason': reason} : null,
     );
   }
 

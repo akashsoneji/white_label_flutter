@@ -67,14 +67,16 @@ class TradeWinPastWinModel {
       category: json['category']?.toString() ?? '',
       imagePath: json['image_path']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
-      claimDate: json['claim_date']?.toString() ?? '',
-      statusDate: json['status_date']?.toString() ?? '',
+      claimDate: json['claim_date']?.toString() ?? json['created_at']?.toString() ?? '',
+      statusDate: json['status_date']?.toString() ?? json['updated_at']?.toString() ?? '',
       adminNote: json['admin_note']?.toString(),
       prizeValue: toDouble(json['prize_value']),
       shippingDetails: shipping,
       spentDetailsReadable: spent,
     );
   }
+
+  String get createdAt => claimDate;
 
   String get referenceCode =>
       referenceNo.isNotEmpty ? referenceNo : 'INDP-$id';

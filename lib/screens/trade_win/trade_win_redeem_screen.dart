@@ -15,6 +15,7 @@ import 'package:crm_app/widgets/app_select_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/trade_win/widgets/trade_win_product_image.dart';
 import 'package:crm_app/screens/trade_win/widgets/trade_win_redeem_stepper.dart';
+import 'package:crm_app/screens/trade_win/view_models/trade_win_controller.dart';
 
 class TradeWinRedeemScreen extends StatefulWidget {
   const TradeWinRedeemScreen({super.key});
@@ -40,8 +41,16 @@ class _TradeWinRedeemScreenState extends State<TradeWinRedeemScreen> {
   void initState() {
     super.initState();
     final args = Get.arguments as Map<String, dynamic>?;
-    final product = args?['product'] as TradeWinProductModel?;
+    var product = args?['product'] as TradeWinProductModel?;
     final quantity = args?['quantity'] as int? ?? 1;
+
+    if (product == null && args?['productId'] != null) {
+      if (Get.isRegistered<TradeWinController>()) {
+        final twc = Get.find<TradeWinController>();
+        final id = args!['productId'];
+        product = twc.products.firstWhereOrNull((p) => p.id == id);
+      }
+    }
 
     if (product == null) {
       _initialized = false;

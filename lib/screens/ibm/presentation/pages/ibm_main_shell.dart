@@ -8,8 +8,7 @@ import 'package:crm_app/screens/ibm/presentation/pages/ibm_promotion_screen.dart
 import 'package:crm_app/screens/ibm/presentation/pages/ibm_clients_screen.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/ibm_wallet_screen.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/ibm_links_screen.dart';
-import 'package:crm_app/screens/ibm/presentation/pages/ibm_marketing_screen.dart';
-import 'package:crm_app/screens/ibm/presentation/pages/ibm_settings_screen.dart';
+import 'package:crm_app/screens/ibm/presentation/pages/ibm_more_screen.dart';
 import 'package:crm_app/services/language_service.dart';
 
 class IbmMainShell extends StatelessWidget {
@@ -26,8 +25,7 @@ class IbmMainShell extends StatelessWidget {
       IbmClientsScreen(),
       IbmWalletScreen(),
       IbmLinksScreen(),
-      IbmMarketingScreen(),
-      IbmSettingsScreen(),
+      IbmMoreScreen(),
     ];
 
     return Scaffold(
@@ -113,14 +111,9 @@ class IbmMainShell extends StatelessWidget {
                   label: languageService.tr('Links'),
                 ),
                 BottomNavigationBarItem(
-                  icon: const Icon(Icons.image_outlined),
-                  activeIcon: const Icon(Icons.image),
-                  label: languageService.tr('Marketing'),
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.tune_outlined),
-                  activeIcon: const Icon(Icons.tune),
-                  label: languageService.tr('Settings'),
+                  icon: const Icon(Icons.more_horiz_outlined),
+                  activeIcon: const Icon(Icons.more_horiz),
+                  label: languageService.tr('More'),
                 ),
               ],
             ),
@@ -186,7 +179,8 @@ class IbmMainShell extends StatelessWidget {
             const Divider(height: 1),
             SizedBox(height: 10.h),
 
-            // 7 Navigation Items matching Screenshot 1
+            // 6 Navigation Items: Dashboard, Promotion, Network, Commission,
+            // Referral Links, More (Marketing + Settings live under More).
             Expanded(
               child: Obx(() {
                 final currentIdx = controller.currentTabIndex.value;
@@ -244,23 +238,13 @@ class IbmMainShell extends StatelessWidget {
                       },
                     ),
                     _buildDrawerItem(
-                      icon: Icons.image_outlined,
-                      title: 'Marketing Material',
+                      icon: Icons.more_horiz_outlined,
+                      title: 'More',
                       isSelected: currentIdx == 5,
-                      hasArrow: false,
+                      hasArrow: true,
                       onTap: () {
                         Get.back();
                         controller.changeTab(5);
-                      },
-                    ),
-                    _buildDrawerItem(
-                      icon: Icons.tune_outlined,
-                      title: 'Settings',
-                      isSelected: currentIdx == 6,
-                      hasArrow: false,
-                      onTap: () {
-                        Get.back();
-                        controller.changeTab(6);
                       },
                     ),
                   ],
