@@ -6,6 +6,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
+import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
+import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:crm_app/controllers/copy_trading/copy_trading_hub_controller.dart';
+import 'package:crm_app/screens/home/trading_main_screen.dart';
 
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:audioplayers/audioplayers.dart';
@@ -127,33 +134,77 @@ class NotificationService {
         debugPrint('🔄 FCM TOKEN REFRESHED: $newToken');
       });
 
-    // 1. Configure iOS/macOS foreground visibility
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+      // 1. Configure iOS/macOS foreground visibility
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
 
-    // 2. Listen to foreground messages and show heads-up notification manually if needed by Android
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Got a message whilst in the foreground!');
-      debugPrint('========== RAW FCM FOREGROUND PAYLOAD (JSON) ==========');
-      debugPrint(jsonEncode(message.toMap()));
-      debugPrint('=======================================================');
+      // 2. Listen to foreground messages and show heads-up notification manually if needed by Android
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint('Got a message whilst in the foreground!');
+        debugPrint('========== RAW FCM FOREGROUND PAYLOAD (JSON) ==========');
+        debugPrint(jsonEncode(message.toMap()));
+        debugPrint('=======================================================');
 
-      if (message.notification != null) {
-        debugPrint(
-          'Message also contained a notification: ${message.notification}',
-        );
+        if (message.notification != null) {
+          debugPrint(
+            'Message also contained a notification: ${message.notification}',
+          );
 
-        // Show local notification for Android (iOS handles it automatically if presentation options are set)
-        _showLocalNotification(message);
-      }
-    });
+          // Show local notification for Android (iOS handles it automatically if presentation options are set)
+          _showLocalNotification(message);
+        }
+      });
+
+      // 3. Listen to messages when app is in the background and opened by user
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        debugPrint('App opened from background via notification! Payload: ${message.data}');
+        _handleNotificationRedirection(message.data);
+      });
+
+      // 4. Check for initial message if app opened from terminated/killed state
+      await setupInteractedMessage();
+
     } catch (e, st) {
       debugPrint('FCM: Failed to set up listeners: $e');
       debugPrint('$st');
+    }
+  }
+
+  /// Handles notification message if the app was launched from a terminated/killed state
+  Future<void> setupInteractedMessage() async {
+    try {
+      // 1. Check FCM RemoteMessage from killed state
+      if (Firebase.apps.isNotEmpty) {
+        RemoteMessage? initialMessage =
+            await FirebaseMessaging.instance.getInitialMessage();
+
+        if (initialMessage != null && initialMessage.data.isNotEmpty) {
+          debugPrint('🔔 [NOTIFICATION REDIRECTION] Initial FCM message received from killed state: ${initialMessage.data}');
+          await _handleNotificationRedirection(initialMessage.data);
+          return;
+        }
+      }
+
+      // 2. Check local notifications plugin from killed state
+      final launchDetails = await _notifications.getNotificationAppLaunchDetails();
+      if (launchDetails != null && launchDetails.didNotificationLaunchApp) {
+        final payloadStr = launchDetails.notificationResponse?.payload;
+        if (payloadStr != null && payloadStr.isNotEmpty) {
+          try {
+            final Map<String, dynamic> data = json.decode(payloadStr);
+            debugPrint('🔔 [NOTIFICATION REDIRECTION] Initial local notification received from killed state: $data');
+            await _handleNotificationRedirection(data);
+          } catch (e) {
+            debugPrint('🔔 [NOTIFICATION REDIRECTION] Error parsing local notification launch payload: $e');
+          }
+        }
+      }
+    } catch (e, st) {
+      debugPrint('🔔 [NOTIFICATION REDIRECTION] Error in setupInteractedMessage: $e\n$st');
     }
   }
 
@@ -234,14 +285,223 @@ class NotificationService {
 
   bool get hasPermission => _hasPermission;
 
+  // Store pending redirection if the app is still starting up
+  static Map<String, dynamic>? _pendingRedirectionData;
+
+  Future<void> _handleNotificationRedirection(Map<String, dynamic> data) async {
+    debugPrint('🔔 [NOTIFICATION REDIRECTION] Started. Payload data: $data');
+    if (data['type'] == null || data['type'].toString().trim().isEmpty) {
+      debugPrint('🔔 [NOTIFICATION REDIRECTION] type is null or empty. Aborting.');
+      return;
+    }
+
+    // Check if user is logged in
+    bool isLoggedIn = false;
+    if (Get.isRegistered<AuthController>()) {
+      isLoggedIn = Get.find<AuthController>().isAuthenticated;
+    }
+    if (!isLoggedIn) {
+      final token = await SecureStorageService.getAuthToken();
+      isLoggedIn = token != null && token.isNotEmpty;
+    }
+    
+    debugPrint('🔔 [NOTIFICATION REDIRECTION] isLoggedIn: $isLoggedIn');
+    if (!isLoggedIn) {
+      debugPrint('🔔 [NOTIFICATION REDIRECTION] User is not logged in. Ignoring redirection.');
+      _pendingRedirectionData = null;
+      return;
+    }
+
+    String type = data['type'].toString().trim();
+    debugPrint('🔔 [NOTIFICATION REDIRECTION] Type is: $type');
+
+    // If the app is currently in splash / auth check screen, save for after home mounts
+    final currentRoute = Get.currentRoute;
+    debugPrint('🔔 [NOTIFICATION REDIRECTION] Current route: $currentRoute');
+    if (currentRoute.isEmpty ||
+        currentRoute == '/' ||
+        currentRoute == AppPages.SPLASH ||
+        currentRoute == AppPages.GET_STARTED ||
+        currentRoute == '/AuthCheckScreen') {
+      debugPrint('🔔 [NOTIFICATION REDIRECTION] App is still in startup/auth check. Storing pending redirection.');
+      _pendingRedirectionData = data;
+      return;
+    }
+
+    // Otherwise execute routing immediately
+    _executeRouting(type, data);
+  }
+
+  void processPendingNotification() {
+    if (_pendingRedirectionData != null) {
+      debugPrint('🔔 [NOTIFICATION REDIRECTION] Processing pending notification now that main screen is loaded: $_pendingRedirectionData');
+      final data = Map<String, dynamic>.from(_pendingRedirectionData!);
+      String type = data['type']?.toString().trim() ?? '';
+      _pendingRedirectionData = null;
+      if (type.isNotEmpty) {
+        // Wait 350ms to allow GetX stack transition (Get.offAllNamed(AppPages.TRADING)) to finish completely
+        Future.delayed(const Duration(milliseconds: 350), () {
+          _executeRouting(type, data);
+        });
+      }
+    }
+  }
+
+  void _executeRouting(String type, [Map<String, dynamic>? data]) {
+    debugPrint('🔔 [NOTIFICATION REDIRECTION] Executing routing for type: $type');
+    try {
+      switch (type) {
+        // Ignored types: Just open the app without redirecting to a sub-screen
+        case 'mt5_credentials':
+        case 'leverage_change':
+        case 'email_failed':
+        case 'trading_restriction':
+          debugPrint('🔔 [NOTIFICATION REDIRECTION] Type "$type" ignored - opening app only.');
+          break;
+
+        // KYC / Compliance: Navigate to 5th bottom tab (More / Assets / Dashboard at index 4)
+        case 'kyc_status':
+        case 'kyc_request':
+        case 'kyc':
+          _navigateToMainTab(4);
+          break;
+
+        // Financial & Transactions
+        case 'deposit':
+        case 'deposit_request':
+        case 'withdraw':
+        case 'withdraw_request':
+        case 'withdrawal_request':
+          Get.toNamed(AppPages.TRANSACTION_HISTORY);
+          break;
+        case 'internal_transfer':
+          Get.toNamed(AppPages.INTERNAL_TRANSFER_HISTORY);
+          break;
+        case 'bonus_request':
+        case 'bonus':
+          Get.toNamed(AppPages.BONUS);
+          break;
+
+        // Profile & Support (Helpdesk)
+        case 'support_ticket':
+        case 'new_ticket':
+        case 'ticket_reply':
+        case 'ticket':
+        case 'ticket_created':
+        case 'ticket_updated':
+        case 'ticket_closed':
+        case 'helpdesk':
+          Get.toNamed(AppPages.TICKET_LIST);
+          break;
+        
+        // Partnerships (IB / PAMM / CopyTrading)
+        case 'ib_request':
+        case 'ib_commission_transfer':
+        case 'ib':
+          // Navigate to the last bottom tab (More / Assets / Dashboard tab at index 4)
+          _navigateToMainTab(4);
+          break;
+        case 'copy_master_request':
+        case 'copy_plan_request':
+        case 'copy_copier_request':
+        case 'copy_trading':
+        case 'copy_trading_request':
+        case 'copy':
+        case 'copy_trade':
+        case 'copy_request':
+        case 'copier':
+          if (Get.isRegistered<CopyTradingHubController>()) {
+            Get.find<CopyTradingHubController>().currentTabIndex.value = 0;
+          }
+          if (Get.currentRoute == AppPages.COPY_TRADING_MAIN) {
+            if (Get.isRegistered<CopyTradingHubController>()) {
+              Get.find<CopyTradingHubController>().currentTabIndex.value = 0;
+            }
+          } else {
+            Get.toNamed(AppPages.COPY_TRADING_MAIN, arguments: 0);
+          }
+          break;
+        case 'pamm_manager_request':
+        case 'pamm_plan_request':
+        case 'pamm_investor_request':
+        case 'pamm_request':
+        case 'pamm':
+          Get.toNamed(AppPages.PMAM_MAIN);
+          break;
+
+        // Custom / Promotional Alerts
+        case 'demo_contest':
+        case 'contest':
+        case 'demo_contest_enroll':
+        case 'demo_contest_winner':
+        case 'demo_contest_start':
+        case 'demo_contest_end':
+          Get.toNamed(AppPages.DEMO_CONTEST);
+          break;
+        case 'tradewin_request':
+        case 'tradewin':
+        case 'trade_win':
+        case 'trade_and_win':
+        case 'trade_win_request':
+        case 'tradewin_reward':
+        case 'tradewin_claim':
+        case 'trade_win_main':
+          Get.toNamed(AppPages.TRADE_WIN_MAIN);
+          break;
+        case 'scratch_card_won':
+        case 'scratch_card_loss':
+        case 'scratch_card_ready':
+        case 'scratch_card':
+        case 'scratchcard':
+        case 'scratch':
+          Get.toNamed(AppPages.SCRATCH_CARD);
+          break;
+        case 'custom_alert':
+          final redirectUrl = data?['redirect_url']?.toString().trim();
+          if (redirectUrl != null && redirectUrl.isNotEmpty) {
+            final uri = Uri.tryParse(redirectUrl);
+            if (uri != null) {
+              launchUrl(uri, mode: LaunchMode.externalApplication);
+              break;
+            }
+          }
+          Get.toNamed(AppPages.NOTIFICATIONS);
+          break;
+
+        default:
+          debugPrint('🔔 [NOTIFICATION REDIRECTION] Unhandled type "$type", navigating to Notifications list');
+          Get.toNamed(AppPages.NOTIFICATIONS);
+          break;
+      }
+    } catch (e, st) {
+      debugPrint('🔔 [NOTIFICATION REDIRECTION] Error navigating for type "$type": $e\n$st');
+    }
+  }
+
+  void _navigateToMainTab(int tabIndex) {
+    if (Get.currentRoute == AppPages.TRADING) {
+      TradingMainScreen.changeTab(tabIndex);
+    } else {
+      Get.until((route) => Get.currentRoute == AppPages.TRADING || route.isFirst);
+      if (Get.currentRoute == AppPages.TRADING) {
+        TradingMainScreen.changeTab(tabIndex);
+      } else {
+        Get.offAllNamed(AppPages.TRADING, arguments: tabIndex);
+      }
+    }
+  }
+
+  Future<void> handleNotificationResponse(NotificationResponse response) async {
+    debugPrint('🔔 [NOTIFICATION SERVICE] handleNotificationResponse: payload = ${response.payload}');
+    await _onNotificationTapped(response);
+  }
+
   Future<void> _onNotificationTapped(NotificationResponse response) async {
-    // Handle notification tap
+    // Handle local notification tap (when app is in foreground)
     if (response.payload != null) {
       try {
         Map<String, dynamic> payload = json.decode(response.payload!);
-        // Navigate to specific screen based on payload
-        // You can implement navigation logic here
-        debugPrint('Notification tapped: $payload');
+        await _handleNotificationRedirection(payload);
       } catch (e) {
         debugPrint('Error parsing notification payload: $e');
       }

@@ -10,54 +10,24 @@ import 'package:crm_app/screens/finance/view_models/internal_transfer_history_co
 import '../../../../widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
-class InternalTransferHistoryScreen extends StatefulWidget {
+class InternalTransferHistoryScreen extends GetView<InternalTransferHistoryController> {
   const InternalTransferHistoryScreen({super.key});
 
   @override
-  State<InternalTransferHistoryScreen> createState() =>
-      _InternalTransferHistoryScreenState();
-}
-
-class _InternalTransferHistoryScreenState
-    extends State<InternalTransferHistoryScreen> {
-  final InternalTransferHistoryController controller = Get.put(
-    InternalTransferHistoryController(),
-  );
-  final ScrollController _scrollController = ScrollController();
-  final DateFormat _displayDateFormat = DateFormat('dd/MM/yyyy');
-
-  @override
-  void initState() {
-    super.initState();
-    controller.fetchHistory();
-    _scrollController.addListener(_handleScroll);
-  }
-
-  @override
-  void dispose() {
-    _scrollController
-      ..removeListener(_handleScroll)
-      ..dispose();
-    super.dispose();
-  }
-
-  void _handleScroll() {
-    if (!_scrollController.hasClients) return;
-    final threshold = _scrollController.position.maxScrollExtent - 180.h;
-    if (_scrollController.position.pixels >= threshold) {
-      controller.loadNextPage();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Initialize the controller here if not done in routes
+    if (!Get.isRegistered<InternalTransferHistoryController>()) {
+      Get.put(InternalTransferHistoryController());
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         scrolledUnderElevation: 0,
         elevation: 0,
         backgroundColor: AppColors.background,
-        leading:  AppBackButton(onPressed: () => NavigationHelper.safeBack(context: context),
+        leading: AppBackButton(
+          onPressed: () => NavigationHelper.safeBack(context: context),
         ),
         title: Text(
           'Internal Transfer History',
@@ -66,56 +36,67 @@ class _InternalTransferHistoryScreenState
         centerTitle: true,
       ),
       body: SafeArea(
-        child: RefreshIndicator(
-          color: AppColors.primary,
-          onRefresh: controller.refreshHistory,
-          child: Obx(() {
-            return CustomScrollView(
-              controller: _scrollController,
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
-                  sliver: SliverToBoxAdapter(child: _buildFilterCard()),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
-                  sliver: SliverToBoxAdapter(child: _buildSummaryHeader()),
-                ),
-                if (controller.isLoading.value && controller.items.isEmpty)
-                  const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: CommonLoadingWidget(isFullScreen: true),
-                    ),
-                  )
-                else if (controller.items.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: _buildEmptyState(),
-                  )
-                else
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 0),
-                    sliver: SliverList.separated(
-                      itemBuilder: (context, index) {
-                        final item = controller.items[index];
-                        return _buildTransferCard(item);
-                      },
-                      separatorBuilder: (_, _) => SizedBox(height: 12.h),
-                      itemCount: controller.items.length,
-                    ),
+        child: Column(
+          children: [
+            // Fixed top part
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 0),
+              child: InternalTransferFilterCard(),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 10.h),
+              child: const InternalTransferSummaryHeader(),
+            ),
+            // Scrollable list part
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value && controller.items.isEmpty) {
+                  return const Center(
+                    child: CommonLoadingWidget(isFullScreen: false),
+                  );
+                }
+
+                if (controller.items.isEmpty) {
+                  return const InternalTransferEmptyState();
+                }
+
+                return RefreshIndicator(
+                  color: AppColors.primary,
+                  onRefresh: controller.refreshHistory,
+                  child: ListView.builder(
+                    controller: controller.scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 24.h),
+                    itemCount: controller.items.length + 1, // +1 for loading indicator
+                    itemBuilder: (context, index) {
+                      if (index == controller.items.length) {
+                        return const InternalTransferPaginationFooter();
+                      }
+                      
+                      final item = controller.items[index];
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: InternalTransferCard(item: item),
+                      );
+                    },
                   ),
-                SliverToBoxAdapter(child: _buildPaginationFooter()),
-              ],
-            );
-          }),
+                );
+              }),
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildFilterCard() {
+class InternalTransferFilterCard extends GetView<InternalTransferHistoryController> {
+  InternalTransferFilterCard({super.key});
+
+  final DateFormat _displayDateFormat = DateFormat('dd/MM/yyyy');
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
@@ -142,40 +123,34 @@ class _InternalTransferHistoryScreenState
             ),
           ),
           SizedBox(height: 12.h),
-          Row(
+          Obx(() => Row(
             children: [
               Expanded(
-                child: Obx(
-                  () => _buildFilterField(
-                    label: 'From Date',
-                    value: _formatFilterDate(controller.fromDate.value),
-                    icon: Icons.calendar_month_outlined,
-                    onTap: () => _pickDate(isFromDate: true),
-                  ),
+                child: _buildFilterField(
+                  label: 'From Date',
+                  value: _formatFilterDate(controller.fromDate.value),
+                  icon: Icons.calendar_month_outlined,
+                  onTap: () => _pickDate(context, isFromDate: true),
                 ),
               ),
               SizedBox(width: 10.w),
               Expanded(
-                child: Obx(
-                  () => _buildFilterField(
-                    label: 'To Date',
-                    value: _formatFilterDate(controller.toDate.value),
-                    icon: Icons.calendar_month_outlined,
-                    onTap: () => _pickDate(isFromDate: false),
-                  ),
+                child: _buildFilterField(
+                  label: 'To Date',
+                  value: _formatFilterDate(controller.toDate.value),
+                  icon: Icons.calendar_month_outlined,
+                  onTap: () => _pickDate(context, isFromDate: false),
                 ),
               ),
             ],
-          ),
+          )),
           SizedBox(height: 10.h),
-          Obx(
-            () => _buildFilterField(
-              label: 'Status',
-              value: controller.selectedStatus.value.label,
-              icon: Icons.keyboard_arrow_down_rounded,
-              onTap: _showStatusSheet,
-            ),
-          ),
+          Obx(() => _buildFilterField(
+            label: 'Status',
+            value: controller.selectedStatus.value.label,
+            icon: Icons.keyboard_arrow_down_rounded,
+            onTap: () => _showStatusSheet(context),
+          )),
           SizedBox(height: 14.h),
           Row(
             children: [
@@ -185,6 +160,7 @@ class _InternalTransferHistoryScreenState
                   child: ElevatedButton(
                     onPressed: controller.applyFilters,
                     style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(0, 0),
                       backgroundColor: AppColors.primary,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -203,24 +179,27 @@ class _InternalTransferHistoryScreenState
                 ),
               ),
               SizedBox(width: 10.w),
-              SizedBox(
-                height: 44.h,
-                child: OutlinedButton(
-                  onPressed: controller.clearFilters,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: AppColors.icongrey.withValues(alpha: 0.22),
+              Expanded(
+                child: SizedBox(
+                  height: 44.h,
+                  child: OutlinedButton(
+                    onPressed: controller.clearFilters,
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 0),
+                      side: BorderSide(
+                        color: AppColors.icongrey.withValues(alpha: 0.22),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
-                  child: Text(
-                    'Clear',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: AppColors.textPrimary,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
+                    child: Text(
+                      'Clear',
+                      style: AppTextStyles.bodyText.copyWith(
+                        color: AppColors.textPrimary,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -283,13 +262,134 @@ class _InternalTransferHistoryScreenState
     );
   }
 
-  Widget _buildSummaryHeader() {
+  String _formatFilterDate(DateTime? date) {
+    return date == null ? 'dd/mm/yyyy' : _displayDateFormat.format(date);
+  }
+
+  Future<void> _pickDate(BuildContext context, {required bool isFromDate}) async {
+    final initialDate = isFromDate
+        ? controller.fromDate.value ?? DateTime.now()
+        : controller.toDate.value ??
+            controller.fromDate.value ??
+            DateTime.now();
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: AppColors.whiteColor,
+              surface: AppColors.whiteColor,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked == null) return;
+    if (isFromDate) {
+      controller.setFromDate(picked);
+    } else {
+      controller.setToDate(picked);
+    }
+  }
+
+  void _showStatusSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.background,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5,
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 42.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  SizedBox(height: 18.h),
+                  Text(
+                    'Select Status',
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.textPrimary,
+                      fontSize: 17.sp,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 12.h),
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: controller.statusFilters.length,
+                      itemBuilder: (context, index) {
+                        final status = controller.statusFilters[index];
+                        final isSelected =
+                            status.value == controller.selectedStatus.value.value;
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            status.label,
+                            style: AppTextStyles.bodyText.copyWith(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.textPrimary,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          trailing: isSelected
+                              ? Icon(Icons.check, color: AppColors.primary)
+                              : null,
+                          onTap: () {
+                            controller.setStatus(status);
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class InternalTransferSummaryHeader extends GetView<InternalTransferHistoryController> {
+  const InternalTransferSummaryHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(() {
       final pagination = controller.pagination.value;
-      final showing =
-          pagination.total == 0
-              ? 'No entries'
-              : 'Showing ${pagination.from} to ${pagination.to} of ${pagination.total} entries';
+      final showing = pagination.total == 0
+          ? 'No entries'
+          : 'Showing ${pagination.from} to ${pagination.to} of ${pagination.total} entries';
 
       return Row(
         children: [
@@ -303,27 +403,33 @@ class _InternalTransferHistoryScreenState
               ),
             ),
           ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Text(
-              'Page ${pagination.currentPage} of ${pagination.lastPage}',
-              style: AppTextStyles.bodyText.copyWith(
-                color: AppColors.primary,
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          // Container(
+          //   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+          //   decoration: BoxDecoration(
+          //     color: AppColors.primary.withValues(alpha: 0.10),
+          //     borderRadius: BorderRadius.circular(20.r),
+          //   ),
+          //   child: Text(
+          //     'Page ${pagination.currentPage} of ${pagination.lastPage}',
+          //     style: AppTextStyles.bodyText.copyWith(
+          //       color: AppColors.primary,
+          //       fontSize: 11.sp,
+          //       fontWeight: FontWeight.w700,
+          //     ),
+          //   ),
+          // ),
         ],
       );
     });
   }
+}
 
-  Widget _buildTransferCard(InternalTransferHistoryItem item) {
+class InternalTransferCard extends StatelessWidget {
+  final InternalTransferHistoryItem item;
+  const InternalTransferCard({super.key, required this.item});
+
+  @override
+  Widget build(BuildContext context) {
     final statusColor = _statusColor(item.status);
 
     return Container(
@@ -378,7 +484,7 @@ class _InternalTransferHistoryScreenState
                     ),
                     SizedBox(height: 5.h),
                     Text(
-                      item.createdAt,
+                      _formatDate(item.createdAt),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.bodyText.copyWith(
@@ -395,9 +501,9 @@ class _InternalTransferHistoryScreenState
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    item.formattedAmount.isEmpty
-                        ? '\$${item.amount}'
-                        : item.formattedAmount,
+                    item.formattedAmount.isNotEmpty
+                        ? item.formattedAmount
+                        : '\$${item.amount}',
                     style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.success,
                       fontSize: 16.sp,
@@ -410,7 +516,7 @@ class _InternalTransferHistoryScreenState
               ),
             ],
           ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 12.h),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             decoration: BoxDecoration(
@@ -446,7 +552,7 @@ class _InternalTransferHistoryScreenState
             ),
           ),
           if (item.comment.isNotEmpty) ...[
-            SizedBox(height: 4.h),
+            SizedBox(height: 10.h),
             Text(
               item.comment,
               maxLines: 2,
@@ -494,7 +600,6 @@ class _InternalTransferHistoryScreenState
             fontWeight: FontWeight.w800,
           ),
         ),
-       
       ],
     );
   }
@@ -517,39 +622,53 @@ class _InternalTransferHistoryScreenState
     );
   }
 
-  Widget _buildPaginationFooter() {
-    return Obx(() {
-      if (controller.isLoadingMore.value) {
-        return Padding(
-          padding: EdgeInsets.symmetric(vertical: 22.h),
-          child: Center(child: CommonLoadingWidget()),
-        );
-      }
-
-      if (controller.items.isEmpty) {
-        return SizedBox(height: 24.h);
-      }
-
-      return Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 24.h),
-        child: Text(
-          controller.hasNextPage
-              ? 'Scroll down to load more'
-              : 'You have reached the end',
-          textAlign: TextAlign.center,
-          style: AppTextStyles.bodyText.copyWith(
-            color: AppColors.icongrey,
-            fontSize: 12.sp,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      );
-    });
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+      case 'completed':
+      case 'success':
+        return AppColors.success;
+      case 'failed':
+      case 'rejected':
+      case 'cancelled':
+      case 'declined':
+        return AppColors.error;
+      case 'pending':
+      case 'processing':
+      case 'in_review':
+        return AppColors.warning;
+      default:
+        return AppColors.primary;
+    }
   }
 
-  Widget _buildEmptyState() {
+  String _titleCase(String value) {
+    return value
+        .split(RegExp(r'[\s_-]+'))
+        .where((word) => word.isNotEmpty)
+        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
+  }
+
+  String _formatDate(String rawDate) {
+    if (rawDate.isEmpty) return '';
+    try {
+      final parsed = DateTime.tryParse(rawDate)?.toLocal();
+      if (parsed != null) {
+        return DateFormat('dd MMM yyyy, hh:mm a').format(parsed);
+      }
+    } catch (_) {}
+    return rawDate;
+  }
+}
+
+class InternalTransferEmptyState extends StatelessWidget {
+  const InternalTransferEmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 50.h),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -568,7 +687,7 @@ class _InternalTransferHistoryScreenState
           ),
           SizedBox(height: 18.h),
           Text(
-            'No transfer history found',
+            'No data',
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
@@ -590,148 +709,39 @@ class _InternalTransferHistoryScreenState
       ),
     );
   }
+}
 
-  Future<void> _pickDate({required bool isFromDate}) async {
-    final initialDate =
-        isFromDate
-            ? controller.fromDate.value ?? DateTime.now()
-            : controller.toDate.value ??
-                controller.fromDate.value ??
-                DateTime.now();
+class InternalTransferPaginationFooter extends GetView<InternalTransferHistoryController> {
+  const InternalTransferPaginationFooter({super.key});
 
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now().add(const Duration(days: 1)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-           colorScheme: ColorScheme.light(
-           primary: AppColors.primary,
-            onPrimary: AppColors.whiteColor,
-              surface: AppColors.whiteColor,
-            onSurface: AppColors.textPrimary,
-            ),
-            ),
-            child: child!,
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isLoadingMore.value) {
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 22.h),
+          child: const Center(child: CommonLoadingWidget()),
         );
-      },
-    );
+      }
 
-    if (picked == null) return;
-    if (isFromDate) {
-      controller.setFromDate(picked);
-    } else {
-      controller.setToDate(picked);
-    }
-  }
+      if (controller.items.isEmpty) {
+        return const SizedBox.shrink();
+      }
 
-  void _showStatusSheet() {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.background,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.5,
-            ),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 42.w,
-                    height: 4.h,
-                    decoration: BoxDecoration(
-                      color: AppColors.border,
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                  ),
-                  SizedBox(height: 18.h),
-                  Text(
-                    'Select Status',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: AppColors.textPrimary,
-                      fontSize: 17.sp,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  SizedBox(height: 12.h),
-                  Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: controller.statusFilters.length,
-                      itemBuilder: (context, index) {
-                        final status = controller.statusFilters[index];
-                        return Obx(() {
-                          final isSelected =
-                              status.value == controller.selectedStatus.value.value;
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(
-                              status.label,
-                              style: AppTextStyles.bodyText.copyWith(
-                                color:
-                                    isSelected
-                                        ? AppColors.primary
-                                        : AppColors.textPrimary,
-                                fontWeight:
-                                    isSelected ? FontWeight.w700 : FontWeight.w500,
-                              ),
-                            ),
-                            trailing:
-                                isSelected
-                                    ? Icon(Icons.check, color: AppColors.primary)
-                                    : null,
-                            onTap: () {
-                              controller.setStatus(status);
-                              Navigator.pop(context);
-                            },
-                          );
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 10.h),
+        child: Text(
+          controller.hasNextPage
+              ? 'Scroll down to load more'
+              : 'You have reached the end',
+          textAlign: TextAlign.center,
+          style: AppTextStyles.bodyText.copyWith(
+            color: AppColors.icongrey,
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w500,
           ),
-        );
-      },
-    );
-  }
-
-  String _formatFilterDate(DateTime? date) {
-    return date == null ? 'dd/mm/yyyy' : _displayDateFormat.format(date);
-  }
-
-  Color _statusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'approved':
-      case 'completed':
-      case 'success':
-        return AppColors.success;
-      case 'failed':
-      case 'rejected':
-      case 'cancelled':
-        return AppColors.error;
-      default:
-        return AppColors.warning;
-    }
-  }
-
-  String _titleCase(String value) {
-    return value
-        .split(RegExp(r'[\s_-]+'))
-        .where((word) => word.isNotEmpty)
-        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
-        .join(' ');
+        ),
+      );
+    });
   }
 }

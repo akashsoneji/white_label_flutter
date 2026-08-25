@@ -19,6 +19,7 @@ import 'package:crm_app/screens/bonus/domain/repositories/bonus_repository.dart'
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
+import 'package:crm_app/services/language_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MODELS
@@ -923,7 +924,9 @@ class ScratchCardListScreen extends StatelessWidget {
         scrolledUnderElevation: 0,
         leading: AppBackButton(onPressed: () => Navigator.of(context).pop()),
         title: Text(
-          'My Rewards',
+          Get.isRegistered<LanguageService>()
+              ? Get.find<LanguageService>().tr('general_scratch_card')
+              : 'Scratch Card',
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -3351,7 +3354,9 @@ class ScratchCardDetailScreen extends StatelessWidget {
         scrolledUnderElevation: 0,
         centerTitle: true,
         title: Text(
-          'My Rewards',
+          Get.isRegistered<LanguageService>()
+              ? Get.find<LanguageService>().tr('general_scratch_card')
+              : 'Scratch Card',
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,

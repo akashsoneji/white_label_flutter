@@ -22,7 +22,7 @@ colors:
 urls:
   api: "https://app.riyadex.com/api/"
   websocket: "wss://app.riyadex.com/trade-engine"
-  chart: "https://app.riyadex.com/"
+  chart: "https://app.riyadex.com"
 
 assets:
   appIcon: icon.png

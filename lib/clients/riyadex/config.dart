@@ -20,7 +20,7 @@ class RiyadexConfig extends BaseClientConfig {
           appIconPath: 'icon.png',
  apiBaseUrl: 'https://app.riyadex.com/api/',
  websocketUrl: 'wss://app.riyadex.com/trade-engine',
- chartBaseUrl: 'https://app.riyadex.com/',
+ chartBaseUrl: 'https://app.riyadex.com',
  useNewChart: false,
  );
 }

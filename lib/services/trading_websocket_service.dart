@@ -648,19 +648,19 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
       _openPositionsSubscription = _openPositionsChannel!.stream.listen(
         (message) {
           if (_isDisposed) return;
-          if (kDebugMode) {
-            final type = message is String
-                ? 'String'
-                : message is List<int>
-                    ? 'List<int>(${message.length})'
-                    : message.runtimeType.toString();
-            final preview = message is String
-                ? message.substring(0, message.length.clamp(0, 100))
-                : '';
-            print(
-              'WS /ws/op RX [$type] $preview',
-            );
-          }
+          // if (kDebugMode) {
+          //   final type = message is String
+          //       ? 'String'
+          //       : message is List<int>
+          //           ? 'List<int>(${message.length})'
+          //           : message.runtimeType.toString();
+          //   final preview = message is String
+          //       ? message.substring(0, message.length.clamp(0, 100))
+          //       : '';
+          //   print(
+          //     'WS /ws/op RX [$type] $preview',
+          //   );
+          // }
           _handleOpenPositionsMessage(message);
         },
         onError: (error) {

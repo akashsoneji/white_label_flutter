@@ -1,3 +1,5 @@
+import 'package:crm_app/services/notification_service.dart';
+
 import 'iquote_home_screen.dart';
 import 'brands/iquote/iquote_market_screen.dart';
 import 'brands/iquote/iquote_position_screen.dart';
@@ -276,6 +278,13 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         }
       });
     }
+
+    // Process any pending notification redirection now that the main screen is fully loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.isRegistered<NotificationService>()) {
+        Get.find<NotificationService>().processPendingNotification();
+      }
+    });
   }
 
   @override

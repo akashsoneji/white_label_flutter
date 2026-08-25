@@ -179,7 +179,7 @@ class TradingController extends GetxController {
   final _marketPositionsById = <String, TradePosition>{};
 
   // ---- History filter state ----
-  /// One of 'today', 'week', 'month', 'threeMonth'.
+  /// One of 'today', 'week', 'month', 'threeMonth', 'custom'.
   /// Defaults to 'today' so the History tab is pre-filtered on first open.
   String _historyFilterPeriod = 'today';
   String get historyFilterPeriod => _historyFilterPeriod;
@@ -190,6 +190,12 @@ class TradingController extends GetxController {
 
   DateTime? _historyEndDate;
   DateTime? get historyEndDate => _historyEndDate;
+
+  /// Persisted last symbol selection from the filter sheet so re-opening the
+  /// sheet shows the user what is currently applied.
+  final List<String> _historySelectedSymbols = <String>['all'];
+  List<String> get historySelectedSymbols =>
+      List<String>.unmodifiable(_historySelectedSymbols);
 
   /// Whether _applyHistoryFilter has ever been called (used to apply
   /// today's default the first time the History tab is opened).
@@ -2126,56 +2132,124 @@ class TradingController extends GetxController {
   }
 
   /// High-level filter entry-point used by the History tab Filter dialog.
-  /// Maps [period] ('today' / 'week' / 'month' / 'threeMonth') to a
+  /// Maps [period] ('today' / 'week' / 'month' / 'threeMonth' / 'custom') to a
   /// start/end DateTime pair, caches them in [_historyStartDate] /
   /// [_historyEndDate] so the date row stays in sync, and forwards to
   /// [loadTradeHistoryWithTimestamps] with the appropriate filterType
   /// so the API matches the existing 'today' / 'thisWeek' / etc. labels.
-  Future<void> applyHistoryFilter({String? period, List<String>? symbols}) async {
+  ///
+  /// [direction] — 'All' / 'Buy' / 'Sell' applied client-side via
+  /// [_closedDirection] so the existing [getFilteredPositions] pipeline
+  /// keeps working.
+  /// [customStart] / [customEnd] — required when [period] == 'custom'.
+  Future<void> applyHistoryFilter({
+    String? period,
+    List<String>? symbols,
+    String? direction,
+    DateTime? customStart,
+    DateTime? customEnd,
+  }) async {
     period ??= _historyFilterPeriod;
     _historyFilterPeriod = period;
+
+    if (direction != null) {
+      _closedDirection.value = direction;
+    }
+
     final now = DateTime.now();
-    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
     DateTime start;
+    DateTime end;
     String filterType;
     switch (period) {
       case 'week':
-        start = end.subtract(const Duration(days: 7));
+        start = DateTime(now.year, now.month, now.day)
+            .subtract(const Duration(days: 6));
+        end = DateTime(now.year, now.month, now.day);
         filterType = 'thisWeek';
         break;
       case 'month':
         start = DateTime(now.year, now.month - 1, now.day);
+        end = DateTime(now.year, now.month, now.day);
         filterType = 'thisMonth';
         break;
       case 'threeMonth':
         start = DateTime(now.year, now.month - 3, now.day);
+        end = DateTime(now.year, now.month, now.day);
         filterType = 'last3Months';
+        break;
+      case 'custom':
+        final cs = customStart ?? _historyStartDate ??
+            DateTime(now.year, now.month, now.day);
+        final ce = customEnd ?? _historyEndDate ??
+            DateTime(now.year, now.month, now.day);
+        if (cs.isAfter(ce)) {
+          start = DateTime(ce.year, ce.month, ce.day);
+          end = DateTime(cs.year, cs.month, cs.day);
+        } else {
+          start = DateTime(cs.year, cs.month, cs.day);
+          end = DateTime(ce.year, ce.month, ce.day);
+        }
+        filterType = 'custom';
         break;
       case 'today':
       default:
         start = DateTime(now.year, now.month, now.day);
+        end = DateTime(now.year, now.month, now.day);
         filterType = 'today';
         break;
     }
-    _historyStartDate = DateTime(start.year, start.month, start.day);
-    _historyEndDate = DateTime(now.year, now.month, now.day);
+    _historyStartDate = start;
+    _historyEndDate = end;
     _historyFilterInitialized = true;
+
+    if (symbols != null) {
+      _historySelectedSymbols
+        ..clear()
+        ..addAll(symbols);
+    }
+
+    // Sync client-side instrument filter used by getFilteredPositions().
+    // - ['all'] / empty  → clear so every symbol passes through
+    // - explicit list    → apply as-is so rows outside the selection are hidden
+    //   (this is what surfaces the empty state when the API returns 0 rows
+    //   for the chosen symbols)
+    _selectedInstruments.clear();
+    final effective = (symbols ?? _historySelectedSymbols)
+        .where((s) => s.isNotEmpty && s != 'all')
+        .toSet();
+    if (effective.isNotEmpty) {
+      _selectedInstruments.addAll(effective);
+    }
+    _selectedInstruments.refresh();
+
     update(['history_filter']);
-    
+
     final fromTimestamp = _historyStartDate!.millisecondsSinceEpoch ~/ 1000;
-    final toTimestamp = _historyEndDate!.add(const Duration(days: 1)).millisecondsSinceEpoch ~/ 1000 - 1;
-    
+    final toTimestamp = _historyEndDate!
+                .add(const Duration(days: 1))
+                .millisecondsSinceEpoch ~/
+            1000 -
+        1;
+
     await loadTradeHistoryWithTimestamps(
       fromTimestamp: fromTimestamp,
       toTimestamp: toTimestamp,
       filterType: filterType,
-      symbols: symbols,
+      symbols: symbols ?? _historySelectedSymbols,
     );
   }
 
   /// Reset to today and reload.
   Future<void> resetHistoryFilter() async {
-    await applyHistoryFilter(period: 'today');
+    _historySelectedSymbols
+      ..clear()
+      ..add('all');
+    _closedDirection.value = 'All';
+    await applyHistoryFilter(
+      period: 'today',
+      symbols: const ['all'],
+      direction: 'All',
+    );
   }
 
   /// Refresh trade history (load first page)

@@ -823,6 +823,11 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
           // End startup phase so normal 401 handling (session expired) resumes
           NetworkStartupPhase.end();
           Get.offAllNamed(AppPages.TRADING);
+          
+          // Handle initial push notification message if any (Killed state)
+          if (Get.isRegistered<NotificationService>()) {
+            Get.find<NotificationService>().setupInteractedMessage();
+          }
         } else {
           // Token validation failed, navigate to get started
           // (no session-expired toast — user was not actively using the app)

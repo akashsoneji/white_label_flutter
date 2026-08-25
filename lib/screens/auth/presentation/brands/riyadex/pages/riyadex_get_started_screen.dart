@@ -24,7 +24,7 @@ class RiyadexGetStartedScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               const Color(0xFF802920),
-              const Color(0xFF9B5848),
+              const Color(0xFFffffff),
             ],
             stops: const [0.0, 0.9],
           ),

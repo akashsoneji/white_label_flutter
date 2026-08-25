@@ -16,7 +16,6 @@ import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/home/close_position_screen.dart';
 import 'package:crm_app/screens/home/edit_order_screen.dart';
 import 'package:crm_app/screens/home/brands/iquote/iquote_order_details_screen.dart';
-import 'package:crm_app/screens/home/brands/iquote/iquote_position_detail_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/payment_methods_screen.dart';
 import 'package:crm_app/screens/finance/presentation/pages/withdrawal_screen.dart';
 import 'package:crm_app/models/mt5_account.dart';
@@ -636,102 +635,162 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       return GetBuilder<TradingController>(
         id: 'history_filter',
         builder: (controller) {
-          // Lazy-init: the first time the History tab is rendered after the user
-          // taps into it, apply the default 'today' filter so the list shows
-          // today's trades without requiring the user to open the dialog.
           if (!controller.historyFilterInitialized) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (Get.find<TradingController>().historyFilterInitialized)
+              if (Get.find<TradingController>().historyFilterInitialized) {
                 return;
+              }
               Get.find<TradingController>().applyHistoryFilter();
             });
           }
 
-          final now = DateHelper.nowUtc();
-          final start =
-              controller.historyStartDate ??
-              DateTime(now.year, now.month, now.day);
-          final end = controller.historyEndDate ?? now;
-          final startDate =
-              DateHelper.formatUtcDateTime(start).split(' ').first;
-          final endDate = DateHelper.formatUtcDateTime(end).split(' ').first;
+          final start = controller.historyStartDate;
+          final end = controller.historyEndDate;
+          final period = controller.historyFilterPeriod;
+          final direction = controller.closedDirection;
+          final symbols = controller.historySelectedSymbols;
+          final symbolCount = symbols.where((s) => s != 'all').length;
+          final hasAllSymbols =
+              symbols.contains('all') || symbols.isEmpty;
+
+          var activeCount = 0;
+          if (period != 'today') activeCount++;
+          if (direction != 'All') activeCount++;
+          if (!hasAllSymbols && symbolCount > 0) activeCount++;
+
+          final periodLabel = _periodLabel(period, start, end);
+          final summary = <String>[
+            periodLabel,
+            if (direction != 'All') direction,
+            if (!hasAllSymbols && symbolCount > 0)
+              '$symbolCount symbol${symbolCount == 1 ? '' : 's'}',
+          ].join('  •  ');
 
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
             child: InkWell(
               onTap: _openHistoryFilterSheet,
-              borderRadius: BorderRadius.circular(6.r),
-              child: Row(
-                children: [
-                  Text(
-                    'Date:',
-                    style: TextStyle(
+              borderRadius: BorderRadius.circular(12.r),
+              child: Container(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: _cardColor,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: activeCount > 0
+                        ? _accent.withValues(alpha: 0.6)
+                        : AppColors.divider,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(7.w),
+                      decoration: BoxDecoration(
+                        color: _accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(
+                        Icons.filter_alt_outlined,
+                        color: _accent,
+                        size: 15.sp,
+                      ),
+                    ),
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'History filter',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              if (activeCount > 0) ...[
+                                SizedBox(width: 6.w),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 6.w,
+                                    vertical: 1.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _accent,
+                                    borderRadius: BorderRadius.circular(8.r),
+                                  ),
+                                  child: Text(
+                                    '$activeCount',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 9.sp,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            summary,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Icon(
+                      Icons.tune_rounded,
                       color: AppColors.textSecondary,
-                      fontSize: 13.sp,
+                      size: 18.sp,
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 8.h),
-                      decoration: BoxDecoration(
-                        color: _cardColor,
-                        borderRadius: BorderRadius.circular(6.r),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      child: Center(
-                        child: Text(
-                          startDate,
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 13.sp,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w),
-                    child: Text(
-                      '—',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13.sp,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 8.h),
-                      decoration: BoxDecoration(
-                        color: _cardColor,
-                        borderRadius: BorderRadius.circular(6.r),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      child: Center(
-                        child: Text(
-                          endDate,
-                          style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 13.sp,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Icon(
-                    Icons.history,
-                    color: AppColors.textSecondary,
-                    size: 24.sp,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
         },
       );
     });
+  }
+
+  String _periodLabel(String period, DateTime? start, DateTime? end) {
+    switch (period) {
+      case 'week':
+        return 'Last 7 days';
+      case 'month':
+        return 'Last month';
+      case 'threeMonth':
+        return 'Last 3 months';
+      case 'custom':
+        if (start != null && end != null) {
+          return '${_shortDate(start)} — ${_shortDate(end)}';
+        }
+        return 'Custom range';
+      case 'today':
+      default:
+        return 'Today';
+    }
+  }
+
+  String _shortDate(DateTime d) {
+    const m = [
+      'Jan','Feb','Mar','Apr','May','Jun',
+      'Jul','Aug','Sep','Oct','Nov','Dec'
+    ];
+    return '${d.day.toString().padLeft(2, '0')} ${m[(d.month - 1).clamp(0, 11)]}';
   }
 
   void _openHistoryFilterSheet() {
@@ -743,10 +802,17 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       builder: (context) {
         return HistoryFilterScreen(
           initialPeriod: controller.historyFilterPeriod,
-          onConfirm: (period, symbols) async {
+          initialDirection: controller.closedDirection,
+          initialSymbols: controller.historySelectedSymbols,
+          initialStart: controller.historyStartDate,
+          initialEnd: controller.historyEndDate,
+          onConfirm: (period, symbols, direction, customStart, customEnd) async {
             await controller.applyHistoryFilter(
               period: period,
               symbols: symbols,
+              direction: direction,
+              customStart: customStart,
+              customEnd: customEnd,
             );
           },
           onReset: () async {
@@ -894,59 +960,89 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     position.closeTime.isNotEmpty ? 'Closed by Trader' : '',
                 swap: PrecisionHelper.formatPnL(position.swap),
                 commission: position.commission.toString(),
+                takeProfit: position.takeProfit,
+                stopLoss: position.stopLoss,
               ),
             ),
           );
         } else {
-          // Open the full position-detail screen so the user can manage
-          // TP/SL, Add Position, or Reverse Order for this open position.
+          // Open the shared modify screens so the layout matches the rest of
+          // the app: pending orders → Edit Order, open positions →
+          // Close / Modify Position (with live P&L + chart).
           final isPending = tradingController.selectedTab == 1;
-          Get.to<void>(
-            () => IQuotePositionDetailScreen(
-              position: position,
-              isPending: isPending,
-            ),
-            transition: Transition.cupertino,
-          );
+          if (isPending) {
+            Get.to<void>(() => EditOrderScreen(position: position));
+          } else {
+            Get.to<void>(() => ClosePositionScreen(position: position));
+          }
         }
       },
       child: Container(
-        padding: EdgeInsets.fromLTRB(10.w, 8.h, 8.w, 8.h),
+        padding: EdgeInsets.fromLTRB(10.w, 5.h, 8.w, 5.h),
         decoration: BoxDecoration(
           color: _cardColor,
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(8.r),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Row 1: side chip + symbol • dismiss/close/time
+            // Row 1: side chip • symbol • volume • TP/SL mini-chips ── PnL • close
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     color: (isBuy ? _green : _red).withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(4.r),
+                    borderRadius: BorderRadius.circular(3.r),
                   ),
                   child: Text(
                     isBuy ? 'Buy' : 'Sell',
                     style: TextStyle(
                       color: isBuy ? _green : _red,
-                      fontSize: 10.sp,
+                      fontSize: 9.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: 6.w),
+                Flexible(
+                  child: Text(
+                    symbol,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
                 Text(
-                  symbol,
+                  '${position.volume}',
                   style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14.sp,
+                    color: AppColors.textSecondary,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (_hasMeaningfulPrice(position.takeProfit)) ...[
+                  SizedBox(width: 6.w),
+                  _tpSlChip('TP', position.takeProfit, _green),
+                ],
+                if (_hasMeaningfulPrice(position.stopLoss)) ...[
+                  SizedBox(width: 4.w),
+                  _tpSlChip('SL', position.stopLoss, _red),
+                ],
+                const Spacer(),
+                Text(
+                  '${isPositive ? '' : '-'}${position.profitLoss.abs().toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: isPositive ? _green : _red,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const Spacer(),
                 if (!isHistory)
                   InkWell(
                     borderRadius: BorderRadius.circular(20.r),
@@ -957,90 +1053,102 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                         _showCloseConfirmDialog(tradingController, position);
                       }
                     },
-                    child: Container(
-                      padding: EdgeInsets.all(4.w),
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 6.w),
                       child: Icon(
-                        Icons.cancel,
+                        Icons.close_rounded,
                         color: AppColors.textSecondary,
-                        size: 18.sp,
+                        size: 14.sp,
                       ),
                     ),
-                  )
-                else if (position.closeTime.isNotEmpty)
-                  Text(
-                    DateHelper.formatIsoStringToUtcHistory(position.closeTime),
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 11.sp,
-                    ),
                   ),
               ],
             ),
-            SizedBox(height: 4.h),
-            // Row 2: lot + leverage • PnL
-            Row(
-              children: [
-                Container(
-                  width: 5.w,
-                  height: 5.w,
-                  margin: EdgeInsets.only(right: 6.w),
-                  decoration: BoxDecoration(
-                    color: _green,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                Text(
-                  '${position.volume}Lot',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(width: 8.w),
-
-                const Spacer(),
-                Text(
-                  '${isPositive ? '' : '-'}${position.profitLoss.abs().toStringAsFixed(2)}',
-                  style: TextStyle(
-                    color: isPositive ? _green : _red,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 4.h),
-            // Row 3: prices (left aligned)
+            SizedBox(height: 2.h),
+            // Row 2: entry → current  ──  close time (history only)
             Row(
               children: [
                 Text(
                   position.entryPrice,
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 10.sp,
                   ),
                 ),
-                SizedBox(width: 6.w),
+                SizedBox(width: 3.w),
                 Icon(
                   Icons.arrow_forward,
                   color: AppColors.textSecondary,
-                  size: 11.sp,
+                  size: 10.sp,
                 ),
-                SizedBox(width: 6.w),
+                SizedBox(width: 3.w),
                 Text(
                   position.currentPrice,
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 10.sp,
                   ),
                 ),
+                const Spacer(),
+                if (isHistory && position.closeTime.isNotEmpty)
+                  Text(
+                    DateHelper.formatIsoStringToUtcHistory(position.closeTime),
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10.sp,
+                    ),
+                  ),
               ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  /// Compact colored pill used inline in the position card to show TP/SL
+  /// without eating a whole row. Kept tiny on purpose so the list stays dense.
+  Widget _tpSlChip(String label, String value, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(3.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 8.5.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          SizedBox(width: 3.w),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 9.5.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// True when the price string represents a real TP/SL value
+  /// (non-empty and not 0 / 0.0 / 0.00000 / "-").
+  bool _hasMeaningfulPrice(String v) {
+    if (v.isEmpty) return false;
+    final t = v.trim();
+    if (t == '-' || t == '---') return false;
+    final n = double.tryParse(t.replaceAll(',', ''));
+    if (n == null) return true;
+    return n != 0;
   }
 
   Widget _buildVipBadge() {

@@ -39,6 +39,7 @@ abstract class Routes {
   static const COPY_TRADING_HUB = _Paths.COPY_TRADING_HUB;
   static const TRADER_DETAILS = _Paths.TRADER_DETAILS;
   static const BONUS = _Paths.BONUS;
+  static const SCRATCH_CARD = _Paths.SCRATCH_CARD;
   static const DEMO_CONTEST = _Paths.DEMO_CONTEST;
   static const DEMO_CONTEST_RULES = _Paths.DEMO_CONTEST_RULES;
   static const DEMO_CONTEST_JOIN = _Paths.DEMO_CONTEST_JOIN;
@@ -139,6 +140,7 @@ abstract class _Paths {
   static const COPY_TRADING_HUB = '/copy-trading-hub';
   static const TRADER_DETAILS = '/trader-details';
   static const BONUS = '/bonus';
+  static const SCRATCH_CARD = '/scratch-card';
   static const DEMO_CONTEST = '/demo-contest';
   static const DEMO_CONTEST_RULES = '/demo-contest/rules';
   static const DEMO_CONTEST_JOIN = '/demo-contest/join';
