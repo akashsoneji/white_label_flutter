@@ -1,11 +1,14 @@
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/create_edit_plan_screen.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/assign_plan_bottom_sheet.dart';
 import 'package:crm_app/screens/ibm/data/ibm_api_provider.dart';
+import 'package:crm_app/screens/ibm/utils/ibm_currency.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
@@ -49,18 +52,15 @@ class _IbmWalletScreenState extends State<IbmWalletScreen>
         leading: Builder(
           builder:
               (ctx) => IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  size: 22.w,
-                  color:
-                      AppColors.isDarkMode
-                          ? Colors.white
-                          : AppColors.textPrimary,
-                ),
-                onPressed: () {
-                  Scaffold.of(ctx).openDrawer();
-                },
-              ),
+          icon: SvgPicture.asset(
+            'assets/svg/ib_dashboard/home.svg',
+            colorFilter: ColorFilter.mode(
+              AppColors.textPrimary,
+              BlendMode.srcIn,
+            ),
+          ),
+          onPressed: () => Get.offAllNamed(AppPages.TRADING),
+        ),
         ),
         titleSpacing: 0,
         title: Text(
@@ -73,7 +73,11 @@ class _IbmWalletScreenState extends State<IbmWalletScreen>
         ),
         actions: [
           Obx(() {
-            final balance = controller.walletData['balance'] ?? '0.00';
+            final wallet = controller.walletData;
+            final balanceStr = IbmCurrency.format(
+              (wallet['balance'] ?? wallet['unpaid_balance']),
+              currencyCode: wallet['currency']?.toString(),
+            );
             return Padding(
               padding: EdgeInsets.only(right: 16.w),
               child: Container(
@@ -92,7 +96,7 @@ class _IbmWalletScreenState extends State<IbmWalletScreen>
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      '\$$balance',
+                      balanceStr,
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
@@ -167,6 +171,48 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
   List<dynamic> _transactions = [];
   String? _error;
 
+  Map<String, dynamic>? _myPlan;
+  bool _planLoading = false;
+  String? _planError;
+
+  static double _asNum(dynamic v) {
+    if (v == null) return 0;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString()) ?? 0;
+  }
+
+  /// GET /portal/wallet returns `wallets[]`; take the first (USD-first) block.
+  /// Falls back to the flat root map if the server returns figures top-level.
+  Map _wallet0([Map? root]) {
+    final r = root ?? _ibmController.walletData;
+    final w = r['wallets'];
+    if (w is List && w.isNotEmpty) {
+      final usd = w.firstWhere(
+        (e) => e is Map && e['currency']?.toString().toUpperCase() == 'USD',
+        orElse: () => w.first,
+      );
+      if (usd is Map) return usd;
+    }
+    return r;
+  }
+
+  String _currency() {
+    final w = _wallet0();
+    return (w['currency'] ??
+            _ibmController.walletData['currency'] ??
+            'USD')
+        .toString();
+  }
+
+  /// Smallest allowed payout — dynamic from wallet, default 50.
+  double _minPayout() {
+    final n = _asNum(_ibmController.walletData['minimum_payout']);
+    return n > 0 ? n : 50;
+  }
+
+  String _fmt(dynamic v) =>
+      IbmCurrency.format(_asNum(v), currencyCode: _currency());
+
   String _selectedSubTab = 'Earnings';
   final List<String> _subTabs = ['Earnings', 'Payouts', 'My Commission Plan'];
 
@@ -195,7 +241,7 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
     });
     try {
       final response = await _apiProvider.getPortalWalletTransactions(
-        currency: 'USD',
+        currency: _currency(),
         type: _selectedFilterValue.isEmpty ? null : _selectedFilterValue,
       );
       if (response.success) {
@@ -232,6 +278,31 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
     }
   }
 
+  Future<void> _fetchMyPlan() async {
+    if (_myPlan != null || _planLoading) return;
+    setState(() {
+      _planLoading = true;
+      _planError = null;
+    });
+    try {
+      final response = await _apiProvider.getMyPlan();
+      if (response.success) {
+        final raw = response.data;
+        Map<String, dynamic> data = {};
+        if (raw is Map<String, dynamic>) {
+          data = raw['data'] is Map<String, dynamic> ? raw['data'] : raw;
+        }
+        _myPlan = data;
+      } else {
+        _planError = response.message ?? 'Failed to load plan';
+      }
+    } catch (e) {
+      _planError = 'An error occurred while loading the plan.';
+    } finally {
+      if (mounted) setState(() => _planLoading = false);
+    }
+  }
+
   void _onFilterSelected(String filterLabel) {
     setState(() {
       _selectedFilter = filterLabel;
@@ -240,20 +311,207 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
     _fetchTransactions();
   }
 
+  Future<void> _openPayoutDialog() async {
+    final root = _ibmController.walletData;
+    final w0 = _wallet0();
+    final available = _asNum(w0['available'] ?? root['unpaid_balance'] ?? root['balance']);
+    final currency = _currency();
+    final minPayout = _minPayout();
+
+    // Payout destinations from GET /portal/wallet `accounts[]`.
+    final List accounts = root['accounts'] is List ? root['accounts'] as List : const [];
+    Map? selectedAccount = accounts.isNotEmpty && accounts.first is Map
+        ? accounts.first as Map
+        : null;
+
+    final amountCtrl = TextEditingController(text: available.toStringAsFixed(2));
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            return AlertDialog(
+              title: const Text('Request payout'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Available: ${IbmCurrency.format(available, currencyCode: currency)}',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+                  ),
+                  SizedBox(height: 12.h),
+                  if (accounts.isNotEmpty) ...[
+                    DropdownButtonFormField<Map>(
+                      value: selectedAccount,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Where it goes',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: accounts
+                          .whereType<Map>()
+                          .map(
+                            (a) => DropdownMenuItem<Map>(
+                              value: a,
+                              child: Text(
+                                (a['label'] ?? a['method_slug'] ?? 'Account').toString(),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setLocal(() => selectedAccount = v),
+                    ),
+                    SizedBox(height: 12.h),
+                  ],
+                  TextField(
+                    controller: amountCtrl,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Amount',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    'Minimum ${IbmCurrency.format(minPayout, currencyCode: currency)}',
+                    style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.whiteColor,
+                    elevation: 0,
+                  ),
+                  child: const Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      amountCtrl.dispose();
+      return;
+    }
+
+    final entered = _asNum(amountCtrl.text);
+    amountCtrl.dispose();
+    if (entered < minPayout || entered > available) {
+      CustomToastService.showError(
+        message:
+            'Amount must be between ${IbmCurrency.format(minPayout, currencyCode: currency)} and ${IbmCurrency.format(available, currencyCode: currency)}',
+      );
+      return;
+    }
+
+    try {
+      final res = await _apiProvider.requestWithdrawal(
+        currency: currency,
+        amount: entered,
+        methodSlug: selectedAccount?['method_slug']?.toString(),
+        withdrawalMethodId: selectedAccount?['withdrawal_method_id'] is int
+            ? selectedAccount!['withdrawal_method_id'] as int
+            : int.tryParse(selectedAccount?['withdrawal_method_id']?.toString() ?? ''),
+      );
+      if (!mounted) return;
+      if (res.success) {
+        CustomToastService.showSuccess(message: 'Payout request submitted');
+        await _ibmController.fetchWallet();
+      } else {
+        CustomToastService.showError(
+          message: res.message ?? 'Could not request payout',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      CustomToastService.showError(message: 'Error: $e');
+    }
+  }
+
+  Future<void> _cancelPayout(int payoutId) async {
+    final reasonCtrl = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel payout'),
+        content: TextField(
+          controller: reasonCtrl,
+          decoration: const InputDecoration(
+            labelText: 'Reason (optional)',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Keep'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: AppColors.whiteColor,
+              elevation: 0,
+            ),
+            child: const Text('Cancel payout'),
+          ),
+        ],
+      ),
+    );
+
+    final reason = reasonCtrl.text.trim();
+    reasonCtrl.dispose();
+    if (confirmed != true) return;
+
+    try {
+      final res = await _apiProvider.cancelPayout(
+        payoutId,
+        reason: reason.isEmpty ? null : reason,
+      );
+      if (!mounted) return;
+      if (res.success) {
+        CustomToastService.showSuccess(message: 'Payout cancelled');
+        await _ibmController.fetchWallet();
+      } else {
+        CustomToastService.showError(
+          message: res.message ?? 'Could not cancel payout',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      CustomToastService.showError(message: 'Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final wallet = _ibmController.walletData;
-      final availableBalance = wallet['balance']?.toString() ?? '0.00';
-      final pendingPayout = wallet['pending_payout']?.toString() ?? '0.00';
+      final w0 = _wallet0(wallet);
+      final availableBalance =
+          w0['available'] ?? wallet['unpaid_balance'] ?? wallet['balance'];
+      final pendingPayout =
+          w0['pending_payout'] ?? wallet['pending_payout'] ?? wallet['locked'] ?? 0;
       final earnedAllTime =
-          wallet['earned_all_time']?.toString() ??
-          wallet['total_earned']?.toString() ??
-          availableBalance;
-      final paidOut =
-          wallet['paid_out']?.toString() ??
-          wallet['total_paid']?.toString() ??
-          '0.00';
+          w0['lifetime_earned'] ?? wallet['lifetime_earned'] ?? 0;
+      final paidOut = w0['lifetime_paid'] ?? wallet['lifetime_paid'] ?? 0;
+      final availableStr = _fmt(availableBalance);
+      final pendingStr = _fmt(pendingPayout);
+      final earnedStr = _fmt(earnedAllTime);
+      final paidStr = _fmt(paidOut);
 
       return SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -276,28 +534,28 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
               children: [
                 _buildStatCard(
                   'Available now',
-                  '\$$availableBalance',
+                  availableStr,
                   'ready to request',
                   Icons.account_balance_wallet,
                   AppColors.primary,
                 ),
                 _buildStatCard(
                   'Pending payout',
-                  '\$$pendingPayout',
+                  pendingStr,
                   'locked in an open request',
                   Icons.hourglass_empty,
                   Colors.orange,
                 ),
                 _buildStatCard(
                   'Earned all time',
-                  '\$$earnedAllTime',
+                  earnedStr,
                   'your share, since day one',
                   Icons.stacked_line_chart,
                   AppColors.primary,
                 ),
                 _buildStatCard(
                   'Paid out',
-                  '\$$paidOut',
+                  paidStr,
                   'settled to you',
                   Icons.check_circle,
                   Colors.green,
@@ -320,7 +578,7 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '\$$availableBalance ready',
+                          '$availableStr ready',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14.sp,
@@ -328,7 +586,7 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                           ),
                         ),
                         Text(
-                          'The smallest payout is \$50.00.',
+                          'The smallest payout is ${IbmCurrency.format(_minPayout(), currencyCode: _currency())}.',
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 12.sp,
@@ -338,23 +596,44 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                     ),
                   ),
                   SizedBox(width: 8.w),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size.zero,
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.whiteColor,
-                      elevation: 0,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 14.w,
-                        vertical: 8.h,
+                  Obx(() {
+                    final w = _ibmController.walletData;
+                    final block = _wallet0(w);
+                    final isFrozen = (block['is_frozen'] ?? w['is_frozen']) == true;
+                    // Doc §7: can_withdraw && !is_frozen && !open_payout_status
+                    // && balance >= minimum_payout. can_withdraw defaults true
+                    // when the server omits it.
+                    final canWithdrawFlag = w['can_withdraw'] != false;
+                    final hasOpenPayout =
+                        w['open_payout_status'] != null &&
+                        w['open_payout_status'].toString().isNotEmpty;
+                    final canRequest = canWithdrawFlag &&
+                        !isFrozen &&
+                        !hasOpenPayout &&
+                        _asNum(availableBalance) >= _minPayout();
+                    return ElevatedButton(
+                      onPressed: canRequest ? _openPayoutDialog : null,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size.zero,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: AppColors.whiteColor,
+                        disabledBackgroundColor: AppColors.primary.withValues(
+                          alpha: 0.4,
+                        ),
+                        disabledForegroundColor: AppColors.whiteColor
+                            .withValues(alpha: 0.85),
+                        elevation: 0,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                          vertical: 8.h,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                    child: const Text('Request payout'),
-                  ),
+                      child: const Text('Request payout'),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -374,6 +653,9 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                             setState(() {
                               _selectedSubTab = tabName;
                             });
+                            if (tabName == 'My Commission Plan') {
+                              _fetchMyPlan();
+                            }
                           },
                           borderRadius: BorderRadius.circular(20.r),
                           child: Container(
@@ -411,6 +693,7 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
               ),
             ),
             SizedBox(height: 14.h),
+            if (_selectedSubTab == 'Earnings') ...[
             Divider(color: AppColors.divider),
             SizedBox(height: 10.h),
             Row(
@@ -531,11 +814,14 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
 
                 // Handle positive/negative amounts
                 final direction = tx['direction'] == 'credit' ? '+' : '-';
-                final amountValue = tx['amount']?.toString() ?? '0.00';
-                final amountStr = '$direction \$$amountValue';
+                final txCurrency = tx['currency']?.toString() ?? _currency();
+                final amountStr =
+                    '$direction ${IbmCurrency.format(_asNum(tx['amount']), currencyCode: txCurrency)}';
 
-                final balanceValue = tx['balance_after']?.toString() ?? '0.00';
-                final balanceStr = '\$$balanceValue';
+                final balanceStr = IbmCurrency.format(
+                  _asNum(tx['balance_after']),
+                  currencyCode: txCurrency,
+                );
 
                 final date = tx['created_at'] ?? 'N/A';
 
@@ -548,10 +834,364 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                   date,
                 );
               }).toList(),
+            ] else if (_selectedSubTab == 'Payouts')
+              _buildPayoutsBody()
+            else
+              _buildMyPlanBody(),
           ],
         ),
       );
     });
+  }
+
+  Widget _buildPayoutsBody() {
+    final raw = _ibmController.walletData['payouts'];
+    final List payouts = raw is List ? raw : const [];
+    if (payouts.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 24.h),
+        child: Center(
+          child: Text(
+            'No payouts yet',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp),
+          ),
+        ),
+      );
+    }
+    return Column(
+      children: payouts.whereType<Map>().map((p) {
+        final currency = p['currency']?.toString() ?? _currency();
+        final status = p['status']?.toString() ?? '';
+        final isCancellable = const ['pending', 'open', 'requested']
+            .contains(status.toLowerCase());
+        final payoutId = p['id'] is int
+            ? p['id'] as int
+            : int.tryParse(p['id']?.toString() ?? '') ?? 0;
+        return Container(
+          margin: EdgeInsets.only(bottom: 8.h),
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      IbmCurrency.format(
+                        _asNum(p['amount']),
+                        currencyCode: currency,
+                      ),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'Requested ${p['requested_at'] ?? '—'}',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11.sp,
+                      ),
+                    ),
+                    Text(
+                      'Paid ${p['paid_at'] ?? '—'}',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    status.isEmpty ? '—' : status,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  if (isCancellable)
+                    TextButton(
+                      onPressed: () => _cancelPayout(payoutId),
+                      style: TextButton.styleFrom(
+                        minimumSize: Size.zero,
+                        padding: EdgeInsets.symmetric(horizontal: 4.w),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.red, fontSize: 12.sp),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildMyPlanBody() {
+    if (_planLoading) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 24.h),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+    if (_planError != null) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 24.h),
+        child: Center(
+          child: Text(
+            _planError!,
+            style: TextStyle(color: Colors.red, fontSize: 14.sp),
+          ),
+        ),
+      );
+    }
+    final plan = _myPlan;
+    if (plan == null) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 24.h),
+        child: Center(
+          child: Text(
+            'No plan assigned',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 14.sp),
+          ),
+        ),
+      );
+    }
+    final planInner = plan['plan'] is Map ? plan['plan'] as Map : null;
+    final name = (planInner?['name'] ?? plan['name'] ?? 'Commission plan')
+        .toString();
+    final rawGroups = plan['groups'] ?? planInner?['groups'] ?? const [];
+    final List groups = rawGroups is List ? rawGroups : const [];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          name,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15.sp,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: 12.h),
+        if (groups.isEmpty)
+          Text(
+            'No commission groups on this plan.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
+          )
+        else
+          ...groups.whereType<Map>().map((g) {
+            final gName =
+                (g['name'] ?? g['symbol_group'] ?? 'Group').toString();
+            final rawRates = g['rates'];
+            final List rates = rawRates is List ? rawRates : const [];
+            return Container(
+              margin: EdgeInsets.only(bottom: 12.h),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: AppColors.divider),
+              ),
+              child: Theme(
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.symmetric(horizontal: 14.w),
+                  childrenPadding: EdgeInsets.zero,
+                  title: Text(
+                    gName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Text(
+                          '${rates.length} rates',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 4.w),
+                      Icon(Icons.expand_more, color: AppColors.textSecondary),
+                    ],
+                  ),
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(14.w),
+                      color: AppColors.isDarkMode
+                          ? const Color(0xFF1E1E1E)
+                          : const Color(0xFFF9F9F9),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'REBATE BY INSTRUMENT TYPE',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+                          if (rates.isEmpty)
+                            Text(
+                              'No rates set for this group.',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppColors.textSecondary,
+                              ),
+                            )
+                          else
+                            ...rates.whereType<Map>().map((r) {
+                              final currency =
+                                  r['currency']?.toString() ?? _currency();
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: 8.h),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        (r['category'] ?? 'Unknown').toString(),
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      IbmCurrency.format(
+                                        _asNum(r['rate_per_lot'] ?? r['rate']),
+                                        currencyCode: currency,
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                          Builder(builder: (_) {
+                            final rawOverrides = g['symbol_overrides'];
+                            final List overrides =
+                                rawOverrides is List ? rawOverrides : const [];
+                            final rawBlocked = g['blocked_symbols'];
+                            final List blocked =
+                                rawBlocked is List ? rawBlocked : const [];
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (overrides.isNotEmpty) ...[
+                                  SizedBox(height: 12.h),
+                                  Text(
+                                    'SYMBOL-SPECIFIC RATES',
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  ...overrides.whereType<Map>().map((o) {
+                                    final currency =
+                                        o['currency']?.toString() ??
+                                            _currency();
+                                    return Padding(
+                                      padding: EdgeInsets.only(bottom: 8.h),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              (o['symbol'] ?? 'Unknown')
+                                                  .toString(),
+                                              style: TextStyle(
+                                                fontSize: 13.sp,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            IbmCurrency.format(
+                                              _asNum(o['rate_per_lot']),
+                                              currencyCode: currency,
+                                            ),
+                                            style: TextStyle(
+                                              fontSize: 13.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                ],
+                                SizedBox(height: 10.h),
+                                Text(
+                                  blocked.isEmpty
+                                      ? 'All symbols allowed on this group.'
+                                      : '${blocked.length} symbol(s) blocked on this group.',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+      ],
+    );
   }
 
   Widget _buildStatCard(
@@ -562,9 +1202,11 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
     Color iconColor,
   ) {
     return Container(
-      width:
-          (Get.width - 40.w) /
-          2, // Half width for mobile layout (16 left padding, 16 right padding, 8 spacing)
+      // Width is governed by parent Wrap; LayoutBuilder keeps two-up on phone.
+      constraints: BoxConstraints(
+        minWidth: 140.w,
+        maxWidth: (MediaQuery.of(context).size.width - 56.w) / 2,
+      ),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.whiteColor,
@@ -655,7 +1297,7 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                         vertical: 2.h,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.15),
+                        color: Colors.green.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(

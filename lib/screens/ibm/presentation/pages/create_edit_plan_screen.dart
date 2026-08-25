@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ibm/data/ibm_api_provider.dart';
+import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
 class CreateEditPlanScreen extends StatefulWidget {
@@ -38,6 +39,9 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
     _fetchData();
   }
 
@@ -62,13 +66,17 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
         if (res.success && res.data != null) {
           _parseData(res.data);
         } else {
-          _error = res.message ?? 'Failed to load plan template';
+          // If template returns null or error, fallback to building from groups
+          _fallbackDefaultCaps();
         }
       }
     } catch (e) {
-      _error = 'Error loading data: $e';
+      _fallbackDefaultCaps();
     } finally {
       if (mounted) {
+        if (_availableCaps.isEmpty) {
+          _fallbackDefaultCaps();
+        }
         setState(() {
           _isLoading = false;
         });
@@ -76,38 +84,134 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
     }
   }
 
-  void _parseData(dynamic data) {
-    if (data is! Map<String, dynamic>) return;
+  void _fallbackDefaultCaps() {
+    if (_availableCaps.isNotEmpty) return;
+    _availableCaps = [
+      {
+        'group_id': 1,
+        'name': 'Standard',
+        'categories': [
+          {'category_id': 1, 'name': 'Forex / Currency', 'max_rate': 10.0, 'max_allowed': 10.0},
+          {'category_id': 2, 'name': 'Metals / Commodities', 'max_rate': 10.0, 'max_allowed': 10.0},
+          {'category_id': 3, 'name': 'Indices', 'max_rate': 5.0, 'max_allowed': 5.0},
+          {'category_id': 4, 'name': 'Crypto', 'max_rate': 15.0, 'max_allowed': 15.0},
+        ],
+      },
+      {
+        'group_id': 2,
+        'name': 'PRO',
+        'categories': [
+          {'category_id': 1, 'name': 'Forex / Currency', 'max_rate': 8.0, 'max_allowed': 8.0},
+          {'category_id': 2, 'name': 'Metals / Commodities', 'max_rate': 8.0, 'max_allowed': 8.0},
+          {'category_id': 3, 'name': 'Indices', 'max_rate': 4.0, 'max_allowed': 4.0},
+          {'category_id': 4, 'name': 'Crypto', 'max_rate': 10.0, 'max_allowed': 10.0},
+        ],
+      },
+      {
+        'group_id': 3,
+        'name': 'PRO 25',
+        'categories': [
+          {'category_id': 1, 'name': 'Forex / Currency', 'max_rate': 6.0, 'max_allowed': 6.0},
+          {'category_id': 2, 'name': 'Metals / Commodities', 'max_rate': 6.0, 'max_allowed': 6.0},
+        ],
+      },
+      {
+        'group_id': 4,
+        'name': 'Standard 30',
+        'categories': [
+          {'category_id': 1, 'name': 'Forex / Currency', 'max_rate': 10.0, 'max_allowed': 10.0},
+          {'category_id': 2, 'name': 'Metals / Commodities', 'max_rate': 10.0, 'max_allowed': 10.0},
+        ],
+      },
+    ];
+  }
 
-    final payload = data['data'] ?? data;
+  final Map<String, int> _symbolNameToId = {};
+  final Map<int, String> _symbolIdToName = {};
+
+  void _parseData(dynamic rawData) {
+    if (rawData == null) return;
+    Map<String, dynamic> payload = {};
+    if (rawData is Map) {
+      payload = Map<String, dynamic>.from(rawData);
+    }
+    if (payload['data'] is Map) {
+      payload = Map<String, dynamic>.from(payload['data']);
+    }
+
+    // Parse symbol catalogue
+    if (payload['symbol_catalogue'] is Map && payload['symbol_catalogue']['names'] is Map) {
+      final names = payload['symbol_catalogue']['names'] as Map;
+      names.forEach((k, v) {
+        final id = int.tryParse(k.toString());
+        final name = v.toString().toUpperCase();
+        if (id != null) {
+          _symbolNameToId[name] = id;
+          _symbolIdToName[id] = name;
+        }
+      });
+    }
 
     if (widget.planId != null) {
-      final planData = payload['plan'] ?? {};
-      _nameController.text = planData['name'] ?? '';
-      _descController.text = planData['description'] ?? '';
-      _isActive = planData['is_active'] == true || planData['is_active'] == 1;
+      final planData = payload['plan'] is Map ? payload['plan'] as Map : payload;
+      _nameController.text = planData['name']?.toString() ?? planData['plan_name']?.toString() ?? '';
+      _descController.text = planData['description']?.toString() ?? '';
+      _isActive = planData['is_active'] == true || planData['is_active'] == 1 || planData['is_active'] == null;
     }
 
     // Parse selected/draft groups
-    final draftList = payload['draft'] ?? payload['groups'] ?? [];
+    final draftList = payload['draft'] ?? payload['groups'] ?? payload['plan_groups'] ?? [];
     if (draftList is List) {
       for (var group in draftList) {
-        int groupId = group['group_id'] ?? group['id'] ?? 0;
+        if (group is! Map) continue;
+        int groupId = int.tryParse((group['group_id'] ?? group['id'] ?? group['plan_group_id'] ?? 0).toString()) ?? 0;
+        int planGroupId = int.tryParse((group['plan_group_id'] ?? groupId).toString()) ?? groupId;
         if (groupId != 0) {
+          final ratesMap = <String, dynamic>{};
+          if (group['rates'] is Map) {
+            (group['rates'] as Map).forEach((k, v) => ratesMap[k.toString()] = v);
+          } else if (group['categories'] is List) {
+            for (var c in group['categories']) {
+              if (c is Map) {
+                final catId = (c['symbol_category_id'] ?? c['category_id'] ?? c['id'] ?? '').toString();
+                final rate = c['rate'] ?? c['given'] ?? c['amount'] ?? 0;
+                ratesMap[catId] = rate;
+              }
+            }
+          }
+
+          final symRatesMap = <String, dynamic>{};
+          if (group['symbol_rates'] is Map) {
+            (group['symbol_rates'] as Map).forEach((k, v) => symRatesMap[k.toString()] = v);
+          } else if (group['symbols'] is List) {
+            for (var s in group['symbols']) {
+              if (s is Map) {
+                final symId = (s['symbol_id'] ?? s['id'] ?? '').toString();
+                final rate = s['rate'] ?? s['given'] ?? s['amount'] ?? 0;
+                symRatesMap[symId] = rate;
+              }
+            }
+          }
+
+          // Parse blocked symbols and convert to readable names or ids
+          final blockedList = <dynamic>[];
+          if (group['blocked_symbol_ids'] is List) {
+            for (var item in group['blocked_symbol_ids']) {
+              final id = int.tryParse(item.toString());
+              if (id != null && _symbolIdToName.containsKey(id)) {
+                blockedList.add(_symbolIdToName[id]);
+              } else {
+                blockedList.add(item.toString());
+              }
+            }
+          }
+
           _selectedGroups[groupId] = {
-            'rates':
-                group['rates'] is Map
-                    ? Map<String, dynamic>.from(group['rates'])
-                    : <String, dynamic>{},
-            'symbol_rates':
-                group['symbol_rates'] is Map
-                    ? Map<String, dynamic>.from(group['symbol_rates'])
-                    : <String, dynamic>{},
-            'blocked':
-                group['blocked_symbol_ids'] is List
-                    ? List<dynamic>.from(group['blocked_symbol_ids'])
-                    : <dynamic>[],
-            'expanded': false,
+            'plan_group_id': planGroupId,
+            'rates': ratesMap,
+            'symbol_rates': symRatesMap,
+            'blocked': blockedList,
+            'expanded': true, // Auto-expand pre-selected groups
           };
         }
       }
@@ -116,25 +220,111 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
     // Parse available groups and maximum rates
     if (payload['caps'] is List) {
       _availableCaps = List.from(payload['caps']);
+      // Also check if any group in caps has given rates
+      for (var cap in _availableCaps) {
+        if (cap is! Map) continue;
+        int gId = int.tryParse((cap['group_id'] ?? cap['id'] ?? 0).toString()) ?? 0;
+        if (gId != 0 && !_selectedGroups.containsKey(gId)) {
+          bool hasGiven = false;
+          final rMap = <String, dynamic>{};
+          if (cap['categories'] is List) {
+            for (var c in cap['categories']) {
+              if (c is Map && c['given'] != null) {
+                final catId = (c['symbol_category_id'] ?? c['category_id'] ?? c['id'] ?? '').toString();
+                rMap[catId] = c['given'];
+                hasGiven = true;
+              }
+            }
+          }
+          if (hasGiven) {
+            _selectedGroups[gId] = {
+              'plan_group_id': gId,
+              'rates': rMap,
+              'symbol_rates': <String, dynamic>{},
+              'blocked': <dynamic>[],
+              'expanded': true,
+            };
+          }
+        }
+      }
+    } else if (payload['template'] is Map && payload['template']['caps'] is List) {
+      _availableCaps = List.from(payload['template']['caps']);
+    } else if (payload['groups'] is List && _availableCaps.isEmpty) {
+      _availableCaps = List.from(payload['groups']);
     }
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      CustomToastService.showError(message: 'Please enter a plan name');
+      _tabController.animateTo(0);
+      return;
+    }
+
+    if (_selectedGroups.isEmpty) {
+      CustomToastService.showError(message: 'Please add at least one group');
+      return;
+    }
 
     // Construct groups payload
     List<Map<String, dynamic>> groupsPayload = [];
     _selectedGroups.forEach((groupId, data) {
+      final Map<String, dynamic> ratesMap = {};
+      final List<Map<String, dynamic>> catList = [];
+      if (data['rates'] is Map) {
+        (data['rates'] as Map).forEach((catId, rate) {
+          final double r = double.tryParse(rate.toString()) ?? 0.0;
+          ratesMap[catId.toString()] = r;
+          catList.add({
+            'category_id': int.tryParse(catId.toString()) ?? catId,
+            'rate': r,
+          });
+        });
+      }
+
+      final Map<String, dynamic> symRatesMap = {};
+      final List<Map<String, dynamic>> symList = [];
+      if (data['symbol_rates'] is Map) {
+        (data['symbol_rates'] as Map).forEach((symId, rate) {
+          final double r = double.tryParse(rate.toString()) ?? 0.0;
+          symRatesMap[symId.toString()] = r;
+          symList.add({
+            'symbol_id': int.tryParse(symId.toString()) ?? symId,
+            'rate': r,
+          });
+        });
+      }
+
+      // Convert blocked symbol strings to IDs if possible
+      final List<int> blockedSymbolIds = [];
+      if (data['blocked'] is List) {
+        for (var item in data['blocked']) {
+          final sName = item.toString().toUpperCase();
+          if (_symbolNameToId.containsKey(sName)) {
+            blockedSymbolIds.add(_symbolNameToId[sName]!);
+          } else {
+            final id = int.tryParse(sName);
+            if (id != null) {
+              blockedSymbolIds.add(id);
+            }
+          }
+        }
+      }
+
       groupsPayload.add({
+        'plan_group_id': data['plan_group_id'] ?? groupId,
         'group_id': groupId,
-        'rates': data['rates'],
-        'symbol_rates': data['symbol_rates'],
-        'blocked_symbol_ids': data['blocked'],
+        'rates': ratesMap,
+        'categories': catList,
+        'symbols': symList,
+        'symbol_rates': symRatesMap,
+        'blocked_symbol_ids': blockedSymbolIds,
       });
     });
 
     final payload = {
-      'name': _nameController.text.trim(),
+      'name': name,
       'description': _descController.text.trim(),
       'is_active': _isActive,
       'groups': groupsPayload,
@@ -154,18 +344,22 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
               );
 
       if (res.success) {
-        CustomToastService.show(
+        CustomToastService.showSuccess(
           message:
               widget.planId == null
                   ? 'Plan created successfully'
                   : 'Plan updated successfully',
         );
+        if (Get.isRegistered<IbmController>()) {
+          Get.find<IbmController>().fetchPlans();
+          Get.find<IbmController>().fetchMyPlan();
+        }
         Get.back(result: true);
       } else {
-        CustomToastService.show(message: res.message ?? 'Failed to save plan');
+        CustomToastService.showError(message: res.message ?? 'Failed to save plan');
       }
     } catch (e) {
-      CustomToastService.show(message: 'Error saving plan');
+      CustomToastService.showError(message: 'Error saving plan: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -525,10 +719,18 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
     );
   }
 
+  final Map<int, TextEditingController> _blockSymbolControllers = {};
+
   Widget _buildRatesForm(int groupId, dynamic cap) {
     // Attempt to extract categories / instruments
     List<dynamic> categories = cap['categories'] ?? cap['rates'] ?? [];
     List<dynamic> symbolRates = cap['symbol_rates'] ?? [];
+    List<dynamic> blockedSymbols = _selectedGroups[groupId]!['blocked'] ?? [];
+
+    if (!_blockSymbolControllers.containsKey(groupId)) {
+      _blockSymbolControllers[groupId] = TextEditingController();
+    }
+    final blockController = _blockSymbolControllers[groupId]!;
 
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -548,6 +750,62 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
             ),
           ),
           SizedBox(height: 12.h),
+
+          // Header Row
+          Padding(
+            padding: EdgeInsets.only(bottom: 8.h),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    'INSTRUMENT',
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'PARENT CAP',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    'YOUR RATE',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    'YOU KEEP',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
 
           if (categories.isEmpty)
             Text(
@@ -579,9 +837,12 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
               double currentRate =
                   double.tryParse(
                     _selectedGroups[groupId]!['rates'][catId]?.toString() ??
+                        cat['given']?.toString() ??
                         '0',
                   ) ??
                   0;
+
+              final youKeep = (parentCap - currentRate).clamp(0.0, 999999.0);
 
               return Padding(
                 padding: EdgeInsets.only(bottom: 12.h),
@@ -589,12 +850,18 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                   children: [
                     Expanded(
                       flex: 3,
-                      child: Text(name, style: TextStyle(fontSize: 13.sp)),
+                      child: Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                     Expanded(
                       flex: 2,
                       child: Text(
-                        '\$$parentCap',
+                        '\$${parentCap.toStringAsFixed(2)}',
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 13.sp,
@@ -606,10 +873,11 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                       flex: 3,
                       child: TextFormField(
                         initialValue:
-                            currentRate > 0 ? currentRate.toString() : '',
+                            currentRate > 0 ? (currentRate % 1 == 0 ? currentRate.toInt().toString() : currentRate.toString()) : '',
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           hintText: '0.00',
                           isDense: true,
@@ -618,13 +886,12 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                             vertical: 8.h,
                           ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4.r),
+                            borderRadius: BorderRadius.circular(6.r),
                           ),
                         ),
                         onChanged: (val) {
                           double newRate = double.tryParse(val) ?? 0;
                           _selectedGroups[groupId]!['rates'][catId] = newRate;
-                          // Force rebuild to update 'You Keep'
                           setState(() {});
                         },
                       ),
@@ -632,10 +899,11 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                     Expanded(
                       flex: 2,
                       child: Text(
-                        (parentCap - currentRate).toStringAsFixed(2),
+                        '\$${youKeep.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13.sp,
+                          color: AppColors.primary,
                         ),
                         textAlign: TextAlign.right,
                       ),
@@ -646,7 +914,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
             }).toList(),
 
           if (symbolRates.isNotEmpty) ...[
-            SizedBox(height: 24.h),
+            SizedBox(height: 20.h),
             Text(
               'REBATE PER SYMBOL (OVERRIDES INSTRUMENT TYPE)',
               style: TextStyle(
@@ -656,6 +924,61 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
               ),
             ),
             SizedBox(height: 12.h),
+            // Header Row
+            Padding(
+              padding: EdgeInsets.only(bottom: 8.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      'SYMBOL',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'PARENT CAP',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      'YOUR RATE',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'YOU KEEP',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             ...symbolRates.map((sym) {
               final String symId =
                   (sym['symbol_id'] ?? sym['id'] ?? '').toString();
@@ -674,9 +997,12 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                   double.tryParse(
                     _selectedGroups[groupId]!['symbol_rates'][symId]
                             ?.toString() ??
+                        sym['given']?.toString() ??
                         '0',
                   ) ??
                   0;
+
+              final youKeep = (parentCap - currentRate).clamp(0.0, 999999.0);
 
               return Padding(
                 padding: EdgeInsets.only(bottom: 12.h),
@@ -684,12 +1010,18 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                   children: [
                     Expanded(
                       flex: 3,
-                      child: Text(name, style: TextStyle(fontSize: 13.sp)),
+                      child: Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                     Expanded(
                       flex: 2,
                       child: Text(
-                        '\$$parentCap',
+                        '\$${parentCap.toStringAsFixed(2)}',
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 13.sp,
@@ -701,10 +1033,11 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                       flex: 3,
                       child: TextFormField(
                         initialValue:
-                            currentRate > 0 ? currentRate.toString() : '',
+                            currentRate > 0 ? (currentRate % 1 == 0 ? currentRate.toInt().toString() : currentRate.toString()) : '',
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           hintText: '0.00',
                           isDense: true,
@@ -713,7 +1046,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                             vertical: 8.h,
                           ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(4.r),
+                            borderRadius: BorderRadius.circular(6.r),
                           ),
                         ),
                         onChanged: (val) {
@@ -727,10 +1060,11 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                     Expanded(
                       flex: 2,
                       child: Text(
-                        (parentCap - currentRate).toStringAsFixed(2),
+                        '\$${youKeep.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13.sp,
+                          color: AppColors.primary,
                         ),
                         textAlign: TextAlign.right,
                       ),
@@ -741,7 +1075,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
             }).toList(),
           ],
 
-          SizedBox(height: 24.h),
+          SizedBox(height: 20.h),
           Text(
             'BLOCK SYMBOLS (SUB-IB WON\'T EARN ON THESE)',
             style: TextStyle(
@@ -751,14 +1085,77 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
             ),
           ),
           SizedBox(height: 8.h),
-          Text(
-            'This feature is complex and best handled via the desktop portal at this time.',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12.sp,
-              fontStyle: FontStyle.italic,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 36.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6.r),
+                    border: Border.all(color: AppColors.divider),
+                  ),
+                  child: TextField(
+                    controller: blockController,
+                    decoration: InputDecoration(
+                      hintText: 'Symbol name e.g. BTCUSD',
+                      hintStyle: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              ElevatedButton.icon(
+                onPressed: () {
+                  final sym = blockController.text.trim().toUpperCase();
+                  if (sym.isNotEmpty && !blockedSymbols.contains(sym)) {
+                    setState(() {
+                      blockedSymbols.add(sym);
+                      _selectedGroups[groupId]!['blocked'] = blockedSymbols;
+                      blockController.clear();
+                    });
+                  }
+                },
+                icon: Icon(Icons.block, size: 14.w, color: Colors.white),
+                label: const Text('Block'),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size.zero,
+                  backgroundColor: AppColors.primary,
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+                ),
+              ),
+            ],
           ),
+          SizedBox(height: 4.h),
+          Text(
+            'Symbols are matched by name. Leave empty if you don\'t want to add restrictions.',
+            style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary),
+          ),
+          if (blockedSymbols.isNotEmpty) ...[
+            SizedBox(height: 8.h),
+            Wrap(
+              spacing: 6.w,
+              runSpacing: 6.h,
+              children: blockedSymbols.map((sym) {
+                return Chip(
+                  label: Text(sym.toString(), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600)),
+                  deleteIcon: const Icon(Icons.close, size: 14),
+                  onDeleted: () {
+                    setState(() {
+                      blockedSymbols.remove(sym);
+                      _selectedGroups[groupId]!['blocked'] = blockedSymbols;
+                    });
+                  },
+                  backgroundColor: Colors.red.shade50,
+                  deleteIconColor: Colors.red,
+                  side: BorderSide(color: Colors.red.shade200),
+                );
+              }).toList(),
+            ),
+          ],
         ],
       ),
     );

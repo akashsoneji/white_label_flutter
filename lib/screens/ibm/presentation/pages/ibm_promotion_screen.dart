@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/trade_win/view_models/trade_win_controller.dart';
 import 'package:crm_app/models/trade_win/trade_win_product_model.dart';
 import 'package:crm_app/models/trade_win/trade_win_leaderboard_entry_model.dart';
 import 'package:crm_app/utils/trade_win_format.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
 import 'package:crm_app/screens/trade_win/widgets/trade_win_product_image.dart';
 
@@ -23,6 +25,15 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
   String selectedFilter = 'all'; // all, ready_to_redeem
   final Map<int, int> productQuantities = {};
 
+  void _fetchData() {
+    controller.fetchProducts(
+      audience: 'ib',
+      availability: 'all',
+      category: 'all',
+    );
+    controller.fetchPastWins(reset: true);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -32,12 +43,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
       controller = Get.put(TradeWinController());
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchProducts(
-        audience: 'ib',
-        availability: 'all',
-        category: 'all',
-      );
-      controller.fetchPastWins(reset: true);
+      _fetchData();
     });
   }
 
@@ -587,19 +593,12 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                     // Redeem Button
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: () {
-                          Get.toNamed(
-                            Routes.TRADE_WIN_REDEEM,
-                            arguments: {
-                              'productId': product.id,
-                              'quantity': qty,
-                            },
-                          );
-                        },
+                        onPressed:
+                            () => _showRedeemDialog(context, product, qty),
                         icon: Icon(
                           Icons.redeem,
                           size: 16.w,
-                          color: Colors.white,
+                          color: AppColors.whiteColor,
                         ),
                         label: Text(
                           'Redeem Now',
@@ -611,7 +610,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.whiteColor,
                           padding: EdgeInsets.symmetric(vertical: 12.h),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.r),
@@ -626,6 +625,492 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showRedeemDialog(
+    BuildContext context,
+    TradeWinProductModel product,
+    int qty,
+  ) {
+    int currentStep = 1;
+    bool isSubmitting = false;
+    String referenceNo = '';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+              ),
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 24.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with close button
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8.r),
+                        child: SizedBox(
+                          width: 56.w,
+                          height: 56.w,
+                          child: TradeWinProductImage(imagePath: product.imagePath),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'REDEEM PRIZE',
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textGrey,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              product.name,
+                              style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              '\$${product.prizeValue.toStringAsFixed(0)} value',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.close,
+                          color: AppColors.textGrey,
+                          size: 20.w,
+                        ),
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+
+                  // Stepper Line (1 and 2)
+                  Row(
+                    children: [
+                      Container(
+                        width: 24.w,
+                        height: 24.w,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF5F259E),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '1',
+                          style: TextStyle(
+                            color: AppColors.whiteColor,
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 2,
+                          color: currentStep == 2
+                              ? const Color(0xFF5F259E)
+                              : AppColors.divider,
+                          margin: EdgeInsets.symmetric(horizontal: 8.w),
+                        ),
+                      ),
+                      Container(
+                        width: 24.w,
+                        height: 24.w,
+                        decoration: BoxDecoration(
+                          color: currentStep == 2
+                              ? const Color(0xFF5F259E)
+                              : (AppColors.isDarkMode
+                                  ? Colors.grey[800]
+                                  : const Color(0xFFE0E0E0)),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '2',
+                          style: TextStyle(
+                            color: currentStep == 2
+                                ? AppColors.whiteColor
+                                : AppColors.textGrey,
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 18.h),
+
+                  if (currentStep == 1) ...[
+                    // Step 1: Confirm Redemption
+                    Text(
+                      'Step 1: Confirm Redemption',
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
+
+                    // Items Box
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.isDarkMode
+                            ? Colors.grey[900]
+                            : const Color(0xFFF9F9FB),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: AppColors.divider),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Item: ',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                product.name,
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 6.h),
+                          Row(
+                            children: [
+                              Text(
+                                'Quantity: ',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                '$qty',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 14.h),
+
+                    // Amber Warning Box
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF8E1),
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(color: const Color(0xFFFFE082)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: const Color(0xFFE65100),
+                            size: 18.w,
+                          ),
+                          SizedBox(width: 10.w),
+                          Expanded(
+                            child: Text(
+                              'Once redeemed, this claim will be processed and your stock will be adjusted.',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: const Color(0xFF8D4E00),
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+
+                    // Action buttons: Cancel & Yes, Continue
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: isSubmitting
+                                ? null
+                                : () => Navigator.of(ctx).pop(),
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              side: BorderSide(color: AppColors.divider),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                            ),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: isSubmitting
+                                ? null
+                                : () async {
+                                    setModalState(() {
+                                      isSubmitting = true;
+                                    });
+                                    try {
+                                      final response = await ApiService.post(
+                                        endpoint: ApiConstants.tradeWinClaim,
+                                        data: {
+                                          'product_id': product.id,
+                                          'quantity': qty,
+                                          'shipping_details': null,
+                                          'audience': 'ib',
+                                        },
+                                      );
+
+                                      if (response.success &&
+                                          response.data != null) {
+                                        final ref = response.data['reference_no'] ??
+                                            response.data['reference'] ??
+                                            response.data['claim_id']?.toString() ??
+                                            '';
+                                        setModalState(() {
+                                          referenceNo = ref.toString();
+                                          currentStep = 2;
+                                          isSubmitting = false;
+                                        });
+                                      } else {
+                                        setModalState(() {
+                                          isSubmitting = false;
+                                        });
+                                        CustomToastService.showError(
+                                          message: response.message ??
+                                              'Claim failed',
+                                        );
+                                      }
+                                    } catch (e) {
+                                      setModalState(() {
+                                        isSubmitting = false;
+                                      });
+                                      CustomToastService.showError(
+                                        message: 'Error: $e',
+                                      );
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.whiteColor,
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                            ),
+                            child: isSubmitting
+                                ? SizedBox(
+                                    width: 18.w,
+                                    height: 18.w,
+                                    child: CircularProgressIndicator(
+                                      color: AppColors.whiteColor,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Yes, Continue',
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.whiteColor,
+                                        ),
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Icon(
+                                        Icons.arrow_forward,
+                                        size: 14,
+                                        color: AppColors.whiteColor,
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    // Step 2: Redemption Successful!
+                    Center(
+                      child: Column(
+                        children: [
+                          SizedBox(height: 10.h),
+                          Container(
+                            width: 64.w,
+                            height: 64.w,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xFF00C853),
+                                width: 3.5,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              color: const Color(0xFF00C853),
+                              size: 40.w,
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            'Redemption Successful!',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF004D40),
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            'Your ${product.name} is being processed.',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.symmetric(
+                              vertical: 14.h,
+                              horizontal: 16.w,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.isDarkMode
+                                  ? Colors.grey[900]
+                                  : const Color(0xFFF9F9FB),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(color: AppColors.divider),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'REFERENCE NUMBER',
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textGrey,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                SizedBox(height: 6.h),
+                                Text(
+                                  referenceNo.isNotEmpty
+                                      ? referenceNo
+                                      : 'INDP-644',
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 14.h),
+                          Text(
+                            'You will receive status updates via email and the "Past Wins" section.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                          SizedBox(height: 20.h),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(ctx).pop();
+                                _fetchData();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.whiteColor,
+                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                              ),
+                              child: Text(
+                                'Done',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.whiteColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -762,6 +1247,21 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                       children: [
                         _buildRankBadge(rank),
                         SizedBox(width: 10.w),
+                        CircleAvatar(
+                          radius: 12.r,
+                          backgroundColor: const Color(
+                            0xFF5F259E,
+                          ).withOpacity(0.1),
+                          child: Text(
+                            name.isNotEmpty ? name[0].toUpperCase() : 'T',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
                             name,
@@ -848,33 +1348,133 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                 )
               else
                 ...pastWins.map((win) {
-                  final title =
-                      win is Map
-                          ? (win['product_name'] ?? 'Prize')
-                          : (win.productName ?? 'Prize');
-                  final date =
-                      win is Map
-                          ? (win['created_at'] ?? '')
-                          : (win.createdAt ?? '');
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
+                  String title = 'Prize';
+                  String date = '';
+                  String ref = '';
+                  String status = 'Delivered';
+                  String imagePath = '';
+                  double prizeValue = 0;
+
+                  if (win is Map) {
+                    title = win['product_name']?.toString() ?? 'Prize';
+                    date =
+                        (win['claim_date'] ?? win['created_at'] ?? '')
+                            .toString();
+                    ref =
+                        (win['reference_no'] ?? 'INDP-${win['id'] ?? ''}')
+                            .toString();
+                    status = (win['status'] ?? 'Delivered').toString();
+                    imagePath = (win['image_path'] ?? '').toString();
+                    prizeValue =
+                        double.tryParse((win['prize_value'] ?? 0).toString()) ??
+                        0;
+                  } else {
+                    title =
+                        win.productName.isNotEmpty ? win.productName : 'Prize';
+                    date =
+                        win.claimDate.isNotEmpty
+                            ? win.claimDate
+                            : win.statusDate;
+                    ref = win.referenceCode;
+                    status = win.status.isNotEmpty ? win.status : 'Delivered';
+                    imagePath = win.imagePath;
+                    prizeValue = win.prizeValue;
+                  }
+
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 10.h),
+                    padding: EdgeInsets.all(10.w),
+                    decoration: BoxDecoration(
+                      color:
+                          AppColors.isDarkMode
+                              ? Colors.grey[900]
+                              : const Color(0xFFF9F9FB),
+                      borderRadius: BorderRadius.circular(10.r),
+                      border: Border.all(color: AppColors.divider),
                     ),
-                    title: Text(
-                      '$title',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    subtitle: Text(
-                      '$date',
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        color: AppColors.textGrey,
-                      ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6.r),
+                          child: SizedBox(
+                            width: 44.w,
+                            height: 44.w,
+                            child: TradeWinProductImage(imagePath: imagePath),
+                          ),
+                        ),
+                        SizedBox(width: 10.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      '$title ${prizeValue > 0 ? '(\$${prizeValue.toStringAsFixed(0)} value)' : ''}',
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 6.w,
+                                      vertical: 2.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          status.toLowerCase() == 'delivered' ||
+                                                  status.toLowerCase() ==
+                                                      'approved'
+                                              ? const Color(0xFFE8F5E9)
+                                              : const Color(0xFFFFF3E0),
+                                      borderRadius: BorderRadius.circular(4.r),
+                                    ),
+                                    child: Text(
+                                      status.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 8.5.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            status.toLowerCase() ==
+                                                        'delivered' ||
+                                                    status.toLowerCase() ==
+                                                        'approved'
+                                                ? const Color(0xFF2E7D32)
+                                                : const Color(0xFFE65100),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 3.h),
+                              Text(
+                                'Reference: $ref',
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  color: AppColors.textGrey,
+                                ),
+                              ),
+                              if (date.isNotEmpty) ...[
+                                SizedBox(height: 2.h),
+                                Text(
+                                  'Submitted: $date',
+                                  style: TextStyle(
+                                    fontSize: 9.5.sp,
+                                    color: AppColors.textGrey,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }).toList(),

@@ -1,4 +1,6 @@
+import 'package:crm_app/routes/app_pages.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
@@ -41,16 +43,16 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
               ),
             )
           : Builder(
-              builder: (ctx) => IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  size: 22.w,
-                  color: AppColors.isDarkMode ? Colors.white : AppColors.textPrimary,
-                ),
-                onPressed: () {
-                  Scaffold.of(ctx).openDrawer();
-                },
-              ),
+              builder: (ctx) =>  IconButton(
+          icon: SvgPicture.asset(
+            'assets/svg/ib_dashboard/home.svg',
+            colorFilter: ColorFilter.mode(
+              AppColors.textPrimary,
+              BlendMode.srcIn,
+            ),
+          ),
+          onPressed: () => Get.offAllNamed(AppPages.TRADING),
+        ),
             ),
       titleSpacing: 0,
       title: Row(

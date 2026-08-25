@@ -21,13 +21,22 @@ class IbmController extends GetxController {
   final RxBool canApply = false.obs;
   final RxMap<String, dynamic> partnerRequest = <String, dynamic>{}.obs;
 
-  // Dashboard state
+  // Dashboard & Network state
   final RxMap<String, dynamic> dashboardData = <String, dynamic>{}.obs;
   final RxMap<String, dynamic> dashboardActivityData = <String, dynamic>{}.obs;
   final RxMap<String, dynamic> networkData = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> networkSummaryData = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> networkTreeSummaryData = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> networkPerformanceData = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentPartnerDetail = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentPartnerWallet = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentPartnerLinks = <String, dynamic>{}.obs;
 
   // Clients state
   final RxMap<String, dynamic> clientsData = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> clientsNetworkTreeData = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentClientAccounts = <String, dynamic>{}.obs;
+  final RxMap<String, dynamic> currentClientAccountTrades = <String, dynamic>{}.obs;
   final RxString clientPeriod = 'this_month'.obs;
   final RxString clientScope = 'direct'.obs;
 
@@ -41,6 +50,7 @@ class IbmController extends GetxController {
   final RxString transactionFilter = 'Everything'.obs;
 
   // Commission Plans state
+  final RxMap<String, dynamic> myPlanData = <String, dynamic>{}.obs;
   final RxList<dynamic> plansList = <dynamic>[].obs;
   final RxMap<String, dynamic> planTemplate = <String, dynamic>{}.obs;
 
@@ -236,7 +246,7 @@ class IbmController extends GetxController {
     try {
       isLoading.value = true;
       final response = await _apiProvider.getPortalDashboard(
-        period: period ?? 'this_month',
+        period: period ?? 'mtd',
         scope: scope ?? 'total',
         from: from,
         to: to,
@@ -286,7 +296,16 @@ class IbmController extends GetxController {
     }
   }
 
-  Future<void> fetchClients({String? period, String? scope}) async {
+  Future<void> fetchClients({
+    String? period,
+    String? scope,
+    String? search,
+    String? status,
+    String? linkId,
+    String? from,
+    String? to,
+    int page = 1,
+  }) async {
     try {
       isLoading.value = true;
       if (period != null) clientPeriod.value = period;
@@ -295,6 +314,12 @@ class IbmController extends GetxController {
       final response = await _apiProvider.getPortalClients(
         period: clientPeriod.value,
         scope: clientScope.value,
+        page: page,
+        search: search,
+        status: status,
+        linkId: linkId,
+        from: from,
+        to: to,
       );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
@@ -712,11 +737,21 @@ class IbmController extends GetxController {
   final RxBool isProfileLoading = false.obs;
   final RxString profileErrorMessage = ''.obs;
 
-  Future<void> fetchClientOverview(int id, {String period = 'mtd'}) async {
+  Future<void> fetchClientOverview(
+    int id, {
+    String period = 'mtd',
+    String? from,
+    String? to,
+  }) async {
     try {
       isProfileLoading.value = true;
       profileErrorMessage.value = '';
-      final response = await _apiProvider.getClientOverview(id, period: period);
+      final response = await _apiProvider.getClientOverview(
+        id,
+        period: period,
+        from: from,
+        to: to,
+      );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
         final Map<String, dynamic> data =
@@ -736,6 +771,8 @@ class IbmController extends GetxController {
   Future<void> fetchClientTrades(
     int id, {
     String period = 'mtd',
+    String? from,
+    String? to,
     int page = 1,
     String? type,
     String? symbol,
@@ -745,6 +782,8 @@ class IbmController extends GetxController {
       final response = await _apiProvider.getClientTrades(
         id,
         period: period,
+        from: from,
+        to: to,
         page: page,
         type: type,
         symbol: symbol,
@@ -762,10 +801,20 @@ class IbmController extends GetxController {
     }
   }
 
-  Future<void> fetchNetworkNode(int id, {String period = 'mtd'}) async {
+  Future<void> fetchNetworkNode(
+    int id, {
+    String period = 'mtd',
+    String? from,
+    String? to,
+  }) async {
     try {
       isProfileLoading.value = true;
-      final response = await _apiProvider.getNetworkNode(id, period: period);
+      final response = await _apiProvider.getNetworkNode(
+        id,
+        period: period,
+        from: from,
+        to: to,
+      );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
         final Map<String, dynamic> data =
@@ -779,10 +828,46 @@ class IbmController extends GetxController {
     }
   }
 
-  Future<void> fetchNetworkSymbols(int id, {String period = 'mtd'}) async {
+  Future<List<Map<String, dynamic>>> getNetworkNodeChildren(
+    int id, {
+    String period = 'mtd',
+    String? from,
+    String? to,
+  }) async {
+    try {
+      final response = await _apiProvider.getNetworkNode(
+        id,
+        period: period,
+        from: from,
+        to: to,
+      );
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        final people = data['people'] as List? ?? data['sub_ibs'] as List? ?? data['clients'] as List? ?? [];
+        return people.map((e) => _toMap(e)).toList();
+      }
+    } catch (e) {
+      // ignore
+    }
+    return [];
+  }
+
+  Future<void> fetchNetworkSymbols(
+    int id, {
+    String period = 'mtd',
+    String? from,
+    String? to,
+  }) async {
     try {
       isProfileLoading.value = true;
-      final response = await _apiProvider.getNetworkSymbols(id, period: period);
+      final response = await _apiProvider.getNetworkSymbols(
+        id,
+        period: period,
+        from: from,
+        to: to,
+      );
       if (response.success && response.data != null) {
         final Map<String, dynamic> root = _toMap(response.data);
         final Map<String, dynamic> data =
@@ -951,7 +1036,7 @@ class IbmController extends GetxController {
         defaultPlanGroupId: defaultVisibilityGroupId.value,
       );
 
-      Get.back(closeOverlays: true);
+      if (Get.isDialogOpen ?? false) Get.back();
 
       if (response.success) {
         CustomToastService.showSuccess(
@@ -1011,6 +1096,246 @@ class IbmController extends GetxController {
       }
     } catch (e) {
       // Handle silently
+    }
+  }
+
+  // ==========================================
+  // --- Network Additional API Methods ---
+  // ==========================================
+  Future<void> fetchNetworkSummary({String period = 'this_month'}) async {
+    try {
+      final response = await _apiProvider.getPortalNetworkSummary(period: period);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        networkSummaryData.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<void> fetchNetworkTreeSummary({String? period}) async {
+    try {
+      final response = await _apiProvider.getPortalNetworkTreeSummary(
+        period: period,
+      );
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        networkTreeSummaryData.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<void> fetchNetworkPerformance({
+    String period = 'mtd',
+    String? sort,
+    String? dir,
+    String? q,
+    String? from,
+    String? to,
+    int page = 1,
+    int perPage = 25,
+  }) async {
+    try {
+      final response = await _apiProvider.getPortalNetworkPerformance(
+        period: period,
+        sort: sort,
+        dir: dir,
+        q: q,
+        from: from,
+        to: to,
+        page: page,
+        perPage: perPage,
+      );
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        networkPerformanceData.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<void> fetchPartnerDetail(int partnerUserId, {String? period}) async {
+    try {
+      isProfileLoading.value = true;
+      final response = await _apiProvider.getPartnerDetail(partnerUserId, period: period);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        currentPartnerDetail.assignAll(data);
+      }
+    } catch (e) {
+      profileErrorMessage.value = e.toString();
+    } finally {
+      isProfileLoading.value = false;
+    }
+  }
+
+  Future<void> fetchPartnerWallet(int partnerUserId, {String? period}) async {
+    try {
+      final response = await _apiProvider.getPartnerWallet(
+        partnerUserId,
+        period: period,
+      );
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        currentPartnerWallet.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<void> fetchPartnerLinks(int partnerUserId) async {
+    try {
+      final response = await _apiProvider.getPartnerLinks(partnerUserId);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        currentPartnerLinks.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  // ==========================================
+  // --- Clients Additional API Methods ---
+  // ==========================================
+  Future<void> fetchClientsNetworkTree({
+    String? period,
+    String? from,
+    String? to,
+  }) async {
+    try {
+      final response = await _apiProvider.getClientsNetworkTree(
+        period: period ?? 'today',
+        from: from,
+        to: to,
+      );
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        clientsNetworkTreeData.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<void> fetchClientAccounts(int clientId) async {
+    try {
+      final response = await _apiProvider.getClientAccounts(clientId);
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        currentClientAccounts.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<void> fetchClientAccountTrades(
+    int clientId,
+    int accountId, {
+    int page = 1,
+    int perPage = 50,
+  }) async {
+    try {
+      final response = await _apiProvider.getClientAccountTrades(
+        clientId,
+        accountId,
+        page: page,
+        perPage: perPage,
+      );
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        currentClientAccountTrades.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<bool> moveClient(int clientId, int targetIbId) async {
+    try {
+      Get.dialog(
+        Center(child: CommonLoadingWidget(size: 50.0, color: AppColors.primary)),
+        barrierDismissible: false,
+      );
+      final response = await _apiProvider.moveClient(clientId, targetIbId);
+      Get.back(closeOverlays: true);
+      if (response.success) {
+        CustomToastService.showSuccess(message: 'Client reassigned successfully.');
+        fetchClients();
+        return true;
+      } else {
+        CustomToastService.showError(message: response.message ?? 'Failed to move client.');
+        return false;
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      CustomToastService.showError(message: 'Error moving client: $e');
+      return false;
+    }
+  }
+
+  // ==========================================
+  // --- My Plan & Wallet API Methods ---
+  // ==========================================
+  Future<void> fetchMyPlan() async {
+    try {
+      final response = await _apiProvider.getMyPlan();
+      if (response.success && response.data != null) {
+        final Map<String, dynamic> root = _toMap(response.data);
+        final Map<String, dynamic> data =
+            root['data'] is Map ? _toMap(root['data']) : root;
+        myPlanData.assignAll(data);
+      }
+    } catch (e) {
+      // Handle silently
+    }
+  }
+
+  Future<bool> cancelPayout(int payoutId, {String? reason}) async {
+    try {
+      Get.dialog(
+        Center(child: CommonLoadingWidget(size: 50.0, color: AppColors.primary)),
+        barrierDismissible: false,
+      );
+      final response = await _apiProvider.cancelPayout(payoutId, reason: reason);
+      Get.back(closeOverlays: true);
+      if (response.success) {
+        CustomToastService.showSuccess(message: 'Payout request cancelled successfully.');
+        fetchWallet();
+        fetchTransactions();
+        return true;
+      } else {
+        CustomToastService.showError(message: response.message ?? 'Failed to cancel payout.');
+        return false;
+      }
+    } catch (e) {
+      if (Get.isDialogOpen ?? false) Get.back();
+      CustomToastService.showError(message: 'Error cancelling payout: $e');
+      return false;
     }
   }
 }
