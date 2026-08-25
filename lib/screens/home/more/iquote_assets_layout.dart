@@ -16,6 +16,8 @@ import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
+import 'package:crm_app/services/one_click_trading_service.dart';
+import 'package:crm_app/screens/home/more/one_click_trading_disclaimer_screen.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
 class IquoteAssetsLayout extends StatefulWidget {
@@ -32,6 +34,8 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
   void initState() {
     super.initState();
     _loadBiometricState();
+    // Seed the shared notifier so the switch below reflects saved state.
+    OneClickTradingService.instance.isOneClickTradingEnabled();
   }
 
   Future<void> _loadBiometricState() async {
@@ -40,6 +44,22 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     setState(() {
       _isBiometricEnabled = enabled;
     });
+  }
+
+  Future<void> _toggleOneClickTrading() async {
+    final currentlyOn =
+        OneClickTradingService.instance.enabledNotifier.value;
+    if (currentlyOn) {
+      await OneClickTradingService.instance.setOneClickTradingEnabled(false);
+    } else {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const OneClickTradingDisclaimerScreen(),
+        ),
+      );
+      // Disclaimer screen persists via the service; notifier is already in sync.
+    }
   }
 
   Future<void> _toggleBiometric() async {
@@ -1189,7 +1209,32 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           ),
           _buildDivider(isDark),
 
-          // 3. Biometric Login with Switch
+          // 3. One Click Trading with Switch
+          ValueListenableBuilder<bool>(
+            valueListenable:
+                OneClickTradingService.instance.enabledNotifier,
+            builder: (context, enabled, _) {
+              return _buildOptionItem(
+                icon: Icons.touch_app_rounded,
+                iconColor: AppColors.primary,
+                title: 'One Click Trading',
+                isDark: isDark,
+                textPrimary: textPrimary,
+                trailing: SizedBox(
+                  height: 24.h,
+                  child: Switch.adaptive(
+                    value: enabled,
+                    activeColor: AppColors.primary,
+                    onChanged: (_) => _toggleOneClickTrading(),
+                  ),
+                ),
+                onTap: _toggleOneClickTrading,
+              );
+            },
+          ),
+          _buildDivider(isDark),
+
+          // 4. Biometric Login with Switch
           _buildOptionItem(
             icon: Icons.fingerprint,
             iconColor: Colors.cyan,

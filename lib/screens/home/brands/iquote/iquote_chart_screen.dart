@@ -41,6 +41,7 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -668,31 +669,115 @@ class _BottomBar extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
               ],
+              // Buy/Sell side-by-side with overlapping center spread badge —
+              // same layout as the iQuote market row (Stack + Positioned).
+              // A compact one-click toggle sits to the right.
               Row(
                 children: [
                   Expanded(
-                    flex: 5,
-                    child: _ActionPill(
-                      color: _kBullColor,
-                      icon: Icons.trending_up,
-                      label: 'Buy',
-                      price:
-                          ask != null && ask > 0 ? ask.toStringAsFixed(d) : '—',
-                      onTap: () => _openNewOrderSheet(context, side: 'buy'),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap:
+                                    () => _handleOrderTap(context, side: 'buy'),
+                                child: Container(
+                                  height: 44.h,
+                                  decoration: BoxDecoration(
+                                    color: _kBullColor,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(6.r),
+                                      bottomLeft: Radius.circular(6.r),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Buy',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.85),
+                                          fontSize: 10.sp,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      SizedBox(height: 1.h),
+                                      Text(
+                                        ask != null && ask > 0
+                                            ? ask.toStringAsFixed(d)
+                                            : '—',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 1.w),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap:
+                                    () =>
+                                        _handleOrderTap(context, side: 'sell'),
+                                child: Container(
+                                  height: 44.h,
+                                  decoration: BoxDecoration(
+                                    color: _kBearColor,
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(6.r),
+                                      bottomRight: Radius.circular(6.r),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Sell',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.85),
+                                          fontSize: 10.sp,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      SizedBox(height: 1.h),
+                                      Text(
+                                        bid != null && bid > 0
+                                            ? bid.toStringAsFixed(d)
+                                            : '—',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Positioned(
+                          top: 3.h,
+                          child: Obx(
+                            () => _SpreadBadge(spread: ctrl.lastSpread.value),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(width: 6.w),
-                  Expanded(
-                    flex: 5,
-                    child: _ActionPill(
-                      color: _kBearColor,
-                      icon: Icons.trending_down,
-                      label: 'Sell',
-                      price:
-                          bid != null && bid > 0 ? bid.toStringAsFixed(d) : '—',
-                      onTap: () => _openNewOrderSheet(context, side: 'sell'),
-                    ),
-                  ),
+                  SizedBox(width: 8.w),
+                  const _OneClickChartToggle(),
                 ],
               ),
             ],
@@ -700,6 +785,29 @@ class _BottomBar extends StatelessWidget {
         }),
       ),
     );
+  }
+
+  /// Buy/Sell tap: if one-click trading is enabled, place a market order
+  /// straight away using the last-used volume. Otherwise, fall back to the
+  /// existing New Order bottom sheet.
+  Future<void> _handleOrderTap(
+    BuildContext context, {
+    required String side,
+  }) async {
+    final oneClickOn =
+        await OneClickTradingService.instance.isOneClickTradingEnabled();
+    if (oneClickOn) {
+      final vol = ctrl.lastVolume.value > 0 ? ctrl.lastVolume.value : 0.01;
+      await ctrl.submitOrder(
+        side: side,
+        orderKind: 'market',
+        volume: vol,
+        price: '',
+      );
+      return;
+    }
+    if (!context.mounted) return;
+    _openNewOrderSheet(context, side: side);
   }
 
   void _openNewOrderSheet(BuildContext context, {required String side}) {
@@ -719,6 +827,94 @@ class _BottomBar extends StatelessWidget {
                     ? (ctrl.lastAsk.value ?? 0)
                     : (ctrl.lastBid.value ?? 0),
           ),
+    );
+  }
+}
+
+/// Compact one-click trading toggle shown to the right of the Buy/Sell
+/// pills on the chart. When ON, Buy/Sell taps place a market order
+/// immediately with the last-used volume (0.01 by default). When OFF,
+/// taps open the standard New Order bottom sheet.
+class _OneClickChartToggle extends StatefulWidget {
+  const _OneClickChartToggle();
+
+  @override
+  State<_OneClickChartToggle> createState() => _OneClickChartToggleState();
+}
+
+class _OneClickChartToggleState extends State<_OneClickChartToggle> {
+  @override
+  void initState() {
+    super.initState();
+    // Seed the notifier from SharedPreferences on first mount.
+    OneClickTradingService.instance.isOneClickTradingEnabled();
+  }
+
+  Future<void> _toggle(bool v) async {
+    await OneClickTradingService.instance.setOneClickTradingEnabled(v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final activeColor = AppColors.primary;
+    return ValueListenableBuilder<bool>(
+      valueListenable: OneClickTradingService.instance.enabledNotifier,
+      builder: (context, enabled, _) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.touch_app_rounded,
+              size: 18.sp,
+              color: enabled
+                  ? activeColor
+                  : Theme.of(context).iconTheme.color?.withOpacity(0.55),
+            ),
+            SizedBox(height: 2.h),
+            SizedBox(
+              height: 22.h,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Switch.adaptive(
+                  value: enabled,
+                  activeColor: activeColor,
+                  onChanged: _toggle,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Small dark spread badge shown between the Buy and Sell pills. Style
+/// mirrors the badge on the iQuote market list rows.
+class _SpreadBadge extends StatelessWidget {
+  const _SpreadBadge({required this.spread});
+  final double spread;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final text = spread > 0 ? spread.toStringAsFixed(0) : '0';
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF0F172A) : const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: Colors.white24, width: 0.5),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }

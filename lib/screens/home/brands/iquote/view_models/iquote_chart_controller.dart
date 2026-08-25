@@ -110,6 +110,11 @@ class IQuoteChartController extends GetxController {
   final priceChangePct = Rxn<double>();
   final lastBid = Rxn<double>();
   final lastAsk = Rxn<double>();
+  /// Live spread (in points) as delivered by the price websocket
+  /// (`InstrumentPrice.spreadDiff`). 0 when unknown.
+  final lastSpread = 0.0.obs;
+  /// Last volume the user placed an order with (used by one-click trading).
+  final lastVolume = 0.01.obs;
   // Renamed from `digits` to avoid shadowing GetxController.digits.
   final priceDigits = 2.obs;
   final period = '1M'.obs; // Default period
@@ -200,6 +205,7 @@ class IQuoteChartController extends GetxController {
     priceDigits.value = quote.digits;
     lastBid.value = quote.bid;
     lastAsk.value = quote.ask;
+    lastSpread.value = quote.spreadDiff;
 
     final dayLow = quote.dayLow;
     final changeVal = dayLow > 0 ? (quote.bid - dayLow) : 0.0;
@@ -378,6 +384,7 @@ class IQuoteChartController extends GetxController {
       );
 
       if (ok) {
+        lastVolume.value = volume;
         final cleanSymbol = symbol.split('.').first.toUpperCase();
         final typeName = orderType.requiresPrice 
             ? orderType.displayName 

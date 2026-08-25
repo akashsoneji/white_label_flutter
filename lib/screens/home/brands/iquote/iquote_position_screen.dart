@@ -978,7 +978,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         }
       },
       child: Container(
-        padding: EdgeInsets.fromLTRB(10.w, 5.h, 8.w, 5.h),
+        padding: EdgeInsets.fromLTRB(10.w, 5.h, 4.w, 5.h),
         decoration: BoxDecoration(
           color: _cardColor,
           borderRadius: BorderRadius.circular(8.r),
@@ -986,7 +986,7 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Row 1: side chip • symbol • volume • TP/SL mini-chips ── PnL • close
+            // Row 1: side chip • symbol • volume ─── PnL • close
             Row(
               children: [
                 Container(
@@ -1006,15 +1006,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                   ),
                 ),
                 SizedBox(width: 6.w),
-                Flexible(
-                  child: Text(
-                    symbol,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                    ),
+                // Symbol gets its natural width so long names show fully;
+                // if the row overflows, volume/PnL area is what shrinks.
+                Text(
+                  symbol,
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 SizedBox(width: 6.w),
@@ -1026,14 +1025,6 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                if (_hasMeaningfulPrice(position.takeProfit)) ...[
-                  SizedBox(width: 6.w),
-                  _tpSlChip('TP', position.takeProfit, _green),
-                ],
-                if (_hasMeaningfulPrice(position.stopLoss)) ...[
-                  SizedBox(width: 4.w),
-                  _tpSlChip('SL', position.stopLoss, _red),
-                ],
                 const Spacer(),
                 Text(
                   '${isPositive ? '' : '-'}${position.profitLoss.abs().toStringAsFixed(2)}',
@@ -1054,18 +1045,20 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                       }
                     },
                     child: Padding(
-                      padding: EdgeInsets.only(left: 6.w),
+                      padding: EdgeInsets.only(left: 4.w, right: 2.w),
                       child: Icon(
                         Icons.close_rounded,
-                        color: AppColors.textSecondary,
-                        size: 14.sp,
+                        color: AppColors.textPrimary,
+                        size: 18.sp,
                       ),
                     ),
-                  ),
+                  )
+                else
+                  SizedBox(width: 4.w),
               ],
             ),
             SizedBox(height: 2.h),
-            // Row 2: entry → current  ──  close time (history only)
+            // Row 2: entry→current (left) • TP/SL (center) • close time (right, history)
             Row(
               children: [
                 Text(
@@ -1089,7 +1082,21 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                     fontSize: 10.sp,
                   ),
                 ),
-                const Spacer(),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      if (_hasMeaningfulPrice(position.takeProfit))
+                        _tpSlChip('TP', position.takeProfit, _green),
+                      if (_hasMeaningfulPrice(position.takeProfit) &&
+                          _hasMeaningfulPrice(position.stopLoss))
+                        SizedBox(width: 6.w),
+                      if (_hasMeaningfulPrice(position.stopLoss))
+                        _tpSlChip('SL', position.stopLoss, _red),
+                    ],
+                  ),
+                ),
                 if (isHistory && position.closeTime.isNotEmpty)
                   Text(
                     DateHelper.formatIsoStringToUtcHistory(position.closeTime),
