@@ -282,7 +282,7 @@ controller.fetchClients(period: p);
                                 '$reqs',
                                 style: TextStyle(
                                   fontSize: 9.sp,
-                                  color: Colors.white,
+                                  color: AppColors.whiteColor,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -553,6 +553,7 @@ controller.fetchClients(period: p);
                 Expanded(
                   child: Container(
                     height: 40.h,
+                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
                       color: AppColors.card,
                       borderRadius: BorderRadius.circular(12.r),
@@ -778,7 +779,7 @@ controller.fetchClients(period: p);
   Widget _buildDateFilterSegmentedControl() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.isDarkMode ? AppColors.surface : Colors.white,
+        color: AppColors.isDarkMode ? AppColors.surface : AppColors.whiteColor,
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: AppColors.divider),
       ),
@@ -841,7 +842,7 @@ controller.fetchClients(period: p);
                       style: TextStyle(
                         color:
                             isSelected
-                                ? Colors.white
+                                ? AppColors.whiteColor
                                 : (AppColors.isDarkMode
                                     ? Colors.white70
                                     : const Color(0xFF222222)),
@@ -1131,14 +1132,14 @@ controller.fetchClients(period: p);
                             style: TextStyle(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppColors.whiteColor,
                             ),
                           ),
                           SizedBox(width: 3.w),
-                          const Icon(
+                           Icon(
                             Icons.arrow_forward,
                             size: 12,
-                            color: Colors.white,
+                            color: AppColors.whiteColor,
                           ),
                         ],
                       ),
@@ -1277,7 +1278,7 @@ controller.fetchClients(period: p);
                   child: Text(
                     'I',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.whiteColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 13.sp,
                     ),
@@ -2025,7 +2026,7 @@ _applyNodeResponse(partnerId, fetched);
               decoration: BoxDecoration(
                 color:
                     isSelected
-                        ? Colors.white.withOpacity(0.2)
+                        ? AppColors.whiteColor.withOpacity(0.2)
                         : (AppColors.isDarkMode
                             ? AppColors.surface
                             : const Color(0xFFF1EEF8)),
@@ -2036,7 +2037,7 @@ _applyNodeResponse(partnerId, fetched);
                 style: TextStyle(
                   color:
                       isSelected
-                          ? Colors.white
+                          ? AppColors.whiteColor
                           : (AppColors.isDarkMode
                               ? AppColors.textPrimary
                               : AppColors.primary),
@@ -2247,7 +2248,7 @@ _applyNodeResponse(partnerId, fetched);
                               child: Text(
                                 'IB',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: AppColors.whiteColor,
                                   fontSize: 9.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -2366,7 +2367,7 @@ _applyNodeResponse(partnerId, fetched);
                                   ? AppColors.primary
                                   : (AppColors.isDarkMode
                                       ? AppColors.surface
-                                      : Colors.white),
+                                      : AppColors.whiteColor),
                           borderRadius: BorderRadius.circular(16.r),
                           border: Border.all(
                             color:
@@ -2380,7 +2381,7 @@ _applyNodeResponse(partnerId, fetched);
                           style: TextStyle(
                             color:
                                 isSelected
-                                    ? Colors.white
+                                    ? AppColors.whiteColor
                                     : AppColors.textSecondary,
                             fontSize: 12.sp,
                             fontWeight:
@@ -2471,7 +2472,7 @@ _applyNodeResponse(partnerId, fetched);
                     onPressed: () => _handleApprove(id),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.whiteColor,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.r),
@@ -2531,7 +2532,7 @@ _applyNodeResponse(partnerId, fetched);
       ),
       textConfirm: 'Approve',
       textCancel: 'Cancel',
-      confirmTextColor: Colors.white,
+      confirmTextColor: AppColors.whiteColor,
       buttonColor: AppColors.primary,
       onConfirm: () async {
         Get.back();
@@ -2571,7 +2572,7 @@ _applyNodeResponse(partnerId, fetched);
       ),
       textConfirm: 'Decline',
       textCancel: 'Cancel',
-      confirmTextColor: Colors.white,
+      confirmTextColor: AppColors.whiteColor,
       buttonColor: Colors.red,
       onConfirm: () async {
         Get.back();

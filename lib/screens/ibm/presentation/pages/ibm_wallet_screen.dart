@@ -311,136 +311,6 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
     _fetchTransactions();
   }
 
-  Future<void> _openPayoutDialog() async {
-    final root = _ibmController.walletData;
-    final w0 = _wallet0();
-    final available = _asNum(w0['available'] ?? root['unpaid_balance'] ?? root['balance']);
-    final currency = _currency();
-    final minPayout = _minPayout();
-
-    // Payout destinations from GET /portal/wallet `accounts[]`.
-    final List accounts = root['accounts'] is List ? root['accounts'] as List : const [];
-    Map? selectedAccount = accounts.isNotEmpty && accounts.first is Map
-        ? accounts.first as Map
-        : null;
-
-    final amountCtrl = TextEditingController(text: available.toStringAsFixed(2));
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setLocal) {
-            return AlertDialog(
-              title: const Text('Request payout'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Available: ${IbmCurrency.format(available, currencyCode: currency)}',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
-                  ),
-                  SizedBox(height: 12.h),
-                  if (accounts.isNotEmpty) ...[
-                    DropdownButtonFormField<Map>(
-                      value: selectedAccount,
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Where it goes',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: accounts
-                          .whereType<Map>()
-                          .map(
-                            (a) => DropdownMenuItem<Map>(
-                              value: a,
-                              child: Text(
-                                (a['label'] ?? a['method_slug'] ?? 'Account').toString(),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (v) => setLocal(() => selectedAccount = v),
-                    ),
-                    SizedBox(height: 12.h),
-                  ],
-                  TextField(
-                    controller: amountCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Amount',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    'Minimum ${IbmCurrency.format(minPayout, currencyCode: currency)}',
-                    style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.whiteColor,
-                    elevation: 0,
-                  ),
-                  child: const Text('Submit'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (confirmed != true) {
-      amountCtrl.dispose();
-      return;
-    }
-
-    final entered = _asNum(amountCtrl.text);
-    amountCtrl.dispose();
-    if (entered < minPayout || entered > available) {
-      CustomToastService.showError(
-        message:
-            'Amount must be between ${IbmCurrency.format(minPayout, currencyCode: currency)} and ${IbmCurrency.format(available, currencyCode: currency)}',
-      );
-      return;
-    }
-
-    try {
-      final res = await _apiProvider.requestWithdrawal(
-        currency: currency,
-        amount: entered,
-        methodSlug: selectedAccount?['method_slug']?.toString(),
-        withdrawalMethodId: selectedAccount?['withdrawal_method_id'] is int
-            ? selectedAccount!['withdrawal_method_id'] as int
-            : int.tryParse(selectedAccount?['withdrawal_method_id']?.toString() ?? ''),
-      );
-      if (!mounted) return;
-      if (res.success) {
-        CustomToastService.showSuccess(message: 'Payout request submitted');
-        await _ibmController.fetchWallet();
-      } else {
-        CustomToastService.showError(
-          message: res.message ?? 'Could not request payout',
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      CustomToastService.showError(message: 'Error: $e');
-    }
-  }
-
   Future<void> _cancelPayout(int payoutId) async {
     final reasonCtrl = TextEditingController();
     final confirmed = await showDialog<bool>(
@@ -612,7 +482,11 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                         !hasOpenPayout &&
                         _asNum(availableBalance) >= _minPayout();
                     return ElevatedButton(
-                      onPressed: canRequest ? _openPayoutDialog : null,
+                      onPressed: 
+                      canRequest
+                          ?
+                           () => Get.toNamed(AppPages.WITHDRAWAL)
+                          : null,
                       style: ElevatedButton.styleFrom(
                         minimumSize: Size.zero,
                         backgroundColor: AppColors.primary,

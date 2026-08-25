@@ -161,7 +161,7 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
             onChanged: (v) => setState(() => _query = v.trim()),
             decoration: InputDecoration(
               hintText: 'Search your plans',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon:  Icon(Icons.search,color: AppColors.textPrimary,),
               hintStyle: TextStyle(color: AppColors.textGrey),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
@@ -216,7 +216,7 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
 
   Widget _buildList(List<Map<String, dynamic>> plans) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: Colors.purple));
+      return  Center(child: CircularProgressIndicator(color: AppColors.primary));
     }
     if (_error != null) {
       return Center(
@@ -257,7 +257,7 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
               Flexible(
                 child: Text(
                   name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style:  TextStyle(fontWeight: FontWeight.bold,color: AppColors.textPrimary),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

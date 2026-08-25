@@ -343,12 +343,16 @@ class _IbmSettingsScreenState extends State<IbmSettingsScreen> {
                         ],
                       ),
                     ),
-                    Switch(
-                      value: isVisible,
-                      activeColor: AppColors.primary,
-                      onChanged: (val) {
-                        controller.toggleGroupVisibility(id);
-                      },
+                    Transform.scale(
+                      scale: 0.75,
+                      child: Switch(
+                        value: isVisible,
+                        activeColor: AppColors.primary,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        onChanged: (val) {
+                          controller.toggleGroupVisibility(id);
+                        },
+                      ),
                     ),
                   ],
                 ),

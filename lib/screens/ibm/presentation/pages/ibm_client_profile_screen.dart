@@ -283,7 +283,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
           }),
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(185.h),
+          preferredSize: Size.fromHeight(130.h),
           child: Container(
             color:
                 AppColors.isDarkMode
@@ -525,7 +525,7 @@ return GestureDetector(
                   style: TextStyle(
                     color:
                         isSelected
-                            ? Colors.white
+                            ? AppColors.whiteColor
                             : (AppColors.isDarkMode
                                 ? Colors.white70
                                 : AppColors.textSecondary),
@@ -1305,6 +1305,7 @@ return GestureDetector(
                         onSelected:
                             (_) => setState(() => _tradeSideFilter = side),
                         selectedColor: AppColors.primary,
+                        checkmarkColor: AppColors.whiteColor,
                         labelStyle: TextStyle(
                           color:
                               isSel
@@ -1327,6 +1328,7 @@ return GestureDetector(
                     selected: isSel,
                     onSelected: (_) => setState(() => _tradeSideFilter = side),
                     selectedColor: AppColors.primary,
+                    checkmarkColor: AppColors.whiteColor,
                     labelStyle: TextStyle(
                       color:
                           isSel
@@ -2111,6 +2113,7 @@ return GestureDetector(
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14.sp,
+                    color: AppColors.textPrimary
                   ),
                 ),
                 trailing: Row(

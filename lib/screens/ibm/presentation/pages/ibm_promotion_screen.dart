@@ -721,8 +721,8 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                       Container(
                         width: 24.w,
                         height: 24.w,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF5F259E),
+                        decoration:  BoxDecoration(
+                          color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -739,7 +739,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                         child: Container(
                           height: 2,
                           color: currentStep == 2
-                              ? const Color(0xFF5F259E)
+                              ?  AppColors.primary
                               : AppColors.divider,
                           margin: EdgeInsets.symmetric(horizontal: 8.w),
                         ),
@@ -749,7 +749,7 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
                         height: 24.w,
                         decoration: BoxDecoration(
                           color: currentStep == 2
-                              ? const Color(0xFF5F259E)
+                              ?  AppColors.primary
                               : (AppColors.isDarkMode
                                   ? Colors.grey[800]
                                   : const Color(0xFFE0E0E0)),
