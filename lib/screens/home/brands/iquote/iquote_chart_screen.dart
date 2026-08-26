@@ -777,7 +777,9 @@ class _BottomBar extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 8.w),
-                  const _OneClickChartToggle(),
+                  _PendingOrderButton(
+                    onTap: () => _openNewOrderSheet(context, side: 'buy'),
+                  ),
                 ],
               ),
             ],
@@ -831,61 +833,37 @@ class _BottomBar extends StatelessWidget {
   }
 }
 
-/// Compact one-click trading toggle shown to the right of the Buy/Sell
-/// pills on the chart. When ON, Buy/Sell taps place a market order
-/// immediately with the last-used volume (0.01 by default). When OFF,
-/// taps open the standard New Order bottom sheet.
-class _OneClickChartToggle extends StatefulWidget {
-  const _OneClickChartToggle();
-
-  @override
-  State<_OneClickChartToggle> createState() => _OneClickChartToggleState();
-}
-
-class _OneClickChartToggleState extends State<_OneClickChartToggle> {
-  @override
-  void initState() {
-    super.initState();
-    // Seed the notifier from SharedPreferences on first mount.
-    OneClickTradingService.instance.isOneClickTradingEnabled();
-  }
-
-  Future<void> _toggle(bool v) async {
-    await OneClickTradingService.instance.setOneClickTradingEnabled(v);
-  }
+/// Compact "Pending" order button shown to the right of the Buy/Sell pills.
+/// Tapping it opens the standard New Order bottom sheet so the user can
+/// place a limit/stop order (with TP/SL) instead of a one-click market order.
+class _PendingOrderButton extends StatelessWidget {
+  const _PendingOrderButton({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = AppColors.primary;
-    return ValueListenableBuilder<bool>(
-      valueListenable: OneClickTradingService.instance.enabledNotifier,
-      builder: (context, enabled, _) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.touch_app_rounded,
-              size: 18.sp,
-              color: enabled
-                  ? activeColor
-                  : Theme.of(context).iconTheme.color?.withOpacity(0.55),
+    final iconColor =
+        Theme.of(context).iconTheme.color?.withOpacity(0.85) ??
+        AppColors.textPrimary;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.edit_note_rounded, size: 22.sp, color: iconColor),
+          SizedBox(height: 2.h),
+          Text(
+            'Pending',
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w600,
+              color: iconColor,
             ),
-            SizedBox(height: 2.h),
-            SizedBox(
-              height: 22.h,
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Switch.adaptive(
-                  value: enabled,
-                  activeColor: activeColor,
-                  onChanged: _toggle,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }
