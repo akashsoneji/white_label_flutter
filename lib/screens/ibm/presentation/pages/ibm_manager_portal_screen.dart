@@ -51,25 +51,46 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
   void _onPeriodChanged(String period) async {
     if (period == 'custom') {
-      final DateTimeRange? picked = await showDateRangePicker(
+      final now = DateTime.now();
+      final DateTime? start = await showDatePicker(
         context: context,
+        helpText: 'Select start date',
+        initialDate: (customFrom != null ? DateTime.tryParse(customFrom!) : null) ??
+            now.subtract(const Duration(days: 30)),
         firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-        builder: (context, child) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              platform: TargetPlatform.windows,
-              colorScheme: ColorScheme.light(
-                primary: AppColors.primary,
-                onPrimary: Colors.white,
-                onSurface: Colors.black,
-              ),
+        lastDate: now,
+        builder: (context, child) => Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
             ),
-            child: child!,
-          );
-        },
+          ),
+          child: child!,
+        ),
       );
-      if (picked != null) {
+      if (start == null) return;
+      final DateTime? end = await showDatePicker(
+        context: context,
+        helpText: 'Select end date',
+        initialDate: start,
+        firstDate: start,
+        lastDate: now,
+        builder: (context, child) => Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        ),
+      );
+      if (end == null) return;
+      final picked = DateTimeRange(start: start, end: end);
+      {
         String fromStr =
             "${picked.start.year}-${picked.start.month.toString().padLeft(2, '0')}-${picked.start.day.toString().padLeft(2, '0')}";
         String toStr =
@@ -249,29 +270,19 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             fontSize: 13.sp,
           ),
         ),
-        SizedBox(height: 6.h),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              
-              SizedBox(height: 6.h),
-
-              _buildToggleGroup(
-                options: {
-                  'today': 'Today',
-                  '7d': '7D',
-                  '30d': '30D',
-                  'this_month': 'MTD',
-                  'all': 'All',
-                  'custom': 'Custom',
-                },
-                selectedValue: selectedPeriod,
-                onChanged: _onPeriodChanged,
-              ),
-            ],
-          ),
+        SizedBox(height: 10.h),
+        _buildToggleGroup(
+          options: {
+            'today': 'Today',
+            '7d': '7D',
+            '30d': '30D',
+            'this_month': 'MTD',
+            'all': 'All',
+            'custom': 'Custom',
+          },
+          selectedValue: selectedPeriod,
+          onChanged: _onPeriodChanged,
+          fillWidth: true,
         ),
       ],
     );
@@ -281,47 +292,57 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     required Map<String, String> options,
     required String selectedValue,
     required Function(String) onChanged,
+    bool fillWidth = false,
   }) {
+    Widget buildItem(MapEntry<String, String> e) {
+      final isSelected = e.key == selectedValue;
+      return GestureDetector(
+        onTap: () => onChanged(e.key),
+        child: Container(
+          alignment: Alignment.center,
+          padding: EdgeInsets.symmetric(
+            horizontal: 6.w,
+            vertical: 8.h,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Text(
+            e.value,
+            maxLines: 1,
+            overflow: TextOverflow.visible,
+            softWrap: false,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? AppColors.whiteColor : AppColors.textPrimary,
+              fontSize: 11.sp,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
+      width: fillWidth ? double.infinity : null,
+      padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(color: AppColors.divider),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children:
-            options.entries.map((e) {
-              final isSelected = e.key == selectedValue;
-              return GestureDetector(
-                onTap: () => onChanged(e.key),
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 6.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : AppColors.card,
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: Text(
-                    e.value,
-                    style: TextStyle(
-                      color:
-                          isSelected
-                              ? AppColors.whiteColor
-                              : AppColors.textPrimary,
-                      fontSize: 11.sp,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+        mainAxisSize: fillWidth ? MainAxisSize.max : MainAxisSize.min,
+        children: fillWidth
+            ? options.entries
+                .map((e) => Expanded(child: buildItem(e)))
+                .toList()
+            : options.entries.map(buildItem).toList(),
       ),
     );
   }
+
 
   Widget _buildTopGrid(
     Map clients,

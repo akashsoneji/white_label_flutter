@@ -8,7 +8,6 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/ibm_client_profile_screen.dart';
-import 'package:crm_app/screens/ibm/presentation/widgets/ibm_date_range_dialog.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_shimmer_loading.dart';
 
 class IbmClientsScreen extends StatefulWidget {
@@ -820,24 +819,50 @@ controller.fetchClients(period: p);
                 GestureDetector(
                   onTap: () async {
                     if (filter == 'Custom') {
-                      final picked = await showIbmDateRangeDialog(
-                        context,
-                        initialRange:
-                            _customStartDate != null && _customEndDate != null
-                                ? DateTimeRange(
-                                  start: _customStartDate!,
-                                  end: _customEndDate!,
-                                )
-                                : null,
+                      final now = DateTime.now();
+                      final DateTime? start = await showDatePicker(
+                        context: context,
+                        helpText: 'Select start date',
+                        initialDate: _customStartDate ??
+                            now.subtract(const Duration(days: 30)),
+                        firstDate: DateTime(2000),
+                        lastDate: now,
+                        builder: (context, child) => Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: ColorScheme.light(
+                              primary: AppColors.primary,
+                              onPrimary: Colors.white,
+                              onSurface: Colors.black,
+                            ),
+                          ),
+                          child: child!,
+                        ),
                       );
-                      if (picked != null) {
-                        setState(() {
-                          _customStartDate = picked.start;
-                          _customEndDate = picked.end;
-                          _selectedDateFilter = 'Custom';
-                        });
-                        _refreshAllData();
-                      }
+                      if (start == null) return;
+                      final DateTime? end = await showDatePicker(
+                        context: context,
+                        helpText: 'Select end date',
+                        initialDate: start,
+                        firstDate: start,
+                        lastDate: now,
+                        builder: (context, child) => Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: ColorScheme.light(
+                              primary: AppColors.primary,
+                              onPrimary: Colors.white,
+                              onSurface: Colors.black,
+                            ),
+                          ),
+                          child: child!,
+                        ),
+                      );
+                      if (end == null) return;
+                      setState(() {
+                        _customStartDate = start;
+                        _customEndDate = end;
+                        _selectedDateFilter = 'Custom';
+                      });
+                      _refreshAllData();
                     } else {
                       setState(() {
                         _selectedDateFilter = filter;

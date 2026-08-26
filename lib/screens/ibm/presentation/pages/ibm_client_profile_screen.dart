@@ -6,7 +6,6 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
-import 'package:crm_app/screens/ibm/presentation/widgets/ibm_date_range_dialog.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/change_plan_bottom_sheet.dart';
 
 class IbmClientProfileScreen extends StatefulWidget {
@@ -502,76 +501,102 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
 
   Widget _buildDateFilters() {
     return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
-        color:
-            AppColors.isDarkMode
-                ? const Color(0xFF1E1E1E)
-                : const Color(0xFFF1EEF8),
+        color: AppColors.isDarkMode
+            ? const Color(0xFF1E1E1E)
+            : const Color(0xFFF1EEF8),
         borderRadius: BorderRadius.circular(20.r),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(_dateFilters.length, (index) {
-            final filter = _dateFilters[index];
-            final isSelected = _selectedDateFilter == filter;
-return GestureDetector(
+      child: Row(
+        children: List.generate(_dateFilters.length, (index) {
+          final filter = _dateFilters[index];
+          final isSelected = _selectedDateFilter == filter;
+          return Expanded(
+            child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () async {
                 if (filter == 'Custom') {
-                  final picked = await showIbmDateRangeDialog(
-                    context,
-                    initialRange:
-                        _customStartDate != null && _customEndDate != null
-                            ? DateTimeRange(
-                              start: _customStartDate!,
-                              end: _customEndDate!,
-                            )
-                            : null,
+                  final now = DateTime.now();
+                  final DateTime? start = await showDatePicker(
+                    context: context,
+                    helpText: 'Select start date',
+                    initialDate: _customStartDate ??
+                        now.subtract(const Duration(days: 30)),
+                    firstDate: DateTime(2000),
+                    lastDate: now,
+                    builder: (context, child) => Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: ColorScheme.light(
+                          primary: AppColors.primary,
+                          onPrimary: Colors.white,
+                          onSurface: Colors.black,
+                        ),
+                      ),
+                      child: child!,
+                    ),
                   );
-                  if (picked != null) {
-                    setState(() {
-                      _customStartDate = picked.start;
-                      _customEndDate = picked.end;
-                      _selectedDateFilter = 'Custom';
-                    });
-                    _fetchDataForTab(_tabController.index);
-                  }
+                  if (start == null) return;
+                  final DateTime? end = await showDatePicker(
+                    context: context,
+                    helpText: 'Select end date',
+                    initialDate: start,
+                    firstDate: start,
+                    lastDate: now,
+                    builder: (context, child) => Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: ColorScheme.light(
+                          primary: AppColors.primary,
+                          onPrimary: Colors.white,
+                          onSurface: Colors.black,
+                        ),
+                      ),
+                      child: child!,
+                    ),
+                  );
+                  if (end == null) return;
+                  setState(() {
+                    _customStartDate = start;
+                    _customEndDate = end;
+                    _selectedDateFilter = 'Custom';
+                  });
+                  _fetchDataForTab(_tabController.index);
                 } else {
                   _onDateFilterChanged(filter);
                 }
               },
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                alignment: Alignment.center,
+                padding: EdgeInsets.symmetric(vertical: 8.h),
                 decoration: BoxDecoration(
-                  color:
-                      isSelected ? AppColors.primary : Colors.transparent,
+                  color: isSelected ? AppColors.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   filter == 'Custom' && _customStartDate != null
-                      ? '${DateFormat('MM/dd').format(_customStartDate!)} - ${DateFormat('MM/dd').format(_customEndDate!)}'
+                      ? '${DateFormat('MM/dd').format(_customStartDate!)}-${DateFormat('MM/dd').format(_customEndDate!)}'
                       : filter,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color:
-                        isSelected
-                            ? AppColors.whiteColor
-                            : (AppColors.isDarkMode
-                                ? Colors.white70
-                                : AppColors.textSecondary),
+                    color: isSelected
+                        ? AppColors.whiteColor
+                        : (AppColors.isDarkMode
+                            ? Colors.white70
+                            : AppColors.textSecondary),
                     fontSize: 11.sp,
-                    fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   ),
                 ),
               ),
-            );
-          }),
-        ),
+            ),
+          );
+        }),
       ),
     );
   }
+
 
   // ==========================
   // TAB 1: OVERVIEW
