@@ -150,6 +150,30 @@ controller.fetchClients(period: p);
         _applyNodeResponse(masterId!, people);
         _lazyLoadingKeys.remove(key);
       });
+      // Prefetch every L1 sub-IB's own /node so L2 rows render with real
+      // name/email/figures on first paint (no expand tap needed).
+      for (final row in people) {
+        final childId = int.tryParse(row['user_id']?.toString() ?? '') ?? 0;
+        final hasDownline = (row['sub_ibs'] ?? 0).toString() != '0' ||
+            (row['clients_tree'] ?? 0).toString() != '0';
+        if (childId <= 0 || !hasDownline) continue;
+        final childKey = 'node_$childId';
+        if (_lazyChildrenCache.containsKey(childKey) ||
+            _lazyLoadingKeys.contains(childKey)) continue;
+        _lazyLoadingKeys.add(childKey);
+        controller
+            .getNetworkNodeChildren(childId, period: period)
+            .then((grand) {
+          if (!mounted) {
+            _lazyLoadingKeys.remove(childKey);
+            return;
+          }
+          setState(() {
+            _applyNodeResponse(childId, grand);
+            _lazyLoadingKeys.remove(childKey);
+          });
+        });
+      }
     });
   }
 
