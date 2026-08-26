@@ -1129,6 +1129,32 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
         );
       }
 
+      // Notifications
+      items.add(
+        _buildOptionItem(
+          icon: Icons.notifications_none_outlined,
+          iconColor: Colors.orangeAccent,
+          title:
+              languageService?.trf('general_notifications', 'Notifications') ??
+              'Notifications',
+          isDark: isDark,
+          textPrimary: textPrimary,
+          onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
+        ),
+      );
+
+      // Demo Contest
+      items.add(
+        _buildOptionItem(
+          icon: Icons.emoji_events_outlined,
+          iconColor: const Color(0xFFFFC107),
+          title: languageService?.tr('more_demo_contest') ?? 'Demo Contest',
+          isDark: isDark,
+          textPrimary: textPrimary,
+          onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
+        ),
+      );
+
       return Container(
         decoration: BoxDecoration(
           color: cardBg,
