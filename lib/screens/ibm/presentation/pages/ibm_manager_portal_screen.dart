@@ -612,13 +612,29 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       );
     }
 
-    final earner = rows.first;
-    final name = earner['name'] ?? 'Unknown';
-    final clients = earner['clients'] ?? 0;
-    final active = earner['active_clients'] ?? earner['active'] ?? 0;
+    return _buildSectionCard(
+      'Sub-IB Performance',
+      'View all',
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (int i = 0; i < rows.length; i++) ...[
+            if (i > 0) SizedBox(height: 12.h),
+            _buildSubIbRow(rows[i] is Map ? rows[i] as Map : {}),
+          ],
+        ],
+      ),
+      onAction: () => controller.currentTabIndex.value = 2,
+    );
+  }
+
+  Widget _buildSubIbRow(Map row) {
+    final name = (row['name'] ?? 'Unknown').toString();
+    final clients = row['clients'] ?? 0;
+    final active = row['active_clients'] ?? row['active'] ?? 0;
 
     final List currencies =
-        earner['currencies'] is List ? earner['currencies'] : [];
+        row['currencies'] is List ? row['currencies'] : [];
     final firstCurrency = currencies.isNotEmpty ? currencies.first : {};
 
     final netDeposit = _parseDouble(
@@ -626,34 +642,34 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     );
     final earned = _parseDouble(firstCurrency['commission']);
     final lots = _parseDouble(firstCurrency['lots']);
+    final isActive = _parseDouble(active) >= 1;
+    final badgeColor = isActive ? Colors.orange : Colors.red;
 
-    return _buildSectionCard(
-      'Sub-IB Performance',
-      'View all',
-      Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border),
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: AppColors.primary,
-                  radius: 12.r,
-                  child: Text(
-                    name[0],
-                    style: TextStyle(
-                      color: AppColors.whiteColor,
-                      fontSize: 10.sp,
-                    ),
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: AppColors.primary,
+                radius: 12.r,
+                child: Text(
+                  name.isNotEmpty ? name[0] : '?',
+                  style: TextStyle(
+                    color: AppColors.whiteColor,
+                    fontSize: 10.sp,
                   ),
                 ),
-                SizedBox(width: 8.w),
-                Text(
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
                   name,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -661,73 +677,72 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                Spacer(),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(10.r),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: badgeColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Text(
+                  isActive ? 'Low' : 'Inactive',
+                  style: TextStyle(color: badgeColor, fontSize: 10.sp),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Net deposit',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10.sp,
+                    ),
                   ),
-                  child: Text(
-                    'Low',
-                    style: TextStyle(color: Colors.orange, fontSize: 10.sp),
+                  Text(
+                    '\$${netDeposit.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Net deposit',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 10.sp,
-                      ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'You earned',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 10.sp,
                     ),
-                    Text(
-                      '\$${netDeposit.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.sp,
-                        color: AppColors.textPrimary,
-                      ),
+                  ),
+                  Text(
+                    '\$${earned.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                      color: AppColors.textPrimary,
                     ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'You earned',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 10.sp,
-                      ),
-                    ),
-                    Text(
-                      '\$${earned.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.sp,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              '$clients clients   $active active   ${lots.toStringAsFixed(2)} lots',
-              style: TextStyle(color: AppColors.textGrey, fontSize: 10.sp),
-            ),
-          ],
-        ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            '$clients clients   $active active   ${lots.toStringAsFixed(2)} lots',
+            style: TextStyle(color: AppColors.textGrey, fontSize: 10.sp),
+          ),
+        ],
       ),
     );
   }
@@ -976,7 +991,12 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     );
   }
 
-  Widget _buildSectionCard(String title, String actionText, Widget child) {
+  Widget _buildSectionCard(
+    String title,
+    String actionText,
+    Widget child, {
+    VoidCallback? onAction,
+  }) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -994,11 +1014,18 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 title,
                 style: AppTextStyles.heading.copyWith(fontSize: 14.sp),
               ),
-              Text(
-                actionText,
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 11.sp,
+              GestureDetector(
+                onTap: onAction,
+                child: Text(
+                  actionText,
+                  style: TextStyle(
+                    color: onAction != null
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                    fontSize: 11.sp,
+                    fontWeight:
+                        onAction != null ? FontWeight.w600 : FontWeight.normal,
+                  ),
                 ),
               ),
             ],

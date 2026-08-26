@@ -386,7 +386,7 @@ controller.fetchClients(period: p);
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'My Network',
+                        'My Clients',
                         style: AppTextStyles.heading.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -1583,20 +1583,24 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
                 if (canExpand) {
                   if (_collapsedNodeKeys.contains(nodeKey)) {
                     _collapsedNodeKeys.remove(nodeKey);
-                    
+                  } else {
+                    _collapsedNodeKeys.add(nodeKey);
+                  }
+                  
+                  final isCollapsedNow = _isAllExpanded ? _collapsedNodeKeys.contains(nodeKey) : !_collapsedNodeKeys.contains(nodeKey);
+                  
+                  if (!isCollapsedNow) {
                     if (children.isEmpty && !_lazyChildrenCache.containsKey(nodeKey) && partnerId > 0) {
                       _lazyLoadingKeys.add(nodeKey);
                       controller.getNetworkNodeChildren(partnerId, period: _mapFilterToApi(_selectedDateFilter)).then((fetched) {
                         if (mounted) {
                           setState(() {
-_applyNodeResponse(partnerId, fetched);
+                            _applyNodeResponse(partnerId, fetched);
                             _lazyLoadingKeys.remove(nodeKey);
                           });
                         }
                       });
                     }
-                  } else {
-                    _collapsedNodeKeys.add(nodeKey);
                   }
                 }
               });
@@ -1635,20 +1639,24 @@ _applyNodeResponse(partnerId, fetched);
                             setState(() {
                               if (_collapsedNodeKeys.contains(nodeKey)) {
                                 _collapsedNodeKeys.remove(nodeKey);
-                                
+                              } else {
+                                _collapsedNodeKeys.add(nodeKey);
+                              }
+                              
+                              final isCollapsedNow = _isAllExpanded ? _collapsedNodeKeys.contains(nodeKey) : !_collapsedNodeKeys.contains(nodeKey);
+                              
+                              if (!isCollapsedNow) {
                                 if (children.isEmpty && !_lazyChildrenCache.containsKey(nodeKey) && partnerId > 0) {
                                   _lazyLoadingKeys.add(nodeKey);
                                   controller.getNetworkNodeChildren(partnerId, period: _mapFilterToApi(_selectedDateFilter)).then((fetched) {
                                     if (mounted) {
                                       setState(() {
-_applyNodeResponse(partnerId, fetched);
+                                        _applyNodeResponse(partnerId, fetched);
                                         _lazyLoadingKeys.remove(nodeKey);
                                       });
                                     }
                                   });
                                 }
-                              } else {
-                                _collapsedNodeKeys.add(nodeKey);
                               }
                             });
                           },
@@ -1764,17 +1772,9 @@ _applyNodeResponse(partnerId, fetched);
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              'Open',
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primary,
-                              ),
-                            ),
                             Icon(
                               Icons.arrow_forward,
-                              size: 13.w,
+                              size: 18.w,
                               color: AppColors.primary,
                             ),
                           ],

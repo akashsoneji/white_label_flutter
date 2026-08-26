@@ -293,17 +293,48 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildProfileHeader(),
-                TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  indicatorColor: AppColors.primary,
-                  labelColor: AppColors.primary,
-                  unselectedLabelColor: AppColors.textGrey,
-                  labelStyle: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: EdgeInsets.all(3.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.whiteColor,
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: TabBar(
+                        controller: _tabController,
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.start,
+                        padding: EdgeInsets.zero,
+                        labelPadding: EdgeInsets.symmetric(horizontal: 14.w),
+                        dividerColor: Colors.transparent,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicatorPadding: EdgeInsets.zero,
+                        indicator: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                        labelColor: AppColors.whiteColor,
+                        unselectedLabelColor: AppColors.textGrey,
+                        labelStyle: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        unselectedLabelStyle: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        tabs: _tabNames
+                            .map((name) => Tab(
+                                  height: 32.h,
+                                  child: Text(name),
+                                ))
+                            .toList(),
+                      ),
+                    ),
                   ),
-                  tabs: _tabNames.map((name) => Tab(text: name)).toList(),
                 ),
               ],
             ),
@@ -476,7 +507,7 @@ class _IbmClientProfileScreenState extends State<IbmClientProfileScreen>
             AppColors.isDarkMode
                 ? const Color(0xFF1E1E1E)
                 : const Color(0xFFF1EEF8),
-        borderRadius: BorderRadius.circular(6.r),
+        borderRadius: BorderRadius.circular(20.r),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -516,7 +547,7 @@ return GestureDetector(
                 decoration: BoxDecoration(
                   color:
                       isSelected ? AppColors.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(6.r),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   filter == 'Custom' && _customStartDate != null
@@ -662,7 +693,7 @@ return GestureDetector(
     return RefreshIndicator(
       onRefresh: () async => _fetchDataForTab(0),
       child: ListView(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.fromLTRB(16.w, 16, 16.w, 16.w),
         children: [
           Text(
             'THEIR DOWNLINE',
@@ -1403,11 +1434,16 @@ return GestureDetector(
             ...rows.map((t) {
               final trade = t is Map ? t : {};
               final ticket =
+                  trade['account']?.toString() ??
                   trade['ticket']?.toString() ??
+                  trade['trade_id']?.toString() ??
                   trade['id']?.toString() ??
                   '--';
               final symbol = trade['symbol']?.toString() ?? 'EURUSD';
-              final type = trade['type']?.toString().toUpperCase() ?? 'BUY';
+              final type =
+                  (trade['side'] ?? trade['type'] ?? 'BUY')
+                      .toString()
+                      .toUpperCase();
               final lots = _parseDouble(trade['lots']).toStringAsFixed(2);
               final openPrice = _parseDouble(
                 trade['open_price'],
@@ -1415,11 +1451,17 @@ return GestureDetector(
               final closePrice = _parseDouble(
                 trade['close_price'],
               ).toStringAsFixed(2);
-              final profit = _parseDouble(trade['profit']).toStringAsFixed(2);
+              final double profitValue = _parseDouble(trade['profit']);
+              final profit = profitValue.toStringAsFixed(2);
               final commission = _parseDouble(
                 trade['commission'],
               ).toStringAsFixed(2);
+              final openTime =
+                  trade['opened_at']?.toString() ??
+                  trade['open_time']?.toString() ??
+                  '--';
               final closeTime =
+                  trade['closed_at']?.toString() ??
                   trade['close_time']?.toString() ??
                   trade['created_at']?.toString() ??
                   '--';
@@ -1512,25 +1554,34 @@ return GestureDetector(
                           ),
                         ),
                         Text(
-                          'Profit: \$$profit',
+                          'P/L: \$$profit',
                           style: TextStyle(
                             fontSize: 11.sp,
-                            color: AppColors.textPrimary,
+                            color: profitValue < 0 ? Colors.red : Colors.green,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 4.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        closeTime,
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          color: AppColors.textGrey,
+                    SizedBox(height: 6.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Open: $openTime',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: AppColors.textGrey,
+                          ),
                         ),
-                      ),
+                        Text(
+                          'Close: $closeTime',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
