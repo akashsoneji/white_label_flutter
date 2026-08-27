@@ -706,6 +706,19 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     SizedBox(width: 4.w),
                     InkWell(
+                      onTap: () => _showAccountInfoBottomSheet(account),
+                      borderRadius: BorderRadius.circular(4.r),
+                      child: Padding(
+                        padding: EdgeInsets.all(2.r),
+                        child: Icon(
+                          Icons.info_outline_rounded,
+                          color: textSecondary,
+                          size: 16.r,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 2.w),
+                    InkWell(
                       onTap: () => _showAccountMenuBottomSheet(account),
                       borderRadius: BorderRadius.circular(4.r),
                       child: Padding(
@@ -2672,8 +2685,20 @@ class AccountInfoBottomSheet extends StatelessWidget {
                       children: [
                         Text(
                           accountInfo != null
-                              ? '\$${accountInfo.equity.toStringAsFixed(2)} USD'
-                              : '\$${account.equity} USD',
+                              ? () {
+                                  final symbol = account.isCentAccount ? '¢' : '\$';
+                                  final code = account.isCentAccount
+                                      ? (account.currency.isNotEmpty ? account.currency : 'USC')
+                                      : (account.currency.isNotEmpty ? account.currency : 'USD');
+                                  return '$symbol${accountInfo.equity.toStringAsFixed(2)} $code';
+                                }()
+                              : () {
+                                  final symbol = account.isCentAccount ? '¢' : '\$';
+                                  final code = account.isCentAccount
+                                      ? (account.currency.isNotEmpty ? account.currency : 'USC')
+                                      : (account.currency.isNotEmpty ? account.currency : 'USD');
+                                  return '$symbol${account.equity} $code';
+                                }(),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
@@ -2698,9 +2723,15 @@ class AccountInfoBottomSheet extends StatelessWidget {
               children: [
                 _buildDetailRow(
                   languageService.tr('dashboard_balance'),
-                  accountInfo != null
-                      ? PrecisionHelper.formatMoney(accountInfo.balance)
-                      : '\$${account.balance} USD',
+                  () {
+                    final symbol = account.isCentAccount ? '¢' : '\$';
+                    final code = account.isCentAccount
+                        ? (account.currency.isNotEmpty ? account.currency : 'USC')
+                        : (account.currency.isNotEmpty ? account.currency : 'USD');
+                    return accountInfo != null
+                        ? '$symbol${accountInfo.balance.toStringAsFixed(2)} $code'
+                        : '$symbol${account.balance} $code';
+                  }(),
                 ),
                 if (accountInfo != null && accountInfo.credit > 0)
                   _buildDetailRow(
@@ -2709,27 +2740,52 @@ class AccountInfoBottomSheet extends StatelessWidget {
                   ),
                 _buildDetailRow(
                   languageService.tr('dashboard_equity'),
-                  accountInfo != null
-                      ? PrecisionHelper.formatMoney(accountInfo.equity)
-                      : '\$${account.equity} USD',
+                  () {
+                    final symbol = account.isCentAccount ? '¢' : '\$';
+                    final code = account.isCentAccount
+                        ? (account.currency.isNotEmpty ? account.currency : 'USC')
+                        : (account.currency.isNotEmpty ? account.currency : 'USD');
+                    return accountInfo != null
+                        ? '$symbol${accountInfo.equity.toStringAsFixed(2)} $code'
+                        : '$symbol${account.equity} $code';
+                  }(),
                 ),
                 _buildDetailRow(
                   languageService.tr('dashboard_total_pl'),
-                  accountInfo != null
-                      ? '\$${accountInfo.profit.toStringAsFixed(2)} USD'
-                      : '\$0.00 USD',
+                  () {
+                    final symbol = account.isCentAccount ? '¢' : '\$';
+                    final code = account.isCentAccount
+                        ? (account.currency.isNotEmpty ? account.currency : 'USC')
+                        : (account.currency.isNotEmpty ? account.currency : 'USD');
+                    final value = accountInfo != null
+                        ? accountInfo.profit.toStringAsFixed(2)
+                        : '0.00';
+                    return '$symbol$value $code';
+                  }(),
                 ),
                 _buildDetailRow(
                   languageService.tr('trade_metric_margin'),
-                  accountInfo != null
-                      ? '\$${accountInfo.margin.toStringAsFixed(2)} USD'
-                      : '\$${account.margin} USD',
+                  () {
+                    final symbol = account.isCentAccount ? '¢' : '\$';
+                    final code = account.isCentAccount
+                        ? (account.currency.isNotEmpty ? account.currency : 'USC')
+                        : (account.currency.isNotEmpty ? account.currency : 'USD');
+                    return accountInfo != null
+                        ? '$symbol${accountInfo.margin.toStringAsFixed(2)} $code'
+                        : '$symbol${account.margin} $code';
+                  }(),
                 ),
                 _buildDetailRow(
                   languageService.tr('trade_metric_free_margin'),
-                  accountInfo != null
-                      ? '\$${accountInfo.marginFree.toStringAsFixed(2)} USD'
-                      : '\$${account.freeMargin} USD',
+                  () {
+                    final symbol = account.isCentAccount ? '¢' : '\$';
+                    final code = account.isCentAccount
+                        ? (account.currency.isNotEmpty ? account.currency : 'USC')
+                        : (account.currency.isNotEmpty ? account.currency : 'USD');
+                    return accountInfo != null
+                        ? '$symbol${accountInfo.marginFree.toStringAsFixed(2)} $code'
+                        : '$symbol${account.freeMargin} $code';
+                  }(),
                 ),
                 _buildDetailRow(
                   languageService.tr('trade_metric_margin_level'),
