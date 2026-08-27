@@ -20,6 +20,14 @@ import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/screens/home/more/one_click_trading_disclaimer_screen.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
+/// Modernized Assets & Hub Layout (Fintech Elite Style).
+///
+/// Features:
+///   • High-status Trader Profile Header with verified status badge and profile action
+///   • Vibrant Action Hub (Deposit, Withdrawal, Demo, Real) with modern gradients and micro-icons
+///   • KYC Account Verification Card with live percentage gauge
+///   • Curated Financial Services with themed soft-background icon badges
+///   • Account & Security Hub with tactile switches and seamless navigation
 class IquoteAssetsLayout extends StatefulWidget {
   const IquoteAssetsLayout({super.key});
 
@@ -34,7 +42,6 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
   void initState() {
     super.initState();
     _loadBiometricState();
-    // Seed the shared notifier so the switch below reflects saved state.
     OneClickTradingService.instance.isOneClickTradingEnabled();
   }
 
@@ -58,7 +65,6 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           builder: (_) => const OneClickTradingDisclaimerScreen(),
         ),
       );
-      // Disclaimer screen persists via the service; notifier is already in sync.
     }
   }
 
@@ -101,22 +107,21 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(22.r),
         ),
         backgroundColor: AppColors.cardBackground,
         child: Container(
-          padding: EdgeInsets.all(20.w),
+          padding: EdgeInsets.all(22.w),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(22.r),
             color: AppColors.cardBackground,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 8.h),
               Container(
-                width: 52.w,
-                height: 52.w,
+                width: 56.w,
+                height: 56.w,
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
@@ -124,7 +129,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 child: Center(
                   child: Icon(
                     Icons.fingerprint_rounded,
-                    size: 28.sp,
+                    size: 30.sp,
                     color: AppColors.primary,
                   ),
                 ),
@@ -136,7 +141,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 17.sp,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
               ),
@@ -146,13 +151,13 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                     'Biometric authentication is not set up on this device.',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 13.5.sp,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w400,
                   color: AppColors.textSecondary,
                   height: 1.4,
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 22.h),
               Row(
                 children: [
                   Expanded(
@@ -162,15 +167,18 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                       child: Container(
                         height: 44.h,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.12),
+                          color: AppColors.background,
                           borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: AppColors.border.withValues(alpha: 0.5),
+                          ),
                         ),
                         alignment: Alignment.center,
                         child: Text(
                           languageService?.tr('common_close') ?? 'Close',
                           style: AppTextStyles.bodyText.copyWith(
-                            color: AppColors.primary,
-                            fontSize: 14.5.sp,
+                            color: AppColors.textPrimary,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -197,9 +205,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                           languageService?.tr('biometric_open_settings') ??
                               'Open Settings',
                           style: AppTextStyles.bodyText.copyWith(
-                            color: AppColors.pureWhite,
-                            fontSize: 14.5.sp,
-                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -215,11 +223,14 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
   }
 
   Future<void> _handleSwitchToIB() async {
+    final languageService = Get.find<LanguageService>();
     try {
       final ibmController = Get.put(IbmController());
       await ibmController.checkSystemAndNavigate();
     } catch (e) {
-      CustomToastService.showError(message: 'Error checking IB status: $e');
+      CustomToastService.showError(
+        message: languageService.tr('common_ib_status_error_with_msg').replaceAll('{error}', '$e'),
+      );
     }
   }
 
@@ -231,51 +242,73 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(22.r),
         ),
         backgroundColor: AppColors.cardBackground,
         child: Container(
-          padding: EdgeInsets.all(20.w),
+          padding: EdgeInsets.all(22.w),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(22.r),
             color: AppColors.cardBackground,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 10.h),
-              Text(
-                languageService?.tr('logout_confirm_message') ??
-                    'Are you sure you want to log out?',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+              Container(
+                width: 52.w,
+                height: 52.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.logout_rounded,
+                    size: 26.sp,
+                    color: const Color(0xFFEF4444),
+                  ),
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 16.h),
+              Text(
+                'Log Out',
+                style: AppTextStyles.heading.copyWith(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                languageService?.tr('logout_confirm_message') ??
+                    'Are you sure you want to log out from this device?',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodyText.copyWith(
+                  fontSize: 13.sp,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              SizedBox(height: 22.h),
               Row(
                 children: [
                   Expanded(
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12.r),
-                      onTap: () async {
-                        Get.back(closeOverlays: true);
-                        await authController.logout();
-                      },
+                      onTap: () => Get.back(closeOverlays: true),
                       child: Container(
                         height: 44.h,
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
+                          color: AppColors.background,
                           borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: AppColors.border.withValues(alpha: 0.5),
+                          ),
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          languageService?.tr('navigation_yes') ?? 'Yes',
+                          languageService?.tr('navigation_no') ?? 'Cancel',
                           style: AppTextStyles.bodyText.copyWith(
-                            color: AppColors.whiteColor,
-                            fontSize: 15.sp,
+                            color: AppColors.textPrimary,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -286,20 +319,23 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                   Expanded(
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12.r),
-                      onTap: () => Get.back(closeOverlays: true),
+                      onTap: () async {
+                        Get.back(closeOverlays: true);
+                        await authController.logout();
+                      },
                       child: Container(
                         height: 44.h,
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.12),
+                          color: const Color(0xFFEF4444),
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          languageService?.tr('navigation_no') ?? 'No',
+                          languageService?.tr('navigation_yes') ?? 'Logout',
                           style: AppTextStyles.bodyText.copyWith(
-                            color: AppColors.primary,
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
@@ -328,13 +364,13 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(22.r),
         ),
         backgroundColor: AppColors.cardBackground,
         child: Container(
-          padding: EdgeInsets.all(20.w),
+          padding: EdgeInsets.all(22.w),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(22.r),
             color: AppColors.cardBackground,
           ),
           child: Column(
@@ -346,7 +382,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
               ),
@@ -365,13 +401,15 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                     hintStyle: AppTextStyles.bodyText.copyWith(
                       color: AppColors.textSecondary,
                     ),
+                    filled: true,
+                    fillColor: AppColors.background,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                       borderSide: BorderSide(
                         color:
                             isPasswordEmpty.value
                                 ? AppColors.error
-                                : AppColors.textGrey,
+                                : AppColors.border.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -380,6 +418,29 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               SizedBox(height: 18.h),
               Row(
                 children: [
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12.r),
+                      onTap: () => Get.back(closeOverlays: true),
+                      child: Container(
+                        height: 44.h,
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          languageService?.tr('navigation_no') ?? 'Cancel',
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: AppColors.textPrimary,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Obx(
                       () => InkWell(
@@ -411,32 +472,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                             languageService?.tr('navigation_yes') ?? 'Delete',
                             style: AppTextStyles.bodyText.copyWith(
                               color: Colors.white,
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12.r),
-                      onTap: () => Get.back(closeOverlays: true),
-                      child: Container(
-                        height: 44.h,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          languageService?.tr('navigation_no') ?? 'Cancel',
-                          style: AppTextStyles.bodyText.copyWith(
-                            color: AppColors.primary,
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -453,7 +491,6 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = AppColors.isDarkMode;
     final bgDark = AppColors.background;
     final cardBg = AppColors.card;
     final textPrimary = AppColors.textPrimary;
@@ -469,22 +506,19 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Profile & Edit/View Action Header Bar
-              _buildTopHeader(cardBg, textPrimary, textSecondary, isDark),
-              SizedBox(height: 16.h),
+              // 1. Profile Header Card
+              _buildTopHeader(cardBg, textPrimary, textSecondary),
+              SizedBox(height: 14.h),
 
-              // 2. Main Account Card (Hero Card with Real Dynamic Data)
-              _buildAccountHeroCard(
-                cardBg,
-                textPrimary,
-                textSecondary,
-                primaryColor,
-                isDark,
-              ),
+              // 2. Action Hub (Deposit, Withdrawal, Demo, Real)
+              _buildQuickActionHub(cardBg, textPrimary, textSecondary, primaryColor),
+              SizedBox(height: 12.h),
+
+              // 3. KYC Verification Card (Only when unverified)
               Obx(() {
                 final model = Get.find<MoreController>().dashboardModel.value;
                 final stage = model?.data?.stageCompletion;
@@ -493,52 +527,28 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                     (stage?.mobileVerified != null) &&
                     (stage?.personalDetails == true);
                 if (isVerified) return const SizedBox.shrink();
-                return const _VerifyAccountCard();
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  child: const _VerifyAccountCard(),
+                );
               }),
+
+              // 4. Financial Services Group
+              _buildSectionHeader(
+                title: languageService?.tr('general_financial') ?? 'Financial Services',
+                textPrimary: textPrimary,
+              ),
+              SizedBox(height: 8.h),
+              _buildDynamicServicesGroup(cardBg, textPrimary),
               SizedBox(height: 16.h),
 
-              // 3. Create Demo & Create Real Account Action Cards Grid
-              _buildQuickFeatureRow(cardBg, textPrimary, textSecondary, isDark),
-              SizedBox(height: 16.h),
-
-              // 4. Dynamic Enabled Modules & Services Section
-              Text(
-                languageService?.tr('general_financial') ??
-                    'Services & Account',
-                style: AppTextStyles.bodyText.copyWith(
-                  color: textPrimary,
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.2,
-                ),
+              // 5. Account & Security Settings Group
+              _buildSectionHeader(
+                title: languageService?.tr('general_account_security') ?? 'Account & Security',
+                textPrimary: textPrimary,
               ),
-              SizedBox(height: 10.h),
-              _buildDynamicServicesGroup(
-                cardBg,
-                textPrimary,
-                textSecondary,
-                isDark,
-              ),
-              SizedBox(height: 16.h),
-
-              // 5. Security & Settings Section
-              Text(
-                languageService?.tr('general_account_security') ??
-                    'Account & Security',
-                style: AppTextStyles.bodyText.copyWith(
-                  color: textPrimary,
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.2,
-                ),
-              ),
-              SizedBox(height: 10.h),
-              _buildSecuritySettingsGroup(
-                cardBg,
-                textPrimary,
-                textSecondary,
-                isDark,
-              ),
+              SizedBox(height: 8.h),
+              _buildSecuritySettingsGroup(cardBg, textPrimary),
               SizedBox(height: 24.h),
             ],
           ),
@@ -547,12 +557,36 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     );
   }
 
-  // ── 1. Top Profile Header (With View/Edit Profile Icon Logic) ────────────────
+  Widget _buildSectionHeader({required String title, required Color textPrimary}) {
+    return Row(
+      children: [
+        Container(
+          width: 3.5.w,
+          height: 14.h,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(2.r),
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Text(
+          title,
+          style: AppTextStyles.bodyText.copyWith(
+            color: textPrimary,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── 1. Top Profile Header ───────────────────────────────────────────────
   Widget _buildTopHeader(
     Color cardBg,
     Color textPrimary,
     Color textSecondary,
-    bool isDark,
   ) {
     final AuthController? authController =
         Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
@@ -562,27 +596,23 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             : Get.put(MoreController());
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color:
-              isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.05),
+          color: AppColors.border.withValues(alpha: 0.5),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.04),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Row(
         children: [
-          // Profile Info
           Expanded(
             child: InkWell(
               onTap: () {
@@ -593,32 +623,40 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                   Get.toNamed(AppPages.VIEW_PROFILE);
                 }
               },
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(14.r),
               child: Row(
                 children: [
+                  // Profile Avatar with Status Ring
                   Stack(
                     children: [
                       Container(
-                        padding: EdgeInsets.all(2.w),
+                        width: 48.w,
+                        height: 48.h,
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
                           gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFFFF9538),
+                              const Color(0xFF6366F1),
                               AppColors.primary,
                             ],
                           ),
+                          borderRadius: BorderRadius.circular(15.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.25),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        child: CircleAvatar(
-                          radius: 18.r,
-                          backgroundColor:
-                              isDark
-                                  ? const Color(0xFF2C324B)
-                                  : const Color(0xFFE5E7EB),
-                          child: Icon(
-                            Icons.person,
-                            color: isDark ? Colors.white : AppColors.primary,
-                            size: 22.r,
+                        alignment: Alignment.center,
+                        child: Text(
+                          _getUserInitials(authController?.userFullName ?? ''),
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: Colors.white,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
@@ -626,18 +664,18 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                         bottom: 0,
                         right: 0,
                         child: Container(
-                          width: 9.w,
-                          height: 9.h,
+                          width: 12.r,
+                          height: 12.r,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2ED573),
+                            color: const Color(0xFF10B981),
                             shape: BoxShape.circle,
-                            border: Border.all(color: cardBg, width: 1.5),
+                            border: Border.all(color: cardBg, width: 2),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(width: 10.w),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -648,15 +686,16 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                             final displayName =
                                 name.trim().isNotEmpty
                                     ? name.trim()
-                                    : 'Sign in/Sign up';
+                                    : 'Sign in / Sign up';
                             return Text(
                               displayName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w600,
+                              style: AppTextStyles.heading.copyWith(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w800,
                                 color: textPrimary,
+                                letterSpacing: -0.3,
                               ),
                             );
                           },
@@ -668,14 +707,15 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                             final subText =
                                 email.isNotEmpty
                                     ? email
-                                    : 'Manage your assets & profile';
+                                    : 'Manage your portfolio & accounts';
                             return Text(
                               subText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 11.sp,
+                                fontSize: 11.5.sp,
                                 color: textSecondary,
+                                fontWeight: FontWeight.w500,
                               ),
                             );
                           },
@@ -687,10 +727,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               ),
             ),
           ),
-
           SizedBox(width: 8.w),
 
-          // Right Header Action: Edit / View Profile Button
+          // Profile View/Edit Action Icon
           if (moreController != null)
             Obx(() {
               final model = moreController.dashboardModel.value;
@@ -715,32 +754,21 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                   },
                   borderRadius: BorderRadius.circular(12.r),
                   child: Container(
-                    padding: EdgeInsets.all(8.w),
+                    padding: EdgeInsets.all(9.w),
                     decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? Colors.white.withOpacity(0.08)
-                              : Colors.black.withOpacity(0.04),
+                      color: AppColors.background,
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
-                        color:
-                            isDark
-                                ? Colors.white.withOpacity(0.08)
-                                : Colors.black.withOpacity(0.05),
+                        color: AppColors.border.withValues(alpha: 0.4),
                       ),
                     ),
-                    child:
-                        isProfileVerified
-                            ? Icon(
-                              Icons.remove_red_eye_outlined,
-                              size: 20.r,
-                              color: AppColors.primary,
-                            )
-                            : Icon(
-                              Icons.edit_outlined,
-                              size: 20.r,
-                              color: AppColors.primary,
-                            ),
+                    child: Icon(
+                      isProfileVerified
+                          ? Icons.visibility_outlined
+                          : Icons.edit_note_rounded,
+                      size: 20.sp,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
               );
@@ -750,13 +778,12 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     );
   }
 
-  // ── 2. Deposit & Withdrawal Buttons (Only Action Buttons as requested) ─────────────
-  Widget _buildAccountHeroCard(
+  // ── 2. Modern Quick Action Hub (Deposit, Withdrawal, Demo, Real) ─────────
+  Widget _buildQuickActionHub(
     Color cardBg,
     Color textPrimary,
     Color textSecondary,
     Color primaryColor,
-    bool isDark,
   ) {
     final AuthController? authController =
         Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
@@ -766,98 +793,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           (authController?.userFullName?.isNotEmpty == true) ||
           (authController?.userEmail?.isNotEmpty == true);
 
-      if (isLoggedIn) {
-        return Row(
-          children: [
-            Expanded(
-              child: InkWell(
-                onTap:
-                    () => Get.to(() => PaymentMethodsScreen(accountNumber: '')),
-                borderRadius: BorderRadius.circular(14.r),
-                child: Container(
-                  height: 48.h,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF2ED573), Color(0xFF10B981)],
-                    ),
-                    borderRadius: BorderRadius.circular(14.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF2ED573).withOpacity(0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_circle_outline,
-                        color: Colors.white,
-                        size: 20.r,
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        'Deposit',
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: Colors.white,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 14.w),
-            Expanded(
-              child: InkWell(
-                onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
-                borderRadius: BorderRadius.circular(14.r),
-                child: Container(
-                  height: 48.h,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFF9538), Color(0xFFFF6B00)],
-                    ),
-                    borderRadius: BorderRadius.circular(14.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFF9538).withOpacity(0.35),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.remove_circle_outline,
-                        color: Colors.white,
-                        size: 20.r,
-                      ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        'Withdrawal',
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: Colors.white,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      } else {
+      if (!isLoggedIn) {
         return Row(
           children: [
             Expanded(
@@ -865,56 +801,42 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 onTap: () => Get.toNamed(AppPages.LOGIN),
                 borderRadius: BorderRadius.circular(14.r),
                 child: Container(
-                  height: 48.h,
+                  height: 46.h,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? Colors.white.withOpacity(0.08)
-                            : Colors.grey.withOpacity(0.15),
+                    color: AppColors.card,
                     borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(
-                      color: isDark ? Colors.white24 : Colors.black12,
-                    ),
+                    border: Border.all(color: AppColors.border),
                   ),
                   child: Text(
-                    'Sign in',
+                    'Sign In',
                     style: AppTextStyles.bodyText.copyWith(
                       color: textPrimary,
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ),
             ),
-            SizedBox(width: 14.w),
+            SizedBox(width: 12.w),
             Expanded(
               child: InkWell(
                 onTap: () => Get.toNamed(AppPages.CREATE_ACCOUNT),
                 borderRadius: BorderRadius.circular(14.r),
                 child: Container(
-                  height: 48.h,
+                  height: 46.h,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFF9538), Color(0xFFFF6B00)],
-                    ),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(14.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFFF9538).withOpacity(0.35),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
                   child: Text(
-                    'Sign up',
+                    'Get Started',
                     style: AppTextStyles.bodyText.copyWith(
                       color: Colors.white,
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -923,130 +845,231 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           ],
         );
       }
+
+      return Column(
+        children: [
+          // Row 1: Primary Money Actions (Deposit & Withdrawal)
+          Row(
+            children: [
+              Expanded(
+                child: _primaryActionCard(
+                  title: 'Deposit',
+                  subtitle: 'Instant Add Funds',
+                  icon: Icons.add_circle_rounded,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF10B981), Color(0xFF059669)],
+                  ),
+                  onTap: () => Get.to(() => PaymentMethodsScreen(accountNumber: '')),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _primaryActionCard(
+                  title: 'Withdrawal',
+                  subtitle: 'Fast Payouts',
+                  icon: Icons.arrow_circle_up_rounded,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFF97316), Color(0xFFEA580C)],
+                  ),
+                  onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+
+          // Row 2: Secondary Account Setup Actions (Demo & Real)
+          Row(
+            children: [
+              Expanded(
+                child: _secondaryActionCard(
+                  title: 'Demo Trading',
+                  subtitle: 'Practice with \$10k',
+                  icon: Icons.play_arrow_rounded,
+                  iconColor: const Color(0xFFF59E0B),
+                  cardBg: cardBg,
+                  textPrimary: textPrimary,
+                  textSecondary: textSecondary,
+                  onTap: () => Get.toNamed(
+                    AppPages.CHOOSE_ACCOUNT,
+                    arguments: {'isDemo': true},
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _secondaryActionCard(
+                  title: 'Live Account',
+                  subtitle: 'Trade Real Markets',
+                  icon: Icons.account_balance_wallet_rounded,
+                  iconColor: const Color(0xFF10B981),
+                  cardBg: cardBg,
+                  textPrimary: textPrimary,
+                  textSecondary: textSecondary,
+                  onTap: () => Get.toNamed(
+                    AppPages.CHOOSE_ACCOUNT,
+                    arguments: {'isDemo': false},
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
     });
   }
 
-  // ── 3. Account Creation Cards (Create Demo & Create Real) ─────────────────
-  Widget _buildQuickFeatureRow(
-    Color cardBg,
-    Color textPrimary,
-    Color textSecondary,
-    bool isDark,
-  ) {
-    return Row(
-      children: [
-        // Create Demo Account Button Card
-        Expanded(
-          child: InkWell(
-            onTap:
-                () => Get.toNamed(
-                  AppPages.CHOOSE_ACCOUNT,
-                  arguments: {'isDemo': true},
+  Widget _primaryActionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Gradient gradient,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.r),
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(7.w),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.22),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 20.sp),
                 ),
-            borderRadius: BorderRadius.circular(18.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(18.r),
-                border: Border.all(
-                  color:
-                      isDark
-                          ? Colors.white.withOpacity(0.08)
-                          : Colors.black.withOpacity(0.05),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: Colors.white,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.play_circle_outline,
-                    color: Colors.orangeAccent,
-                    size: 22.r,
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    'Create Demo Account',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: textPrimary,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
-        SizedBox(width: 12.w),
-
-        // Create Real Account Button Card
-        Expanded(
-          child: InkWell(
-            onTap:
-                () => Get.toNamed(
-                  AppPages.CHOOSE_ACCOUNT,
-                  arguments: {'isDemo': false},
-                ),
-            borderRadius: BorderRadius.circular(18.r),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(18.r),
-                border: Border.all(
-                  color:
-                      isDark
-                          ? Colors.white.withOpacity(0.08)
-                          : Colors.black.withOpacity(0.05),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.account_balance_wallet_outlined,
-                    color: const Color(0xFF2ED573),
-                    size: 22.r,
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    'Create Real Account',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: textPrimary,
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  // ── 4. Dynamic Financial Services Group ───────────────────────────────────
+  Widget _secondaryActionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required Color cardBg,
+    required Color textPrimary,
+    required Color textSecondary,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: AppColors.border.withValues(alpha: 0.5),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.r),
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 11.h),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(7.w),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 18.sp),
+                ),
+                SizedBox(width: 9.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: textPrimary,
+                          fontSize: 12.5.sp,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodyText.copyWith(
+                          color: textSecondary,
+                          fontSize: 9.5.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── 3. Dynamic Financial Services Group ───────────────────────────────────
   Widget _buildDynamicServicesGroup(
     Color cardBg,
     Color textPrimary,
-    Color textSecondary,
-    bool isDark,
   ) {
     return Obx(() {
       final modulesService =
@@ -1065,11 +1088,11 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 
       // Dashboard
       items.add(
-        _buildOptionItem(
-          icon: Icons.space_dashboard_outlined,
-          iconColor: Colors.blueAccent,
-          title: languageService?.tr('dashboard_title') ?? 'Dashboard',
-          isDark: isDark,
+        _buildModernOptionTile(
+          icon: Icons.dashboard_rounded,
+          iconColor: const Color(0xFF3B82F6),
+          title: languageService?.tr('dashboard_title') ?? 'Trading Dashboard',
+          subtitle: 'Overview of balances & metrics',
           textPrimary: textPrimary,
           onTap: () => showDashboardBottomSheet(context),
         ),
@@ -1077,23 +1100,25 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 
       // General Finance
       items.add(
-        _buildOptionItem(
-          icon: Icons.monetization_on_outlined,
-          iconColor: Colors.green,
-          title: languageService?.tr('general_finance') ?? 'General Finance',
-          isDark: isDark,
+        _buildModernOptionTile(
+          icon: Icons.account_balance_wallet_rounded,
+          iconColor: const Color(0xFF10B981),
+          title: languageService?.tr('general_finance') ?? 'Finance & Wallet',
+          subtitle: 'Transfer, history & methods',
           textPrimary: textPrimary,
           onTap: () => Get.toNamed(AppPages.FINANCE),
         ),
       );
 
-      // IB Dashboard (Flow with _handleSwitchToIB)
+      // IB Dashboard
       items.add(
-        _buildOptionItem(
-          icon: Icons.handshake_outlined,
-          iconColor: const Color(0xFFFF9538),
-          title: languageService?.tr('more_dashboard') ?? 'IB Dashboard',
-          isDark: isDark,
+        _buildModernOptionTile(
+          icon: Icons.handshake_rounded,
+          iconColor: const Color(0xFFF97316),
+          title: languageService?.tr('more_dashboard') ?? 'IB Partner Portal',
+          subtitle: 'Commissions & client tree',
+          badgeText: 'Earn',
+          badgeColor: const Color(0xFFF97316),
           textPrimary: textPrimary,
           onTap: () async => await _handleSwitchToIB(),
         ),
@@ -1101,28 +1126,31 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 
       if (showPromotional) {
         items.add(
-          _buildOptionItem(
-            icon: Icons.card_giftcard,
-            iconColor: Colors.pinkAccent,
-            title: languageService?.tr('general_promotional') ?? 'Promotional',
-            isDark: isDark,
+          _buildModernOptionTile(
+            icon: Icons.card_giftcard_rounded,
+            iconColor: const Color(0xFFEC4899),
+            title: languageService?.tr('general_promotional') ?? 'Promotions & Rewards',
+            subtitle: 'Bonuses, scratch cards & offers',
+            badgeText: 'Bonus',
+            badgeColor: const Color(0xFFEC4899),
             textPrimary: textPrimary,
-            onTap:
-                () => Get.to(
-                  () => const PromotionalScreen(),
-                  transition: Transition.rightToLeft,
-                ),
+            onTap: () => Get.to(
+              () => const PromotionalScreen(),
+              transition: Transition.rightToLeft,
+            ),
           ),
         );
       }
 
       if (showCopyTrading) {
         items.add(
-          _buildOptionItem(
-            icon: Icons.auto_awesome,
-            iconColor: Colors.cyan,
+          _buildModernOptionTile(
+            icon: Icons.auto_awesome_rounded,
+            iconColor: const Color(0xFF6366F1),
             title: languageService?.tr('more_copy_trading') ?? 'Copy Trading',
-            isDark: isDark,
+            subtitle: 'Follow top verified master traders',
+            badgeText: 'Pro',
+            badgeColor: const Color(0xFF6366F1),
             textPrimary: textPrimary,
             onTap: () => Get.toNamed(AppPages.COPY_TRADING_MAIN),
           ),
@@ -1131,13 +1159,11 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 
       // Notifications
       items.add(
-        _buildOptionItem(
-          icon: Icons.notifications_none_outlined,
-          iconColor: Colors.orangeAccent,
-          title:
-              languageService?.trf('general_notifications', 'Notifications') ??
-              'Notifications',
-          isDark: isDark,
+        _buildModernOptionTile(
+          icon: Icons.notifications_active_rounded,
+          iconColor: const Color(0xFFF59E0B),
+          title: languageService?.trf('general_notifications', 'Notifications') ?? 'Notifications',
+          subtitle: 'Price alerts & account updates',
           textPrimary: textPrimary,
           onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
         ),
@@ -1145,11 +1171,13 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
 
       // Demo Contest
       items.add(
-        _buildOptionItem(
-          icon: Icons.emoji_events_outlined,
-          iconColor: const Color(0xFFFFC107),
-          title: languageService?.tr('more_demo_contest') ?? 'Demo Contest',
-          isDark: isDark,
+        _buildModernOptionTile(
+          icon: Icons.emoji_events_rounded,
+          iconColor: const Color(0xFFEAB308),
+          title: languageService?.tr('more_demo_contest') ?? 'Trading Contests',
+          subtitle: 'Compete risk-free for real cash prizes',
+          badgeText: 'Win',
+          badgeColor: const Color(0xFFEAB308),
           textPrimary: textPrimary,
           onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
         ),
@@ -1158,19 +1186,23 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
       return Container(
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
-            color:
-                isDark
-                    ? Colors.white.withOpacity(0.08)
-                    : Colors.black.withOpacity(0.05),
+            color: AppColors.border.withValues(alpha: 0.5),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           children: [
             for (int i = 0; i < items.length; i++) ...[
               items[i],
-              if (i < items.length - 1) _buildDivider(isDark),
+              if (i < items.length - 1) _buildDivider(),
             ],
           ],
         ),
@@ -1178,12 +1210,10 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     });
   }
 
-  // ── 5. Account & Security Settings Group (Includes all 7 user-requested options) ────────
+  // ── 4. Account & Security Settings Group ───────────────────────────────────
   Widget _buildSecuritySettingsGroup(
     Color cardBg,
     Color textPrimary,
-    Color textSecondary,
-    bool isDark,
   ) {
     final AuthController? authController =
         Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
@@ -1199,130 +1229,126 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color:
-              isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.05),
+          color: AppColors.border.withValues(alpha: 0.5),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
           // 1. Support / Customer Service
-          _buildOptionItem(
-            icon: Icons.headset_mic_outlined,
-            iconColor: Colors.greenAccent,
-            title:
-                languageService?.tr('ticket_title') ??
+          _buildModernOptionTile(
+            icon: Icons.support_agent_rounded,
+            iconColor: const Color(0xFF10B981),
+            title: languageService?.tr('ticket_title') ??
                 languageService?.tr('support') ??
-                'Customer Service / Support',
-            isDark: isDark,
+                '24/7 Support & Helpdesk',
+            subtitle: 'Submit tickets & live assistance',
             textPrimary: textPrimary,
             onTap: () => Get.toNamed(AppPages.TICKET_LIST),
           ),
-          _buildDivider(isDark),
+          _buildDivider(),
 
           // 2. Theme Switcher
-          _buildOptionItem(
-            icon: isDark ? Icons.wb_sunny_outlined : Icons.dark_mode_outlined,
-            iconColor: Colors.amber,
-            title: languageService?.tr('theme') ?? 'Theme',
-            subtitle: isDark ? 'Dark' : 'Light',
-            isDark: isDark,
+          _buildModernOptionTile(
+            icon: AppColors.isDarkMode
+                ? Icons.light_mode_rounded
+                : Icons.dark_mode_rounded,
+            iconColor: const Color(0xFFF59E0B),
+            title: languageService?.tr('theme') ?? 'Theme Appearance',
+            subtitle: AppColors.isDarkMode ? 'Dark Mode Active' : 'Light Mode Active',
             textPrimary: textPrimary,
             onTap: () => showThemeBottomSheet(context),
           ),
-          _buildDivider(isDark),
+          _buildDivider(),
 
           // 3. One Click Trading with Switch
           ValueListenableBuilder<bool>(
             valueListenable:
                 OneClickTradingService.instance.enabledNotifier,
             builder: (context, enabled, _) {
-              return _buildOptionItem(
+              return _buildModernOptionTile(
                 icon: Icons.touch_app_rounded,
                 iconColor: AppColors.primary,
-                title: 'One Click Trading',
-                isDark: isDark,
+                title: Get.find<LanguageService>().tr('more_screen_one_click_trading'),
+                subtitle: 'Instant order execution without confirmation',
                 textPrimary: textPrimary,
-                trailing: SizedBox(
-                  height: 24.h,
-                  child: Switch.adaptive(
-                    value: enabled,
-                    activeColor: AppColors.primary,
-                    onChanged: (_) => _toggleOneClickTrading(),
-                  ),
+                trailing: Switch.adaptive(
+                  value: enabled,
+                  activeColor: AppColors.primary,
+                  onChanged: (_) => _toggleOneClickTrading(),
                 ),
                 onTap: _toggleOneClickTrading,
               );
             },
           ),
-          _buildDivider(isDark),
+          _buildDivider(),
 
           // 4. Biometric Login with Switch
-          _buildOptionItem(
-            icon: Icons.fingerprint,
-            iconColor: Colors.cyan,
-            title: languageService?.tr('biometric_login') ?? 'Biometric Login',
-            isDark: isDark,
+          _buildModernOptionTile(
+            icon: Icons.fingerprint_rounded,
+            iconColor: const Color(0xFF06B6D4),
+            title: languageService?.tr('biometric_login') ?? 'Biometric & Face ID',
+            subtitle: 'Secure fingerprint or face unlock',
             textPrimary: textPrimary,
-            trailing: SizedBox(
-              height: 24.h,
-              child: Switch.adaptive(
-                value: _isBiometricEnabled,
-                activeColor: AppColors.primary,
-                onChanged: (val) => _toggleBiometric(),
-              ),
+            trailing: Switch.adaptive(
+              value: _isBiometricEnabled,
+              activeColor: AppColors.primary,
+              onChanged: (val) => _toggleBiometric(),
             ),
             onTap: _toggleBiometric,
           ),
-          _buildDivider(isDark),
+          _buildDivider(),
 
-          // 4. Change Password
-          _buildOptionItem(
-            icon: Icons.lock_reset_outlined,
-            iconColor: Colors.orangeAccent,
+          // 5. Change Password
+          _buildModernOptionTile(
+            icon: Icons.lock_reset_rounded,
+            iconColor: const Color(0xFFF97316),
             title: languageService?.tr('change_password') ?? 'Change Password',
-            isDark: isDark,
+            subtitle: 'Update your security credentials',
             textPrimary: textPrimary,
             onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
           ),
-          _buildDivider(isDark),
+          _buildDivider(),
 
-          // 5. Two Factor Authentication
-          _buildOptionItem(
-            icon: Icons.security_outlined,
-            iconColor: Colors.purpleAccent,
-            title:
-                languageService?.tr('two_factor_authentication') ??
-                'Two Factor Authentication',
-            isDark: isDark,
+          // 6. Two Factor Authentication
+          _buildModernOptionTile(
+            icon: Icons.security_rounded,
+            iconColor: const Color(0xFF8B5CF6),
+            title: languageService?.tr('two_factor_authentication') ?? 'Two-Factor Auth (2FA)',
+            subtitle: 'Additional security layer for withdrawals',
             textPrimary: textPrimary,
             onTap: () => Get.toNamed(AppPages.TWO_FACTOR_AUTH),
           ),
 
           if (isLoggedIn && authController != null) ...[
-            _buildDivider(isDark),
+            _buildDivider(),
 
-            // 6. Delete Account
-            _buildOptionItem(
-              icon: Icons.delete_forever_outlined,
-              iconColor: Colors.redAccent,
+            // 7. Delete Account
+            _buildModernOptionTile(
+              icon: Icons.delete_outline_rounded,
+              iconColor: const Color(0xFFEF4444),
               title: languageService?.tr('delete_account') ?? 'Delete Account',
-              isDark: isDark,
-              textPrimary: Colors.redAccent,
+              subtitle: 'Permanently close account and data',
+              textPrimary: const Color(0xFFEF4444),
               onTap: () => _showDeleteAccountDialog(context, authController),
             ),
-            _buildDivider(isDark),
+            _buildDivider(),
 
-            // 7. Logout
-            _buildOptionItem(
-              icon: Icons.logout,
-              iconColor: Colors.red,
-              title: languageService?.tr('more_logout') ?? 'Logout',
-              isDark: isDark,
-              textPrimary: Colors.red,
+            // 8. Logout
+            _buildModernOptionTile(
+              icon: Icons.logout_rounded,
+              iconColor: const Color(0xFFEF4444),
+              title: languageService?.tr('more_logout') ?? 'Log Out',
+              subtitle: 'Sign out from this session',
+              textPrimary: const Color(0xFFEF4444),
               onTap: () => _showLogoutDialog(context, authController),
             ),
           ],
@@ -1331,86 +1357,105 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     );
   }
 
-  String _toTitleCase(String text) {
-    if (text.trim().isEmpty) return text;
-    return text
-        .split(' ')
-        .map((word) {
-          if (word.isEmpty) return word;
-          if (word.contains('/')) {
-            return word.split('/').map((w) => _toTitleCase(w)).join(' / ');
-          }
-          if (word.toUpperCase() == word && word.length <= 3) return word;
-          return word[0].toUpperCase() + word.substring(1).toLowerCase();
-        })
-        .join(' ');
-  }
-
-  Widget _buildOptionItem({
+  Widget _buildModernOptionTile({
     required IconData icon,
     required Color iconColor,
     required String title,
     String? subtitle,
+    String? badgeText,
+    Color? badgeColor,
     Widget? trailing,
-    bool isExternal = false,
-    required bool isDark,
     required Color textPrimary,
     required VoidCallback onTap,
   }) {
-    final formattedTitle = _toTitleCase(title);
-    final formattedSubtitle = subtitle != null ? _toTitleCase(subtitle) : null;
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16.r),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 15.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Icon Badge Container
+              Container(
+                width: 38.w,
+                height: 38.h,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(11.r),
+                ),
+                child: Center(
+                  child: Icon(icon, color: iconColor, size: 20.sp),
+                ),
+              ),
+              SizedBox(width: 12.w),
+
+              // Title and Subtitle
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(icon, color: iconColor, size: 20.r),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Text(
-                        formattedTitle,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.bodyText.copyWith(
+                              color: textPrimary,
+                              fontSize: 13.5.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        if (badgeText != null) ...[
+                          SizedBox(width: 6.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.5.h),
+                            decoration: BoxDecoration(
+                              color: (badgeColor ?? AppColors.primary).withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              badgeText,
+                              style: TextStyle(
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w800,
+                                color: badgeColor ?? AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    if (subtitle != null) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.bodyText.copyWith(
-                          color: textPrimary,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
+                          color: AppColors.textGrey,
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
-              Row(
-                children: [
-                  if (formattedSubtitle != null) ...[
-                    Text(
-                      formattedSubtitle,
-                      style: AppTextStyles.bodyText.copyWith(
-                        color: const Color(0xFFFF9538),
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(width: 4.w),
-                  ],
-                  if (trailing != null)
-                    trailing
-                  else
-                    Icon(
-                      isExternal ? Icons.open_in_new : Icons.chevron_right,
-                      color: isDark ? Colors.white38 : Colors.black38,
-                      size: 18.r,
-                    ),
-                ],
-              ),
+
+              // Trailing action or Chevron
+              if (trailing != null)
+                trailing
+              else
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: AppColors.textGrey.withValues(alpha: 0.6),
+                  size: 13.sp,
+                ),
             ],
           ),
         ),
@@ -1418,18 +1463,22 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     );
   }
 
-  Widget _buildDivider(bool isDark) {
+  Widget _buildDivider() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      padding: EdgeInsets.only(left: 64.w, right: 14.w),
       child: Divider(
         height: 1,
-        thickness: 0.6,
-        color:
-            isDark
-                ? Colors.white.withOpacity(0.08)
-                : Colors.black.withOpacity(0.05),
+        thickness: 0.5,
+        color: AppColors.border.withValues(alpha: 0.4),
       ),
     );
+  }
+
+  String _getUserInitials(String fullName) {
+    if (fullName.trim().isEmpty) return '?';
+    final parts = fullName.trim().split(RegExp(r'\s+'));
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 }
 
@@ -1464,72 +1513,93 @@ class _VerifyAccountCard extends StatelessWidget {
         final stage = model?.data?.stageCompletion;
         final completion = _calculateCompletion(stage);
 
-        return Card(
-          elevation: 0,
-          color: AppColors.primary.withValues(alpha: 0.08),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.primary.withValues(alpha: 0.12),
+                AppColors.primary.withValues(alpha: 0.04),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.25),
+            ),
           ),
-          child: InkWell(
-            onTap: () async {
-              final model = controller.dashboardModel.value;
-              final stage = model?.data?.stageCompletion;
-              await Get.toNamed(AppPages.KYC_INTRO, arguments: stage);
-              controller.loadMoreScreenData();
-            },
-            borderRadius: BorderRadius.circular(12.r),
-            child: Padding(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Verify Account',
-                          style: AppTextStyles.headingblack.copyWith(
-                            fontSize: 14.sp,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () async {
+                final model = controller.dashboardModel.value;
+                final stage = model?.data?.stageCompletion;
+                await Get.toNamed(AppPages.KYC_INTRO, arguments: stage);
+                controller.loadMoreScreenData();
+              },
+              borderRadius: BorderRadius.circular(16.r),
+              child: Padding(
+                padding: EdgeInsets.all(14.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(6.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Icon(
+                            Icons.verified_user_rounded,
+                            size: 16.sp,
+                            color: AppColors.primary,
                           ),
                         ),
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: AppColors.textPrimary,
-                        size: 14.r,
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    'Complete your profile to unlock all features',
-                    style: AppTextStyles.labelOnChartPendingOrder.copyWith(
-                      fontSize: 12.sp,
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            'Verify Your Profile',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 13.5.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '$completion% ${languageService?.tr('completed') ?? 'Done'}',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    '$completion% ${languageService?.tr('completed') ?? 'Completed'}',
-                    style: AppTextStyles.bodyText.copyWith(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(2.r),
-                    child: LinearProgressIndicator(
-                      value: completion / 100,
-                      minHeight: 3.h,
-                      backgroundColor: AppColors.border,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppColors.primary,
+                    SizedBox(height: 6.h),
+                    Text(
+                      'Complete verification to unlock unlimited deposits and higher leverage.',
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 11.sp,
+                        color: AppColors.textGrey,
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: 10.h),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4.r),
+                      child: LinearProgressIndicator(
+                        value: completion / 100,
+                        minHeight: 4.h,
+                        backgroundColor: AppColors.border.withValues(alpha: 0.4),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

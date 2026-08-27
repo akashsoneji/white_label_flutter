@@ -102,7 +102,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Close failed: $e')),
+        SnackBar(content: Text(Get.find<LanguageService>().tr('meta_close_failed').replaceAll('{error}', '$e'))),
       );
     }
   }

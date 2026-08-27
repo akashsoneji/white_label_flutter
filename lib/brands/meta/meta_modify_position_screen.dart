@@ -274,7 +274,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Modify failed: $e')));
+      ).showSnackBar(SnackBar(content: Text(Get.find<LanguageService>().tr('meta_modify_failed').replaceAll('{error}', '$e'))));
     }
   }
 

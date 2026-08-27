@@ -326,7 +326,7 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                   fontSize: 15.sp,
                   fontWeight: FontWeight.w700)),
           SizedBox(height: 6.h),
-          Text('Tap  +  to add symbols',
+          Text(Get.find<LanguageService>().tr('meta_watchlist_screen_tap_to_add_symbols'),
               style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c), fontSize: 12.sp)),
         ],
@@ -1005,9 +1005,9 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Remove symbols'),
+        title: Text(Get.find<LanguageService>().tr('meta_watchlist_remove_symbols')),
         content:
-            Text('Remove ${_checked.length} symbol(s) from your watchlist?'),
+            Text(Get.find<LanguageService>().tr('meta_remove_symbols_confirm').replaceAll('{n}', '${_checked.length}')),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -1083,7 +1083,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
                 IconButton(
                   icon: Icon(Icons.add,
                       color: MetaTheme.mainText(c), size: 26.sp),
-                  tooltip: 'Add symbols',
+                  tooltip: Get.find<LanguageService>().tr('meta_watchlist_screen_add_symbols'),
                   onPressed: () {
                     Navigator.of(c).pop();
                     Navigator.of(c)
@@ -1093,7 +1093,7 @@ class _SelectedSymbolsScreenState extends State<_SelectedSymbolsScreen> {
                 IconButton(
                   icon: Icon(Icons.delete_outline,
                       color: MetaTheme.mainText(c), size: 24.sp),
-                  tooltip: 'Remove symbols',
+                  tooltip: Get.find<LanguageService>().tr('meta_watchlist_remove_symbols'),
                   onPressed: _toggleDeleteMode,
                 ),
               ],

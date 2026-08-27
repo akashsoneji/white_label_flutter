@@ -44,6 +44,7 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/home/close_position_screen.dart';
 
 
@@ -981,7 +982,7 @@ class _TpSlPanel extends StatelessWidget {
         children: [
           SizedBox(height: 16.h),
           _TpSlSection(
-            label: 'Take profit',
+            label: Get.find<LanguageService>().tr('pending_order_take_profit_label'),
             field: _StepperField(
               controller: tpCtl,
               focusNode: tpFocus,
@@ -996,7 +997,7 @@ class _TpSlPanel extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           _TpSlSection(
-            label: 'Stop loss',
+            label: Get.find<LanguageService>().tr('pending_order_stop_loss_label'),
             field: _StepperField(
               controller: slCtl,
               focusNode: slFocus,

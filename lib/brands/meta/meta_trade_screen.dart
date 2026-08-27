@@ -341,7 +341,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                     )
                );
             },
-            tooltip: 'Add ticket',
+            tooltip: Get.find<LanguageService>().tr('meta_trade_add_ticket'),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
@@ -691,7 +691,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 ),
                 const Spacer(),
                 if (isPending)
-                  Text('placed',
+                  Text(Get.find<LanguageService>().tr('meta_trade_screen_placed'),
                       style: AppTextStyles.bodyText.copyWith(
                         color: MetaTheme.subText(c),
                         fontSize: 13.sp,
@@ -937,7 +937,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                     if (Get.isRegistered<AppNotificationController>()) {
                       Get.find<AppNotificationController>().showError(
                         title: Get.find<LanguageService>().tr('meta_trade_error'),
-                        message: 'No active trading account found',
+                        message: Get.find<LanguageService>().tr('celestial_trade_screen_no_active_trading_account_found'),
                       );
                     }
                     return;
@@ -951,7 +951,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                     if (errMsg.isEmpty) {
                       Get.find<AppNotificationController>().showSuccess(
                         title: Get.find<LanguageService>().tr('meta_trade_success'),
-                        message: 'Pending order cancelled',
+                        message: Get.find<LanguageService>().tr('celestial_trade_screen_pending_order_cancelled'),
                       );
                     } else {
                       Get.find<AppNotificationController>().showError(
@@ -1037,7 +1037,7 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
             if (Get.isRegistered<AppNotificationController>()) {
               Get.find<AppNotificationController>().showError(
                 title: Get.find<LanguageService>().tr('meta_trade_error'),
-                message: 'No active trading account found',
+                message: Get.find<LanguageService>().tr('celestial_trade_screen_no_active_trading_account_found'),
               );
             }
             return Future.value(false);

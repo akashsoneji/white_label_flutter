@@ -18,7 +18,9 @@ class AppNotificationStack extends StatelessWidget {
     if (FlavorConfig.usesIquoteUi()) {
       return Positioned.fill(
         child: Align(
-          alignment: Alignment.centerRight,
+          // Top 25% band — toast centered at 12.5% from top:
+          // y = 2*0.125 - 1 = -0.75 (top=-1, center=0, bottom=1).
+          alignment: const Alignment(1, -0.75),
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 12.h),
             child: const _IquoteNotificationContent(),

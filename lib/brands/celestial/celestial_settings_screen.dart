@@ -161,7 +161,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
 
     final supported = await BiometricService.instance.isDeviceSupported();
     if (!supported) {
-      CustomToastService.showError(message: 'Biometric not supported on this device');
+      CustomToastService.showError(message: languageService.tr('celestial_settings_screen_biometric_not_supported_on_this_device'));
       return;
     }
     final enrolled = await BiometricService.instance.isEnrolled();
@@ -187,7 +187,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
       await ibmController.checkSystemAndNavigate();
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back(closeOverlays: true);
-      CustomToastService.showError(message: 'Error checking IB status: $e');
+      CustomToastService.showError(message: languageService.tr('common_ib_status_error_with_msg').replaceAll('{error}', '$e'));
     }
   }
 
@@ -639,7 +639,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
       ),
       _CelMenuItem(
         icon: Icons.account_balance_rounded,
-        label: 'Finance',
+        label: languageService.tr('settings_finance'),
         color: const Color(0xFF009688),
         onTap: () async {
           await Get.toNamed(AppPages.FINANCE);
@@ -651,7 +651,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
     if (showPromotional) {
       items.add(_CelMenuItem(
         icon: Icons.campaign_rounded,
-        label: 'Promotional',
+        label: languageService.tr('settings_promotional'),
         color: const Color(0xFFFF9800),
         onTap: () => Get.to(
           () => const PromotionalScreen(),
@@ -662,7 +662,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
 
     items.add(_CelMenuItem(
       icon: Icons.dashboard_rounded,
-      label: 'IB Dashboard',
+      label: languageService.tr('settings_ib_dashboard'),
       color: CelTheme.buy(c),
       onTap: () async => await _handleSwitchToIB(),
     ));
@@ -670,7 +670,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
     if (showCopyTrading) {
       items.add(_CelMenuItem(
         icon: Icons.content_copy_rounded,
-        label: 'Copy Trading',
+        label: languageService.tr('settings_copy_trading'),
         color: const Color(0xFF2196F3),
         onTap: () => Get.toNamed(Routes.COPY_TRADING_MAIN),
       ));
@@ -698,25 +698,25 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
       if (themeService.canUserChangeTheme)
         _CelMenuItem(
           icon: Icons.color_lens_rounded,
-          label: 'Theme',
+          label: languageService.tr('celestial_settings_theme'),
           color: const Color(0xFF9C27B0),
           onTap: () => showThemeBottomSheet(context),
         ),
       _CelMenuItem(
         icon: Icons.lock_outline_rounded,
-        label: 'Change Password',
+        label: languageService.tr('settings_change_password'),
         color: const Color(0xFFF44336),
         onTap: () => Get.toNamed(AppPages.CHANGE_PASSWORD),
       ),
       _CelMenuItem(
         icon: Icons.security_rounded,
-        label: 'Two-Factor Authentication',
+        label: languageService.tr('settings_two_factor_auth'),
         color: const Color(0xFF673AB7),
         onTap: () => Get.toNamed(Routes.TWO_FACTOR_AUTH),
       ),
       _CelMenuItem(
         icon: Icons.touch_app_rounded,
-        label: 'One Click Trading',
+        label: languageService.tr('settings_one_click_trading'),
         color: const Color(0xFF00BCD4),
         isToggle: true,
         toggleValue: _oneClickEnabled,
@@ -724,7 +724,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
       ),
       _CelMenuItem(
         icon: Icons.fingerprint_rounded,
-        label: 'Biometric Login',
+        label: languageService.tr('settings_biometric_login'),
         color: const Color(0xFF3F51B5),
         isToggle: true,
         toggleValue: _biometricEnabled,
@@ -741,31 +741,31 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
     return [
       _CelMenuItem(
         icon: Icons.notifications_none_rounded,
-        label: 'Notifications',
+        label: languageService.tr('settings_notifications_title'),
         color: const Color(0xFFE91E63),
         onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
       ),
       _CelMenuItem(
         icon: Icons.emoji_events_outlined,
-        label: 'Demo Contest',
+        label: languageService.tr('more_demo_contest'),
         color: const Color(0xFFFFC107),
         onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
       ),
       _CelMenuItem(
         icon: Icons.support_agent_rounded,
-        label: 'Support Tickets',
+        label: languageService.tr('settings_support_tickets'),
         color: const Color(0xFFE91E63),
         onTap: () => Get.toNamed(Routes.TICKET_LIST),
       ),
       _CelMenuItem(
         icon: Icons.delete_forever_rounded,
-        label: 'Delete Account',
+        label: languageService.tr('settings_delete_account'),
         color: const Color(0xFFE91E63),
         onTap: () => _showDeleteAccountDialog(c, auth),
       ),
       _CelMenuItem(
         icon: Icons.logout_rounded,
-        label: 'Logout',
+        label: languageService.tr('celestial_settings_logout'),
         color: CelTheme.sell(c),
         showArrow: false,
         onTap: () => _showLogoutDialog(c, auth),
@@ -969,7 +969,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                     child: Obx(
                       () => _dialogButton(
                         c,
-                        label: 'Yes',
+                        label: languageService.tr('settings_yes'),
                         isPrimary: true,
                         onTap: auth.isLoading
                             ? null
@@ -1036,7 +1036,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                     style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp, color: CelTheme.mainText(c)),
                     decoration: InputDecoration(
-                      hintText: 'Enter your password',
+                      hintText: languageService.tr('settings_enter_password'),
                       hintStyle: AppTextStyles.bodyText.copyWith(color: CelTheme.subText(c)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.r),
@@ -1072,7 +1072,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
                   Expanded(
                     child: Obx(() => _dialogButton(
                           c,
-                          label: 'Yes',
+                          label: languageService.tr('settings_yes'),
                           isPrimary: true,
                           isDanger: true,
                           onTap: auth.isLoading

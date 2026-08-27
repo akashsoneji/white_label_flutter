@@ -1,0 +1,325 @@
+{
+ "lib/screens/auth/presentation/brands/iquote/pages/iquote_create_account_screen.dart": [
+  [
+   225,
+   "title",
+   "Error"
+  ]
+ ],
+ "lib/screens/home/brands/iquote/history_filter_sheet.dart": [
+  [
+   526,
+   "hintText",
+   "Search symbol"
+  ]
+ ],
+ "lib/screens/home/brands/iquote/iquote_chart_screen.dart": [
+  [
+   465,
+   "title",
+   "Error"
+  ],
+  [
+   466,
+   "message",
+   "No active account found"
+  ],
+  [
+   479,
+   "title",
+   "Success"
+  ],
+  [
+   480,
+   "message",
+   "Positions closed successfully"
+  ],
+  [
+   484,
+   "title",
+   "Error"
+  ],
+  [
+   485,
+   "message",
+   "Failed to close positions: $e"
+  ],
+  [
+   1222,
+   "label",
+   "Market"
+  ],
+  [
+   1228,
+   "label",
+   "Pending"
+  ],
+  [
+   1420,
+   "label",
+   "Trigger Price"
+  ],
+  [
+   1458,
+   "label",
+   "Limit Price"
+  ],
+  [
+   1521,
+   "label",
+   "Order Price"
+  ],
+  [
+   1582,
+   "label",
+   "Take profit"
+  ],
+  [
+   1594,
+   "label",
+   "Stop loss"
+  ],
+  [
+   2080,
+   "label",
+   "Undo"
+  ],
+  [
+   2202,
+   "hintText",
+   "Search symbols…"
+  ],
+  [
+   2322,
+   "tooltip",
+   "Sort"
+  ]
+ ],
+ "lib/screens/home/brands/iquote/iquote_market_screen.dart": [
+  [
+   364,
+   "message",
+   "Loading..."
+  ]
+ ],
+ "lib/screens/home/brands/iquote/iquote_position_detail_screen.dart": [
+  [
+   984,
+   "label",
+   "Take profit"
+  ],
+  [
+   999,
+   "label",
+   "Stop loss"
+  ]
+ ],
+ "lib/screens/home/brands/iquote/iquote_position_screen.dart": [
+  [
+   1243,
+   "Text",
+   "Close Position"
+  ],
+  [
+   1250,
+   "Text",
+   "Edit Order"
+  ],
+  [
+   1296,
+   "label",
+   "Close Losing Positions"
+  ],
+  [
+   1303,
+   "title",
+   "Close all losing positions?"
+  ],
+  [
+   1309,
+   "label",
+   "Close Profitable Positions"
+  ],
+  [
+   1316,
+   "title",
+   "Close all profitable positions?"
+  ],
+  [
+   1322,
+   "label",
+   "Close All Positions"
+  ],
+  [
+   1329,
+   "title",
+   "Close all positions?"
+  ],
+  [
+   1391,
+   "title",
+   "No positions"
+  ],
+  [
+   1392,
+   "message",
+   "No positions matched the selected filter"
+  ],
+  [
+   1500,
+   "title",
+   "Error"
+  ],
+  [
+   1501,
+   "message",
+   "No active account found"
+  ],
+  [
+   1515,
+   "title",
+   "Error"
+  ],
+  [
+   1516,
+   "message",
+   "Failed to close positions: $e"
+  ],
+  [
+   1719,
+   "title",
+   "Error"
+  ],
+  [
+   1720,
+   "message",
+   "No active account found"
+  ],
+  [
+   1731,
+   "title",
+   "Error"
+  ],
+  [
+   1732,
+   "message",
+   "Failed to close position: $e"
+  ],
+  [
+   1871,
+   "title",
+   "Error"
+  ],
+  [
+   1872,
+   "message",
+   "No active account found"
+  ],
+  [
+   1883,
+   "title",
+   "Error"
+  ],
+  [
+   1884,
+   "message",
+   "Failed to cancel order: $e"
+  ]
+ ],
+ "lib/screens/home/brands/iquote/view_models/iquote_chart_controller.dart": [
+  [
+   343,
+   "message",
+   "No active MT5 account selected."
+  ],
+  [
+   350,
+   "message",
+   "Volume must be greater than 0."
+  ],
+  [
+   367,
+   "message",
+   "Please enter a valid trigger price."
+  ],
+  [
+   377,
+   "message",
+   "Please enter a valid limit price."
+  ],
+  [
+   387,
+   "message",
+   "Please enter a valid limit price."
+  ],
+  [
+   398,
+   "message",
+   "Authentication token missing."
+  ],
+  [
+   435,
+   "message",
+   "Order placed"
+  ]
+ ],
+ "lib/screens/home/iquote_home_screen.dart": [
+  [
+   41,
+   "message",
+   "Error checking IB status: $e"
+  ],
+  [
+   206,
+   "label",
+   "Demo"
+  ],
+  [
+   218,
+   "label",
+   "Real"
+  ],
+  [
+   226,
+   "label",
+   "IB"
+  ],
+  [
+   235,
+   "label",
+   "PAMM"
+  ],
+  [
+   244,
+   "label",
+   "Scratchcard"
+  ],
+  [
+   253,
+   "label",
+   "Support Ticket"
+  ],
+  [
+   261,
+   "label",
+   "Deposit"
+  ],
+  [
+   272,
+   "label",
+   "Withdrawal"
+  ]
+ ],
+ "lib/screens/home/more/iquote_assets_layout.dart": [
+  [
+   222,
+   "message",
+   "Error checking IB status: $e"
+  ],
+  [
+   1246,
+   "title",
+   "One Click Trading"
+  ]
+ ]
+}

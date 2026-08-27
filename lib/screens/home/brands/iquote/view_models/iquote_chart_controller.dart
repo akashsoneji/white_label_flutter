@@ -23,6 +23,7 @@ import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:crm_app/services/language_service.dart';
 
 import 'package:crm_app/services/symbol_selection_service.dart';
 
@@ -47,6 +48,8 @@ class CandleData {
 }
 
 class IQuoteChartController extends GetxController {
+  LanguageService get _lang => Get.find<LanguageService>();
+
   IQuoteChartController([String? initialSymbol]) {
     final symService =
         Get.isRegistered<SymbolSelectionService>()
@@ -329,34 +332,62 @@ class IQuoteChartController extends GetxController {
     required String orderKind,
     required double volume,
     required String price,
+    String? stopLimitPrice,
     String? takeProfit,
     String? stopLoss,
+    // Pre-formatted lot string that preserves the user's actual decimal
+    // precision (e.g. "0.001"). When null we fall back to 2-decimal format.
+    String? formattedVolume,
   }) async {
     final acct = activeAccount;
     if (acct == null) {
       return (
         ok: false,
-        message: 'No active MT5 account selected.',
+        message: _lang.tr('iquote_no_mt5_account'),
         orderType: _orderType(side, orderKind),
       );
     }
     if (volume <= 0) {
       return (
         ok: false,
-        message: 'Volume must be greater than 0.',
+        message: _lang.tr('iquote_volume_gt_zero'),
         orderType: _orderType(side, orderKind),
       );
     }
 
     final kind = orderKind.toLowerCase();
     final orderType = _orderType(side, kind);
-    if (orderType.requiresPrice &&
+    final isStopLimit = kind == 'stop_limit';
+
+    // For stop-limit orders: `price` is the Trigger Price and
+    // `stopLimitPrice` is the Limit Price. Both are required.
+    if (isStopLimit) {
+      if (price.isEmpty ||
+          double.tryParse(price) == null ||
+          double.parse(price) <= 0) {
+        return (
+          ok: false,
+          message: _lang.tr('iquote_valid_trigger'),
+          orderType: orderType,
+        );
+      }
+      if (stopLimitPrice == null ||
+          stopLimitPrice.isEmpty ||
+          double.tryParse(stopLimitPrice) == null ||
+          double.parse(stopLimitPrice) <= 0) {
+        return (
+          ok: false,
+          message: _lang.tr('iquote_valid_limit'),
+          orderType: orderType,
+        );
+      }
+    } else if (orderType.requiresPrice &&
         (price.isEmpty ||
             double.tryParse(price) == null ||
             double.parse(price) <= 0)) {
       return (
         ok: false,
-        message: 'Please enter a valid limit price.',
+        message: _lang.tr('iquote_valid_limit'),
         orderType: orderType,
       );
     }
@@ -367,16 +398,19 @@ class IQuoteChartController extends GetxController {
       if (token == null || token.isEmpty) {
         return (
           ok: false,
-          message: 'Authentication token missing.',
+          message: _lang.tr('iquote_auth_token_missing'),
           orderType: orderType,
         );
       }
 
       final ok = await _trading.placeTradeOrder(
         symbol: symbol,
-        volume: volume.toStringAsFixed(2),
+        volume: (formattedVolume != null && formattedVolume.isNotEmpty)
+            ? formattedVolume
+            : volume.toStringAsFixed(2),
         orderType: orderType,
         price: orderType.requiresPrice ? price : '',
+        stopLimitPrice: isStopLimit ? stopLimitPrice : null,
         takeProfit:
             (takeProfit != null && takeProfit.isNotEmpty) ? takeProfit : null,
         stopLoss: (stopLoss != null && stopLoss.isNotEmpty) ? stopLoss : null,
@@ -401,7 +435,7 @@ class IQuoteChartController extends GetxController {
         // update immediately.
         await _trading.refreshTradeHistory();
         _refreshCounts();
-        return (ok: true, message: 'Order placed', orderType: orderType);
+        return (ok: true, message: _lang.tr('iquote_order_placed'), orderType: orderType);
       }
 
       final errorMsg =
@@ -423,6 +457,8 @@ class IQuoteChartController extends GetxController {
       return isBuy ? OrderType.buyLimit : OrderType.sellLimit;
     } else if (kind == 'stop') {
       return isBuy ? OrderType.buyStop : OrderType.sellStop;
+    } else if (kind == 'stop_limit') {
+      return isBuy ? OrderType.buyStopLimit : OrderType.sellStopLimit;
     } else {
       return isBuy ? OrderType.buyMarket : OrderType.sellMarket;
     }

@@ -361,7 +361,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
         }
         return Center(
           child: CommonLoadingWidget(
-            message: 'Loading...',
+            message: _ls.tr('common_loading'),
             size: 40,
             color: AppColors.primary,
           ),

@@ -1,0 +1,827 @@
+[
+ [
+  "lib/screens/auth/presentation/pages/account_created_screen.dart",
+  196,
+  "Create Trading Account"
+ ],
+ [
+  "lib/screens/copy_trading/add_investment_screen.dart",
+  38,
+  "Add Investment"
+ ],
+ [
+  "lib/screens/copy_trading/change_proportion_screen.dart",
+  37,
+  "Change Copy Proportion"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  285,
+  "Retry"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  325,
+  "Fixed Lot Size"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  326,
+  "Equity Proportional"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  327,
+  "Balance Proportional"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  328,
+  "Lot Multiplier"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  329,
+  "Mirror Ratio"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  330,
+  "Percentage Risk"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  331,
+  "Reverse Copying"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  332,
+  "Dynamic Drawdown Lot"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  333,
+  "Fixed Profit Ratio"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  504,
+  "Cancel"
+ ],
+ [
+  "lib/screens/copy_trading/components/edit_subscription_sheet.dart",
+  519,
+  "Save Changes"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  193,
+  "Stop investment?"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  200,
+  "Cancel"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  205,
+  "Stop"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  232,
+  "Add capital"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  243,
+  "Cancel"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  251,
+  "Add"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  308,
+  "Your Investment"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  669,
+  "Pause"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  685,
+  "Resume"
+ ],
+ [
+  "lib/screens/copy_trading/investment_detail_screen.dart",
+  702,
+  "Stop"
+ ],
+ [
+  "lib/screens/copy_trading/reduce_investment_screen.dart",
+  37,
+  "Reduce Investment"
+ ],
+ [
+  "lib/screens/copy_trading/tabs/investment_tab.dart",
+  84,
+  "Your Investment"
+ ],
+ [
+  "lib/screens/copy_trading/tabs/my_plans_tab.dart",
+  346,
+  "Try Again"
+ ],
+ [
+  "lib/screens/copy_trading/tabs/my_plans_tab.dart",
+  483,
+  "Create First Plan"
+ ],
+ [
+  "lib/screens/demo_contest/presentation/pages/demo_contest_my_stats_screen.dart",
+  229,
+  "Retry"
+ ],
+ [
+  "lib/screens/demo_contest/presentation/pages/demo_contest_screen.dart",
+  186,
+  "No contests available."
+ ],
+ [
+  "lib/screens/demo_contest/presentation/pages/demo_contest_screen.dart",
+  361,
+  "Top Prize "
+ ],
+ [
+  "lib/screens/demo_contest/presentation/pages/demo_contest_screen.dart",
+  377,
+  "STARTS"
+ ],
+ [
+  "lib/screens/demo_contest/presentation/pages/demo_contest_screen.dart",
+  394,
+  "ENDS"
+ ],
+ [
+  "lib/screens/demo_contest/presentation/pages/demo_contest_screen.dart",
+  408,
+  "Dubai Time (UTC+4)"
+ ],
+ [
+  "lib/screens/example_rtl_components_screen.dart",
+  23,
+  "RTL Components Demo"
+ ],
+ [
+  "lib/screens/example_rtl_components_screen.dart",
+  136,
+  "Card Title"
+ ],
+ [
+  "lib/screens/example_rtl_components_screen.dart",
+  149,
+  "Custom Card"
+ ],
+ [
+  "lib/screens/example_rtl_components_screen.dart",
+  158,
+  "Container with default styling"
+ ],
+ [
+  "lib/screens/finance/presentation/pages/cregis_address_screen.dart",
+  173,
+  "Cancel payment?"
+ ],
+ [
+  "lib/screens/finance/presentation/pages/cregis_address_screen.dart",
+  181,
+  "No, keep waiting"
+ ],
+ [
+  "lib/screens/finance/presentation/pages/cregis_address_screen.dart",
+  185,
+  "Yes, cancel"
+ ],
+ [
+  "lib/screens/finance/presentation/pages/cregis_success_screen.dart",
+  179,
+  "Cancel payment?"
+ ],
+ [
+  "lib/screens/finance/presentation/pages/cregis_success_screen.dart",
+  187,
+  "No, keep waiting"
+ ],
+ [
+  "lib/screens/finance/presentation/pages/cregis_success_screen.dart",
+  191,
+  "Yes, cancel"
+ ],
+ [
+  "lib/screens/finance/presentation/pages/payment_methods_screen.dart",
+  210,
+  "Instant up to 1 hour"
+ ],
+ [
+  "lib/screens/home/change_leverage_screen.dart",
+  218,
+  "Change Leverage"
+ ],
+ [
+  "lib/screens/home/chart_screen.dart",
+  1078,
+  "Price Debug Info"
+ ],
+ [
+  "lib/screens/home/chart_screen.dart",
+  1111,
+  "Active: ${status["
+ ],
+ [
+  "lib/screens/home/chart_screen.dart",
+  1112,
+  "Active Alerts: ${status["
+ ],
+ [
+  "lib/screens/home/chart_screen.dart",
+  1274,
+  "Close"
+ ],
+ [
+  "lib/screens/home/chart_screen.dart",
+  4782,
+  "Asset Price"
+ ],
+ [
+  "lib/screens/home/chart_screen.dart",
+  4786,
+  "Profit in \\$"
+ ],
+ [
+  "lib/screens/home/dashboard_screen.dart",
+  3570,
+  "Change Master Password"
+ ],
+ [
+  "lib/screens/home/dashboard_screen.dart",
+  3579,
+  "Reset Investor Password"
+ ],
+ [
+  "lib/screens/home/enhanced_pending_order_content.dart",
+  668,
+  "OK"
+ ],
+ [
+  "lib/screens/home/more/copytrading/copy_trading_create_plan_screen.dart",
+  73,
+  "Create New Plan"
+ ],
+ [
+  "lib/screens/home/more/copytrading/copy_trading_edit_plan_screen.dart",
+  98,
+  "Edit Plan"
+ ],
+ [
+  "lib/screens/home/more/copytrading/copy_trading_hub_screen.dart",
+  285,
+  "Pending Review"
+ ],
+ [
+  "lib/screens/home/more/copytrading/copy_trading_hub_screen.dart",
+  308,
+  "Code: $masterCode"
+ ],
+ [
+  "lib/screens/home/more/copytrading/copy_trading_hub_screen.dart",
+  320,
+  "OK"
+ ],
+ [
+  "lib/screens/home/more/copytrading/copy_trading_hub_screen.dart",
+  372,
+  "Become a Master"
+ ],
+ [
+  "lib/screens/home/more/copytrading/explore_masters_screen.dart",
+  671,
+  "Apply Search"
+ ],
+ [
+  "lib/screens/home/more/copytrading/explore_masters_screen.dart",
+  1290,
+  "Reset All Filters"
+ ],
+ [
+  "lib/screens/home/more/copytrading/explore_masters_screen.dart",
+  1346,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/copytrading/explore_masters_screen.dart",
+  1372,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/copytrading/master_dashboard_overview_tab.dart",
+  1761,
+  "No overview data available"
+ ],
+ [
+  "lib/screens/home/more/copytrading/master_dashboard_overview_tab.dart",
+  1766,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/copytrading/master_details_screen.dart",
+  69,
+  "No data"
+ ],
+ [
+  "lib/screens/home/more/copytrading/master_details_screen.dart",
+  780,
+  "Per trade"
+ ],
+ [
+  "lib/screens/home/more/copytrading/master_details_screen.dart",
+  801,
+  "Cumulative P&L"
+ ],
+ [
+  "lib/screens/home/more/copytrading/master_details_screen.dart",
+  1318,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/copytrading/master_plan_detail_screen.dart",
+  272,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_copies_screen.dart",
+  70,
+  "My Copiers"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_copies_screen.dart",
+  862,
+  "Cancel"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_copies_screen.dart",
+  905,
+  "Stop Copy"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_copies_screen.dart",
+  912,
+  "Cancel"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_copies_screen.dart",
+  930,
+  "Stop"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  98,
+  "My Investments"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  265,
+  "Loading more..."
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  284,
+  "Add capital"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  295,
+  "Cancel"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  304,
+  "Add"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  335,
+  "Stop investment?"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  336,
+  "This is permanent. You\\"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  340,
+  "Cancel"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  344,
+  "Stop"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  1084,
+  "Failed to load trades"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  1097,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  1119,
+  "No trades yet"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  1286,
+  "P&L"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  1433,
+  "No investments yet"
+ ],
+ [
+  "lib/screens/home/more/copytrading/my_investments_screen.dart",
+  1514,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  503,
+  "Please go back and select a plan/account."
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  686,
+  "Plan & account"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  690,
+  "Account: ${item.accountNumber}"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  692,
+  "Capital: \\$${item.capitalAmount.toStringAsFixed(2)}"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  711,
+  "Select a Plan *"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  731,
+  "Select Your Trading Account *"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  734,
+  "Select a plan first."
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  758,
+  "No eligible accounts found."
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  801,
+  "Copy settings"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1058,
+  "Advanced Settings"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1089,
+  "Multiply master lot size"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1153,
+  "PER-TRADE TP / SL"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1166,
+  "Override master"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1522,
+  "Minimum investment: \\$$minCapital"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1577,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1618,
+  "Min: \\$${plan.minimumCapital}"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1620,
+  "Fee: ${plan.commissionLabel.isNotEmpty ? plan.commissionLabel : plan.commissionType}"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1626,
+  "Grace: ${plan.noFeeDays} days"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1774,
+  "No Eligible Accounts Found."
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1831,
+  "Back"
+ ],
+ [
+  "lib/screens/home/more/copytrading/subscribe_to_plan_screen.dart",
+  1935,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/more_screen.dart",
+  518,
+  "Add Account"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_become_manager_screen.dart",
+  93,
+  "Become a Manager"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_create_plan_screen.dart",
+  119,
+  "Create New Plan"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_fund_manager_view_screen.dart",
+  1442,
+  "No trades available"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_investor_portal_screen.dart",
+  355,
+  "Unsubscribe"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_investor_portal_screen.dart",
+  362,
+  "Cancel"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_investor_portal_screen.dart",
+  369,
+  "OK"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_investor_portal_screen.dart",
+  702,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_investor_portal_screen.dart",
+  1324,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_investor_portal_screen.dart",
+  1676,
+  "Refresh"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_manager_dashboard_screen.dart",
+  62,
+  "MANAGER DASHBOARD"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_manager_dashboard_screen.dart",
+  269,
+  "No data available for $_selectedChartTab"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_manager_dashboard_screen.dart",
+  594,
+  "No plans available"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_manager_dashboard_screen.dart",
+  770,
+  "No recent trades"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_manager_detail_screen.dart",
+  368,
+  "Manager Detail"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_manager_investor_detail_screen.dart",
+  425,
+  "Investor: ${widget.investorName}"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_manager_investor_detail_screen.dart",
+  460,
+  "Retry"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_manager_plan_detail_screen.dart",
+  61,
+  "Plan: $planName"
+ ],
+ [
+  "lib/screens/home/more/pmam/pmam_manager_portal_screen.dart",
+  96,
+  "Manager Portal"
+ ],
+ [
+  "lib/screens/ib/presentation/pages/commission_groups_screen.dart",
+  71,
+  "Cancel"
+ ],
+ [
+  "lib/screens/ib/presentation/pages/commission_groups_screen.dart",
+  75,
+  "Delete"
+ ],
+ [
+  "lib/screens/ib/presentation/pages/ib_requests_screen.dart",
+  675,
+  "Close"
+ ],
+ [
+  "lib/screens/ib/presentation/pages/ib_requests_screen.dart",
+  703,
+  "Submit"
+ ],
+ [
+  "lib/screens/ib/presentation/pages/ib_transfer_commission_screen.dart",
+  88,
+  "Transfer Commission"
+ ],
+ [
+  "lib/screens/ib/presentation/pages/my_clients_screen.dart",
+  554,
+  "Retry Now"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/create_edit_plan_screen.dart",
+  1122,
+  "Block"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_application_screen.dart",
+  15,
+  "Become a Partner"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_client_profile_screen.dart",
+  1297,
+  "Signed up: $signedUp"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_client_profile_screen.dart",
+  1298,
+  "Funded: $funded"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_clients_screen.dart",
+  292,
+  "Sub-IB Requests"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_clients_screen.dart",
+  1913,
+  "Loading..."
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_links_screen.dart",
+  686,
+  "Cancel"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_links_screen.dart",
+  697,
+  "Delete"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_manager_portal_screen.dart",
+  161,
+  "Retry"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_wallet_screen.dart",
+  319,
+  "Cancel payout"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_wallet_screen.dart",
+  330,
+  "Keep"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_wallet_screen.dart",
+  339,
+  "Cancel payout"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_wallet_screen.dart",
+  508,
+  "Request payout"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_wallet_screen.dart",
+  1294,
+  "Delete Plan"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_wallet_screen.dart",
+  1299,
+  "Cancel"
+ ],
+ [
+  "lib/screens/ibm/presentation/pages/ibm_wallet_screen.dart",
+  1368,
+  "New Plan"
+ ],
+ [
+  "lib/screens/ibm/presentation/widgets/assign_plan_bottom_sheet.dart",
+  146,
+  "Choose a Sub-IB"
+ ],
+ [
+  "lib/screens/ibm/presentation/widgets/change_plan_bottom_sheet.dart",
+  185,
+  "Cancel"
+ ],
+ [
+  "lib/screens/ibm/presentation/widgets/change_plan_bottom_sheet.dart",
+  207,
+  "Move them"
+ ],
+ [
+  "lib/screens/kyc/presentation/pages/unified_compliance_wizard.dart",
+  171,
+  "Verify Later?"
+ ],
+ [
+  "lib/screens/kyc/view_models/kyc_docs_controller.dart",
+  177,
+  "Front Camera"
+ ],
+ [
+  "lib/screens/kyc/view_models/kyc_docs_controller.dart",
+  187,
+  "Back Camera"
+ ],
+ [
+  "lib/screens/notifications/presentation/pages/notifications_screen.dart",
+  16,
+  "Notifications"
+ ],
+ [
+  "lib/screens/settings/presentation/pages/account_management_screen.dart",
+  214,
+  "Cancel"
+ ],
+ [
+  "lib/screens/settings/presentation/pages/account_management_screen.dart",
+  265,
+  "Cancel"
+ ],
+ [
+  "lib/widgets/kyc_scaffold.dart",
+  100,
+  "Verify Later?"
+ ]
+]

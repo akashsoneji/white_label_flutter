@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 /// Modern bottom sheet used by the History tab to filter trade history.
 ///
@@ -522,8 +523,8 @@ class _HistoryFilterScreenState extends State<HistoryFilterScreen> {
       child: TextField(
         onChanged: (v) => setState(() => _search = v.trim()),
         style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp),
-        decoration: InputDecoration(
-          hintText: 'Search symbol',
+          decoration: InputDecoration(
+          hintText: Get.find<LanguageService>().tr('iquote_search_symbol'),
           hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp),
           prefixIcon: Icon(Icons.search,
               color: AppColors.textSecondary, size: 18.sp),

@@ -184,8 +184,8 @@ class _CelestialWatchlistScreenState
                 if (activeAccount == null || activeAccount.metaAccountNumber.isEmpty) {
                   if (Get.isRegistered<AppNotificationController>()) {
                     Get.find<AppNotificationController>().showError(
-                      title: 'Error',
-                      message: 'No active trading account found',
+                      title: Get.find<LanguageService>().tr('trading_error'),
+                      message: Get.find<LanguageService>().tr('celestial_trade_screen_no_active_trading_account_found'),
                     );
                   }
                   return Future.value(false);

@@ -746,8 +746,8 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                       activeAccount.metaAccountNumber.isEmpty) {
                     if (Get.isRegistered<AppNotificationController>()) {
                       Get.find<AppNotificationController>().showError(
-                        title: 'Error',
-                        message: 'No active trading account found',
+                        title: Get.find<LanguageService>().tr('trading_error'),
+                        message: Get.find<LanguageService>().tr('celestial_trade_screen_no_active_trading_account_found'),
                       );
                     }
                     return;
@@ -760,12 +760,12 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   if (Get.isRegistered<AppNotificationController>()) {
                     if (errMsg.isEmpty) {
                       Get.find<AppNotificationController>().showSuccess(
-                        title: 'Success',
-                        message: 'Pending order cancelled',
+                        title: Get.find<LanguageService>().tr('common_success'),
+                        message: Get.find<LanguageService>().tr('celestial_trade_screen_pending_order_cancelled'),
                       );
                     } else {
                       Get.find<AppNotificationController>().showError(
-                        title: 'Error',
+                        title: Get.find<LanguageService>().tr('trading_error'),
                         message: errMsg,
                       );
                     }
@@ -839,8 +839,8 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   activeAccount.metaAccountNumber.isEmpty) {
                 if (Get.isRegistered<AppNotificationController>()) {
                   Get.find<AppNotificationController>().showError(
-                    title: 'Error',
-                    message: 'No active trading account found',
+                    title: Get.find<LanguageService>().tr('trading_error'),
+                    message: Get.find<LanguageService>().tr('celestial_trade_screen_no_active_trading_account_found'),
                   );
                 }
                 return Future.value(false);
@@ -1509,8 +1509,8 @@ class _ModifySheetState extends State<_ModifySheet> {
                   activeAccount.metaAccountNumber.isEmpty) {
                 if (Get.isRegistered<AppNotificationController>()) {
                   Get.find<AppNotificationController>().showError(
-                    title: 'Error',
-                    message: 'No active trading account found',
+                    title: Get.find<LanguageService>().tr('trading_error'),
+                    message: Get.find<LanguageService>().tr('celestial_trade_screen_no_active_trading_account_found'),
                   );
                 }
                 return;

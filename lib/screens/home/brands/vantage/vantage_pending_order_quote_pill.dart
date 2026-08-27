@@ -1,6 +1,7 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -30,7 +31,7 @@ class VantagePendingOrderQuotePill extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _QuoteCell(
-              label: 'Bid',
+              label: Get.find<LanguageService>().tr('meta_watchlist_bid'),
               value: bid.toString(),
               valueColor: AppColors.error,
             ),
@@ -42,7 +43,7 @@ class VantagePendingOrderQuotePill extends StatelessWidget {
             ),
             SizedBox(width: 8.w),
             _QuoteCell(
-              label: 'Ask',
+              label: Get.find<LanguageService>().tr('meta_watchlist_ask'),
               value: ask.toString(),
               valueColor: AppColors.primary,
             ),

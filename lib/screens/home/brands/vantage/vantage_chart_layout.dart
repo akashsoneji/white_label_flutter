@@ -43,6 +43,7 @@ import 'package:crm_app/screens/home/pending_order_screen.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/favorites_storage_service.dart';
@@ -92,6 +93,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
   TradingController get _trade => Get.find<TradingController>();
   ChartSocketController get _socket => Get.find<ChartSocketController>();
   AccountController get _account => Get.find<AccountController>();
+  LanguageService get _lang => Get.find<LanguageService>();
 
   StreamSubscription<String>? _symSub;
 
@@ -147,12 +149,12 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     final bid = _socket.getBidPrice();
     final ask = _socket.getAskPrice();
     if (bid == null || ask == null) {
-      CustomToastService.showWarning(message: 'Waiting for live price...');
+      CustomToastService.showWarning(message: _lang.tr('vantage_waiting_live_price'));
       return;
     }
     final active = _account.activeMT5Account;
     if (active == null) {
-      CustomToastService.showWarning(message: 'No active trading account.');
+      CustomToastService.showWarning(message: _lang.tr('vantage_no_active_account'));
       return;
     }
 
@@ -177,7 +179,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
       // with the actual API message + account number
     } catch (e) {
       if (!mounted) return;
-      CustomToastService.showError(message: 'Trade error: $e');
+      CustomToastService.showError(message: '${_lang.tr('vantage_trade_error')}: $e');
     }
   }
 
@@ -476,7 +478,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
     final symbol = _rawSymbol();
     final marketPrice = _socket.getMarketPrice() ?? 0.0;
     if (marketPrice == 0.0) {
-      CustomToastService.showWarning(message: 'Waiting for live price...');
+      CustomToastService.showWarning(message: _lang.tr('vantage_waiting_live_price'));
       return;
     }
     showModalBottomSheet(
@@ -535,7 +537,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                   // regular pop so the user can still leave the chart.
                   Navigator.of(context).maybePop();
                   CustomToastService.showInfo(
-                    message: 'Trade tab is not available in this context.',
+                    message: _lang.tr('vantage_trade_tab_unavailable'),
                   );
                 }
               },
@@ -888,7 +890,7 @@ class _BottomDock extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _SideButton(
-                      label: 'SELL',
+                      label: Get.find<LanguageService>().tr('meta_neworder_sell'),
                       sub: bidStr,
                       color: AppColors.error,
                       onTap: onSell,
@@ -917,7 +919,7 @@ class _BottomDock extends StatelessWidget {
                   ),
                   Expanded(
                     child: _SideButton(
-                      label: 'BUY',
+                      label: Get.find<LanguageService>().tr('meta_neworder_buy'),
                       sub: askStr,
                       color: primary,
                       onTap: onBuy,
@@ -982,7 +984,7 @@ class _QuantityBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Quantity (lots)',
+                    Get.find<LanguageService>().tr('vantage_chart_layout_quantity_lots'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       color: muted,

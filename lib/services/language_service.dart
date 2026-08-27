@@ -12,13 +12,14 @@ class LanguageService extends GetxService {
   // Supported languages
   static const Map<String, String> supportedLanguages = {
     'en': 'English',
-    'ar': 'العربية',
     'es': 'Español',
+    'es_MX': 'Español (México)',
+    'zh': '中文 (简体)',
+    'id': 'Bahasa Indonesia',
+    'ar': 'العربية',
     'fr': 'Français',
     'hi': 'हिंदी',
-    'id': 'Bahasa',
     'tr': 'Türkçe',
-    'zh': '中文',
   };
 
   /// Supported locales for MaterialApp.supportedLocales. Derived from
@@ -38,6 +39,8 @@ class LanguageService extends GetxService {
     switch (code) {
       case 'zh':
         return const Locale('zh', 'CN');
+      case 'es_MX':
+        return const Locale('es', 'MX');
       default:
         return Locale(code);
     }

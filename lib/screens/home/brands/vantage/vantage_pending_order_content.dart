@@ -630,7 +630,7 @@ class _VantagePendingOrderContentState extends State<VantagePendingOrderContent>
                                       tint: AppColors.success,
                                     ),
                                     _summaryPill(
-                                      label: 'Stop Loss',
+                                      label: languageService.tr('pending_order_stop_loss_label'),
                                       value:
                                           widget.stopLossEnabled.value
                                               ? 'ON'
