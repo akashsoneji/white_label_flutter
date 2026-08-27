@@ -63,7 +63,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
               primary: AppColors.primary,
-              onPrimary: Colors.white,
+              onPrimary: AppColors.whiteColor,
               onSurface: Colors.black,
             ),
           ),
@@ -81,7 +81,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
               primary: AppColors.primary,
-              onPrimary: Colors.white,
+              onPrimary: AppColors.whiteColor,
               onSurface: Colors.black,
             ),
           ),
@@ -355,154 +355,309 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     int trades,
     double perLot,
   ) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12.h,
-      crossAxisSpacing: 12.w,
-      childAspectRatio: 1.6,
-      children: [
-        _buildStatCard(
-          title: 'Total Clients',
-          value: '${clients['total'] ?? 0}',
-          subtitle: '${clients['new_in_period'] ?? 0} new this month',
-          icon: Icons.people,
-          color: AppColors.primary,
-        ),
-        _buildStatCard(
-          title: 'Active Traders',
-          value: '${clients['active'] ?? 0}',
-          subtitle: 'traded this month',
-          icon: Icons.person,
-          color: AppColors.primary,
-        ),
-        _buildStatCard(
-          title: 'Sub-IBs',
-          value: '${(partners['direct'] ?? 0) + (partners['network'] ?? 0)}',
-          subtitle: '${partners['direct'] ?? 0} directly under you',
-          icon: Icons.account_tree,
-          color: AppColors.primary,
-        ),
-        _buildStatCard(
-          title: 'Total Deposits',
-          value: '\$${deposits.toStringAsFixed(2)}',
-          subtitle: 'net',
-          icon: Icons.arrow_circle_down,
-          color: Colors.green,
-        ),
-        _buildStatCard(
-          title: 'Total Withdrawals',
-          value: '\$${withdrawals.toStringAsFixed(2)}',
-          subtitle: '',
-          icon: Icons.arrow_circle_up,
-          color: Colors.red,
-        ),
+    final totalClients = clients['total'] ?? 0;
+    final newInPeriod = clients['new_in_period'] ?? 0;
+    final activeTraders = clients['active'] ?? 0;
+    final directPartners = partners['direct'] ?? 0;
+    final networkPartners = partners['network'] ?? 0;
+    final totalSubIbs = directPartners + networkPartners;
+    final netFlow = deposits - withdrawals;
+    // Web "Average Lots per Trader" = total lots / active traders (not / trades).
+    final activeTradersNum =
+        activeTraders is num ? activeTraders : num.tryParse('$activeTraders') ?? 0;
+    final avgLotSize =
+        activeTradersNum > 0 ? lots / activeTradersNum : 0.0;
 
-        _buildStatCard(
-          title: 'Client Equity',
-          value: '\$${equity.toStringAsFixed(2)}',
-          subtitle: 'right now',
-          icon: Icons.account_balance_wallet,
-          color: AppColors.primary,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildHeroEarnedCard(commission),
+        SizedBox(height: 14.h),
+        Row(
+          children: [
+            Expanded(
+              child: _buildPillStat(
+                icon: Icons.people_alt_rounded,
+                iconBg: AppColors.iconBgPrimary,
+                iconColor: AppColors.primary,
+                label: 'Total Clients',
+                value: '$totalClients',
+                hint: '$newInPeriod new this period',
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: _buildPillStat(
+                icon: Icons.trending_up_rounded,
+                iconBg: const Color(0xFF00C48C).withValues(alpha: 0.12),
+                iconColor: const Color(0xFF00C48C),
+                label: 'Active Traders',
+                value: '$activeTraders',
+                hint: 'traded this period',
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: _buildPillStat(
+                icon: Icons.account_tree_rounded,
+                iconBg: AppColors.iconBgPrimary,
+                iconColor: AppColors.primary,
+                label: 'Sub-IBs',
+                value: '$totalSubIbs',
+                hint: '$directPartners direct',
+              ),
+            ),
+          ],
         ),
-        _buildStatCard(
-          title: 'Total Lots',
-          value: lots.toStringAsFixed(2),
-          subtitle: '$trades trades',
-          icon: Icons.bar_chart,
-          color: AppColors.primary,
-        ),
-        _buildStatCard(
-          title: 'Per Lot',
-          value: '\$${perLot.toStringAsFixed(2)}',
-          subtitle: 'across everything',
-          icon: Icons.percent,
-          color: AppColors.primary,
-        ),
-        _buildStatCard(
-          title: 'Avg Lot Size',
-          value: trades > 0 ? (lots / trades).toStringAsFixed(2) : '0.00',
-          subtitle: 'this month',
-          icon: Icons.pie_chart,
-          color: AppColors.primary,
-        ),
-        _buildStatCard(
-          title: 'Earned today',
-          value: '\$${commission.toStringAsFixed(2)}',
-          subtitle: '',
-          icon: Icons.monetization_on,
-          color: AppColors.primary,
-        ),
+        SizedBox(height: 14.h),
+        _buildMoneyFlowRow(deposits, withdrawals, equity, netFlow),
+        SizedBox(height: 14.h),
+        _buildPerformanceGrid(lots, trades, perLot, avgLotSize),
       ],
     );
   }
 
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required String subtitle,
+  Widget _buildHeroEarnedCard(double commission) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 18.h),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary,
+            AppColors.primary.withValues(alpha: 0.78),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: AppColors.whiteColor.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(Icons.payments_rounded, color: AppColors.whiteColor, size: 20.w),
+              ),
+              SizedBox(width: 10.w),
+              Text(
+                'Earned this period',
+                style: TextStyle(
+                  color: AppColors.whiteColor.withValues(alpha: 0.9),
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            '\$${commission.toStringAsFixed(2)}',
+            style: TextStyle(
+              color: AppColors.whiteColor,
+              fontSize: 32.sp,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Row(
+            children: [
+              Icon(Icons.bolt_rounded, size: 14.w, color: AppColors.whiteColor.withValues(alpha: 0.85)),
+              SizedBox(width: 4.w),
+              Text(
+                _periodLabel(),
+                style: TextStyle(
+                  color: AppColors.whiteColor.withValues(alpha: 0.85),
+                  fontSize: 11.sp,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _periodLabel() {
+    switch (selectedPeriod) {
+      case 'today':
+        return 'Today';
+      case '7d':
+        return 'Last 7 days';
+      case '30d':
+        return 'Last 30 days';
+      case 'this_month':
+        return 'Month to date';
+      case 'all':
+        return 'All time';
+      case 'custom':
+        if (customFrom != null && customTo != null) return '$customFrom → $customTo';
+        return 'Custom range';
+      default:
+        return 'Selected period';
+    }
+  }
+
+  Widget _buildPillStat({
     required IconData icon,
-    required Color color,
+    required Color iconBg,
+    required Color iconColor,
+    required String label,
+    required String value,
+    required String hint,
   }) {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            padding: EdgeInsets.all(6.w),
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(icon, color: iconColor, size: 16.w),
+          ),
+          SizedBox(height: 10.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            hint,
+            style: TextStyle(fontSize: 9.sp, color: AppColors.textGrey),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, double netFlow) {
+    final netPositive = netFlow >= 0;
+    final netColor = netPositive ? const Color(0xFF00C48C) : const Color(0xFFFF647C);
+    final depositsColor = const Color(0xFF00C48C);
+    final withdrawalsColor = const Color(0xFFFF647C);
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: EdgeInsets.all(6.w),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8.r),
+              Text(
+                'MONEY FLOW',
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textSecondary,
+                  letterSpacing: 0.6,
                 ),
-                child: Icon(icon, color: color, size: 16.w),
               ),
-              SizedBox(width: 8.w),
-              Expanded(
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: AppColors.iconBgSurface,
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
                 child: Text(
-                  title,
+                  'This period',
                   style: TextStyle(
+                    fontSize: 9.sp,
                     color: AppColors.textSecondary,
-                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          SizedBox(height: 12.h),
+          Row(
             children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: _buildColoredMiniStat(
+                  label: 'Deposits',
+                  value: '\$${deposits.toStringAsFixed(2)}',
+                  icon: Icons.south_west_rounded,
+                  color: depositsColor,
                 ),
               ),
-              if (subtitle.isNotEmpty)
-                Text(
-                  subtitle,
-                  style: TextStyle(color: AppColors.textGrey, fontSize: 10.sp),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: _buildColoredMiniStat(
+                  label: 'Withdrawals',
+                  value: '\$${withdrawals.toStringAsFixed(2)}',
+                  icon: Icons.north_east_rounded,
+                  color: withdrawalsColor,
                 ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildColoredMiniStat(
+                  label: 'Client Equity',
+                  value: '\$${equity.toStringAsFixed(2)}',
+                  icon: Icons.account_balance_rounded,
+                  color: AppColors.primary,
+                  trailingText: 'live',
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: _buildColoredMiniStat(
+                  label: 'Net flow',
+                  value: '${netPositive ? '+' : ''}\$${netFlow.toStringAsFixed(2)}',
+                  icon: netPositive
+                      ? Icons.trending_up_rounded
+                      : Icons.trending_down_rounded,
+                  color: netColor,
+                ),
+              ),
             ],
           ),
         ],
@@ -510,8 +665,137 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     );
   }
 
-  Widget _buildCommissionSummary(Map wallet) {
-    // If it has 'summary', it's from separate endpoint. Otherwise it's from dashboard.
+  Widget _buildColoredMiniStat({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+    String? trailingText,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: AppColors.iconBgSurface,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(6.w),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(7.r),
+            ),
+            child: Icon(icon, size: 14.w, color: color),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  trailingText ?? label,
+                  style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceGrid(double lots, int trades, double perLot, double avgLotSize) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'PERFORMANCE',
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textSecondary,
+              letterSpacing: 0.6,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            children: [
+              Expanded(child: _buildMiniStat(label: 'Total Lots', value: lots.toStringAsFixed(2), icon: Icons.bar_chart_rounded)),
+              SizedBox(width: 10.w),
+              Expanded(child: _buildMiniStat(label: 'Trades', value: '$trades', icon: Icons.swap_horiz_rounded)),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              Expanded(child: _buildMiniStat(label: 'Per Lot', value: '\$${perLot.toStringAsFixed(2)}', icon: Icons.percent_rounded)),
+              SizedBox(width: 10.w),
+              Expanded(child: _buildMiniStat(label: 'Avg Lots/Trader', value: avgLotSize.toStringAsFixed(2), icon: Icons.straighten_rounded)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniStat({required String label, required String value, required IconData icon}) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: AppColors.iconBgSurface,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(6.w),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(7.r),
+            ),
+            child: Icon(icon, size: 14.w, color: AppColors.primary),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(label, style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+Widget _buildCommissionSummary(Map wallet) {
     final sum = wallet.containsKey('summary') ? wallet['summary'] : wallet;
     final earned = _parseDouble(sum['lifetime_earned'] ?? sum['total_earned']);
     final paid = _parseDouble(sum['lifetime_paid'] ?? sum['total_paid']);
@@ -519,49 +803,161 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     final available = _parseDouble(
       sum['unpaid_balance'] ?? sum['total_available'],
     );
+    final total = earned > 0 ? earned : 1.0;
+    final paidRatio = (paid / total).clamp(0.0, 1.0);
+    final pendingRatio = (pending / total).clamp(0.0, 1.0);
+    final availableRatio = (available / total).clamp(0.0, 1.0);
 
-    return _buildSectionCard(
-      'Commission Summary',
-      'USD - lifetime unless stated',
-      Column(
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 2.0,
-            mainAxisSpacing: 16.h,
-            crossAxisSpacing: 16.w,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSimpleStat(
-                'TOTAL EARNED',
-                '\$${earned.toStringAsFixed(2)}',
+              Text(
+                'Commission Summary',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
-              _buildSimpleStat('PAID OUT', '\$${paid.toStringAsFixed(2)}'),
-              _buildSimpleStat('PENDING', '\$${pending.toStringAsFixed(2)}'),
-              _buildSimpleStat(
-                'AVAILABLE',
-                '\$${available.toStringAsFixed(2)}',
-                valueColor: Colors.green,
+              Text(
+                'USD · lifetime',
+                style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
               ),
             ],
           ),
-          SizedBox(height: 16.h),
-          _buildProgressBar(
-            'Direct clients',
-            0.5,
-            AppColors.primary,
-            '\$${(earned).toStringAsFixed(2)}',
+          SizedBox(height: 12.h),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6.r),
+            child: SizedBox(
+              height: 10.h,
+              child: Row(
+                children: [
+                  if (paidRatio > 0)
+                    Expanded(
+                      flex: (paidRatio * 1000).round(),
+                      child: Container(color: AppColors.primary),
+                    ),
+                  if (pendingRatio > 0)
+                    Expanded(
+                      flex: (pendingRatio * 1000).round(),
+                      child: Container(color: const Color(0xFFFFB547)),
+                    ),
+                  if (availableRatio > 0)
+                    Expanded(
+                      flex: (availableRatio * 1000).round(),
+                      child: Container(color: const Color(0xFF00C48C)),
+                    ),
+                  if (paidRatio + pendingRatio + availableRatio <= 0)
+                    Expanded(child: Container(color: AppColors.divider)),
+                ],
+              ),
+            ),
           ),
-          SizedBox(height: 8.h),
-          _buildProgressBar(
-            'Sub-IB network',
-            0.5,
-            Colors.green,
-            '\$${(earned).toStringAsFixed(2)}',
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildLegendItem(
+                  label: 'Paid',
+                  value: paid,
+                  color: AppColors.primary,
+                ),
+              ),
+              Expanded(
+                child: _buildLegendItem(
+                  label: 'Pending',
+                  value: pending,
+                  color: const Color(0xFFFFB547),
+                ),
+              ),
+              Expanded(
+                child: _buildLegendItem(
+                  label: 'Available',
+                  value: available,
+                  color: const Color(0xFF00C48C),
+                  highlight: true,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Container(
+            height: 1,
+            color: AppColors.divider.withValues(alpha: 0.5),
+          ),
+          SizedBox(height: 10.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total earned',
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                '\$${earned.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLegendItem({
+    required String label,
+    required double value,
+    required Color color,
+    bool highlight = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 8.w,
+              height: 8.w,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+            SizedBox(width: 5.w),
+            Text(
+              label,
+              style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
+            ),
+          ],
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          '\$${value.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.bold,
+            color: highlight ? const Color(0xFF00C48C) : AppColors.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 
@@ -1087,57 +1483,6 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildProgressBar(
-    String label,
-    double percent,
-    Color color,
-    String valueText,
-  ) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 80.w,
-          child: Text(
-            label,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 11.sp),
-          ),
-        ),
-        Expanded(
-          child: Stack(
-            children: [
-              Container(
-                height: 8.h,
-                decoration: BoxDecoration(
-                  color: AppColors.divider,
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-              ),
-              FractionallySizedBox(
-                widthFactor: percent,
-                child: Container(
-                  height: 8.h,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: 8.w),
-        Text(
-          valueText,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 11.sp,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
     );
   }
 
