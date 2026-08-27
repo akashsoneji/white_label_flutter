@@ -1516,18 +1516,20 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
                 ? (node['own'] as List)[0]
                 : {});
 
+    // The card represents the Sub-IB themselves, so DEPOSITS / NET / LOTS
+    // must come from their OWN trading activity (node['own'][0]), not from
+    // their branch aggregates. Branch aggregates flow into BRANCH EARNED only,
+    // matching the web UI.
     final deposits =
         (double.tryParse(
-                  (branch['deposits'] ?? own['deposits'] ?? node['deposits'] ?? 0)
-                      .toString(),
+                  (own['deposits'] ?? node['deposits'] ?? 0).toString(),
                 ) ??
                 0.0)
             .toStringAsFixed(2);
     final net =
         (double.tryParse(
-                  (branch['net'] ??
-                          branch['net_funding'] ??
-                          own['net'] ??
+                  (own['net'] ??
+                          own['net_funding'] ??
                           node['net'] ??
                           0)
                       .toString(),
@@ -1536,16 +1538,13 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
             .toStringAsFixed(2);
     final lots =
         (double.tryParse(
-                  (branch['lots'] ?? own['lots'] ?? node['lots'] ?? 0)
-                      .toString(),
+                  (own['lots'] ?? node['lots'] ?? 0).toString(),
                 ) ??
                 0.0)
             .toStringAsFixed(2);
     final earned =
         (double.tryParse(
-                  (branch['commission'] ??
-                          branch['you_earned'] ??
-                          own['commission'] ??
+                  (own['commission'] ??
                           node['you_earned'] ??
                           node['commission'] ??
                           0)
@@ -1565,6 +1564,7 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
         (double.tryParse(
                   (node['branch_earned'] ??
                           branch['commission'] ??
+                          branch['you_earned'] ??
                           node['commission'] ??
                           0)
                       .toString(),
@@ -1626,34 +1626,17 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedFocusNode = node;
-                if (canExpand) {
-                  if (_collapsedNodeKeys.contains(nodeKey)) {
-                    _collapsedNodeKeys.remove(nodeKey);
-                  } else {
-                    _collapsedNodeKeys.add(nodeKey);
+            behavior: HitTestBehavior.opaque,
+            onTap: partnerId > 0
+                ? () {
+                    Get.to(
+                      () => IbmClientProfileScreen(
+                        clientId: partnerId,
+                        clientName: name,
+                      ),
+                    );
                   }
-                  
-                  final isCollapsedNow = _isAllExpanded ? _collapsedNodeKeys.contains(nodeKey) : !_collapsedNodeKeys.contains(nodeKey);
-                  
-                  if (!isCollapsedNow) {
-                    if (children.isEmpty && !_lazyChildrenCache.containsKey(nodeKey) && partnerId > 0) {
-                      _lazyLoadingKeys.add(nodeKey);
-                      controller.getNetworkNodeChildren(partnerId, period: _mapFilterToApi(_selectedDateFilter)).then((fetched) {
-                        if (mounted) {
-                          setState(() {
-                            _applyNodeResponse(partnerId, fetched);
-                            _lazyLoadingKeys.remove(nodeKey);
-                          });
-                        }
-                      });
-                    }
-                  }
-                }
-              });
-            },
+                : null,
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.card,
@@ -1671,7 +1654,7 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
                           ? AppColors.primary
                           : (isSubIb
                               ? AppColors.primary
-                              : const Color(0xFF00C48C)),
+                              : const Color(0xFFF2994A)),
                     ),
                     Expanded(
                       child: Padding(
@@ -1842,7 +1825,8 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
                     ),
                   ],
                   SizedBox(height: 8.h),
-                  // Metrics horizontal scroll strip
+                  // Metrics strip — wraps to 2 lines on narrow screens so
+                  // DOWNLINE / BRANCH EARNED never get clipped.
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 10.w,
@@ -1855,35 +1839,27 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
                               : const Color(0xFFF8F9FA),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _buildMiniMetricMobile('DEPOSITS', '\$$deposits'),
-                          SizedBox(width: 14.w),
-                          _buildMiniMetricMobile('NET', '\$$net'),
-                          SizedBox(width: 14.w),
-                          _buildMiniMetricMobile('LOTS', lots),
-                          SizedBox(width: 14.w),
-                          _buildMiniMetricMobile('YOU EARNED', '\$$earned'),
-                          if (downlineSubs > 0 || downlineClients > 0) ...[
-                            SizedBox(width: 14.w),
-                            _buildMiniMetricMobile(
-                              'DOWNLINE',
-                              '$downlineSubs sub · $downlineClients clients',
-                            ),
-                          ],
-                          if (double.tryParse(branchEarned) != null &&
-                              double.parse(branchEarned) > 0) ...[
-                            SizedBox(width: 14.w),
-                            _buildMiniMetricMobile(
-                              'BRANCH EARNED',
-                              '\$$branchEarned',
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
+                    child: Wrap(
+                      spacing: 14.w,
+                      runSpacing: 6.h,
+                      children: [
+                        _buildMiniMetricMobile('DEPOSITS', '\$$deposits'),
+                        _buildMiniMetricMobile('NET', '\$$net'),
+                        _buildMiniMetricMobile('LOTS', lots),
+                        _buildMiniMetricMobile('YOU EARNED', '\$$earned'),
+                        if (downlineSubs > 0 || downlineClients > 0)
+                          _buildMiniMetricMobile(
+                            'DOWNLINE',
+                            '$downlineSubs sub · $downlineClients cli',
+                          ),
+                        if (double.tryParse(branchEarned) != null &&
+                            double.parse(branchEarned) > 0)
+                          _buildMiniMetricMobile(
+                            'BRANCH EARNED',
+                            '\$$branchEarned',
+                          ),
+                    ],
+                  ),
                   ),
                 ],
               ),
@@ -2109,7 +2085,7 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: AppColors.card,
         borderRadius: BorderRadius.circular(14.r),
@@ -2126,50 +2102,50 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
                   ),
                 ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(6.w),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  shape: BoxShape.circle,
+          Container(
+            padding: EdgeInsets.all(6.w),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(7.r),
+            ),
+            child: Icon(icon, size: 14.w, color: color),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  value,
+                  style: AppTextStyles.heading.copyWith(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                child: Icon(icon, size: 16.w, color: color),
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
+                Text(
                   title,
                   style: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 11.sp,
+                    fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            value,
-            style: AppTextStyles.heading.copyWith(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              height: 1.0,
+                Text(
+                  subtitle,
+                  style: TextStyle(color: AppColors.textGrey, fontSize: 9.sp),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            subtitle,
-            style: TextStyle(color: AppColors.textGrey, fontSize: 9.sp),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

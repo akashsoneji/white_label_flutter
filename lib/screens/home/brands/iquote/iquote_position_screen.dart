@@ -20,7 +20,10 @@ import 'package:crm_app/screens/finance/presentation/pages/payment_methods_scree
 import 'package:crm_app/screens/finance/presentation/pages/withdrawal_screen.dart';
 import 'package:crm_app/models/mt5_account.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
 import 'package:crm_app/screens/home/brands/iquote/history_filter_sheet.dart';
+import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
 class IQuotePositionScreen extends StatefulWidget {
@@ -1045,12 +1048,11 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                       }
                     },
                     child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 8.w, vertical: 6.h),
+                      padding: EdgeInsets.only(left: 4.w, right: 2.w),
                       child: Icon(
                         Icons.close_rounded,
                         color: AppColors.textPrimary,
-                        size: 20.sp,
+                        size: 18.sp,
                       ),
                     ),
                   )
@@ -1240,14 +1242,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: Text(languageService.tr('iquote_close_position')),
+                title: const Text('Close Position'),
                 onTap: () {
                   Get.back();
                   Get.to(() => ClosePositionScreen(position: position));
                 },
               ),
               ListTile(
-                title: Text(languageService.tr('edit_order_screen_edit_order')),
+                title: const Text('Edit Order'),
                 onTap: () {
                   Get.back();
                   Get.to(() => EditOrderScreen(position: position));
@@ -1264,257 +1266,362 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
   // Bulk Operations bottom sheet (Position tab)
   // ─────────────────────────────────────────────────────────────────────────
   void _showBulkOperationsSheet(TradingController tradingController) {
-    Get.bottomSheet(
-      Container(
-        decoration: BoxDecoration(
-          color: _cardColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-        ),
-        padding: EdgeInsets.fromLTRB(0, 12.h, 0, 24.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: AppColors.textSecondary.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
-            SizedBox(height: 20.h),
-            Text(
-              'Bulk Operations',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(height: 24.h),
-            _bulkTile(
-              label: languageService.tr('iquote_close_losing'),
-              chipLabel: 'Loss',
-              chipColor: _red,
-              onTap: () {
-                Get.back();
-                _confirmBulkClose(
-                  tradingController,
-                  title: languageService.tr('iquote_close_losing_confirm'),
-                  filter: (p) => p.profitLoss < 0,
-                );
-              },
-            ),
-            _bulkTile(
-              label: languageService.tr('iquote_close_profitable'),
-              chipLabel: 'Profitable',
-              chipColor: _green,
-              onTap: () {
-                Get.back();
-                _confirmBulkClose(
-                  tradingController,
-                  title: languageService.tr('iquote_close_profitable_confirm'),
-                  filter: (p) => p.profitLoss > 0,
-                );
-              },
-            ),
-            _bulkTile(
-              label: languageService.tr('iquote_close_all'),
-              chipLabel: 'ALL',
-              chipColor: _accent,
-              onTap: () {
-                Get.back();
-                _confirmBulkClose(
-                  tradingController,
-                  title: languageService.tr('iquote_close_all_confirm'),
-                  filter: (_) => true,
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      isScrollControlled: false,
-    );
-  }
+    String selectedOption = 'all_currently_open';
 
-  Widget _bulkTile({
-    required String label,
-    required String chipLabel,
-    required Color chipColor,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 22.h),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 15.sp,
-                fontWeight: FontWeight.w700,
-              ),
+    final screenHeight = MediaQuery.of(Get.context!).size.height;
+    final screenWidth = MediaQuery.of(Get.context!).size.width;
+
+    Get.bottomSheet(
+      StatefulBuilder(
+        builder: (context, setState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            SizedBox(width: 10.w),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-              decoration: BoxDecoration(
-                color: chipColor.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(4.r),
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: screenHeight * 0.75,
+                minHeight: 320.h,
+                maxWidth: screenWidth,
               ),
-              child: Text(
-                chipLabel,
-                style: TextStyle(
-                  color: chipColor,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w700,
+              decoration: BoxDecoration(
+                color: AppColors.whiteColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
               ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(16.w),
+                    child: Text(
+                      'Which positions would you like to close at market prices?',
+                      style: AppTextStyles.heading.copyWith(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Flexible(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildCloseOption(
+                              tradingController,
+                              'all_currently_open',
+                              'All currently open',
+                              () => tradingController.getTotalProfitLoss(),
+                              selectedOption == 'all_currently_open',
+                              (value) => setState(() => selectedOption = value),
+                            ),
+                            _buildCloseOption(
+                              tradingController,
+                              'all_profitable',
+                              'All profitable',
+                              () => tradingController
+                                  .getTotalProfitableProfitLoss(),
+                              selectedOption == 'all_profitable',
+                              (value) => setState(() => selectedOption = value),
+                            ),
+                            _buildCloseOption(
+                              tradingController,
+                              'all_losing',
+                              'All losing',
+                              () => tradingController.getTotalLosingProfitLoss(),
+                              selectedOption == 'all_losing',
+                              (value) => setState(() => selectedOption = value),
+                            ),
+                            _buildCloseOption(
+                              tradingController,
+                              'all_long',
+                              'All Long',
+                              () => tradingController.getTotalLongProfitLoss(),
+                              selectedOption == 'all_long',
+                              (value) => setState(() => selectedOption = value),
+                            ),
+                            _buildCloseOption(
+                              tradingController,
+                              'all_short',
+                              'All Short',
+                              () => tradingController.getTotalShortProfitLoss(),
+                              selectedOption == 'all_short',
+                              (value) => setState(() => selectedOption = value),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 16.w, right: 16.w),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: AppColors.primary),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                ),
+                                minimumSize: Size(double.infinity, 40.h),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: AppTextStyles.label.copyWith(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 16.w),
+                          Expanded(
+                            child: Obx(() {
+                              final pnl = _getPnLForOption(
+                                selectedOption,
+                                tradingController,
+                              );
+                              final isPositive = pnl >= 0;
+                              final isPendingTab =
+                                  tradingController.selectedTab == 1;
+
+                              String buttonText;
+                              if (isPendingTab) {
+                                final count =
+                                    tradingController.pendingPositions.length;
+                                buttonText =
+                                    'Confirm ($count order${count != 1 ? 's' : ''})';
+                              } else {
+                                buttonText = isPositive
+                                    ? 'Confirm (+\$${PrecisionHelper.formatPnL(pnl)})'
+                                    : 'Confirm (\$${PrecisionHelper.formatPnL(pnl)})';
+                              }
+
+                              return ElevatedButton(
+                                onPressed: tradingController.isLoading
+                                    ? null
+                                    : () async {
+                                        await _executeClosePositionsDirectly(
+                                          tradingController,
+                                          selectedOption,
+                                        );
+                                        Navigator.of(context).pop();
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  backgroundColor: isPendingTab
+                                      ? AppColors.primary
+                                      : (isPositive
+                                          ? AppColors.success
+                                          : AppColors.error),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.r),
+                                  ),
+                                  minimumSize: Size(double.infinity, 40.h),
+                                ),
+                                child: tradingController.isLoading
+                                    ? ButtonLoadingWidget(
+                                        size: 16.0,
+                                        color: AppColors.whiteColor,
+                                      )
+                                    : Text(
+                                        buttonText,
+                                        textAlign: TextAlign.center,
+                                        style: AppTextStyles.label.copyWith(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.whiteColor,
+                                        ),
+                                      ),
+                              );
+                            }),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          );
+        },
       ),
+      isScrollControlled: true,
+      isDismissible: true,
+      enableDrag: true,
     );
   }
 
-  Future<void> _confirmBulkClose(
-    TradingController tradingController, {
-    required String title,
-    required bool Function(TradePosition) filter,
-  }) async {
-    final targets = tradingController.marketPositions.where(filter).toList();
-    if (targets.isEmpty) {
-      CustomToastService.showInfo(
-        title: languageService.tr('iquote_no_positions'),
-        message: languageService.tr('iquote_no_positions_filter'),
-      );
-      return;
-    }
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.55),
-      builder: (dialogContext) {
-        return Dialog(
-          backgroundColor: _cardColor,
-          insetPadding: EdgeInsets.symmetric(horizontal: 32.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
+  Widget _buildCloseOption(
+    TradingController tradingController,
+    String value,
+    String title,
+    double Function() getProfitLoss,
+    bool isSelected,
+    Function(String) onChanged,
+  ) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 0.h),
+      child: Row(
+        children: [
+          Expanded(
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
+                  style: AppTextStyles.label.copyWith(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-                SizedBox(height: 8.h),
-                Text(
-                  '${targets.length} position(s) will be closed at market price.',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13.sp,
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 44.h,
-                        child: OutlinedButton(
-                          onPressed:
-                              () => Navigator.of(dialogContext).pop(false),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: _accent, width: 1.2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                          ),
-                          child: Text(
-                            'Cancel',
-                            style: TextStyle(
-                              color: _accent,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: SizedBox(
-                        height: 44.h,
-                        child: ElevatedButton(
-                          onPressed:
-                              () => Navigator.of(dialogContext).pop(true),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _accent,
-                            foregroundColor: AppColors.onPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'Confirm',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                SizedBox(height: 2.h),
               ],
             ),
           ),
-        );
-      },
+          Row(
+            children: [
+              Obx(() {
+                final profitLoss = getProfitLoss();
+                final isPositive = profitLoss >= 0;
+                final hasPositions = profitLoss != 0;
+
+                return Text(
+                  hasPositions
+                      ? '\$${PrecisionHelper.formatPnL(profitLoss)}'
+                      : '-',
+                  style: AppTextStyles.label.copyWith(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: hasPositions
+                        ? (isPositive ? AppColors.success : AppColors.error)
+                        : AppColors.textGrey,
+                  ),
+                );
+              }),
+              Obx(() {
+                final profitLoss = getProfitLoss();
+                final hasPositions = profitLoss != 0;
+
+                return Radio<String>(
+                  value: value,
+                  groupValue: isSelected ? value : null,
+                  onChanged:
+                      hasPositions ? (newValue) => onChanged(newValue!) : null,
+                  activeColor: AppColors.primary,
+                  fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return AppColors.primary;
+                    }
+                    return AppColors.isDarkMode ? Colors.white : Colors.grey;
+                  }),
+                );
+              }),
+            ],
+          ),
+        ],
+      ),
     );
-    if (confirmed != true) return;
-    await _executeBulkClose(tradingController, targets);
   }
 
-  Future<void> _executeBulkClose(
+  double _getPnLForOption(String option, TradingController tradingController) {
+    if (tradingController.selectedTab == 1) {
+      return 0.0;
+    }
+
+    switch (option) {
+      case 'all_currently_open':
+        return tradingController.getTotalProfitLoss();
+      case 'all_profitable':
+        return tradingController.getTotalProfitableProfitLoss();
+      case 'all_losing':
+        return tradingController.getTotalLosingProfitLoss();
+      case 'all_long':
+        return tradingController.getTotalLongProfitLoss();
+      case 'all_short':
+        return tradingController.getTotalShortProfitLoss();
+      default:
+        return 0.0;
+    }
+  }
+
+  Future<void> _executeClosePositionsDirectly(
     TradingController tradingController,
-    List<TradePosition> targets,
+    String option,
   ) async {
+    final accountController = Get.find<AccountController>();
+    final activeAccount = accountController.activeMT5Account;
+
+    if (activeAccount == null) {
+      CustomToastService.showError(
+        title: 'Error',
+        message: 'No active account found',
+      );
+      return;
+    }
+
     try {
-      final accountController = Get.find<AccountController>();
-      final activeAccount = accountController.activeMT5Account;
-      if (activeAccount == null) {
-        CustomToastService.showError(
-          title: languageService.tr('trading_error'),
-          message: languageService.tr('chart_no_active_account'),
-        );
-        return;
-      }
-      for (final p in targets) {
-        final positionId = int.tryParse(p.orderId) ?? 0;
-        if (positionId == 0) continue;
-        await tradingController.closePositionById(
-          mt5Account: activeAccount.metaAccountNumber,
-          positionId: positionId,
-        );
+      if (tradingController.selectedTab == 1) {
+        final pendingOrders = tradingController.pendingPositions;
+        final orderIds =
+            pendingOrders.map((p) => int.parse(p.orderId)).toList();
+
+        if (orderIds.isNotEmpty) {
+          await tradingController.closeMultiplePendingOrders(
+            mt5Account: activeAccount.metaAccountNumber,
+            orderIds: orderIds,
+          );
+        }
+      } else {
+        switch (option) {
+          case 'all_currently_open':
+            await tradingController.closeAllPositions(
+              mt5Account: activeAccount.metaAccountNumber,
+            );
+            break;
+          case 'all_profitable':
+            await tradingController.closeAllProfitablePositions(
+              mt5Account: activeAccount.metaAccountNumber,
+            );
+            break;
+          case 'all_losing':
+            await tradingController.closeAllLosingPositions(
+              mt5Account: activeAccount.metaAccountNumber,
+            );
+            break;
+          case 'all_long':
+            await tradingController.closeAllLongPositions(
+              mt5Account: activeAccount.metaAccountNumber,
+            );
+            break;
+          case 'all_short':
+            await tradingController.closeAllShortPositions(
+              mt5Account: activeAccount.metaAccountNumber,
+            );
+            break;
+        }
       }
     } catch (e) {
-      CustomToastService.showError(
-        title: languageService.tr('trading_error'),
-        message: '${languageService.tr('iquote_failed_close_positions')}: $e',
-      );
+      if (Get.isRegistered<AppNotificationController>()) {
+        Get.find<AppNotificationController>().showError(
+          message: 'Failed to close positions: ${e.toString()}',
+          title: 'Error',
+        );
+      }
     }
   }
 
@@ -1716,8 +1823,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: languageService.tr('trading_error'),
-          message: languageService.tr('chart_no_active_account'),
+          title: 'Error',
+          message: 'No active account found',
         );
         return;
       }
@@ -1728,8 +1835,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       );
     } catch (e) {
       CustomToastService.showError(
-        title: languageService.tr('trading_error'),
-        message: '${languageService.tr('iquote_failed_close_position')}: $e',
+        title: 'Error',
+        message: 'Failed to close position: $e',
       );
     }
   }
@@ -1868,8 +1975,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: languageService.tr('trading_error'),
-          message: languageService.tr('chart_no_active_account'),
+          title: 'Error',
+          message: 'No active account found',
         );
         return;
       }
@@ -1880,8 +1987,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       );
     } catch (e) {
       CustomToastService.showError(
-        title: languageService.tr('trading_error'),
-        message: '${languageService.tr('iquote_failed_cancel_order')}: $e',
+        title: 'Error',
+        message: 'Failed to cancel order: $e',
       );
     }
   }
