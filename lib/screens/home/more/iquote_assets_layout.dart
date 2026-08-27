@@ -598,16 +598,25 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: cardBg,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary.withValues(alpha: AppColors.isDarkMode ? 0.18 : 0.10),
+            cardBg,
+            cardBg,
+          ],
+          stops: const [0.0, 0.55, 1.0],
+        ),
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: AppColors.border.withValues(alpha: 0.5),
+          color: AppColors.primary.withValues(alpha: 0.22),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: AppColors.primary.withValues(alpha: 0.10),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
