@@ -2,19 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_masters_controller.dart';
 import 'package:crm_app/screens/home/more/copytrading/master_details_screen.dart';
 
-/// Explore Masters — public list of available master traders.
+/// Explore Masters — Elite Trading Pro Redesign.
 ///
-/// Re-designed to match the web portal:
-///   • 4 summary cards (Available / Community AUM / Avg Gain / Enrolled)
-///   • Tab bar (All / Enrolled / Discover) with counts
-///   • Filter chips (Risk / Time / Sort / Search)
-///   • One master card per row (mobile-friendly horizontal layout)
+/// Features:
+///   • Executive Glassmorphic Hero Hub Card (AUM, Avg Gain, Masters & Enrolled counts)
+///   • Sleek integrated Search & Filter Bar
+///   • Custom Segmented Pill Tab Switcher (All / Enrolled / Discover)
+///   • Filter Badges Strip (Risk, Time, Sort)
+///   • High-tech Master Trader Cards with verified badge, 3-column stats, and prominent CTA
+///   • Custom Shimmer Loading Skeleton
+///   • 100% Adaptive & Responsive across all screen sizes
 class ExploreMastersScreen extends StatefulWidget {
   const ExploreMastersScreen({super.key});
 
@@ -23,17 +27,12 @@ class ExploreMastersScreen extends StatefulWidget {
 }
 
 class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
-  // Registered exactly once in initState so we never race with the build
-  // cycle. If a fresh instance is needed, call
-  // `Get.delete<CopyTradingMastersController>()` first.
   late final CopyTradingMastersController controller;
 
   @override
   void initState() {
     super.initState();
     controller = Get.put(CopyTradingMastersController(), permanent: false);
-    // Belt-and-suspenders: kick off a refresh after the first frame in
-    // case onInit's microtask was dropped (hot reload, route swap, etc.).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!controller.isLoading.value &&
           controller.allMasters.isEmpty &&
@@ -49,33 +48,44 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.card,
-        elevation: 0.5,
-        scrolledUnderElevation: 0,
+        elevation: 0,
+        scrolledUnderElevation: 0.5,
+        titleSpacing: 0,
         title: Text(
           'Explore Masters',
           style: AppTextStyles.heading.copyWith(
             fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
+            letterSpacing: -0.3,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.refresh,
-              color: AppColors.textPrimary,
-              size: 22.sp,
+            icon: Container(
+              padding: EdgeInsets.all(6.w),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(
+                Icons.refresh_rounded,
+                color: AppColors.textPrimary,
+                size: 18.sp,
+              ),
             ),
+            tooltip: 'Refresh',
             onPressed: () {
               HapticFeedback.lightImpact();
               controller.refreshMasters();
             },
           ),
+          SizedBox(width: 8.w),
         ],
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.allMasters.isEmpty) {
-          return const _LoadingList();
+          return const _ExploreMastersProShimmer();
         }
         if (controller.errorMessage.value.isNotEmpty &&
             controller.allMasters.isEmpty) {
@@ -85,7 +95,7 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
           );
         }
 
-        // ─── Filtered view ─────────────────────────────────────
+        // ─── Filtered items ─────────────────────────────────────
         final filter = controller.selectedFilter.value;
         final filtered =
             controller.allMasters.where((m) {
@@ -93,6 +103,7 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
               if (filter == MasterFilterTab.discover) return !m.isEnrolled;
               return true;
             }).toList();
+
         final q = controller.searchQuery.value.trim().toLowerCase();
         final visible =
             q.isEmpty
@@ -107,23 +118,43 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
                     .toList();
 
         return RefreshIndicator(
+          color: AppColors.primary,
+          backgroundColor: AppColors.card,
           onRefresh: controller.refreshMasters,
           child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            // Bottom padding leaves room for the persistent bottom
-            // navigation bar so the last card isn't covered.
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
             padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 100.h),
             children: [
-              const _SummaryCards(),
+              // 1. Hero Performance Hub Banner
+              const _HeroPerformanceBanner(),
               SizedBox(height: 14.h),
-              _FilterTabs(controller: controller),
+
+              // 2. Search & Segmented Controls
+              _SearchBarSection(controller: controller),
               SizedBox(height: 10.h),
-              _FilterChips(controller: controller),
+
+              // 3. Category Tabs (All / Enrolled / Discover)
+              _SegmentedFilterTabs(controller: controller),
+              SizedBox(height: 10.h),
+
+              // 4. Filter Chips Strip
+              _FilterChipsStrip(controller: controller),
               SizedBox(height: 14.h),
+
+              // 5. Trader Cards List
               if (visible.isEmpty)
-                _NoSearchMatchesState(query: controller.searchQuery.value)
+                _NoSearchMatchesState(
+                  query: controller.searchQuery.value,
+                  onClear: () {
+                    controller.search.value = '';
+                    controller.selectedFilter.value = MasterFilterTab.all;
+                    controller.riskFilter.value = 'All Risks';
+                  },
+                )
               else
-                ...visible.map((m) => _MasterCardWrapper(m: m)),
+                ...visible.map((m) => _ProMasterCardWrapper(m: m)),
             ],
           ),
         );
@@ -132,42 +163,10 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
   }
 }
 
-/// Wraps each master card in a try/catch so one bad item can't crash
-/// the whole list. Logs the failure to the debug console and falls back
-/// to a placeholder.
-class _MasterCardWrapper extends StatelessWidget {
-  final dynamic m;
-  const _MasterCardWrapper({required this.m});
+// ─────────────────────────── 1. HERO PERFORMANCE BANNER ───────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    try {
-      return Padding(
-        padding: EdgeInsets.only(bottom: 12.h),
-        child: _MasterCardHorizontal(
-          item: m,
-          onTap: () {
-            HapticFeedback.selectionClick();
-            Get.to(() => MasterDetailsScreen(masterCode: m.masterCode));
-          },
-          onCopy: () {
-            HapticFeedback.selectionClick();
-            Get.to(() => MasterDetailsScreen(masterCode: m.masterCode));
-          },
-        ),
-      );
-    } catch (e, st) {
-      debugPrint('[ExploreMasters] card render failed for ${m.masterCode}: $e');
-      debugPrintStack(label: 'card render', stackTrace: st);
-      return const SizedBox.shrink();
-    }
-  }
-}
-
-// ─────────────────────────── summary cards (2x2) ───────────────────────────
-
-class _SummaryCards extends StatelessWidget {
-  const _SummaryCards();
+class _HeroPerformanceBanner extends StatelessWidget {
+  const _HeroPerformanceBanner();
 
   @override
   Widget build(BuildContext context) {
@@ -175,173 +174,318 @@ class _SummaryCards extends StatelessWidget {
     final all = controller.allMasters;
     final communityAum = all.fold<double>(
       0,
-      (sum, m) => sum + (m.totalAum as num).toDouble(),
+      (sum, m) => sum + m.totalAum.toDouble(),
     );
     final gains =
         all
-            .map((m) => (m.totalGainPercent as num).toDouble())
+            .map((m) => m.totalGainPercent.toDouble())
             .where((g) => g != 0)
             .toList();
     final avgGain =
         gains.isEmpty ? 0.0 : gains.reduce((a, b) => a + b) / gains.length;
     final enrolled = all.where((m) => m.isEnrolled).length;
 
-    // Use plain SizedBox rows instead of Wrap + fixed-height SizedBox
-    // children (which previously tripped RenderBox.hasSize assertions).
-    return Column(
-      children: [
-        Row(
+    final isDark = AppColors.isDarkMode;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [
+                  const Color(0xFF1E1B4B),
+                  const Color(0xFF0F172A),
+                ]
+              : [
+                  AppColors.primary,
+                  const Color(0xFF4338CA),
+                ],
+        ),
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: (isDark ? Colors.black : AppColors.primary).withValues(alpha: 0.22),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: _SummaryCard(
-                label: 'Available Masters',
-                value: '${all.length}',
-                icon: Icons.grid_view_rounded,
-                tag: 'Browse all',
-                color: AppColors.primary,
-              ),
+            // Header Tag + Live Indicator
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.auto_graph_rounded,
+                            size: 13.sp,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 5.w),
+                          Text(
+                            'COPY TRADING HUB',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 9.5.sp,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.20),
+                    borderRadius: BorderRadius.circular(20.r),
+                    border: Border.all(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 6.r,
+                        height: 6.r,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF10B981),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(
+                        'Live Pool',
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 9.5.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF34D399),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: _SummaryCard(
-                label: 'Community AUM',
-                value: _formatMoney(communityAum),
-                icon: Icons.account_balance_wallet_outlined,
-                tag: 'Total locked',
-                color: AppColors.primary,
+            SizedBox(height: 14.h),
+
+            // Main Primary KPI
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total Community AUM',
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 11.sp,
+                        color: Colors.white.withValues(alpha: 0.75),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 3.h),
+                    Text(
+                      _formatMoney(communityAum),
+                      style: AppTextStyles.heading.copyWith(
+                        fontSize: 26.sp,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
+                ),
+                // Avg Gain Badge
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Avg Return',
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 9.sp,
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Row(
+                        children: [
+                          Icon(
+                            avgGain >= 0
+                                ? Icons.trending_up_rounded
+                                : Icons.trending_down_rounded,
+                            size: 14.sp,
+                            color: avgGain >= 0
+                                ? const Color(0xFF34D399)
+                                : const Color(0xFFF87171),
+                          ),
+                          SizedBox(width: 3.w),
+                          Text(
+                            '${avgGain >= 0 ? '+' : ''}${_formatPct(avgGain)}%',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 13.5.sp,
+                              fontWeight: FontWeight.w800,
+                              color: avgGain >= 0
+                                  ? const Color(0xFF34D399)
+                                  : const Color(0xFFF87171),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 14.h),
+
+            // Bottom Sub-metrics strip
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _heroSubItem(
+                    icon: Icons.groups_rounded,
+                    label: 'Available Masters',
+                    value: '${all.length}',
+                  ),
+                  Container(
+                    height: 20.h,
+                    width: 1,
+                    color: Colors.white.withValues(alpha: 0.15),
+                  ),
+                  _heroSubItem(
+                    icon: Icons.verified_user_rounded,
+                    label: 'Enrolled By You',
+                    value: '$enrolled',
+                    highlight: enrolled > 0,
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        SizedBox(height: 8.w),
-        Row(
-          children: [
-            Expanded(
-              child: _SummaryCard(
-                label: 'Avg Gain (All Time)',
-                value: '${_formatPct(avgGain)}%',
-                valueColor: avgGain >= 0 ? AppColors.success : AppColors.error,
-                icon: Icons.trending_up,
-                tag: 'Performance',
-                color: AppColors.primary,
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: _SummaryCard(
-                label: 'Enrolled by you',
-                value: '$enrolled',
-                valueColor:
-                    enrolled > 0 ? AppColors.success : AppColors.textPrimary,
-                icon: Icons.people_alt_outlined,
-                tag: 'Subscribed',
-                color: AppColors.primary,
-              ),
-            ),
-          ],
+      ),
+    );
+  }
+
+  Widget _heroSubItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    bool highlight = false,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 15.sp, color: Colors.white.withValues(alpha: 0.8)),
+        SizedBox(width: 6.w),
+        Text(
+          '$label: ',
+          style: AppTextStyles.bodyText.copyWith(
+            fontSize: 11.sp,
+            color: Colors.white.withValues(alpha: 0.7),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: AppTextStyles.bodyText.copyWith(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w800,
+            color: highlight ? const Color(0xFF34D399) : Colors.white,
+          ),
         ),
       ],
     );
   }
 }
 
-class _SummaryCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? valueColor;
-  final IconData icon;
-  final String tag;
-  final Color color;
+// ─────────────────────────── 2. SEARCH BAR ───────────────────────────
 
-  const _SummaryCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.tag,
-    required this.color,
-    this.valueColor,
-  });
+class _SearchBarSection extends StatelessWidget {
+  final CopyTradingMastersController controller;
+  const _SearchBarSection({required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Fixed, comfortable height — no FittedBox wrappers, no unbounded
-      // children. Row/Column sizes flow naturally inside this box.
-      height: 86.h,
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.border, width: 1),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: AppColors.border.withValues(alpha: 0.5),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 22.w,
-                height: 22.h,
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 13.sp, color: AppColors.whiteColor),
-              ),
-              SizedBox(width: 6.w),
-              Expanded(
-                child: Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 10.sp,
-                    color: AppColors.textGrey,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+      child: TextField(
+        onChanged: (v) => controller.search.value = v.trim(),
+        style: AppTextStyles.bodyText.copyWith(
+          color: AppColors.textPrimary,
+          fontSize: 13.sp,
+        ),
+        decoration: InputDecoration(
+          hintText: 'Search master by name, code or strategy...',
+          hintStyle: AppTextStyles.bodyText.copyWith(
+            color: AppColors.textGrey,
+            fontSize: 12.5.sp,
           ),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              value,
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w700,
-                color: valueColor ?? AppColors.textPrimary,
-              ),
-            ),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            size: 18.sp,
+            color: AppColors.textGrey,
           ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(6.r),
-            ),
-            child: Text(
-              tag,
-              style: AppTextStyles.bodyText.copyWith(
-                fontSize: 9.sp,
-                color: AppColors.textGrey,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
+          suffixIcon: Obx(() {
+            if (controller.search.value.isEmpty) return const SizedBox.shrink();
+            return IconButton(
+              icon: Icon(Icons.clear_rounded, size: 16.sp, color: AppColors.textGrey),
+              onPressed: () => controller.search.value = '',
+            );
+          }),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        ),
       ),
     );
   }
 }
 
-// ─────────────────────────── tab bar ───────────────────────────
+// ─────────────────────────── 3. SEGMENTED FILTER TABS ───────────────────────────
 
-class _FilterTabs extends StatelessWidget {
+class _SegmentedFilterTabs extends StatelessWidget {
   final CopyTradingMastersController controller;
-  const _FilterTabs({required this.controller});
+  const _SegmentedFilterTabs({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -351,78 +495,103 @@ class _FilterTabs extends StatelessWidget {
       final allCount = all.length;
       final enrolledCount = all.where((m) => m.isEnrolled).length;
       final discoverCount = all.where((m) => !m.isEnrolled).length;
-      return SizedBox(
-        height: 34.h,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
+
+      return Container(
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+            color: AppColors.border.withValues(alpha: 0.4),
+          ),
+        ),
+        child: Row(
           children: [
-            _tab(active, MasterFilterTab.all, 'All', allCount),
-            SizedBox(width: 8.w),
-            _tab(active, MasterFilterTab.enrolled, 'Enrolled', enrolledCount),
-            SizedBox(width: 8.w),
-            _tab(active, MasterFilterTab.discover, 'Discover', discoverCount),
+            Expanded(
+              child: _segmentItem(
+                label: 'All Masters',
+                count: allCount,
+                isSelected: active == MasterFilterTab.all,
+                onTap: () => controller.selectedFilter.value = MasterFilterTab.all,
+              ),
+            ),
+            Expanded(
+              child: _segmentItem(
+                label: 'Enrolled',
+                count: enrolledCount,
+                isSelected: active == MasterFilterTab.enrolled,
+                onTap: () => controller.selectedFilter.value = MasterFilterTab.enrolled,
+              ),
+            ),
+            Expanded(
+              child: _segmentItem(
+                label: 'Discover',
+                count: discoverCount,
+                isSelected: active == MasterFilterTab.discover,
+                onTap: () => controller.selectedFilter.value = MasterFilterTab.discover,
+              ),
+            ),
           ],
         ),
       );
     });
   }
 
-  Widget _tab(
-    MasterFilterTab active,
-    MasterFilterTab value,
-    String label,
-    int count,
-  ) {
-    final selected = active == value;
+  Widget _segmentItem({
+    required String label,
+    required int count,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
-        controller.selectedFilter.value = value;
+        onTap();
       },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14.w),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: EdgeInsets.symmetric(vertical: 8.h),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : AppColors.card,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: selected ? AppColors.primary : AppColors.border,
-          ),
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(10.r),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               label,
               style: AppTextStyles.bodyText.copyWith(
-                fontSize: 12.sp,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color:
-                    selected
-                        ? AppColors.onColoredBackground
-                        : AppColors.textPrimary,
+                fontSize: 11.5.sp,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected ? AppColors.whiteColor : AppColors.textGrey,
               ),
             ),
-            SizedBox(width: 6.w),
+            SizedBox(width: 4.w),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
+              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.h),
               decoration: BoxDecoration(
-                color:
-                    selected
-                        ? AppColors.whiteColor.withValues(alpha: 0.30)
-                        : AppColors.background,
-                borderRadius: BorderRadius.circular(10.r),
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.25)
+                    : AppColors.background,
+                borderRadius: BorderRadius.circular(8.r),
               ),
               child: Text(
                 '$count',
                 style: AppTextStyles.bodyText.copyWith(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w700,
-                  color:
-                      selected
-                          ? AppColors.onColoredBackground
-                          : AppColors.textGrey,
+                  fontSize: 9.5.sp,
+                  fontWeight: FontWeight.w800,
+                  color: isSelected ? AppColors.whiteColor : AppColors.textPrimary,
                 ),
               ),
             ),
@@ -433,11 +602,11 @@ class _FilterTabs extends StatelessWidget {
   }
 }
 
-// ─────────────────────────── filter chips ───────────────────────────
+// ─────────────────────────── 4. FILTER CHIPS STRIP ───────────────────────────
 
-class _FilterChips extends StatelessWidget {
+class _FilterChipsStrip extends StatelessWidget {
   final CopyTradingMastersController controller;
-  const _FilterChips({required this.controller});
+  const _FilterChipsStrip({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -448,28 +617,25 @@ class _FilterChips extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           children: [
-            _filterChip(
+            _chip(
               label: controller.riskFilter.value,
-              icon: Icons.shield_outlined,
+              icon: Icons.shield_rounded,
+              isActive: controller.riskFilter.value != 'All Risks',
               onTap: () => _showRiskSheet(context, controller),
             ),
             SizedBox(width: 8.w),
-            _filterChip(
+            _chip(
               label: controller.timeFilter.value,
-              icon: Icons.schedule,
+              icon: Icons.timelapse_rounded,
+              isActive: controller.timeFilter.value != 'All Time',
               onTap: () => _showTimeSheet(context, controller),
             ),
             SizedBox(width: 8.w),
-            _filterChip(
+            _chip(
               label: 'Sort: ${controller.sortBy.value}',
-              icon: Icons.sort,
+              icon: Icons.tune_rounded,
+              isActive: controller.sortBy.value != 'Gain %',
               onTap: () => _showSortSheet(context, controller),
-            ),
-            SizedBox(width: 8.w),
-            _filterChip(
-              label: 'Search',
-              icon: Icons.search,
-              onTap: () => _showSearchSheet(context, controller),
             ),
           ],
         ),
@@ -477,39 +643,51 @@ class _FilterChips extends StatelessWidget {
     });
   }
 
-  Widget _filterChip({
+  Widget _chip({
     required String label,
     required IconData icon,
     required VoidCallback onTap,
+    bool isActive = false,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: AppColors.border),
+          color: isActive
+              ? AppColors.primary.withValues(alpha: 0.12)
+              : AppColors.card,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: isActive
+                ? AppColors.primary
+                : AppColors.border.withValues(alpha: 0.5),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 13.sp, color: AppColors.textGrey),
+            Icon(
+              icon,
+              size: 12.5.sp,
+              color: isActive ? AppColors.primary : AppColors.textGrey,
+            ),
             SizedBox(width: 4.w),
             Text(
               label,
               style: AppTextStyles.bodyText.copyWith(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
+                fontSize: 11.sp,
+                fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                color: isActive ? AppColors.primary : AppColors.textPrimary,
               ),
             ),
             SizedBox(width: 2.w),
             Icon(
-              Icons.keyboard_arrow_down,
-              size: 14.sp,
-              color: AppColors.textGrey,
+              Icons.arrow_drop_down_rounded,
+              size: 16.sp,
+              color: isActive ? AppColors.primary : AppColors.textGrey,
             ),
           ],
         ),
@@ -520,7 +698,7 @@ class _FilterChips extends StatelessWidget {
   void _showRiskSheet(BuildContext context, CopyTradingMastersController c) {
     _showOptionsSheet(
       context: context,
-      title: 'Filter by Risk',
+      title: 'Filter by Risk Level',
       options: ['All Risks', 'Low (1-2)', 'Medium (3)', 'High (4-5)'],
       current: c.riskFilter.value,
       onSelect: (v) => c.riskFilter.value = v,
@@ -530,7 +708,7 @@ class _FilterChips extends StatelessWidget {
   void _showTimeSheet(BuildContext context, CopyTradingMastersController c) {
     _showOptionsSheet(
       context: context,
-      title: 'Filter by Time',
+      title: 'Performance Timeframe',
       options: [
         'All Time',
         'Last 7 Days',
@@ -546,56 +724,10 @@ class _FilterChips extends StatelessWidget {
   void _showSortSheet(BuildContext context, CopyTradingMastersController c) {
     _showOptionsSheet(
       context: context,
-      title: 'Sort Masters',
+      title: 'Sort Masters By',
       options: ['Gain %', 'AUM', 'Copiers', 'Active Days'],
-      current: 'Sort: ${c.sortBy.value}'.replaceFirst('Sort: ', ''),
+      current: c.sortBy.value,
       onSelect: (v) => c.sortBy.value = v,
-    );
-  }
-
-  void _showSearchSheet(BuildContext context, CopyTradingMastersController c) {
-    final ctrl = TextEditingController(text: c.search.value);
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-      ),
-      builder:
-          (ctx) => Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Search Masters',
-                  style: AppTextStyles.heading.copyWith(fontSize: 16.sp),
-                ),
-                SizedBox(height: 12.h),
-                TextField(
-                  controller: ctrl,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: 'Nickname, name or code',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                  ),
-                  onChanged: (v) => c.search.value = v.trim(),
-                ),
-                SizedBox(height: 12.h),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text('Done'),
-                  ),
-                ),
-              ],
-            ),
-          ),
     );
   }
 
@@ -610,46 +742,117 @@ class _FilterChips extends StatelessWidget {
       context: context,
       backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
       ),
       builder:
-          (ctx) => Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTextStyles.heading.copyWith(fontSize: 16.sp),
-                ),
-                SizedBox(height: 8.h),
-                for (final o in options)
-                  ListTile(
-                    title: Text(o),
-                    trailing:
-                        o == current
-                            ? Icon(Icons.check, color: AppColors.primary)
-                            : null,
-                    onTap: () {
-                      onSelect(o);
-                      Navigator.pop(ctx);
-                    },
+          (ctx) => SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 38.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.border.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
                   ),
-              ],
+                  SizedBox(height: 14.h),
+                  Text(
+                    title,
+                    style: AppTextStyles.heading.copyWith(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  SizedBox(height: 10.h),
+                  for (final o in options)
+                    InkWell(
+                      borderRadius: BorderRadius.circular(12.r),
+                      onTap: () {
+                        onSelect(o);
+                        Navigator.pop(ctx);
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                        margin: EdgeInsets.only(bottom: 4.h),
+                        decoration: BoxDecoration(
+                          color: o == current
+                              ? AppColors.primary.withValues(alpha: 0.10)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              o,
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 13.5.sp,
+                                fontWeight: o == current
+                                    ? FontWeight.w800
+                                    : FontWeight.w500,
+                                color: o == current
+                                    ? AppColors.primary
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                            if (o == current)
+                              Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 18.sp),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
     );
   }
 }
 
-// ─────────────────────────── master card (horizontal / one per row) ───────────────────────────
+// ─────────────────────────── 5. PRO MASTER TRADER CARDS ───────────────────────────
 
-class _MasterCardHorizontal extends StatelessWidget {
+class _ProMasterCardWrapper extends StatelessWidget {
+  final dynamic m;
+  const _ProMasterCardWrapper({required this.m});
+
+  @override
+  Widget build(BuildContext context) {
+    try {
+      return Padding(
+        padding: EdgeInsets.only(bottom: 12.h),
+        child: _ProMasterCard(
+          item: m,
+          onTap: () {
+            HapticFeedback.selectionClick();
+            Get.to(() => MasterDetailsScreen(masterCode: m.masterCode));
+          },
+          onCopy: () {
+            HapticFeedback.selectionClick();
+            Get.to(() => MasterDetailsScreen(masterCode: m.masterCode));
+          },
+        ),
+      );
+    } catch (e, st) {
+      debugPrint('[ExploreMasters] render failed: $e');
+      debugPrintStack(label: 'card render', stackTrace: st);
+      return const SizedBox.shrink();
+    }
+  }
+}
+
+class _ProMasterCard extends StatelessWidget {
   final dynamic item;
   final VoidCallback onTap;
   final VoidCallback onCopy;
-  const _MasterCardHorizontal({
+
+  const _ProMasterCard({
     required this.item,
     required this.onTap,
     required this.onCopy,
@@ -680,267 +883,364 @@ class _MasterCardHorizontal extends StatelessWidget {
     final pnlText = _formatPnl(pnl);
     final minInvestText =
         minInvest == 0 ? '\$0' : '\$${minInvest.toStringAsFixed(0)}';
-    final pnlColor = pnl >= 0 ? AppColors.success : AppColors.error;
-    final gainColor = gain >= 0 ? AppColors.success : AppColors.error;
+    final pnlColor = pnl >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+    final isGainPositive = gain >= 0;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14.r),
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: AppColors.border, width: 1),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(
+          color: AppColors.border.withValues(alpha: 0.5),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 44.w,
-                    height: 44.h,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(22.r),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      _initials(displayName),
-                      style: AppTextStyles.bodyText.copyWith(
-                        color: AppColors.whiteColor,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18.r),
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.all(14.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Header Row
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Squircle Avatar with Pro Badge
+                    Stack(
                       children: [
-                        Text(
-                          displayName,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.label.copyWith(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                        Container(
+                          width: 46.w,
+                          height: 46.h,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF6366F1),
+                                Color(0xFF3B82F6),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            _initials(displayName),
+                            style: AppTextStyles.bodyText.copyWith(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ),
-                        SizedBox(height: 2.h),
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                'Active ${activeDays}D',
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 11.sp,
-                                  color: AppColors.textGrey,
-                                ),
-                              ),
+                        Positioned(
+                          right: -1,
+                          bottom: -1,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: AppColors.card,
+                              shape: BoxShape.circle,
                             ),
-                            SizedBox(width: 6.w),
-                            Text(
-                              '•',
-                              style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 11.sp,
-                                color: AppColors.textGrey,
-                              ),
+                            child: Icon(
+                              Icons.verified_rounded,
+                              size: 14.sp,
+                              color: const Color(0xFF3B82F6),
                             ),
-                            SizedBox(width: 6.w),
-                            Flexible(
-                              child: Text(
-                                serverType == 'self_hosted'
-                                    ? 'SELFHOSTED'
-                                    : serverType.toUpperCase(),
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 10.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color:
-                                      serverType == 'self_hosted'
-                                          ? AppColors.primary
-                                          : AppColors.textGrey,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _riskColor(riskScore).withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Text(
-                      'RISK $riskScore',
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w700,
-                        color: _riskColor(riskScore),
+                    SizedBox(width: 12.w),
+                    // Trader Name & Tags
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            displayName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.label.copyWith(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          SizedBox(height: 3.h),
+                          Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.5.h),
+                                decoration: BoxDecoration(
+                                  color: AppColors.background,
+                                  borderRadius: BorderRadius.circular(4.r),
+                                ),
+                                child: Text(
+                                  serverType == 'self_hosted'
+                                      ? 'SELFHOSTED'
+                                      : serverType.toUpperCase(),
+                                  style: AppTextStyles.bodyText.copyWith(
+                                    fontSize: 9.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                '•  ${activeDays}D active',
+                                style: AppTextStyles.bodyText.copyWith(
+                                  fontSize: 11.sp,
+                                  color: AppColors.textGrey,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 12.h),
-              Divider(height: 1, color: AppColors.border),
-              SizedBox(height: 10.h),
-              // 2x2 metrics
-              Row(
-                children: [
-                  Expanded(
-                    child: _metricCell('TOTAL GAIN', gainText, gainColor),
-                  ),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: _metricCell(
-                      'MAX DRAWDOWN',
-                      drawdownText,
-                      AppColors.error,
+                    // Risk Pill
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: _riskColor(riskScore).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: _riskColor(riskScore).withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Text(
+                        'RISK $riskScore',
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w800,
+                          color: _riskColor(riskScore),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 14.h),
+
+                // Hero Gain Block (Fintech Style)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                  decoration: BoxDecoration(
+                    color: isGainPositive
+                        ? const Color(0xFF10B981).withValues(alpha: 0.08)
+                        : const Color(0xFFEF4444).withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: isGainPositive
+                          ? const Color(0xFF10B981).withValues(alpha: 0.20)
+                          : const Color(0xFFEF4444).withValues(alpha: 0.20),
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 6.h),
-              Row(
-                children: [
-                  Expanded(child: _metricCell('TOTAL P&L', pnlText, pnlColor)),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: _metricCell(
-                      'MIN INVESTMENT',
-                      minInvestText,
-                      AppColors.textPrimary,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            isGainPositive
+                                ? Icons.arrow_upward_rounded
+                                : Icons.arrow_downward_rounded,
+                            size: 16.sp,
+                            color: isGainPositive
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFEF4444),
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            'Total Gain (ROI)',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 11.5.sp,
+                              color: AppColors.textGrey,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        gainText,
+                        style: AppTextStyles.heading.copyWith(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w900,
+                          color: isGainPositive
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFFEF4444),
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 10.h),
-              Divider(height: 1, color: AppColors.border),
-              SizedBox(height: 8.h),
-              // Footer
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      'Fee: $commissionPct',
-                      overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 10.h),
+
+                // 3-Column Metrics Grid
+                Row(
+                  children: [
+                    Expanded(
+                      child: _statPill(
+                        label: 'Total P&L',
+                        value: pnlText,
+                        valueColor: pnlColor,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: _statPill(
+                        label: 'Max Drawdown',
+                        value: drawdownText,
+                        valueColor: const Color(0xFFEF4444),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: _statPill(
+                        label: 'Min Invest',
+                        value: minInvestText,
+                        valueColor: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 14.h),
+
+                // Footer Bar (Fee, Copiers, CTA)
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      child: Text(
+                        'Fee: $commissionPct',
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 10.5.sp,
+                          color: AppColors.textGrey,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Icon(
+                      Icons.people_alt_rounded,
+                      size: 14.sp,
+                      color: AppColors.textGrey,
+                    ),
+                    SizedBox(width: 3.w),
+                    Text(
+                      '$totalCopiers copiers',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Icon(
-                    Icons.people_outline,
-                    size: 14.r,
-                    color: AppColors.textGrey,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    '$totalCopiers',
-                    style: AppTextStyles.bodyText.copyWith(
-                      fontSize: 11.sp,
-                      color: AppColors.textGrey,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  ElevatedButton(
-                    onPressed: hasPlan ? onCopy : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      disabledBackgroundColor: AppColors.textGrey.withValues(
-                        alpha: 0.20,
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: hasPlan ? onCopy : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        disabledBackgroundColor: AppColors.textGrey.withValues(alpha: 0.15),
+                        foregroundColor: Colors.white,
+                        elevation: hasPlan ? 2 : 0,
+                        shadowColor: AppColors.primary.withValues(alpha: 0.4),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        minimumSize: Size(0, 34.h),
                       ),
-                      foregroundColor: AppColors.onColoredBackground,
-                      elevation: 0,
-                      padding: EdgeInsets.symmetric(horizontal: 18.w),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      minimumSize: Size(0, 32.h),
-                    ),
-                    child: Text(
-                      hasPlan ? 'Copy' : 'No Plan',
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.whiteColor
+                      child: Text(
+                        hasPlan ? 'Copy Strategy' : 'No Plan',
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w800,
+                          color: hasPlan ? Colors.white : AppColors.textGrey,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _metricCell(String label, String value, Color valueColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.bodyText.copyWith(
-            fontSize: 9.sp,
-            color: AppColors.textGrey,
-            fontWeight: FontWeight.w600,
+  Widget _statPill({
+    required String label,
+    required String value,
+    required Color valueColor,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 9.sp,
+              color: AppColors.textGrey,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        SizedBox(height: 2.h),
-        Text(
-          value,
-          overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.bodyText.copyWith(
-            fontSize: 13.sp,
-            color: valueColor,
-            fontWeight: FontWeight.w700,
+          SizedBox(height: 2.h),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 12.5.sp,
+              color: valueColor,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-// ─────────────────────────── helpers ───────────────────────────
+// ─────────────────────────── HELPERS ───────────────────────────
 
-/// Best-effort label for the commission on a master list item. The list
-/// model doesn't expose `commissionPercentage` (only available on the
-/// plan-detail endpoint) so we fall back to '—' until the field is added.
 String _safeCommission(dynamic item) {
   try {
     final dynamic raw = item.commissionPercentage;
     if (raw is num) return '${raw.toStringAsFixed(0)}%';
-  } catch (_) {
-    // Field not present on this build of the model — fall through.
-  }
+  } catch (_) {}
   return '—';
 }
 
 Color _riskColor(int risk) {
-  if (risk <= 2) return AppColors.success;
+  if (risk <= 2) return const Color(0xFF10B981);
   if (risk == 3) return const Color(0xFFF59E0B);
-  return AppColors.error;
+  return const Color(0xFFEF4444);
 }
 
 String _initials(String name) {
@@ -976,68 +1276,123 @@ String _formatPnl(num n) {
   return '${n < 0 ? '-' : (n > 0 ? '+' : '')}\$$body';
 }
 
-// ─────────────────────────── empty / error / loading states ───────────────────────────
+// ─────────────────────────── PRO SHIMMER SKELETON ───────────────────────────
 
-class _LoadingList extends StatelessWidget {
-  const _LoadingList();
+class _ExploreMastersProShimmer extends StatelessWidget {
+  const _ExploreMastersProShimmer();
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        ListView.builder(
-          padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 100.h),
-          itemCount: 4,
-          itemBuilder:
-              (_, __) => Container(
-                height: 200.h,
-                margin: EdgeInsets.only(bottom: 12.h),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: BorderRadius.circular(14.r),
-                  border: Border.all(color: AppColors.border),
-                ),
-              ),
-        ),
-        const Positioned(
-          top: 12,
-          right: 16,
-          child: SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
+    final isDark = AppColors.isDarkMode;
+    final baseColor = isDark ? const Color(0xFF1E1E28) : const Color(0xFFE5E7EB);
+    final highlightColor = isDark ? const Color(0xFF2D2D3D) : const Color(0xFFF3F4F6);
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 100.h),
+        physics: const NeverScrollableScrollPhysics(),
+        children: [
+          // Hero Banner Shimmer
+          _shimmerBox(height: 160.h, radius: 20.r),
+          SizedBox(height: 14.h),
+
+          // Search Box Shimmer
+          _shimmerBox(height: 44.h, radius: 14.r),
+          SizedBox(height: 10.h),
+
+          // Segmented Tabs Shimmer
+          _shimmerBox(height: 40.h, radius: 14.r),
+          SizedBox(height: 10.h),
+
+          // Filter Chips Shimmer
+          Row(
+            children: [
+              _shimmerBox(width: 80.w, height: 32.h, radius: 16.r),
+              SizedBox(width: 8.w),
+              _shimmerBox(width: 90.w, height: 32.h, radius: 16.r),
+              SizedBox(width: 8.w),
+              _shimmerBox(width: 90.w, height: 32.h, radius: 16.r),
+            ],
           ),
-        ),
-      ],
+          SizedBox(height: 14.h),
+
+          // Trader Cards Shimmer
+          for (int i = 0; i < 3; i++) ...[
+            _shimmerBox(height: 210.h, radius: 18.r),
+            SizedBox(height: 12.h),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _shimmerBox({
+    double? width,
+    required double height,
+    double radius = 16,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(radius),
+      ),
     );
   }
 }
 
 class _NoSearchMatchesState extends StatelessWidget {
   final String query;
-  const _NoSearchMatchesState({required this.query});
+  final VoidCallback onClear;
+  const _NoSearchMatchesState({required this.query, required this.onClear});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 32.h),
+      padding: EdgeInsets.symmetric(vertical: 40.h, horizontal: 20.w),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.search_off, size: 40.r, color: AppColors.textGrey),
-          SizedBox(height: 10.h),
+          Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+            ),
+            child: Icon(Icons.search_off_rounded, size: 36.sp, color: AppColors.textGrey),
+          ),
+          SizedBox(height: 14.h),
           Text(
             query.isEmpty
-                ? 'No masters in this view'
+                ? 'No Masters in this category'
                 : 'No Masters Match "$query"',
             textAlign: TextAlign.center,
-            style: AppTextStyles.subheading.copyWith(color: AppColors.textGrey),
+            style: AppTextStyles.subheading.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           SizedBox(height: 6.h),
           Text(
-            'Try a different filter or clear the search.',
+            'Try adjusting your risk filter, time period, or search query.',
             textAlign: TextAlign.center,
             style: AppTextStyles.caption.copyWith(color: AppColors.textGrey),
+          ),
+          SizedBox(height: 16.h),
+          OutlinedButton(
+            onPressed: onClear,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: BorderSide(color: AppColors.primary),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+            ),
+            child: const Text('Reset All Filters'),
           ),
         ],
       ),
@@ -1054,24 +1409,46 @@ class _ErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(24.r),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 40.r, color: AppColors.error),
-            SizedBox(height: 10.h),
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.error_outline_rounded, size: 36.sp, color: AppColors.error),
+            ),
+            SizedBox(height: 14.h),
+            Text(
+              'Failed to Load Masters',
+              style: AppTextStyles.heading.copyWith(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(height: 6.h),
             Text(
               message,
               textAlign: TextAlign.center,
               style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
             ),
-            SizedBox(height: 12.h),
-            ElevatedButton(
+            SizedBox(height: 16.h),
+            ElevatedButton.icon(
               onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
               ),
-              child: Text('Retry'),
+              label: const Text('Retry'),
             ),
           ],
         ),
@@ -1079,3 +1456,4 @@ class _ErrorState extends StatelessWidget {
     );
   }
 }
+

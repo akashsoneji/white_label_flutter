@@ -23,6 +23,7 @@ import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:crm_app/services/language_service.dart';
 
 import 'package:crm_app/services/symbol_selection_service.dart';
 
@@ -47,6 +48,8 @@ class CandleData {
 }
 
 class IQuoteChartController extends GetxController {
+  LanguageService get _lang => Get.find<LanguageService>();
+
   IQuoteChartController([String? initialSymbol]) {
     final symService =
         Get.isRegistered<SymbolSelectionService>()
@@ -340,14 +343,14 @@ class IQuoteChartController extends GetxController {
     if (acct == null) {
       return (
         ok: false,
-        message: 'No active MT5 account selected.',
+        message: _lang.tr('iquote_no_mt5_account'),
         orderType: _orderType(side, orderKind),
       );
     }
     if (volume <= 0) {
       return (
         ok: false,
-        message: 'Volume must be greater than 0.',
+        message: _lang.tr('iquote_volume_gt_zero'),
         orderType: _orderType(side, orderKind),
       );
     }
@@ -364,7 +367,7 @@ class IQuoteChartController extends GetxController {
           double.parse(price) <= 0) {
         return (
           ok: false,
-          message: 'Please enter a valid trigger price.',
+          message: _lang.tr('iquote_valid_trigger'),
           orderType: orderType,
         );
       }
@@ -374,7 +377,7 @@ class IQuoteChartController extends GetxController {
           double.parse(stopLimitPrice) <= 0) {
         return (
           ok: false,
-          message: 'Please enter a valid limit price.',
+          message: _lang.tr('iquote_valid_limit'),
           orderType: orderType,
         );
       }
@@ -384,7 +387,7 @@ class IQuoteChartController extends GetxController {
             double.parse(price) <= 0)) {
       return (
         ok: false,
-        message: 'Please enter a valid limit price.',
+        message: _lang.tr('iquote_valid_limit'),
         orderType: orderType,
       );
     }
@@ -395,7 +398,7 @@ class IQuoteChartController extends GetxController {
       if (token == null || token.isEmpty) {
         return (
           ok: false,
-          message: 'Authentication token missing.',
+          message: _lang.tr('iquote_auth_token_missing'),
           orderType: orderType,
         );
       }
@@ -432,7 +435,7 @@ class IQuoteChartController extends GetxController {
         // update immediately.
         await _trading.refreshTradeHistory();
         _refreshCounts();
-        return (ok: true, message: 'Order placed', orderType: orderType);
+        return (ok: true, message: _lang.tr('iquote_order_placed'), orderType: orderType);
       }
 
       final errorMsg =

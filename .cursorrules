@@ -1,0 +1,7 @@
+# Cursor & Windsurf Rules for Flutter UI Development
+
+1. Always follow Flutter official responsive design principles (`LayoutBuilder`, `MediaQuery.sizeOf(context)`).
+2. Avoid hardcoded hex colors and dimensions; use `Theme.of(context)`.
+3. Use `const` constructors on all widgets where possible to optimize rebuilds.
+4. Always handle Loading (Shimmer), Error (with retry), and Empty UI states cleanly.
+5. Refer to `.agents/skills/` for comprehensive task blueprints.

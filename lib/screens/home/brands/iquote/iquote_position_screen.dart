@@ -1240,14 +1240,14 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('Close Position'),
+                title: Text(languageService.tr('iquote_close_position')),
                 onTap: () {
                   Get.back();
                   Get.to(() => ClosePositionScreen(position: position));
                 },
               ),
               ListTile(
-                title: const Text('Edit Order'),
+                title: Text(languageService.tr('edit_order_screen_edit_order')),
                 onTap: () {
                   Get.back();
                   Get.to(() => EditOrderScreen(position: position));
@@ -1293,40 +1293,40 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             ),
             SizedBox(height: 24.h),
             _bulkTile(
-              label: 'Close Losing Positions',
+              label: languageService.tr('iquote_close_losing'),
               chipLabel: 'Loss',
               chipColor: _red,
               onTap: () {
                 Get.back();
                 _confirmBulkClose(
                   tradingController,
-                  title: 'Close all losing positions?',
+                  title: languageService.tr('iquote_close_losing_confirm'),
                   filter: (p) => p.profitLoss < 0,
                 );
               },
             ),
             _bulkTile(
-              label: 'Close Profitable Positions',
+              label: languageService.tr('iquote_close_profitable'),
               chipLabel: 'Profitable',
               chipColor: _green,
               onTap: () {
                 Get.back();
                 _confirmBulkClose(
                   tradingController,
-                  title: 'Close all profitable positions?',
+                  title: languageService.tr('iquote_close_profitable_confirm'),
                   filter: (p) => p.profitLoss > 0,
                 );
               },
             ),
             _bulkTile(
-              label: 'Close All Positions',
+              label: languageService.tr('iquote_close_all'),
               chipLabel: 'ALL',
               chipColor: _accent,
               onTap: () {
                 Get.back();
                 _confirmBulkClose(
                   tradingController,
-                  title: 'Close all positions?',
+                  title: languageService.tr('iquote_close_all_confirm'),
                   filter: (_) => true,
                 );
               },
@@ -1388,8 +1388,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     final targets = tradingController.marketPositions.where(filter).toList();
     if (targets.isEmpty) {
       CustomToastService.showInfo(
-        title: 'No positions',
-        message: 'No positions matched the selected filter',
+        title: languageService.tr('iquote_no_positions'),
+        message: languageService.tr('iquote_no_positions_filter'),
       );
       return;
     }
@@ -1497,8 +1497,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: languageService.tr('trading_error'),
+          message: languageService.tr('chart_no_active_account'),
         );
         return;
       }
@@ -1512,8 +1512,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       }
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to close positions: $e',
+        title: languageService.tr('trading_error'),
+        message: '${languageService.tr('iquote_failed_close_positions')}: $e',
       );
     }
   }
@@ -1716,8 +1716,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: languageService.tr('trading_error'),
+          message: languageService.tr('chart_no_active_account'),
         );
         return;
       }
@@ -1728,8 +1728,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       );
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to close position: $e',
+        title: languageService.tr('trading_error'),
+        message: '${languageService.tr('iquote_failed_close_position')}: $e',
       );
     }
   }
@@ -1868,8 +1868,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: languageService.tr('trading_error'),
+          message: languageService.tr('chart_no_active_account'),
         );
         return;
       }
@@ -1880,8 +1880,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       );
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to cancel order: $e',
+        title: languageService.tr('trading_error'),
+        message: '${languageService.tr('iquote_failed_cancel_order')}: $e',
       );
     }
   }

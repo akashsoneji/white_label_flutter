@@ -162,7 +162,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
 
     final supported = await BiometricService.instance.isDeviceSupported();
     if (!supported) {
-      CustomToastService.showError(message: 'Biometric not supported on this device');
+      CustomToastService.showError(message: languageService.tr('celestial_settings_screen_biometric_not_supported_on_this_device'));
       return;
     }
     final enrolled = await BiometricService.instance.isEnrolled();
@@ -188,7 +188,7 @@ class _MetaSettingsScreenState extends State<MetaSettingsScreen>
       await ibmController.checkSystemAndNavigate();
     } catch (e) {
       if (Get.isDialogOpen ?? false) Get.back(closeOverlays: true);
-      CustomToastService.showError(message: 'Error checking IB status: $e');
+      CustomToastService.showError(message: languageService.tr('common_ib_status_error_with_msg').replaceAll('{error}', '$e'));
     }
   }
 

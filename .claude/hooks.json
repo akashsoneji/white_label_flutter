@@ -1,0 +1,8 @@
+{
+  "PreToolUse": [
+    {
+      "matcher": "Write|Edit",
+      "command": "bash -c 'if [[ \"$CLAUDE_TOOL_INPUT_PATH\" == *.g.dart ]] || [[ \"$CLAUDE_TOOL_INPUT_PATH\" == *.freezed.dart ]]; then echo \"Blocked: Do not edit generated files. Run build_runner instead.\"; exit 1; fi'"
+    }
+  ]
+}

@@ -34,6 +34,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/theme_service.dart';
 import 'package:crm_app/widgets/account_header_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
@@ -462,8 +463,8 @@ class _BottomBar extends StatelessWidget {
         final activeAccount = accountController.activeMT5Account;
         if (activeAccount == null) {
           CustomToastService.showError(
-            title: 'Error',
-            message: 'No active account found',
+            title: Get.find<LanguageService>().tr('trading_error'),
+            message: Get.find<LanguageService>().tr('chart_no_active_account'),
           );
           return;
         }
@@ -476,13 +477,13 @@ class _BottomBar extends StatelessWidget {
           );
         }
         CustomToastService.showSuccess(
-          title: 'Success',
-          message: 'Positions closed successfully',
+          title: Get.find<LanguageService>().tr('common_success'),
+          message: Get.find<LanguageService>().tr('iquote_positions_closed_success'),
         );
       } catch (e) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'Failed to close positions: $e',
+          title: Get.find<LanguageService>().tr('trading_error'),
+          message: '${Get.find<LanguageService>().tr('iquote_failed_close_positions')}: $e',
         );
       }
     }
@@ -1219,13 +1220,13 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
               child: Row(
                 children: [
                   _TabButton(
-                    label: 'Market',
+                    label: Get.find<LanguageService>().tr('iquote_tab_market'),
                     active: _tab == 0,
                     palette: palette,
                     onTap: () => setState(() => _tab = 0),
                   ),
                   _TabButton(
-                    label: 'Pending',
+                    label: Get.find<LanguageService>().tr('iquote_tab_pending'),
                     active: _tab == 1,
                     palette: palette,
                     onTap: () => setState(() => _tab = 1),
@@ -1417,7 +1418,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                 SizedBox(height: 6.h),
                 Obx(
                   () => _Field(
-                    label: 'Trigger Price',
+                    label: Get.find<LanguageService>().tr('iquote_trigger_price'),
                     controller: _triggerCtl,
                     palette: palette,
                     digits: widget.ctrl.priceDigits.value,
@@ -1455,7 +1456,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                 SizedBox(height: 6.h),
                 Obx(
                   () => _Field(
-                    label: 'Limit Price',
+                    label: Get.find<LanguageService>().tr('iquote_limit_price'),
                     controller: _priceCtl,
                     palette: palette,
                     digits: widget.ctrl.priceDigits.value,
@@ -1518,7 +1519,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                   padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 4.h),
                   child: Obx(
                     () => _Field(
-                      label: 'Order Price',
+                      label: Get.find<LanguageService>().tr('iquote_order_price'),
                       controller: _priceCtl,
                       palette: palette,
                       digits: widget.ctrl.priceDigits.value,
@@ -1579,7 +1580,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                   Expanded(
                     child: Obx(
                       () => _Field(
-                        label: 'Take profit',
+                        label: Get.find<LanguageService>().tr('pending_order_take_profit_label'),
                         controller: _tpCtl,
                         focusNode: _tpFocusNode,
                         palette: palette,
@@ -1591,7 +1592,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                   Expanded(
                     child: Obx(
                       () => _Field(
-                        label: 'Stop loss',
+                        label: Get.find<LanguageService>().tr('pending_order_stop_loss_label'),
                         controller: _slCtl,
                         focusNode: _slFocusNode,
                         palette: palette,
@@ -2077,7 +2078,7 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
         ),
         duration: const Duration(seconds: 3),
         action: SnackBarAction(
-          label: 'Undo',
+          label: Get.find<LanguageService>().tr('common_undo'),
           textColor: const Color(0xFFF97316),
           onPressed: () {
             if (_lastRemoved != null) {
@@ -2199,7 +2200,7 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
                     vertical: 12.h,
                   ),
                   border: InputBorder.none,
-                  hintText: 'Search symbols…',
+                  hintText: Get.find<LanguageService>().tr('iquote_search_symbols'),
                   hintStyle: TextStyle(
                     color: palette.axisText,
                     fontSize: 13.sp,
@@ -2319,7 +2320,7 @@ class _SortMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<_WatchSort>(
-      tooltip: 'Sort',
+      tooltip: Get.find<LanguageService>().tr('common_sort'),
       splashRadius: 20,
       color: palette.sheetBg,
       shape: RoundedRectangleBorder(

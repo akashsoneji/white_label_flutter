@@ -222,7 +222,7 @@ class _IquoteCreateAccountScreenState
         Get.offAllNamed(AppPages.ACCOUNT_CREATED);
       }
     } catch (e) {
-      CustomToastService.showError(title: 'Error', message: '$e');
+      CustomToastService.showError(title: _languageService.tr('trading_error'), message: '$e');
     }
   }
 

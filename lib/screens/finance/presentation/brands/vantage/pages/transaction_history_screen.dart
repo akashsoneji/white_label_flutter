@@ -276,7 +276,7 @@ class _VantageTransactionHistoryScreenState
           children: [
             Expanded(
               child: _buildSummaryItem(
-                label: 'Deposits',
+                label: languageService.tr('transaction_history_deposits'),
                 value: '\$${totalDeposits.toStringAsFixed(2)}',
                 count: depositCount,
                 icon: Icons.arrow_downward_rounded,
@@ -287,7 +287,7 @@ class _VantageTransactionHistoryScreenState
             SizedBox(width: 12.w),
             Expanded(
               child: _buildSummaryItem(
-                label: 'Withdrawals',
+                label: languageService.tr('transaction_history_withdrawals'),
                 value: '\$${totalWithdrawals.toStringAsFixed(2)}',
                 count: withdrawalCount,
                 icon: Icons.arrow_upward_rounded,
@@ -437,7 +437,7 @@ class _VantageTransactionHistoryScreenState
         children: [
           Expanded(
             child: _buildDatePickerButton(
-              label: 'Start',
+              label: languageService.tr('transaction_history_start'),
               date: customStartDate,
               onTap: () => _showCustomDatePicker(true),
             ),
@@ -450,7 +450,7 @@ class _VantageTransactionHistoryScreenState
           ),
           Expanded(
             child: _buildDatePickerButton(
-              label: 'End',
+              label: languageService.tr('transaction_history_end'),
               date: customEndDate,
               onTap: () => _showCustomDatePicker(false),
             ),
@@ -515,7 +515,7 @@ class _VantageTransactionHistoryScreenState
       child: Row(
         children: [
           Text(
-            'Type:',
+            languageService.tr('transaction_history_type_label'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w500,
@@ -613,7 +613,7 @@ class _VantageTransactionHistoryScreenState
                   ),
                   SizedBox(width: 8.w),
                   Text(
-                    'Recent Transactions',
+                    languageService.tr('transaction_history_screen_recent_transactions'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -950,7 +950,7 @@ class _VantageTransactionHistoryScreenState
           ),
           SizedBox(height: 20.h),
           Text(
-            'No Transactions Found',
+            languageService.tr('transaction_history_no_transactions'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
@@ -959,7 +959,7 @@ class _VantageTransactionHistoryScreenState
           ),
           SizedBox(height: 8.h),
           Text(
-            'Try adjusting your filters to find more transactions',
+            languageService.tr('transaction_history_adjust_filters'),
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp, color: AppColors.textSecondary),
           ),
@@ -974,7 +974,7 @@ class _VantageTransactionHistoryScreenState
               });
             },
             icon: Icon(Icons.refresh_rounded, size: 16.sp),
-            label: Text('Reset Filters', style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp)),
+            label: Text(languageService.tr('transaction_history_screen_reset_filters'), style: AppTextStyles.bodyText.copyWith(fontSize: 13.sp)),
             style: TextButton.styleFrom(foregroundColor: AppColors.primary),
           ),
         ],

@@ -431,7 +431,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
       backgroundColor: MetaTheme.bg(context),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(14))),
       builder: (ctx) => _MetaSheetWrapper(
-        title: 'MENU',
+        title: Get.find<LanguageService>().tr('common_menu'),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           _SheetRow(icon: Icons.calendar_today, leading: 'Period: $_selectedPeriodLabel', onTap: () { Navigator.of(ctx).pop(); _openPeriodSheet(context); }),
           const _SheetDivider(),

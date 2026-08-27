@@ -278,8 +278,8 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
     final account = _accounts.activeMT5Account;
     if (account == null) {
       CustomToastService.showError(
-        title: 'No active account',
-        message: 'Switch to an MT5 account to place an order.',
+        title: Get.find<LanguageService>().tr('meta_neworder_no_active_account'),
+        message: Get.find<LanguageService>().tr('meta_new_order_screen_switch_to_an_mt5_account_to'),
       );
       return;
     }
@@ -355,7 +355,7 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
         }
       } else {
         CustomToastService.showError(
-          title: 'Order failed',
+          title: Get.find<LanguageService>().tr('meta_neworder_order_failed'),
           message: _trading.errorMessage.isNotEmpty
               ? _trading.errorMessage
               : 'Unable to place order',
@@ -364,8 +364,8 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
     } catch (e) {
       if (!mounted) return;
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to place order: $e',
+        title: Get.find<LanguageService>().tr('trading_error'),
+        message: Get.find<LanguageService>().tr('meta_order_place_failed').replaceAll('{error}', '$e'),
       );
     } finally {
       if (mounted) setState(() => _submitting = false);
@@ -1097,8 +1097,8 @@ class _MetaNewOrderScreenState extends State<MetaNewOrderScreen> {
   void _refresh() {
     _socket.changeSymbol(_symbol);
     CustomToastService.showInfo(
-      title: 'Refreshed',
-      message: 'Re-subscribing to live prices for $_symbol',
+      title: Get.find<LanguageService>().tr('meta_neworder_refreshed'),
+      message: Get.find<LanguageService>().tr('meta_resubscribing').replaceAll('{symbol}', '$_symbol'),
     );
   }
 }

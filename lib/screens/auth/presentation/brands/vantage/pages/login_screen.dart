@@ -149,7 +149,7 @@ class _VantageLoginScreenState extends State<VantageLoginScreen> {
           SizedBox(height: 12.h),
           VantagePillTextField(
             controller: passwordController,
-            hintText: 'Password',
+            hintText: languageService.tr('register_password'),
             obscureText: obscureText,
             prefixIcon: Icon(
               Icons.lock_outline_rounded,

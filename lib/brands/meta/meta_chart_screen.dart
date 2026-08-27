@@ -272,7 +272,7 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
                 color:   MetaTheme.buyBlue ,
                 borderRadius: BorderRadius.circular(6.r),
               ),
-              child: Text('Trade', style: AppTextStyles.bodyText.copyWith(
+              child: Text(languageService.tr('nav_tab_trade_alt'), style: AppTextStyles.bodyText.copyWith(
                   color: Colors.white,
                   fontSize: 12.sp, fontWeight: FontWeight.w700)),
             ),
@@ -319,9 +319,9 @@ class _MetaChartScreenState extends State<MetaChartScreen> with AutomaticKeepAli
             ),
             const Spacer(),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text('H: ${price.dayHigh.toStringAsFixed(digits)}',
+              Text(languageService.tr('meta_chart_hi').replaceAll('{value}', price.dayHigh.toStringAsFixed(digits)),
                   style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(c), fontSize: 10.sp)),
-              Text('L: ${price.dayLow.toStringAsFixed(digits)}',
+              Text(languageService.tr('meta_chart_lo').replaceAll('{value}', price.dayLow.toStringAsFixed(digits)),
                   style: AppTextStyles.bodyText.copyWith(color: MetaTheme.subText(c), fontSize: 10.sp)),
             ]),
           ],

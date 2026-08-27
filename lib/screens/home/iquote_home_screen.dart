@@ -20,6 +20,7 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/screens/trading/view_models/banner_controller.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
 import 'package:crm_app/utils/precision_helper.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
@@ -38,7 +39,7 @@ class IquoteHomeScreen extends StatefulWidget {
       final ibmController = Get.put(IbmController());
       await ibmController.checkSystemAndNavigate();
     } catch (e) {
-      CustomToastService.showError(message: 'Error checking IB status: $e');
+      CustomToastService.showError(message: Get.find<LanguageService>().tr('common_ib_status_error_with_msg').replaceAll('{error}', '$e'));
     }
   }
 
@@ -203,7 +204,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                             // 1. Demo
                             _buildShortcutItem(
                               icon: Icons.play_circle_outline,
-                              label: 'Demo',
+                              label: Get.find<LanguageService>().tr('common_demo'),
                               color: Colors.orangeAccent,
                               textColor: textPrimary,
                               onTap:
@@ -215,7 +216,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                             // 2. Real
                             _buildShortcutItem(
                               icon: Icons.account_balance_wallet_outlined,
-                              label: 'Real',
+                              label: Get.find<LanguageService>().tr('common_real'),
                               color: Colors.greenAccent,
                               textColor: textPrimary,
                               onTap: () => Get.toNamed(AppPages.CHOOSE_ACCOUNT),
@@ -241,7 +242,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                             // 5. Scratchcard
                             _buildShortcutItem(
                               icon: Icons.confirmation_number_outlined,
-                              label: 'Scratchcard',
+                              label: Get.find<LanguageService>().tr('iquote_scratchcard'),
                               color: Colors.amber,
                               textColor: textPrimary,
                               onTap:
@@ -250,7 +251,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                             // 6. Support Ticket
                             _buildShortcutItem(
                               icon: Icons.support_agent_outlined,
-                              label: 'Support Ticket',
+                              label: Get.find<LanguageService>().tr('iquote_support_ticket'),
                               color: Colors.tealAccent,
                               textColor: textPrimary,
                               onTap: () => Get.toNamed(AppPages.TICKET_LIST),
@@ -258,7 +259,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                             // 7. Deposit
                             _buildShortcutItem(
                               icon: Icons.add_circle_outline,
-                              label: 'Deposit',
+                              label: Get.find<LanguageService>().tr('common_deposit'),
                               color: Colors.blueAccent,
                               textColor: textPrimary,
                               onTap:
@@ -269,7 +270,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                             // 8. Withdrawal
                             _buildShortcutItem(
                               icon: Icons.remove_circle_outline,
-                              label: 'Withdrawal',
+                              label: Get.find<LanguageService>().tr('general_withdrawal'),
                               color: Colors.lightBlue,
                               textColor: textPrimary,
                               onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
