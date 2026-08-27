@@ -1,3 +1,4 @@
+import 'package:crm_app/screens/finance/presentation/finance_ui_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
@@ -309,11 +310,14 @@ class DepositInstructionController extends GetxController {
           dashboardController.markMT5AccountsAsStale();
         } catch (_) {}
 
-        Get.toNamed(
-          AppPages.TRANSACTION_HISTORY,
+        // Get.toNamed(
+        //   AppPages.TRANSACTION_HISTORY,
+        //   arguments: {'from': 'dashboard'},
+        // );
+        Get.to(
+          () => FinanceUiScope.widgets.transactionHistory(),
           arguments: {'from': 'dashboard'},
         );
-
         amountController.clear();
         selectedImage.value = null;
       } else {

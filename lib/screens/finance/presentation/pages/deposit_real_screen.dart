@@ -1,3 +1,4 @@
+import 'package:crm_app/screens/finance/presentation/finance_ui_scope.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -546,6 +547,8 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     }
 
     // Get.toNamed(AppPages.DEPOSIT_INSTRUCTION_SCREEN,arguments: controller.depositMethod.value);
+   
+   /// it workin proper
     Get.to(
       () => DepositInstructionScreen(
         object: controller.depositMethod.value!,
@@ -557,6 +560,8 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         fromBonus: Get.arguments != null && Get.arguments is Map && Get.arguments['from'] == 'bonus',
       ),
     );
+
+ 
 
     // Call deposit API
     // controller.submitDepositForTopUpDemo({
