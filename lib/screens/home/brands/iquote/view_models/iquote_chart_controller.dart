@@ -329,8 +329,12 @@ class IQuoteChartController extends GetxController {
     required String orderKind,
     required double volume,
     required String price,
+    String? stopLimitPrice,
     String? takeProfit,
     String? stopLoss,
+    // Pre-formatted lot string that preserves the user's actual decimal
+    // precision (e.g. "0.001"). When null we fall back to 2-decimal format.
+    String? formattedVolume,
   }) async {
     final acct = activeAccount;
     if (acct == null) {
@@ -350,7 +354,31 @@ class IQuoteChartController extends GetxController {
 
     final kind = orderKind.toLowerCase();
     final orderType = _orderType(side, kind);
-    if (orderType.requiresPrice &&
+    final isStopLimit = kind == 'stop_limit';
+
+    // For stop-limit orders: `price` is the Trigger Price and
+    // `stopLimitPrice` is the Limit Price. Both are required.
+    if (isStopLimit) {
+      if (price.isEmpty ||
+          double.tryParse(price) == null ||
+          double.parse(price) <= 0) {
+        return (
+          ok: false,
+          message: 'Please enter a valid trigger price.',
+          orderType: orderType,
+        );
+      }
+      if (stopLimitPrice == null ||
+          stopLimitPrice.isEmpty ||
+          double.tryParse(stopLimitPrice) == null ||
+          double.parse(stopLimitPrice) <= 0) {
+        return (
+          ok: false,
+          message: 'Please enter a valid limit price.',
+          orderType: orderType,
+        );
+      }
+    } else if (orderType.requiresPrice &&
         (price.isEmpty ||
             double.tryParse(price) == null ||
             double.parse(price) <= 0)) {
@@ -374,9 +402,12 @@ class IQuoteChartController extends GetxController {
 
       final ok = await _trading.placeTradeOrder(
         symbol: symbol,
-        volume: volume.toStringAsFixed(2),
+        volume: (formattedVolume != null && formattedVolume.isNotEmpty)
+            ? formattedVolume
+            : volume.toStringAsFixed(2),
         orderType: orderType,
         price: orderType.requiresPrice ? price : '',
+        stopLimitPrice: isStopLimit ? stopLimitPrice : null,
         takeProfit:
             (takeProfit != null && takeProfit.isNotEmpty) ? takeProfit : null,
         stopLoss: (stopLoss != null && stopLoss.isNotEmpty) ? stopLoss : null,
@@ -423,6 +454,8 @@ class IQuoteChartController extends GetxController {
       return isBuy ? OrderType.buyLimit : OrderType.sellLimit;
     } else if (kind == 'stop') {
       return isBuy ? OrderType.buyStop : OrderType.sellStop;
+    } else if (kind == 'stop_limit') {
+      return isBuy ? OrderType.buyStopLimit : OrderType.sellStopLimit;
     } else {
       return isBuy ? OrderType.buyMarket : OrderType.sellMarket;
     }

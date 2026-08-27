@@ -1045,11 +1045,12 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
                       }
                     },
                     child: Padding(
-                      padding: EdgeInsets.only(left: 4.w, right: 2.w),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 8.w, vertical: 6.h),
                       child: Icon(
                         Icons.close_rounded,
                         color: AppColors.textPrimary,
-                        size: 18.sp,
+                        size: 20.sp,
                       ),
                     ),
                   )

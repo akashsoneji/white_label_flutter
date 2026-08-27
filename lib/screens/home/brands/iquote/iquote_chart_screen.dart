@@ -27,6 +27,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -977,16 +978,90 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
 
   late TextEditingController _volumeCtl;
   late TextEditingController _priceCtl;
+  late TextEditingController _triggerCtl;
   late TextEditingController _tpCtl;
   late TextEditingController _slCtl;
   late FocusNode _tpFocusNode;
   late FocusNode _slFocusNode;
-  bool _isTpCustom = false;
-  bool _isSlCustom = false;
+  // Last auto-computed TP/SL strings (formatted to `priceDigits` digits).
+  // The user has gone "custom" only when the controller text differs from
+  // this — so re-computing on every bid/ask tick is safe: if the user typed
+  // something different we leave it; if they deleted back to our value (or
+  // hit a ±-step that lands on it) we resume auto-updating.
+  String? _lastAutoTp;
+  String? _lastAutoSl;
   Worker? _askWorker;
   Worker? _bidWorker;
   int _tab = 0; // 0 market, 1 limit
   bool _tpSlEnabled = false;
+
+  // ── pending-order order-type dropdown ───────────────────────────────
+  // Side × kind × variant. The user picks one of six — never auto-derived
+  // from price vs bid/ask (that was the old two-button SELL STOP / BUY
+  // LIMIT auto-label behavior, replaced by Vantage-style explicit choice).
+  // kind: 'limit' → limit price triggers the order
+  //       'stop'  → stop price triggers the order
+  //       'stop_limit' → stop price arms the order, then limit price fires it
+  String _orderType = 'buy_limit';
+  static const List<String> _pendingOrderTypes = [
+    'buy_limit',
+    'sell_limit',
+    'buy_stop',
+    'sell_stop',
+    'buy_stop_limit',
+    'sell_stop_limit',
+  ];
+  String _labelForOrderType(String t) {
+    switch (t) {
+      case 'buy_limit':
+        return 'Buy Limit';
+      case 'sell_limit':
+        return 'Sell Limit';
+      case 'buy_stop':
+        return 'Buy Stop';
+      case 'sell_stop':
+        return 'Sell Stop';
+      case 'buy_stop_limit':
+        return 'Buy Stop Limit';
+      case 'sell_stop_limit':
+        return 'Sell Stop Limit';
+      default:
+        return t;
+    }
+  }
+
+  /// Auto-fill the order price based on the chosen order-type:
+  /// limit kinds seed from ask (buy) / bid (sell),
+  /// stop kinds seed from bid (buy) / ask (sell),
+  /// stop_limit kinds leave the price empty for user entry.
+  void _onOrderTypeChanged(String newType) {
+    setState(() {
+      _orderType = newType;
+      // Reset cached auto-values so the next tick writes a fresh TP/SL.
+      _lastAutoTp = null;
+      _lastAutoSl = null;
+      final d = widget.ctrl.priceDigits.value;
+      final ask = widget.ctrl.lastAsk.value ?? 0.0;
+      final bid = widget.ctrl.lastBid.value ?? 0.0;
+      double? seed;
+      if (newType == 'buy_limit' || newType == 'sell_stop') {
+        seed = (newType == 'buy_limit') ? ask : bid;
+      } else if (newType == 'sell_limit' || newType == 'buy_stop') {
+        seed = (newType == 'sell_limit') ? bid : ask;
+      } else if (newType == 'buy_stop_limit' || newType == 'sell_stop_limit') {
+        // Stop-limit needs two prices: Trigger (buy→ask / sell→bid) and Limit.
+        // Seed both to the same market price so the user only nudges from there.
+        seed = (newType == 'buy_stop_limit') ? ask : bid;
+        if (seed > 0) {
+          _triggerCtl.text = seed.toStringAsFixed(d);
+        }
+      }
+      if (seed != null && seed > 0) {
+        _priceCtl.text = seed.toStringAsFixed(d);
+      }
+      _updateTpSlFromMarketPrice();
+    });
+  }
 
   @override
   void initState() {
@@ -1000,21 +1075,14 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
               )
               : '',
     );
+    _triggerCtl = TextEditingController();
     _tpCtl = TextEditingController();
     _slCtl = TextEditingController();
     _tpFocusNode = FocusNode();
     _slFocusNode = FocusNode();
 
-    _tpCtl.addListener(() {
-      if (_tpFocusNode.hasFocus) {
-        _isTpCustom = true;
-      }
-    });
-    _slCtl.addListener(() {
-      if (_slFocusNode.hasFocus) {
-        _isSlCustom = true;
-      }
-    });
+    // Custom-vs-auto detection is text-based (see _lastAutoTp/_lastAutoSl).
+    // No focus listeners needed — the controller's text is the source of truth.
 
     _askWorker = ever(widget.ctrl.lastAsk, (_) => _updateTpSlFromMarketPrice());
     _bidWorker = ever(widget.ctrl.lastBid, (_) => _updateTpSlFromMarketPrice());
@@ -1026,6 +1094,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
     _bidWorker?.dispose();
     _volumeCtl.dispose();
     _priceCtl.dispose();
+    _triggerCtl.dispose();
     _tpCtl.dispose();
     _slCtl.dispose();
     _tpFocusNode.dispose();
@@ -1071,17 +1140,32 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
         sl = entryPrice + offset;
       }
 
-      if (!_isTpCustom && !_tpFocusNode.hasFocus) {
-        _tpCtl.text = tp.toStringAsFixed(digits);
+      final tpStr = tp.toStringAsFixed(digits);
+      final slStr = sl.toStringAsFixed(digits);
+      // Only auto-overwrite when the field is either empty, or it currently
+      // matches the last value we wrote. If the user typed something else,
+      // the diff keeps us out of the way — and if they delete back to our
+      // value (or a ±-step lands on it), we resume auto-updating on the next
+      // tick. Also skip while a field is focused to avoid clobbering an
+      // in-progress edit.
+      if (!_tpFocusNode.hasFocus &&
+          (_tpCtl.text.isEmpty || _tpCtl.text == _lastAutoTp)) {
+        _tpCtl.text = tpStr;
       }
-      if (!_isSlCustom && !_slFocusNode.hasFocus) {
-        _slCtl.text = sl.toStringAsFixed(digits);
+      if (!_slFocusNode.hasFocus &&
+          (_slCtl.text.isEmpty || _slCtl.text == _lastAutoSl)) {
+        _slCtl.text = slStr;
       }
+      _lastAutoTp = tpStr;
+      _lastAutoSl = slStr;
     }
   }
 
   double get _volume => double.tryParse(_volumeCtl.text.trim()) ?? 0.01;
   double get _price => double.tryParse(_priceCtl.text.trim()) ?? 0;
+  double get _trigger => double.tryParse(_triggerCtl.text.trim()) ?? 0;
+  bool get _isStopLimit =>
+      _orderType == 'buy_stop_limit' || _orderType == 'sell_stop_limit';
   double get _margin {
     if (_price <= 0) return 0;
     const leverage = 300.0;
@@ -1108,23 +1192,24 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
           top: 12.h,
           bottom: MediaQuery.of(context).viewInsets.bottom + 12.h,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: palette.axisText.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(2.r),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: palette.axisText.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 12.h),
-            // Market / Limit tabs (Limit/Local hidden)
+              SizedBox(height: 12.h),
+              // Market / Limit tabs (Limit/Local hidden)
             Container(
               decoration: BoxDecoration(
                 color: palette.inactiveTabBg,
@@ -1256,72 +1341,210 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
             ),
             SizedBox(height: 14.h),
             if (_tab == 1) ...[
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 4.h),
-                // decoration: BoxDecoration(
-                //   color: palette.sheetFieldBg,
-                //   borderRadius: BorderRadius.circular(8.r),
-                //   border: Border.all(color: palette.sheetFieldBorder),
-                // ),
-                child: _Field(
-                  label: 'Order Price',
-                  controller: _priceCtl,
-                  palette: palette,
-                  prefix: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        final step = 1 / math.pow(10, d);
-                        final p = _price - step;
-                        _priceCtl.text = p.toStringAsFixed(d);
-                      });
-                    },
-                    icon: Icon(Icons.remove, color: AppColors.textPrimary),
+              // ── Order-type picker (taps open a bottom-sheet list) ──
+              InkWell(
+                onTap: () async {
+                  final picked = await showModalBottomSheet<String>(
+                    context: context,
+                    backgroundColor: palette.sheetBg,
+                    isScrollControlled: true,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16.r)),
+                    ),
+                    builder: (_) => _OrderTypePickerSheet(
+                      options: _pendingOrderTypes,
+                      selected: _orderType,
+                      labelFor: _labelForOrderType,
+                      palette: palette,
+                    ),
+                  );
+                  if (picked != null && picked != _orderType) {
+                    _onOrderTypeChanged(picked);
+                  }
+                },
+                borderRadius: BorderRadius.circular(10.r),
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
+                  decoration: BoxDecoration(
+                    color: palette.sheetFieldBg,
+                    borderRadius: BorderRadius.circular(10.r),
+                    border: Border.all(color: palette.sheetFieldBorder),
                   ),
-                  suffix: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        final step = 1 / math.pow(10, d);
-                        final p = _price + step;
-                        _priceCtl.text = p.toStringAsFixed(d);
-                      });
-                    },
-                    icon: Icon(Icons.add, color: AppColors.textPrimary),
+                  child: Row(
+                    children: [
+                      Icon(Icons.list_alt,
+                          size: 18.sp, color: AppColors.textPrimary),
+                      SizedBox(width: 10.w),
+                      Text(
+                        'Order Type',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          _labelForOrderType(_orderType),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      Icon(Icons.keyboard_arrow_down,
+                          color: AppColors.textPrimary),
+                    ],
                   ),
                 ),
-
-                // child: Row(
-                //   children: [
-                //     Expanded(
-                //       child: _Field(
-                //         label: 'Order Price',
-                //         controller: _priceCtl,
-                //         palette: palette,
-                //         prefix: IconButton(
-                //           onPressed: () {
-                //             setState(() {
-                //               final p = _price - 0.01;
-                //               _priceCtl.text = p.toStringAsFixed(d);
-                //             });
-                //           },
-                //           icon: Icon(
-                //             Icons.remove,
-                //             color: AppColors.textPrimary,
-                //           ),
-                //         ),
-                //         suffix: IconButton(
-                //           onPressed: () {
-                //             setState(() {
-                //               final p = _price + 0.01;
-                //               _priceCtl.text = p.toStringAsFixed(d);
-                //             });
-                //           },
-                //           icon: Icon(Icons.add, color: AppColors.textPrimary),
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // ),
               ),
+              SizedBox(height: 10.h),
+              if (_isStopLimit) ...[
+                // ── Stop-limit: two prices (Trigger + Limit), Vantage-style ──
+                Text(
+                  'When Price Is Trigger Price',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Obx(
+                  () => _Field(
+                    label: 'Trigger Price',
+                    controller: _triggerCtl,
+                    palette: palette,
+                    digits: widget.ctrl.priceDigits.value,
+                    prefix: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          final step = 1 / math.pow(10, d);
+                          final p = _trigger - step;
+                          _triggerCtl.text = p.toStringAsFixed(d);
+                        });
+                      },
+                      icon: Icon(Icons.remove, color: AppColors.textPrimary),
+                    ),
+                    suffix: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          final step = 1 / math.pow(10, d);
+                          final p = _trigger + step;
+                          _triggerCtl.text = p.toStringAsFixed(d);
+                        });
+                      },
+                      icon: Icon(Icons.add, color: AppColors.textPrimary),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'When Price Is Limit Price',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                Obx(
+                  () => _Field(
+                    label: 'Limit Price',
+                    controller: _priceCtl,
+                    palette: palette,
+                    digits: widget.ctrl.priceDigits.value,
+                    prefix: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          final step = 1 / math.pow(10, d);
+                          final p = _price - step;
+                          _priceCtl.text = p.toStringAsFixed(d);
+                        });
+                      },
+                      icon: Icon(Icons.remove, color: AppColors.textPrimary),
+                    ),
+                    suffix: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          final step = 1 / math.pow(10, d);
+                          final p = _price + step;
+                          _priceCtl.text = p.toStringAsFixed(d);
+                        });
+                      },
+                      icon: Icon(Icons.add, color: AppColors.textPrimary),
+                    ),
+                  ),
+                ),
+                // Cross-validation: buy → trigger must be above ask,
+                // sell → trigger must be below bid. Mirrors Vantage.
+                Obx(() {
+                  final ask = widget.ctrl.lastAsk.value ?? 0.0;
+                  final bid = widget.ctrl.lastBid.value ?? 0.0;
+                  final dd = widget.ctrl.priceDigits.value;
+                  String? error;
+                  if (_orderType == 'buy_stop_limit') {
+                    if (ask > 0 && _trigger <= ask) {
+                      error =
+                          'Trigger price should be above ${ask.toStringAsFixed(dd)}';
+                    }
+                  } else if (_orderType == 'sell_stop_limit') {
+                    if (bid > 0 && _trigger >= bid) {
+                      error =
+                          'Trigger price should be below ${bid.toStringAsFixed(dd)}';
+                    }
+                  }
+                  if (error == null) return const SizedBox.shrink();
+                  return Padding(
+                    padding: EdgeInsets.only(top: 8.h),
+                    child: Text(
+                      error,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: _kBearColor,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  );
+                }),
+              ] else
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 4.h),
+                  child: Obx(
+                    () => _Field(
+                      label: 'Order Price',
+                      controller: _priceCtl,
+                      palette: palette,
+                      digits: widget.ctrl.priceDigits.value,
+                      prefix: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            final step = 1 / math.pow(10, d);
+                            final p = _price - step;
+                            _priceCtl.text = p.toStringAsFixed(d);
+                          });
+                        },
+                        icon: Icon(Icons.remove, color: AppColors.textPrimary),
+                      ),
+                      suffix: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            final step = 1 / math.pow(10, d);
+                            final p = _price + step;
+                            _priceCtl.text = p.toStringAsFixed(d);
+                          });
+                        },
+                        icon: Icon(Icons.add, color: AppColors.textPrimary),
+                      ),
+                    ),
+                  ),
+                ),
             ],
             // TP SL HIDDEN
             Row(
@@ -1340,8 +1563,9 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                     setState(() {
                       _tpSlEnabled = v;
                       if (v) {
-                        _isTpCustom = false;
-                        _isSlCustom = false;
+                        // Force a fresh auto-fill on the next update.
+                        _lastAutoTp = null;
+                        _lastAutoSl = null;
                         _updateTpSlFromMarketPrice();
                       }
                     });
@@ -1353,20 +1577,26 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
               Row(
                 children: [
                   Expanded(
-                    child: _Field(
-                      label: 'Take profit',
-                      controller: _tpCtl,
-                      focusNode: _tpFocusNode,
-                      palette: palette,
+                    child: Obx(
+                      () => _Field(
+                        label: 'Take profit',
+                        controller: _tpCtl,
+                        focusNode: _tpFocusNode,
+                        palette: palette,
+                        digits: widget.ctrl.priceDigits.value,
+                      ),
                     ),
                   ),
                   SizedBox(width: 8.w),
                   Expanded(
-                    child: _Field(
-                      label: 'Stop loss',
-                      controller: _slCtl,
-                      focusNode: _slFocusNode,
-                      palette: palette,
+                    child: Obx(
+                      () => _Field(
+                        label: 'Stop loss',
+                        controller: _slCtl,
+                        focusNode: _slFocusNode,
+                        palette: palette,
+                        digits: widget.ctrl.priceDigits.value,
+                      ),
                     ),
                   ),
                 ],
@@ -1389,7 +1619,9 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                         ),
-                        onPressed: () => _submit(side),
+                        onPressed: widget.ctrl.isLoading.value
+                            ? null
+                            : () => _submit(side),
                         child: Obx(() {
                           if (widget.ctrl.isLoading.value) {
                             return SizedBox(
@@ -1438,99 +1670,77 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                 ],
               ),
             ] else ...[
-              Obx(() {
-                final currentBid = widget.ctrl.lastBid.value ?? 0.0;
-                final currentAsk = widget.ctrl.lastAsk.value ?? 0.0;
-                final isSellStop = _price < currentBid;
-                final isBuyLimit = _price < currentAsk;
-
-                final sellLabel = isSellStop ? 'SELL STOP' : 'SELL LIMIT';
-                final buyLabel = isBuyLimit ? 'BUY LIMIT' : 'BUY STOP';
-
-                return Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 48.h,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _kBearColor,
-                            foregroundColor: AppColors.pureWhite,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                          ),
-                          onPressed: () => _submit('sell'),
-                          child:
-                              widget.ctrl.isLoading.value
-                                  ? SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      color: _kBearColor,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                  : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(width: 6.w),
-                                      Text(
-                                        sellLabel,
-                                        style: TextStyle(
-                                          fontSize: 13.sp,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+              // ── Place pending order (single button, side+kind from dropdown) ──
+              Builder(
+                builder: (context) {
+                  final isBuyOrder =
+                      _orderType == 'buy_limit' ||
+                      _orderType == 'buy_stop' ||
+                      _orderType == 'buy_stop_limit';
+                  final btnColor = isBuyOrder ? _kBullColor : _kBearColor;
+                  final sideForSubmit = isBuyOrder ? 'buy' : 'sell';
+                  return SizedBox(
+                    height: 48.h,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: btnColor,
+                        foregroundColor: AppColors.pureWhite,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: SizedBox(
-                        height: 48.h,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _kBullColor,
-                            foregroundColor: AppColors.pureWhite,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                          ),
-                          onPressed: () => _submit('buy'),
-                          child:
-                              widget.ctrl.isLoading.value
-                                  ? SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      color: _kBullColor,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                  : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        buyLabel,
-                                        style: TextStyle(
-                                          fontSize: 13.sp,
-                                          fontWeight: FontWeight.w800,
+                      onPressed: widget.ctrl.isLoading.value
+                          ? null
+                          : () => _submit(sideForSubmit),
+                      child:
+                          widget.ctrl.isLoading.value
+                              ? SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  color: btnColor,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 240),
+                                    transitionBuilder: (child, anim) =>
+                                        FadeTransition(
+                                      opacity: anim,
+                                      child: ScaleTransition(
+                                        scale: Tween<double>(
+                                          begin: 0.92,
+                                          end: 1.0,
+                                        ).animate(
+                                          CurvedAnimation(
+                                            parent: anim,
+                                            curve: Curves.easeOutCubic,
+                                          ),
                                         ),
+                                        child: child,
                                       ),
-                                      SizedBox(width: 6.w),
-                                    ],
+                                    ),
+                                    child: Text(
+                                      'Place ${_labelForOrderType(_orderType)} order',
+                                      key: ValueKey(_orderType),
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
                                   ),
-                        ),
-                      ),
+                                ],
+                              ),
                     ),
-                  ],
-                );
-              }),
+                  );
+                },
+              ),
             ],
           ],
+        ),
         ),
       ),
     );
@@ -1544,19 +1754,58 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
   }
 
   Future<void> _submit(String side) async {
-    final isLimitTab = _tab == 1;
-    final price = isLimitTab ? _priceCtl.text.trim() : '';
+    final isPendingTab = _tab == 1;
+    final digits = widget.ctrl.priceDigits.value;
+    // Stop-limit sends the Trigger Price as `price` and the Limit Price as
+    // `stopLimitPrice`; every other kind sends the single Order Price.
+    final price = !isPendingTab
+        ? ''
+        : (_isStopLimit ? _triggerCtl.text.trim() : _priceCtl.text.trim());
+    final stopLimitPrice =
+        (isPendingTab && _isStopLimit) ? _priceCtl.text.trim() : null;
 
-    String orderKind = 'market';
-    if (isLimitTab) {
-      final currentBid = widget.ctrl.lastBid.value ?? 0.0;
-      final currentAsk = widget.ctrl.lastAsk.value ?? 0.0;
-      final priceVal = double.tryParse(price) ?? 0.0;
-      if (side == 'buy') {
-        orderKind = priceVal > currentAsk ? 'stop' : 'limit';
-      } else {
-        orderKind = priceVal < currentBid ? 'stop' : 'limit';
-      }
+    // Format volume preserving the user's actual decimal precision
+    // (e.g. 0.001 → "0.001", 0.10 → "0.10") — never collapse to 2 decimals.
+    final volStr = _volume.toString();
+    final dotIdx = volStr.indexOf('.');
+    final actualDecimals =
+        dotIdx == -1 ? 0 : volStr.length - dotIdx - 1;
+    final volDecimals = actualDecimals < 2 ? 2 : actualDecimals;
+    final formattedVolume = _volume.toStringAsFixed(volDecimals);
+
+    // Format TP/SL to the live priceDigits — same precision the backend
+    // expects (matches Vantage's _placePendingOrder wiring).
+    final String? formattedTp = (_tpSlEnabled && _tpCtl.text.trim().isNotEmpty)
+        ? PrecisionHelper.formatPrice(
+            PrecisionHelper.parseDouble(
+              _tpCtl.text.trim(),
+              decimals: digits,
+            ),
+            decimals: digits,
+          )
+        : null;
+    final String? formattedSl = (_tpSlEnabled && _slCtl.text.trim().isNotEmpty)
+        ? PrecisionHelper.formatPrice(
+            PrecisionHelper.parseDouble(
+              _slCtl.text.trim(),
+              decimals: digits,
+            ),
+            decimals: digits,
+          )
+        : null;
+
+    // Map the user-selected dropdown value to the wire orderKind the
+    // controller's _orderType helper understands. The dropdown now controls
+    // the order kind explicitly; no more auto-detect from price vs bid/ask.
+    String orderKind;
+    if (!isPendingTab) {
+      orderKind = 'market';
+    } else if (_orderType == 'buy_stop_limit' || _orderType == 'sell_stop_limit') {
+      orderKind = 'stop_limit';
+    } else if (_orderType == 'buy_stop' || _orderType == 'sell_stop') {
+      orderKind = 'stop';
+    } else {
+      orderKind = 'limit';
     }
 
     final result = await widget.ctrl.submitOrder(
@@ -1564,8 +1813,10 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
       orderKind: orderKind,
       volume: _volume,
       price: price,
-      takeProfit: _tpSlEnabled ? _tpCtl.text.trim() : null,
-      stopLoss: _tpSlEnabled ? _slCtl.text.trim() : null,
+      stopLimitPrice: stopLimitPrice,
+      takeProfit: formattedTp,
+      stopLoss: formattedSl,
+      formattedVolume: formattedVolume,
     );
     if (!mounted) return;
     if (result.ok) {
@@ -1623,6 +1874,7 @@ class _Field extends StatelessWidget {
     this.suffix,
     this.prefix,
     this.focusNode,
+    this.digits,
   });
   final String label;
   final TextEditingController controller;
@@ -1631,12 +1883,21 @@ class _Field extends StatelessWidget {
   final Widget? prefix;
   final FocusNode? focusNode;
 
+  /// Optional decimal-digit cap driven by the live websocket
+  /// `priceDigits` value. When supplied, the user is prevented from typing
+  /// more fractional digits than the symbol supports (and digits update
+  /// reactively when the websocket reports a new value).
+  final int? digits;
+
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       focusNode: focusNode,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: digits == null
+          ? null
+          : [_DecimalDigitsFormatter(maxFractionDigits: digits!)],
       style: TextStyle(color: AppColors.textPrimary, fontSize: 14.sp),
       textAlign:
           prefix != null
@@ -2490,6 +2751,152 @@ class _FlagIcon extends StatelessWidget {
           ),
         ),
       ),
+);
+  }
+}
+
+// ── Animated expand-collapse order-type picker ───────────────────────────
+// Replaces a native DropdownButton so the option list opens inline with a
+// smooth expand-collapse animation (AnimatedSize + chevron rotation +
+// staggered option fade-in). Selected option shows a popping radio dot +
+// tinted background. Built as a stateless widget driven by parent state.
+// ── Bottom-sheet picker for the 6 pending order types ───────────────────
+// Opens on top of the New Order sheet when the user taps the order-type
+// row. Tapping an option pops the sheet with the chosen kind string;
+// the parent rebuilds and runs `_onOrderTypeChanged`.
+class _OrderTypePickerSheet extends StatelessWidget {
+  const _OrderTypePickerSheet({
+    required this.options,
+    required this.selected,
+    required this.labelFor,
+    required this.palette,
+  });
+  final List<String> options;
+  final String selected;
+  final String Function(String) labelFor;
+  final _ChartPalette palette;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: palette.axisText.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Select Order Type',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+            ...options.map((opt) => InkWell(
+                  onTap: () => Navigator.of(context).pop(opt),
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                    child: Row(
+                      children: [
+                        Icon(
+                          opt == selected
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: opt == selected
+                              ? AppColors.primary
+                              : AppColors.textGrey,
+                          size: 20.sp,
+                        ),
+                        SizedBox(width: 14.w),
+                        Expanded(
+                          child: Text(
+                            labelFor(opt),
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 15.sp,
+                              fontWeight: opt == selected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        if (opt.contains('stop_limit'))
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppColors.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                            child: Text(
+                              '2 prices',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                )),
+            SizedBox(height: 8.h),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Decimal-digit clamp formatter (reactive to live priceDigits) ────────
+// Used as a `TextInputFormatter` on price/TP/SL fields so the user can
+// only type up to `maxFractionDigits` decimals. When the websocket emits a
+// new `priceDigits` value for the symbol, the parent rebuilds the field
+// with a fresh formatter — no manual input clearing needed.
+class _DecimalDigitsFormatter extends TextInputFormatter {
+  const _DecimalDigitsFormatter({required this.maxFractionDigits});
+
+  final int maxFractionDigits;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (maxFractionDigits <= 0) return newValue;
+    final text = newValue.text;
+    if (text.isEmpty || text == '-' || text == '+') return newValue;
+    if ('.'.allMatches(text).length > 1) return oldValue;
+    final dot = text.indexOf('.');
+    if (dot < 0) return newValue;
+    final fracLen = text.length - dot - 1;
+    if (fracLen <= maxFractionDigits) return newValue;
+    final trimmed = text.substring(0, dot + 1 + maxFractionDigits);
+    return TextEditingValue(
+      text: trimmed,
+      selection: TextSelection.collapsed(offset: trimmed.length),
     );
   }
 }

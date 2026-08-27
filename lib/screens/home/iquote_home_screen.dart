@@ -722,33 +722,6 @@ class _PromoCarouselState extends State<_PromoCarousel> {
   Timer? _timer;
   late final BannerController _bannerController;
 
-  final List<Map<String, dynamic>> _fallbackSlides = [
-    {
-      'title': 'Profit & Bonus Ranking',
-      'subtitle': 'Data updated daily',
-      'btn': 'View',
-      'icon': Icons.emoji_events,
-      'iconColor': Colors.orange,
-      'action': () => Get.toNamed(AppPages.CHOOSE_ACCOUNT),
-    },
-    {
-      'title': 'Refer & Earn Program',
-      'subtitle': 'Invite friends, earn rebates',
-      'btn': 'Invite',
-      'icon': Icons.group_add_outlined,
-      'iconColor': Colors.blue,
-      'action': () => IquoteHomeScreen.handleSwitchToIB(),
-    },
-    {
-      'title': 'Exclusive Promotions',
-      'subtitle': 'Claim your trading bonuses',
-      'btn': 'Claim',
-      'icon': Icons.card_giftcard,
-      'iconColor': Colors.red,
-      'action': () => Get.to(() => const PromotionalScreen()),
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -758,9 +731,7 @@ class _PromoCarouselState extends State<_PromoCarousel> {
 
     _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (_pageController.hasClients) {
-        final totalCount = _bannerController.banners.isNotEmpty
-            ? _bannerController.banners.length
-            : _fallbackSlides.length;
+        final totalCount = _bannerController.banners.length;
         if (totalCount > 1) {
           final next = (_currentPage + 1) % totalCount;
           _pageController.animateToPage(
@@ -781,11 +752,14 @@ class _PromoCarouselState extends State<_PromoCarousel> {
   }
 
   @override
-  Widget build(BuildContext context) {
+Widget build(BuildContext context) {
     return Obx(() {
+      // Render API banners only — when the API returns an empty list the
+      // carousel section is hidden entirely (no static fallback slides).
+      if (_bannerController.banners.isEmpty) {
+        return const SizedBox.shrink();
+      }
       final banners = _bannerController.banners;
-      final hasApiBanners = banners.isNotEmpty;
-      final itemCount = hasApiBanners ? banners.length : _fallbackSlides.length;
 
       return Padding(
         padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
@@ -797,154 +771,75 @@ class _PromoCarouselState extends State<_PromoCarousel> {
               child: PageView.builder(
                 controller: _pageController,
                 onPageChanged: (val) => setState(() => _currentPage = val),
-                itemCount: itemCount,
+                itemCount: banners.length,
                 itemBuilder: (context, i) {
-                  if (hasApiBanners) {
-                    final banner = banners[i];
-                    final imageUrl = banner.imageUrl ?? '';
+                  final banner = banners[i];
+                  final imageUrl = banner.imageUrl ?? '';
 
-                    return GestureDetector(
-                      onTap: () => _bannerController.handleBannerTap(banner),
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: AppColors.border.withValues(alpha: 0.25),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                  return GestureDetector(
+                    onTap: () => _bannerController.handleBannerTap(banner),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16.r),
+                        border: Border.all(
+                          color: AppColors.border.withValues(alpha: 0.25),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16.r),
-                          child: imageUrl.isNotEmpty
-                              ? Image.network(
-                                  imageUrl,
-                                  fit: BoxFit.fill,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      _buildBannerFallback(banner),
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Container(
-                                      color: widget.isDark
-                                          ? const Color(0xFF2C344E)
-                                          : AppColors.primary
-                                              .withValues(alpha: 0.06),
-                                      alignment: Alignment.center,
-                                      child: SizedBox(
-                                        width: 24.w,
-                                        height: 24.w,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                            AppColors.primary,
-                                          ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16.r),
+                        child: imageUrl.isNotEmpty
+                            ? Image.network(
+                                imageUrl,
+                                fit: BoxFit.fill,
+                                width: double.infinity,
+                                height: double.infinity,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    _buildBannerFallback(banner),
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    color: widget.isDark
+                                        ? const Color(0xFF2C344E)
+                                        : AppColors.primary
+                                            .withValues(alpha: 0.06),
+                                    alignment: Alignment.center,
+                                    child: SizedBox(
+                                      width: 24.w,
+                                      height: 24.w,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          AppColors.primary,
                                         ),
                                       ),
-                                    );
-                                  },
-                                )
-                              : _buildBannerFallback(banner),
-                        ),
-                      ),
-                    );
-                  }
-
-                  final s = _fallbackSlides[i];
-                  return Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 20.h),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: widget.isDark
-                            ? [
-                                const Color(0xFF2C344E),
-                                const Color(0xFF1E2436),
-                              ]
-                            : [
-                                AppColors.primary.withValues(alpha: 0.08),
-                                AppColors.primary.withValues(alpha: 0.02),
-                              ],
-                      ),
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(
-                          alpha: widget.isDark ? 0.1 : 0.15,
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                s['title'],
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: widget.textPrimary,
-                                ),
-                              ),
-                              SizedBox(height: 4.h),
-                              Text(
-                                s['subtitle'],
-                                style: AppTextStyles.bodyText.copyWith(
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: widget.textSecondary,
-                                ),
-                              ),
-                              SizedBox(height: 10.h),
-                              GestureDetector(
-                                onTap: s['action'],
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 18.w,
-                                    vertical: 6.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary,
-                                    borderRadius: BorderRadius.circular(20.r),
-                                  ),
-                                  child: Text(
-                                    s['btn'],
-                                    style: AppTextStyles.bodyText.copyWith(
-                                      color: AppColors.whiteColor,
-                                      fontSize: 11.sp,
-                                      fontWeight: FontWeight.w600,
                                     ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(s['icon'], size: 56.r, color: s['iconColor']),
-                      ],
+                                  );
+                                },
+                              )
+                            : _buildBannerFallback(banner),
+                      ),
                     ),
                   );
                 },
               ),
             ),
-            if (itemCount > 1)
+            if (banners.length > 1)
               Positioned(
                 bottom: 8.h,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
-                    itemCount,
+                    banners.length,
                     (idx) => AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       margin: EdgeInsets.symmetric(horizontal: 3.w),
