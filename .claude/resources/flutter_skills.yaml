@@ -1,0 +1,434 @@
+# Copyright (c) 2026, the Dart project authors.  Please see the AUTHORS file
+# for details. All rights reserved. Use of this source code is governed by a
+# BSD-style license that can be found in the LICENSE file.
+
+# This is the configuration file for the skill generator.
+# To generate skills, use the following command (from the `tool` directory):
+# dart run skills generate-skill --config ../resources/flutter_skills.yaml --output ../skills
+- name: flutter-add-integration-test
+  description: Configures Flutter Driver for app interaction and converts MCP
+    actions into permanent integration tests. Use when adding integration
+    testing to a project, exploring UI components via MCP, or automating user
+    flows with the integration_test package.
+  examplePrompt: "Add an integration test that validates the checkout experience"
+  instructions: |
+    1. **Project Setup and Dependency Management:**
+        * Add the `integration_test` package as a `dev_dependency` to your `pubspec.yaml` file. This can be done by running `flutter pub add 'dev:integration_test:{"sdk":"flutter"}'`.
+        * Ensure the `flutter_test` package is also included as a `dev_dependency`.
+        * Ensure `flutter_driver` is configured by importing `package:flutter_driver/driver_extension.dart' and calling `enableFlutterDriverExtension()`
+
+    2. **Interactive Exploration (Flutter Driver MCP)**
+        * Once configured, use the `flutter-driver` MCP tools to explore the app:
+            1.  **Launch**: Use `launch_app` with `target: "lib/main_test.dart"`.
+            2.  **Inspect**: Use `get_widget_tree` to find `Key`s, `Text`, or `Type`s.
+            3.  **Interact**: Use `tap`, `enter_text`, and `scroll` to execute your flow.
+            4.  **Wait**: Always call `waitFor` or check `get_health` if transitions are slow.
+        * If a widget isn't found, it might be unmounted in a `SliverList` or `ListView`. Use `scroll` or `scrollIntoView` first.
+    3. **Integration Test File Creation:**
+        * Create a new directory named `integration_test/` within your project.
+        * Inside this directory, create your test files with the format `<name>_test.dart`.
+        * For running tests with `flutter drive`, create a `test_driver` directory and an `integration_test.dart` file within it, containing `integrationDriver()`.
+
+    4. **Writing Integration Tests:**
+        * Integration tests verify the behavior of the complete app and can be used to validate how individual pieces work together or capture app performance on a real device. They are also known as end-to-end or GUI testing.
+        * Use `flutter_test` APIs to write tests in a style similar to widget tests.
+        * To verify a widget is displayed, load the main app widget using `tester.pumpWidget` and then use `expect` with `findsOneWidget`.
+        * For user interactions like tapping, use `tester.tap` and then `tester.pumpAndSettle` to wait for UI changes.
+        * To verify a widget is not displayed, use `expect` with `findsNothing`.
+        * For scrolling, `integration_test` allows using `tester.scrollUntilVisible` to scroll to a specific item.
+        * When working with `flutter_driver` (for migration or specific scenarios), `waitFor` is used to locate widgets, and `waitForAbsent` to ensure a widget is not present. `flutter_driver` also uses `driver.tap` for interactions and `driver.scroll` for scrolling.
+        * Add `Key` parameters to widgets, such as `ValueKey('increment')`, to allow finding specific widgets within the test suite.
+
+    5. **Running Integration Tests:**
+        * Integration tests can be run on a physical device or emulator using the `flutter drive` command.
+        * To run tests on Chrome, launch `chromedriver` and then use `flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart -d chrome`.
+        * To run as a headless test, use `flutter drive` with the `-d web-server` option.
+        * For Android, you can build a debug APK using `flutter build apk --debug` and then build an Android test APK using `./gradlew app:assembleAndroidTest`.
+        * Integration tests can also be run on Firebase Test Lab to automate testing on various devices. This involves creating an APK using Gradle and uploading it to the Firebase Test Lab Console.
+  resources:
+  - https://raw.githubusercontent.com/dart-lang/ai/refs/heads/main/pkgs/dart_mcp_server/README.md
+  - https://docs.flutter.dev/cookbook/testing/integration
+  - https://docs.flutter.dev/cookbook/testing/integration/introduction
+  - https://docs.flutter.dev/cookbook/testing/integration/profiling
+  - https://docs.flutter.dev/testing/integration-tests
+  - https://docs.flutter.dev/testing/plugins-in-tests
+  - https://docs.flutter.dev/testing/testing-plugins
+- name: flutter-fix-layout-issues
+  description: Fixes Flutter layout errors (overflows, unbounded constraints)
+    using Dart and Flutter MCP tools. Use when addressing "RenderFlex overflowed",
+    "Vertical viewport was given unbounded height", or similar layout issues.
+  examplePrompt: "Fix the overflow error on the profile page when the keyboard is visible"
+  instructions: |
+    1.  **Identify the Layout Error:**
+        *   Recognize common Flutter framework errors, including layout errors.
+        *   Look for specific error messages such as "RenderFlex overflowed", "Vertical viewport was given unbounded height", "An InputDecorator...cannot have an unbounded width", or "RenderBox was not laid out".
+        *   A solid red or grey screen can also indicate an error.
+
+    2.  **Understand the Cause of the Error:**
+        *   **"Vertical viewport was given unbounded height"**: This error often occurs when a scrollable widget, like a `ListView` or `GridView`, is placed inside a `Column`. `ListView`s take all available vertical space unless constrained by a parent, and `Column`s don't impose height constraints on their children by default, leading to an inability to determine the `ListView`'s size.
+        *   **Unbounded Width Errors (e.g., `InputDecorator` or `TextField`)**: This happens when a `Row` contains a `TextFormField` or `TextField` without a width constraint. Similarly, a `Column` might try to be wider than its parent `Row` can allocate, causing an overflow. This is due to Flutter's layout process where parents pass down constraints, and children respond by passing up a size within those constraints. If a child, like a `Text` widget, determines its own width based on its content, and its parent (`Column`) adopts that width, it can clash with the parent's (`Row`) maximum horizontal space.
+        *   **"RenderBox was not laid out"**: This error is often a side effect of a primary error earlier in the rendering pipeline. It usually relates to violations of box constraints, meaning Flutter needs more information on how to constrain the widgets.
+        *   **"Incorrect use of ParentData widget"**: This error indicates that a `ParentDataWidget` is not placed directly inside a compatible ancestor widget. Certain widgets, like `Flexible` and `Expanded`, expect specific parent widgets such as `Row`, `Column`, or `Flex`. `Positioned` expects a `Stack`, and `TableCell` expects a `Table`.
+
+    3.  **Apply the Appropriate Fix:**
+        *   **For "Vertical viewport was given unbounded height" (ListView in Column)**:
+            *   Specify the height of the `ListView`.
+            *   Wrap the `ListView` in an `Expanded` widget to make it take the remaining space in the `Column`.
+            *   Alternatively, use a `SizedBox` for an absolute height or a `Flexible` widget for a relative height.
+        *   **For unbounded width errors (e.g., `TextField` in `Row` or `Column` in `Row`)**:
+            *   Constrain the width of the widget (e.g., `InputDecorator`, `TextField`, or `Column`).
+            *   Wrap the widget in an `Expanded` widget.
+            *   Wrap the widget in a `Flexible` widget and specify a flex factor. An `Expanded` widget is equivalent to a `Flexible` widget with a flex factor of 1.0.
+        *   **For "RenderBox was not laid out"**: The solution involves providing more information to Flutter about how to constrain the widgets. Understanding how constraints work in Flutter is crucial.
+        *   **For "Incorrect use of ParentData widget"**: The fix is to place the `ParentDataWidget` inside its expected parent widget.
+
+    4.  **Review and Refine:**
+        *   Compare your code to working examples if available.
+        *   Use automatic reformatting support in your Flutter editor.
+        *   Leverage Flutter's hot reload feature to accelerate development and see changes quickly.
+  resources:
+    - https://raw.githubusercontent.com/dart-lang/ai/refs/heads/main/pkgs/dart_mcp_server/README.md
+    - https://docs.flutter.dev/get-started/fundamentals/layout
+    - https://docs.flutter.dev/release/breaking-changes/layout-builder-optimization
+    - https://docs.flutter.dev/testing/common-errors
+    - https://docs.flutter.dev/testing/errors
+    - https://docs.flutter.dev/tools/devtools/inspector
+    - https://docs.flutter.dev/tools/devtools/legacy-inspector
+    - https://docs.flutter.dev/tools/flutter-fix
+    - https://docs.flutter.dev/ui/layout
+    - https://docs.flutter.dev/ui/layout/constraints
+    - https://docs.flutter.dev/ui/layout/tutorial
+- name: flutter-add-widget-preview
+  description: Adds interactive widget previews to the project using the
+    previews.dart system. Use when creating new UI components or updating
+    existing screens to ensure consistent design and interactive testing.
+  examplePrompt: "Create a preview for the ProductCard widget with different price states"
+  instructions: |
+    1. Defining Widget Previews:
+    *   To preview a widget, use the `@Preview` annotation defined in `package:flutter/widget_previews.dart`.
+    *   This annotation can be applied to top-level functions that return a `Widget` or `WidgetBuilder`, static methods within a class that return a `Widget` or `WidgetBuilder`, or public `Widget` constructors and factories with no required arguments.
+    *   A basic example involves importing `package:flutter/widget_previews.dart` and `package:flutter/material.dart`, then defining a function annotated with `@Preview` that returns a `Widget`, such as a `Text` widget. For instance:
+        ```dart
+        import 'package:flutter/widget_previews.dart';
+        import 'package:flutter/material.dart';
+
+        @Preview(name: 'My Sample Text')
+        Widget mySampleText() {
+        return const Text('Hello, World!');
+        }
+        ```
+    
+    *   Multiple preview configurations can be created by applying multiple `@Preview` annotations to a single function or constructor.
+    *   For common configurations, extend `MultiPreview` to create a custom annotation. `MultiPreview` also provides a `transform()` method to perform transformations on each preview at runtime.
+
+    2. Interacting with Previews:
+    *   As of Flutter 3.38, Android Studio, IntelliJ, and Visual Studio Code automatically start the Flutter Widget Previewer on launch.
+    *   Alternatively, the previewer can be started from the command line by navigating to the Flutter project's root directory and running `flutter widget-preview start`. This command launches a local server and opens a Widget Preview environment in Chrome that updates automatically with project changes.
+  resources:
+    - https://docs.flutter.dev/tools/widget-previewer
+- name: flutter-apply-architecture-best-practices
+  description: Architects a Flutter application using the recommended layered
+    approach (UI, Logic, Data). Use when structuring a new project or
+    refactoring for scalability.
+  examplePrompt: "Refactor the authentication flow to follow the recommended layered architecture"
+  instructions: |
+    **1. Understand the Core Principles and Layers:**
+    *   **Separation of Concerns** is the most important principle to follow when designing your Flutter app. This principle makes your code less error-prone by keeping widgets "dumb".
+    *   Flutter applications should be written in **layers**. Layered architecture organizes an application into distinct layers, each with specific roles and responsibilities.
+    *   Typically, applications are separated into 2 to 3 layers, depending on complexity. The three common layers are the UI layer, logic layer, and data layer.
+    *   The Flutter team strongly recommends using clearly defined **data and UI layers**.
+    *   Within each layer, further separate your application by **feature or functionality**. For example, authentication logic should be in a different class than search logic.
+
+    **2. Structure the UI Layer:**
+    *   The **UI layer** displays data to the user that is exposed by the business logic layer, and handles user interaction. It is also commonly referred to as the 'presentation layer'.
+    *   The UI layer contains separate classes for UI logic and widgets.
+    *   Use **ViewModels and Views** in the UI layer. Views and ViewModels make up the UI layer of an application.
+    *   Implement the **MVVM architectural pattern** (Model-View-ViewModel) in the UI layer. MVVM separates a feature into three parts: Model, ViewModel, and View.
+    *   Write **reusable, lean widgets** that hold as little logic as possible. Do not put logic in widgets.
+    *   Use **ChangeNotifiers and Listenables** to handle widget updates. The ChangeNotifier API is part of the Flutter SDK and is a convenient way for widgets to observe changes in ViewModels.
+
+    **3. Structure the Logic Layer (Optional):**
+    *   The **Logic layer** implements core business logic and facilitates interaction between the data layer and UI layer. It is commonly known as the 'domain layer'.
+    *   This layer is **optional** and only needs to be implemented if your application has complex business logic that happens on the client. Many apps are only concerned with presenting and changing data (CRUD apps).
+
+    **4. Structure the Data Layer:**
+    *   The **data layer** exposes application data to the rest of the app and contains most of the business logic.
+    *   Use the **repository pattern** in the data layer. This pattern isolates data access logic from the rest of the application, creating an abstraction layer between business logic and underlying data storage mechanisms (databases, APIs, file systems, etc.).
+    *   In practice, this means creating **Repository classes and Service classes**.
+    *   Repositories and services represent the data of an application, or the model layer of MVVM.
+    *   Services interact with external APIs, such as client servers and platform plugins.
+
+    **5. Project Organization and Best Practices:**
+    *   A single feature in an application might require a View, a ViewModel, one or more Repositories, and zero or more Services.
+    *   Well-organized code is easier for multiple engineers to work on with minimal code conflicts and is easier for new engineers to navigate and understand.
+    *   These recommendations are guidelines, not steadfast rules, and should be adapted to your unique requirements.
+    *   The Flutter team strongly recommends implementing these practices when starting a new application and strongly considering refactoring existing apps unless it fundamentally clashes with the current approach.
+
+  resources:
+    - https://docs.flutter.dev/app-architecture
+    - https://docs.flutter.dev/app-architecture/case-study
+    - https://docs.flutter.dev/app-architecture/case-study/data-layer
+    - https://docs.flutter.dev/app-architecture/case-study/ui-layer
+    - https://docs.flutter.dev/app-architecture/concepts
+    - https://docs.flutter.dev/app-architecture/design-patterns
+    - https://docs.flutter.dev/app-architecture/guide
+    - https://docs.flutter.dev/app-architecture/recommendations
+    - https://docs.flutter.dev/learn/pathway/how-flutter-works
+    - https://docs.flutter.dev/reference/create-new-app
+    - https://docs.flutter.dev/resources/architectural-overview
+    - https://docs.flutter.dev/resources/faq
+    - https://docs.flutter.dev/ui/layout/tutorial
+- name: flutter-build-responsive-layout
+  description: Use `LayoutBuilder`, `MediaQuery`, or `Expanded/Flexible` to
+    create a layout that adapts to different screen sizes. Use when you need the
+    UI to look good on both mobile and tablet/desktop form factors.
+  examplePrompt: "Make the home screen responsive so it displays a grid on tablets and a list on phones"
+  instructions: |
+    1.  **Determine the available space**:
+        *   Use `MediaQuery.sizeOf(context)` or `LayoutBuilder` to get the size of the window your app is currently running in.
+        *   `LayoutBuilder` builds a widget tree that can depend on the parent widget's size. Its builder callback provides `BoxConstraints` from its parent, which can be used to return different widgets based on the available space.
+        *   Avoid using `MediaQuery.orientationOf` or `OrientationBuilder` near the top of your widget tree to switch between different app layouts, as the device's orientation doesn't necessarily inform you of the app window's space.
+        *   Do not check for hardware types like "phone" or "tablet" when making layout decisions, as the space an app renders in isn't always tied to the full screen size of the device. Flutter apps can run in resizable windows, multi-window modes, or picture-in-picture.
+        *   For large screen devices, `MediaQuery` can be used to get the app window size rather than the physical device size.
+        *   Another approach is to use the `maxWidth` property of `BoxConstraints` by wrapping a widget like `GridView` in a `ConstrainedBox` or `Container`.
+
+    2.  **Implement adaptive layouts based on available space**:
+        *   Use `LayoutBuilder` to return different layouts based on the `BoxConstraints` received. For example, you can check `constraints.maxWidth` to determine if the screen is large (e.g., `maxWidth > largeScreenMinWidth`) and return a different widget tree accordingly.
+        *   For small screens, you might use a navigation-style approach, while for large screens, you could use a `Row` to place elements side-by-side.
+        *   Consider using adaptive breakpoints, such as those recommended by Material Design.
+
+    3.  **Manage widget sizing and positioning within layouts**:
+        *   Utilize `Expanded` and `Flexible` widgets within `Row`, `Column`, or `Flex` to distribute available space among children.
+        *   `Expanded` stretches a child to fill any remaining available space. It is equivalent to `Flexible` with a `flex` factor of 1.0.
+        *   `Flexible` allows a child to be sized to a specific size while still allowing it to expand or contract. You can specify a `flex` factor to determine the ratio in which `Expanded` or `Flexible` children consume available space. For example, a `flex` factor of 2 will make a widget twice as wide as others with a `flex` factor of 1.
+        *   To prevent widgets from gobbling up all horizontal space on large screens, consider constraining their width.
+        *   For lists with an unknown number of items, `ListView.builder` can be used to lazily render items.
+
+    4.  **Consider specific device and orientation behaviors**:
+        *   Avoid locking screen orientation, as it can cause issues on foldable devices, potentially leading to letterboxing where the app is centered with black borders.
+        *   If screen orientation must be locked (though generally discouraged), use the `Display API` to get physical screen dimensions instead of `MediaQuery`. The `Display API` is useful in situations where `MediaQuery` might not receive the larger window size due to compatibility modes.
+        *   Android and Flutter design guidance recommends not locking screen orientation. Android large format tiers require both portrait and landscape support.
+        *   Support a variety of input devices, including basic mice, trackpads, and keyboard shortcuts.
+  resources:
+    - https://docs.flutter.dev/cookbook/design/orientation
+    - https://docs.flutter.dev/get-started/fundamentals/layout
+    - https://docs.flutter.dev/learn/pathway/tutorial/adaptive-layout
+    - https://docs.flutter.dev/release/breaking-changes/layout-builder-optimization
+    - https://docs.flutter.dev/testing/common-errors
+    - https://docs.flutter.dev/ui
+    - https://docs.flutter.dev/ui/adaptive-responsive
+    - https://docs.flutter.dev/ui/adaptive-responsive/best-practices
+    - https://docs.flutter.dev/ui/adaptive-responsive/general
+    - https://docs.flutter.dev/ui/adaptive-responsive/large-screens
+    - https://docs.flutter.dev/ui/adaptive-responsive/safearea-mediaquery
+    - https://docs.flutter.dev/ui/layout
+    - https://docs.flutter.dev/ui/layout/constraints
+    - https://docs.flutter.dev/ui/layout/tutorial
+    - https://docs.flutter.dev/ui/widgets/layout
+- name: flutter-setup-declarative-routing
+  description: Configure `MaterialApp.router` using a package like `go_router`
+    for advanced URL-based navigation. Use when developing web applications or
+    mobile apps that require specific deep linking and browser history support.
+  examplePrompt: "Set up GoRouter with paths for home, details, and settings"
+  instructions: |
+    1.  **Create a new Flutter application**:
+        *   Use the command `flutter create <app-name>`. For example, `flutter create deeplink_cookbook`.
+
+    2.  **Add the `go_router` package as a dependency**:
+        *   Run `flutter pub add go_router`. The Flutter team maintains the `go_router` package, which offers a simple API for complex routing scenarios.
+
+    3.  **Configure `MaterialApp.router` with a `GoRouter` object**:
+        *   In your `main.dart` file, import `package:go_router/go_router.dart'` and `package:flutter/material.dart'`.
+        *   Create a `GoRouter` object that defines your application's routes. This object will handle routing, including paths like '/' and '/details'.
+        *   Set up your `main` function to run `MaterialApp.router` and provide it with the `routerConfig` property, which should be your `GoRouter` object.
+        *   For example, you can define routes within the `GoRouter` object using `GoRoute` for different paths and their corresponding builders.
+        *   Routing packages like `go_router` are declarative, meaning they will consistently display the same screen(s) when a deep link is received.
+
+    4.  **Configure deep linking for specific platforms (if needed)**:
+        *   **For iOS:**
+            *   If using a Flutter version earlier than 3.27, manually opt-in to deep linking by adding `FlutterDeepLinkingEnabled` with a value of `YES` to `Info.plist`.
+            *   If using third-party plugins for deep links (e.g., `app_links`), you should opt out of Flutter's default deep link handler by setting `FlutterDeepLinkingEnabled` to `NO` in `Info.plist`.
+            *   Add associated domains by launching Xcode, selecting the top-level Runner, clicking the Runner target, and then "Signing & Capabilities". Add a new capability for "Associated Domains" and enter `applinks:<web domain>`.
+            *   Open `ios/Runner/Runner.entitlements` and add the associated domain inside the `<dict>` tag.
+            *   Host an `apple-app-site-association` file in your web domain, which tells the mobile browser to open your iOS app instead of the browser. This file requires your app's `appID`, formatted as `<team id>.<bundle id>`.
+        *   **For Android:**
+            *   Web apps read the deep link path from the URL fragment by default, using the pattern `/#/path/to/app/screen`, but this can be changed by configuring the URL strategy.
+            *   To configure your Android application to handle deep links, refer to the deep linking documentation.
+  resources:
+    - https://docs.flutter.dev/cookbook/animation/page-route-animation
+    - https://docs.flutter.dev/cookbook/effects/nested-nav
+    - https://docs.flutter.dev/cookbook/navigation/named-routes
+    - https://docs.flutter.dev/cookbook/navigation/navigate-with-arguments
+    - https://docs.flutter.dev/cookbook/navigation/navigation-basics
+    - https://docs.flutter.dev/cookbook/navigation/set-up-app-links
+    - https://docs.flutter.dev/cookbook/navigation/set-up-universal-links
+    - https://docs.flutter.dev/packages-and-plugins/using-packages
+    - https://docs.flutter.dev/platform-integration/web
+    - https://docs.flutter.dev/platform-integration/web/building
+    - https://docs.flutter.dev/platform-integration/web/embedding-flutter-web
+    - https://docs.flutter.dev/platform-integration/web/initialization
+    - https://docs.flutter.dev/release/breaking-changes/deep-links-flag-change
+    - https://docs.flutter.dev/release/breaking-changes/route-navigator-refactoring
+    - https://docs.flutter.dev/tools/devtools/deep-links
+    - https://docs.flutter.dev/ui/navigation
+    - https://docs.flutter.dev/ui/navigation/deep-linking
+    - https://docs.flutter.dev/ui/navigation/url-strategies
+    - https://pub.dev/documentation/go_router/latest/topics/Configuration-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Deep%20linking-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Error%20handling-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Get%20started-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Named%20routes-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Navigation-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Redirection-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/State%20restoration-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Transition%20animations-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Type-safe%20routes-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Upgrading-topic.html
+    - https://pub.dev/documentation/go_router/latest/topics/Web-topic.html
+- name: flutter-add-widget-test
+  description: Implement a component-level test using `WidgetTester` to verify
+    UI rendering and user interactions (tapping, scrolling, entering text). Use
+    when validating that a specific widget displays correct data and responds to
+    events as expected.
+  examplePrompt: "Add a widget test for the CustomButton to verify the onTap callback is called"
+  instructions: |
+    1.  **Add the `flutter_test` dependency**. This dependency should be included in the `dev_dependencies` section of your `pubspec.yaml` file. If you created your Flutter project using command-line tools or a code editor, this dependency might already be present.
+    2.  **Create the widget to test**. For example, you might create a widget that displays a title and a message.
+    3.  **Create a `testWidgets` test**. Use the `testWidgets()` function from the `flutter_test` package to define your test. This function automatically provides a `WidgetTester` for each test case. The `WidgetTester` allows you to build and interact with widgets in the test environment.
+    4.  **Build the widget using the `WidgetTester`**. Use the `pumpWidget()` method provided by `WidgetTester` to build and render your widget within the test environment. For instance, you can create an instance of `MyWidget` with specific title and message values. After the initial `pumpWidget()` call, `WidgetTester` offers additional methods like `tester.pump()` to rebuild the widget, which is useful for `StatefulWidget`s or animations where Flutter doesn't automatically rebuild after state changes in the test environment.
+    5.  **Search for the widget using a `Finder`**. `Finder` classes allow you to locate widgets in the test environment. For example, you can use `find.text('Your Text')` to find a `Text` widget.
+    6.  **Verify the widget using a `Matcher`**. Widget-specific `Matcher` constants help confirm whether a `Finder` successfully locates a widget or multiple widgets. For example, `findsOneWidget` can verify that a `Text` widget appears exactly once in the widget tree. You can also use `matchesGoldenFile` to verify that a widget's rendering matches a specific bitmap image (golden file testing).
+    7.  **Simulate user interactions**. The `WidgetTester` provides methods for simulating interactions like entering text, tapping, and dragging.
+        *   To enter text, use `enterText()`.
+        *   To tap, use `tap()`.
+        *   To drag, use `drag()`.
+        *   To handle scrolling, the `WidgetTester` class provides the `scrollUntilVisible()` method, which scrolls until a specific widget is visible. This is useful when the height of items in a list can vary.
+    8.  **Rebuild the widget tree after interactions**. Since Flutter doesn't automatically rebuild widgets in the test environment after user interactions update the app's state, you need to call `pump()` or `pumpAndSettle()` methods provided by the `WidgetTester` to ensure the widget tree is rebuilt.
+    9.  **Run the tests**. Execute the tests using the command `flutter test test/widget_test.dart` from the root of your project.
+
+    A widget test (also known as a component test in other UI frameworks) aims to verify that a single widget's UI looks and interacts as expected. It involves multiple classes and requires a test environment that provides the appropriate widget lifecycle context. Widget tests are more comprehensive than unit tests because the widget being tested can receive user actions, perform layout, and instantiate child widgets. However, like unit tests, the widget test environment is a simpler implementation than a full UI system.
+  resources:
+    - https://docs.flutter.dev/app-architecture/case-study/testing
+    - https://docs.flutter.dev/cookbook/testing/integration/introduction
+    - https://docs.flutter.dev/cookbook/testing/unit/introduction
+    - https://docs.flutter.dev/cookbook/testing/widget/introduction
+    - https://docs.flutter.dev/cookbook/testing/widget/orientation
+    - https://docs.flutter.dev/cookbook/testing/widget/scrolling
+    - https://docs.flutter.dev/cookbook/testing/widget/tap-drag
+    - https://docs.flutter.dev/get-started/fundamentals/user-input
+    - https://docs.flutter.dev/release/breaking-changes/mock-platform-channels
+    - https://docs.flutter.dev/testing
+    - https://docs.flutter.dev/testing/integration-tests
+    - https://docs.flutter.dev/testing/overview
+    - https://docs.flutter.dev/testing/testing-plugins
+- name: flutter-setup-localization
+  description: Add `flutter_localizations` and `intl` dependencies, enable
+    "generate true" in `pubspec.yaml`, and create an `l10n.yaml` configuration
+    file. Use when initializing localization support for a new Flutter project.
+  examplePrompt: "Setup localization and add English and Spanish translations"
+  instructions: |
+    1.  **Add `flutter_localizations` and `intl` dependencies**:
+        *   Add `flutter_localizations` and `intl` packages to your `pubspec.yaml` file. You can do this by running `$ flutter pub add flutter_localizations --sdk=flutter` and `$ flutter pub add intl:any`.
+        *   The `flutter_localizations` package is a Flutter SDK package that enables the localization of ARB files and is often used with the `intl` package.
+        *   After adding the packages, your `pubspec.yaml` file should include entries like:
+            ```yaml
+            dependencies:
+            flutter:
+                sdk: flutter
+            flutter_localizations:
+                sdk: flutter
+            intl: any
+            ```
+        
+        *   After adding a package dependency, run `flutter pub get` in your terminal to install it.
+
+    2.  **Enable `generate: true` in `pubspec.yaml`**:
+        *   Open your `pubspec.yaml` file.
+        *   In the `flutter` section, add `generate: true`. This flag handles localization tasks.
+        *   The `flutter` section in `pubspec.yaml` is specific to Flutter.
+
+    3.  **Create an `l10n.yaml` configuration file**:
+        *   Add a new YAML file named `l10n.yaml` to the root directory of your Flutter project.
+        *   This file can be used to specify options like `synthetic-package: false` to generate localized messages directly into source files instead of a synthetic package. You can also specify `arb-dir` or `output-dir` in this file.
+
+    4.  **Configure `MaterialApp` or `CupertinoApp`**:
+        *   Import the `flutter_localizations` library.
+        *   Specify `localizationsDelegates` and `supportedLocales` for your `MaterialApp` or `CupertinoApp`. For example:
+            ```dart
+            import 'package:flutter_localizations/flutter_localizations.dart';
+            // ...
+            return const MaterialApp(
+            title: 'Localizations Sample App',
+            localizationsDelegates: [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [
+                Locale('en'), // English
+                Locale('es'), // Spanish
+            ],
+            home: MyHomePage(),
+            );
+            ```
+        
+        *   After these steps, Material and Cupertino packages should be correctly localized in the supported locales, and widgets should adapt to localized messages and layout.
+  resources:
+    - https://docs.flutter.dev/ui/internationalization
+- name: flutter-use-http-package
+  description: Use the `http` package to execute GET, POST, PUT, or DELETE
+    requests. Use when you need to fetch from or send data to a REST API.
+  examplePrompt: "Use the http package to fetch the list of products from the API"
+  instructions: |
+    1.  **Add the `http` package as a dependency**.
+        *   Run `flutter pub add http` in your terminal.
+    2.  **Import the `http` package**.
+        *   Add `import 'package:http/http.dart' as http;` to your Dart file.
+    3.  **Configure platform-specific permissions (if deploying to Android or macOS)**.
+        *   For Android, add the Internet permission to your `AndroidManifest.xml` file: `<uses-permission android:name="android.permission.INTERNET" />`.
+        *   For macOS, include the network client entitlement in `macos/Runner/DebugProfile.entitlements` and `macos/Runner/Release.entitlements` files: `<key>com.apple.security.network.client</key><true/>`.
+    4.  **Make a network request**.
+        *   The `http` package provides methods for GET, POST, PUT, and DELETE operations.
+        *   For example, to make a GET request, use `http.get(Uri.parse('your_url'))`.
+        *   To make a POST request, use `http.post()`.
+        *   To make a PUT request, use `http.put()`.
+        *   You can add authorization headers to your requests using the `headers` parameter. For example: `headers: {HttpHeaders.authorizationHeader: 'Basic your_api_token_here'}`.
+        *   For POST requests, you might need to set `Content-Type` headers and encode the body as JSON.
+    5.  **Handle the response**.
+        *   The `http.Response` object contains the server's response.
+        *   Check the `statusCode` of the response to determine success or failure (e.g., `200 OK` for success, `201 CREATED` for a successful POST).
+        *   Parse the JSON response if applicable.
+        *   Convert the response into a custom Dart object.
+        *   Handle errors by throwing exceptions, especially for non-success status codes, to prevent indefinite loading indicators.
+    6.  **Display the data with Flutter**.
+        *   Use widgets like `FutureBuilder` to display data fetched asynchronously and handle loading and error states.
+        *   For long-running tasks, consider showing a `ProgressIndicator` widget.
+        *   For expensive computations like JSON parsing, perform them in a separate Isolate to avoid UI jank.
+  resources:
+    - https://docs.flutter.dev/cookbook/networking/authenticated-requests
+    - https://docs.flutter.dev/cookbook/networking/background-parsing
+    - https://docs.flutter.dev/cookbook/networking/delete-data
+    - https://docs.flutter.dev/cookbook/networking/fetch-data
+    - https://docs.flutter.dev/cookbook/networking/send-data
+    - https://docs.flutter.dev/cookbook/networking/update-data
+    - https://docs.flutter.dev/get-started/fundamentals/networking
+- name: flutter-implement-json-serialization
+  description: Create model classes with `fromJson` and `toJson` methods using
+    `dart:convert`. Use when manually mapping JSON keys to class properties for
+    simple data structures.
+  examplePrompt: "Implement JSON serialization for the User model class"
+  instructions: |
+    1.  **Import the `dart:convert` library**: Flutter includes a built-in `dart:convert` library that provides a straightforward JSON encoder and decoder. This library allows you to serialize JSON manually.
+    2.  **Define a model class**: Create a plain model class, for example, named `User`. This class will contain the properties that correspond to your JSON structure.
+    3.  **Implement a `fromJson` constructor**: Inside your model class, create a factory constructor, such as `User.fromJson()`, which takes a `Map` structure as input. This constructor is responsible for constructing a new instance of your model class from the JSON map. For example, if you receive a 200 OK response from a server, you can parse the JSON using `jsonDecode(response.body) as Map<String, dynamic>` and then pass it to your `fromJson` constructor.
+    4.  **Implement a `toJson` method**: Add a `toJson()` method to your model class. This method converts an instance of your model class into a `Map`.
+    5.  **Benefits of this approach**: Using model classes with `fromJson` and `toJson` methods provides type safety, autocompletion for fields, and compile-time exceptions. This helps combat issues like typos or incorrect type usage that would otherwise lead to runtime crashes.
+    6.  **Considerations for `jsonDecode()`**: When using `jsonDecode()`, it returns a `dynamic` type, meaning the types of values are not known until runtime.
+    7.  **Testing**: In a production application, it is important to ensure that serialization works correctly by having unit tests in place for both the `User.fromJson()` and `User.toJson()` methods.
+  resources:
+    - https://docs.flutter.dev/cookbook/networking/background-parsing
+    - https://docs.flutter.dev/cookbook/networking/fetch-data
+    - https://docs.flutter.dev/cookbook/networking/send-data
+    - https://docs.flutter.dev/cookbook/networking/update-data
+    - https://docs.flutter.dev/data-and-backend/serialization
+    - https://docs.flutter.dev/data-and-backend/serialization/json
