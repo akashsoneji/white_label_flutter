@@ -131,7 +131,24 @@ class ChartDatafeedBridge {
  'close': (m['close'] as num?)?.toDouble() ?? 0.0,
  };
  }).toList();
- return {'bars': bars, 'noData': false};
+    if (bars.isNotEmpty && Get.isRegistered<ChartSocketController>()) {
+      final lastBar = bars.last;
+      final close = lastBar['close'] as double?;
+      if (close != null && close > 0) {
+        final socket = Get.find<ChartSocketController>();
+        if (socket.matchesSymbol(symbol)) {
+          final curBid = socket.realTimePrice['bid'];
+          if (curBid == null || curBid == 0.0) {
+            socket.updatePriceFromExternal(
+              symbol: symbol,
+              bid: close,
+              ask: close,
+            );
+          }
+        }
+      }
+    }
+    return {'bars': bars, 'noData': false};
  } catch (e) {
  debugPrint('[ChartDatafeedBridge] getBars error: $e');
  return {'bars': <Map<String, dynamic>>[], 'noData': true};

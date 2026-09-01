@@ -187,15 +187,16 @@ class TenaxChartController {
     // Tell the chart to switch symbol. The chart will reset its own canvas state.
     await _send({'type': 'symbol', 'symbol': symbol, 'interval': _resolution});
 
+    // Subscribe to ticks immediately so live price ticks stream instantly
+    // without being blocked on historical candle loading over HTTP.
+    _tickCancel = api.subscribeTicks(symbol, (tick) => pushTick(tick));
+
     try {
       final bars = await api.fetchCandles(symbol: symbol, resolution: _resolution);
       await _send({'type': 'candles', 'bars': bars.map((c) => c.toJson()).toList()});
     } catch (e) {
       _emitError('Failed to fetch candles for $symbol: $e');
     }
-
-    // Subscribe to ticks after candles (or failure).
-    _tickCancel = api.subscribeTicks(symbol, (tick) => pushTick(tick));
   }
 
   /// Change timeframe on the current symbol (reloads history).

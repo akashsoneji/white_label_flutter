@@ -16,6 +16,7 @@ import 'package:crm_app/utils/message_pack_decoder.dart';
 import 'package:crm_app/services/unified_websocket_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
+import 'package:crm_app/services/market_watch_v2_service.dart';
 
 class ChartSocketController extends GetxController with WidgetsBindingObserver {
   // Connection state
@@ -30,6 +31,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
   bool _loggedFirstMessage = false;
   late WebSocketChannel channel;
   StreamSubscription? _unifiedSymbolSub;
+  StreamSubscription<dynamic>? _marketWatchV2Sub;
 
   // Unsubscribe/resubscribe state
   Completer<void>? _unsubscribeCompleter;
@@ -60,7 +62,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     // Listen to changes from SymbolSelectionService to update currentSymbol
     ever(symService.lastSymbolRx, (String sym) {
       if (sym.isNotEmpty && currentSymbol.value != sym) {
-        currentSymbol.value = sym;
+        changeSymbol(sym);
       }
     });
 
@@ -77,11 +79,11 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
       if (sym.isEmpty) return;
       // Only auto-subscribe if already connected
       if (isConnected.value && !_isDisposed) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          if (isConnected.value && !_isDisposed) getSocketData();
-        });
+        getSocketData();
       }
     });
+
+    _bindMarketWatchV2Listener();
 
     // ✅ FIX: Listen to account changes and reconnect when needed
     try {
@@ -212,6 +214,7 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _reconnectTimer?.cancel();
     _unifiedSymbolSub?.cancel();
+    _marketWatchV2Sub?.cancel();
     try {
       if (!_priceStreamController.isClosed) {
         _priceStreamController.close();
@@ -323,17 +326,33 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
     }
 
     currentSymbol.value = symbol;
-    realTimePrice['symbol'] = symbol;
+
+    _bindMarketWatchV2Listener();
 
     // Immediately seed with cached/live price from InstrumentsController so
     // Buy/Sell buttons and chart prices render INSTANTLY without showing '--' or '0.00'
     if (Get.isRegistered<InstrumentsController>()) {
-      final match = Get.find<InstrumentsController>().findInstrument(symbol);
-      if (match != null && match.bid > 0) {
-        realTimePrice['bid'] = match.bid;
-        realTimePrice['ask'] = match.ask;
-        realTimePrice['spreadDiff'] = match.spreadDiff;
+      final inst = Get.find<InstrumentsController>();
+      final live = inst.getLivePrice(symbol);
+      final match = inst.findInstrument(symbol);
+      final bid = (live != null && live.bid > 0) ? live.bid : match?.bid;
+      final ask = (live != null && live.ask > 0) ? live.ask : match?.ask;
+      final spreadDiff = (live != null && live.spreadDiff > 0) ? live.spreadDiff : match?.spreadDiff;
+
+      if (bid != null && bid > 0) {
+        realTimePrice['symbol'] = symbol;
+        realTimePrice['bid'] = bid;
+        realTimePrice['ask'] = (ask != null && ask > 0) ? ask : bid;
+        realTimePrice['spreadDiff'] = spreadDiff ?? 0.0;
         _priceStreamController.add(Map<String, dynamic>.from(realTimePrice));
+      }
+    }
+
+    // Subscribe immediately on MarketWatchV2Service as well so ticks flow without delay
+    if (Get.isRegistered<MarketWatchV2Service>()) {
+      final clean = MarketWatchV2Service.normalizeSymbol(symbol);
+      if (clean.isNotEmpty) {
+        Get.find<MarketWatchV2Service>().subscribeSymbols([clean]);
       }
     }
 
@@ -621,16 +640,18 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
   void sendEvent(Map<String, dynamic> event) {
     try {
+      final jsonStr = jsonEncode(event);
+      if (isConnected.value) {
+        try {
+          channel.sink.add(jsonStr);
+        } catch (_) {}
+      }
       try {
         final unified = Get.find<UnifiedWebSocketService>();
-        unified.sendEvent(WebSocketChannelType.symbols, event);
-      } catch (_) {
-        if (isConnected.value) {
-          channel.sink.add(jsonEncode(event));
-        } else {
-          dev.log('Chart: cannot send, WS not connected');
+        if (unified.isSymbolsConnected.value) {
+          unified.sendEvent(WebSocketChannelType.symbols, event);
         }
-      }
+      } catch (_) {}
     } catch (e) {
       dev.log('Chart: send error: $e');
       isConnected.value = false;
@@ -923,6 +944,101 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
           }
         }
       }
+    }
+  }
+
+  void _bindMarketWatchV2Listener() {
+    if (_marketWatchV2Sub != null) return;
+    if (!Get.isRegistered<MarketWatchV2Service>()) return;
+    _marketWatchV2Sub = Get.find<MarketWatchV2Service>().decodedFrames.listen(
+      _handleMarketWatchV2Decoded,
+    );
+  }
+
+  void _handleMarketWatchV2Decoded(dynamic decodedData) {
+    if (_isDisposed || currentSymbol.value.isEmpty) return;
+    final cur = currentSymbol.value;
+    final cleanCur = MarketWatchV2Service.normalizeSymbol(cur);
+
+    void checkAndApply(Map map) {
+      final s = map['symbol'] ?? map['Symbol'] ?? map['s'] ?? map['name'];
+      if (s == null) return;
+      final str = s.toString();
+      if (_matchesCurrentSymbol(str) ||
+          MarketWatchV2Service.normalizeSymbol(str) == cleanCur) {
+        final bid = (map['bid'] ?? map['Bid'] ?? map['b'] as num?)?.toDouble();
+        final ask = (map['ask'] ?? map['Ask'] ?? map['a'] as num?)?.toDouble();
+        final spread = (map['spread'] ??
+                map['spread_points'] ??
+                map['spreadPoints'] ??
+                map['SpreadDiff'] ??
+                map['spread_diff'] as num?)
+            ?.toDouble();
+        if (bid != null && bid > 0) {
+          updatePriceFromExternal(
+            symbol: cur,
+            bid: bid,
+            ask: ask ?? bid,
+            spreadDiff: spread,
+          );
+        }
+      }
+    }
+
+    if (decodedData is Map) {
+      checkAndApply(decodedData);
+    } else if (decodedData is List) {
+      for (final item in decodedData) {
+        if (item is Map) {
+          checkAndApply(item);
+        } else if (item is List && item.length >= 3) {
+          final s = item[0]?.toString();
+          if (s != null &&
+              (_matchesCurrentSymbol(s) ||
+                  MarketWatchV2Service.normalizeSymbol(s) == cleanCur)) {
+            final bid = double.tryParse(item[1].toString());
+            final ask = double.tryParse(item[2].toString());
+            final spread =
+                item.length > 3 ? double.tryParse(item[3].toString()) : null;
+            if (bid != null && bid > 0) {
+              updatePriceFromExternal(
+                symbol: cur,
+                bid: bid,
+                ask: ask ?? bid,
+                spreadDiff: spread,
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+
+  bool matchesSymbol(String? responseSymbol) =>
+      _matchesCurrentSymbol(responseSymbol);
+
+  void updatePriceFromExternal({
+    required String symbol,
+    required double bid,
+    required double ask,
+    double? spreadDiff,
+  }) {
+    if (_isDisposed) return;
+    if (!_matchesCurrentSymbol(symbol)) return;
+
+    final transformed = <String, dynamic>{
+      'type': 'singleSymbolPrice',
+      'symbol': symbol,
+      'bid': bid,
+      'ask': ask,
+      'spreadDiff': spreadDiff ?? realTimePrice['spreadDiff'] ?? 0.0,
+      'digits': realTimePrice['digits'] ?? 5,
+    };
+
+    realTimePrice.value = transformed;
+    noteTickObserved();
+    if (!_priceStreamController.isClosed) {
+      _priceStreamController.add(Map<String, dynamic>.from(transformed));
     }
   }
 

@@ -30,6 +30,7 @@ import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/models/order_types.dart';
 
 class TenaxChartWebView extends StatefulWidget {
@@ -561,6 +562,17 @@ class _PipzeTenaxApi extends TenaxChartApi {
           if (bid == null || ask == null) return;
 
           onTick(Tick(symbol: sym, bid: bid, ask: ask));
+
+          if (Get.isRegistered<ChartSocketController>()) {
+            final chartSocket = Get.find<ChartSocketController>();
+            if (chartSocket.matchesSymbol(sym)) {
+              chartSocket.updatePriceFromExternal(
+                symbol: sym,
+                bid: bid,
+                ask: ask,
+              );
+            }
+          }
         } catch (_) {}
       },
       onDone: () {

@@ -41,6 +41,25 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  InstrumentPrice? getLivePrice(String symbol) {
+    if (symbol.isEmpty) return null;
+    final normalized = MarketWatchV2Service.normalizeSymbol(symbol);
+
+    final p1 = _pendingPriceUpdates[normalized] ?? _pendingPriceUpdates[symbol];
+    if (p1 != null && p1.bid > 0) return p1;
+
+    final p2 = _priceBySymbol[normalized]?.value ?? _priceBySymbol[symbol]?.value;
+    if (p2 != null && p2.bid > 0) return p2;
+
+    for (final entry in _priceBySymbol.entries) {
+      if (entry.key.toUpperCase() == normalized ||
+          MarketWatchV2Service.normalizeSymbol(entry.key) == normalized) {
+        if (entry.value.value.bid > 0) return entry.value.value;
+      }
+    }
+    return null;
+  }
+
   /// Fast lookup of an instrument by symbol
   ListElement? findInstrument(String symbol) {
     if (symbol.isEmpty) return null;
@@ -49,24 +68,53 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
         ? cleanSym.substring(0, cleanSym.indexOf('.'))
         : cleanSym;
 
+    ListElement? match;
     for (final e in instruments) {
       final eUpper = e.symbol.toUpperCase();
       if (eUpper == cleanSym ||
           eUpper == cleanWithoutDot ||
           (eUpper.contains('.') && eUpper.substring(0, eUpper.indexOf('.')) == cleanWithoutDot)) {
-        return e;
+        match = e;
+        break;
       }
     }
 
-    for (final e in allInstruments) {
-      final eUpper = e.symbol.toUpperCase();
-      if (eUpper == cleanSym ||
-          eUpper == cleanWithoutDot ||
-          (eUpper.contains('.') && eUpper.substring(0, eUpper.indexOf('.')) == cleanWithoutDot)) {
-        return e;
+    if (match == null) {
+      for (final e in allInstruments) {
+        final eUpper = e.symbol.toUpperCase();
+        if (eUpper == cleanSym ||
+            eUpper == cleanWithoutDot ||
+            (eUpper.contains('.') && eUpper.substring(0, eUpper.indexOf('.')) == cleanWithoutDot)) {
+          match = e;
+          break;
+        }
       }
     }
-    return null;
+
+    final live = getLivePrice(symbol);
+    if (live != null && live.bid > 0) {
+      if (match != null) {
+        return match.copyWith(
+          bid: live.bid,
+          ask: live.ask,
+          spreadDiff: live.spreadDiff,
+          digits: live.digits,
+        );
+      }
+      return ListElement(
+        symbol: symbol,
+        bid: live.bid,
+        ask: live.ask,
+        spreadDiff: live.spreadDiff,
+        digits: live.digits,
+        last: 0,
+        volume: 0,
+        volumeReal: 0,
+        logo: '',
+      );
+    }
+
+    return match;
   }
 
   double _preserveNonZero(double incoming, double current) {
@@ -85,7 +133,7 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // Preserve the last non-zero price until a valid new value arrives.
     final current = priceRx(item.symbol).value;
     final nowMs = DateTime.now().millisecondsSinceEpoch;
-    _pendingPriceUpdates[item.symbol] = current.copyWith(
+    final newPrice = current.copyWith(
       bid: _preserveNonZero(item.bid, current.bid),
       ask: _preserveNonZero(item.ask, current.ask),
       digits: item.digits,
@@ -94,6 +142,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       dayHigh: _preserveOptionalNonZero(item.dayHigh, current.dayHigh),
       tickAtMs: nowMs,
     );
+    _pendingPriceUpdates[item.symbol] = newPrice;
+    final normalized = MarketWatchV2Service.normalizeSymbol(item.symbol);
+    _pendingPriceUpdates[normalized] = newPrice;
     _schedulePriceFlush();
     // Tell the keep-alive timer that we just saw a live tick —
     // it can skip its periodic re-subscribe while the socket is

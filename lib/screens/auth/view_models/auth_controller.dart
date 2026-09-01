@@ -308,11 +308,27 @@ class AuthController extends GetxController {
           'AuthController: Re-initializing all controllers and services...',
         );
 
-        // DashboardController + AccountController are already registered as
-        // permanent in main.dart and were populated by the awaited fetch above
-        // (forceCheckMT5Accounts + forceRefreshAccountData). Deleting and
-        // re-putting them here would re-fire their onInit fetches, hitting
-        // user/mt5accounts/get 2 extra times per login. So we reuse them as-is.
+        // DashboardController + AccountController are registered as permanent in
+        // main.dart at app startup and were populated by the awaited fetch above
+        // (forceCheckMT5Accounts + forceRefreshAccountData). We must NOT delete
+        // and re-put them on every login — that re-fires their onInit fetches and
+        // hits user/mt5accounts/get 2 extra times.
+        //
+        // BUT after a LOGOUT the cleanup force-deletes both controllers, so the
+        // permanent instances no longer exist. If we skip registration here, the
+        // Prices/Trade screens call Get.find<AccountController>() on a missing
+        // controller, GetX lazily recreates it while its deps are half-registered,
+        // and the recreation re-enters itself → StackOverflowError on the Prices
+        // tab. So re-register ONLY when missing: no-op on first login (permanent
+        // instance already present → no duplicate fetch), self-heals after logout.
+        if (!Get.isRegistered<DashboardController>()) {
+          Get.put<DashboardController>(DashboardController(), permanent: true);
+          print('AuthController: DashboardController re-registered after logout');
+        }
+        if (!Get.isRegistered<AccountController>()) {
+          Get.put<AccountController>(AccountController(), permanent: true);
+          print('AuthController: AccountController re-registered after logout');
+        }
 
         // 3. Re-initialize InstrumentsController (has WebSocket)
         try {

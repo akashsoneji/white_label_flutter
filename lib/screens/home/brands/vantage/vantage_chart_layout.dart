@@ -31,7 +31,6 @@
 import 'dart:async';
 import 'package:crm_app/constants/text_styles.dart';
 
-import 'package:crm_app/widgets/app_svg_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -41,6 +40,7 @@ import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/models/order_types.dart';
 import 'package:crm_app/screens/home/pending_order_screen.dart';
 import 'package:crm_app/screens/home/search_instruments_screen.dart';
+import 'package:crm_app/screens/home/chart_screen.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -48,7 +48,6 @@ import 'package:crm_app/screens/trading/view_models/instruments_controller.dart'
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/services/favorites_storage_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
-import 'package:crm_app/widgets/advanced_chart_inapp_webview.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/widgets/tenax_chart_webview.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -380,12 +379,13 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                       final sym = _stripSuffix(raw);
                       final isActive = sym == active;
                       return InkWell(
-                        onTap: () async {
+                        onTap: () {
                           Navigator.of(sheetCtx).pop();
                           // (a) tell the rest of the app which symbol to
                           //     use (drives chart rebuild via ValueKey in
                           //     `_ChartArea`).
                           Get.find<SymbolSelectionService>().setSymbol(raw);
+                          ChartScreen.setSelectedSymbol(raw);
                           // Immediately rebuild this layout so the Header
                           // (top-left) shows the new symbol instantly.
                           setState(() {});
@@ -394,7 +394,7 @@ class _VantageChartLayoutState extends State<VantageChartLayout> {
                           //     symbol — same as the watchlist row tap
                           //     flow does via `ChartScreen.setSelectedSymbol`.
                           try {
-                            await _socket.changeSymbol(raw);
+                            _socket.changeSymbol(raw);
                           } catch (_) {}
                           // (c) bump the local tick so the dock Obx
                           //     rebuilds even before the first tick of
@@ -593,16 +593,6 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = isDark ? Colors.white : const Color(0xFF111114);
     final muted = isDark ? Colors.white60 : const Color(0xFF6B6B7A);
-    // Top-right icon tint rule:
-    //   • Light mode → brand's configured primary color (whatever the
-    //     flavor sets as primaryColor — NOT darkPrimaryColor).
-    //   • Dark mode  → pure white.
-    // Note: deliberately NOT `AppColors.primary` here, because that
-    // getter auto-switches to darkPrimaryColor in dark mode, which is
-    // exactly what the user wants to avoid for this button.
-    final iconColor =
-        isDark ? Colors.white : FlavorConfig.instance.primaryColor;
-
     return Padding(
       padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 8.h),
       child: Row(
@@ -723,6 +713,7 @@ class _ChartAreaState extends State<_ChartArea> {
     _initialSymbol = raw;
     // Push the new symbol into the running WebView without rebuilding.
     _tenaxKey.currentState?.updateSymbol(raw);
+    widget.webViewKey.currentState?.updateSymbol(raw);
   }
 
   static String _stripDot(String s) {
@@ -827,6 +818,12 @@ class _BottomDock extends StatelessWidget {
         // ──────────────────────────────────────────�───────────────
         // ignore: unused_local_variable
         final _ = tick.value;
+        // Guard against teardown (e.g. logout) where controllers are deleted
+        // while this layout is still mounted — an unguarded find throws
+        // "ChartSocketController not found" every frame.
+        if (!Get.isRegistered<ChartSocketController>()) {
+          return const SizedBox.shrink();
+        }
         final socket = Get.find<ChartSocketController>();
         // ignore: invalid_use_of_protected_member
         final priceMap = socket.realTimePrice.value;
@@ -839,26 +836,55 @@ class _BottomDock extends StatelessWidget {
         // spreadDiff comes from the WS pre-converted to *points*
         // (the controller's // spread_points comment). Display
         // it as-is - no extra /pip math.
-        var bid =
-            priceMap['bid'] is num ? (priceMap['bid'] as num).toDouble() : null;
-        var ask =
-            priceMap['ask'] is num ? (priceMap['ask'] as num).toDouble() : null;
-        var spreadDiff =
-            priceMap['spreadDiff'] is num
-                ? (priceMap['spreadDiff'] as num).toDouble()
-                : null;
+        final sym = socket.currentSymbol.value.isNotEmpty
+            ? socket.currentSymbol.value
+            : Get.find<SymbolSelectionService>().currentSymbol;
+
+        final priceSymbol = priceMap['symbol']?.toString();
+        final bool isMatch = priceSymbol != null &&
+            (priceSymbol == sym ||
+                _VantageChartLayoutState._stripSuffix(priceSymbol) ==
+                    _VantageChartLayoutState._stripSuffix(sym));
+
+        var bid = isMatch && priceMap['bid'] is num
+            ? (priceMap['bid'] as num).toDouble()
+            : null;
+        var ask = isMatch && priceMap['ask'] is num
+            ? (priceMap['ask'] as num).toDouble()
+            : null;
+        var spreadDiff = isMatch && priceMap['spreadDiff'] is num
+            ? (priceMap['spreadDiff'] as num).toDouble()
+            : null;
 
         if ((bid == null || bid == 0.0 || ask == null || ask == 0.0) &&
             Get.isRegistered<InstrumentsController>()) {
-          final sym = socket.currentSymbol.value.isNotEmpty
-              ? socket.currentSymbol.value
-              : Get.find<SymbolSelectionService>().currentSymbol;
-          final match = Get.find<InstrumentsController>().findInstrument(sym);
-          if (match != null && match.bid > 0) {
-            bid = match.bid;
-            ask = match.ask;
-            spreadDiff = match.spreadDiff;
+          final inst = Get.find<InstrumentsController>();
+          final live = inst.getLivePrice(sym);
+          if (live != null && live.bid > 0) {
+            bid = live.bid;
+            ask = live.ask;
+            spreadDiff = live.spreadDiff;
+          } else {
+            final match = inst.findInstrument(sym);
+            if (match != null && match.bid > 0) {
+              bid = match.bid;
+              ask = match.ask;
+              spreadDiff = match.spreadDiff;
+            }
           }
+        }
+
+        // Absolute fallback to last valid socket price to eliminate dash lines
+        if ((bid == null || bid == 0.0) &&
+            priceMap['bid'] is num &&
+            (priceMap['bid'] as num) > 0) {
+          bid = (priceMap['bid'] as num).toDouble();
+          ask = priceMap['ask'] is num
+              ? (priceMap['ask'] as num).toDouble()
+              : bid;
+          spreadDiff = priceMap['spreadDiff'] is num
+              ? (priceMap['spreadDiff'] as num).toDouble()
+              : 0.0;
         }
 
         final bidStr =
@@ -966,7 +992,6 @@ class _QuantityBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final muted = isDark ? Colors.white60 : const Color(0xFF6B6B7A);
-    final fg = isDark ? Colors.white : const Color(0xFF111114);
 
     return Container(
       height: 52.h,

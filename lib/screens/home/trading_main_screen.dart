@@ -29,7 +29,6 @@ import 'package:crm_app/flavor_config.dart';
 import '../../services/one_click_trading_service.dart';
 import '../../services/app_status/app_status_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
-import 'package:crm_app/services/chart_webview_prewarmer.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
 
@@ -104,28 +103,18 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
     _isVantage = FlavorConfig.isVantage();
     final isIquote = FlavorConfig.usesIquoteUi();
 
-    // ✅ PERFORMANCE OPTIMIZATION: Pre-warm the chart WebView in background
-    // Start it at app launch (TradingMainScreen) rather than waiting for Chart tab.
+    // NOTE: No headless chart pre-warm here. The 5 Vantage tabs live in an
+    // eager IndexedStack (see build → _screens built in initState), so the
+    // visible ChartInAppWebView already starts loading its remote URL at home
+    // mount. A headless prewarmer loading the SAME url only doubles the cold
+    // network fetch and contends for bandwidth — it cannot get ahead of the
+    // synchronous eager mount. So we let the visible WebView warm itself.
+    // Still make sure a default symbol is resolved for the chart tab.
     if (!FlavorConfig.instance.useNewChart) {
-      final symService =
-          Get.isRegistered<SymbolSelectionService>()
-              ? Get.find<SymbolSelectionService>()
-              : Get.put(SymbolSelectionService());
-
-      symService.ensureDefault().then((_) {
-        String fallback = 'EURUSD';
-        if (Get.isRegistered<InstrumentsController>()) {
-          final instCtrl = Get.find<InstrumentsController>();
-          if (instCtrl.instruments.isNotEmpty) {
-            fallback = instCtrl.instruments.first.symbol;
-          }
-        }
-        final sym =
-            symService.currentSymbol.isNotEmpty
-                ? symService.currentSymbol
-                : fallback;
-        ChartWebViewPrewarmer.instance.prewarm(symbol: sym);
-      });
+      final symService = Get.isRegistered<SymbolSelectionService>()
+          ? Get.find<SymbolSelectionService>()
+          : Get.put(SymbolSelectionService());
+      symService.ensureDefault();
     }
 
     // ✅ FIX: Check for initial tab index from navigation arguments
