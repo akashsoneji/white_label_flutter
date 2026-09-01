@@ -1507,11 +1507,11 @@ class DashboardScreen extends StatelessWidget {
                 cacheExtent: 500,
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  const SliverToBoxAdapter(
-                    child: DashboardBannerCarousel(
-                      margin: EdgeInsets.fromLTRB(16, 4, 16, 8),
-                    ),
-                  ),
+                  // const SliverToBoxAdapter(
+                  //   child: DashboardBannerCarousel(
+                  //     margin: EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  //   ),
+                  // ),
                   if (isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,

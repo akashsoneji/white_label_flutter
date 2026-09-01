@@ -76,6 +76,7 @@ import 'widgets/exit_confirmation_wrapper.dart';
 import 'widgets/keyboard_dismiss_wrapper.dart';
 import 'widgets/app_notification_stack.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'widgets/tenax_chart/chart_prewarmer.dart';
 import 'utils/app_logger.dart';
 import 'utils/keyboard_unfocus_navigator_observer.dart';
 // App status check imports are enabled
@@ -751,6 +752,13 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   @override
   void initState() {
     super.initState();
+    // Pre-warm the chart WebView as early as possible — the bundle is a LOCAL
+    // asset and needs no auth, so parsing it now (during the auth check / login
+    // screen) means the first chart open after login is already warm. Candle
+    // DATA still loads later once a token exists.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => TenaxChartPrewarmer.warm(),
+    );
     _checkAuthAndNavigate();
     // testDecryption();
   }

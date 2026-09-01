@@ -68,6 +68,10 @@ class AuthController extends GetxController {
   final _verifiedOtp = ''.obs;
   final _registerData = Rxn<Map<String, dynamic>>();
   final _profileData = Rxn<profile_model.SettingsProfileData>();
+  // Timestamp of the last successful getProfile() network fetch, used to skip a
+  // duplicate fetch when two callers request the profile within a few seconds
+  // (e.g. the login compliance gate and the trading screen's compliance check).
+  DateTime? _profileFetchedAt;
 
   // Getters
   bool get isLoading => _isLoading.value;
@@ -187,7 +191,12 @@ class AuthController extends GetxController {
         // Pre-initialize controllers in parallel with saving tokens
         // This reduces sequential overhead
         final controllerInitStart = stopwatch.elapsedMilliseconds;
-        final dashboardController = Get.put(DashboardController());
+        // Reuse the permanent instance registered in main.dart (L340). Marking
+        // it permanent here prevents it being disposed/recreated, which would
+        // re-fire onInit's duplicate mt5accounts/get fetch.
+        final dashboardController = Get.isRegistered<DashboardController>()
+            ? Get.find<DashboardController>()
+            : Get.put(DashboardController(), permanent: true);
         print(
           '⏱️ [PERFORMANCE] DashboardController initialized: ${stopwatch.elapsedMilliseconds - controllerInitStart}ms',
         );
@@ -299,29 +308,11 @@ class AuthController extends GetxController {
           'AuthController: Re-initializing all controllers and services...',
         );
 
-        // 1. Re-initialize DashboardController
-        try {
-          if (Get.isRegistered<DashboardController>()) {
-            Get.delete<DashboardController>(force: true);
-          }
-          Get.put<DashboardController>(DashboardController(), permanent: true);
-          print('AuthController: DashboardController re-initialized');
-        } catch (e) {
-          print(
-            'AuthController: Error re-initializing DashboardController: $e',
-          );
-        }
-
-        // 2. Re-initialize AccountController
-        try {
-          if (Get.isRegistered<AccountController>()) {
-            Get.delete<AccountController>(force: true);
-          }
-          Get.put<AccountController>(AccountController(), permanent: true);
-          print('AuthController: AccountController re-initialized');
-        } catch (e) {
-          print('AuthController: Error re-initializing AccountController: $e');
-        }
+        // DashboardController + AccountController are already registered as
+        // permanent in main.dart and were populated by the awaited fetch above
+        // (forceCheckMT5Accounts + forceRefreshAccountData). Deleting and
+        // re-putting them here would re-fire their onInit fetches, hitting
+        // user/mt5accounts/get 2 extra times per login. So we reuse them as-is.
 
         // 3. Re-initialize InstrumentsController (has WebSocket)
         try {
@@ -1414,7 +1405,18 @@ class AuthController extends GetxController {
   }
 
   // Get Profile Method
-  Future<profile_model.SettingsProfileData?> getProfile() async {
+  Future<profile_model.SettingsProfileData?> getProfile({
+    bool forceRefresh = false,
+  }) async {
+    // Reuse the last fetched profile when a second caller asks within 10s (e.g.
+    // login compliance gate → trading screen compliance check), unless the
+    // caller explicitly wants fresh data.
+    if (!forceRefresh &&
+        _profileData.value != null &&
+        _profileFetchedAt != null &&
+        DateTime.now().difference(_profileFetchedAt!).inSeconds < 10) {
+      return _profileData.value;
+    }
     try {
       _isLoading.value = true;
       _clearError();
@@ -1428,6 +1430,7 @@ class AuthController extends GetxController {
           response.data,
         );
         _profileData.value = profileData;
+        _profileFetchedAt = DateTime.now();
         await _syncUserDataFromProfile(profileData);
         return profileData;
       } else {

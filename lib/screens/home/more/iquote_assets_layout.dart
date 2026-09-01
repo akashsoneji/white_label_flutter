@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
-import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/services/enabled_modules_service.dart';
 import 'package:crm_app/services/language_service.dart';
@@ -18,6 +17,7 @@ import 'package:crm_app/services/biometric_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/services/one_click_trading_service.dart';
 import 'package:crm_app/screens/home/more/one_click_trading_disclaimer_screen.dart';
+import 'package:crm_app/screens/home/iquote_home_screen.dart';
 import 'package:crm_app/widgets/dashboard_bottom_sheet.dart';
 
 /// Modernized Assets & Hub Layout (Fintech Elite Style).
@@ -222,17 +222,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
     );
   }
 
-  Future<void> _handleSwitchToIB() async {
-    final languageService = Get.find<LanguageService>();
-    try {
-      final ibmController = Get.put(IbmController());
-      await ibmController.checkSystemAndNavigate();
-    } catch (e) {
-      CustomToastService.showError(
-        message: languageService.tr('common_ib_status_error_with_msg').replaceAll('{error}', '$e'),
-      );
-    }
-  }
+  // Delegates to the single shared implementation on IquoteHomeScreen so the
+  // IB-status check + error handling live in exactly one place.
+  Future<void> _handleSwitchToIB() => IquoteHomeScreen.handleSwitchToIB();
 
   void _showLogoutDialog(BuildContext context, AuthController authController) {
     final languageService =

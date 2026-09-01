@@ -261,6 +261,9 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
 
       // Trigger background compliance check
       _checkCompliance();
+
+      // Chart WebView is pre-warmed earlier in AuthCheckScreen (before login),
+      // so no need to warm it again here.
     });
 
     // ✅ If initial tab is dashboard, refresh accounts (vantage index 3, default index 3)
@@ -270,7 +273,11 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
         try {
           if (Get.isRegistered<DashboardController>()) {
             final dashboardController = Get.find<DashboardController>();
-            dashboardController.refreshMT5Accounts(force: true);
+            // force:false so the 1500ms throttle skips this fetch when login
+            // (forceCheckMT5Accounts) or the controller's onInit just fetched
+            // the accounts — avoids a duplicate user/mt5accounts/get on the
+            // first Vantage home load.
+            dashboardController.refreshMT5Accounts();
             dashboardController.unsubscribeAndResubscribe();
           }
         } catch (e) {

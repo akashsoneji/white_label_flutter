@@ -3436,78 +3436,14 @@ class TradingWebSocketService extends GetxService with WidgetsBindingObserver {
         swap: swap,
       );
 
-      // Get current positions and update
-      final currentPositions =
-          _tradingController.marketPositions
-              .map(
-                (p) => TradingPosition(
-                  mt5Account: int.tryParse(p.accountId) ?? 0,
-                  position: int.tryParse(p.orderId) ?? 0,
-                  action: p.action,
-                  volume: p.volume.toString(),
-                  priceOpen: p.entryPrice,
-                  priceSL:
-                      p.stopLoss.isEmpty || p.stopLoss == '-'
-                          ? '0'
-                          : p.stopLoss,
-                  priceTP:
-                      p.takeProfit.isEmpty || p.takeProfit == '-'
-                          ? '0'
-                          : p.takeProfit,
-                  priceCurrent: p.currentPrice,
-                  closeTime: p.closeTime,
-                  timeCreate: p.openTime,
-                  symbol: p.symbol,
-                  logo: p.flag,
-                  profit: p.profitLoss,
-                  digits:
-                      p.digits > 0
-                          ? p.digits
-                          : 5, // Use digits from TradePosition
-                  swap: p.swap,
-                ),
-              )
-              .toList();
-
-      // Handle add vs update to avoid conflicts
-      final index = currentPositions.indexWhere(
-        (p) => p.position == position.position,
-      );
-
-      if (isAddOnly) {
-        // "a"/"add" flag: Only add if position doesn't exist
-        // ✅ FIX: Prevent duplicate additions - if position already exists, skip entirely
-        if (index == -1) {
-          currentPositions.add(position);
-        } else {
-          // ✅ FIX: Position already exists - skip to prevent duplicate
-          // Return early to avoid unnecessary UI update
-          return; // Skip processing to avoid duplicate
-        }
-      } else if (isUpdate) {
-        // "u" flag or "op" format: Update if exists, add if doesn't exist
-        // ✅ FIX: Process updates immediately without any delays
-        if (index != -1) {
-          currentPositions[index] = position;
-        } else {
-          // Position doesn't exist - add it (this handles late-arriving positions)
-          currentPositions.add(position);
-        }
+      // ✅ PERF: Route this single tick straight into the controller's batched
+      // queue instead of cloning the ENTIRE positions list on every tick.
+      // queuePositionUpdate adds-or-updates by orderId (O(1)) and flushes on a
+      // 50ms timer with incremental GetBuilder updates, so we no longer rebuild
+      // and re-process all N positions for a single-position update.
+      if (isAddOnly || isUpdate) {
+        _tradingController.queuePositionUpdate(position.toTradePosition());
       }
-
-      // ✅ FIX: Update TradingController immediately for real-time updates
-      // No debounce or delays - instant UI refresh for trading data
-      _tradingController.updateWebSocketData(
-        WebSocketTradingResponse(
-          openPositions: OpenPositionsData(
-            positions: currentPositions,
-            accountinfo: [],
-          ),
-          pendingOrders: null,
-          realtime: true,
-          serverTimestamp: DateHelper.nowUtc().millisecondsSinceEpoch ~/ 1000,
-        ),
-      );
 
       if (kDebugMode) {
         // dev.log(

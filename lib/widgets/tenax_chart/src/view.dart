@@ -92,6 +92,10 @@ class _TenaxChartViewState extends State<TenaxChartView> {
         // anything except what the app explicitly pushes.
         disableContextMenu: true,
         javaScriptEnabled: true,
+        // Cache the local bundle/resources so the 736 KB chart JS is not
+        // re-fetched/re-parsed cold on every mount.
+        cacheEnabled: true,
+        clearCache: false,
         allowFileAccess: true,
         allowFileAccessFromFileURLs: true,
         allowUniversalAccessFromFileURLs: true,

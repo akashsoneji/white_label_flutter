@@ -35,6 +35,11 @@ class TenaxRestApi extends TenaxChartApi {
 
   // ---- history -------------------------------------------------------------
 
+  /// Number of bars to request on the first (unbounded) history load. Keeping
+  /// this bounded makes the initial chart paint fast — older bars are fetched
+  /// lazily as the user scrolls back.
+  static const int _initialBarCount = 500;
+
   @override
   Future<List<Candle>> fetchCandles({
     required String symbol,
@@ -42,6 +47,15 @@ class TenaxRestApi extends TenaxChartApi {
     int? from,
     int? to,
   }) async {
+    // When the caller gives no explicit range (the first load), bound the
+    // window to the most recent [_initialBarCount] bars instead of letting the
+    // server return its full default history — that default can be thousands of
+    // bars and is the main first-load cost.
+    if (from == null && to == null) {
+      final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      to = nowSec;
+      from = nowSec - _resolutionSeconds(resolution) * _initialBarCount;
+    }
     final res = await _http.get(
       config.url(TenaxApiConfig.historyPath, query: {
         'symbol': symbol,
@@ -196,6 +210,27 @@ class TenaxRestApi extends TenaxChartApi {
       if (b is Map && b['message'] != null) message = '${b['message']}';
     } catch (_) {/* keep default */}
     throw Exception(message);
+  }
+
+  /// Maps a chart resolution string (e.g. "1", "5", "60", "1D", "1W") to its
+  /// duration in seconds. Used to size the initial history window.
+  static int _resolutionSeconds(String resolution) {
+    final r = resolution.trim().toUpperCase();
+    if (r.endsWith('D')) {
+      final n = int.tryParse(r.substring(0, r.length - 1)) ?? 1;
+      return n * 86400;
+    }
+    if (r.endsWith('W')) {
+      final n = int.tryParse(r.substring(0, r.length - 1)) ?? 1;
+      return n * 604800;
+    }
+    if (r.endsWith('M')) {
+      final n = int.tryParse(r.substring(0, r.length - 1)) ?? 1;
+      return n * 2592000; // ~30 days
+    }
+    // Bare number = minutes.
+    final minutes = int.tryParse(r) ?? 1;
+    return minutes * 60;
   }
 
   static int? _asInt(dynamic v) =>

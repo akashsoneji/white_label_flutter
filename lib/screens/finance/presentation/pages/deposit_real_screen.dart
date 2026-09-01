@@ -346,9 +346,10 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       if (raw.isNotEmpty && raw != '0.00') {
         final entered = double.tryParse(raw);
         if (entered != null) {
-          if (minLimit != null && entered < minLimit) {
+          final converted = _convertedAmount(entered);
+          if (minLimit != null && converted < minLimit) {
             error = 'Minimum deposit is \$${minLimit.toStringAsFixed(2)}';
-          } else if (maxLimit != null && entered > maxLimit) {
+          } else if (maxLimit != null && converted > maxLimit) {
             error = 'Maximum deposit is \$${maxLimit.toStringAsFixed(2)}';
           }
         }
@@ -423,6 +424,15 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       return 'Amount ($_sourceCurrency)';
     }
     return 'Amount';
+  }
+
+  /// Converts the entered source-currency amount into the target (USD)
+  /// value, which is what min/max limits are expressed in.
+  double _convertedAmount(double entered) {
+    if (_hasConversion && _conversionRate > 0) {
+      return entered / _conversionRate;
+    }
+    return entered;
   }
 
   String _convertedDepositText() {
@@ -532,13 +542,14 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     if (m != null) {
       final minLimit = double.tryParse(m['min_limit']?.toString() ?? '');
       final maxLimit = double.tryParse(m['max_limit']?.toString() ?? '');
-      if (minLimit != null && entered < minLimit) {
+      final converted = _convertedAmount(entered);
+      if (minLimit != null && converted < minLimit) {
         CustomToastService.showError(
           message: 'Amount cannot be less than minimum limit of \$${minLimit.toStringAsFixed(2)}',
         );
         return;
       }
-      if (maxLimit != null && entered > maxLimit) {
+      if (maxLimit != null && converted > maxLimit) {
         CustomToastService.showError(
           message: 'Amount cannot be more than maximum limit of \$${maxLimit.toStringAsFixed(2)}',
         );

@@ -395,7 +395,15 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       }
 
       final v2 = Get.find<MarketWatchV2Service>();
-      await hydrateFavoritesFromRest();
+      // Only re-fetch the favorites catalog from REST when we don't already
+      // have it. On repeat Market-tab entries the instruments are already
+      // loaded and the socket is live, so we skip the redundant
+      // getInstrumentsByAccount call and just re-subscribe symbols below.
+      final alreadyHydrated =
+          hasAttemptedInitialLoad.value && favoriteInstruments.isNotEmpty;
+      if (!alreadyHydrated) {
+        await hydrateFavoritesFromRest();
+      }
 
       final syms =
           favoriteInstruments
@@ -2020,6 +2028,10 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     allInstruments.clear();
     instruments.clear();
     tradingGroups.clear();
+    // Account switched: the row catalog above was just wiped, so allow the next
+    // startMarketWatchV2Only() to run a fresh REST hydrate for the new account
+    // instead of hitting the "already hydrated" fast-path.
+    hasAttemptedInitialLoad.value = false;
     // Reset filter to 'Favorites' to show favorites from new account
     currentFilter.value = 'Favorites';
     // Clear available filters and rebuild from new account data

@@ -58,10 +58,12 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
     } else {
       _ic = Get.find<InstrumentsController>();
     }
-    final bannerController = Get.isRegistered<BannerController>()
-        ? Get.find<BannerController>()
-        : Get.put(BannerController(), permanent: true);
-    bannerController.fetchBanners();
+    // Registering BannerController triggers its onInit → fetchBanners(), so we
+    // must NOT call fetchBanners() again here (that caused a duplicate
+    // GET user/banners on first launch). Registration alone is enough.
+    if (!Get.isRegistered<BannerController>()) {
+      Get.put(BannerController(), permanent: true);
+    }
   }
 
   void _openSearchSheet() {

@@ -378,8 +378,10 @@ class ComplianceController extends GetxController {
       if (response.success) {
         CustomToastService.showSuccess(message: 'Regulation questionnaire saved successfully.');
         
-        // Refresh local profile status so state resolves regulation_submitted = 1
-        await _authController.getProfile();
+        // Refresh local profile status so state resolves regulation_submitted = 1.
+        // forceRefresh bypasses the getProfile TTL cache — this read must see the
+        // server value we just mutated, not a cached pre-submit profile.
+        await _authController.getProfile(forceRefresh: true);
         
         // Proceed to Step 2 (Documents Upload)
         currentStep.value = 1;
