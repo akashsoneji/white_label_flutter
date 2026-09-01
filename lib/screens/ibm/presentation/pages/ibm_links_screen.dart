@@ -1,3 +1,4 @@
+import 'package:crm_app/flavor_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -400,7 +401,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
         visits > 0 ? ((signups / visits) * 100).toStringAsFixed(0) : '0';
 
     // Full URL
-    final url = 'https://dev.tenaxcodecrm.com/register?ref=$code';
+    final url = 'https://my.pipze.com/register?ref=$code';
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),

@@ -23,6 +23,7 @@ class PartnershipProgramScreen extends StatefulWidget {
 
 class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
   bool _isApplicationSubmitted = false;
+  bool _termsAccepted = false;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +50,12 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
           children: [
             // Verification Cards Grid
             _buildVerificationCards(
+              languageService,
+              moreController.dashboardModel.value?.data?.stageCompletion,
+            ),
+
+            // IB Terms acceptance checkbox
+            _buildTermsCheckbox(
               languageService,
               moreController.dashboardModel.value?.data?.stageCompletion,
             ),
@@ -264,13 +271,13 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
                 final ibmController = Get.put(IbmController());
                 await ibmController.checkSystemAndNavigate();
               }
-              : canSubmit
-              ? _showIbApplicationDialog
+              : (canSubmit && _termsAccepted)
+              ? () async => await _submitIBApplication()
               : null,
       style: ElevatedButton.styleFrom(
         padding: EdgeInsets.zero,
         backgroundColor:
-            _isApplicationSubmitted || canSubmit
+            _isApplicationSubmitted || (canSubmit && _termsAccepted)
                 ? AppColors.primary
                 : Colors.grey,
         foregroundColor: AppColors.whiteColor,
@@ -291,178 +298,68 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
     );
   }
 
-  void _showIbApplicationDialog() {
-    bool isAgreed = false;
+  Widget _buildTermsCheckbox(
+    LanguageService languageService,
+    dynamic stageCompletion,
+  ) {
+    // Only relevant before the application is submitted
+    if (_isApplicationSubmitted) {
+      return const SizedBox.shrink();
+    }
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              backgroundColor: AppColors.background,
+    final isEmailVerified = stageCompletion?.emailVerified != null;
+    final isMobileVerified = stageCompletion?.mobileVerified != null;
+    final isPersonalInfoVerified = stageCompletion?.personalDetails == true;
+    final canSubmit =
+        isEmailVerified && isMobileVerified && isPersonalInfoVerified;
+
+    if (!canSubmit) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            height: 20.h,
+            width: 20.w,
+            child: Checkbox(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(4.r),
               ),
-              child: Container(
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12.r),
-                  color: AppColors.card,
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: Text(
-                              'IB Application',
-                              style: AppTextStyles.bodyText.copyWith(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w500,
-                                height: 1.4,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Container(
-                            width: 23.w,
-                            height: 23.w,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
-                            child: InkWell(
-                              onTap: () => Navigator.of(context).pop(),
-                              child: Center(
-                                child: SvgPicture.asset(
-                                  'assets/svg/partnership_program/cancel.svg',
-                                  width: 30.55.w,
-                                  height: 30.55.w,
-                                  colorFilter: ColorFilter.mode(
-                                    AppColors.textPrimary,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 16.h),
-
-                    // Content
-                    Text(
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-                      style: AppTextStyles.bodyText.copyWith(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondary,
-                        height: 1.33,
-                      ),
-                    ),
-
-                    SizedBox(height: 20.h),
-
-                    // Checkbox
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: 16.h,
-                          width: 16.w,
-                          child: Checkbox(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                            activeColor: AppColors.primary,
-                            checkColor: AppColors.whiteColor,
-                            side: BorderSide(
-                              color: AppColors.textGrey,
-                              width: 1.5,
-                            ),
-                            fillColor: WidgetStateProperty.resolveWith((
-                              states,
-                            ) {
-                              if (states.contains(WidgetState.selected)) {
-                                return AppColors.primary;
-                              }
-                              return AppColors.card;
-                            }),
-                            value: isAgreed,
-                            onChanged: (value) {
-                              setDialogState(() {
-                                isAgreed = value ?? false;
-                              });
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Expanded(
-                          child: Text(
-                            'I agree to the IB Terms',
-                            style: AppTextStyles.bodyText.copyWith(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w400,
-                              height: 1.58,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 20.h),
-
-                    // Submit button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 44.h,
-                      child: ElevatedButton(
-                        onPressed:
-                            isAgreed
-                                ? () async {
-                                  Navigator.of(context).pop();
-                                  await _submitIBApplication();
-                                }
-                                : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.whiteColor,
-                          disabledBackgroundColor: AppColors.neutralTrack,
-                          disabledForegroundColor: AppColors.textSecondary,
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          'Submit',
-                          style: AppTextStyles.bodyText.copyWith(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.whiteColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              activeColor: AppColors.primary,
+              checkColor: AppColors.whiteColor,
+              side: BorderSide(color: AppColors.textGrey, width: 1.5),
+              fillColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return AppColors.primary;
+                }
+                return AppColors.card;
+              }),
+              value: _termsAccepted,
+              onChanged: (value) {
+                setState(() {
+                  _termsAccepted = value ?? false;
+                });
+              },
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              'I accept the IB Terms and conditions',
+              style: AppTextStyles.bodyText.copyWith(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w400,
+                height: 1.58,
+                color: AppColors.textPrimary,
               ),
-            );
-          },
-        );
-      },
+            ),
+          ),
+        ],
+      ),
     );
   }
 

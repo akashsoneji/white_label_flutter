@@ -114,33 +114,33 @@ class _DemoContestMyStatsScreenState extends State<DemoContestMyStatsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // Back to all contests breadcrumb
-                        InkWell(
-                          onTap: () => Get.back(),
-                          borderRadius: BorderRadius.circular(6.r),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 6.h),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.arrow_back,
-                                  size: 14.sp,
-                                  color: AppColors.textGrey,
-                                ),
-                                SizedBox(width: 6.w),
-                                Text(
-                                  'Back to all contests',
-                                  style: AppTextStyles.bodyText.copyWith(
-                                    color: AppColors.textGrey,
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10.h),
+                        // InkWell(
+                        //   onTap: () => Get.back(),
+                        //   borderRadius: BorderRadius.circular(6.r),
+                        //   child: Padding(
+                        //     padding: EdgeInsets.symmetric(vertical: 6.h),
+                        //     child: Row(
+                        //       mainAxisSize: MainAxisSize.min,
+                        //       children: [
+                        //         Icon(
+                        //           Icons.arrow_back,
+                        //           size: 14.sp,
+                        //           color: AppColors.textGrey,
+                        //         ),
+                        //         SizedBox(width: 6.w),
+                        //         Text(
+                        //           'Back to all contests',
+                        //           style: AppTextStyles.bodyText.copyWith(
+                        //             color: AppColors.textGrey,
+                        //             fontSize: 12.sp,
+                        //             fontWeight: FontWeight.w600,
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   ),
+                        // ),
+                        // SizedBox(height: 10.h),
 
                         // 1. Ranking Top Banner
                         _RankingBanner(
@@ -249,11 +249,11 @@ class _RankingBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = isDark
-        ? const Color(0xFF2A1535)
-        : const Color(0xFFFAF5FF);
+        ? AppColors.primary
+        : AppColors.primary.withValues(alpha: 0.4);
     final borderColor = isDark
-        ? const Color(0xFF581C87).withValues(alpha: 0.4)
-        : const Color(0xFFE9D5FF);
+        ? AppColors.primary.withValues(alpha: 0.4)
+        : AppColors.primary.withValues(alpha: 0.4);
 
     return Container(
       width: double.infinity,
@@ -494,23 +494,24 @@ class _HeroContestCard extends StatelessWidget {
     final poolPrize = contest.pool?['total_prize_pool']?.toString() ?? '0.00';
     final filledPercent = (contest.filledPercent * 100).toStringAsFixed(0);
 
+    final primary = AppColors.primary;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF4A0E4E),
-            Color(0xFF6B1570),
-            Color(0xFF531057),
+            primary,
+            Color.lerp(primary, Colors.white, 0.12)!,
+            Color.lerp(primary, Colors.black, 0.12)!,
           ],
         ),
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4A0E4E).withValues(alpha: 0.25),
+            color: primary.withValues(alpha: 0.25),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1126,7 +1127,7 @@ class _PrizeStructureCard extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4A0E4E),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(vertical: 13.h),
                 shape: RoundedRectangleBorder(
@@ -1184,9 +1185,9 @@ class _PrizeItemRow extends StatelessWidget {
           height: 32.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: const Color(0xFF5B1065).withValues(alpha: 0.12),
+            color: AppColors.primary.withValues(alpha: 0.12),
             border: Border.all(
-              color: const Color(0xFF5B1065).withValues(alpha: 0.4),
+              color: AppColors.primary.withValues(alpha: 0.4),
               width: 1.5,
             ),
           ),
@@ -1194,7 +1195,7 @@ class _PrizeItemRow extends StatelessWidget {
           child: Text(
             index < 10 ? '0$index' : '$index',
             style: TextStyle(
-              color: const Color(0xFF5B1065),
+              color: AppColors.primary,
               fontSize: 11.sp,
               fontWeight: FontWeight.w800,
             ),
