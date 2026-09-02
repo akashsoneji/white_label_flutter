@@ -73,7 +73,7 @@ class KycScaffold extends StatelessWidget {
               Align(
                 alignment: Alignment.topRight,
                 child: GestureDetector(
-                  onTap: () => Get.back(closeOverlays: true),
+                  onTap: () => Get.back(),
                   child: Container(
                     width: 24.w,
                     height: 24.h,
@@ -138,7 +138,7 @@ class KycScaffold extends StatelessWidget {
                 SizedBox(width: 16.w),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Get.back(closeOverlays: true),
+                    onPressed: () => Get.back(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary, // Light purple
                       foregroundColor: AppColors.whiteColor,
@@ -154,6 +154,7 @@ class KycScaffold extends StatelessWidget {
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
+                        color: AppColors.whiteColor,
                       ),
                     ),
                   ),

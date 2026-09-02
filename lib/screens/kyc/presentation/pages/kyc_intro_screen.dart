@@ -542,7 +542,7 @@ class KycIntroScreen extends StatelessWidget {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [
-                    Color.lerp(AppColors.primary, Colors.black, 0.15)!,
+                    Color.lerp(AppColors.primary.withValues(alpha: 0.3), AppColors.primary.withValues(alpha: 0.4), 0.9)!,
                     AppColors.primary,
                   ],
                 ),

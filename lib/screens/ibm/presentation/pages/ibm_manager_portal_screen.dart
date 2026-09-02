@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter/services.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
@@ -410,10 +412,109 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           ],
         ),
         SizedBox(height: 14.h),
+        _buildDefaultLinkCard(controller.linksList),
+        SizedBox(height: 14.h),
         _buildMoneyFlowRow(deposits, withdrawals, equity, netFlow),
         SizedBox(height: 14.h),
         _buildPerformanceGrid(lots, trades, perLot, avgLotSize),
       ],
+    );
+  }
+
+  Widget _buildDefaultLinkCard(List links) {
+    Map? defaultLink;
+    for (final l in links) {
+      if (l is Map && (l['is_default_link'] == true || l['is_default'] == true)) {
+        defaultLink = l;
+        break;
+      }
+    }
+    if (defaultLink == null && links.isNotEmpty && links.first is Map) {
+      defaultLink = links.first as Map;
+    }
+
+    final code = defaultLink?['code']?.toString() ?? 'PARTNER123';
+    final label = defaultLink?['label']?.toString() ?? 'Default Partner Link';
+
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Default Referral Link',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: const Text(
+                  'ACTIVE',
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2E7D32),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            label,
+            style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+          ),
+          SizedBox(height: 10.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: AppColors.isDarkMode ? Colors.grey[900] : const Color(0xFFF9F9FB),
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: AppColors.divider),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.link, size: 16.w, color: AppColors.primary),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    code,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.copy, size: 16.w, color: AppColors.primary),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: code));
+                    CustomToastService.showSuccess(message: 'Referral code copied!');
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

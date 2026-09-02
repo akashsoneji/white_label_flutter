@@ -401,7 +401,7 @@ class _IbmLinksScreenState extends State<IbmLinksScreen> {
         visits > 0 ? ((signups / visits) * 100).toStringAsFixed(0) : '0';
 
     // Full URL
-    final url = 'https://my.pipze.com/register?ref=$code';
+    final url = '${FlavorConfig.instance.chartBaseUrl}/register?ref=$code';
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
