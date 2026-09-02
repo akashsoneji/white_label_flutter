@@ -26,6 +26,12 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
       'this_month'; // today, 7d, 30d, this_month, all, custom
   String? customFrom;
   String? customTo;
+  String selectedCurrencyCode = 'USD'; // USD, USC (cent)
+
+  String get _currencyPrefix =>
+      selectedCurrencyCode == 'USD' ? r'$' : '$selectedCurrencyCode ';
+
+  String _fmt(double v) => '$_currencyPrefix${v.toStringAsFixed(2)}';
 
   @override
   void initState() {
@@ -177,8 +183,26 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         final partners = data['partners'] ?? {};
         final funnel = data['funnel'] ?? {};
         final currencies = data['currencies'] ?? [];
-        final Map<String, dynamic> firstCurrency =
-            (currencies is List && currencies.isNotEmpty) ? currencies[0] : {};
+        final List currencyList = currencies is List ? currencies : const [];
+        final List<String> availableCodes = currencyList
+            .whereType<Map>()
+            .map((c) => (c['currency'] ?? '').toString())
+            .where((c) => c.isNotEmpty)
+            .toList();
+        // Keep selectedCurrencyCode valid vs API response.
+        if (availableCodes.isNotEmpty &&
+            !availableCodes.contains(selectedCurrencyCode)) {
+          selectedCurrencyCode = availableCodes.first;
+        }
+        final Map<String, dynamic> firstCurrency = currencyList
+            .whereType<Map>()
+            .cast<Map<String, dynamic>>()
+            .firstWhere(
+              (c) => c['currency'] == selectedCurrencyCode,
+              orElse: () => currencyList.isNotEmpty
+                  ? Map<String, dynamic>.from(currencyList.first as Map)
+                  : <String, dynamic>{},
+            );
 
         final funding = firstCurrency['funding'] ?? {};
         final deposits = _parseDouble(funding['deposits'] ?? funding['net']);
@@ -216,6 +240,10 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
             children: [
               _buildHeaderRow(),
+              if (availableCodes.length > 1) ...[
+                SizedBox(height: 16.h),
+                _buildCurrencySelector(availableCodes),
+              ],
               SizedBox(height: 24.h),
               _buildTopGrid(
                 clients,
@@ -294,6 +322,83 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           fillWidth: true,
         ),
       ],
+    );
+  }
+
+  Widget _buildCurrencySelector(List<String> codes) {
+    String labelFor(String c) {
+      switch (c.toUpperCase()) {
+        case 'USD':
+          return 'USD';
+        case 'USC':
+          return 'USC';
+        default:
+          return c;
+      }
+    }
+
+    String subLabelFor(String c) {
+      switch (c.toUpperCase()) {
+        case 'USD':
+          return 'Dollar';
+        case 'USC':
+          return 'Cent';
+        default:
+          return '';
+      }
+    }
+
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Row(
+        children: codes.map((c) {
+          final isSelected = c == selectedCurrencyCode;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => selectedCurrencyCode = c),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      labelFor(c),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected
+                            ? AppColors.whiteColor
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      subLabelFor(c),
+                      style: TextStyle(
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.w500,
+                        color: isSelected
+                            ? AppColors.whiteColor.withValues(alpha: 0.85)
+                            : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -497,7 +602,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              '\$${commission.toStringAsFixed(2)}',
+              _fmt(commission),
               maxLines: 1,
               style: TextStyle(
                 color: AppColors.whiteColor,
@@ -578,7 +683,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              '\$${rebate.toStringAsFixed(2)}',
+              _fmt(rebate),
               maxLines: 1,
               style: TextStyle(
                 color: AppColors.whiteColor,
@@ -897,7 +1002,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
               Expanded(
                 child: _buildColoredMiniStat(
                   label: 'Deposits',
-                  value: '\$${deposits.toStringAsFixed(2)}',
+                  value: _fmt(deposits),
                   icon: Icons.south_west_rounded,
                   color: depositsColor,
                 ),
@@ -906,7 +1011,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
               Expanded(
                 child: _buildColoredMiniStat(
                   label: 'Withdrawals',
-                  value: '\$${withdrawals.toStringAsFixed(2)}',
+                  value: _fmt(withdrawals),
                   icon: Icons.north_east_rounded,
                   color: withdrawalsColor,
                 ),
@@ -919,7 +1024,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
               Expanded(
                 child: _buildColoredMiniStat(
                   label: 'Client Equity',
-                  value: '\$${equity.toStringAsFixed(2)}',
+                  value: _fmt(equity),
                   icon: Icons.account_balance_rounded,
                   color: AppColors.primary,
                   trailingText: 'live',
@@ -929,7 +1034,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
               Expanded(
                 child: _buildColoredMiniStat(
                   label: 'Net flow',
-                  value: '${netPositive ? '+' : ''}\$${netFlow.toStringAsFixed(2)}',
+                  value: '${netPositive ? '+' : ''}${_fmt(netFlow)}',
                   icon: netPositive
                       ? Icons.trending_up_rounded
                       : Icons.trending_down_rounded,
@@ -1026,7 +1131,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
           SizedBox(height: 10.h),
           Row(
             children: [
-              Expanded(child: _buildMiniStat(label: 'Per Lot', value: '\$${perLot.toStringAsFixed(2)}', icon: Icons.percent_rounded)),
+              Expanded(child: _buildMiniStat(label: 'Per Lot', value: _fmt(perLot), icon: Icons.percent_rounded)),
               SizedBox(width: 10.w),
               Expanded(child: _buildMiniStat(label: 'Avg Lots/Trader', value: avgLotSize.toStringAsFixed(2), icon: Icons.straighten_rounded)),
             ],
@@ -1186,7 +1291,7 @@ Widget _buildCommissionSummary(Map wallet) {
                 ),
               ),
               Text(
-                '\$${earned.toStringAsFixed(2)}',
+                _fmt(earned),
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -1228,7 +1333,7 @@ Widget _buildCommissionSummary(Map wallet) {
         ),
         SizedBox(height: 4.h),
         Text(
-          '\$${value.toStringAsFixed(2)}',
+          _fmt(value),
           style: TextStyle(
             fontSize: 13.sp,
             fontWeight: FontWeight.bold,
@@ -1401,7 +1506,7 @@ Widget _buildCommissionSummary(Map wallet) {
                     ),
                   ),
                   Text(
-                    '\$${netDeposit.toStringAsFixed(2)}',
+                    _fmt(netDeposit),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14.sp,
@@ -1421,7 +1526,7 @@ Widget _buildCommissionSummary(Map wallet) {
                     ),
                   ),
                   Text(
-                    '\$${earned.toStringAsFixed(2)}',
+                    _fmt(earned),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14.sp,
@@ -1584,8 +1689,8 @@ Widget _buildCommissionSummary(Map wallet) {
             final amountStr =
                 amount > 0
                     ? (isPositive
-                        ? '+\$${amount.toStringAsFixed(2)}'
-                        : '\$${amount.toStringAsFixed(2)}')
+                        ? '+${_fmt(amount)}'
+                        : _fmt(amount))
                     : '';
 
             return Padding(
