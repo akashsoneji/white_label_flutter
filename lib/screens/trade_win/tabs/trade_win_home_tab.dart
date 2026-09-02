@@ -49,7 +49,8 @@ class TradeWinHomeTab extends StatelessWidget {
         },
         child: RefreshIndicator(
           color: AppColors.primary,
-          onRefresh: () => controller.fetchProducts(showLoader: false),
+          onRefresh: () =>
+              controller.fetchProducts(showLoader: false, audience: 'client'),
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [

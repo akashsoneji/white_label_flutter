@@ -1630,12 +1630,13 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                           ),
                           minimumSize: Size(double.infinity, 44.h),
                         ),
-                        icon: Icon(Icons.add, size: 20.sp),
+                        icon: Icon(Icons.add, size: 20.sp,color: AppColors.whiteColor,),
                         label: Text(
                           'Add Bank Account',
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
+                            color: AppColors.whiteColor
                           ),
                         ),
                       ),

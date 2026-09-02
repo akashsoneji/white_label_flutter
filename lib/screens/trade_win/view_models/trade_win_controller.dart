@@ -29,7 +29,7 @@ class TradeWinController extends GetxController {
   int pastWinsLastPage = 1;
 
   final RxString selectedAvailability = 'all'.obs;
-  final RxString selectedAudience = 'ib'.obs;
+  final RxString selectedAudience = 'client'.obs;
   final RxBool isProductsFiltering = false.obs;
   final RxSet<String> allKnownCategories = <String>{'all'}.obs;
 
@@ -63,7 +63,7 @@ class TradeWinController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchProducts();
+    fetchProducts(audience: 'client');
     fetchPastWins(reset: true);
   }
 

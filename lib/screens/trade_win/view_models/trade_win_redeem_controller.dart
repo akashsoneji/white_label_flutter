@@ -84,7 +84,7 @@ class TradeWinRedeemController extends GetxController {
     if (Get.isRegistered<TradeWinController>()) {
       final tradeWin = Get.find<TradeWinController>();
       tradeWin.mainTabIndex.value = 0;
-      await tradeWin.fetchProducts(showLoader: false);
+      await tradeWin.fetchProducts(showLoader: false, audience: 'client');
       await tradeWin.fetchPastWins(reset: true);
     }
 

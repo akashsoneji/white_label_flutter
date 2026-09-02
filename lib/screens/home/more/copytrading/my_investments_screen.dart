@@ -1430,10 +1430,10 @@ class _EmptyInvestmentsState extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16.h),
-            Text('No investments yet', style: AppTextStyles.headingblack),
+            Text('No subscriptions yet', style: AppTextStyles.headingblack),
             SizedBox(height: 8.h),
             Text(
-              'Start copying successful traders to grow your portfolio.',
+              'You haven\'t copied any master traders yet. Explore the leaderboard to find traders to copy.',
               style: AppTextStyles.caption,
               textAlign: TextAlign.center,
             ),
@@ -1450,20 +1450,18 @@ class _EmptyInvestmentsState extends StatelessWidget {
                   Get.to(() => const ExploreMastersScreen());
                 }
               },
-              icon: Icon(Icons.explore_outlined, size: 16.r),
+              icon: Icon(Icons.explore_outlined, size: 16.r,color: AppColors.whiteColor,),
               label: Text(
                 'Explore Masters',
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.whiteColor
                 ),
               ),
               style: ElevatedButton.styleFrom(
                 elevation: 0,
-                backgroundColor:
-                    AppColors.isDarkMode
-                        ? AppColors.textPrimaryDark.withValues(alpha: 0.1)
-                        : AppColors.primary,
+                backgroundColor: AppColors.primary,
                 foregroundColor:
                     AppColors.isDarkMode
                         ? AppColors.textPrimaryDark
