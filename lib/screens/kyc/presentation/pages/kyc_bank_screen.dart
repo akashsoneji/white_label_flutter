@@ -81,6 +81,14 @@ class _KycBankScreenState extends State<KycBankScreen> {
       isFromKYC = Get.arguments?['isFromKYC'] as bool?;
       print('Screen name from arguments: $screenName');
       controller.setIsBankList(screenName == 'Withdrawal Method');
+
+      // Preselect account type when provided (e.g. "Add Bank Account" flow)
+      final preselectedAccountType =
+          Get.arguments?['account_type'] as String?;
+      if (preselectedAccountType != null &&
+          controller.accountTypes.contains(preselectedAccountType)) {
+        controller.setAccountType(preselectedAccountType);
+      }
       print('✅ KycBankController initialized successfully');
 
       // Initialize camera

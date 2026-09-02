@@ -517,9 +517,16 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             SizedBox(height: 16.h),
             ElevatedButton(
               onPressed: () {
-                // Navigate to bank list screen to add withdrawal method
-                // Refresh when returning from bank list
-                Get.toNamed(AppPages.BANK_LIST)?.then((_) {
+                // Navigate directly to add withdrawal method form with
+                // Crypto preselected. Refresh when returning.
+                Get.toNamed(
+                  AppPages.KYC_BANK,
+                  arguments: {
+                    'screen_name': 'Withdrawal Method',
+                    'account_type': 'Crypto',
+                    'isFromKYC': false,
+                  },
+                )?.then((_) {
                   _refreshOnReturn();
                 });
               },
@@ -535,13 +542,14 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.add, size: 20.sp),
+                  Icon(Icons.add, size: 20.sp,color: AppColors.whiteColor,),
                   SizedBox(width: 8.w),
                   Text(
                     'Add Method',
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
+                      color: AppColors.whiteColor
                     ),
                   ),
                 ],
@@ -1618,7 +1626,14 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () {
                           Navigator.pop(context);
-                          Get.toNamed(AppPages.BANK_LIST)?.then((_) {
+                          Get.toNamed(
+                            AppPages.KYC_BANK,
+                            arguments: {
+                              'screen_name': 'Withdrawal Method',
+                              'account_type': 'Bank',
+                              'isFromKYC': false,
+                            },
+                          )?.then((_) {
                             _refreshOnReturn();
                           });
                         },

@@ -7,6 +7,7 @@ import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/brand_switcher.dart';
 
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
 
@@ -196,6 +197,10 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
 
         // Use dashboard wallet data directly
         final effectiveWallet = data['wallet'] ?? firstCurrency['wallet'] ?? {};
+        // Current available (unpaid) rebate balance for the rebate card.
+        final rebate = _parseDouble(effectiveWallet['unpaid_balance']);
+        // Referral link may or may not be present in the response.
+        final referralLink = data['referral_link'];
         final network = controller.networkData;
 
         return RefreshIndicator(
@@ -222,6 +227,8 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 lots,
                 trades,
                 perLot,
+                rebate,
+                referralLink,
               ),
               SizedBox(height: 24.h),
               _buildCommissionSummary(effectiveWallet),
@@ -356,6 +363,8 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     double lots,
     int trades,
     double perLot,
+    double rebate,
+    dynamic referralLink,
   ) {
     final totalClients = clients['total'] ?? 0;
     final newInPeriod = clients['new_in_period'] ?? 0;
@@ -373,7 +382,16 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildHeroEarnedCard(commission),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _buildHeroEarnedCard(commission)),
+              SizedBox(width: 12.w),
+              Expanded(child: _buildRebateCard(rebate)),
+            ],
+          ),
+        ),
         SizedBox(height: 14.h),
         Row(
           children: [
@@ -411,110 +429,15 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             ),
           ],
         ),
-        SizedBox(height: 14.h),
-        _buildDefaultLinkCard(controller.linksList),
+        if (_hasReferralLink(referralLink, controller.linksList)) ...[
+          SizedBox(height: 14.h),
+          _buildReferralLinkCard(referralLink, controller.linksList),
+        ],
         SizedBox(height: 14.h),
         _buildMoneyFlowRow(deposits, withdrawals, equity, netFlow),
         SizedBox(height: 14.h),
         _buildPerformanceGrid(lots, trades, perLot, avgLotSize),
       ],
-    );
-  }
-
-  Widget _buildDefaultLinkCard(List links) {
-    Map? defaultLink;
-    for (final l in links) {
-      if (l is Map && (l['is_default_link'] == true || l['is_default'] == true)) {
-        defaultLink = l;
-        break;
-      }
-    }
-    if (defaultLink == null && links.isNotEmpty && links.first is Map) {
-      defaultLink = links.first as Map;
-    }
-
-    final code = defaultLink?['code']?.toString() ?? 'PARTNER123';
-    final label = defaultLink?['label']?.toString() ?? 'Default Partner Link';
-
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Default Referral Link',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-                child: const Text(
-                  'ACTIVE',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2E7D32),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            label,
-            style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
-          ),
-          SizedBox(height: 10.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: AppColors.isDarkMode ? Colors.grey[900] : const Color(0xFFF9F9FB),
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: AppColors.divider),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.link, size: 16.w, color: AppColors.primary),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Text(
-                    code,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.copy, size: 16.w, color: AppColors.primary),
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: code));
-                    CustomToastService.showSuccess(message: 'Referral code copied!');
-                  },
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -553,25 +476,34 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 child: Icon(Icons.payments_rounded, color: AppColors.whiteColor, size: 20.w),
               ),
               SizedBox(width: 10.w),
-              Text(
-                'Earned this period',
-                style: TextStyle(
-                  color: AppColors.whiteColor.withValues(alpha: 0.9),
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.3,
+              Expanded(
+                child: Text(
+                  'Earned this period',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppColors.whiteColor.withValues(alpha: 0.9),
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 12.h),
-          Text(
-            '\$${commission.toStringAsFixed(2)}',
-            style: TextStyle(
-              color: AppColors.whiteColor,
-              fontSize: 32.sp,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.5,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '\$${commission.toStringAsFixed(2)}',
+              maxLines: 1,
+              style: TextStyle(
+                color: AppColors.whiteColor,
+                fontSize: 32.sp,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+              ),
             ),
           ),
           SizedBox(height: 4.h),
@@ -587,6 +519,214 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRebateCard(double rebate) {
+    const accent = Color(0xFF00C48C);
+    return Container(
+      padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 18.h),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [accent, accent.withValues(alpha: 0.78)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: AppColors.whiteColor.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(Icons.account_balance_wallet_rounded,
+                    color: AppColors.whiteColor, size: 20.w),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  'Available rebate',
+                  style: TextStyle(
+                    color: AppColors.whiteColor.withValues(alpha: 0.9),
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              '\$${rebate.toStringAsFixed(2)}',
+              maxLines: 1,
+              style: TextStyle(
+                color: AppColors.whiteColor,
+                fontSize: 32.sp,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Row(
+            children: [
+              Icon(Icons.savings_rounded,
+                  size: 14.w,
+                  color: AppColors.whiteColor.withValues(alpha: 0.85)),
+              SizedBox(width: 4.w),
+              Text(
+                'Unpaid balance',
+                style: TextStyle(
+                  color: AppColors.whiteColor.withValues(alpha: 0.85),
+                  fontSize: 11.sp,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _hasReferralLink(dynamic referralLink, List links) {
+    if (referralLink is Map) {
+      final code = referralLink['code']?.toString() ?? '';
+      if (code.isNotEmpty) return true;
+    }
+    return links.isNotEmpty;
+  }
+
+  Widget _buildReferralLinkCard(dynamic referralLink, List links) {
+    String code = '';
+    String label = '';
+    bool isActive = true;
+
+    if (referralLink is Map) {
+      code = referralLink['code']?.toString() ?? '';
+      label = referralLink['label']?.toString() ?? '';
+      isActive = referralLink['is_active'] != false;
+    }
+
+    // Fall back to the links list if the dashboard didn't inline the link.
+    if (code.isEmpty && links.isNotEmpty && links.first is Map) {
+      final first = links.first as Map;
+      code = first['code']?.toString() ?? '';
+      label = first['label']?.toString() ?? '';
+    }
+
+    // Build the full referral URL using the active brand/flavor base URL
+    // (e.g. https://my.pipze.com) — never hardcode a domain.
+    final baseUrl = BrandSwitcher.currentChartBaseUrl.replaceAll(
+      RegExp(r'/+$'),
+      '',
+    );
+    final referralUrl =
+        code.isEmpty ? '' : '$baseUrl/register?ref=$code';
+
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Default Referral Link',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (isActive)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: const Text(
+                    'ACTIVE',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2E7D32),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          if (label.isNotEmpty) ...[
+            SizedBox(height: 4.h),
+            Text(
+              label,
+              style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+            ),
+          ],
+          SizedBox(height: 10.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: AppColors.isDarkMode
+                  ? Colors.grey[900]
+                  : const Color(0xFFF9F9FB),
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: AppColors.divider),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.link, size: 16.w, color: AppColors.primary),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    referralUrl,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.copy, size: 16.w, color: AppColors.primary),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: referralUrl));
+                    CustomToastService.showSuccess(
+                        message: 'Referral link copied!');
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
           ),
         ],
       ),

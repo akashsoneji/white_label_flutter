@@ -90,19 +90,33 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
           children: [
             _label(lang.tr('ticket_department')),
             Obx(
-              () => DropdownButtonFormField<String>(
-                value: _departmentId,
-                isExpanded: true,
-                decoration: _inputDecoration(lang.tr('ticket_select_department')),
-                dropdownColor: AppColors.card,
-                items: controller.departments
-                    .map((d) =>
-                        DropdownMenuItem(value: d.id, child: Text(d.name,style: AppTextStyles.black14600,)))
-                    .toList(),
-                validator: (v) =>
-                    v == null ? lang.tr('ticket_select_department') : null,
-                onChanged: (v) => setState(() => _departmentId = v),
-              ),
+              () {
+                // Default-select the "Support" department once loaded.
+                if (_departmentId == null &&
+                    controller.departments.isNotEmpty) {
+                  final support = controller.departments.firstWhereOrNull(
+                    (d) => d.name.toLowerCase() == 'support',
+                  );
+                  if (support != null) {
+                    _departmentId = support.id;
+                  }
+                }
+                return DropdownButtonFormField<String>(
+                  value: _departmentId,
+                  isExpanded: true,
+                  decoration:
+                      _inputDecoration(lang.tr('ticket_select_department')),
+                  dropdownColor: AppColors.card,
+                  items: controller.departments
+                      .map((d) => DropdownMenuItem(
+                          value: d.id,
+                          child: Text(d.name, style: AppTextStyles.black14600)))
+                      .toList(),
+                  validator: (v) =>
+                      v == null ? lang.tr('ticket_select_department') : null,
+                  onChanged: (v) => setState(() => _departmentId = v),
+                );
+              },
             ),
             SizedBox(height: 16.h),
             _label(lang.tr('ticket_priority')),
