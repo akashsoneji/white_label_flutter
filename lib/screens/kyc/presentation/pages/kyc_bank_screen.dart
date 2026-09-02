@@ -216,8 +216,10 @@ class _KycBankScreenState extends State<KycBankScreen> {
 
                                     // SizedBox(height: 8.h),
 
-                                    // Proof upload section
-                                    _buildProofUploadSection(),
+                                    // Proof upload section — only when the
+                                    // API requires proof for this method.
+                                    if (controller.isProofRequired)
+                                      _buildProofUploadSection(),
 
                                     // OTP section
                                     if (controller.isOtpSent.value) ...[
@@ -322,8 +324,10 @@ class _KycBankScreenState extends State<KycBankScreen> {
 
                                     // SizedBox(height: 8.h),
 
-                                    // Proof upload section
-                                    _buildProofUploadSection(),
+                                    // Proof upload section — only when the
+                                    // API requires proof for this method.
+                                    if (controller.isProofRequired)
+                                      _buildProofUploadSection(),
 
                                     // OTP section
                                     if (controller.isOtpSent.value) ...[

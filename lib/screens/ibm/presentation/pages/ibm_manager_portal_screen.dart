@@ -382,6 +382,10 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (_hasReferralLink(referralLink, controller.linksList)) ...[
+          _buildReferralLinkCard(referralLink, controller.linksList),
+          SizedBox(height: 14.h),
+        ],
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -429,10 +433,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
             ),
           ],
         ),
-        if (_hasReferralLink(referralLink, controller.linksList)) ...[
-          SizedBox(height: 14.h),
-          _buildReferralLinkCard(referralLink, controller.linksList),
-        ],
+        
         SizedBox(height: 14.h),
         _buildMoneyFlowRow(deposits, withdrawals, equity, netFlow),
         SizedBox(height: 14.h),
@@ -664,38 +665,74 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              if (isActive)
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E9),
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                  child: const Text(
-                    'ACTIVE',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E7D32),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isActive)
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 6.w, vertical: 2.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: const Text(
+                        'ACTIVE',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2E7D32),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  
+                ],
+              ),
             ],
           ),
           if (label.isNotEmpty) ...[
             SizedBox(height: 4.h),
-            Text(
-              label,
-              style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
+                ),
+                 InkWell(
+                    onTap: () => controller.changeTab(4),
+                    borderRadius: BorderRadius.circular(6.r),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 8.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6.r),
+                        border: Border.all(color: AppColors.primary),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                         
+                          Text(
+                            'Custom links',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
           SizedBox(height: 10.h),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 1.h),
             decoration: BoxDecoration(
-              color: AppColors.isDarkMode
-                  ? Colors.grey[900]
-                  : const Color(0xFFF9F9FB),
+              color: AppColors.whiteColor,
               borderRadius: BorderRadius.circular(8.r),
               border: Border.all(color: AppColors.divider),
             ),

@@ -37,6 +37,7 @@ class WithdrawalMethodDetailData {
   final List<MT5Account>? userMT5Accounts;
   final Wallet? wallet;
   final IbAccount? ibaccount;
+  final IbmWallet? ibmWallet;
 
   WithdrawalMethodDetailData({
     this.withdrawalMethod,
@@ -44,6 +45,7 @@ class WithdrawalMethodDetailData {
     this.userMT5Accounts,
     this.wallet,
     this.ibaccount,
+    this.ibmWallet,
   });
 
   factory WithdrawalMethodDetailData.fromJson(Map<String, dynamic> json) {
@@ -72,6 +74,10 @@ class WithdrawalMethodDetailData {
       ibaccount:
           json['ibaccount'] != null && json['ibaccount'] is Map<String, dynamic>
               ? IbAccount.fromJson(json['ibaccount'])
+              : null,
+      ibmWallet:
+          json['ibmWallet'] != null && json['ibmWallet'] is Map<String, dynamic>
+              ? IbmWallet.fromJson(json['ibmWallet'])
               : null,
     );
   }
@@ -172,6 +178,28 @@ class IbAccount {
               : int.tryParse(json['id']?.toString() ?? ''),
       promotionTool: json['promotion_tool']?.toString(),
       status: json['status']?.toString(),
+    );
+  }
+}
+
+class IbmWallet {
+  final int? id;
+  final String? referenceLinkId;
+  final num? balance;
+  final String? currency;
+
+  IbmWallet({this.id, this.referenceLinkId, this.balance, this.currency});
+
+  factory IbmWallet.fromJson(Map<String, dynamic> json) {
+    return IbmWallet(
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? ''),
+      referenceLinkId: json['reference_link_id']?.toString(),
+      balance: json['balance'] is num
+          ? json['balance']
+          : num.tryParse(json['balance']?.toString() ?? ''),
+      currency: json['currency']?.toString(),
     );
   }
 }
@@ -346,6 +374,7 @@ class WithdrawalController extends GetxController {
   var userMT5Accounts = <MT5Account>[].obs;
   var wallet = Rxn<Wallet>();
   var ibAccount = Rxn<IbAccount>();
+  var ibmWallet = Rxn<IbmWallet>();
   var withdrawalMethodDetail = Rxn<WithdrawalMethodDetailResponse>();
 
   // Flag to show "no data" view when API returns status: false with message
@@ -534,6 +563,7 @@ class WithdrawalController extends GetxController {
             userMT5Accounts.assignAll(data.data?.userMT5Accounts ?? []);
             wallet.value = data.data?.wallet;
             ibAccount.value = data.data?.ibaccount;
+            ibmWallet.value = data.data?.ibmWallet;
 
             print(
               "After loading - userMT5Accounts length: ${userMT5Accounts.length}",
@@ -686,6 +716,7 @@ class WithdrawalController extends GetxController {
             userMT5Accounts.clear();
             wallet.value = null;
             ibAccount.value = null;
+            ibmWallet.value = null;
             withdrawalMethodDetail.value = null;
             // DO NOT call Get.back(closeOverlays: true) - stay on screen and show message
           }
@@ -735,6 +766,7 @@ class WithdrawalController extends GetxController {
             userMT5Accounts.clear();
             wallet.value = null;
             ibAccount.value = null;
+            ibmWallet.value = null;
             withdrawalMethodDetail.value = null;
             // DO NOT call Get.back(closeOverlays: true) - stay on screen and show message
           } else {

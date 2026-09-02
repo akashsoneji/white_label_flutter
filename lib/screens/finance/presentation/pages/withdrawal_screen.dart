@@ -412,6 +412,12 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
       return '${wallet.walletId ?? ''} - \$ ${wallet.walletBalance ?? '0.00'}';
     }
 
+    // Check if it's the IBM wallet
+    final ibmWallet = controller.ibmWallet.value;
+    if (ibmWallet != null && ibmWallet.referenceLinkId == selectedAccountId) {
+      return '${ibmWallet.referenceLinkId ?? ''} - \$ ${ibmWallet.balance ?? '0.00'}';
+    }
+
     // Check if it's an MT5 account
     final accounts = controller.userMT5Accounts;
     try {
@@ -1346,6 +1352,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         return Obx(() {
           final accounts = controller.userMT5Accounts;
           final wallet = controller.wallet.value;
+          final ibmWallet = controller.ibmWallet.value;
 
           // Check if we have any accounts (MT5 or Wallet)
           final bool hasMT5Accounts = accounts.isNotEmpty;
@@ -1353,9 +1360,16 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
               wallet != null &&
               wallet.walletId != null &&
               wallet.walletId!.isNotEmpty &&
-              wallet.walletStatus?.toLowerCase() == 'active';
+              // Treat a missing status as active — some endpoints omit it.
+              (wallet.walletStatus == null ||
+                  wallet.walletStatus!.isEmpty ||
+                  wallet.walletStatus!.toLowerCase() == 'active');
+          final bool hasIbmWallet =
+              ibmWallet != null &&
+              ibmWallet.referenceLinkId != null &&
+              ibmWallet.referenceLinkId!.isNotEmpty;
 
-          if (!hasMT5Accounts && !hasWallet) {
+          if (!hasMT5Accounts && !hasWallet && !hasIbmWallet) {
             return Padding(
               padding: EdgeInsets.all(24.0),
               child: Center(
@@ -1370,8 +1384,10 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             );
           }
 
-          // Calculate total items (MT5 accounts + wallet if exists)
-          final int totalItems = accounts.length + (hasWallet ? 1 : 0);
+          // Calculate total items (MT5 accounts + wallet + ibm wallet)
+          final int totalItems = accounts.length +
+              (hasWallet ? 1 : 0) +
+              (hasIbmWallet ? 1 : 0);
 
           return ListView.separated(
             shrinkWrap: true,
@@ -1379,7 +1395,87 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             separatorBuilder:
                 (_, __) => Divider(height: 1, color: Colors.grey.shade300),
             itemBuilder: (context, index) {
-              // Check if this is the wallet item (last item if wallet exists)
+              // IBM wallet is the very last item when present.
+              final int ibmWalletIndex =
+                  accounts.length + (hasWallet ? 1 : 0);
+              final bool isIbmWalletItem =
+                  hasIbmWallet && index == ibmWalletIndex;
+
+              if (isIbmWalletItem) {
+                final isSelected = ibmWallet.referenceLinkId ==
+                    controller.selectedAccount.value;
+
+                return InkWell(
+                  onTap: () {
+                    controller.selectedAccount.value =
+                        ibmWallet.referenceLinkId;
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary.withOpacity(0.1)
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 4.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withAlpha(40),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'IB Wallet',
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Text(
+                            ibmWallet.referenceLinkId ?? "-",
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w600,
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "\$ ${ibmWallet.balance ?? '0.00'}",
+                          style: AppTextStyles.bodyText.copyWith(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                        if (isSelected) ...[
+                          SizedBox(width: 8.w),
+                          Icon(Icons.check,
+                              color: AppColors.primary, size: 20),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              // Check if this is the wallet item
               final bool isWalletItem = hasWallet && index == accounts.length;
 
               if (isWalletItem) {

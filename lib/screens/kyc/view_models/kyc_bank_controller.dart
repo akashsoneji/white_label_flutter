@@ -40,6 +40,9 @@ class KycBankController extends GetxController {
       <WithdrawalMethods>[].obs;
   final RxList<AllowedCryptoNetwork> allowedCryptoNetworks =
       <AllowedCryptoNetwork>[].obs;
+  // Per-method proof-image requirement from the API, e.g.
+  // {bank: true, crypto: false, local: true, upi: true}.
+  final RxMap<String, bool> requireProofImageByMethod = <String, bool>{}.obs;
   // final RxString selectedCurrency = 'USD'.obs;
   final RxString selectedIfscIban = 'IFSCs'.obs;
   final RxString selectedCryptoNetwork = ''.obs;
@@ -166,6 +169,9 @@ class KycBankController extends GetxController {
             currencyListModel.data?.withdrawalMethods ?? [];
         allowedCryptoNetworks.value =
             currencyListModel.data?.allowedCryptoNetworks ?? [];
+        requireProofImageByMethod.value =
+            currencyListModel.data?.requireProofImageByMethod ?? {};
+        _applyAccountTypesFromApi();
         print('💰 Found ${bankWithdrawalList.length} withdrawal methods');
         print('🔌 Found ${allowedCryptoNetworks.length} crypto networks');
       } else {
@@ -180,6 +186,31 @@ class KycBankController extends GetxController {
       isLoading.value = false;
       hasLoadedOnce.value = true; // Mark first load complete
     }
+  }
+
+  /// Build the account-type dropdown dynamically from the API response
+  /// (keys of require_proof_image_by_method, e.g. bank/crypto/local/upi) so
+  /// it stays in sync when the broker enables/disables methods server-side.
+  void _applyAccountTypesFromApi() {
+    final keys = requireProofImageByMethod.keys.toList();
+    if (keys.isEmpty) return;
+    final types = keys
+        .map((k) => k.isEmpty ? k : '${k[0].toUpperCase()}${k.substring(1)}')
+        .toList();
+    accountTypes.value = types;
+    // Keep the current selection valid; otherwise fall back to the first type.
+    final currentLower = selectedAccountType.value.toLowerCase();
+    if (!keys.contains(currentLower)) {
+      selectedAccountType.value = types.first;
+    }
+  }
+
+  /// Whether the currently selected account type needs a proof image,
+  /// driven by the API's require_proof_image_by_method map. Defaults to true
+  /// when the method isn't listed (safer to require than to silently skip).
+  bool get isProofRequired {
+    final key = selectedAccountType.value.toLowerCase();
+    return requireProofImageByMethod[key] ?? true;
   }
 
   // Set account type
@@ -498,8 +529,8 @@ class KycBankController extends GetxController {
       }
     }
 
-    // Proof validation - Required for all account types
-    if (proofFile.value == null) {
+    // Proof validation — only required when the API says so for this method.
+    if (isProofRequired && proofFile.value == null) {
       errorMessage.value = 'Please upload proof image';
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(

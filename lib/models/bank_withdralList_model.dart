@@ -26,10 +26,20 @@ class Data {
   List<WithdrawalMethods>? withdrawalMethods;
   List<Currencies>? currencies;
   List<AllowedCryptoNetwork>? allowedCryptoNetworks;
+  Map<String, bool>? requireProofImageByMethod;
 
-  Data({this.withdrawalMethods, this.currencies, this.allowedCryptoNetworks});
+  Data({
+    this.withdrawalMethods,
+    this.currencies,
+    this.allowedCryptoNetworks,
+    this.requireProofImageByMethod,
+  });
 
   Data.fromJson(Map<String, dynamic> json) {
+    if (json['require_proof_image_by_method'] is Map) {
+      requireProofImageByMethod = (json['require_proof_image_by_method'] as Map)
+          .map((k, v) => MapEntry(k.toString(), v == true));
+    }
     if (json['withdrawalMethods'] != null) {
       withdrawalMethods = <WithdrawalMethods>[];
       json['withdrawalMethods'].forEach((v) {

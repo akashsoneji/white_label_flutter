@@ -206,7 +206,15 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
 
   /// Smallest allowed payout — dynamic from wallet, default 50.
   double _minPayout() {
-    final n = _asNum(_ibmController.walletData['minimum_payout']);
+    final block = _wallet0();
+    // Prefer wallets[0].minimum_payout, then minimum_payout_by_currency[cur],
+    // then flat root, defaulting to 50.
+    double n = _asNum(block['minimum_payout']);
+    if (n <= 0) {
+      final byCur = _ibmController.walletData['minimum_payout_by_currency'];
+      if (byCur is Map) n = _asNum(byCur[_currency()]);
+    }
+    if (n <= 0) n = _asNum(_ibmController.walletData['minimum_payout']);
     return n > 0 ? n : 50;
   }
 
@@ -371,8 +379,11 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
     return Obx(() {
       final wallet = _ibmController.walletData;
       final w0 = _wallet0(wallet);
-      final availableBalance =
-          w0['available'] ?? wallet['unpaid_balance'] ?? wallet['balance'];
+      final availableBalance = w0['balance'] ??
+          w0['available'] ??
+          wallet['unpaid_balance'] ??
+          wallet['balance'] ??
+          0;
       final pendingPayout =
           w0['pending_payout'] ?? wallet['pending_payout'] ?? wallet['locked'] ?? 0;
       final earnedAllTime =
@@ -473,10 +484,15 @@ class _MyCommissionTabState extends State<MyCommissionTab> {
                     // Doc §7: can_withdraw && !is_frozen && !open_payout_status
                     // && balance >= minimum_payout. can_withdraw defaults true
                     // when the server omits it.
-                    final canWithdrawFlag = w['can_withdraw'] != false;
-                    final hasOpenPayout =
-                        w['open_payout_status'] != null &&
-                        w['open_payout_status'].toString().isNotEmpty;
+                    // Read the flags from the wallets[0] block first, falling
+                    // back to the flat root when the server returns figures
+                    // top-level. can_withdraw defaults true when omitted.
+                    final canWithdrawFlag =
+                        (block['can_withdraw'] ?? w['can_withdraw']) != false;
+                    final openPayoutStatus =
+                        block['open_payout_status'] ?? w['open_payout_status'];
+                    final hasOpenPayout = openPayoutStatus != null &&
+                        openPayoutStatus.toString().isNotEmpty;
                     final canRequest = canWithdrawFlag &&
                         !isFrozen &&
                         !hasOpenPayout &&
