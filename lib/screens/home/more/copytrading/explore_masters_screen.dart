@@ -199,7 +199,7 @@ class _HeroPerformanceBanner extends StatelessWidget {
                 ]
               : [
                   AppColors.primary,
-                  const Color(0xFF4338CA),
+                  AppColors.primary.withValues(alpha: 0.45),
                 ],
         ),
         borderRadius: BorderRadius.circular(20.r),
@@ -1172,7 +1172,7 @@ class _ProMasterCard extends StatelessWidget {
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w800,
-                          color: hasPlan ? Colors.white : AppColors.textGrey,
+                          color: hasPlan ? AppColors.whiteColor : AppColors.textGrey,
                         ),
                       ),
                     ),
@@ -1356,33 +1356,19 @@ class _NoSearchMatchesState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
-            ),
-            child: Icon(Icons.search_off_rounded, size: 36.sp, color: AppColors.textGrey),
-          ),
+         
           SizedBox(height: 14.h),
           Text(
             query.isEmpty
-                ? 'No Masters in this category'
+                ? 'Not Enrolled In Master'
                 : 'No Masters Match "$query"',
             textAlign: TextAlign.center,
             style: AppTextStyles.subheading.copyWith(
               color: AppColors.textPrimary,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 6.h),
-          Text(
-            'Try adjusting your risk filter, time period, or search query.',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textGrey),
-          ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 24.h),
           OutlinedButton(
             onPressed: onClear,
             style: OutlinedButton.styleFrom(
@@ -1392,7 +1378,7 @@ class _NoSearchMatchesState extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),
-            child: const Text('Reset All Filters'),
+            child: const Text('Explore All Masters'),
           ),
         ],
       ),

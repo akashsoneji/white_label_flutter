@@ -86,9 +86,9 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   @override
   void didUpdateWidget(covariant ChartInAppWebView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    debugPrint(
-      '📊 ChartInAppWebView: didUpdateWidget - old: ${oldWidget.symbol}, new: ${widget.symbol}',
-    );
+    // debugPrint(
+      // '📊 ChartInAppWebView: didUpdateWidget - old: ${oldWidget.symbol}, new: ${widget.symbol}',
+    // );
 
     // Base URL changed (e.g. theme toggle) — reload.
     if (oldWidget.url != widget.url) {
@@ -193,10 +193,10 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
 
   /// Switch symbol via JS — returns true if the chart accepted it.
   Future<bool> updateSymbol(String symbol) async {
-    debugPrint('📊 ChartInAppWebView: updateSymbol called for $symbol');
+    // debugPrint('📊 ChartInAppWebView: updateSymbol called for $symbol');
     if (_controller == null || symbol.isEmpty) return false;
     if (!_isReady) {
-      debugPrint('📊 ChartInAppWebView: Not ready, storing as pendingSymbol');
+      // debugPrint('📊 ChartInAppWebView: Not ready, storing as pendingSymbol');
       _pendingSymbol = symbol;
       return false;
     }
@@ -266,13 +266,13 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     ''';
 
     try {
-      debugPrint('📊 ChartInAppWebView: Executing JS for $symbol (attempt 1)');
+      // debugPrint('📊 ChartInAppWebView: Executing JS for $symbol (attempt 1)');
       var res = await _controller!.evaluateJavascript(source: jsSource(symbol));
       if (res == 'ok') return true;
 
-      debugPrint(
-        '📊 ChartInAppWebView: Executing JS for $symClean (attempt 2)',
-      );
+      // debugPrint(
+        // '📊 ChartInAppWebView: Executing JS for $symClean (attempt 2)',
+      // );
       res = await _controller!.evaluateJavascript(source: jsSource(symClean));
       if (res == 'ok') return true;
 

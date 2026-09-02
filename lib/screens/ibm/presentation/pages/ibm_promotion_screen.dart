@@ -6,6 +6,7 @@ import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/trade_win/view_models/trade_win_controller.dart';
+import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/models/trade_win/trade_win_product_model.dart';
 import 'package:crm_app/models/trade_win/trade_win_leaderboard_entry_model.dart';
 import 'package:crm_app/utils/trade_win_format.dart';
@@ -24,6 +25,9 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
   late final TradeWinController controller;
   String selectedFilter = 'all'; // all, ready_to_redeem
   final Map<int, int> productQuantities = {};
+  Worker? _tabWorker;
+
+  static const int _promotionTabIndex = 1;
 
   void _fetchData() {
     controller.fetchProducts(
@@ -45,6 +49,26 @@ class _IbmPromotionScreenState extends State<IbmPromotionScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchData();
     });
+    if (Get.isRegistered<IbmController>()) {
+      final ibm = Get.find<IbmController>();
+      _tabWorker = ever<int>(ibm.currentTabIndex, (index) {
+        if (index == _promotionTabIndex) {
+          controller.fetchProducts(
+            audience: 'ib',
+            availability: controller.selectedAvailability.value,
+            category: controller.selectedCategory.value,
+            showLoader: false,
+          );
+          controller.fetchPastWins(reset: true);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabWorker?.dispose();
+    super.dispose();
   }
 
   @override

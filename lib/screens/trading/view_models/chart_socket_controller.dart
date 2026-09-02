@@ -610,9 +610,9 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
       accountNumber = activeAccount?.metaAccountNumber ?? "0";
     } catch (_) {}
 
-    dev.log("Chart: Using MT5 Account Number: $accountNumber");
-    dev.log("Chart: Subscribing to symbol: ${currentSymbol.value}");
-    dev.log("Chart: WebSocket connected: ${isConnected.value}");
+    // dev.log("Chart: Using MT5 Account Number: $accountNumber");
+    // dev.log("Chart: Subscribing to symbol: ${currentSymbol.value}");
+    // dev.log("Chart: WebSocket connected: ${isConnected.value}");
 
     // ✅ Send correct request format: { "authID": "token", "trading_account": "account", "symbol": "SYMBOL" }
     // ✅ PERFORMANCE: Request binary format for improved performance (50-70% smaller, 5-10x faster)
@@ -625,9 +625,9 @@ class ChartSocketController extends GetxController with WidgetsBindingObserver {
 
     sendEvent(subscriptionPayload);
 
-    dev.log(
-      '📤 ChartSocket: Sent subscription request for ${currentSymbol.value} (account: $accountNumber)',
-    );
+    // dev.log(
+    //   '📤 ChartSocket: Sent subscription request for ${currentSymbol.value} (account: $accountNumber)',
+    // );
     if (kDebugMode) {
       dev.log('📤 ChartSocket: Subscription payload: $subscriptionPayload');
     }
