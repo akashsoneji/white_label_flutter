@@ -10,6 +10,7 @@ import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/brand_switcher.dart';
 
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_top_header.dart';
+import 'package:crm_app/routes/app_pages.dart';
 
 class IbmManagerPortalScreen extends StatefulWidget {
   const IbmManagerPortalScreen({super.key});
@@ -22,8 +23,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   final IbmController controller = Get.find<IbmController>();
 
   String selectedScope = 'total'; // total, network, direct
-  String selectedPeriod =
-      'this_month'; // today, 7d, 30d, this_month, all, custom
+  String selectedPeriod = 'all'; // today, 7d, 30d, all, custom
   String? customFrom;
   String? customTo;
   String selectedCurrencyCode = 'USD'; // USD, USC (cent)
@@ -135,9 +135,11 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
-      appBar: const IbmTopHeader(
+      appBar: IbmTopHeader(
         title: 'IB Manager Portal',
         showBackButton: false,
+        hideWallet: true,
+        extraActions: [_buildHeaderCurrencySwitch()],
       ),
       body: Obx(() {
         if (controller.isLoading.value && controller.dashboardData.isEmpty) {
@@ -239,12 +241,12 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
             children: [
-              _buildHeaderRow(),
-              if (availableCodes.length > 1) ...[
+              if (_hasReferralLink(referralLink, controller.linksList)) ...[
+                _buildReferralLinkCard(referralLink, controller.linksList),
                 SizedBox(height: 16.h),
-                _buildCurrencySelector(availableCodes),
               ],
-              SizedBox(height: 24.h),
+              _buildHeaderRow(),
+              SizedBox(height: 20.h),
               _buildTopGrid(
                 clients,
                 partners,
@@ -275,130 +277,118 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
   }
 
   Widget _buildHeaderRow() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Dashboard',
-              style: AppTextStyles.heading.copyWith(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            _buildToggleGroup(
-                options: {
-                  'total': 'Total',
-                  'network': 'Network',
-                  'direct': 'Direct',
-                },
-                selectedValue: selectedScope,
-                onChanged: _onScopeChanged,
-              ),
-          ],
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          'Your IB performance overview',
-          style: AppTextStyles.bodyText.copyWith(
-            color: AppColors.textGrey,
-            fontSize: 13.sp,
-          ),
-        ),
-        SizedBox(height: 10.h),
         _buildToggleGroup(
           options: {
-            'today': 'Today',
-            '7d': '7D',
-            '30d': '30D',
-            'this_month': 'MTD',
-            'all': 'All',
-            'custom': 'Custom',
+            'total': 'Total',
+            'network': 'Network',
+            'direct': 'Direct',
           },
-          selectedValue: selectedPeriod,
-          onChanged: _onPeriodChanged,
-          fillWidth: true,
+          selectedValue: selectedScope,
+          onChanged: _onScopeChanged,
+          compact: true,
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: _buildToggleGroup(
+            options: {
+              'today': 'Today',
+              '7d': '7D',
+              '30d': '30D',
+              'all': 'All',
+            },
+            selectedValue: selectedPeriod,
+            onChanged: _onPeriodChanged,
+            fillWidth: true,
+            compact: true,
+          ),
+        ),
+        SizedBox(width: 8.w),
+        GestureDetector(
+          onTap: () => _onPeriodChanged('custom'),
+          child: Container(
+            padding: EdgeInsets.all(9.w),
+            decoration: BoxDecoration(
+              color: selectedPeriod == 'custom'
+                  ? AppColors.primary
+                  : AppColors.card,
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: AppColors.divider),
+            ),
+            child: Icon(
+              Icons.calendar_today_rounded,
+              size: 18.w,
+              color: selectedPeriod == 'custom'
+                  ? AppColors.whiteColor
+                  : AppColors.textPrimary,
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildCurrencySelector(List<String> codes) {
-    String labelFor(String c) {
-      switch (c.toUpperCase()) {
-        case 'USD':
-          return 'USD';
-        case 'USC':
-          return 'USC';
-        default:
-          return c;
-      }
-    }
+  Widget _buildHeaderCurrencySwitch() {
+    return Padding(
+      padding: EdgeInsets.only(right: 12.w),
+      child: Obx(() {
+        final currencies = controller.dashboardData['currencies'];
+        final List list = currencies is List ? currencies : const [];
+        final codes = list
+            .whereType<Map>()
+            .map((c) => (c['currency'] ?? '').toString())
+            .where((c) => c.isNotEmpty)
+            .toList();
+        if (codes.length < 2) return const SizedBox.shrink();
 
-    String subLabelFor(String c) {
-      switch (c.toUpperCase()) {
-        case 'USD':
-          return 'Dollar';
-        case 'USC':
-          return 'Cent';
-        default:
-          return '';
-      }
-    }
-
-    return Container(
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Row(
-        children: codes.map((c) {
-          final isSelected = c == selectedCurrencyCode;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => selectedCurrencyCode = c),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      labelFor(c),
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w700,
-                        color: isSelected
-                            ? AppColors.whiteColor
-                            : AppColors.textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      subLabelFor(c),
-                      style: TextStyle(
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected
-                            ? AppColors.whiteColor.withValues(alpha: 0.85)
-                            : AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+        return Container(
+          padding: EdgeInsets.all(3.w),
+          decoration: BoxDecoration(
+            color: AppColors.isDarkMode
+                ? Colors.grey[900]
+                : AppColors.card,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: AppColors.isDarkMode
+                  ? Colors.grey[800]!
+                  : AppColors.divider,
             ),
-          );
-        }).toList(),
-      ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: codes.map((c) {
+              final isSelected = c == selectedCurrencyCode;
+              return GestureDetector(
+                onTap: () => setState(() => selectedCurrencyCode = c),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 5.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        isSelected ? AppColors.primary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(18.r),
+                  ),
+                  child: Text(
+                    c,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected
+                          ? AppColors.whiteColor
+                          : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      }),
     );
   }
 
@@ -407,6 +397,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     required String selectedValue,
     required Function(String) onChanged,
     bool fillWidth = false,
+    bool compact = false,
   }) {
     Widget buildItem(MapEntry<String, String> e) {
       final isSelected = e.key == selectedValue;
@@ -415,7 +406,7 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         child: Container(
           alignment: Alignment.center,
           padding: EdgeInsets.symmetric(
-            horizontal: 6.w,
+            horizontal: compact ? 4.w : 6.w,
             vertical: 8.h,
           ),
           decoration: BoxDecoration(
@@ -425,12 +416,12 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
           child: Text(
             e.value,
             maxLines: 1,
-            overflow: TextOverflow.visible,
             softWrap: false,
+            overflow: TextOverflow.visible,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: isSelected ? AppColors.whiteColor : AppColors.textPrimary,
-              fontSize: 11.sp,
+              fontSize: compact ? 10.sp : 11.sp,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -487,10 +478,6 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (_hasReferralLink(referralLink, controller.linksList)) ...[
-          _buildReferralLinkCard(referralLink, controller.linksList),
-          SizedBox(height: 14.h),
-        ],
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -631,6 +618,33 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
     );
   }
 
+  /// GET /portal/wallet returns `wallets[]`; take the USD-first block.
+  Map _wallet0([Map? root]) {
+    final r = root ?? controller.walletData;
+    final w = r['wallets'];
+    if (w is List && w.isNotEmpty) {
+      final usd = w.firstWhere(
+        (e) => e is Map && e['currency']?.toString().toUpperCase() == 'USD',
+        orElse: () => w.first,
+      );
+      if (usd is Map) return usd;
+    }
+    return r;
+  }
+
+  double _minPayout() {
+    final block = _wallet0();
+    double n = _parseDouble(block['minimum_payout']);
+    if (n <= 0) {
+      final byCur = controller.walletData['minimum_payout_by_currency'];
+      if (byCur is Map) {
+        n = _parseDouble(byCur[selectedCurrencyCode]);
+      }
+    }
+    if (n <= 0) n = _parseDouble(controller.walletData['minimum_payout']);
+    return n > 0 ? n : 50;
+  }
+
   Widget _buildRebateCard(double rebate) {
     const accent = Color(0xFF00C48C);
     return Container(
@@ -709,6 +723,50 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
               ),
             ],
           ),
+          SizedBox(height: 14.h),
+          Obx(() {
+            final w = controller.walletData;
+            final block = _wallet0(w);
+            final isFrozen = (block['is_frozen'] ?? w['is_frozen']) == true;
+            final canWithdrawFlag =
+                (block['can_withdraw'] ?? w['can_withdraw']) != false;
+            final openPayoutStatus =
+                block['open_payout_status'] ?? w['open_payout_status'];
+            final hasOpenPayout = openPayoutStatus != null &&
+                openPayoutStatus.toString().isNotEmpty;
+            final canRequest = canWithdrawFlag &&
+                !isFrozen &&
+                !hasOpenPayout &&
+                rebate >= _minPayout();
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed:
+                    canRequest ? () => Get.toNamed(AppPages.WITHDRAWAL) : null,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size.zero,
+                  backgroundColor: AppColors.whiteColor,
+                  foregroundColor: accent,
+                  disabledBackgroundColor:
+                      AppColors.whiteColor.withValues(alpha: 0.45),
+                  disabledForegroundColor:
+                      AppColors.whiteColor.withValues(alpha: 0.85),
+                  elevation: 0,
+                  padding: EdgeInsets.symmetric(vertical: 10.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+                child: Text(
+                  'Request payout',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -760,77 +818,63 @@ class _IbmManagerPortalScreenState extends State<IbmManagerPortalScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Default Referral Link',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+              Expanded(
+                child: Text(
+                  'Default Referral Link',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isActive)
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 6.w, vertical: 2.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE8F5E9),
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: const Text(
-                        'ACTIVE',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2E7D32),
-                        ),
-                      ),
+              SizedBox(width: 8.w),
+              if (isActive)
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: const Text(
+                    'ACTIVE',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2E7D32),
                     ),
-                  
-                ],
+                  ),
+                ),
+              SizedBox(width: 8.w),
+              InkWell(
+                onTap: () => controller.changeTab(4),
+                borderRadius: BorderRadius.circular(6.r),
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6.r),
+                    border: Border.all(color: AppColors.primary),
+                  ),
+                  child: Text(
+                    'Custom links',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
           if (label.isNotEmpty) ...[
             SizedBox(height: 4.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
-                ),
-                 InkWell(
-                    onTap: () => controller.changeTab(4),
-                    borderRadius: BorderRadius.circular(6.r),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 8.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6.r),
-                        border: Border.all(color: AppColors.primary),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                         
-                          Text(
-                            'Custom links',
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
+            Text(
+              label,
+              style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
             ),
           ],
           SizedBox(height: 10.h),

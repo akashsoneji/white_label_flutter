@@ -12,6 +12,7 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
   final int? badgeCount;
   final bool showBackButton;
   final List<Widget>? extraActions;
+  final bool hideWallet;
 
   const IbmTopHeader({
     super.key,
@@ -19,6 +20,7 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
     this.badgeCount,
     this.showBackButton = true,
     this.extraActions,
+    this.hideWallet = false,
   });
 
   @override
@@ -88,6 +90,7 @@ class IbmTopHeader extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         if (extraActions != null) ...extraActions!,
+        if (!hideWallet)
         // Wallet Balance Chip
         Obx(() {
           final balance = controller.walletData['balance'] ?? '0.00';

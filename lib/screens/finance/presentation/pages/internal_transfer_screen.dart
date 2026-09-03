@@ -118,6 +118,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
       return account.metaAccountNumber;
     } else if (accountType == 'ib' && account is UserMT5Account) {
       return account.metaAccountNumber;
+    } else if (accountType == 'ibmwallet' && account is IbmWallet) {
+      return account.referenceLinkId;
     }
     return '';
   }
@@ -386,6 +388,9 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
     } else if (_selectedTransferFromType == 'mt5' || _selectedTransferFromType == 'ib') {
       final account = _selectedTransferFromAccount as UserMT5Account;
       return account.availableForTransfer ?? double.tryParse(account.balance);
+    } else if (_selectedTransferFromType == 'ibmwallet') {
+      final ibmWallet = _selectedTransferFromAccount as IbmWallet;
+      return double.tryParse(ibmWallet.balance);
     }
     return null;
   }
@@ -619,6 +624,15 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
             }
           }
 
+          // Add IBM Wallet option if available
+          if (controller.ibmWallet.value != null) {
+            accountItems.add({
+              'type': 'ibmwallet',
+              'ibmwallet': controller.ibmWallet.value,
+              'identifier': controller.ibmWallet.value!.referenceLinkId,
+            });
+          }
+
           if (accountItems.isEmpty) {
             return Padding(
               padding: EdgeInsets.all(24.0),
@@ -680,6 +694,15 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                       _selectedTransferFromType = 'ib';
                       controller.selectedFromAccount.value = account;
                       controller.selectedFromAccountType.value = 'ib';
+                    } else if (accountType == 'ibmwallet') {
+                      final ibmWallet = item['ibmwallet'] as IbmWallet;
+                      _selectedTransferFrom = ibmWallet.referenceLinkId;
+                      _transferFromController.text =
+                          '${ibmWallet.referenceLinkId} - \$ ${ibmWallet.balance}';
+                      _selectedTransferFromAccount = ibmWallet;
+                      _selectedTransferFromType = 'ibmwallet';
+                      controller.selectedFromAccount.value = null;
+                      controller.selectedFromAccountType.value = 'ibmwallet';
                     }
 
                     // Reset Transfer To if it was the same account
@@ -720,6 +743,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                               ? 'Wallet'
                               : accountType == 'ib'
                               ? FlavorConfig.instance.appName
+                              : accountType == 'ibmwallet'
+                              ? 'IB Wallet'
                               : (item['account'] as UserMT5Account)
                                   .masterGroupId,
                           style: AppTextStyles.bodyText.copyWith(
@@ -735,6 +760,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                         child: Text(
                           accountType == 'wallet'
                               ? (item['wallet'] as Wallet).walletId
+                              : accountType == 'ibmwallet'
+                              ? (item['ibmwallet'] as IbmWallet).referenceLinkId
                               : (item['account'] as UserMT5Account)
                                   .metaAccountNumber,
                           style: AppTextStyles.bodyText.copyWith(
@@ -749,6 +776,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                       Text(
                         accountType == 'wallet'
                             ? '\$ ${(item['wallet'] as Wallet).walletBalance}'
+                            : accountType == 'ibmwallet'
+                            ? '\$ ${(item['ibmwallet'] as IbmWallet).balance}'
                             : '\$ ${(item['account'] as UserMT5Account).balance}',
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
@@ -832,6 +861,16 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
             }
           }
 
+          // Add IBM Wallet option (exclude if selected as From)
+          if (controller.ibmWallet.value != null &&
+              _selectedTransferFromType != 'ibmwallet') {
+            accountItems.add({
+              'type': 'ibmwallet',
+              'ibmwallet': controller.ibmWallet.value,
+              'identifier': controller.ibmWallet.value!.referenceLinkId,
+            });
+          }
+
           if (accountItems.isEmpty) {
             return Padding(
               padding: EdgeInsets.all(24.0),
@@ -898,6 +937,15 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                       _selectedTransferToType = 'ib';
                       controller.selectedToAccount.value = account;
                       controller.selectedToAccountType.value = 'ib';
+                    } else if (accountType == 'ibmwallet') {
+                      final ibmWallet = item['ibmwallet'] as IbmWallet;
+                      _selectedTransferTo = ibmWallet.referenceLinkId;
+                      _transferToController.text =
+                          '${ibmWallet.referenceLinkId} - \$ ${ibmWallet.balance}';
+                      _selectedTransferToAccount = ibmWallet;
+                      _selectedTransferToType = 'ibmwallet';
+                      controller.selectedToAccount.value = ibmWallet;
+                      controller.selectedToAccountType.value = 'ibmwallet';
                     }
                   });
                   Navigator.pop(context);
@@ -928,6 +976,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                               ? 'Wallet'
                               : accountType == 'ib'
                               ? FlavorConfig.instance.appName
+                              : accountType == 'ibmwallet'
+                              ? 'IB Wallet'
                               : (item['account'] as UserMT5Account)
                                   .masterGroupId,
                           style: AppTextStyles.bodyText.copyWith(
@@ -943,6 +993,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                         child: Text(
                           accountType == 'wallet'
                               ? (item['wallet'] as Wallet).walletId
+                              : accountType == 'ibmwallet'
+                              ? (item['ibmwallet'] as IbmWallet).referenceLinkId
                               : (item['account'] as UserMT5Account)
                                   .metaAccountNumber,
                           style: AppTextStyles.bodyText.copyWith(
@@ -957,6 +1009,8 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                       Text(
                         accountType == 'wallet'
                             ? '\$ ${(item['wallet'] as Wallet).walletBalance}'
+                            : accountType == 'ibmwallet'
+                            ? '\$ ${(item['ibmwallet'] as IbmWallet).balance}'
                             : '\$ ${(item['account'] as UserMT5Account).balance}',
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
