@@ -43,7 +43,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
   bool _isAllExpanded = false;
   final Set<String> _collapsedNodeKeys = {};
 
-// Lazy loading state for tree nodes
+  // Lazy loading state for tree nodes
   final Map<String, List<Map<String, dynamic>>> _lazyChildrenCache = {};
   final Set<String> _lazyLoadingKeys = {};
 
@@ -85,12 +85,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
             ? DateFormat('yyyy-MM-dd').format(_customEndDate!)
             : null;
 
-controller.fetchClients(period: p);
-    controller.fetchClientsNetworkTree(
-      period: p,
-      from: from,
-      to: to,
-    ).then((_) => _enrichVisibleTreeRows());
+    controller.fetchClients(period: p);
+    controller
+        .fetchClientsNetworkTree(period: p, from: from, to: to)
+        .then((_) => _enrichVisibleTreeRows());
     controller.fetchNetworkTreeSummary();
     controller.fetchNetworkPerformance(period: p);
     controller.fetchNetwork(period: p);
@@ -102,7 +100,7 @@ controller.fetchClients(period: p);
   /// only returns child counts; the rich per-row figures come from the
   /// per-node endpoint. We previously only fetched on expand, which is why
   /// initial cards rendered with all zeros (looking like blank white cards).
-/// `/portal/network/{id}/node` returns id's direct downline in
+  /// `/portal/network/{id}/node` returns id's direct downline in
   /// `data.people[]`, each entry shaped like the row builder expects
   /// (name, user_id, own[], branch[], sub_ibs, clients_tree). Indexing
   /// figures by user_id lets the row builder overlay them onto the node
@@ -132,7 +130,8 @@ controller.fetchClients(period: p);
     final nodes = treeData['nodes'];
     if (nodes is List && nodes.isNotEmpty && nodes.first is Map) {
       final first = nodes.first as Map;
-      masterId = int.tryParse(first['ib_user_id']?.toString() ?? '') ??
+      masterId =
+          int.tryParse(first['ib_user_id']?.toString() ?? '') ??
           int.tryParse(first['user_id']?.toString() ?? '');
     }
     if (masterId == null || masterId <= 0) return;
@@ -153,16 +152,18 @@ controller.fetchClients(period: p);
       // name/email/figures on first paint (no expand tap needed).
       for (final row in people) {
         final childId = int.tryParse(row['user_id']?.toString() ?? '') ?? 0;
-        final hasDownline = (row['sub_ibs'] ?? 0).toString() != '0' ||
+        final hasDownline =
+            (row['sub_ibs'] ?? 0).toString() != '0' ||
             (row['clients_tree'] ?? 0).toString() != '0';
         if (childId <= 0 || !hasDownline) continue;
         final childKey = 'node_$childId';
         if (_lazyChildrenCache.containsKey(childKey) ||
-            _lazyLoadingKeys.contains(childKey)) continue;
+            _lazyLoadingKeys.contains(childKey))
+          continue;
         _lazyLoadingKeys.add(childKey);
-        controller
-            .getNetworkNodeChildren(childId, period: period)
-            .then((grand) {
+        controller.getNetworkNodeChildren(childId, period: period).then((
+          grand,
+        ) {
           if (!mounted) {
             _lazyLoadingKeys.remove(childKey);
             return;
@@ -196,15 +197,15 @@ controller.fetchClients(period: p);
         leading: Builder(
           builder:
               (ctx) => IconButton(
-          icon: SvgPicture.asset(
-            'assets/svg/ib_dashboard/home.svg',
-            colorFilter: ColorFilter.mode(
-              AppColors.textPrimary,
-              BlendMode.srcIn,
-            ),
-          ),
-          onPressed: () => Get.offAllNamed(AppPages.TRADING),
-        ),
+                icon: SvgPicture.asset(
+                  'assets/svg/ib_dashboard/home.svg',
+                  colorFilter: ColorFilter.mode(
+                    AppColors.textPrimary,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                onPressed: () => Get.offAllNamed(AppPages.TRADING),
+              ),
         ),
         titleSpacing: 0,
         title: Text(
@@ -217,7 +218,7 @@ controller.fetchClients(period: p);
         ),
         actions: [
           Obx(() {
-            final balance = controller.walletData['balance'] ?? '0.00';
+            final balance = controller.walletBalance;
             return Padding(
               padding: EdgeInsets.only(right: 16.w),
               child: Container(
@@ -348,9 +349,7 @@ controller.fetchClients(period: p);
 
       final totalClients = summary['total'] ?? 0;
       final activeClients =
-          isNetwork
-              ? (treeSummary['active'] ?? 0)
-              : (summary['active'] ?? 0);
+          isNetwork ? (treeSummary['active'] ?? 0) : (summary['active'] ?? 0);
       final newClients = summary['new_in_period'] ?? 0;
       final commission =
           summary['commission'] is Map
@@ -362,15 +361,12 @@ controller.fetchClients(period: p);
       final totalPartners = treeSummary['total'] ?? treeSummary['sub_ibs'] ?? 0;
       final totalNetworkClients =
           treeSummary['clients'] ?? treeSummary['network_clients'] ?? 3;
-      final networkEarned =
-          (double.tryParse(
-                    (treeSummary['earned'] ??
-                            treeSummary['you_earned'] ??
-                            0.09)
-                        .toString(),
-                  ) ??
-                  0.09)
-              .toStringAsFixed(2);
+      final networkEarned = (double.tryParse(
+                (treeSummary['earned'] ?? treeSummary['you_earned'] ?? 0.09)
+                    .toString(),
+              ) ??
+              0.09)
+          .toStringAsFixed(2);
 
       final List<dynamic> rows = data['rows'] ?? [];
 
@@ -590,9 +586,10 @@ controller.fetchClients(period: p);
                         color: AppColors.textPrimary,
                       ),
                       decoration: InputDecoration(
-                        hintText: isNetwork
-                            ? 'Search anyone in your network'
-                            : 'Search name or email',
+                        hintText:
+                            isNetwork
+                                ? 'Search anyone in your network'
+                                : 'Search name or email',
                         hintStyle: TextStyle(
                           color: AppColors.textGrey,
                           fontSize: 13.sp,
@@ -602,19 +599,20 @@ controller.fetchClients(period: p);
                           size: 20.w,
                           color: AppColors.textGrey,
                         ),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? GestureDetector(
-                                onTap: () {
-                                  _searchController.clear();
-                                  setState(() => _searchQuery = '');
-                                },
-                                child: Icon(
-                                  Icons.close,
-                                  size: 18.w,
-                                  color: AppColors.textGrey,
-                                ),
-                              )
-                            : null,
+                        suffixIcon:
+                            _searchQuery.isNotEmpty
+                                ? GestureDetector(
+                                  onTap: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 18.w,
+                                    color: AppColors.textGrey,
+                                  ),
+                                )
+                                : null,
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
@@ -658,9 +656,7 @@ controller.fetchClients(period: p);
                     onTap: () {
                       setState(() {
                         _isAllExpanded = false;
-                        _collapsedNodeKeys.addAll(
-                          _getAllNodeKeys(treeList),
-                        );
+                        _collapsedNodeKeys.addAll(_getAllNodeKeys(treeList));
                       });
                     },
                     child: Container(
@@ -823,20 +819,22 @@ controller.fetchClients(period: p);
                       final DateTime? start = await showDatePicker(
                         context: context,
                         helpText: 'Select start date',
-                        initialDate: _customStartDate ??
+                        initialDate:
+                            _customStartDate ??
                             now.subtract(const Duration(days: 30)),
                         firstDate: DateTime(2000),
                         lastDate: now,
-                        builder: (context, child) => Theme(
-                          data: Theme.of(context).copyWith(
-                            colorScheme: ColorScheme.light(
-                              primary: AppColors.primary,
-                              onPrimary: Colors.white,
-                              onSurface: Colors.black,
+                        builder:
+                            (context, child) => Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: ColorScheme.light(
+                                  primary: AppColors.primary,
+                                  onPrimary: Colors.white,
+                                  onSurface: Colors.black,
+                                ),
+                              ),
+                              child: child!,
                             ),
-                          ),
-                          child: child!,
-                        ),
                       );
                       if (start == null) return;
                       final DateTime? end = await showDatePicker(
@@ -845,16 +843,17 @@ controller.fetchClients(period: p);
                         initialDate: start,
                         firstDate: start,
                         lastDate: now,
-                        builder: (context, child) => Theme(
-                          data: Theme.of(context).copyWith(
-                            colorScheme: ColorScheme.light(
-                              primary: AppColors.primary,
-                              onPrimary: Colors.white,
-                              onSurface: Colors.black,
+                        builder:
+                            (context, child) => Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: ColorScheme.light(
+                                  primary: AppColors.primary,
+                                  onPrimary: Colors.white,
+                                  onSurface: Colors.black,
+                                ),
+                              ),
+                              child: child!,
                             ),
-                          ),
-                          child: child!,
-                        ),
                       );
                       if (end == null) return;
                       setState(() {
@@ -879,29 +878,35 @@ controller.fetchClients(period: p);
                     ),
                     decoration: BoxDecoration(
                       color:
-                          isSelected
-                              ? AppColors.primary
-                              : Colors.transparent,
+                          isSelected ? AppColors.primary : Colors.transparent,
                       borderRadius: BorderRadius.circular(6.r),
                     ),
-                    child: Text(
-                      filter == 'Custom' && _customStartDate != null
-                          ? '${DateFormat('MM/dd').format(_customStartDate!)} - ${DateFormat('MM/dd').format(_customEndDate!)}'
-                          : filter,
-                      style: TextStyle(
-                        color:
-                            isSelected
+                    child: (filter == 'Custom' && _customStartDate == null)
+                        ? Icon(
+                            Icons.calendar_today_outlined,
+                            size: 18.sp,
+                            color: isSelected
                                 ? AppColors.whiteColor
                                 : (AppColors.isDarkMode
                                     ? Colors.white70
                                     : const Color(0xFF222222)),
-                        fontSize: 13.sp,
-                        fontWeight:
-                            isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                      ),
-                    ),
+                          )
+                        : Text(
+                            filter == 'Custom' && _customStartDate != null
+                                ? '${DateFormat('MM/dd').format(_customStartDate!)} - ${DateFormat('MM/dd').format(_customEndDate!)}'
+                                : filter,
+                            style: TextStyle(
+                              color: isSelected
+                                  ? AppColors.whiteColor
+                                  : (AppColors.isDarkMode
+                                      ? Colors.white70
+                                      : const Color(0xFF222222)),
+                              fontSize: 13.sp,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
                   ),
                 ),
                 if (index < _dateFilters.length - 1)
@@ -925,15 +930,16 @@ controller.fetchClients(period: p);
   // FOCUSED SUB-IB 8 SUMMARY CARDS
   // ==========================================
   Widget _buildFocusedNodeSummaryCards(Map<String, dynamic> node) {
-    final name = (node['name'] ??
-            node['partner_name'] ??
-            node['username'] ??
-            node['client_name'] ??
-            node['user_name'] ??
-            node['full_name'] ??
-            node['email']?.toString().split('@').first ??
-            'ibm sub two')
-        .toString();
+    final name =
+        (node['name'] ??
+                node['partner_name'] ??
+                node['username'] ??
+                node['client_name'] ??
+                node['user_name'] ??
+                node['full_name'] ??
+                node['email']?.toString().split('@').first ??
+                'ibm sub two')
+            .toString();
     final level = node['level'] ?? 2;
     final plan = node['plan_name'] ?? node['plan'] ?? 'Sub 5';
     final partnerId =
@@ -961,11 +967,9 @@ controller.fetchClients(period: p);
     final equity = (double.tryParse((node['equity'] ?? 155.01).toString()) ??
             155.01)
         .toStringAsFixed(2);
-    final available = (double.tryParse(
-              (node['available'] ?? 0.15).toString(),
-            ) ??
-            0.15)
-        .toStringAsFixed(2);
+    final available =
+        (double.tryParse((node['available'] ?? 0.15).toString()) ?? 0.15)
+            .toStringAsFixed(2);
     final pendingPayout = (double.tryParse(
               (node['pending_payout'] ?? node['pending'] ?? 0).toString(),
             ) ??
@@ -1185,7 +1189,7 @@ controller.fetchClients(period: p);
                             ),
                           ),
                           SizedBox(width: 3.w),
-                           Icon(
+                          Icon(
                             Icons.arrow_forward,
                             size: 12,
                             color: AppColors.whiteColor,
@@ -1283,20 +1287,16 @@ controller.fetchClients(period: p);
     final role = youData['type']?.toString() ?? 'Master IB';
     final direct = youData['direct'] ?? summary['direct'] ?? 3;
     final totalSubs =
-        youData['sub_ibs'] ??
-        summary['total'] ??
-        summary['sub_ibs'] ??
-        3;
-    final earned =
-        (double.tryParse(
-                  (youData['earned'] ??
-                          summary['earned'] ??
-                          summary['you_earned'] ??
-                          0.09)
-                      .toString(),
-                ) ??
-                0.09)
-            .toStringAsFixed(2);
+        youData['sub_ibs'] ?? summary['total'] ?? summary['sub_ibs'] ?? 3;
+    final earned = (double.tryParse(
+              (youData['earned'] ??
+                      summary['earned'] ??
+                      summary['you_earned'] ??
+                      0.09)
+                  .toString(),
+            ) ??
+            0.09)
+        .toStringAsFixed(2);
     final myId = youData['partner_user_id'] ?? youData['user_id'] ?? 38;
 
     return Container(
@@ -1322,100 +1322,104 @@ controller.fetchClients(period: p);
                       child: Row(
                         children: [
                           CircleAvatar(
-                  radius: 16.r,
-                  backgroundColor: AppColors.primary,
-                  child: Text(
-                    'I',
-                    style: TextStyle(
-                      color: AppColors.whiteColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13.sp,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 6.w,
-                        runSpacing: 2.h,
-                        children: [
-                          Text(
-                            name,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                            radius: 16.r,
+                            backgroundColor: AppColors.primary,
+                            child: Text(
+                              'I',
+                              style: TextStyle(
+                                color: AppColors.whiteColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13.sp,
+                              ),
                             ),
                           ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 6.w,
-                              vertical: 1.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                            child: Text(
-                              role,
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontSize: 9.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          SizedBox(width: 10.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: 6.w,
+                                  runSpacing: 2.h,
+                                  children: [
+                                    Text(
+                                      name,
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 6.w,
+                                        vertical: 1.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withOpacity(
+                                          0.12,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          4.r,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        role,
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontSize: 9.sp,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  '$direct direct · $totalSubs sub-IBs · \$$earned earned',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    color: AppColors.textGrey,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        '$direct direct · $totalSubs sub-IBs · \$$earned earned',
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          color: AppColors.textGrey,
-                        ),
+                    ),
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: () {
+                        final id = int.tryParse(myId.toString()) ?? 38;
+                        Get.to(
+                          () => IbmClientProfileScreen(
+                            clientId: id,
+                            clientName: name,
+                            isYou: true,
+                          ),
+                        );
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Open',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward,
+                            size: 13.w,
+                            color: AppColors.primary,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8.w),
-          GestureDetector(
-            onTap: () {
-              final id = int.tryParse(myId.toString()) ?? 38;
-              Get.to(
-                () => IbmClientProfileScreen(
-                  clientId: id,
-                  clientName: name,
-                  isYou: true,
-                ),
-              );
-            },
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Open',
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward,
-                  size: 13.w,
-                  color: AppColors.primary,
-                ),
-              ],
-            ),
-          ),
+                    ),
                   ],
                 ),
               ),
@@ -1457,7 +1461,7 @@ controller.fetchClients(period: p);
                 node['came_via'] ??
                 '')
             .toString();
-final partnerId =
+    final partnerId =
         int.tryParse(
           (node['partner_user_id'] ??
                   node['user_id'] ??
@@ -1468,16 +1472,16 @@ final partnerId =
         ) ??
         0;
 
-// Overlay enriched figures fetched from /portal/network/{id}/node.
+    // Overlay enriched figures fetched from /portal/network/{id}/node.
     // The network-tree endpoint only returns label/ib_user_id/child counts,
     // so every money/count field is 0 on first paint; the per-node endpoint
     // (cached eagerly via _enrichVisibleTreeRows) fills them in. Merge any
     // cached enrichment so the row matches web on first render.
-// Overlay figures from _nodeFiguresById[partnerId] (parent's /node people
+    // Overlay figures from _nodeFiguresById[partnerId] (parent's /node people
     // entry). The old code copied cached.first onto the parent — wrong:
     // cached.first was the parent's FIRST CHILD, so every row rendered
     // with the same figures. Real figures live keyed by user_id.
-final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
+    final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
     final donor = partnerId > 0 ? _nodeFiguresById[partnerId] : null;
     if (donor != null) {
       final merged = Map<String, dynamic>.from(node);
@@ -1485,7 +1489,8 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
         if (value == null) return;
         final existing = merged[key];
         final donorHasRealValue = value is num ? value != 0 : true;
-        final existingIsEmpty = existing == null ||
+        final existingIsEmpty =
+            existing == null ||
             (existing is num && existing == 0) ||
             (existing is String && existing.isEmpty);
         if (existingIsEmpty && donorHasRealValue) merged[key] = value;
@@ -1520,38 +1525,28 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
     // must come from their OWN trading activity (node['own'][0]), not from
     // their branch aggregates. Branch aggregates flow into BRANCH EARNED only,
     // matching the web UI.
-    final deposits =
-        (double.tryParse(
-                  (own['deposits'] ?? node['deposits'] ?? 0).toString(),
-                ) ??
-                0.0)
-            .toStringAsFixed(2);
-    final net =
-        (double.tryParse(
-                  (own['net'] ??
-                          own['net_funding'] ??
-                          node['net'] ??
-                          0)
-                      .toString(),
-                ) ??
-                0.0)
-            .toStringAsFixed(2);
+    final deposits = (double.tryParse(
+              (own['deposits'] ?? node['deposits'] ?? 0).toString(),
+            ) ??
+            0.0)
+        .toStringAsFixed(2);
+    final net = (double.tryParse(
+              (own['net'] ?? own['net_funding'] ?? node['net'] ?? 0).toString(),
+            ) ??
+            0.0)
+        .toStringAsFixed(2);
     final lots =
-        (double.tryParse(
-                  (own['lots'] ?? node['lots'] ?? 0).toString(),
-                ) ??
-                0.0)
+        (double.tryParse((own['lots'] ?? node['lots'] ?? 0).toString()) ?? 0.0)
             .toStringAsFixed(2);
-    final earned =
-        (double.tryParse(
-                  (own['commission'] ??
-                          node['you_earned'] ??
-                          node['commission'] ??
-                          0)
-                      .toString(),
-                ) ??
-                0.0)
-            .toStringAsFixed(2);
+    final earned = (double.tryParse(
+              (own['commission'] ??
+                      node['you_earned'] ??
+                      node['commission'] ??
+                      0)
+                  .toString(),
+            ) ??
+            0.0)
+        .toStringAsFixed(2);
     final downlineSubs =
         node['downline_subs'] ?? node['sub_ibs'] ?? node['subs_count'] ?? 0;
     final downlineClients =
@@ -1560,17 +1555,16 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
         node['clients_count'] ??
         node['clients'] ??
         0;
-    final branchEarned =
-        (double.tryParse(
-                  (node['branch_earned'] ??
-                          branch['commission'] ??
-                          branch['you_earned'] ??
-                          node['commission'] ??
-                          0)
-                      .toString(),
-                ) ??
-                0.0)
-            .toStringAsFixed(2);
+    final branchEarned = (double.tryParse(
+              (node['branch_earned'] ??
+                      branch['commission'] ??
+                      branch['you_earned'] ??
+                      node['commission'] ??
+                      0)
+                  .toString(),
+            ) ??
+            0.0)
+        .toStringAsFixed(2);
 
     final List<dynamic> rawChildren =
         node['children'] is List
@@ -1591,11 +1585,16 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
             : rawChildren.whereType<Map<String, dynamic>>().toList();
     // Wait, simpler `isCollapsed`: if it's in `_collapsedNodeKeys`, it's the OPPOSITE of `_isAllExpanded`.
     // Actually, let's just do:
-    final isCollapsedLocal = _isAllExpanded 
-        ? _collapsedNodeKeys.contains(nodeKey) 
-        : !_collapsedNodeKeys.contains(nodeKey);
+    final isCollapsedLocal =
+        _isAllExpanded
+            ? _collapsedNodeKeys.contains(nodeKey)
+            : !_collapsedNodeKeys.contains(nodeKey);
 
-    final bool canExpand = children.isNotEmpty || isSubIb || downlineSubs.toString() != '0' || downlineClients.toString() != '0';
+    final bool canExpand =
+        children.isNotEmpty ||
+        isSubIb ||
+        downlineSubs.toString() != '0' ||
+        downlineClients.toString() != '0';
 
     // Search query matching
     if (_searchQuery.isNotEmpty) {
@@ -1615,7 +1614,8 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
     final double leftIndent = (level - 1) * 14.w;
 
     final subtitleItems = <String>[];
-    if (account.isNotEmpty) subtitleItems.add(account.startsWith('#') ? account : '#$account');
+    if (account.isNotEmpty)
+      subtitleItems.add(account.startsWith('#') ? account : '#$account');
     if (email.isNotEmpty) subtitleItems.add(email);
     if (plan.isNotEmpty) subtitleItems.add(plan);
     if (cameVia.isNotEmpty) subtitleItems.add('via $cameVia');
@@ -1627,16 +1627,17 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
         children: [
           GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: partnerId > 0
-                ? () {
-                    Get.to(
-                      () => IbmClientProfileScreen(
-                        clientId: partnerId,
-                        clientName: name,
-                      ),
-                    );
-                  }
-                : null,
+            onTap:
+                partnerId > 0
+                    ? () {
+                      Get.to(
+                        () => IbmClientProfileScreen(
+                          clientId: partnerId,
+                          clientName: name,
+                        ),
+                      );
+                    }
+                    : null,
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.card,
@@ -1650,11 +1651,12 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
                   children: [
                     Container(
                       width: 4.w,
-                      color: _selectedFocusNode == node
-                          ? AppColors.primary
-                          : (isSubIb
+                      color:
+                          _selectedFocusNode == node
                               ? AppColors.primary
-                              : const Color(0xFFF2994A)),
+                              : (isSubIb
+                                  ? AppColors.primary
+                                  : const Color(0xFFF2994A)),
                     ),
                     Expanded(
                       child: Padding(
@@ -1663,244 +1665,305 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (canExpand)
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              if (_collapsedNodeKeys.contains(nodeKey)) {
-                                _collapsedNodeKeys.remove(nodeKey);
-                              } else {
-                                _collapsedNodeKeys.add(nodeKey);
-                              }
-                              
-                              final isCollapsedNow = _isAllExpanded ? _collapsedNodeKeys.contains(nodeKey) : !_collapsedNodeKeys.contains(nodeKey);
-                              
-                              if (!isCollapsedNow) {
-                                if (children.isEmpty && !_lazyChildrenCache.containsKey(nodeKey) && partnerId > 0) {
-                                  _lazyLoadingKeys.add(nodeKey);
-                                  controller.getNetworkNodeChildren(partnerId, period: _mapFilterToApi(_selectedDateFilter)).then((fetched) {
-                                    if (mounted) {
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (canExpand)
+                                  GestureDetector(
+                                    onTap: () {
                                       setState(() {
-                                        _applyNodeResponse(partnerId, fetched);
-                                        _lazyLoadingKeys.remove(nodeKey);
+                                        if (_collapsedNodeKeys.contains(
+                                          nodeKey,
+                                        )) {
+                                          _collapsedNodeKeys.remove(nodeKey);
+                                        } else {
+                                          _collapsedNodeKeys.add(nodeKey);
+                                        }
+
+                                        final isCollapsedNow =
+                                            _isAllExpanded
+                                                ? _collapsedNodeKeys.contains(
+                                                  nodeKey,
+                                                )
+                                                : !_collapsedNodeKeys.contains(
+                                                  nodeKey,
+                                                );
+
+                                        if (!isCollapsedNow) {
+                                          if (children.isEmpty &&
+                                              !_lazyChildrenCache.containsKey(
+                                                nodeKey,
+                                              ) &&
+                                              partnerId > 0) {
+                                            _lazyLoadingKeys.add(nodeKey);
+                                            controller
+                                                .getNetworkNodeChildren(
+                                                  partnerId,
+                                                  period: _mapFilterToApi(
+                                                    _selectedDateFilter,
+                                                  ),
+                                                )
+                                                .then((fetched) {
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      _applyNodeResponse(
+                                                        partnerId,
+                                                        fetched,
+                                                      );
+                                                      _lazyLoadingKeys.remove(
+                                                        nodeKey,
+                                                      );
+                                                    });
+                                                  }
+                                                });
+                                          }
+                                        }
                                       });
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                        right: 6.w,
+                                        top: 2.h,
+                                      ),
+                                      child:
+                                          _lazyLoadingKeys.contains(nodeKey)
+                                              ? SizedBox(
+                                                width: 14.w,
+                                                height: 14.w,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: AppColors.primary,
+                                                    ),
+                                              )
+                                              : Icon(
+                                                isCollapsedLocal
+                                                    ? Icons.chevron_right
+                                                    : Icons.expand_more,
+                                                size: 20.w,
+                                                color: AppColors.textGrey,
+                                              ),
+                                    ),
+                                  ),
+                                Expanded(
+                                  child: Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    spacing: 6.w,
+                                    runSpacing: 4.h,
+                                    children: [
+                                      Text(
+                                        name,
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      if (isSubIb)
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 5.w,
+                                            vertical: 1.h,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary
+                                                .withOpacity(0.12),
+                                            borderRadius: BorderRadius.circular(
+                                              4.r,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Sub-IB · L$nodeLevel',
+                                            style: TextStyle(
+                                              color: AppColors.primary,
+                                              fontSize: 9.sp,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      if (isDirectClient) ...[
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 5.w,
+                                            vertical: 1.h,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(
+                                              0xFF00C48C,
+                                            ).withOpacity(0.12),
+                                            borderRadius: BorderRadius.circular(
+                                              4.r,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Direct client',
+                                            style: TextStyle(
+                                              color: Color(0xFF00C48C),
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                      if (isSubClient) ...[
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 5.w,
+                                            vertical: 1.h,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(
+                                              0xFFF2994A,
+                                            ).withOpacity(0.12),
+                                            borderRadius: BorderRadius.circular(
+                                              4.r,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            "Sub-IB's client",
+                                            style: TextStyle(
+                                              color: Color(0xFFF2994A),
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: 8.w),
+                                GestureDetector(
+                                  onTap: () {
+                                    if (partnerId > 0) {
+                                      Get.to(
+                                        () => IbmClientProfileScreen(
+                                          clientId: partnerId,
+                                          clientName: name,
+                                        ),
+                                      );
                                     }
-                                  });
-                                }
-                              }
-                            });
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(right: 6.w, top: 2.h),
-                            child: _lazyLoadingKeys.contains(nodeKey)
-                                ? SizedBox(
-                                    width: 14.w,
-                                    height: 14.w,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-                                  )
-                                : Icon(
-                                    isCollapsedLocal
-                                        ? Icons.chevron_right
-                                        : Icons.expand_more,
-                                    size: 20.w,
-                                    color: AppColors.textGrey,
+                                  },
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.arrow_forward,
+                                        size: 18.w,
+                                        color: AppColors.primary,
+                                      ),
+                                    ],
                                   ),
-                          ),
-                        ),
-                      Expanded(
-                        child: Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 6.w,
-                          runSpacing: 4.h,
-                          children: [
-                            Text(
-                              name,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
+                                ),
+                              ],
                             ),
-                            if (isSubIb)
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 5.w,
-                                  vertical: 1.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                                child: Text(
-                                  'Sub-IB · L$nodeLevel',
-                                  style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 9.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            if (isDirectClient) ...[
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 5.w,
-                                  vertical: 1.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF00C48C,
-                                  ).withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                                child: const Text(
-                                  'Direct client',
-                                  style: TextStyle(
-                                    color: Color(0xFF00C48C),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                            if (subtitleItems.isNotEmpty) ...[
+                              SizedBox(height: 4.h),
+                              Text(
+                                subtitleItems.join(' · '),
+                                style: TextStyle(
+                                  color: AppColors.textGrey,
+                                  fontSize: 10.sp,
                                 ),
                               ),
                             ],
-                            if (isSubClient) ...[
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 5.w,
-                                  vertical: 1.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFFF2994A,
-                                  ).withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(4.r),
-                                ),
-                                child: const Text(
-                                  "Sub-IB's client",
-                                  style: TextStyle(
-                                    color: Color(0xFFF2994A),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
+                            SizedBox(height: 8.h),
+                            // Metrics strip — wraps to 2 lines on narrow screens so
+                            // DOWNLINE / BRANCH EARNED never get clipped.
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 6.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.isDarkMode
+                                        ? const Color(0xFF1E1E1E)
+                                        : const Color(0xFFF8F9FA),
+                                borderRadius: BorderRadius.circular(8.r),
+                              ),
+                              child: Wrap(
+                                spacing: 14.w,
+                                runSpacing: 6.h,
+                                children: [
+                                  _buildMiniMetricMobile(
+                                    'DEPOSITS',
+                                    '\$$deposits',
                                   ),
-                                ),
+                                  _buildMiniMetricMobile('NET', '\$$net'),
+                                  _buildMiniMetricMobile('LOTS', lots),
+                                  _buildMiniMetricMobile(
+                                    'YOU EARNED',
+                                    '\$$earned',
+                                  ),
+                                  if (downlineSubs > 0 || downlineClients > 0)
+                                    _buildMiniMetricMobile(
+                                      'DOWNLINE',
+                                      '$downlineSubs sub · $downlineClients cli',
+                                    ),
+                                  if (double.tryParse(branchEarned) != null &&
+                                      double.parse(branchEarned) > 0)
+                                    _buildMiniMetricMobile(
+                                      'BRANCH EARNED',
+                                      '\$$branchEarned',
+                                    ),
+                                ],
                               ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      GestureDetector(
-                        onTap: () {
-                          if (partnerId > 0) {
-                            Get.to(
-                              () => IbmClientProfileScreen(
-                                clientId: partnerId,
-                                clientName: name,
-                              ),
-                            );
-                          }
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.arrow_forward,
-                              size: 18.w,
-                              color: AppColors.primary,
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                  if (subtitleItems.isNotEmpty) ...[
-                    SizedBox(height: 4.h),
-                    Text(
-                      subtitleItems.join(' · '),
-                      style: TextStyle(
-                        color: AppColors.textGrey,
-                        fontSize: 10.sp,
                       ),
                     ),
                   ],
-                  SizedBox(height: 8.h),
-                  // Metrics strip — wraps to 2 lines on narrow screens so
-                  // DOWNLINE / BRANCH EARNED never get clipped.
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          AppColors.isDarkMode
-                              ? const Color(0xFF1E1E1E)
-                              : const Color(0xFFF8F9FA),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Wrap(
-                      spacing: 14.w,
-                      runSpacing: 6.h,
-                      children: [
-                        _buildMiniMetricMobile('DEPOSITS', '\$$deposits'),
-                        _buildMiniMetricMobile('NET', '\$$net'),
-                        _buildMiniMetricMobile('LOTS', lots),
-                        _buildMiniMetricMobile('YOU EARNED', '\$$earned'),
-                        if (downlineSubs > 0 || downlineClients > 0)
-                          _buildMiniMetricMobile(
-                            'DOWNLINE',
-                            '$downlineSubs sub · $downlineClients cli',
-                          ),
-                        if (double.tryParse(branchEarned) != null &&
-                            double.parse(branchEarned) > 0)
-                          _buildMiniMetricMobile(
-                            'BRANCH EARNED',
-                            '\$$branchEarned',
-                          ),
-                    ],
-                  ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ],
-      ),
-    ),
-  ),
-),
 
           // Children nodes recursion
           if (canExpand && !isCollapsedLocal)
             Padding(
               padding: EdgeInsets.only(top: 8.h),
-              child: _lazyLoadingKeys.contains(nodeKey)
-                  ? Padding(
-                      padding: EdgeInsets.only(left: 14.w, top: 8.h, bottom: 8.h),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 16.w,
-                            height: 16.w,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
-                          ),
-                          SizedBox(width: 8.w),
-                          Text('Loading...', style: TextStyle(color: AppColors.textGrey, fontSize: 12.sp)),
-                        ],
+              child:
+                  _lazyLoadingKeys.contains(nodeKey)
+                      ? Padding(
+                        padding: EdgeInsets.only(
+                          left: 14.w,
+                          top: 8.h,
+                          bottom: 8.h,
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 16.w,
+                              height: 16.w,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              'Loading...',
+                              style: TextStyle(
+                                color: AppColors.textGrey,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                      : Column(
+                        children:
+                            children
+                                .map(
+                                  (child) => _buildTreeNodeWidget(
+                                    child,
+                                    level: level + 1,
+                                  ),
+                                )
+                                .toList(),
                       ),
-                    )
-                  : Column(
-                      children:
-                          children
-                              .map(
-                                (child) => _buildTreeNodeWidget(
-                                  child,
-                                  level: level + 1,
-                                ),
-                              )
-                              .toList(),
-                    ),
             ),
         ],
       ),
@@ -1911,16 +1974,27 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
   List<Map<String, dynamic>> _extractTreeNodes(Map<String, dynamic> treeData) {
     List<Map<String, dynamic>> list = [];
     if (treeData['tree'] is List && (treeData['tree'] as List).isNotEmpty) {
-      list = (treeData['tree'] as List).whereType<Map<String, dynamic>>().toList();
-    } else if (treeData['nodes'] is List && (treeData['nodes'] as List).isNotEmpty) {
-      list = (treeData['nodes'] as List).whereType<Map<String, dynamic>>().toList();
-    } else if (treeData['people'] is List && (treeData['people'] as List).isNotEmpty) {
-      list = (treeData['people'] as List).whereType<Map<String, dynamic>>().toList();
-    } else if (treeData['rows'] is List && (treeData['rows'] as List).isNotEmpty) {
-      list = (treeData['rows'] as List).whereType<Map<String, dynamic>>().toList();
+      list =
+          (treeData['tree'] as List).whereType<Map<String, dynamic>>().toList();
+    } else if (treeData['nodes'] is List &&
+        (treeData['nodes'] as List).isNotEmpty) {
+      list =
+          (treeData['nodes'] as List)
+              .whereType<Map<String, dynamic>>()
+              .toList();
+    } else if (treeData['people'] is List &&
+        (treeData['people'] as List).isNotEmpty) {
+      list =
+          (treeData['people'] as List)
+              .whereType<Map<String, dynamic>>()
+              .toList();
+    } else if (treeData['rows'] is List &&
+        (treeData['rows'] as List).isNotEmpty) {
+      list =
+          (treeData['rows'] as List).whereType<Map<String, dynamic>>().toList();
     }
 
-// Normalise every node so downstream widgets see consistent keys
+    // Normalise every node so downstream widgets see consistent keys
     // regardless of which endpoint it came from. `/clients/network-tree`
     // uses `label` + `ib_user_id`; `/network/{id}/node` uses `name` +
     // `user_id`. The row builder reads `name`, `user_id`, etc., so we
@@ -1936,17 +2010,18 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
       final first = list.first;
       final isSyntheticRoot =
           first['type']?.toString() == 'direct' ||
-              first['type']?.toString() == 'cascade' ||
-              first['client_count'] != null ||
-              first['sub_ib_count'] != null;
+          first['type']?.toString() == 'cascade' ||
+          first['client_count'] != null ||
+          first['sub_ib_count'] != null;
       if (isSyntheticRoot) {
         final rawChildren =
             first['children'] ?? first['nodes'] ?? first['people'] ?? [];
         if (rawChildren is List && rawChildren.isNotEmpty) {
-          list = rawChildren
-              .whereType<Map<String, dynamic>>()
-              .map(_normaliseTreeNode)
-              .toList();
+          list =
+              rawChildren
+                  .whereType<Map<String, dynamic>>()
+                  .map(_normaliseTreeNode)
+                  .toList();
         } else {
           list = [];
         }
@@ -1988,21 +2063,28 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
     final out = Map<String, dynamic>.from(node);
     final children = out['children'];
     if (children is List && children.isNotEmpty) {
-      final normalised =
-          children.whereType<Map<String, dynamic>>().map(_normaliseTreeNode);
+      final normalised = children.whereType<Map<String, dynamic>>().map(
+        _normaliseTreeNode,
+      );
       out['children'] = normalised.map(_unwrapNested).toList();
     }
     return out;
   }
 
-  Set<String> _getAllNodeKeys(List<Map<String, dynamic>> nodes, {int level = 1}) {
+  Set<String> _getAllNodeKeys(
+    List<Map<String, dynamic>> nodes, {
+    int level = 1,
+  }) {
     final keys = <String>{};
     for (final node in nodes) {
       final name = node['name']?.toString() ?? 'Node';
       final id = node['partner_user_id'] ?? node['user_id'] ?? 0;
       keys.add('${name}_${id}_$level');
       if (node['children'] is List) {
-        final children = (node['children'] as List).whereType<Map<String, dynamic>>().toList();
+        final children =
+            (node['children'] as List)
+                .whereType<Map<String, dynamic>>()
+                .toList();
         keys.addAll(_getAllNodeKeys(children, level: level + 1));
       }
     }
@@ -2154,7 +2236,9 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
 
   Widget _buildMiniMetricMobile(String label, String value) {
     final isPositive =
-        label == 'DEPOSITS' || label == 'YOU EARNED' || label == 'BRANCH EARNED';
+        label == 'DEPOSITS' ||
+        label == 'YOU EARNED' ||
+        label == 'BRANCH EARNED';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -2189,25 +2273,33 @@ final nodeKey = partnerId > 0 ? 'node_$partnerId' : '${name}_$level';
     final email = (r['email'] ?? '').toString();
     final isIb = r['is_ib'] ?? false;
     final lastLogin = (r['last_login'] ?? '--').toString();
-    final deposits =
-        (double.tryParse((r['deposits'] ?? 100).toString()) ?? 100.0)
-            .toStringAsFixed(2);
-    final net =
-        (double.tryParse((r['net_deposit'] ?? r['net'] ?? 100).toString()) ??
-                100.0)
-            .toStringAsFixed(2);
-    final lots = r['lots']?.toString() ?? '0';
-    final comm =
-        (double.tryParse((r['commission'] ?? 0).toString()) ?? 0.0)
-            .toStringAsFixed(2);
+
+    // Extract financials from currencies array if available
+    Map? firstCurr;
+    final currencies = r['currencies'];
+    if (currencies is List && currencies.isNotEmpty) {
+      firstCurr = currencies.first is Map ? currencies.first : null;
+    }
+
+    final depositsValue = double.tryParse((firstCurr?['deposits'] ?? r['deposits'] ?? 0).toString()) ?? 0.0;
+    final deposits = depositsValue.toStringAsFixed(2);
+
+    final withdrawalsValue = double.tryParse((firstCurr?['withdrawals'] ?? r['withdrawals'] ?? 0).toString()) ?? 0.0;
+
+    final netRaw = firstCurr?['net_deposit'] ?? firstCurr?['net'] ?? r['net_deposit'] ?? r['net'];
+    final netValue = netRaw != null ? (double.tryParse(netRaw.toString()) ?? 0.0) : (depositsValue - withdrawalsValue);
+    final net = netValue.toStringAsFixed(2);
+
+    final lots = (firstCurr?['lots'] ?? r['lots'])?.toString() ?? '0';
+
+    final commStr = (firstCurr?['commission'] ?? r['commission'] ?? 0).toString();
+    final comm = (double.tryParse(commStr) ?? 0.0).toStringAsFixed(2);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
         final id = r['client_user_id'] ?? r['id'] ?? 0;
-        Get.to(
-          () => IbmClientProfileScreen(clientId: id, clientName: name),
-        );
+        Get.to(() => IbmClientProfileScreen(clientId: id, clientName: name));
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 12.h),

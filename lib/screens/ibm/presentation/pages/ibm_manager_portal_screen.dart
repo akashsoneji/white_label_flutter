@@ -1071,7 +1071,7 @@ Widget _buildMoneyFlowRow(double deposits, double withdrawals, double equity, do
                   value: _fmt(equity),
                   icon: Icons.account_balance_rounded,
                   color: AppColors.primary,
-                  trailingText: 'live',
+                  trailingText: 'Client Equity',
                 ),
               ),
               SizedBox(width: 10.w),
@@ -1602,8 +1602,18 @@ Widget _buildCommissionSummary(Map wallet) {
     final pendingRequests =
         requestsList.where((r) => r['status'] == 'pending').toList();
 
+    final int maxRows = [
+      deposits.length,
+      withdrawals.length,
+      payouts.length,
+      accounts.length,
+      pendingRequests.length,
+    ].reduce((a, b) => a > b ? a : b);
+    // Header (title + subtitle) ~ 52, each row ~ 42, min one empty-state slot.
+    final double cardHeight = 52.h + (maxRows > 0 ? maxRows : 1) * 42.h;
+
     return SizedBox(
-      height: 140.h,
+      height: cardHeight,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
@@ -1696,9 +1706,10 @@ Widget _buildCommissionSummary(Map wallet) {
             subtitle,
             style: TextStyle(color: AppColors.textSecondary, fontSize: 10.sp),
           ),
-          Spacer(),
-          content,
-          Spacer(),
+          SizedBox(height: 8.h),
+          Expanded(
+            child: SingleChildScrollView(child: content),
+          ),
         ],
       ),
     );
@@ -1722,7 +1733,7 @@ Widget _buildCommissionSummary(Map wallet) {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children:
-          items.take(2).map((item) {
+          items.map((item) {
             final name = item['name'] ?? 'Unknown';
             final status = item['status'] ?? '';
             final amount = _parseDouble(item['amount']);

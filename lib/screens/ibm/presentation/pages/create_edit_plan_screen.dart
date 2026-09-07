@@ -8,8 +8,13 @@ import 'package:crm_app/widgets/custom_toast.dart';
 
 class CreateEditPlanScreen extends StatefulWidget {
   final int? planId;
+  final bool readOnly;
 
-  const CreateEditPlanScreen({super.key, this.planId});
+  const CreateEditPlanScreen({
+    super.key,
+    this.planId,
+    this.readOnly = false,
+  });
 
   @override
   State<CreateEditPlanScreen> createState() => _CreateEditPlanScreenState();
@@ -381,22 +386,28 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
       backgroundColor: AppColors.whiteColor,
       appBar: AppBar(
         title: Text(
-          widget.planId == null ? 'Create Partner Plan' : 'Edit Partner Plan',
+          widget.readOnly
+              ? 'View Partner Plan'
+              : (widget.planId == null
+                  ? 'Create Partner Plan'
+                  : 'Edit Partner Plan'),
           style: TextStyle(color: AppColors.textPrimary, fontSize: 18.sp),
         ),
         backgroundColor: AppColors.whiteColor,
         elevation: 1,
         iconTheme: IconThemeData(color: AppColors.textPrimary),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primary,
-          tabs: const [
-            Tab(text: '1 • Details'),
-            Tab(text: '2 • Groups & Rates'),
-          ],
-        ),
+        bottom: widget.readOnly
+            ? null
+            : TabBar(
+                controller: _tabController,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.textSecondary,
+                indicatorColor: AppColors.primary,
+                tabs: const [
+                  Tab(text: '1 • Details'),
+                  Tab(text: '2 • Groups & Rates'),
+                ],
+              ),
       ),
       body:
           _isLoading
@@ -407,6 +418,8 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
               ? Center(
                 child: Text(_error!, style: TextStyle(color: Colors.red)),
               )
+              : widget.readOnly
+              ? _buildReadOnlyBody()
               : TabBarView(
                 controller: _tabController,
                 physics:
@@ -414,7 +427,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                 children: [_buildDetailsTab(), _buildGroupsRatesTab()],
               ),
       bottomNavigationBar:
-          _isLoading || _error != null
+          _isLoading || _error != null || widget.readOnly
               ? null
               : Container(
                 padding: EdgeInsets.all(16.w),
@@ -428,7 +441,9 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                     ),
                   ],
                 ),
-                child: Row(
+                child: SafeArea(
+                  top: false,
+                  child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton(
@@ -485,6 +500,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                               ),
                     ),
                   ],
+                  ),
                 ),
               ),
     );
@@ -493,72 +509,139 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
   Widget _buildDetailsTab() {
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.w),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Plan name *',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
-            ),
-            SizedBox(height: 8.h),
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12.w,
-                  vertical: 12.h,
-                ),
+      child: _buildDetailsFields(),
+    );
+  }
+
+  Widget _buildDetailsFields() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Plan name *',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+          ),
+          SizedBox(height: 8.h),
+          TextFormField(
+            controller: _nameController,
+            readOnly: widget.readOnly,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6.r),
               ),
-              validator:
-                  (val) =>
-                      val == null || val.trim().isEmpty ? 'Required' : null,
-            ),
-            SizedBox(height: 24.h),
-            Text(
-              'Description',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
-            ),
-            SizedBox(height: 8.h),
-            TextFormField(
-              controller: _descController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6.r),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12.w,
-                  vertical: 12.h,
-                ),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 12.w,
+                vertical: 12.h,
               ),
             ),
-            SizedBox(height: 24.h),
-            Text(
-              'Status',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
-            ),
-            SizedBox(height: 8.h),
-            SwitchListTile(
-              title: Text(
-                _isActive ? 'Active' : 'Inactive',
-                style: TextStyle(fontSize: 14.sp),
+            validator:
+                (val) => val == null || val.trim().isEmpty ? 'Required' : null,
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            'Description',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+          ),
+          SizedBox(height: 8.h),
+          TextFormField(
+            controller: _descController,
+            maxLines: 4,
+            readOnly: widget.readOnly,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6.r),
               ),
-              value: _isActive,
-              activeColor: AppColors.primary,
-              contentPadding: EdgeInsets.zero,
-              onChanged: (val) {
-                setState(() {
-                  _isActive = val;
-                });
-              },
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 12.w,
+                vertical: 12.h,
+              ),
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 24.h),
+          Text(
+            'Status',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13.sp),
+          ),
+          SizedBox(height: 8.h),
+          SwitchListTile(
+            title: Text(
+              _isActive ? 'Active' : 'Inactive',
+              style: TextStyle(fontSize: 14.sp),
+            ),
+            value: _isActive,
+            activeColor: AppColors.primary,
+            contentPadding: EdgeInsets.zero,
+            onChanged: widget.readOnly
+                ? null
+                : (val) {
+                    setState(() {
+                      _isActive = val;
+                    });
+                  },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoBanner() {
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      margin: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(6.r),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline, size: 18.w, color: AppColors.textSecondary),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              'Rates shown in Parent cap are the maximum you can give. You can only use groups your master plan includes.',
+              style: TextStyle(fontSize: 11.sp, color: AppColors.textSecondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReadOnlyBody() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: 24.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16.w),
+            child: _buildDetailsFields(),
+          ),
+          _buildInfoBanner(),
+          if (_availableCaps.isEmpty)
+            Padding(
+              padding: EdgeInsets.all(24.w),
+              child: Center(
+                child: Text(
+                  'No groups available',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+            )
+          else
+            ...List.generate(_availableCaps.length, (index) {
+              final cap = _availableCaps[index];
+              final int groupId = cap['group_id'] ?? cap['id'] ?? 0;
+              final String groupName =
+                  cap['group_name'] ?? cap['name'] ?? 'Group $groupId';
+              final bool isAdded = _selectedGroups.containsKey(groupId);
+              return _buildGroupRow(groupId, groupName, cap, isAdded);
+            }),
+        ],
       ),
     );
   }
@@ -566,33 +649,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
   Widget _buildGroupsRatesTab() {
     return Column(
       children: [
-        Container(
-          padding: EdgeInsets.all(12.w),
-          margin: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(6.r),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.info_outline,
-                size: 18.w,
-                color: AppColors.textSecondary,
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  'Rates shown in Parent cap are the maximum you can give. You can only use groups your master plan includes.',
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        _buildInfoBanner(),
         Expanded(
           child:
               _availableCaps.isEmpty
@@ -672,22 +729,23 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                           style: TextStyle(color: AppColors.textPrimary),
                         ),
                       ),
-                      TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _selectedGroups.remove(groupId);
-                          });
-                        },
-                        style: TextButton.styleFrom(minimumSize: Size.zero),
-                        icon: Icon(Icons.close, size: 16.w, color: Colors.red),
-                        label: const Text(
-                          'Remove',
-                          style: TextStyle(color: Colors.red),
+                      if (!widget.readOnly)
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _selectedGroups.remove(groupId);
+                            });
+                          },
+                          style: TextButton.styleFrom(minimumSize: Size.zero),
+                          icon: Icon(Icons.close, size: 16.w, color: Colors.red),
+                          label: const Text(
+                            'Remove',
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ),
-                      ),
                     ],
                   )
-                else
+                else if (!widget.readOnly)
                   TextButton.icon(
                     onPressed: () {
                       setState(() {
@@ -874,6 +932,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                       child: TextFormField(
                         initialValue:
                             currentRate > 0 ? (currentRate % 1 == 0 ? currentRate.toInt().toString() : currentRate.toString()) : '',
+                        readOnly: widget.readOnly,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -1034,6 +1093,7 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
                       child: TextFormField(
                         initialValue:
                             currentRate > 0 ? (currentRate % 1 == 0 ? currentRate.toInt().toString() : currentRate.toString()) : '',
+                        readOnly: widget.readOnly,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -1085,55 +1145,57 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
             ),
           ),
           SizedBox(height: 8.h),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 36.h,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6.r),
-                    border: Border.all(color: AppColors.divider),
-                  ),
-                  child: TextField(
-                    controller: blockController,
-                    decoration: InputDecoration(
-                      hintText: 'Symbol name e.g. BTCUSD',
-                      hintStyle: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+          if (!widget.readOnly) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 36.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6.r),
+                      border: Border.all(color: AppColors.divider),
+                    ),
+                    child: TextField(
+                      controller: blockController,
+                      decoration: InputDecoration(
+                        hintText: 'Symbol name e.g. BTCUSD',
+                        hintStyle: TextStyle(fontSize: 12.sp, color: AppColors.textSecondary),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(width: 8.w),
-              ElevatedButton.icon(
-                onPressed: () {
-                  final sym = blockController.text.trim().toUpperCase();
-                  if (sym.isNotEmpty && !blockedSymbols.contains(sym)) {
-                    setState(() {
-                      blockedSymbols.add(sym);
-                      _selectedGroups[groupId]!['blocked'] = blockedSymbols;
-                      blockController.clear();
-                    });
-                  }
-                },
-                icon: Icon(Icons.block, size: 14.w, color: Colors.white),
-                label: const Text('Block'),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size.zero,
-                  backgroundColor: AppColors.primary,
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+                SizedBox(width: 8.w),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final sym = blockController.text.trim().toUpperCase();
+                    if (sym.isNotEmpty && !blockedSymbols.contains(sym)) {
+                      setState(() {
+                        blockedSymbols.add(sym);
+                        _selectedGroups[groupId]!['blocked'] = blockedSymbols;
+                        blockController.clear();
+                      });
+                    }
+                  },
+                  icon: Icon(Icons.block, size: 14.w, color: Colors.white),
+                  label: const Text('Block'),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size.zero,
+                    backgroundColor: AppColors.primary,
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'Symbols are matched by name. Leave empty if you don\'t want to add restrictions.',
-            style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary),
-          ),
+              ],
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              'Symbols are matched by name. Leave empty if you don\'t want to add restrictions.',
+              style: TextStyle(fontSize: 10.sp, color: AppColors.textSecondary),
+            ),
+          ],
           if (blockedSymbols.isNotEmpty) ...[
             SizedBox(height: 8.h),
             Wrap(
@@ -1142,13 +1204,16 @@ class _CreateEditPlanScreenState extends State<CreateEditPlanScreen>
               children: blockedSymbols.map((sym) {
                 return Chip(
                   label: Text(sym.toString(), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600)),
-                  deleteIcon: const Icon(Icons.close, size: 14),
-                  onDeleted: () {
-                    setState(() {
-                      blockedSymbols.remove(sym);
-                      _selectedGroups[groupId]!['blocked'] = blockedSymbols;
-                    });
-                  },
+                  deleteIcon:
+                      widget.readOnly ? null : const Icon(Icons.close, size: 14),
+                  onDeleted: widget.readOnly
+                      ? null
+                      : () {
+                          setState(() {
+                            blockedSymbols.remove(sym);
+                            _selectedGroups[groupId]!['blocked'] = blockedSymbols;
+                          });
+                        },
                   backgroundColor: Colors.red.shade50,
                   deleteIconColor: Colors.red,
                   side: BorderSide(color: Colors.red.shade200),
