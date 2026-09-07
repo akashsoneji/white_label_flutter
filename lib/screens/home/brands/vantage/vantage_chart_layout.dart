@@ -29,6 +29,7 @@
 // ============================================================
 
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:crm_app/constants/text_styles.dart';
 
 import 'package:flutter/material.dart';
@@ -629,29 +630,213 @@ class _Header extends StatelessWidget {
               ),
             ),
           ),
-          // Top-right settings/sound icon
-          // InkResponse(
-          //   onTap: onSettingsTap,
-          //   radius: 24,
-          //   child: Container(
-          //     width: 26.w,
-          //     height: 26.h,
-          //     alignment: Alignment.center,
-          //     decoration: BoxDecoration(
-          //       color: primary.withValues(alpha: 0.12),
-          //       borderRadius: BorderRadius.circular(10.r),
-          //     ),
-          //     child: AppSvgIcon(
-          //       assetPath: 'assets/svg/bottom_navigation/candle_bold.svg',
-          //       color: iconColor,
-          //       height: 18,
-          //       width: 18,
-          //     ),
-          //   ),
-          // ),
+          // Top-right active-account chip: wallet icon + #account + DEMO/LIVE
+          // badge. Tapping opens the SAME dropdown the Prices tab uses
+          // (anchored popup menu) so both tabs stay in sync via AccountController.
+          Builder(
+            builder: (pillContext) => GestureDetector(
+              onTap: () {
+                final accCtrl = Get.find<AccountController>();
+                accCtrl.resetToDefaultAccounts();
+                _showAccountPopup(pillContext, accCtrl);
+              },
+              child: Obx(() {
+                final active = Get.find<AccountController>().activeMT5Account;
+                final accNumber = active?.metaAccountNumber ?? '------';
+                final isDemo =
+                    (active?.accountType ?? 'REAL').toUpperCase() == 'DEMO';
+                final typeText = isDemo ? 'DEMO' : 'LIVE';
+                final typeColor = isDemo ? AppColors.primary : AppColors.accent;
+
+                return Container(
+                  height: 28.h,
+                  padding: EdgeInsets.symmetric(horizontal: 10.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.isDarkMode
+                        ? AppColors.surfaceSecondary
+                        : AppColors.card.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: AppColors.border.withOpacity(0.18),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 20.w,
+                        height: 20.w,
+                        decoration: BoxDecoration(
+                          color: AppColors.isDarkMode
+                              ? AppColors.surfaceSecondary
+                              : typeColor.withOpacity(0.16),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.account_balance_wallet_outlined,
+                          size: 12.sp,
+                          color: AppColors.isDarkMode
+                              ? AppColors.whiteColor
+                              : typeColor,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Flexible(
+                        child: Text(
+                          accNumber,
+                          style: AppTextStyles.label.copyWith(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 3.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.isDarkMode
+                              ? AppColors.surfaceSecondary
+                              : typeColor.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          typeText,
+                          style: AppTextStyles.bodyText.copyWith(
+                            color: AppColors.isDarkMode
+                                ? AppColors.whiteColor
+                                : typeColor,
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  /// Anchored dropdown listing all MT5 accounts (same UX as the Prices tab
+  /// header). Tapping a row switches the active account via AccountController,
+  /// which the chip's Obx picks up automatically.
+  Future<void> _showAccountPopup(
+    BuildContext anchorContext,
+    AccountController accountController,
+  ) async {
+    final overlay =
+        Overlay.of(anchorContext).context.findRenderObject() as RenderBox?;
+    final renderBox = anchorContext.findRenderObject() as RenderBox?;
+    if (overlay == null || renderBox == null) return;
+
+    final position = renderBox.localToGlobal(Offset.zero, ancestor: overlay);
+    final rect = position & renderBox.size;
+
+    final selected = await showMenu<String>(
+      context: anchorContext,
+      color: AppColors.card,
+      surfaceTintColor: AppColors.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        side: BorderSide(color: AppColors.border.withOpacity(0.18), width: 0.5),
+      ),
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(rect.left, rect.bottom + 6.h, rect.width, rect.height),
+        Offset.zero & overlay.size,
+      ),
+      items: accountController.mt5Accounts.map((account) {
+        final isActive =
+            accountController.activeMT5Account?.metaAccountNumber ==
+            account.metaAccountNumber;
+        final type = account.accountType.toUpperCase();
+        final typeColor = type == 'LIVE' ? AppColors.accent : AppColors.primary;
+
+        return PopupMenuItem<String>(
+          value: account.metaAccountNumber,
+          height: 42.h,
+          child: Row(
+            children: [
+              Container(
+                width: 18.w,
+                height: 18.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.isDarkMode
+                      ? AppColors.surfaceSecondary
+                      : typeColor.withOpacity(0.16),
+                ),
+                child: Icon(
+                  Icons.account_balance_wallet_outlined,
+                  size: 12.sp,
+                  color: AppColors.isDarkMode
+                      ? AppColors.whiteColor
+                      : typeColor,
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  account.metaAccountNumber,
+                  style: AppTextStyles.label.copyWith(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              SizedBox(width: 10.w),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: AppColors.isDarkMode
+                      ? AppColors.surfaceSecondary
+                      : typeColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  type,
+                  style: AppTextStyles.bodyText.copyWith(
+                    color: AppColors.isDarkMode
+                        ? AppColors.whiteColor
+                        : typeColor,
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (isActive) ...[
+                SizedBox(width: 8.w),
+                Icon(Icons.check, size: 16.sp, color: AppColors.success),
+              ],
+            ],
+          ),
+        );
+      }).toList(),
+    );
+
+    if (selected == null) return;
+    if (accountController.isLoading) return;
+    if (accountController.activeMT5Account?.metaAccountNumber == selected) {
+      return;
+    }
+
+    try {
+      await accountController.setActiveMT5Account(selected);
+    } catch (e) {
+      if (kDebugMode) debugPrint('Account switch failed: $e');
+    }
   }
 }
 

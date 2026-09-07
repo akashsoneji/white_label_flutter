@@ -658,45 +658,15 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
           ),
         ),
         actions: [
-          Obx(() {
-            // Access stage data reactively inside Obx
-            final model = moreController.dashboardModel.value;
-            final stage = model?.data?.stageCompletion;
-            // Check if KYC verification is completed (all required fields verified)
-            final isProfileVerified =
-                (stage?.emailVerified != null) &&
-                (stage?.mobileVerified != null) &&
-                (stage?.personalDetails == true);
-
-            return IconButton(
-              icon:
-                  isProfileVerified
-                      ? Icon(
-                        Icons.remove_red_eye_outlined,
-                        size: 24.sp,
-                        color: AppColors.primary,
-                      )
-                      : SvgPicture.asset(
-                        'assets/svg/edit_profile.svg',
-                        height: 24.h,
-                        width: 24.w,
-                        color: AppColors.primary,
-                      ),
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-              onPressed: () {
-                if (isProfileVerified) {
-                  // All required fields verified → show read-only view profile
-                  Get.toNamed(AppPages.VIEW_PROFILE);
-                } else {
-                  // Existing edit profile flow
-                  Get.toNamed(
-                    AppPages.EDIT_PROFILE,
-                    arguments: isProfileVerified,
-                  );
-                }
-              },
-            );
-          }),
+          IconButton(
+            icon: Icon(
+              Icons.notifications_none_rounded,
+              size: 24.sp,
+              color: AppColors.primary,
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+            onPressed: () => Get.toNamed(AppPages.NOTIFICATIONS),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -782,6 +752,41 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                                   );
                                 },
                               ),
+                              const Spacer(),
+                              Obx(() {
+                                final model =
+                                    moreController.dashboardModel.value;
+                                final stage = model?.data?.stageCompletion;
+                                final isProfileVerified =
+                                    (stage?.emailVerified != null) &&
+                                    (stage?.mobileVerified != null) &&
+                                    (stage?.personalDetails == true);
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (isProfileVerified) {
+                                      Get.toNamed(AppPages.VIEW_PROFILE);
+                                    } else {
+                                      Get.toNamed(
+                                        AppPages.EDIT_PROFILE,
+                                        arguments: isProfileVerified,
+                                      );
+                                    }
+                                  },
+                                  child:
+                                      isProfileVerified
+                                          ? Icon(
+                                            Icons.remove_red_eye_outlined,
+                                            size: 22.sp,
+                                            color: AppColors.primary,
+                                          )
+                                          : SvgPicture.asset(
+                                            'assets/svg/edit_profile.svg',
+                                            height: 22.h,
+                                            width: 22.w,
+                                            color: AppColors.primary,
+                                          ),
+                                );
+                              }),
                             ],
                           ),
                           SizedBox(height: 2.h),
