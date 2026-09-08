@@ -81,8 +81,22 @@ class NotificationService {
   }
 
   Future<void> _createNotificationChannels() async {
-    // Android channels are automatically created when showing notifications
-    // with the newer version of flutter_local_notifications
+    // Explicitly create the high-importance channel so Android 8+ shows
+    // heads-up banners while the app is in the foreground. Without this,
+    // some OEM devices suppress the pop-up because the channel importance
+    // isn't registered until the first notification is shown.
+    const AndroidNotificationChannel highImportanceChannel =
+        AndroidNotificationChannel(
+      'high_importance_channel',
+      'High Importance Notifications',
+      description: 'This channel is used for important notifications.',
+      importance: Importance.max,
+    );
+
+    await _notifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(highImportanceChannel);
   }
 
   Future<bool> requestPermissions() async {

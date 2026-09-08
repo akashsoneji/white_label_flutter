@@ -1,8 +1,7 @@
 name: baazex
 type: child
-inheritsFrom: iquote
+inheritsFrom: vantage
 parents:
-  - iquote
   - vantage
 label: Baazex
 themeMode: both
@@ -16,11 +15,11 @@ ios:
   appName: Baazex
 
 colors:
-  primary: "#BF235C"
+  primary: "#2242FF"
   secondary: "#212121"
-  accent: "#BF235C"
-  splashColor: "#BF235C"
-  launcherBackground: "#BF235C"
+  accent: "#2242FF"
+  splashColor: "#2242FF"
+  launcherBackground: "#2242FF"
 
 urls:
   api: https://my.baazex.com/api/

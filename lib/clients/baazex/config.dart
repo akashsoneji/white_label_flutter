@@ -11,10 +11,10 @@ class BaazexConfig extends BaseClientConfig {
       : super(
           brandName: 'Baazex',
           appTitle: 'Baazex',
-          primaryColor: const Color(0xFFBF235C),
+          primaryColor: const Color(0xFF2242FF),
           darkPrimaryColor: const Color(0xFFFFFFFF),
           secondaryColor: const Color(0xFF212121),
-          accentColor: const Color(0xFFBF235C),
+          accentColor: const Color(0xFF2242FF),
           logoSvgPath: 'logo.svg',
           splashLogoPath: 'splash_logo.svg',
           appIconPath: 'icon.png',

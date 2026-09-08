@@ -2,36 +2,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Baazex (parent: iQuote) (debug)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "baazex", "--dart-define=CLIENT=baazex", "--dart-define=FLAVOR=baazex", "--dart-define=PARENT=iquote", "--no-enable-impeller"],
-            "flutterMode": "debug",
-            "console": "terminal",
-            "preLaunchTask": "prepare-baazex"
-        },
-        {
-            "name": "Baazex (parent: iQuote) (profile)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "baazex", "--dart-define=CLIENT=baazex", "--dart-define=FLAVOR=baazex", "--dart-define=PARENT=iquote"],
-            "flutterMode": "profile",
-            "console": "terminal",
-            "preLaunchTask": "prepare-baazex"
-        },
-        {
-            "name": "Baazex (parent: iQuote) (release)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "baazex", "--dart-define=CLIENT=baazex", "--dart-define=FLAVOR=baazex", "--dart-define=PARENT=iquote"],
-            "flutterMode": "release",
-            "console": "terminal",
-            "preLaunchTask": "prepare-baazex"
-        },
-        {
             "name": "Baazex (parent: Vantage) (debug)",
             "request": "launch",
             "type": "dart",
