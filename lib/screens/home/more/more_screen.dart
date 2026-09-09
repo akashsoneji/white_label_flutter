@@ -1882,7 +1882,7 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
                           child: Text(
                             _languageService.tr('biometric_open_settings'),
                             style: AppTextStyles.bodyText.copyWith(
-                              color: AppColors.pureWhite,
+                              color: AppColors.isDarkMode ? AppColors.textPrimaryLight : AppColors.pureWhite,
                               fontSize: 14.5.sp,
                               fontWeight: FontWeight.w600,
                             ),
