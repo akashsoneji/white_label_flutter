@@ -31,6 +31,7 @@ class _DashboardBannerCarouselState extends State<DashboardBannerCarousel> {
   int _currentPage = 0;
   Timer? _autoPlayTimer;
   late final BannerController _bannerController;
+  double? _imageAspectRatio;
 
   @override
   void initState() {
@@ -40,7 +41,24 @@ class _DashboardBannerCarouselState extends State<DashboardBannerCarousel> {
         ? Get.find<BannerController>()
         : Get.put(BannerController(), permanent: true);
 
+    _resolveImageAspectRatio();
     _startAutoPlay();
+  }
+
+  void _resolveImageAspectRatio() {
+    final banners = _bannerController.banners;
+    final url = banners.isNotEmpty ? (banners.first.imageUrl ?? '') : '';
+    if (url.isEmpty) return;
+    final stream = NetworkImage(url).resolve(const ImageConfiguration());
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener((info, _) {
+      final ratio = info.image.width / info.image.height;
+      if (mounted && ratio > 0) {
+        setState(() => _imageAspectRatio = ratio);
+      }
+      stream.removeListener(listener);
+    }, onError: (_, __) => stream.removeListener(listener));
+    stream.addListener(listener);
   }
 
   @override
@@ -78,7 +96,9 @@ class _DashboardBannerCarouselState extends State<DashboardBannerCarousel> {
         return const SizedBox.shrink();
       }
 
-      final carouselHeight = widget.height ?? 125.h;
+      final horizontalMargin = (widget.margin ?? EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 6.h)).horizontal;
+      final aspectRatio = _imageAspectRatio ?? 3.35;
+      final carouselHeight = widget.height ?? (1.sw - horizontalMargin) / aspectRatio;
       final radius = widget.borderRadius ?? 14.r;
 
       return Container(
@@ -124,7 +144,7 @@ class _DashboardBannerCarouselState extends State<DashboardBannerCarousel> {
                         child: imageUrl.isNotEmpty
                             ? Image.network(
                                 imageUrl,
-                                fit: BoxFit.fill,
+                                fit: BoxFit.cover,
                                 width: double.infinity,
                                 height: double.infinity,
                                 errorBuilder: (context, error, stackTrace) =>
