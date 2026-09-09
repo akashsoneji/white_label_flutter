@@ -51,7 +51,7 @@ class AppColors {
   // ── Common White & Surface ─────────────────────────────────────────────────
   // Off-white for light surfaces — used for light theme backgrounds
   static Color get whiteColor =>
-      isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFF6F6F6);
+      isDarkMode ? const Color(0xFF2C2C2C) : const Color(0xFFFFFFFF);
   // Pure white for buttons and text — always white regardless of theme
   static Color get pureWhite => const Color(0xFFFFFFFF);
   // Scaffold background — #FFFFFF in light, #121212 in dark

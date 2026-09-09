@@ -393,7 +393,7 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
             ),
           ),
           bottomNavigationBar:
-              isIquote
+              (isIquote || _isVantage)
                   ? TradingBottomNavigation(
                     currentIndex: _currentIndex,
                     onTap: (index) {
@@ -402,11 +402,15 @@ class _TradingMainScreenState extends State<TradingMainScreen> {
                   )
                   : null,
           floatingActionButtonLocation:
-              isIquote ? null : FloatingActionButtonLocation.centerDocked,
+              (isIquote || _isVantage)
+                  ? null
+                  : FloatingActionButtonLocation.centerDocked,
           floatingActionButtonAnimator:
-              isIquote ? null : FloatingActionButtonAnimator.scaling,
+              (isIquote || _isVantage)
+                  ? null
+                  : FloatingActionButtonAnimator.scaling,
           floatingActionButton:
-              isIquote
+              (isIquote || _isVantage)
                   ? null
                   : TradingBottomNavigation(
                     currentIndex: _currentIndex,

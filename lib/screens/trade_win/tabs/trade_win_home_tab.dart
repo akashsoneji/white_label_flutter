@@ -109,7 +109,7 @@ class TradeWinHomeTab extends StatelessWidget {
                       final label =
                           cat == 'all'
                               ? languageService.tr('tw_all')
-                              : TradeWinFormat.categoryLabel(cat);
+                              : controller.categoryDisplayName(cat);
                       return _CatalogFilterChip(
                         label: label,
                         selected: selected,

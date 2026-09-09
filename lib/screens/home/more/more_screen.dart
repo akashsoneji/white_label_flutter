@@ -682,27 +682,47 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
             children: [
               // Profile Section Card
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                 decoration: BoxDecoration(
-                  color: AppColors.whiteColor,
-                  borderRadius: BorderRadius.circular(16.r),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primary,
+                      AppColors.primary.withValues(alpha: 0.72),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(24.r),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.border.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: AppColors.primary.withValues(alpha: 0.28),
+                      blurRadius: 22,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 24.r,
-                      backgroundColor: AppColors.primary.withOpacity(0.1),
-                      child: Icon(
-                        Icons.person,
-                        size: 28.r,
-                        color: AppColors.primary,
+                    Container(
+                      padding: EdgeInsets.all(3.r),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.whiteColor.withValues(alpha: 0.18),
+                        border: Border.all(
+                          color: AppColors.whiteColor.withValues(alpha: 0.45),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: CircleAvatar(
+                        radius: 24.r,
+                        backgroundColor: AppColors.whiteColor.withValues(
+                          alpha: 0.22,
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          size: 28.r,
+                          color: AppColors.whiteColor,
+                        ),
                       ),
                     ),
                     SizedBox(width: 14.w),
@@ -726,9 +746,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                                 return Text(
                                   name,
                                   style: AppTextStyles.bodyText.copyWith(
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w700,
                                     fontSize: 18.sp,
-                                    color: AppColors.textPrimary,
+                                    color: AppColors.whiteColor,
                                   ),
                                 );
                               }),
@@ -741,12 +761,14 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                                     stage,
                                   );
                                   return Icon(
-                                    Icons.verified,
+                                    (completion == 100)
+                                        ? Icons.verified
+                                        : Icons.verified_outlined,
                                     color:
                                         (completion == 100)
-                                            ? AppColors.primary
-                                            : AppColors.icongrey.withValues(
-                                              alpha: 0.3,
+                                            ? AppColors.whiteColor
+                                            : AppColors.whiteColor.withValues(
+                                              alpha: 0.45,
                                             ),
                                     size: 18.r,
                                   );
@@ -772,19 +794,28 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                                       );
                                     }
                                   },
-                                  child:
-                                      isProfileVerified
-                                          ? Icon(
-                                            Icons.remove_red_eye_outlined,
-                                            size: 22.sp,
-                                            color: AppColors.primary,
-                                          )
-                                          : SvgPicture.asset(
-                                            'assets/svg/edit_profile.svg',
-                                            height: 22.h,
-                                            width: 22.w,
-                                            color: AppColors.primary,
-                                          ),
+                                  child: Container(
+                                    padding: EdgeInsets.all(7.r),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.whiteColor.withValues(
+                                        alpha: 0.18,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child:
+                                        isProfileVerified
+                                            ? Icon(
+                                              Icons.remove_red_eye_outlined,
+                                              size: 18.sp,
+                                              color: AppColors.whiteColor,
+                                            )
+                                            : SvgPicture.asset(
+                                              'assets/svg/edit_profile.svg',
+                                              height: 18.h,
+                                              width: 18.w,
+                                              color: AppColors.whiteColor,
+                                            ),
+                                  ),
                                 );
                               }),
                             ],
@@ -803,7 +834,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                             return Text(
                               email,
                               style: AppTextStyles.bodyText.copyWith(
-                                color: AppColors.textGrey,
+                                color: AppColors.whiteColor.withValues(
+                                  alpha: 0.85,
+                                ),
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -817,14 +850,18 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                                 Icon(
                                   Icons.business_rounded,
                                   size: 13.sp,
-                                  color: AppColors.textGrey,
+                                  color: AppColors.whiteColor.withValues(
+                                    alpha: 0.8,
+                                  ),
                                 ),
                                 SizedBox(width: 4.w),
                                 Flexible(
                                   child: Text(
                                     _currentBrokerName!,
                                     style: AppTextStyles.bodyText.copyWith(
-                                      color: AppColors.textGrey,
+                                      color: AppColors.whiteColor.withValues(
+                                        alpha: 0.8,
+                                      ),
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -848,14 +885,14 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                             vertical: 4.h,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.08),
+                            color: AppColors.whiteColor.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Row(
                             children: [
                               Icon(
                                 Icons.keyboard_arrow_down_rounded,
-                                color: AppColors.primary,
+                                color: AppColors.whiteColor,
                                 size: 20.sp,
                               ),
                             ],
@@ -894,7 +931,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   _QuickActionButton(
                     icon: 'deposit',
                     label: languageService.tr('general_deposit'),
-                    color: AppColors.quickActionGreen, // Green
+                    color: AppColors.primary,
                     onTap:
                         () => Get.to(
                           () => PaymentMethodsScreen(accountNumber: ''),
@@ -903,29 +940,32 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   _QuickActionButton(
                     icon: 'withdrawal',
                     label: languageService.tr('general_withdraw'),
-                    color: AppColors.quickActionOrange, // Orange
+                    color: AppColors.primary,
                     onTap: () => Get.toNamed(AppPages.WITHDRAWAL),
                   ),
                   _QuickActionButton(
                     icon: 'internal-transfer',
                     label: languageService.tr('general_transfer'),
-                    color: AppColors.quickActionBlue, // Blue
+                    color: AppColors.primary,
                     onTap: () => Get.toNamed(AppPages.INTERNAL_TRANSFER),
                   ),
                   _QuickActionButton(
                     icon: 'clock',
                     label: languageService.tr('general_history'),
-                    color: AppColors.quickActionPurple, // Purple
+                    color: AppColors.primary,
                     onTap: () => Get.toNamed(AppPages.TRANSACTION_HISTORY),
                   ),
                 ],
               ),
 
-              // Verification Card (if not completed)
+// Verification Card (if not completed)
+              SizedBox(height: 16.h),
 
-              // Financial Section
-              // _SectionHeader(title: languageService.tr('general_financial')),
-              Obx(() {
+              // Services Section
+              _SectionHeader(
+                title: languageService.tr('general_financial'),
+              ),
+Obx(() {
                 final modulesService = Get.find<EnabledModulesService>();
                 final modules = modulesService.modules.value;
                 final showCopyTrading = modules?.copytrading ?? false;
@@ -935,7 +975,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 final items = <Widget>[];
                 if (FlavorConfig.usesIquoteUi()) {
                   items.add(
-                    _MenuItem(
+                    _ServiceTile(
                       icon: 'wallet',
                       label: languageService.tr('dashboard_title'),
                       onTap: () => Get.to(() => DashboardScreen()),
@@ -943,7 +983,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   );
                 }
                 items.addAll([
-                  _MenuItem(
+                  _ServiceTile(
                     icon: 'dollar-circle',
                     label: languageService.tr('general_finance'),
                     onTap: () async {
@@ -951,7 +991,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                       if (mounted) _refreshDataIfNeeded();
                     },
                   ),
-                  _MenuItem(
+                  _ServiceTile(
                     icon: 'dashboard',
                     label: languageService.tr('more_dashboard'),
                     onTap: () async => await _handleSwitchToIB(),
@@ -961,7 +1001,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 if (showPromotional) {
                   items.insert(
                     1,
-                    _MenuItem(
+                    _ServiceTile(
                       icon: 'promotional',
                       label: languageService.tr('general_promotional'),
                       onTap:
@@ -975,7 +1015,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
 
                 if (showCopyTrading) {
                   items.add(
-                    _MenuItem(
+                    _ServiceTile(
                       icon: 'copy-trading',
                       label: languageService.tr('more_copy_trading'),
                       onTap: () => Get.toNamed(AppPages.COPY_TRADING_MAIN),
@@ -984,37 +1024,41 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 }
                 if (showPmam) {
                   items.add(
-                    _MenuItem(
+                    _ServiceTile(
                       icon: 'dashboard',
                       label: 'PAMM',
                       onTap: () => Get.toNamed(AppPages.PMAM_MAIN),
                     ),
                   );
                 }
-                items.add(
-                  _MenuItem(
-                    icon: 'notification', // Fallback, not used when iconData is present
-                    iconData: Icons.notifications_none_outlined,
-                    label: languageService.trf(
-                      'general_notifications',
-                      'Notifications',
-                    ),
-                    onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
-                  ),
-                );
+                // items.add(
+                //   _ServiceTile(
+                //     icon: 'notification',
+                //     iconData: Icons.notifications_none_outlined,
+                //     label: languageService.trf(
+                //       'general_notifications',
+                //       'Notifications',
+                //     ),
+                //     onTap: () => Get.toNamed(AppPages.NOTIFICATIONS),
+                //   ),
+                // );
 
                 items.add(
-                  _MenuItem(
+                  _ServiceTile(
                     icon: 'democontest-icon',
                     label: languageService.tr('more_demo_contest'),
                     onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
                   ),
                 );
 
-                return _CardGroup(children: items);
+                return Wrap(
+                  spacing: 10.w,
+                  runSpacing: 10.w,
+                  children: items,
+                );
               }),
 
-              SizedBox(height: 20.h),
+              SizedBox(height: 14.h),
 
               // Account & Security Section
               _SectionHeader(
@@ -1022,7 +1066,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
               ),
               _CardGroup(children: [const _OneClickTradingMenuItem()]),
 
-              SizedBox(height: 20.h),
+              SizedBox(height: 14.h),
 
               // Others Section
               _SectionHeader(
@@ -1371,73 +1415,130 @@ class _CreateAccountActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = Get.find<LanguageService>();
-    return Row(
-      children: [
-        Expanded(
-          child: _AccountActionButton(
-            icon: 'wallet',
-            label: lang.tr('create_account_open_real_account'),
-            color: AppColors.quickActionGreen,
-            onTap: _openRealAccount,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _AccountActionButton(
+              icon: 'wallet',
+              iconData: Icons.trending_up_rounded,
+              label: lang.tr('create_account_open_real_account'),
+              color: AppColors.primary,
+              filled: true,
+              onTap: _openRealAccount,
+            ),
           ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: _AccountActionButton(
-            icon: 'demo-account',
-            label: lang.tr('create_account_open_demo_account'),
-            color: AppColors.quickActionBlue,
-            onTap: _openDemoAccount,
+          SizedBox(width: 12.w),
+          Expanded(
+            child: _AccountActionButton(
+              icon: 'demo-account',
+              iconData: Icons.school_outlined,
+              label: lang.tr('create_account_open_demo_account'),
+              color: AppColors.primary,
+              onTap: _openDemoAccount,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
 class _AccountActionButton extends StatelessWidget {
   final String icon;
+  final IconData? iconData;
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final bool filled;
 
   const _AccountActionButton({
     required this.icon,
     required this.label,
     required this.color,
     required this.onTap,
+    this.iconData,
+    this.filled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12.r),
+      borderRadius: BorderRadius.circular(18.r),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 14.h),
+        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 14.w),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: color.withValues(alpha: 0.25)),
+          color: filled ? color : AppColors.whiteColor,
+          borderRadius: BorderRadius.circular(18.r),
+          border: Border.all(
+            color: filled ? color : color.withValues(alpha: 0.30),
+            width: filled ? 0 : 1.4,
+          ),
+          boxShadow:
+              filled
+                  ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.30),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ]
+                  : null,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SvgPicture.asset(
-              'assets/svg/more/$icon.svg',
-              width: 18.w,
-              height: 18.w,
-              color: color,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 40.w,
+                  height: 40.w,
+                  decoration: BoxDecoration(
+                    color:
+                        filled
+                            ? AppColors.whiteColor.withValues(alpha: 0.20)
+                            : color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Center(
+                    child:
+                        iconData != null
+                            ? Icon(
+                              iconData,
+                              size: 21.sp,
+                              color: filled ? AppColors.whiteColor : color,
+                            )
+                            : SvgPicture.asset(
+                              'assets/svg/more/$icon.svg',
+                              width: 19.w,
+                              height: 19.w,
+                              color: filled ? AppColors.whiteColor : color,
+                            ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_outward_rounded,
+                  size: 18.sp,
+                  color:
+                      filled
+                          ? AppColors.whiteColor.withValues(alpha: 0.85)
+                          : color.withValues(alpha: 0.6),
+                ),
+              ],
             ),
-            SizedBox(width: 8.w),
+            SizedBox(height: 12.h),
             Text(
               label,
               style: AppTextStyles.bodyText.copyWith(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                fontSize: 13.5.sp,
+                fontWeight: FontWeight.w700,
+                color: filled ? AppColors.whiteColor : AppColors.textPrimary,
+                height: 1.15,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ],
@@ -1446,6 +1547,86 @@ class _AccountActionButton extends StatelessWidget {
     );
   }
 }
+
+class _ServiceTile extends StatelessWidget {
+  final String icon;
+  final IconData? iconData;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ServiceTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.iconData,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final double tileWidth = (1.sw - 32.w - 10.w) / 2;
+    return SizedBox(
+      width: tileWidth,
+      child: Material(
+        color: AppColors.primary.withValues(alpha: 0.04),
+        borderRadius: BorderRadius.circular(14.r),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.10),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 34.w,
+                  height: 34.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Center(
+                    child:
+                        iconData != null
+                            ? Icon(
+                              iconData,
+                              size: 18.sp,
+                              color: AppColors.primary,
+                            )
+                            : SvgPicture.asset(
+                              'assets/svg/more/$icon.svg',
+                              height: 16.h,
+                              width: 16.w,
+                              color: AppColors.primary,
+                            ),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: AppTextStyles.bodyText.copyWith(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 
 class _QuickActionButton extends StatelessWidget {
   final String icon;
@@ -1474,8 +1655,16 @@ class _QuickActionButton extends StatelessWidget {
               width: 48.w,
               height: 48.w,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(12.r),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    color.withValues(alpha: 0.18),
+                    color.withValues(alpha: 0.07),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(15.r),
+                border: Border.all(color: color.withValues(alpha: 0.16)),
               ),
               child: Center(
                 child: SvgPicture.asset(
@@ -1512,15 +1701,28 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 4.w, bottom: 10.h, top: 2.h),
-      child: Text(
-        title.toUpperCase(),
-        style: AppTextStyles.bodyText.copyWith(
-          fontSize: 10.5.sp,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textGrey.withValues(alpha: 0.75),
-          letterSpacing: 1.0,
-        ),
+      padding: EdgeInsets.only(left: 4.w, bottom: 7.h, top: 2.h),
+      child: Row(
+        children: [
+          Container(
+            width: 3.w,
+            height: 12.h,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(3.r),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Text(
+            title.toUpperCase(),
+            style: AppTextStyles.bodyText.copyWith(
+              fontSize: 10.5.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary.withValues(alpha: 0.7),
+              letterSpacing: 1.0,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1534,9 +1736,9 @@ class _CardGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.whiteColor,
+        color: AppColors.primary.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: AppColors.icongrey.withValues(alpha: 0.14)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
       ),
       child: Column(
         children:
@@ -1587,39 +1789,46 @@ class _MenuItem extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(18.r),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 11.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
           child: Row(
             children: [
               Container(
-                width: 34.w,
-                height: 34.w,
+                width: 32.w,
+                height: 32.w,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      (color ?? AppColors.primary).withValues(alpha: 0.14),
+                      (color ?? AppColors.primary).withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(11.r),
                 ),
                 child: Center(
                   child:
                       iconData != null
                           ? Icon(
                             iconData,
-                            size: 20.sp,
-                            color: AppColors.primary,
+                            size: 18.sp,
+                            color: color ?? AppColors.primary,
                           )
                           : SvgPicture.asset(
                             'assets/svg/more/$icon.svg',
-                            height: 18.h,
-                            width: 18.w,
-                            color: AppColors.primary,
+                            height: 16.h,
+                            width: 16.w,
+                            color: color ?? AppColors.primary,
                           ),
                 ),
               ),
-              SizedBox(width: 14.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Text(
                   label,
                   style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w500,
                     color: color ?? AppColors.textPrimary,
                   ),
                 ),
@@ -1627,8 +1836,8 @@ class _MenuItem extends StatelessWidget {
               if (showArrow)
                 Icon(
                   Icons.arrow_forward_ios_rounded,
-                  size: 16.sp,
-                  color: AppColors.icongrey.withValues(alpha: 0.6),
+                  size: 14.sp,
+                  color: AppColors.icongrey.withValues(alpha: 0.55),
                 ),
             ],
           ),
@@ -1669,12 +1878,12 @@ class _OneClickTradingMenuItemState extends State<_OneClickTradingMenuItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 11.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
       child: Row(
         children: [
           Container(
-            width: 34.w,
-            height: 34.w,
+            width: 32.w,
+            height: 32.w,
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.08),
               shape: BoxShape.circle,
@@ -1682,18 +1891,18 @@ class _OneClickTradingMenuItemState extends State<_OneClickTradingMenuItem> {
             child: Center(
               child: Icon(
                 Icons.touch_app_rounded,
-                size: 18.sp,
+                size: 17.sp,
                 color: AppColors.primary,
               ),
             ),
           ),
-          SizedBox(width: 14.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Text(
               'One Click Trading',
               style: AppTextStyles.bodyText.copyWith(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
+                fontSize: 13.5.sp,
+                fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -1955,12 +2164,12 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 11.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
       child: Row(
         children: [
           Container(
-            width: 34.w,
-            height: 34.w,
+            width: 32.w,
+            height: 32.w,
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.08),
               shape: BoxShape.circle,
@@ -1968,18 +2177,18 @@ class _BiometricLoginMenuItemState extends State<_BiometricLoginMenuItem> {
             child: Center(
               child: Icon(
                 Icons.fingerprint_rounded,
-                size: 18.sp,
+                size: 17.sp,
                 color: AppColors.primary,
               ),
             ),
           ),
-          SizedBox(width: 14.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Text(
               _languageService.tr('biometric_login_toggle'),
               style: AppTextStyles.bodyText.copyWith(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w400,
+                fontSize: 13.5.sp,
+                fontWeight: FontWeight.w500,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -2044,12 +2253,12 @@ class _ThemeMenuItem extends StatelessWidget {
         onTap: () => showThemeBottomSheet(context),
         borderRadius: BorderRadius.circular(18.r),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 11.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
           child: Row(
             children: [
               Container(
-                width: 34.w,
-                height: 34.w,
+                width: 32.w,
+                height: 32.w,
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
@@ -2057,25 +2266,25 @@ class _ThemeMenuItem extends StatelessWidget {
                 child: Center(
                   child: Icon(
                     Icons.palette_outlined,
-                    size: 18.sp,
+                    size: 17.sp,
                     color: AppColors.primary,
                   ),
                 ),
               ),
-              SizedBox(width: 14.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Text(
                   languageService.tr('settings_theme'),
                   style: AppTextStyles.bodyText.copyWith(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w400,
+                    fontSize: 13.5.sp,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
                 ),
               ),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                size: 16.sp,
+                size: 14.sp,
                 color: AppColors.icongrey.withValues(alpha: 0.6),
               ),
             ],

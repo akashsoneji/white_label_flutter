@@ -91,62 +91,70 @@ class TradingBottomNavigation extends StatelessWidget {
     }
 
     if (isVantage) {
+      // Solid bottom bar (no bump / no transparent reserved zone → no gray
+      // strip above it). Selected tab gets a normal in-bar circle animation.
+      // Theme-aware via AppColors.card; safe-area padding handled inline so it
+      // sits flush on both Android and iOS.
+      final double bottomInset = MediaQuery.of(context).padding.bottom;
       return Container(
-        height: 56.h,
-        margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 18.h),
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
         decoration: BoxDecoration(
-          color: AppColors.whiteColor,
-          borderRadius: BorderRadius.circular(32.r),
+          color: AppColors.card,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
           boxShadow: [
             BoxShadow(
               color: AppColors.textPrimary.withValues(
-                alpha: AppColors.isDarkMode ? 0.18 : 0.15,
+                alpha: AppColors.isDarkMode ? 0.30 : 0.10,
               ),
-              blurRadius: 22,
-              spreadRadius: 2,
-              offset: const Offset(2, 0),
+              blurRadius: 16,
+              offset: const Offset(0, -3),
             ),
           ],
         ),
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildVantageNavItem(
+        padding: EdgeInsets.only(top: 8.h, bottom: 8.h + bottomInset),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: _buildVantageNavItem(
                 0,
                 "assets/svg/bottom_navigation/trend-up.svg",
                 "assets/svg/bottom_navigation/trend-up_bold.svg",
                 'Prices',
               ),
-              _buildVantageNavItem(
+            ),
+            Expanded(
+              child: _buildVantageNavItem(
                 1,
                 "assets/svg/bottom_navigation/chart.svg",
                 "assets/svg/bottom_navigation/chart_bold.svg",
                 'Chart',
               ),
-              _buildVantageNavItem(
+            ),
+            Expanded(
+              child: _buildVantageNavItem(
                 2,
                 "assets/svg/bottom_navigation/candle.svg",
                 "assets/svg/bottom_navigation/candle_bold.svg",
                 'Position',
               ),
-              _buildVantageNavItem(
+            ),
+            Expanded(
+              child: _buildVantageNavItem(
                 3,
                 "assets/svg/bottom_navigation/wallet.svg",
                 "assets/svg/bottom_navigation/wallet_bold.svg",
                 'Accounts',
               ),
-              _buildVantageNavItem(
+            ),
+            Expanded(
+              child: _buildVantageNavItem(
                 4,
                 "assets/svg/copy_trading/bottom_navigation/dashboard.svg",
                 "assets/svg/copy_trading/bottom_navigation/dashboard_bold.svg",
                 'Dashboard',
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
@@ -240,9 +248,6 @@ class TradingBottomNavigation extends StatelessWidget {
   static const double _tabCapsuleHeight = 42;
   static const double _selectedIconSize = 22;
   static const double _unselectedIconSize = 22;
-
-  Color get _vantageSelectedCapsuleColor =>
-      AppColors.primary.withValues(alpha: 0.10);
 
   BorderRadius get _tabCapsuleRadius =>
       BorderRadius.circular((_tabCapsuleHeight / 2).h);
@@ -392,52 +397,46 @@ class TradingBottomNavigation extends StatelessWidget {
   ) {
     final isSelected = currentIndex == index;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: _tabCapsuleRadius,
-        onTap: () => onTap(index),
-        splashColor: AppColors.primary.withValues(alpha: 0.15),
-        highlightColor: AppColors.primary.withValues(alpha: 0.08),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOut,
-          height: _tabCapsuleHeight.h,
-          padding: EdgeInsets.symmetric(
-            horizontal: isSelected ? 12.w : 8.w,
-            vertical: 4.h,
+    return InkWell(
+      borderRadius: BorderRadius.circular(16.r),
+      onTap: () => onTap(index),
+      splashColor: AppColors.primary.withValues(alpha: 0.12),
+      highlightColor: AppColors.primary.withValues(alpha: 0.06),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Selected tab shows a brand circle behind the icon — a normal
+          // in-bar animation that stays fully inside the bar (no bump).
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+            width: 40.w,
+            height: 40.w,
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primary : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: AppSvgIcon(
+              assetPath: isSelected ? iconBold : icon,
+              height: _selectedIconSize.h,
+              width: _selectedIconSize.w,
+              color: isSelected ? AppColors.whiteColor : AppColors.textGrey,
+            ),
           ),
-          decoration: BoxDecoration(
-            color:
-                isSelected ? _vantageSelectedCapsuleColor : Colors.transparent,
-            borderRadius: _tabCapsuleRadius,
+          SizedBox(height: 3.h),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.subheading.copyWith(
+              fontSize: 11.sp,
+              color: isSelected ? AppColors.primary : AppColors.textGrey,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AppSvgIcon(
-                assetPath: isSelected ? iconBold : icon,
-                height: _selectedIconSize.h,
-                width: _selectedIconSize.w,
-                color: isSelected ? AppColors.primary : AppColors.textGrey,
-              ),
-              if (isSelected) ...[
-                SizedBox(width: 6.w),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.subheading.copyWith(
-                    fontSize: 12.sp,
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }

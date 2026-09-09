@@ -998,7 +998,7 @@ class _BottomDock extends StatelessWidget {
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 14.h + 70.h),
+      padding: EdgeInsets.fromLTRB(12.w, 8.h, 12.w, 14.h),
       child: Obx(() {
         // ──────────────────────────────────────────�───────────────
         // ignore: unused_local_variable

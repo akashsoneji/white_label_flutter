@@ -257,10 +257,10 @@ class DashboardScreen extends StatelessWidget {
     EdgeInsets? margin,
     String? label,
   }) {
-    // Label variant renders a wider pill so the full label fits without
-    // ellipsis (e.g. "Create Account"). Icon-only variant stays compact.
-    final double buttonW = label != null ? 96.w : 36.w;
-    final double buttonH = label != null ? 36.h : 36.h;
+    // Label variant renders a wider pill with a leading "+" icon plus the
+    // label (e.g. "+ Account"). Icon-only variant stays compact.
+    final double buttonH = 36.h;
+    final double? buttonW = label != null ? null : 36.w;
     return Container(
       margin: margin,
       height: buttonH,
@@ -281,9 +281,9 @@ class DashboardScreen extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.whiteColor,
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          minimumSize: Size(buttonW, buttonH),
-          maximumSize: Size(buttonW, buttonH),
+          padding: EdgeInsets.symmetric(horizontal: label != null ? 12.w : 4.w),
+          minimumSize: Size(buttonW ?? 36.w, buttonH),
+          maximumSize: Size(buttonW ?? double.infinity, buttonH),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.r),
@@ -293,18 +293,25 @@ class DashboardScreen extends StatelessWidget {
         ),
         child:
             label != null
-                ? Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.visible,
-                  softWrap: false,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
-                    height: 1.0,
-                    letterSpacing: -0.3,
-                  ),
+                ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, size: 16.sp, color: AppColors.whiteColor),
+                    SizedBox(width: 4.w),
+                    Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.visible,
+                      softWrap: false,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
+                        height: 1.0,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ],
                 )
                 : Center(
                   child: AppSvgIcon(
@@ -449,7 +456,7 @@ class DashboardScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          languageService.tr('dashboard_open_real_account'),
+                          languageService.tr('dashboard_open_real'),
                           style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontSize: 12.sp,
@@ -474,7 +481,7 @@ class DashboardScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          languageService.tr('dashboard_open_demo_account'),
+                          languageService.tr('dashboard_open_demo'),
                           style: AppTextStyles.bodyText.copyWith(
                             color: Colors.white,
                             fontSize: 12.sp,
@@ -1578,7 +1585,7 @@ class DashboardScreen extends StatelessWidget {
                                   onPressed: controller.openRealAccount,
                                   child: Text(
                                     languageService.tr(
-                                      'dashboard_open_real_account',
+                                      'dashboard_open_real',
                                     ),
                                     style: AppTextStyles.black14600h1_71
                                         .copyWith(color: AppColors.primary),
@@ -1602,7 +1609,7 @@ class DashboardScreen extends StatelessWidget {
                                   onPressed: controller.openDemoAccount,
                                   child: Text(
                                     languageService.tr(
-                                      'dashboard_open_demo_account',
+                                      'dashboard_open_demo',
                                     ),
                                     style: AppTextStyles.black14600h1_71
                                         .copyWith(color: AppColors.whiteColor),
@@ -1689,6 +1696,7 @@ class DashboardScreen extends StatelessWidget {
               title: Text('', style: AppTextStyles.screenTitle),
               actions: [
                 _buildHeaderIconButton(
+                  label: 'Account',
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
                   margin: EdgeInsets.only(right: 16.w),
@@ -1773,7 +1781,7 @@ class DashboardScreen extends StatelessWidget {
               // centerTitle: true,
               actions: [
                 _buildHeaderIconButton(
-                  label: 'Create Account',
+                  label: 'Account',
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
                   margin: EdgeInsets.only(right: 16.w),
@@ -1879,6 +1887,9 @@ class DashboardScreen extends StatelessWidget {
   ) {
     final languageService = Get.find<LanguageService>();
     final isVantage = FlavorConfig.isVantage();
+    if (isVantage) {
+      return _buildModernAccountCard(account, accountInfo, languageService);
+    }
     return Container(
       padding: EdgeInsets.all(isVantage ? 14 : 12),
       decoration:
@@ -1887,6 +1898,12 @@ class DashboardScreen extends StatelessWidget {
               : BoxDecoration(
                 color: AppColors.card,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.primary.withValues(
+                    alpha: AppColors.isDarkMode ? 0.30 : 0.8,
+                  ),
+                  width: 2.9,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.divider.withOpacity(0.5),
@@ -2399,6 +2416,355 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  // ── Modern account card (non-Vantage / Pipze / default brands) ────────────
+  // Visual redesign only — every tap target & branch mirrors the legacy
+  // _buildAccountCardContent path exactly.
+  Widget _buildModernAccountCard(
+    MT5Account account,
+    AccountInfo? accountInfo,
+    LanguageService languageService,
+  ) {
+    final isLive = account.accountType.toLowerCase() == 'live';
+    final bool isDark = AppColors.isDarkMode;
+    final Color primary = AppColors.primary;
+    final String equityText =
+        accountInfo != null
+            ? '\$${accountInfo.equity.toStringAsFixed(2)}'
+            : '\$${account.equity}';
+
+    void switchToTrade() {
+      final accountController = Get.find<AccountController>();
+      accountController
+          .setActiveMT5Account(account.metaAccountNumber)
+          .then((_) {
+            if (Get.context != null &&
+                Navigator.of(Get.context!).canPop()) {
+              Navigator.of(Get.context!).pop();
+            }
+            final marketTabIndex = FlavorConfig.usesIquoteUi() ? 1 : 2;
+            if (onNavigateToTab != null) {
+              onNavigateToTab!(marketTabIndex);
+            } else {
+              TradingMainScreen.changeTab(marketTabIndex);
+            }
+          })
+          .catchError((e) {
+            if (kDebugMode) print('Account switch failed: $e');
+          });
+    }
+
+    // Solid, deep primary tint so the card doesn't look washed-out.
+    final Color tileBg = primary.withValues(alpha: isDark ? 0.28 : 0.16);
+    final Color headerBg = primary.withValues(alpha: isDark ? 0.24 : 0.14);
+
+    Widget iconTile({
+      required String asset,
+      required VoidCallback onTap,
+      double size = 17,
+    }) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(9.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 7.h, horizontal: 8.w),
+          decoration: BoxDecoration(
+            color: tileBg,
+            borderRadius: BorderRadius.circular(9.r),
+          ),
+          child: AppSvgIcon(
+            assetPath: asset,
+            height: size.h,
+            width: size.w,
+            color: primary,
+          ),
+        ),
+      );
+    }
+
+    Widget actionBtn({
+      required String svg,
+      required String label,
+      required VoidCallback onTap,
+    }) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(9.r),
+        child: Container(
+          constraints: BoxConstraints(minHeight: 32.h),
+          padding: EdgeInsets.symmetric(vertical: 7.h, horizontal: 6.w),
+          decoration: BoxDecoration(
+            color: tileBg,
+            borderRadius: BorderRadius.circular(9.r),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppSvgIcon(
+                assetPath: svg,
+                height: 15.h,
+                width: 15.w,
+                color: primary,
+              ),
+              SizedBox(width: 6.w),
+              Flexible(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.bodyText.copyWith(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w600,
+                    color: primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: primary.withValues(alpha: isDark ? 0.55 : 0.45),
+          width: 0.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withValues(alpha: isDark ? 0.28 : 0.16),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Header strip (compact, deep primary tint) ─────────────────
+          Container(
+            padding: EdgeInsets.fromLTRB(12.w, 8.h, 10.w, 8.h),
+            decoration: BoxDecoration(
+              color: headerBg,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(14.r),
+                topRight: Radius.circular(14.r),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              account.metaAccountNumber,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          // Live = solid primary, Demo = primary outline
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 2.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isLive ? primary : Colors.transparent,
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(color: primary, width: 1),
+                            ),
+                            child: Text(
+                              account.accountType.capitalizeFirst ?? '',
+                              style: AppTextStyles.bodyText.copyWith(
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w700,
+                                color:
+                                    isLive
+                                        ? (isDark
+                                            ? Colors.black
+                                            : Colors.white)
+                                        : primary,
+                              ),
+                            ),
+                          ),
+                          if (account.isScratchCardAccount) ...[
+                            SizedBox(width: 6.w),
+                            BrandLogo(
+                              source: "assets/svg/more/scratch.svg",
+                              height: 14,
+                              width: 14,
+                              color: primary,
+                            ),
+                          ],
+                        ],
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        account.masterGroupId,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodyText.copyWith(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 6.w),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      languageService.tr('dashboard_equity'),
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textGrey,
+                      ),
+                    ),
+                    SizedBox(width: 5.w),
+                    Text(
+                      equityText,
+                      style: AppTextStyles.bodyText.copyWith(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(width: 3.w),
+                    InkWell(
+                      onTap: () => _showAccountInfoBottomSheet(account),
+                      borderRadius: BorderRadius.circular(999),
+                      child: AppSvgIcon(
+                        assetPath: 'assets/svg/info-circle.svg',
+                        height: 19,
+                        width: 19,
+                        color: primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // ── Action row (compact, primary-only) ─────────────────────────
+          Padding(
+            padding: EdgeInsets.fromLTRB(8.w, 8.h, 8.w, 8.h),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    iconTile(
+                      asset: 'assets/svg/bottom_navigation/candle_bold.svg',
+                      onTap: switchToTrade,
+                    ),
+                    SizedBox(width: 6.w),
+                    Expanded(
+                      child: actionBtn(
+                        svg: 'assets/svg/deshboard/money-recive.svg',
+                        label: languageService.tr('dashboard_deposit'),
+                        onTap: () {
+                          if (isLive) {
+                            controller.onDepositRealAccount(
+                              account.metaAccountNumber,
+                            );
+                          } else {
+                            controller.onDeposit(account.metaAccountNumber);
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    Expanded(
+                      child: actionBtn(
+                        svg:
+                            isLive
+                                ? "assets/svg/deshboard/money-send.svg"
+                                : 'assets/svg/more/settings.svg',
+                        label:
+                            isLive
+                                ? languageService.tr('dashboard_withdraw')
+                                : languageService.tr('more_settings'),
+                        onTap: () {
+                          if (isLive) {
+                            controller.onWithdraw(account.metaAccountNumber);
+                          } else {
+                            controller.onSettings(account.metaAccountNumber);
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    iconTile(
+                      asset: 'assets/svg/deshboard/Three_dot.svg',
+                      onTap: () => _showAccountMenuBottomSheet(account),
+                    ),
+                  ],
+                ),
+                if (!account.isPrimaryAccount) ...[
+                  SizedBox(height: 6.h),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: switchToTrade,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor:
+                            isDark ? Colors.black : Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(9.r),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 7.h),
+                        minimumSize: Size(double.infinity, 34.h),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AppSvgIcon(
+                            assetPath: 'assets/svg/deshboard/switch_icon.svg',
+                            height: 15.h,
+                            width: 15.w,
+                            color: isDark ? Colors.black : Colors.white,
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            languageService.tr('dashboard_switch_to_trade'),
+                            style: AppTextStyles.bodyText.copyWith(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.black : Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );

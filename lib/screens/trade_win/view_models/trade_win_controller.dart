@@ -33,13 +33,34 @@ class TradeWinController extends GetxController {
   final RxBool isProductsFiltering = false.obs;
   final RxSet<String> allKnownCategories = <String>{'all'}.obs;
 
+  /// Reward categories returned by the API (slug -> display name).
+  /// Drives the filter chips so categories with no product on the current
+  /// page (e.g. Electronics, Travel) still appear, matching the web UI.
+  final RxList<TradeWinRewardCategory> rewardCategories =
+      <TradeWinRewardCategory>[].obs;
+
   List<String> get categories {
-    final set = <String>{'all'};
-    set.addAll(allKnownCategories);
+    final list = <String>['all'];
+    if (rewardCategories.isNotEmpty) {
+      list.addAll(rewardCategories.map((c) => c.slug));
+      return list;
+    }
+    // Fallback: derive from loaded products if the API omitted the list.
+    final set = <String>{};
+    set.addAll(allKnownCategories.where((c) => c != 'all'));
     for (final p in products) {
       if (p.category.isNotEmpty) set.add(p.category.toLowerCase());
     }
-    return set.toList();
+    list.addAll(set);
+    return list;
+  }
+
+  /// Display label for a category slug, preferring the API-provided name.
+  String categoryDisplayName(String slug) {
+    for (final c in rewardCategories) {
+      if (c.slug.toLowerCase() == slug.toLowerCase()) return c.name;
+    }
+    return slug;
   }
 
   List<TradeWinProductModel> get filteredProducts {
@@ -159,6 +180,21 @@ class TradeWinController extends GetxController {
       } else {
         leaderboard.clear();
       }
+
+      final rewardCategoriesRaw = data['reward_categories'];
+      if (rewardCategoriesRaw is List) {
+        rewardCategories.assignAll(
+          rewardCategoriesRaw
+              .whereType<Map>()
+              .map(
+                (e) => TradeWinRewardCategory.fromJson(
+                  Map<String, dynamic>.from(e),
+                ),
+              )
+              .where((c) => c.slug.isNotEmpty)
+              .toList(),
+        );
+      }
     } catch (e) {
       errorMessage.value = e.toString();
     } finally {
@@ -233,7 +269,13 @@ class TradeWinController extends GetxController {
       fetchPastWins(reset: false, loadMore: true);
 
   void selectCategory(String category) {
-    selectedCategory.value = category.toLowerCase();
+    final normalized = category.toLowerCase();
+    if (selectedCategory.value == normalized && !isProductsFiltering.value) {
+      return;
+    }
+    // Server-side filter: re-fetch page 1 for the selected category so
+    // products that aren't on the current page (e.g. Travel) also load.
+    fetchProducts(category: normalized, audience: selectedAudience.value);
   }
 
   Map<String, dynamic>? _asMap(dynamic raw) {
@@ -302,4 +344,20 @@ class _ProductsPageParse {
     required this.currentPage,
     required this.lastPage,
   });
+}
+
+class TradeWinRewardCategory {
+  final String slug;
+  final String name;
+
+  const TradeWinRewardCategory({required this.slug, required this.name});
+
+  factory TradeWinRewardCategory.fromJson(Map<String, dynamic> json) {
+    final slug = (json['slug'] ?? '').toString();
+    final name = (json['name'] ?? '').toString();
+    return TradeWinRewardCategory(
+      slug: slug,
+      name: name.isNotEmpty ? name : slug,
+    );
+  }
 }
