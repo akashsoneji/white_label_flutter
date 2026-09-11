@@ -1092,7 +1092,9 @@ class _PendingOrderContentState extends State<PendingOrderContent> {
                     decoration: InputDecoration(
                       filled: false,
                       fillColor: Colors.transparent,
-                      hintText: 'Enter lots',
+                      hintText: Get.find<LanguageService>().tr(
+                        'pending_order_enter_lots',
+                      ),
                       hintStyle: AppTextStyles.label.copyWith(
                         fontSize: 12.sp,
                         color: AppColors.textGrey,

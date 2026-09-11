@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 // Message Model
 class ChatMessage {
@@ -171,9 +172,10 @@ class ChatController extends GetxController {
 
   void openVoiceInput() {
     if (Get.isRegistered<AppNotificationController>()) {
+      final lang = Get.find<LanguageService>();
       Get.find<AppNotificationController>().showInfo(
-        message: 'Voice input feature would be implemented here',
-        title: 'Voice Input',
+        message: lang.tr('chat_with_us_voice_input_placeholder'),
+        title: lang.tr('chat_with_us_voice_input_title'),
       );
     }
   }

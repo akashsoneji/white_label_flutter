@@ -27,6 +27,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
@@ -179,7 +180,9 @@ class TenaxChartWebViewState extends State<TenaxChartWebView> {
     if (_loading) {
       return Center(
         child: CommonLoadingWidget(
-          message: 'Initializing chart...',
+          message: Get.find<LanguageService>().tr(
+            'tenax_chart_webview_initializing_chart',
+          ),
           size: 40.0,
           color: AppColors.primary,
         ),

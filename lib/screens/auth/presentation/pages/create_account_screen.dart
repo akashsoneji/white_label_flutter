@@ -273,8 +273,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         Navigator.of(context).pop();
 
         CustomToastService.showSuccess(
-          title: 'Success',
-          message: 'Account created successfully!',
+          title: TranslationUtils.tr('general_success'),
+          message: TranslationUtils.tr(
+            'create_account_account_created_successfully',
+          ),
         );
 
         if (_enableBiometricAfterRegister) {

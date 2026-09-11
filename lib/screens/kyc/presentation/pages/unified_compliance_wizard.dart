@@ -103,7 +103,9 @@ class _UnifiedComplianceWizardState extends State<UnifiedComplianceWizard> {
                       controller.isSchemaLoading.value
                           ? Center(
                             child: CommonLoadingWidget(
-                              message: 'Loading details...',
+                              message: TranslationUtils.tr(
+                                'unified_compliance_wizard_loading_details',
+                              ),
                               size: 40.0,
                               color: AppColors.primary,
                             ),

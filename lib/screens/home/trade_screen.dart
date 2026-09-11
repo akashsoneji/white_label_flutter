@@ -2884,8 +2884,10 @@ class _TradeScreenState extends State<TradeScreen> {
                       // Pending order actions
                       _buildActionOption(
                         icon: Icons.cancel,
-                        title: 'Cancel Order',
-                        subtitle: 'Cancel this pending order',
+                        title: languageService.tr('trade_cancel_order'),
+                        subtitle: languageService.tr(
+                          'trade_cancel_order_subtitle',
+                        ),
                         onTap: () async {
                           Get.back(closeOverlays: true);
                           await _showCancelOrderConfirmation(

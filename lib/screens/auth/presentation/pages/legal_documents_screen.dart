@@ -285,8 +285,10 @@ class _LegalDocumentsScreenState extends State<LegalDocumentsScreen> {
       if (registrationSuccess) {
         _clearOtpFields?.call();
         CustomToastService.showSuccess(
-          title: 'Success',
-          message: 'OTP resent successfully. Please check your email.',
+          title: TranslationUtils.tr('general_success'),
+          message: TranslationUtils.tr(
+            'legal_documents_screen_otp_resent_successfully_please_check_your',
+          ),
         );
       } else {
         final errorMessage =

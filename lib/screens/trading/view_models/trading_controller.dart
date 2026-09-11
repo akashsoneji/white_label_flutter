@@ -6,6 +6,7 @@ import 'package:crm_app/models/trade_history_model.dart';
 import 'package:crm_app/models/order_types.dart';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/screens/trading/data/repositories/trading_repository.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/utils/precision_helper.dart';
 import 'package:crm_app/utils/app_logger.dart';
@@ -1589,7 +1590,10 @@ class TradingController extends GetxController {
     _errorMessage.value = error;
     if (error.isNotEmpty) {
       // Get.snackbar('Error', error, snackPosition: SnackPosition.TOP);
-      CustomToastService.showError(title: 'Error', message: error);
+      CustomToastService.showError(
+        title: TranslationUtils.tr('general_error'),
+        message: error,
+      );
     }
   }
 

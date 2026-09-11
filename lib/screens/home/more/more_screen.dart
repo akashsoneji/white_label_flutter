@@ -515,7 +515,10 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Add Account', style: AppTextStyles.heading),
+                  Text(
+                    languageService.tr('more_screen_add_account'),
+                    style: AppTextStyles.heading,
+                  ),
                   SizedBox(height: 12.h),
                   Text(
                     'Current broker: $selectedBrokerName',
@@ -570,7 +573,10 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
       final ibmController = Get.put(IbmController());
       await ibmController.checkSystemAndNavigate();
     } catch (e) {
-      CustomToastService.showError(message: 'Error checking IB status: $e');
+      CustomToastService.showError(
+        message:
+            '${languageService.tr('more_screen_error_checking_ib_status')}: $e',
+      );
     }
   }
 
@@ -1079,12 +1085,12 @@ Obx(() {
                     label: languageService.tr('ticket_title'),
                     onTap: () => Get.toNamed(AppPages.TICKET_LIST),
                   ),
-                  // _MenuItem(
-                  //   icon: 'language',
-                  //   label: languageService.tr('language_selector_title'),
-                  //   onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
-                  //   iconData: Icons.language,
-                  // ),
+                  _MenuItem(
+                    icon: 'language',
+                    label: languageService.tr('settings_language_title'),
+                    onTap: () => Get.toNamed(AppPages.LANGUAGE_SELECTOR),
+                    iconData: Icons.language,
+                  ),
                   _ThemeMenuItem(),
                   const _BiometricLoginMenuItem(),
                   _MenuItem(

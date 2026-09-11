@@ -303,8 +303,8 @@ class _KycDetailsScreenState extends State<KycDetailsScreen> {
           topRight: Radius.circular(20.0),
         ),
         inputDecoration: InputDecoration(
-          labelText: 'Search',
-          hintText: 'Start typing to search',          
+          labelText: TranslationUtils.tr('kyc_details_screen_search'),
+          hintText: TranslationUtils.tr('edit_profile_start_typing'),
           prefixIcon: Icon(Icons.search, color: AppColors.textPrimary),
           border: OutlineInputBorder(
             borderSide: BorderSide(

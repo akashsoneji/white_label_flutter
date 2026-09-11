@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/text_styles.dart';
 import 'package:crm_app/screens/finance/view_models/internal_transfer_history_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
@@ -527,7 +528,7 @@ class InternalTransferCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildAccountBlock(
-                    title: 'From',
+                    title: TranslationUtils.tr('internal_transfer_history_from'),
                     account: item.fromAccount,
                     alignment: CrossAxisAlignment.start,
                   ),

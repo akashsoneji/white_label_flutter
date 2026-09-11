@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:crm_app/constants/api_const.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/models/bank_withdralList_model.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
@@ -312,7 +313,8 @@ class KycBankController extends GetxController {
       // Use AppNotificationController for consistent notifications
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Error sending OTP: $e',
+        message:
+            '${TranslationUtils.tr('kyc_bank_controller_error_sending_otp')}: $e',
         );
       }
     } finally {

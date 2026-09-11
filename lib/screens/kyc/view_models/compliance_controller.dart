@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/core/network/api_client.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/auth/view_models/auth_controller.dart';
@@ -259,7 +260,10 @@ class ComplianceController extends GetxController {
         if (isRequired && isFieldVisible(f as Map<String, dynamic>)) {
           final val = formAnswers[key];
           if (val == null || val.toString().trim().isEmpty) {
-            CustomToastService.showWarning(message: 'Please complete all required fields: ${f['label']}');
+        CustomToastService.showWarning(
+          message:
+              '${TranslationUtils.tr('compliance_controller_please_complete_all_required_fields')}: ${f['label']}',
+        );
             isLoading.value = false;
             return false;
           }

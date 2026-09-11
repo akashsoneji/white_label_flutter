@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
@@ -137,7 +138,9 @@ class _CregisSuccessScreenState extends State<CregisSuccessScreen> {
         _statusText = 'Payment confirmed!';
       });
     }
-    CustomToastService.showSuccess(message: 'Deposit successful!');
+      CustomToastService.showSuccess(
+        message: TranslationUtils.tr('deposit_deposit_successful'),
+      );
     try {
       Get.find<DashboardController>().markMT5AccountsAsStale();
     } catch (_) {}

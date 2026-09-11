@@ -432,8 +432,8 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('trade_no_active_account'),
         );
         return;
       }

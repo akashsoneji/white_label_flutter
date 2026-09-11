@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class OtpModal extends StatefulWidget {
   final String email;
@@ -476,9 +477,10 @@ class _OtpModalState extends State<OtpModal> {
         // Default behavior
         Get.back(closeOverlays: true); // Close modal
         if (Get.isRegistered<AppNotificationController>()) {
+          final lang = Get.find<LanguageService>();
           Get.find<AppNotificationController>().showSuccess(
-            message: 'OTP verified successfully!',
-            title: 'Success',
+            message: lang.tr('otp_modal_otp_verified_successfully'),
+            title: lang.tr('general_success'),
           );
         }
       }

@@ -250,7 +250,9 @@ class _EnhancedPendingOrderContentState
                 child: TextField(
                   controller: priceController,
                   decoration: InputDecoration(
-                    hintText: 'Enter price',
+                    hintText: Get.find<LanguageService>().tr(
+                      'trading_order_enter_price',
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.r),
                     ),

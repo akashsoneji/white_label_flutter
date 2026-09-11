@@ -322,7 +322,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           ),
         ),
         decoration: InputDecoration(
-          labelText: 'Withdrawal Method',
+          labelText: TranslationUtils.tr(
+            'withdrawal_screen_withdrawal_method_label',
+          ),
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(

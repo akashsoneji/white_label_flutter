@@ -170,7 +170,7 @@ class _KycBankScreenState extends State<KycBankScreen> {
     try {
       return isFromKYC!
           ? KycScaffold(
-            title: 'Add Withdrawal Method',
+            title: TranslationUtils.tr('bank_list_screen_add_withdrawal_method'),
             body: Container(
               color: AppColors.whiteColor, // theme-aware
               child: Stack(

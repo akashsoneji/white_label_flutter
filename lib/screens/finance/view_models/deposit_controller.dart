@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
 // import your DepositService here when ready
@@ -61,7 +62,10 @@ class DepositController extends GetxController {
       }
     } catch (e) {
       _setLoading(false);
-      CustomToastService.showError(message: 'Error while depositing: $e');
+      CustomToastService.showError(
+        message:
+            '${TranslationUtils.tr('deposit_controller_error_while_depositing')}: $e',
+      );
     } finally {
       _setLoading(false);
     }

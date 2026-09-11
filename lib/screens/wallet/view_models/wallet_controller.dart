@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/utils/precision_helper.dart';
@@ -241,7 +242,9 @@ class WalletController extends GetxController {
   Future<void> depositWallet() async {
     if (transferFromAccount.value.isEmpty) {
       CustomToastService.showError(
-        message: 'Please select Transfer From',
+        message: TranslationUtils.tr(
+          'wallet_controller_please_select_transfer_from',
+        ),
       );
       return;
     }
@@ -448,7 +451,9 @@ class WalletController extends GetxController {
     // Common validation
     if (transferFromAccount.value.isEmpty) {
       CustomToastService.showError(
-        message: 'Please select Transfer From',
+        message: TranslationUtils.tr(
+          'wallet_controller_please_select_transfer_from',
+        ),
       );
       return false;
     }

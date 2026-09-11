@@ -6,6 +6,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
 import 'package:crm_app/screens/more/view_models/chat_with_us_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class ChatWithUsScreen extends StatelessWidget {
   const ChatWithUsScreen({super.key});
@@ -307,7 +308,9 @@ class ChatWithUsScreen extends StatelessWidget {
                 child: TextField(
                   controller: controller.messageController,
                   decoration: InputDecoration(
-                    hintText: 'Ask me anything...',
+                    hintText: Get.find<LanguageService>().tr(
+                      'chat_with_us_ask_me_anything',
+                    ),
                     hintStyle: AppTextStyles.bodyText.copyWith(color: Colors.grey[500], fontSize: 15),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 20,

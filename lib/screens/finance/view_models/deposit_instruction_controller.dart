@@ -5,6 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'dart:io';
 import 'dart:async';
 
@@ -123,7 +124,8 @@ class DepositInstructionController extends GetxController {
     } catch (e) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to fetch crypto address: ${e.toString()}',
+        message:
+            '${TranslationUtils.tr('deposit_instruction_failed_to_fetch_crypto_address')}: ${e.toString()}',
           title: 'Error',
         );
       }

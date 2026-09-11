@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/more/view_models/more_controller.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
@@ -86,7 +87,7 @@ class KycIntroScreen extends StatelessWidget {
                     SizedBox(height: 28.h),
                     _buildTimelineStep(
                       stepNumber: 1,
-                      title: 'Profile Setup',
+      title: TranslationUtils.tr('kyc_intro_screen_profile_setup'),
                       state: step1State,
                       headerIcon: Icons.person_outline_rounded,
                       isLast: false,

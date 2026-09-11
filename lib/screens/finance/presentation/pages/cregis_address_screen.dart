@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
 import 'package:crm_app/screens/finance/view_models/transaction_history_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -130,7 +131,7 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
       });
     }
     CustomToastService.showSuccess(
-      message: 'Deposit confirmed! Balance updated.',
+      message: TranslationUtils.tr('cregis_deposit_confirmed_balance_updated'),
     );
     try {
       Get.find<DashboardController>().markMT5AccountsAsStale();

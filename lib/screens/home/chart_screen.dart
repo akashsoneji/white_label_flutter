@@ -813,8 +813,8 @@ Placing Order:
 
         // Show success message (non-blocking)
         CustomToastService.showSuccess(
-          title: 'Success',
-          message: 'Order placed successfully',
+          title: languageService.tr('general_success'),
+          message: languageService.tr('chart_order_placed_success'),
         );
 
         // Pre-connect WebSocket in background (non-blocking, fire and forget)

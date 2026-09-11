@@ -1242,14 +1242,18 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('Close Position'),
+                title: Text(
+                  TranslationUtils.tr('iquote_position_close_position'),
+                ),
                 onTap: () {
                   Get.back();
                   Get.to(() => ClosePositionScreen(position: position));
                 },
               ),
               ListTile(
-                title: const Text('Edit Order'),
+                title: Text(
+                  TranslationUtils.tr('edit_order_screen_edit_order'),
+                ),
                 onTap: () {
                   Get.back();
                   Get.to(() => EditOrderScreen(position: position));
@@ -1568,8 +1572,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
 
     if (activeAccount == null) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'No active account found',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('trade_no_active_account'),
       );
       return;
     }
@@ -1618,8 +1622,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
     } catch (e) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to close positions: ${e.toString()}',
-          title: 'Error',
+          message:
+              '${TranslationUtils.tr('iquote_position_failed_to_close_positions')}: ${e.toString()}',
+          title: TranslationUtils.tr('general_error'),
         );
       }
     }
@@ -1823,8 +1828,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('trade_no_active_account'),
         );
         return;
       }
@@ -1835,8 +1840,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       );
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to close position: $e',
+        title: TranslationUtils.tr('general_error'),
+        message:
+            '${TranslationUtils.tr('iquote_position_failed_to_close_position')}: $e',
       );
     }
   }
@@ -1975,8 +1981,8 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       final activeAccount = accountController.activeMT5Account;
       if (activeAccount == null) {
         CustomToastService.showError(
-          title: 'Error',
-          message: 'No active account found',
+          title: TranslationUtils.tr('general_error'),
+          message: TranslationUtils.tr('trade_no_active_account'),
         );
         return;
       }
@@ -1987,8 +1993,9 @@ class _IQuotePositionScreenState extends State<IQuotePositionScreen> {
       );
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to cancel order: $e',
+        title: TranslationUtils.tr('general_error'),
+        message:
+            '${TranslationUtils.tr('iquote_position_failed_to_cancel_order')}: $e',
       );
     }
   }

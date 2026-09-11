@@ -127,8 +127,8 @@ class _RiyadexCreateAccountScreenState
     if (_emailController.text.trim().isEmpty ||
         !AuthFormValidation.isValidEmail(_emailController.text.trim())) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Please enter a valid email address',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('forgot_password_Please_enter_a_valid_email'),
       );
       return;
     }

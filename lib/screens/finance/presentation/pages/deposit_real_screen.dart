@@ -269,7 +269,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       readOnly: true, // field is non-editable
       onTap: null, // disable dropdown tap
       decoration: InputDecoration(
-        labelText: 'Payment Mode',
+        labelText: TranslationUtils.tr('deposit_payment_mode'),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -309,7 +309,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         ),
       ),
       decoration: InputDecoration(
-        labelText: 'Deposit to',
+        labelText: TranslationUtils.tr('deposit_real_deposit_to'),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -534,7 +534,9 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
     final raw = amountController.text.trim();
     final entered = double.tryParse(raw);
     if (entered == null || entered <= 0) {
-      CustomToastService.showError(message: 'Please enter a valid amount');
+      CustomToastService.showError(
+        message: TranslationUtils.tr('deposit_real_please_enter_valid_amount'),
+      );
       return;
     }
 
@@ -545,13 +547,15 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
       final converted = _convertedAmount(entered);
       if (minLimit != null && converted < minLimit) {
         CustomToastService.showError(
-          message: 'Amount cannot be less than minimum limit of \$${minLimit.toStringAsFixed(2)}',
+          message:
+              '${TranslationUtils.tr('deposit_real_amount_less_than_min_limit')} \$${minLimit.toStringAsFixed(2)}',
         );
         return;
       }
       if (maxLimit != null && converted > maxLimit) {
         CustomToastService.showError(
-          message: 'Amount cannot be more than maximum limit of \$${maxLimit.toStringAsFixed(2)}',
+          message:
+              '${TranslationUtils.tr('deposit_real_amount_more_than_max_limit')} \$${maxLimit.toStringAsFixed(2)}',
         );
         return;
       }

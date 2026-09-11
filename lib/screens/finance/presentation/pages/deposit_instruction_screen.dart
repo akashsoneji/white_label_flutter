@@ -619,7 +619,9 @@ class _DepositInstructionScreenState extends State<DepositInstructionScreen> {
             color: AppColors.textPrimary,
           ),
           decoration: InputDecoration(
-            hintText: 'Enter UTR or transaction reference',
+            hintText: TranslationUtils.tr(
+              'deposit_instruction_screen_enter_utr_or_transaction_reference',
+            ),
             hintStyle: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               color: Colors.grey,

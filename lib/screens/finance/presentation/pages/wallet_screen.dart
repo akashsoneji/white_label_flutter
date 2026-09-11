@@ -343,7 +343,9 @@ class _WalletScreenState extends State<WalletScreen> {
                                       ClipboardData(text: walletId),
                                     );
                                     CustomToastService.showSuccess(
-                                      message: 'Wallet ID copied',
+                                      message: TranslationUtils.tr(
+                                        'wallet_screen_wallet_id_copied',
+                                      ),
                                     );
                                   }
                                 },

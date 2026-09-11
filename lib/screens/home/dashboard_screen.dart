@@ -3437,8 +3437,12 @@ class AccountMenuBottomSheet extends StatelessWidget {
                           floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textGrey,
                           ),
-                          labelText: 'New Password',
-                          hintText: 'Enter new password',
+                          labelText: languageService.tr(
+                            'create_new_password_new_password_label',
+                          ),
+                          hintText: languageService.tr(
+                            'create_new_password_screen_enter_new_password',
+                          ),
                           suffixIcon: IconButton(
                             icon: Icon(
                               obscurePassword.value
@@ -3482,8 +3486,12 @@ class AccountMenuBottomSheet extends StatelessWidget {
                           return null;
                         },
                         decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          hintText: 'Confirm new password',
+                          labelText: languageService.tr(
+                            'auth_confirm_password_label',
+                          ),
+                          hintText: languageService.tr(
+                            'dashboard_confirm_new_password_hint',
+                          ),
                           floatingLabelStyle: AppTextStyles.bodyText.copyWith(
                             color: AppColors.textGrey,
                           ),
@@ -3685,8 +3693,12 @@ class AccountMenuBottomSheet extends StatelessWidget {
                       () => RTLHelper.rtlTextField(
                         obscureText: obscurePassword.value,
                         decoration: InputDecoration(
-                          labelText: 'New Investor Password',
-                          hintText: 'Enter new investor password (8-16 chars)',
+                          labelText: languageService.tr(
+                            'dashboard_new_investor_password_label',
+                          ),
+                          hintText: languageService.tr(
+                            'dashboard_new_investor_password_hint',
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(color: AppColors.border),
@@ -3755,8 +3767,12 @@ class AccountMenuBottomSheet extends StatelessWidget {
                       () => RTLHelper.rtlTextField(
                         obscureText: obscureConfirmPassword.value,
                         decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          hintText: 'Confirm new investor password',
+                          labelText: languageService.tr(
+                            'auth_confirm_password_label',
+                          ),
+                          hintText: languageService.tr(
+                            'dashboard_confirm_investor_password_hint',
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                             borderSide: BorderSide(color: AppColors.border),
@@ -3933,7 +3949,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
               const SizedBox(height: 16),
               ListTile(
                 leading: Icon(Icons.lock_outline, color: AppColors.primary),
-                title: Text('Change Master Password'),
+                title: Text(TranslationUtils.tr('change_master_password')),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: () {
                   Get.back();
@@ -3942,7 +3958,9 @@ class AccountMenuBottomSheet extends StatelessWidget {
               ),
               ListTile(
                 leading: Icon(Icons.vpn_key_outlined, color: AppColors.primary),
-                title: Text('Reset Investor Password'),
+                title: Text(
+                  TranslationUtils.tr('dashboard_reset_investor_password'),
+                ),
                 trailing: const Icon(Icons.chevron_right, color: Colors.grey),
                 onTap: () {
                   Get.back();

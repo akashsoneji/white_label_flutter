@@ -141,7 +141,7 @@ class _DepositScreenState extends State<DepositScreen> {
         _SingleDecimalTextFormatter(),
       ],
       decoration: InputDecoration(
-        labelText: 'Amount',
+        labelText: TranslationUtils.tr('deposit_amount'),
         contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:crm_app/screens/home/more/camera_screen.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class IdScannerController extends GetxController {
   var frontImagePath = ''.obs;
@@ -47,7 +48,9 @@ class IdScannerController extends GetxController {
         print('Error starting camera: $e');
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Failed to start camera. Please check permissions.',
+        message: TranslationUtils.tr(
+          'id_scanner_controller_failed_to_start_camera_please_check',
+        ),
             title: 'Error',
           );
         }

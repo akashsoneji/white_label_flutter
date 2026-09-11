@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -103,7 +104,9 @@ class KycDocsController extends GetxController {
       // Enforce gating at controller level as a safety net
       if (!canUpload(documentType)) {
         CustomToastService.showInfo(
-          message: 'This document is optional or not allowed to upload now',
+          message: TranslationUtils.tr(
+            'kyc_docs_controller_this_document_is_optional_or_not',
+          ),
         );
         return;
       }
@@ -346,7 +349,9 @@ class KycDocsController extends GetxController {
       // Enforce gating at controller level as a safety net
       if (!canUpload(documentType)) {
         CustomToastService.showInfo(
-          message: 'This document is optional or not allowed to upload now',
+          message: TranslationUtils.tr(
+            'kyc_docs_controller_this_document_is_optional_or_not',
+          ),
         );
         return;
       }

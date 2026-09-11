@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart' show CustomToastService;
 import 'package:crm_app/widgets/congratulations_dialog.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
@@ -121,8 +122,10 @@ class CreateTradingAccountController extends GetxController {
     if (depositAmount.value.isEmpty) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter deposit amount',
-          title: 'Error',
+          message: TranslationUtils.tr(
+            'create_trading_account_controller_please_enter_deposit_amount',
+          ),
+          title: TranslationUtils.tr('general_error'),
         );
       }
       return;

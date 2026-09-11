@@ -56,15 +56,21 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'Your new password must be different from previously used passwords.',
+                  Get.find<LanguageService>().tr(
+                    'create_new_password_screen_your_new_password_must_be_different',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 16),
                   textAlign: TextAlign.start,
                 ),
                 SizedBox(height: 40),
                 RTLHelper.rtlTextField(
                   controller: passwordController,
-                  labelText: 'New Password',
-                  hintText: 'Enter new password',
+                  labelText: Get.find<LanguageService>().tr(
+                    'create_new_password_new_password_label',
+                  ),
+                  hintText: Get.find<LanguageService>().tr(
+                    'create_new_password_screen_enter_new_password',
+                  ),
                   obscureText: obscurePassword,
                   suffixIcon: IconButton(
                     icon: Icon(

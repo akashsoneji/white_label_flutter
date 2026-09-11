@@ -377,7 +377,9 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
       Get.dialog(
         Center(
           child: CommonLoadingWidget(
-            message: 'Submitting IB application...',
+            message: Get.find<LanguageService>().tr(
+              'partnership_program_submitting_application',
+            ),
             size: 50.0,
             color: AppColors.primary,
           ),
@@ -419,7 +421,8 @@ class _PartnershipProgramScreenState extends State<PartnershipProgramScreen> {
         Get.back();
       }
       CustomToastService.showError(
-        message: 'Error submitting IB application: $e',
+        message:
+            '${Get.find<LanguageService>().tr('partnership_program_error_submitting_application')}: $e',
       );
     }
   }

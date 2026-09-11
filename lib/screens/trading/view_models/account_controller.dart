@@ -9,6 +9,7 @@ import 'package:crm_app/screens/trading/view_models/chart_socket_controller.dart
 import 'package:crm_app/screens/trading/view_models/trading_controller.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/websocket_endpoint_helper.dart';
 import 'package:crm_app/services/account_cache_service.dart';
 import 'package:crm_app/services/symbol_details_cache_service.dart';
@@ -407,7 +408,7 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
           message: error,
-          title: 'Error',
+          title: TranslationUtils.tr('general_error'),
         );
       }
     }

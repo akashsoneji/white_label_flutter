@@ -91,8 +91,10 @@ class GlobalDrawer extends StatelessWidget {
                       Get.back(closeOverlays: true);
                       if (Get.isRegistered<AppNotificationController>()) {
                         Get.find<AppNotificationController>().showInfo(
-                          message: 'Notifications coming soon',
-                          title: 'Info',
+                          message: languageService.tr(
+                            'global_drawer_notifications_coming_soon',
+                          ),
+                          title: languageService.tr('general_info'),
                         );
                       }
                     },

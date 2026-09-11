@@ -211,7 +211,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Get.back(closeOverlays: true),
-            child: Text('Cancel'),
+            child: Text(languageService.tr('general_cancel')),
           ),
           ElevatedButton(
             onPressed: () {
@@ -262,7 +262,7 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Get.back(closeOverlays: true),
-            child: Text('Cancel'),
+            child: Text(languageService.tr('general_cancel')),
           ),
           ElevatedButton(
             onPressed: () {

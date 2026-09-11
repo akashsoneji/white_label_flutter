@@ -724,6 +724,7 @@ class MyGetXApp extends StatelessWidget {
                     GlobalCupertinoLocalizations.delegate,
                   ],
                   supportedLocales: LanguageService.supportedLocales,
+                  fallbackLocale: LanguageService.defaultLocale,
                   themeMode: themeService.themeMode,
                   theme: _buildLightTheme(),
                   darkTheme: _buildDarkTheme(),

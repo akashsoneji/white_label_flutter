@@ -17,7 +17,7 @@ class AuthFormValidation {
   static bool showErrorsIfAny(List<String> errors) {
     if (errors.isEmpty) return true;
     CustomToastService.showError(
-      title: 'Error',
+      title: TranslationUtils.tr('general_error'),
       message: errors.join('\n'),
     );
     return false;

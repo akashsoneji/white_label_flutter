@@ -298,7 +298,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                   ),
                 ),
         decoration: InputDecoration(
-          labelText: 'Transfer From',
+          labelText: TranslationUtils.tr('wallet_transfer_from'),
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(

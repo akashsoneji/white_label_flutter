@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 
 import '../routes/app_pages.dart';
 
@@ -97,7 +98,10 @@ class KycScaffold extends StatelessWidget {
                 color: AppColors.primary,
               ),
               SizedBox(height: 20.h, width: 20.w),
-              Text('Verify Later?', style: AppTextStyles.black16600),
+              Text(
+                Get.find<LanguageService>().tr('kyc_scaffold_verify_later'),
+                style: AppTextStyles.black16600,
+              ),
             ],
           ),
           content: Text(

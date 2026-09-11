@@ -209,7 +209,9 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                 if (showInitialLoader) {
                   return Center(
                     child: CommonLoadingWidget(
-                      message: 'Loading instruments...',
+                      message: languageService.tr(
+                        'instruments_screen_loading_instruments',
+                      ),
                       size: 50.0,
                       color: AppColors.primary,
                     ),

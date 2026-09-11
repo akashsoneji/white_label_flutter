@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../constants/color.dart';
 import '../constants/text_styles.dart';
+import '../services/language_service.dart';
 import '../services/notification_service.dart';
 import '../services/price_alert_monitor_service.dart';
 import '../utils/precision_helper.dart';
@@ -436,7 +437,9 @@ class _PriceAlertDialogState extends State<PriceAlertDialog> {
     if (_priceController.text.isEmpty) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Please enter a price',
+          message: Get.find<LanguageService>().tr(
+            'price_alert_dialog_please_enter_a_price',
+          ),
         );
       }
       return;
