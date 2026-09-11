@@ -556,7 +556,10 @@ class AccountController extends GetxController with WidgetsBindingObserver {
         final freshAccount = _mt5Accounts.firstWhere(
           (acc) => acc.metaAccountNumber == currentActive.metaAccountNumber,
         );
-        _activeMT5Account.value = freshAccount;
+        final activeAcc = freshAccount.metaAccountNumber;
+        if (activeAcc.isNotEmpty) {
+          SymbolDetailsCacheService.ensureCached(activeAcc);
+        }
         return; // Don't reset to primary!
       }
     }
@@ -570,6 +573,11 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       _activeMT5Account.value = _mt5Accounts.first;
     } else {
       _activeMT5Account.value = null;
+    }
+
+    final activeAcc = _activeMT5Account.value?.metaAccountNumber;
+    if (activeAcc != null && activeAcc.isNotEmpty) {
+      SymbolDetailsCacheService.ensureCached(activeAcc);
     }
   }
 

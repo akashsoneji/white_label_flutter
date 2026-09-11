@@ -918,26 +918,18 @@ Placing Order:
     // Explicitly trigger WebView update after setState completes
     // Use post-frame callback to ensure widget tree has updated
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final chartSymbol =
+          _datafeedSymbolForSelected.isNotEmpty
+              ? _datafeedSymbolForSelected
+              : selectedSymbol;
       if (mounted && _webViewKey.currentState != null) {
-        print('📊 Explicitly updating WebView with symbol: $selectedSymbol');
-        // Remove suffix for chart display
-        String chartSymbol = selectedSymbol;
-        if (chartSymbol.contains('.')) {
-          chartSymbol = chartSymbol.substring(0, chartSymbol.lastIndexOf('.'));
-        }
+        print('📊 Explicitly updating WebView with symbol: $chartSymbol');
         _webViewKey.currentState?.updateSymbol(chartSymbol);
       } else {
         print('⚠️ WebView not ready yet, will update via didUpdateWidget');
         // If WebView isn't ready, schedule another attempt
-        Future.delayed(Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted && _webViewKey.currentState != null) {
-            String chartSymbol = selectedSymbol;
-            if (chartSymbol.contains('.')) {
-              chartSymbol = chartSymbol.substring(
-                0,
-                chartSymbol.lastIndexOf('.'),
-              );
-            }
             _webViewKey.currentState?.updateSymbol(chartSymbol);
           }
         });
@@ -1866,21 +1858,21 @@ Placing Order:
         if (symbolToLookup != _lastSymbolForDatafeedLookup) return;
 
         setState(() {
-          // If API value isn't available, fallback to display symbol.
+          // If API value isn't available, fallback to selectedSymbol or display symbol.
           _datafeedSymbolForSelected =
               resolvedDatafeedSymbol.isNotEmpty
                   ? resolvedDatafeedSymbol
-                  : displaySymbol;
+                  : (selectedSymbol.isNotEmpty ? selectedSymbol : displaySymbol);
           _isFetchingDatafeedSymbol = false;
         });
       });
     }
 
-    // Use resolved datafeed symbol if available, else displaySymbol.
+    // Use resolved datafeed symbol if available, else selectedSymbol (preserving suffix like .c).
     final effectiveDatafeedSymbol =
         _datafeedSymbolForSelected.isNotEmpty
             ? _datafeedSymbolForSelected
-            : displaySymbol;
+            : (selectedSymbol.isNotEmpty ? selectedSymbol : displaySymbol);
 
     // Use stable URL and stable webViewKey to prevent full page reloads on symbol change
     final chartUrl =

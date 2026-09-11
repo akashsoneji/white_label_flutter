@@ -7,6 +7,7 @@ import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/models/search_instruments_model.dart';
 import 'package:crm_app/models/socket_response.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 
 class SearchInstrumentsController extends GetxController {
   final AccountController _accountController = Get.find<AccountController>();
@@ -84,6 +85,11 @@ class SearchInstrumentsController extends GetxController {
 
         if (searchResponse.data != null) {
           allSymbols.assignAll(searchResponse.data!.symbols);
+          for (final s in searchResponse.data!.symbols) {
+            if (s.datafeedSymbol.isNotEmpty) {
+              SymbolDetailsCacheService.registerDatafeedSymbol(s.displaySymbol, s.datafeedSymbol);
+            }
+          }
           _updateAvailableCategories();
 
           currentCategory.value = 'All';

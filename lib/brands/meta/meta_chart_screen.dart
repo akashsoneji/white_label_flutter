@@ -23,6 +23,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/flavor_config.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 
 import 'package:crm_app/brands/meta/meta_theme.dart';
 import 'package:crm_app/models/order_types.dart';
@@ -596,13 +597,11 @@ class _MetaChartAreaState extends State<_MetaChartArea>
   StreamSubscription<String>? _symSub;
 
   static String _strip(String s) {
-    if (s.contains('.')) return s.substring(0, s.lastIndexOf('.'));
     if (s.isNotEmpty) return s;
     if (Get.isRegistered<InstrumentsController>()) {
       final inst = Get.find<InstrumentsController>();
       if (inst.instruments.isNotEmpty) {
-        final f = inst.instruments.first.symbol;
-        return f.contains('.') ? f.substring(0, f.lastIndexOf('.')) : f;
+        return inst.instruments.first.symbol;
       }
     }
     return 'XAUUSD';
@@ -633,6 +632,17 @@ class _MetaChartAreaState extends State<_MetaChartArea>
     super.dispose();
   }
 
+  String _effectiveSymbol(String sym) {
+    String? acc;
+    if (Get.isRegistered<AccountController>()) {
+      acc = Get.find<AccountController>()
+          .activeMT5Account
+          ?.metaAccountNumber
+          .toString();
+    }
+    return SymbolDetailsCacheService.resolveDatafeedSymbolSync(sym, acc);
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -641,9 +651,10 @@ class _MetaChartAreaState extends State<_MetaChartArea>
       if (FlavorConfig.instance.useNewChart) {
         _tenaxKey.currentState?.updateSymbol(sym);
       } else {
-        _webViewKey.currentState?.updateSymbol(sym).then((success) {
+        final effective = _effectiveSymbol(sym);
+        _webViewKey.currentState?.updateSymbol(effective).then((success) {
           if (!success && mounted) {
-            _webViewKey.currentState?.loadUrlWithSymbol(sym);
+            _webViewKey.currentState?.loadUrlWithSymbol(effective);
           }
         });
       }
@@ -660,15 +671,16 @@ class _MetaChartAreaState extends State<_MetaChartArea>
       _tenaxKey.currentState?.updateSymbol(clean);
       return;
     }
+    final effective = _effectiveSymbol(clean);
     if (_wasSymbolFallback) {
       _wasSymbolFallback = false;
-      _initialSymbol = clean;
-      _webViewKey.currentState?.loadUrlWithSymbol(clean);
+      _initialSymbol = effective;
+      _webViewKey.currentState?.loadUrlWithSymbol(effective);
       return;
     }
-    _webViewKey.currentState?.updateSymbol(clean).then((success) {
+    _webViewKey.currentState?.updateSymbol(effective).then((success) {
       if (!success && mounted) {
-        _webViewKey.currentState?.loadUrlWithSymbol(clean);
+        _webViewKey.currentState?.loadUrlWithSymbol(effective);
       }
     });
   }
@@ -684,9 +696,10 @@ class _MetaChartAreaState extends State<_MetaChartArea>
     }
     final url =
         '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}';
+    final effective = _effectiveSymbol(_initialSymbol);
     return ChartInAppWebView(
       key: _webViewKey,
-      symbol: _initialSymbol,
+      symbol: effective,
       url: url,
     );
   }

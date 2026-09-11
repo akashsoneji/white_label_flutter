@@ -19,6 +19,7 @@ import 'package:crm_app/services/notification_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/services/app_lock_service.dart';
 import 'package:crm_app/services/trading_websocket_service.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 
 import 'constants/color.dart';
 import 'constants/text_styles.dart';
@@ -238,6 +239,9 @@ Future<void> initServices() async {
   // Register ThemeService
   final themeService = Get.put<ThemeService>(ThemeService(), permanent: true);
   await themeService.ensureInitialized();
+
+  // Pre-load cached symbol datafeed mappings on cold start
+  await SymbolDetailsCacheService.initFromStorage();
 
   // Shared API client abstraction (wrapping existing ApiService).
   Get.put<ApiClient>(ApiServiceClient(), permanent: true);

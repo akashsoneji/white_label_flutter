@@ -182,6 +182,36 @@
             "preLaunchTask": "prepare-meta"
         },
         {
+            "name": "PipPro (parent: Vantage) (debug)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "pippro", "--dart-define=CLIENT=pippro", "--dart-define=FLAVOR=pippro", "--dart-define=PARENT=vantage", "--no-enable-impeller"],
+            "flutterMode": "debug",
+            "console": "terminal",
+            "preLaunchTask": "prepare-pippro"
+        },
+        {
+            "name": "PipPro (parent: Vantage) (profile)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "pippro", "--dart-define=CLIENT=pippro", "--dart-define=FLAVOR=pippro", "--dart-define=PARENT=vantage"],
+            "flutterMode": "profile",
+            "console": "terminal",
+            "preLaunchTask": "prepare-pippro"
+        },
+        {
+            "name": "PipPro (parent: Vantage) (release)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--flavor", "pippro", "--dart-define=CLIENT=pippro", "--dart-define=FLAVOR=pippro", "--dart-define=PARENT=vantage"],
+            "flutterMode": "release",
+            "console": "terminal",
+            "preLaunchTask": "prepare-pippro"
+        },
+        {
             "name": "Pipze (parent: iQuote) (debug)",
             "request": "launch",
             "type": "dart",

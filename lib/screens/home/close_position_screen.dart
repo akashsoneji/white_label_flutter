@@ -810,7 +810,7 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
                       key: ValueKey(
                         widget.position.symbol,
                       ), // Force update when symbol changes
-                      symbol: _removeSymbolSuffixForDisplay(widget.position.symbol),
+                      symbol: widget.position.symbol,
                       url: _buildChartUrl(widget.position.symbol),
                     ),
             ),
@@ -819,16 +819,8 @@ class _ClosePositionScreenState extends State<ClosePositionScreen> {
     );
   }
 
-  String _removeSymbolSuffixForDisplay(String symbol) {
-    if (symbol.contains('.')) {
-      return symbol.substring(0, symbol.lastIndexOf('.'));
-    }
-    return symbol;
-  }
-
   String _buildChartUrl(String symbol) {
-    final displaySymbol = _removeSymbolSuffixForDisplay(symbol);
-    return '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$displaySymbol&theme=${AppColors.chartTheme}';
+    return '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$symbol&theme=${AppColors.chartTheme}';
   }
 
   Widget _buildCurrentPrices() {

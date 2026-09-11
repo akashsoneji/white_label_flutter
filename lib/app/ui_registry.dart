@@ -133,6 +133,7 @@ const Map<String, String> _uiParentByClient = {
   'kantara': 'vantage',
   'gtxprime': 'vantage',
   'riyadex': 'vantage',
+  'pippro': 'vantage',
 };
 
 /// Picks the right `screens.dart`-style widget set for the active client

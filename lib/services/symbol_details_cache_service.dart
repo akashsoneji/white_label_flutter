@@ -4,6 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:crm_app/core/network/api_client.dart';
 import 'package:crm_app/utils/date_helper.dart';
 
+import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
+import 'package:crm_app/screens/trading/view_models/instruments_controller.dart';
+
 /// Service for caching symbol details (contract size, digits, etc.) per account
 /// Fetches from /api/user/instruments/{trading_account} API
 /// Uses SharedPreferences for persistent storage per account
@@ -14,6 +18,152 @@ class SymbolDetailsCacheService {
   
   // Default cache validity: 24 hours
   static const int _defaultCacheValidityHours = 24;
+
+  /// In-memory cache for fast, synchronous datafeed symbol lookups
+  static final Map<String, List<Map<String, dynamic>>> _memoryCache = {};
+
+  /// Fast global lookup for clean/upper symbol -> broker datafeed_symbol (e.g. "UKOIL" -> "UKOil.c")
+  static final Map<String, String> _globalDatafeedLookup = {};
+
+  /// Registers a display -> datafeed mapping in the global lookup table
+  static void registerDatafeedSymbol(String displaySymbol, String datafeedSymbol) {
+    if (displaySymbol.isEmpty || datafeedSymbol.isEmpty) return;
+    final upperDisp = displaySymbol.toUpperCase().trim();
+    final upperDf = datafeedSymbol.toUpperCase().trim();
+    final cleanDisp = upperDisp.replaceAll('.C', '').replaceAll('.R', '');
+    _globalDatafeedLookup[upperDisp] = datafeedSymbol.trim();
+    _globalDatafeedLookup[cleanDisp] = datafeedSymbol.trim();
+    _globalDatafeedLookup[upperDf] = datafeedSymbol.trim();
+  }
+
+  /// Initialize memory cache and global lookup from SharedPreferences on app launch
+  static Future<void> initFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      for (final key in prefs.getKeys()) {
+        if (key.startsWith('symbol_details_') && !key.contains('timestamp')) {
+          final jsonStr = prefs.getString(key);
+          if (jsonStr != null && jsonStr.isNotEmpty) {
+            final acc = key.replaceFirst('symbol_details_', '');
+            final decoded = jsonDecode(jsonStr);
+            if (decoded is List) {
+              final list = <Map<String, dynamic>>[];
+              for (final item in decoded) {
+                if (item is Map) {
+                  final map = Map<String, dynamic>.from(item);
+                  list.add(map);
+                  final disp = (map['display_symbol'] ?? '').toString();
+                  final df = (map['datafeed_symbol'] ?? '').toString();
+                  if (df.isNotEmpty) {
+                    registerDatafeedSymbol(disp, df);
+                  }
+                }
+              }
+              _memoryCache[acc] = list;
+            }
+          }
+        }
+      }
+      print('✅ SymbolDetailsCacheService: Loaded ${_globalDatafeedLookup.length} datafeed mappings from storage');
+    } catch (e) {
+      print('⚠️ SymbolDetailsCacheService: Error loading from storage: $e');
+    }
+  }
+
+  /// Synchronous in-memory lookup for datafeed_symbol.
+  /// Resolves clean symbols like "UKOil" or "XAUUSD" to their exact broker datafeed
+  /// symbol (e.g. "UKOil.c", "XAUUSD.c") based on the active trading account.
+  static String resolveDatafeedSymbolSync(String symbol, String? accountNumber) {
+    if (symbol.isEmpty) return symbol;
+    final symbolUpper = symbol.toUpperCase().trim();
+    final cleanSymbol = symbolUpper.replaceAll('.C', '').replaceAll('.R', '');
+
+    // 1. Check fast global datafeed lookup (populated on startup & from all API responses)
+    final fromGlobal = _globalDatafeedLookup[symbolUpper] ?? _globalDatafeedLookup[cleanSymbol];
+    if (fromGlobal != null && fromGlobal.isNotEmpty) return fromGlobal;
+
+    // 2. Try in-memory cache for active account
+    String? acc = accountNumber;
+    if ((acc == null || acc.isEmpty) && Get.isRegistered<AccountController>()) {
+      acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
+    }
+    if (acc != null && acc.isNotEmpty) {
+      final cached = _memoryCache[acc];
+      if (cached != null && cached.isNotEmpty) {
+        for (final s in cached) {
+          final display = (s['display_symbol'] ?? '').toString().toUpperCase();
+          final datafeed = (s['datafeed_symbol'] ?? '').toString().toUpperCase();
+          final cleanDisplay = display.replaceAll('.C', '').replaceAll('.R', '');
+          final cleanDatafeed = datafeed.replaceAll('.C', '').replaceAll('.R', '');
+          if (cleanDisplay == cleanSymbol || cleanDatafeed == cleanSymbol) {
+            final df = (s['datafeed_symbol'] ?? '').toString().trim();
+            if (df.isNotEmpty) {
+              registerDatafeedSymbol(s['display_symbol'] ?? '', df);
+              return df;
+            }
+          }
+        }
+      }
+    }
+
+    // 2b. Check in-memory cache across ANY account
+    for (final entry in _memoryCache.entries) {
+      for (final s in entry.value) {
+        final display = (s['display_symbol'] ?? '').toString().toUpperCase();
+        final datafeed = (s['datafeed_symbol'] ?? '').toString().toUpperCase();
+        final cleanDisplay = display.replaceAll('.C', '').replaceAll('.R', '');
+        final cleanDatafeed = datafeed.replaceAll('.C', '').replaceAll('.R', '');
+        if (cleanDisplay == cleanSymbol || cleanDatafeed == cleanSymbol) {
+          final df = (s['datafeed_symbol'] ?? '').toString().trim();
+          if (df.isNotEmpty) {
+            registerDatafeedSymbol(s['display_symbol'] ?? '', df);
+            return df;
+          }
+        }
+      }
+    }
+
+    // 3. Fallback: check live InstrumentsController
+    if (Get.isRegistered<InstrumentsController>()) {
+      final inst = Get.find<InstrumentsController>().findInstrument(symbol);
+      if (inst != null && inst.symbol.contains('.')) {
+        return inst.symbol;
+      }
+    }
+
+    // 4. If symbol already has a dot suffix (e.g. "UKOil.c"), keep it!
+    if (symbol.contains('.')) return symbol;
+
+    // 5. If broker/flavor is known to use .c suffix (e.g. Pipze, or any .c in global lookup)
+    final hasDotCSuffix = _globalDatafeedLookup.values.any((v) => v.toLowerCase().endsWith('.c'));
+    if (hasDotCSuffix || FlavorConfig.isPipze()) {
+      return '$symbol.c';
+    }
+
+    return symbol;
+  }
+
+  /// Async lookup for datafeed_symbol with persistent cache fallback.
+  static Future<String> resolveDatafeedSymbol(String symbol, String? accountNumber) async {
+    if (symbol.isEmpty) return symbol;
+    String? acc = accountNumber;
+    if ((acc == null || acc.isEmpty) && Get.isRegistered<AccountController>()) {
+      acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
+    }
+    final syncRes = resolveDatafeedSymbolSync(symbol, acc);
+    if (syncRes != symbol && syncRes.contains('.')) return syncRes;
+    if (acc == null || acc.isEmpty) return syncRes;
+    try {
+      await ensureCached(acc);
+      final details = await getSymbolDetails(symbol, acc);
+      final df = (details?['datafeed_symbol'] ?? '').toString().trim();
+      if (df.isNotEmpty) {
+        registerDatafeedSymbol(symbol, df);
+        return df;
+      }
+    } catch (_) {}
+    return syncRes;
+  }
 
   /// Symbol detail model for caching
   static Map<String, dynamic> _symbolDetailFromApi(Map<String, dynamic> symbol) {
@@ -45,48 +195,59 @@ class SymbolDetailsCacheService {
       print('SymbolDetailsCacheService: API Response received');
       print('   Success: ${response.success}');
       print('   Message: ${response.message}');
-      print('   Response data type: ${response.data.runtimeType}');
-      if (response.data != null && response.data is Map) {
-        print('   Response data keys: ${(response.data as Map).keys.toList()}');
-      }
 
       if (response.success && response.data != null) {
-        final responseData = response.data as Map<String, dynamic>;
+        final Map<String, dynamic> responseData =
+            response.data is Map ? Map<String, dynamic>.from(response.data as Map) : {};
         
-        // ApiService returns the entire response object, so we need to access data.data.symbols
-        final innerData = responseData['data'] as Map<String, dynamic>?;
-        
-        if (innerData != null && innerData['symbols'] != null) {
-          final symbols = (innerData['symbols'] as List)
-              .map((s) => _symbolDetailFromApi(s as Map<String, dynamic>))
-              .toList();
-
-          // Clear old cache before storing new data to avoid memory leaks
-          await clearCacheForAccount(accountNumber);
-
-          // Store in cache
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(
-            _getCacheKey(accountNumber),
-            jsonEncode(symbols),
-          );
-          await prefs.setString(
-            _getCacheTimestampKey(accountNumber),
-            DateHelper.nowUtc().toIso8601String(),
-          );
-
-          print('═══════════════════════════════════════════════════════════');
-          print('✅ SymbolDetailsCacheService: Cached ${symbols.length} symbols');
-          print('   Account: $accountNumber');
-          print('   Sample symbols: ${symbols.take(3).map((s) => s['display_symbol']).join(', ')}');
-          print('═══════════════════════════════════════════════════════════');
-          return true;
-        } else {
-          print('❌ SymbolDetailsCacheService: API returned no symbols data');
-          print('   Inner data: $innerData');
-          print('   Inner data keys: ${innerData?.keys.toList()}');
-          return false;
+        dynamic rawData = responseData['data'] ?? responseData;
+        List rawSymbols = [];
+        if (rawData is Map && rawData['symbols'] is List) {
+          rawSymbols = rawData['symbols'] as List;
+        } else if (rawData is List) {
+          rawSymbols = rawData;
+        } else if (responseData['symbols'] is List) {
+          rawSymbols = responseData['symbols'] as List;
         }
+
+        if (rawSymbols.isNotEmpty) {
+          final symbols = <Map<String, dynamic>>[];
+          for (final item in rawSymbols) {
+            if (item is Map) {
+              symbols.add(_symbolDetailFromApi(Map<String, dynamic>.from(item)));
+            }
+          }
+
+          if (symbols.isNotEmpty) {
+            await clearCacheForAccount(accountNumber);
+            _memoryCache[accountNumber] = symbols;
+            for (final s in symbols) {
+              registerDatafeedSymbol(
+                (s['display_symbol'] ?? '').toString(),
+                (s['datafeed_symbol'] ?? '').toString(),
+              );
+            }
+
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString(
+              _getCacheKey(accountNumber),
+              jsonEncode(symbols),
+            );
+            await prefs.setString(
+              _getCacheTimestampKey(accountNumber),
+              DateHelper.nowUtc().toIso8601String(),
+            );
+
+            print('═══════════════════════════════════════════════════════════');
+            print('✅ SymbolDetailsCacheService: Cached ${symbols.length} symbols');
+            print('   Account: $accountNumber');
+            print('   Sample symbols: ${symbols.take(3).map((s) => s['display_symbol']).join(', ')}');
+            print('═══════════════════════════════════════════════════════════');
+            return true;
+          }
+        }
+        print('❌ SymbolDetailsCacheService: API returned no symbols data');
+        return false;
       } else {
         print('❌ SymbolDetailsCacheService: API error - ${response.message}');
         return false;
@@ -105,6 +266,10 @@ class SymbolDetailsCacheService {
   /// Returns null if cache doesn't exist, is expired, or invalid
   static Future<List<Map<String, dynamic>>?> getCachedSymbolDetails(String accountNumber) async {
     try {
+      if (_memoryCache.containsKey(accountNumber)) {
+        return _memoryCache[accountNumber];
+      }
+
       if (!await isCacheValid(accountNumber)) {
         return null;
       }
@@ -116,8 +281,22 @@ class SymbolDetailsCacheService {
         return null;
       }
 
-      final symbolsJson = jsonDecode(symbolsJsonStr) as List;
-      return symbolsJson.cast<Map<String, dynamic>>();
+      final decoded = jsonDecode(symbolsJsonStr);
+      if (decoded is! List) return null;
+      final result = <Map<String, dynamic>>[];
+      for (final item in decoded) {
+        if (item is Map) {
+          result.add(Map<String, dynamic>.from(item));
+        }
+      }
+      _memoryCache[accountNumber] = result;
+      for (final s in result) {
+        registerDatafeedSymbol(
+          (s['display_symbol'] ?? '').toString(),
+          (s['datafeed_symbol'] ?? '').toString(),
+        );
+      }
+      return result;
     } catch (e) {
       print('SymbolDetailsCacheService: Error getting cached symbols: $e');
       return null;
@@ -130,26 +309,31 @@ class SymbolDetailsCacheService {
     try {
       print('SymbolDetailsCacheService: Looking up symbol "$symbol" for account $accountNumber');
       
-      final cachedSymbols = await getCachedSymbolDetails(accountNumber);
+      var cachedSymbols = await getCachedSymbolDetails(accountNumber);
       
       if (cachedSymbols == null || cachedSymbols.isEmpty) {
+        await ensureCached(accountNumber);
+        cachedSymbols = await getCachedSymbolDetails(accountNumber);
+      }
+
+      if (cachedSymbols == null || cachedSymbols.isEmpty) {
         print('❌ SymbolDetailsCacheService: No cached symbols for account $accountNumber');
-        print('   Cache might be empty or expired. Try calling ensureCached() first.');
         return null;
       }
 
       print('SymbolDetailsCacheService: Found ${cachedSymbols.length} cached symbols');
 
       // Try to match by display_symbol or datafeed_symbol
-      final symbolUpper = symbol.toUpperCase();
+      final symbolUpper = symbol.toUpperCase().trim();
+      final cleanSymbol = symbolUpper.replaceAll('.C', '').replaceAll('.R', '');
+
       final matchedSymbol = cachedSymbols.firstWhere(
         (s) {
-          final displaySymbol = (s['display_symbol'] ?? '').toString().toUpperCase();
-          final datafeedSymbol = (s['datafeed_symbol'] ?? '').toString().toUpperCase();
+          final displaySymbol = (s['display_symbol'] ?? '').toString().toUpperCase().trim();
+          final datafeedSymbol = (s['datafeed_symbol'] ?? '').toString().toUpperCase().trim();
           // Remove .c suffix for comparison
           final cleanDisplay = displaySymbol.replaceAll('.C', '').replaceAll('.R', '');
           final cleanDatafeed = datafeedSymbol.replaceAll('.C', '').replaceAll('.R', '');
-          final cleanSymbol = symbolUpper.replaceAll('.C', '').replaceAll('.R', '');
           
           return cleanDisplay == cleanSymbol || cleanDatafeed == cleanSymbol;
         },
@@ -218,6 +402,7 @@ class SymbolDetailsCacheService {
   /// Clear cached symbol details for a specific account
   static Future<void> clearCacheForAccount(String accountNumber) async {
     try {
+      _memoryCache.remove(accountNumber);
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_getCacheKey(accountNumber));
       await prefs.remove(_getCacheTimestampKey(accountNumber));
@@ -231,6 +416,7 @@ class SymbolDetailsCacheService {
   /// Called on logout to prevent data leakage between users
   static Future<void> clearAllCache() async {
     try {
+      _memoryCache.clear();
       final prefs = await SharedPreferences.getInstance();
       final keys = prefs.getKeys();
       
@@ -257,6 +443,9 @@ class SymbolDetailsCacheService {
       // Check if cache is valid
       if (await isCacheValid(accountNumber)) {
         print('SymbolDetailsCacheService: Cache valid for account $accountNumber');
+        if (!_memoryCache.containsKey(accountNumber)) {
+          await getCachedSymbolDetails(accountNumber);
+        }
         return true;
       }
 
