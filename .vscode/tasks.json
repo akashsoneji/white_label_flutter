@@ -140,6 +140,25 @@
       }
     },
     {
+      "label": "prepare-pippro",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "CLIENT=all dart run scripts/generate_brand_config.dart && dart run scripts/prepare_flavor.dart pippro && flutter clean && flutter pub get"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": true
+      }
+    },
+    {
       "label": "prepare-pipze",
       "type": "shell",
       "command": "bash",

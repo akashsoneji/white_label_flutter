@@ -67,3 +67,8 @@
 -dontwarn com.google.android.play.core.splitinstall.**
 -dontwarn com.google.android.play.core.tasks.**
 -dontwarn io.flutter.embedding.engine.deferredcomponents.**
+
+# flutter_inappwebview
+-keep class com.pichillilorenzo.flutter_inappwebview_android.** { *; }
+-dontwarn com.pichillilorenzo.flutter_inappwebview_android.**
+-keepclassmembers class com.pichillilorenzo.flutter_inappwebview_android.** { *; }

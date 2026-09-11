@@ -2682,7 +2682,7 @@ class IQuoteFullscreenChartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chartUrl =
-        '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$symbol&theme=${AppColors.chartTheme}';
+        '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
 
     return Scaffold(
       backgroundColor: AppColors.background,

@@ -24,6 +24,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 
 import 'package:crm_app/brands/celestial/celestial_theme.dart';
 import 'package:crm_app/models/order_types.dart';
@@ -710,20 +711,18 @@ class _CelChartAreaState extends State<_CelChartArea>
   StreamSubscription<String>? _symSub;
 
   static String _strip(String s) {
-    if (s.contains('.')) return s.substring(0, s.lastIndexOf('.'));
     if (s.isNotEmpty) return s;
     if (Get.isRegistered<InstrumentsController>()) {
       final inst = Get.find<InstrumentsController>();
       if (inst.instruments.isNotEmpty) {
-        final f = inst.instruments.first.symbol;
-        return f.contains('.') ? f.substring(0, f.lastIndexOf('.')) : f;
+        return inst.instruments.first.symbol;
       }
     }
     return 'XAUUSD';
   }
 
-  String _buildUrl(String sym) =>
-      '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}&symbol=${Uri.encodeComponent(sym)}';
+  String _buildUrl() =>
+      '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}';
 
   @override
   void initState() {
@@ -754,6 +753,17 @@ class _CelChartAreaState extends State<_CelChartArea>
     super.dispose();
   }
 
+  String _effectiveSymbol(String sym) {
+    String? acc;
+    if (Get.isRegistered<AccountController>()) {
+      acc = Get.find<AccountController>()
+          .activeMT5Account
+          ?.metaAccountNumber
+          .toString();
+    }
+    return SymbolDetailsCacheService.resolveDatafeedSymbolSync(sym, acc);
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -762,11 +772,12 @@ class _CelChartAreaState extends State<_CelChartArea>
       if (FlavorConfig.instance.useNewChart) {
         _tenaxKey.currentState?.updateSymbol(sym);
       } else {
+        final effective = _effectiveSymbol(sym);
         // Try JS symbol update. If it fails (e.g. WebView is blank after OS
         // suspension), fall back to a full URL reload with the correct symbol.
-        _webViewKey.currentState?.updateSymbol(sym).then((success) {
+        _webViewKey.currentState?.updateSymbol(effective).then((success) {
           if (!success && mounted) {
-            _webViewKey.currentState?.loadUrlWithSymbol(sym);
+            _webViewKey.currentState?.loadUrlWithSymbol(effective);
           }
         });
       }
@@ -787,21 +798,23 @@ class _CelChartAreaState extends State<_CelChartArea>
       return;
     }
 
+    final effective = _effectiveSymbol(clean);
+
     // For InAppWebView:
     // If this was the first real symbol arriving after a fallback initial load
     // (app-kill scenario), force a full URL reload with the correct symbol.
     if (_wasSymbolFallback) {
       _wasSymbolFallback = false;
-      _initialSymbol = clean;
-      _webViewKey.currentState?.loadUrlWithSymbol(clean);
+      _initialSymbol = effective;
+      _webViewKey.currentState?.loadUrlWithSymbol(effective);
       return;
     }
 
     // Otherwise try JS symbol switch first; fall back to URL reload if it fails
     // (device lock / WebView blank after OS suspension).
-    _webViewKey.currentState?.updateSymbol(clean).then((success) {
+    _webViewKey.currentState?.updateSymbol(effective).then((success) {
       if (!success && mounted) {
-        _webViewKey.currentState?.loadUrlWithSymbol(clean);
+        _webViewKey.currentState?.loadUrlWithSymbol(effective);
       }
     });
   }
@@ -815,10 +828,11 @@ class _CelChartAreaState extends State<_CelChartArea>
         isDark: widget.isDark,
       );
     }
-    final url = _buildUrl(_initialSymbol);
+    final url = _buildUrl();
+    final effective = _effectiveSymbol(_initialSymbol);
     return ChartInAppWebView(
       key: _webViewKey,
-      symbol: _initialSymbol,
+      symbol: effective,
       url: url,
     );
   }

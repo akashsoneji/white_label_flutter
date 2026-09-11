@@ -13,6 +13,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import 'package:crm_app/services/chart_datafeed_bridge.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ChartInAppWebView
@@ -56,22 +57,29 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
+  /// Resolves datafeed symbol (e.g. "UKOil" -> "UKOil.c") from cache if available.
+  String _resolveSymbol(String sym) {
+    if (sym.isEmpty) return sym;
+    String? acc;
+    if (Get.isRegistered<AccountController>()) {
+      acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
+    }
+    return SymbolDetailsCacheService.resolveDatafeedSymbolSync(sym, acc);
+  }
+
   /// Full initial URL with symbol baked in so the chart opens on the right symbol.
   String _urlWithSymbol(String symbol) {
-    final clean =
-        symbol.contains('.')
-            ? symbol.substring(0, symbol.lastIndexOf('.'))
-            : symbol;
+    final effective = _resolveSymbol(symbol);
     try {
       final uri = Uri.parse(widget.url);
       final params = Map<String, String>.from(uri.queryParameters);
-      params['symbol'] = clean;
+      params['symbol'] = effective;
       return uri.replace(queryParameters: params).toString();
     } catch (_) {
       final base =
           widget.url.contains('?')
-              ? '${widget.url}&symbol=${Uri.encodeComponent(clean)}'
-              : '${widget.url}?symbol=${Uri.encodeComponent(clean)}';
+              ? '${widget.url}&symbol=${Uri.encodeComponent(effective)}'
+              : '${widget.url}?symbol=${Uri.encodeComponent(effective)}';
       return base;
     }
   }
@@ -82,6 +90,28 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   void initState() {
     super.initState();
     _startLoadingTimeout();
+    _ensureDatafeedResolved();
+  }
+
+  void _ensureDatafeedResolved() {
+    String? acc;
+    if (Get.isRegistered<AccountController>()) {
+      acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
+    }
+    SymbolDetailsCacheService.resolveDatafeedSymbol(widget.symbol, acc).then((resolved) {
+      if (!mounted) return;
+      final effective = (resolved.isNotEmpty && resolved != widget.symbol)
+          ? resolved
+          : _resolveSymbol(widget.symbol);
+      if (effective != widget.symbol && effective.isNotEmpty) {
+        if (_pendingSymbol != effective) {
+          _pendingSymbol = effective;
+          if (_isReady) {
+            _applyPendingSymbol();
+          }
+        }
+      }
+    });
   }
 
   @override
@@ -110,6 +140,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
 
     // Symbol changed — try JS first (zero reload) or reload immediately if not ready.
     if (oldWidget.symbol != widget.symbol) {
+      _ensureDatafeedResolved();
       _pendingSymbol = widget.symbol;
       if (_isReady) {
         _applyPendingSymbol();
@@ -176,10 +207,6 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   /// indicator shows while the new URL loads.
   void loadUrlWithSymbol(String symbol) {
     if (_controller == null) return;
-    final clean =
-        symbol.contains('.')
-            ? symbol.substring(0, symbol.lastIndexOf('.'))
-            : symbol;
     if (!mounted) return;
     setState(() {
       _isReady = false;
@@ -188,7 +215,7 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     });
     _startLoadingTimeout();
     _controller!.loadUrl(
-      urlRequest: URLRequest(url: WebUri(_urlWithSymbol(clean))),
+      urlRequest: URLRequest(url: WebUri(_urlWithSymbol(symbol))),
     );
   }
 
@@ -196,17 +223,18 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
   Future<bool> updateSymbol(String symbol) async {
     // debugPrint('📊 ChartInAppWebView: updateSymbol called for $symbol');
     if (_controller == null || symbol.isEmpty) return false;
+    final targetSymbol = _resolveSymbol(symbol);
     if (!_isReady) {
       // debugPrint('📊 ChartInAppWebView: Not ready, storing as pendingSymbol');
-      _pendingSymbol = symbol;
+      _pendingSymbol = targetSymbol;
       return false;
     }
 
     // Strip broker suffix (.c / .m / .r) for fallback attempts.
     final symClean =
-        symbol.contains('.')
-            ? symbol.substring(0, symbol.lastIndexOf('.'))
-            : symbol;
+        targetSymbol.contains('.')
+            ? targetSymbol.substring(0, targetSymbol.lastIndexOf('.'))
+            : targetSymbol;
 
     String jsSource(String s) => '''
       (function() {
@@ -267,8 +295,8 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
     ''';
 
     try {
-      // debugPrint('📊 ChartInAppWebView: Executing JS for $symbol (attempt 1)');
-      var res = await _controller!.evaluateJavascript(source: jsSource(symbol));
+      // debugPrint('📊 ChartInAppWebView: Executing JS for $targetSymbol (attempt 1)');
+      var res = await _controller!.evaluateJavascript(source: jsSource(targetSymbol));
       if (res == 'ok') return true;
 
       // debugPrint(
@@ -355,17 +383,25 @@ class ChartInAppWebViewState extends State<ChartInAppWebView> {
                         ?.metaAccountNumber;
               }
               result = await _df.resolveSymbol(
-                symbol: payload['sym']?.toString() ?? '',
+                symbol: payload['sym']?.toString() ?? payload['symbol']?.toString() ?? '',
                 accountNumber: accountNumber,
               );
               break;
             case 'getBars':
+              String? accountNumber;
+              if (Get.isRegistered<AccountController>()) {
+                accountNumber =
+                    Get.find<AccountController>()
+                        .activeMT5Account
+                        ?.metaAccountNumber;
+              }
               result = await _df.getBars(
                 symbol: payload['symbol']?.toString() ?? '',
                 resolution: payload['resolution']?.toString() ?? '1',
                 from: (payload['from'] as num?)?.toInt() ?? 0,
                 to: (payload['to'] as num?)?.toInt() ?? 0,
                 countBack: (payload['countBack'] as num?)?.toInt() ?? 500,
+                accountNumber: accountNumber,
               );
               break;
             case 'subscribeBars':

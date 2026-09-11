@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/flavor_config.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart';
+import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ChartWebViewPrewarmer
@@ -17,10 +20,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 // disk/memory HTTP cache and render in ~300 ms instead of 4-6 seconds.
 //
 // Usage:
-//   // In initState (or early in build):
 //   ChartWebViewPrewarmer.instance.prewarm(symbol: 'EURUSD');
-//
-//   // In dispose:
+//   // when ChartScreen unmounts:
 //   ChartWebViewPrewarmer.instance.dispose();
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -34,9 +35,14 @@ class ChartWebViewPrewarmer {
 
   /// Builds the same URL the visible chart will load, so the cache hit is exact.
   String _chartUrl(String symbol) {
+    String? acc;
+    if (Get.isRegistered<AccountController>()) {
+      acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
+    }
+    final effective = SymbolDetailsCacheService.resolveDatafeedSymbolSync(symbol, acc);
     final base =
         '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${AppColors.chartTheme}';
-    return '$base&symbol=${Uri.encodeComponent(symbol)}';
+    return '$base&symbol=${Uri.encodeComponent(effective)}';
   }
 
   // ── Public API ─────────────────────────────────────────────────────────────
@@ -49,9 +55,14 @@ class ChartWebViewPrewarmer {
     _warmed = true;
 
     try {
-      debugPrint('📊 Prewarmer: starting headless load for $symbol');
+      String? acc;
+      if (Get.isRegistered<AccountController>()) {
+        acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
+      }
+      final effectiveSymbol = await SymbolDetailsCacheService.resolveDatafeedSymbol(symbol, acc);
+      debugPrint('📊 Prewarmer: starting headless load for $effectiveSymbol');
       _headless = HeadlessInAppWebView(
-        initialUrlRequest: URLRequest(url: WebUri(_chartUrl(symbol))),
+        initialUrlRequest: URLRequest(url: WebUri(_chartUrl(effectiveSymbol))),
         initialSettings: InAppWebViewSettings(
           javaScriptEnabled: true,
           // Use the same aggressive cache mode as the visible WebView so the

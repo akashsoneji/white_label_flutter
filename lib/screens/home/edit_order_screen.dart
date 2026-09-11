@@ -795,7 +795,7 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
                     )
                   : ChartInAppWebView(
                       key: ValueKey(widget.position.symbol),
-                      symbol: _removeSymbolSuffixForDisplay(widget.position.symbol),
+                      symbol: widget.position.symbol,
                       url: _buildChartUrl(widget.position.symbol),
                     ),
             ),
@@ -804,17 +804,9 @@ class _EditOrderScreenState extends State<EditOrderScreen> {
     );
   }
 
-  String _removeSymbolSuffixForDisplay(String symbol) {
-    if (symbol.contains('.')) {
-      return symbol.substring(0, symbol.lastIndexOf('.'));
-    }
-    return symbol;
-  }
-
   String _buildChartUrl(String symbol) {
-    final displaySymbol = _removeSymbolSuffixForDisplay(symbol);
     final themeParam = AppColors.isDarkMode ? 'dark' : 'light';
-    return '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$displaySymbol&theme=$themeParam';
+    return '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?symbol=$symbol&theme=$themeParam';
   }
 
   Widget _buildCurrentPrices() {

@@ -21,6 +21,7 @@ import 'package:crm_app/utils/message_pack_decoder.dart';
 import 'package:crm_app/services/websocket_endpoint_helper.dart';
 import 'package:crm_app/services/unified_websocket_service.dart';
 import 'package:crm_app/services/market_watch_v2_service.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 class InstrumentsController extends GetxController with WidgetsBindingObserver {
   final RxList<ListElement> allInstruments = <ListElement>[].obs;
   final RxList<ListElement> instruments = <ListElement>[].obs;
@@ -270,6 +271,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
     // Force reinitialize with new defaults if needed (for existing users)
     _checkAndUpdateDefaults();
 
+    // Eagerly hydrate catalogue from REST to ensure datafeed symbols are registered
+    hydrateFavoritesFromRest();
+
     // ✅ FIX: Listen to account changes and update instruments data
     try {
       final accountController = Get.find<AccountController>();
@@ -304,6 +308,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
 
           // Update last account
           _lastAccount = account;
+
+          // Re-hydrate catalogue for new account
+          hydrateFavoritesFromRest();
 
           // DO NOT call startWebSocket() here
           // WebSocket reconnection is handled centrally by AccountController.setActiveMT5Account()
@@ -553,6 +560,9 @@ class InstrumentsController extends GetxController with WidgetsBindingObserver {
       final incomingAll = <ListElement>[];
       final incomingFavs = <ListElement>[];
       for (final s in symbols) {
+        if (s.datafeedSymbol.isNotEmpty) {
+          SymbolDetailsCacheService.registerDatafeedSymbol(s.displaySymbol, s.datafeedSymbol);
+        }
         final current = priceRx(s.displaySymbol).value;
         final elem = ListElement(
           symbol: s.displaySymbol,

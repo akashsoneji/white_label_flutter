@@ -51,6 +51,7 @@ import 'package:crm_app/services/favorites_storage_service.dart';
 import 'package:crm_app/services/symbol_selection_service.dart';
 import 'package:crm_app/widgets/chart_inapp_webview.dart';
 import 'package:crm_app/widgets/tenax_chart_webview.dart';
+import 'package:crm_app/services/symbol_details_cache_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/widgets/price_alert_dialog.dart';
 
@@ -895,20 +896,23 @@ class _ChartAreaState extends State<_ChartArea> {
 
   void _onSymbolChanged(String newSym) {
     final raw = _stripDot(newSym);
-    _initialSymbol = raw;
+    String? acc;
+    if (Get.isRegistered<AccountController>()) {
+      acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
+    }
+    final effective = SymbolDetailsCacheService.resolveDatafeedSymbolSync(raw, acc);
+    _initialSymbol = effective;
     // Push the new symbol into the running WebView without rebuilding.
-    _tenaxKey.currentState?.updateSymbol(raw);
-    widget.webViewKey.currentState?.updateSymbol(raw);
+    _tenaxKey.currentState?.updateSymbol(effective);
+    widget.webViewKey.currentState?.updateSymbol(effective);
   }
 
   static String _stripDot(String s) {
-    if (s.contains('.')) return s.substring(0, s.lastIndexOf('.'));
     if (s.isNotEmpty) return s;
     if (Get.isRegistered<InstrumentsController>()) {
       final inst = Get.find<InstrumentsController>();
       if (inst.instruments.isNotEmpty) {
-        final f = inst.instruments.first.symbol;
-        return f.contains('.') ? f.substring(0, f.lastIndexOf('.')) : f;
+        return inst.instruments.first.symbol;
       }
     }
     return 'XAUUSD';
@@ -919,11 +923,16 @@ class _ChartAreaState extends State<_ChartArea> {
     return Obx(() {
       final useNew = FlavorConfig.instance.useNewChart;
       final raw = _stripDot(Get.find<SymbolSelectionService>().currentSymbol);
+      String? acc;
+      if (Get.isRegistered<AccountController>()) {
+        acc = Get.find<AccountController>().activeMT5Account?.metaAccountNumber.toString();
+      }
+      final effective = SymbolDetailsCacheService.resolveDatafeedSymbolSync(raw, acc);
 
       if (useNew) {
         return TenaxChartWebView(
           key: _tenaxKey,
-          symbol: _initialSymbol ?? raw,
+          symbol: _initialSymbol ?? effective,
           isDark: widget.isDark,
         );
       }
@@ -932,7 +941,7 @@ class _ChartAreaState extends State<_ChartArea> {
           '${FlavorConfig.instance.chartBaseUrl}/mobile-chart?theme=${widget.isDark ? 'dark' : 'light'}';
       return ChartInAppWebView(
         key: widget.webViewKey,
-        symbol: raw,
+        symbol: effective,
         url: url,
       );
     });
