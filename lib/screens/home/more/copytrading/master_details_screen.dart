@@ -4,6 +4,7 @@ import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_details_controller.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_hub_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -34,7 +35,9 @@ class MasterDetailsScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          masterNickname?.isNotEmpty == true ? masterNickname! : 'Master',
+          masterNickname?.isNotEmpty == true
+              ? masterNickname!
+              : TranslationUtils.tr('copy_trading_master'),
           style: AppTextStyles.heading.copyWith(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
@@ -66,7 +69,9 @@ class MasterDetailsScreen extends StatelessWidget {
 
         final profile = controller.profile.value;
         if (profile == null) {
-          return Center(child: Text('No data'));
+          return Center(
+            child: Text(TranslationUtils.tr('master_details_screen_no_data')),
+          );
         }
 
         return RefreshIndicator(
@@ -188,7 +193,7 @@ class _MasterHeroCard extends StatelessWidget {
                         ),
                         SizedBox(width: 8.w),
                         Text(
-                          'Expert',
+                          TranslationUtils.tr('traders_filter_screen_expert'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 12.sp,
                             color: AppColors.textGrey,
@@ -207,28 +212,30 @@ class _MasterHeroCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _HeroStat(
-                  label: 'Risk score',
+                  label: TranslationUtils.tr('traders_tab_risk_score'),
                   value:
                       profile.riskScore == null
                           ? '-'
-                          : 'Risk ${profile.riskScore}',
+                          : TranslationUtils.trArgs('copy_trading_risk_value', {
+                            'score': '${profile.riskScore}',
+                          }),
                 ),
               ),
               Expanded(
                 child: _HeroStat(
-                  label: 'Equity',
+                  label: TranslationUtils.tr('general_equity'),
                   value: '\$${profile.masterEquity.toStringAsFixed(2)}',
                 ),
               ),
               Expanded(
                 child: _HeroStat(
-                  label: 'Commission',
+                  label: TranslationUtils.tr('general_commission'),
                   value: commission.isNotEmpty ? commission : '-',
                 ),
               ),
               Expanded(
                 child: _HeroStat(
-                  label: 'With Us',
+                  label: TranslationUtils.tr('trader_details_screen_with_us'),
                   value: withUs.isNotEmpty ? withUs : '-',
                 ),
               ),
@@ -265,7 +272,7 @@ class _MasterHeroCard extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                'Subscribe',
+                TranslationUtils.tr('copy_trading_subscribe'),
                 style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, fontWeight: FontWeight.w400,color:AppColors.whiteColor),
               ),
             ),
@@ -273,7 +280,9 @@ class _MasterHeroCard extends StatelessWidget {
           SizedBox(height: 8.h),
           if (minInvestment > 0)
             Text(
-              'Minimum investment \$${minInvestment.toString()}',
+              TranslationUtils.trArgs('copy_trading_minimum_investment_value', {
+                'amount': '\$${minInvestment.toString()}',
+              }),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 12.sp,
                 color: AppColors.textGrey,
@@ -293,7 +302,7 @@ class _MasterHeroCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Strategy Description',
+                  TranslationUtils.tr('master_plan_detail_screen_strategy_description'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
@@ -303,7 +312,7 @@ class _MasterHeroCard extends StatelessWidget {
                 SizedBox(height: 8.h),
                 Text(
                   profile.strategyDescription.trim().isEmpty
-                      ? 'No strategy description provided.'
+                      ? TranslationUtils.tr('copy_trading_no_strategy_description_provided')
                       : profile.strategyDescription,
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
@@ -386,7 +395,7 @@ class _ViewByPlanCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'View by plan',
+            TranslationUtils.tr('master_details_screen_view_by_plan'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
@@ -400,7 +409,7 @@ class _ViewByPlanCard extends StatelessWidget {
               () => Row(
                 children: [
                   _PlanChip(
-                    label: 'All plans',
+                    label: TranslationUtils.tr('my_copies_screen_all_plans'),
                     selected: controller.selectedPlanId.value.isEmpty,
                     onTap: () => controller.selectPlan(''),
                   ),
@@ -505,7 +514,7 @@ class _PerformanceCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Performance',
+              TranslationUtils.tr('portfolio_performance'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -572,7 +581,7 @@ class _PerformanceCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _PerfStat(
-                    label: 'Total Gain',
+                    label: TranslationUtils.tr('copy_trading_total_gain'),
                     value:
                         '${profile.totalGainPercent >= 0 ? '+' : ''}${profile.totalGainPercent.toStringAsFixed(2)}%',
                     valueColor: gainColor,
@@ -580,7 +589,7 @@ class _PerformanceCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: _PerfStat(
-                    label: 'Copiers',
+                    label: TranslationUtils.tr('my_plans_tab_copiers'),
                     value: profile.totalCopiers.toString(),
                   ),
                 ),
@@ -591,7 +600,7 @@ class _PerformanceCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _PerfStat(
-                    label: 'Total P&L',
+                    label: TranslationUtils.tr('copy_trading_total_pnl'),
                     value:
                         '${profile.totalPnl >= 0 ? '+' : ''}\$${profile.totalPnl.toStringAsFixed(2)}',
                     valueColor: pnlColor,
@@ -599,7 +608,7 @@ class _PerformanceCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: _PerfStat(
-                    label: 'Max drawdown',
+                    label: TranslationUtils.tr('copy_trading_max_drawdown'),
                     value: '${profile.maxDrawdown.toStringAsFixed(2)}%',
                     valueColor: ddColor,
                     showUnderline: true,
@@ -743,15 +752,22 @@ class _PerformanceChart extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'From master account closed trades (user trade history), not copier copies.',
+          TranslationUtils.tr('copy_trading_chart_source_disclaimer'),
           style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w500),
         ),
         SizedBox(height: 6.h),
         Row(
           children: [
-            _LegendItem(color: AppColors.primary, label: 'Cumulative P&L', outlined: true),
+            _LegendItem(
+              color: AppColors.primary,
+              label: TranslationUtils.tr('master_details_screen_cumulative'),
+              outlined: true,
+            ),
             SizedBox(width: 16.w),
-            _LegendItem(color: AppColors.green.withValues(alpha: 0.60), label: 'Trade P&L'),
+            _LegendItem(
+              color: AppColors.green.withValues(alpha: 0.60),
+              label: TranslationUtils.tr('copy_trading_trade_pnl'),
+            ),
           ],
         ),
         SizedBox(height: 8.h),
@@ -777,7 +793,7 @@ class _PerformanceChart extends StatelessWidget {
                 rightTitles: AxisTitles(
                   axisNameWidget: Padding(
                     padding: EdgeInsets.only(bottom: 4.h),
-                    child: Text('Per trade', style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600)),
+                    child: Text(TranslationUtils.tr('master_details_screen_per_trade'), style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600)),
                   ),
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -798,7 +814,7 @@ class _PerformanceChart extends StatelessWidget {
                 bottomTitles: AxisTitles(
                   axisNameWidget: Padding(
                     padding: EdgeInsets.only(top: 4.h),
-                    child: Text('Cumulative P&L', style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600)),
+                    child: Text(TranslationUtils.tr('master_details_screen_cumulative'), style: AppTextStyles.bodyText.copyWith(fontSize: 9.sp, color: AppColors.textGrey, fontWeight: FontWeight.w600)),
                   ),
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -921,8 +937,16 @@ class _OrdersCard extends StatelessWidget {
             indicatorColor: AppColors.primary,
             indicatorWeight: 2,
             tabs: [
-              Tab(text: 'Closed orders (${controller.tradeHistory.length})'),
-              Tab(text: 'Open orders (${controller.profile.value?.openPositions.length ?? 0})'),
+              Tab(
+                text: TranslationUtils.trArgs('copy_trading_closed_orders_count', {
+                  'count': '${controller.tradeHistory.length}',
+                }),
+              ),
+              Tab(
+                text: TranslationUtils.trArgs('copy_trading_open_orders_count', {
+                  'count': '${controller.profile.value?.openPositions.length ?? 0}',
+                }),
+              ),
             ],
           )),
           SizedBox(
@@ -952,6 +976,13 @@ class _OrdersCard extends StatelessWidget {
     );
   }
 }
+
+/// Maps the raw status value (kept untranslated because it drives the
+/// `statusLabel.toLowerCase() == 'closed'` branches) onto a localized label.
+String _statusDisplayLabel(String raw) =>
+    raw.toLowerCase() == 'closed'
+        ? TranslationUtils.tr('ticket_status_closed')
+        : TranslationUtils.tr('ticket_status_open');
 
 class _OrdersTable extends StatefulWidget {
   final List<CopyTradingTradeItem> items;
@@ -1007,7 +1038,7 @@ class _OrdersTableState extends State<_OrdersTable> {
     if (widget.items.isEmpty) {
       return Center(
         child: Text(
-          'No orders',
+          TranslationUtils.tr('master_details_screen_no_orders'),
           style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 12.sp),
         ),
       );
@@ -1167,13 +1198,16 @@ class _OrderCardState extends State<_OrderCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: _TField(label: 'Order ID', value: '#${item.id}'),
+                    child: _TField(
+                      label: TranslationUtils.tr('clients_tab_order_id'),
+                      value: '#${item.id}',
+                    ),
                   ),
                   const Spacer(),
                   Expanded(
                     flex: 2,
                     child: _TField(
-                      label: 'Volume',
+                      label: TranslationUtils.tr('general_volume'),
                       value: item.volume.toStringAsFixed(2),
                     ),
                   ),
@@ -1185,7 +1219,7 @@ class _OrderCardState extends State<_OrderCard> {
                 children: [
                   Expanded(
                     child: _TField(
-                      label: 'Open Price',
+                      label: TranslationUtils.tr('open_price'),
                       value: item.openPrice.toDouble().toStringAsFixed(
                         isXAU(item.symbol) ? 2 : 5,
                       ),
@@ -1195,7 +1229,7 @@ class _OrderCardState extends State<_OrderCard> {
                   Expanded(
                     flex: 2,
                     child: _TField(
-                      label: 'Opened',
+                      label: TranslationUtils.tr('copy_trading_opened'),
                       value: _formatTime(item.openTime),
                     ),
                   ),
@@ -1209,8 +1243,8 @@ class _OrderCardState extends State<_OrderCard> {
                     child: _TField(
                       label:
                           widget.statusLabel.toLowerCase() == 'closed'
-                              ? 'Close Price'
-                              : 'Side',
+                              ? TranslationUtils.tr('close_price')
+                              : TranslationUtils.tr('copy_trading_side'),
                       value:
                           widget.statusLabel.toLowerCase() == 'closed'
                               ? item.closePrice.toDouble().toStringAsFixed(
@@ -1229,12 +1263,12 @@ class _OrderCardState extends State<_OrderCard> {
                     child: _TField(
                       label:
                           widget.statusLabel.toLowerCase() == 'closed'
-                              ? 'Closed'
-                              : 'Status',
+                              ? TranslationUtils.tr('ticket_status_closed')
+                              : TranslationUtils.tr('common_status'),
                       value:
                           widget.statusLabel.toLowerCase() == 'closed'
                               ? _formatTime(item.closeTime)
-                              : widget.statusLabel,
+                              : _statusDisplayLabel(widget.statusLabel),
                     ),
                   ),
                 ],
@@ -1315,7 +1349,7 @@ class _ErrorState extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.brandPrimary,
               ),
-              child: Text('Retry'),
+              child: Text(TranslationUtils.tr('common_retry')),
             ),
           ],
         ),
@@ -1347,7 +1381,7 @@ class _StrategyDisclosureCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Strategy & risk disclosure',
+            TranslationUtils.tr('master_details_screen_strategy_risk_disclosure'),
             style: AppTextStyles.label.copyWith(
               fontSize: 14.sp,
               fontWeight: FontWeight.w700,
@@ -1356,7 +1390,7 @@ class _StrategyDisclosureCard extends StatelessWidget {
           ),
           SizedBox(height: 10.h),
           Text(
-            'STRATEGY',
+            TranslationUtils.tr('copy_trading_strategy_upper'),
             style: AppTextStyles.caption.copyWith(
               fontSize: 10.sp,
               fontWeight: FontWeight.w700,
@@ -1366,7 +1400,9 @@ class _StrategyDisclosureCard extends StatelessWidget {
           ),
           SizedBox(height: 4.h),
           Text(
-            hasStrategy ? strategy : 'No strategy description provided.',
+            hasStrategy
+                ? strategy
+                : TranslationUtils.tr('copy_trading_no_strategy_description_provided'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
               color:
@@ -1376,7 +1412,7 @@ class _StrategyDisclosureCard extends StatelessWidget {
           if (hasRisk) ...[
             SizedBox(height: 12.h),
             Text(
-              'RISK',
+              TranslationUtils.tr('copy_trading_risk_upper'),
               style: AppTextStyles.caption.copyWith(
                 fontSize: 10.sp,
                 fontWeight: FontWeight.w700,

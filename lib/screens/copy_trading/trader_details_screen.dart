@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'subscription_setup_screen.dart';
 
 class TraderDetailsScreen extends StatefulWidget {
@@ -85,7 +86,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
       backgroundColor: AppColors.whiteColor, // theme-aware
       appBar: AppBar(
         title: Text(
-          "Master's Performance",
+          TranslationUtils.tr('trader_details_screen_master_performance'),
           style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18,
@@ -155,7 +156,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
             elevation: 0,
           ),
           child:   Text(
-            'Set Up Copying',
+            TranslationUtils.tr('trader_details_screen_set_up_copying'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -209,7 +210,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
               ),
               child: Center(
                 child: Text(
-                  'Summary',
+                  TranslationUtils.tr('common_summary'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: _tabIndex == 0 ? AppColors.whiteColor : AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -236,7 +237,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
               ),
               child: Center(
                 child: Text(
-                  'Trades',
+                  TranslationUtils.tr('tw_trades'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: _tabIndex == 1 ? AppColors.whiteColor : AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -371,13 +372,38 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                     SizedBox(height: 14),
                     Divider(height: 1, thickness: 1, color: AppColors.border),
                     SizedBox(height: 10),
-                    _buildDetailRow('Master name', trade.masterName),
-                    _buildDetailRow('Open time', trade.openTime),
-                    _buildDetailRow('Close time', trade.closeTime),
-                    _buildDetailRow('Open Price', trade.openPrice),
-                    _buildDetailRow('Close Price', trade.closePrice),
-                    _buildDetailRow('Order ID', trade.orderId),
-                    _buildDetailRow('Commission you paid', trade.commission),
+                    _buildDetailRow(
+                      TranslationUtils.tr('clients_tab_master_name'),
+                      trade.masterName,
+                    ),
+                    _buildDetailRow(
+                      TranslationUtils.tr('open_time'),
+                      trade.openTime,
+                    ),
+                    _buildDetailRow(
+                      TranslationUtils.tr(
+                        'pmam_investor_portal_screen_close_time',
+                      ),
+                      trade.closeTime,
+                    ),
+                    _buildDetailRow(
+                      TranslationUtils.tr('trading_order_open_price'),
+                      trade.openPrice,
+                    ),
+                    _buildDetailRow(
+                      TranslationUtils.tr(
+                        'pmam_investor_portal_screen_close_price',
+                      ),
+                      trade.closePrice,
+                    ),
+                    _buildDetailRow(
+                      TranslationUtils.tr('clients_tab_order_id'),
+                      trade.orderId,
+                    ),
+                    _buildDetailRow(
+                      TranslationUtils.tr('clients_tab_commission_you_paid'),
+                      trade.commission,
+                    ),
                   ],
                 ],
               ),
@@ -439,16 +465,22 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
 
   Widget _buildAccountDetailsCard() {
     return _buildBaseCard(
-      title: 'Account Details',
+      title: TranslationUtils.tr('trader_details_screen_account_details'),
       child: Column(
         children: [
-          _buildInfoRow('Floating Profit', r'$0.00'),
+          _buildInfoRow(
+            TranslationUtils.tr('trader_details_screen_floating_profit'),
+            r'$0.00',
+          ),
           SizedBox(height: 16),
-          _buildInfoRow('Balance', r'$510.01'),
+          _buildInfoRow(TranslationUtils.tr('general_balance'), r'$510.01'),
           SizedBox(height: 16),
-          _buildInfoRow("Master Trader's Bonus", r'$0.00'),
+          _buildInfoRow(
+            TranslationUtils.tr('trader_details_screen_master_traders_bonus'),
+            r'$0.00',
+          ),
           SizedBox(height: 16),
-          _buildInfoRow('Leverage', '1:500'),
+          _buildInfoRow(TranslationUtils.tr('common_leverage'), '1:500'),
         ],
       ),
     );
@@ -456,12 +488,18 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
 
   Widget _buildRiskManagementCard() {
     return _buildBaseCard(
-      title: 'Risk Management',
+      title: TranslationUtils.tr('pending_order_risk_management_label'),
       child: Column(
         children: [
-          _buildInfoRow('Maximum Unrealised Loss', r'-$20 555.00'),
+          _buildInfoRow(
+            TranslationUtils.tr('trader_details_screen_maximum_unrealised_loss'),
+            r'-$20 555.00',
+          ),
           SizedBox(height: 16),
-          _buildInfoRow('Maximum Drawdown Duration', '21d'),
+          _buildInfoRow(
+            TranslationUtils.tr('trader_details_screen_maximum_drawdown_duration'),
+            '21d',
+          ),
         ],
       ),
     );
@@ -469,7 +507,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
 
   Widget _buildActivityCard() {
     return _buildBaseCard(
-      title: 'Activity',
+      title: TranslationUtils.tr('trader_details_screen_activity'),
       child: Column(
         children: [SizedBox(height: 8), SteppedActivityChart()],
       ),
@@ -488,7 +526,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
 
   Widget _buildMinimumInvestmentCard() {
     return _buildBaseCard(
-      title: 'Minimum Investment',
+      title: TranslationUtils.tr('trader_details_screen_minimum_investment'),
       titleTrailing: Text(
         r'$25',
         style: AppTextStyles.bodyText.copyWith(fontSize: 15, fontWeight: FontWeight.bold),
@@ -506,7 +544,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '1 RISK',
+                  TranslationUtils.tr('trader_details_screen_risk'),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -524,7 +562,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
                   Icon(Icons.star, color: AppColors.primary, size: 18),
                   SizedBox(width: 8),
                   Text(
-                    'High Achiever',
+                    TranslationUtils.tr('trader_card_high_achiever'),
                     style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.icongrey,
                       fontSize: 14,
@@ -544,14 +582,26 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildMetricColumn('Equity', r'$567.89', isPrimaryValue: true),
-              _buildMetricColumn('Commission', '40%', isPrimaryValue: true),
-              _buildMetricColumn('With Us', '645D', isPrimaryValue: true),
+              _buildMetricColumn(
+                TranslationUtils.tr('general_equity'),
+                r'$567.89',
+                isPrimaryValue: true,
+              ),
+              _buildMetricColumn(
+                TranslationUtils.tr('general_commission'),
+                '40%',
+                isPrimaryValue: true,
+              ),
+              _buildMetricColumn(
+                TranslationUtils.tr('trader_details_screen_with_us'),
+                '645D',
+                isPrimaryValue: true,
+              ),
             ],
           ),
           SizedBox(height: 16),
           Text(
-            'Strategy Description',
+            TranslationUtils.tr('master_plan_detail_screen_strategy_description'),
             style: AppTextStyles.bodyText.copyWith(
               color: AppColors.textPrimary,
               fontSize: 14,
@@ -560,7 +610,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            'welcome to Pipze (A group expert traders.) We are providing safe and secure trading strategies to make profit for our copiers, stay with us and make safe profit.',
+            TranslationUtils.tr('trader_details_screen_welcome_strategy_desc'),
             style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 12, height: 1.4),
           ),
         ],
@@ -570,19 +620,23 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
 
   Widget _buildPerformanceCard() {
     return _buildBaseCard(
-      title: 'Performance',
+      title: TranslationUtils.tr('portfolio_performance'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildMetricColumn('Gain', '33.71%', isPrimaryValue: true),
+              _buildMetricColumn(
+                TranslationUtils.tr('trader_card_gain'),
+                '33.71%',
+                isPrimaryValue: true,
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Copiers',
+                    TranslationUtils.tr('my_plans_tab_copiers'),
                     style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.icongrey,
                       fontSize: 12,
@@ -626,7 +680,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
           ),
           SizedBox(height: 16),
           Text(
-            'Profit and Loss',
+            TranslationUtils.tr('trader_card_profit_and_loss'),
             style: AppTextStyles.bodyText.copyWith(color: AppColors.icongrey, fontSize: 10),
           ),
           SizedBox(height: 4),
@@ -667,7 +721,7 @@ class _TraderDetailsScreenState extends State<TraderDetailsScreen> {
               _buildTimeChip('1M', false),
               _buildTimeChip('3M', true),
               _buildTimeChip('6M', false),
-              _buildTimeChip('All', false),
+              _buildTimeChip(TranslationUtils.tr('common_all'), false),
             ],
           ),
         ],
@@ -819,7 +873,7 @@ class SteppedActivityChart extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(left: 16, top: 16, bottom: 8),
           child: Text(
-            'Activity',
+            TranslationUtils.tr('trader_details_screen_activity'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.bold,

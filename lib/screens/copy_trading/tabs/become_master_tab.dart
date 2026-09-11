@@ -11,6 +11,7 @@ import 'package:crm_app/controllers/copy_trading/copy_trading_hub_controller.dar
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class BecomeMasterTab extends StatefulWidget {
   const BecomeMasterTab({super.key});
@@ -58,7 +59,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
     final userName =
         user != null
             ? '${user.firstName} ${user.lastName}'.trim()
-            : 'demo account';
+            : TranslationUtils.tr('open_account_screen_demo_account');
 
     return Scaffold(
       backgroundColor: AppColors.tradeBackgroundCenterColor,
@@ -78,7 +79,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
           onPressed: () => Get.offAllNamed(AppPages.TRADING),
         ),
         title: Text(
-          'Become a Master Trader',
+          TranslationUtils.tr('become_master_tab_become_master_trader'),
           style: AppTextStyles.screenTitle.copyWith(fontSize: 16.sp),
         ),
       ),
@@ -121,7 +122,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Complete all steps to become a Copy Trading Master',
+                TranslationUtils.tr('become_master_tab_complete_all_steps'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 13.sp,
                   color: AppColors.textGrey,
@@ -142,6 +143,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                 children: [
                   _buildStepCard(
                     title: 'Email Verification',
+                    titleKey: 'email_verification',
                     completed: isEmailVerified,
                     icon:
                         isEmailVerified
@@ -162,6 +164,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                   ),
                   _buildStepCard(
                     title: 'Mobile Verification',
+                    titleKey: 'mobile_verification',
                     completed: isMobileVerified,
                     icon:
                         isMobileVerified
@@ -182,6 +185,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                   ),
                   _buildStepCard(
                     title: 'Personal Information',
+                    titleKey: 'edit_profile_personal_info',
                     completed: isPersonalInfoVerified,
                     icon:
                         isPersonalInfoVerified
@@ -202,6 +206,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                   ),
                   _buildStepCard(
                     title: 'Copy Trading Application',
+                    titleKey: 'become_master_tab_copy_trading_application',
                     completed:
                         status == CopyTradingMasterApplicationStatus.approved,
                     icon:
@@ -213,15 +218,19 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                                 : Icons.notifications_none_rounded),
                     labelOverride:
                         status == CopyTradingMasterApplicationStatus.none
-                            ? 'Not Applied'
+                            ? TranslationUtils.tr(
+                              'become_master_tab_not_applied',
+                            )
                             : (status ==
                                     CopyTradingMasterApplicationStatus.pending
-                                ? 'Pending'
+                                ? TranslationUtils.tr('kyc_verification_pending')
                                 : (status ==
                                         CopyTradingMasterApplicationStatus
                                             .rejected
-                                    ? 'Rejected'
-                                    : 'Completed')),
+                                    ? TranslationUtils.tr(
+                                      'kyc_verification_rejected',
+                                    )
+                                    : TranslationUtils.tr('completed'))),
                   ),
                 ],
               ),
@@ -263,7 +272,9 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Verification Required',
+                                TranslationUtils.tr(
+                                  'become_master_tab_verification_required',
+                                ),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.bold,
@@ -272,7 +283,9 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                'Please complete your KYC to submit the application.',
+                                TranslationUtils.tr(
+                                  'become_master_tab_please_complete_your_kyc',
+                                ),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.primary.withValues(
@@ -317,7 +330,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                   children: [
                     // Your name
                     Text(
-                      'Your name',
+                      TranslationUtils.tr('become_master_tab_your_name'),
                       style: AppTextStyles.label.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -348,7 +361,9 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Shown for admin reference; update in profile if incorrect.',
+                      TranslationUtils.tr(
+                        'become_master_tab_shown_for_admin_reference',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.textGrey,
@@ -357,15 +372,21 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                     SizedBox(height: 4.h),
                     // Public nickname
                     LabeledAppTextField(
-                      label: 'Public nickname *',
+                      label: TranslationUtils.tr(
+                        'become_master_tab_public_nickname',
+                      ),
                       controller: _nicknameCtrl,
                       keyboardType: TextInputType.text,
-                      hintText: 'e.g. Alpha Trader',
+                      hintText: TranslationUtils.tr(
+                        'become_master_tab_eg_alpha_trader',
+                      ),
                       onChanged: (s) => hub.masterApplyNicknameDraft.value = s,
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Displayed on the public leaderboard and master profile.',
+                      TranslationUtils.tr(
+                        'become_master_tab_displayed_on_the_public_leaderboard',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.textGrey,
@@ -375,15 +396,21 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
 
                     // Strategy Description
                     LabeledAppTextField(
-                      label: 'Strategy Description *',
+                      label: TranslationUtils.tr(
+                        'become_master_tab_strategy_description',
+                      ),
                       controller: _strategyCtrl,
                       keyboardType: TextInputType.text,
-                      hintText: 'e.g. Conservative gold scalping strategy',
+                      hintText: TranslationUtils.tr(
+                        'become_master_tab_eg_conservative_gold_scalping',
+                      ),
                       onChanged: (s) => hub.masterApplyStrategyDraft.value = s,
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Explain your trading logic and strategy to copy investors.',
+                      TranslationUtils.tr(
+                        'become_master_tab_explain_your_trading_logic',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.textGrey,
@@ -393,15 +420,19 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
 
                     // Risk Info
                     LabeledAppTextField(
-                      label: 'Risk Info *',
+                      label: TranslationUtils.tr('become_master_tab_risk_info'),
                       controller: _riskInfoCtrl,
                       keyboardType: TextInputType.text,
-                      hintText: 'e.g. Drawdown can reach up to 15%.',
+                      hintText: TranslationUtils.tr(
+                        'become_master_tab_eg_drawdown_can_reach',
+                      ),
                       onChanged: (s) => hub.masterApplyRiskInfoDraft.value = s,
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Provide information about expected drawdown, leverage, or risk constraints.',
+                      TranslationUtils.tr(
+                        'become_master_tab_provide_information_about_drawdown',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         color: AppColors.textGrey,
@@ -440,7 +471,9 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
-                            'I accept the Master Trader Terms & Conditions and confirm that I will trade responsibly. Copiers may mirror my trades in real time.',
+                            TranslationUtils.tr(
+                              'become_master_tab_i_accept_the_master_trader_terms',
+                            ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               color: AppColors.textPrimary,
@@ -496,17 +529,23 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                                           );
                                           if (res.success) {
                                             CustomToastService.showSuccess(
-                                              title: 'Submitted',
+                                              title: TranslationUtils.tr(
+                                                'tw_submitted',
+                                              ),
                                               message:
                                                   res.message ??
-                                                  'Application submitted',
+                                                  TranslationUtils.tr(
+                                                    'become_master_tab_application_submitted',
+                                                  ),
                                               duration: const Duration(
                                                 milliseconds: 2500,
                                               ),
                                             );
                                           } else {
                                             CustomToastService.showError(
-                                              title: 'Failed',
+                                              title: TranslationUtils.tr(
+                                                'transaction_history_failed',
+                                              ),
                                               message:
                                                   res.message ??
                                                   hub.errorMessage.value,
@@ -549,8 +588,12 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                                 )
                                 : Text(
                                   !isKycCompleted
-                                      ? 'Complete KYC to Apply'
-                                      : 'Submit Application',
+                                      ? TranslationUtils.tr(
+                                        'become_master_tab_complete_kyc_to_apply',
+                                      )
+                                      : TranslationUtils.tr(
+                                        'pmam_become_manager_screen_submit_application',
+                                      ),
                                   style: AppTextStyles.button.copyWith(
                                     color:
                                         !isKycCompleted
@@ -573,6 +616,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
 
   Widget _buildStepCard({
     required String title,
+    required String titleKey,
     required bool completed,
     required IconData icon,
     String? labelOverride,
@@ -587,7 +631,11 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
         completed
             ? AppColors.primary
             : (isprimary ? AppColors.primary : AppColors.textGrey);
-    final statusText = labelOverride ?? (completed ? 'Completed' : 'Pending');
+    final statusText =
+        labelOverride ??
+        (completed
+            ? TranslationUtils.tr('completed')
+            : TranslationUtils.tr('kyc_verification_pending'));
 
     return GestureDetector(
       onTap: onTap,
@@ -611,7 +659,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
               children: [
                 Expanded(
                   child: Text(
-                    title,
+                    TranslationUtils.tr(titleKey),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -661,7 +709,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
           Icon(Icons.access_time, size: 48.r, color: AppColors.primary),
           SizedBox(height: 14.h),
           Text(
-            'Under Review',
+            TranslationUtils.tr('kyc_verification_under_review'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 18.sp,
               color: AppColors.textPrimary,
@@ -670,7 +718,9 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Your application is currently being reviewed by our administration team. We will notify you as soon as your status is updated.',
+            TranslationUtils.tr(
+              'become_master_tab_your_application_is_being_reviewed',
+            ),
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 12.sp,
@@ -687,7 +737,7 @@ class _BecomeMasterTabState extends State<BecomeMasterTab> {
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Text(
-                'Master Code: $masterCode',
+                '${TranslationUtils.tr('become_master_tab_master_code')}: $masterCode',
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,

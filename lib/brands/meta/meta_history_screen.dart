@@ -105,7 +105,13 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
         refresh: true,
       );
     } catch (_) {
-      if (mounted) setState(() => _lastError = 'Failed to load history.');
+      if (mounted) {
+        setState(
+          () => _lastError = TranslationUtils.tr(
+            'meta_history_failed_to_load',
+          ),
+        );
+      }
     }
   }
 
@@ -118,6 +124,50 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
     final dt = d.toLocal();
     return '${dt.year.toString().padLeft(4, '0')}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
   }
+
+  /// Display-only label for a raw sort key. The raw values stay as-is because
+  /// they drive `_sortBackendKey` and `_localCompare`.
+  String _sortKeyLabel(String key) {
+    switch (key) {
+      case 'Symbol':
+        return TranslationUtils.tr('meta_watchlist_symbol');
+      case 'Ticket':
+        return TranslationUtils.tr('meta_history_ticket');
+      case 'Type':
+        return TranslationUtils.tr('common_type');
+      case 'Volume':
+        return TranslationUtils.tr('general_volume');
+      case 'Close time':
+        return TranslationUtils.tr('pmam_investor_portal_screen_close_time');
+      case 'Profit':
+        return TranslationUtils.tr('dashboard_profit');
+      case 'Open time':
+      default:
+        return TranslationUtils.tr('open_time');
+    }
+  }
+
+  /// Display-only label for a raw period id.
+  String _periodLabelText(String label) {
+    switch (label) {
+      case 'Last week':
+        return TranslationUtils.tr('transaction_history_period_last_week');
+      case 'Last month':
+        return TranslationUtils.tr('iquote_position_last_month');
+      case 'Last 3 months':
+        return TranslationUtils.tr('iquote_position_last_3_months');
+      case 'Custom period':
+        return TranslationUtils.tr('meta_history_custom_period');
+      case 'Today':
+      default:
+        return TranslationUtils.tr('dc_range_today');
+    }
+  }
+
+  /// Display-only label for a raw symbol filter value.
+  String _symbolLabel(String symbol) => symbol == 'All symbols'
+      ? TranslationUtils.tr('meta_history_all_symbols')
+      : symbol;
 
   String _sortBackendKey(String label) {
     switch (label) {
@@ -370,11 +420,11 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          row('Profit:', _format(t.profit), valueColor: profitColor),
+          row(TranslationUtils.tr('meta_history_profit'), _format(t.profit), valueColor: profitColor),
           row(Get.find<LanguageService>().tr('meta_history_deposit'), _format(t.deposit)),
           row(Get.find<LanguageService>().tr('meta_history_swap'), _format(t.swap)),
           row(Get.find<LanguageService>().tr('meta_history_commission'), _format(t.commission)),
-          row('Balance:', _format(t.balance)),
+          row(TranslationUtils.tr('meta_history_balance'), _format(t.balance)),
           SizedBox(height: 8),
           Divider(height: 1, thickness: 0.5, color: MetaTheme.divider(context)),
         ],
@@ -433,13 +483,13 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
       builder: (ctx) => _MetaSheetWrapper(
         title: Get.find<LanguageService>().tr('common_menu'),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          _SheetRow(icon: Icons.calendar_today, leading: 'Period: $_selectedPeriodLabel', onTap: () { Navigator.of(ctx).pop(); _openPeriodSheet(context); }),
+          _SheetRow(icon: Icons.calendar_today, leading: TranslationUtils.trArgs('meta_history_period_value', {'period': _periodLabelText(_selectedPeriodLabel)}), onTap: () { Navigator.of(ctx).pop(); _openPeriodSheet(context); }),
           const _SheetDivider(),
-          _SheetRow(icon: Icons.sort, leading: 'Sort: $_sortKey', onTap: () { Navigator.of(ctx).pop(); _openSortSheet(context); }),
+          _SheetRow(icon: Icons.sort, leading: TranslationUtils.trArgs('meta_history_sort_value', {'sort': _sortKeyLabel(_sortKey)}), onTap: () { Navigator.of(ctx).pop(); _openSortSheet(context); }),
           const _SheetDivider(),
-          _SheetRow(icon: Icons.view_column, leading: 'Symbol: $_selectedSymbol', onTap: () { Navigator.of(ctx).pop(); _openSymbolSheet(context); }),
+          _SheetRow(icon: Icons.view_column, leading: TranslationUtils.trArgs('meta_history_symbol_value', {'symbol': _symbolLabel(_selectedSymbol)}), onTap: () { Navigator.of(ctx).pop(); _openSymbolSheet(context); }),
           const _SheetDivider(),
-          _SheetRow(icon: Icons.refresh, leading: 'Reload', onTap: () { Navigator.of(ctx).pop(); _refresh(); }),
+          _SheetRow(icon: Icons.refresh, leading: TranslationUtils.tr('meta_history_reload'), onTap: () { Navigator.of(ctx).pop(); _refresh(); }),
         ]),
       ),
     );
@@ -455,7 +505,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
         title: Get.find<LanguageService>().tr('meta_history_select_period'),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           for (final p in periods) ...[
-            _SheetRow(icon: _iconForPeriod(p), leading: p, trailingSub: _rangeLabelForPeriod(p), selected: p == _selectedPeriodLabel,
+            _SheetRow(icon: _iconForPeriod(p), leading: _periodLabelText(p), trailingSub: _rangeLabelForPeriod(p), selected: p == _selectedPeriodLabel,
               onTap: () async {
                 Navigator.of(ctx).pop();
                 if (p == 'Custom period') {
@@ -484,7 +534,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
         title: Get.find<LanguageService>().tr('meta_history_sort_columns'),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           for (final o in options) ...[
-            _SheetRow(icon: null, leading: o, showArrow: o == _sortKey, arrowAscending: o == _sortKey ? _sortAscending : !_sortAscending,
+            _SheetRow(icon: null, leading: _sortKeyLabel(o), showArrow: o == _sortKey, arrowAscending: o == _sortKey ? _sortAscending : !_sortAscending,
               onTap: () async { setState(() { if (_sortKey == o) { _sortAscending = !_sortAscending; } else { _sortKey = o; _sortAscending = false; } }); Navigator.of(ctx).pop(); await _refresh(); }),
             if (o != options.last) const _SheetDivider(),
           ],
@@ -505,7 +555,7 @@ class _MetaHistoryScreenState extends State<MetaHistoryScreen> {
           child: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               for (final s in _cachedSymbols) ...[
-                _SheetRow(icon: null, leading: s, selected: s == _selectedSymbol,
+                _SheetRow(icon: null, leading: _symbolLabel(s), selected: s == _selectedSymbol,
                   onTap: () async { Navigator.of(ctx).pop(); setState(() => _selectedSymbol = s); await _refresh(); }),
                 if (s != _cachedSymbols.last) const _SheetDivider(),
               ],

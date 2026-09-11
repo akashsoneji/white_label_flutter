@@ -513,7 +513,7 @@ class _MetaModifyPositionScreenState extends State<MetaModifyPositionScreen> {
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
               child: Text(
-                'Stop Loss or Take Profit you set must differ from market price by at least 20 points. Stops processing is performed on the broker side.',
+                TranslationUtils.tr('meta_modify_position_stops_hint'),
                 style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c),
                   fontSize: 12.sp,
@@ -838,8 +838,14 @@ class _AutoSlTpBottomSheetState extends State<_AutoSlTpBottomSheet> {
             SizedBox(height: 8.h),
             Text(
               label == Get.find<LanguageService>().tr('meta_modify_take_profit')
-                  ? 'Potential Profit: \$${pnl.toStringAsFixed(2)}'
-                  : 'Potential Loss: \$${(-pnl.abs()).toStringAsFixed(2)}',
+                  ? TranslationUtils.trArgs(
+                      'meta_modify_potential_profit',
+                      {'amount': pnl.toStringAsFixed(2)},
+                    )
+                  : TranslationUtils.trArgs(
+                      'meta_modify_potential_loss',
+                      {'amount': (-pnl.abs()).toStringAsFixed(2)},
+                    ),
               style: AppTextStyles.bodyText.copyWith(
                 color:
                     label == Get.find<LanguageService>().tr('meta_modify_take_profit')

@@ -5,6 +5,7 @@ import 'package:crm_app/core/network/api_client.dart';
 import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/models/google_otp_models.dart';
 import 'package:crm_app/models/login_response_model.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'dart:developer' as dev;
 
 abstract class AuthService extends GetxService {
@@ -92,7 +93,7 @@ class AuthServiceImpl extends AuthService {
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult.contains(ConnectivityResult.none)) {
         return ApiResponse.error(
-          'No internet connection. Please check your network and try again.',
+          TranslationUtils.tr('auth_no_internet_connection'),
         );
       }
 
@@ -120,7 +121,7 @@ class AuthServiceImpl extends AuthService {
         final errorMessage =
             response.message?.isNotEmpty == true
                 ? response.message!
-                : 'Login failed. Please check your credentials and try again.';
+                : TranslationUtils.tr('auth_login_failed_credentials');
         print(
           '⚠️ AuthService: Login failed - Returning error message: $errorMessage',
         );
@@ -137,7 +138,7 @@ class AuthServiceImpl extends AuthService {
             final errorMessage =
                 loginResponse.message.isNotEmpty
                     ? loginResponse.message
-                    : 'Login failed. Please check your credentials and try again.';
+                    : TranslationUtils.tr('auth_login_failed_credentials');
             print(
               '⚠️ AuthService: LoginResponse status is false, message: $errorMessage',
             );
@@ -161,7 +162,7 @@ class AuthServiceImpl extends AuthService {
             return ApiResponse.error(
               loginResponse.message.isNotEmpty
                   ? loginResponse.message
-                  : 'Login failed. Please check your credentials and try again.',
+                  : TranslationUtils.tr('auth_login_failed_credentials'),
             );
           }
 
@@ -180,7 +181,7 @@ class AuthServiceImpl extends AuthService {
         final errorMessage =
             response.message?.isNotEmpty == true
                 ? response.message!
-                : 'Login failed - invalid response format';
+                : TranslationUtils.tr('auth_login_invalid_response_format');
         print(
           '⚠️ AuthService: Data is not a valid Map, returning error: $errorMessage',
         );
@@ -324,7 +325,7 @@ class AuthServiceImpl extends AuthService {
         return ApiResponse.error(
           response.message ??
               response.data?['message'] ??
-              'OTP verification failed',
+              TranslationUtils.tr('auth_otp_verification_failed'),
         );
       }
     } catch (e) {
@@ -359,7 +360,7 @@ class AuthServiceImpl extends AuthService {
         return ApiResponse.error(
           response.message ??
               response.data?['message'] ??
-              'Password reset failed',
+              TranslationUtils.tr('auth_controller_password_reset_failed'),
         );
       }
     } catch (e) {
@@ -479,7 +480,9 @@ class AuthServiceImpl extends AuthService {
       } else {
         // Handle validation errors
         final errorData = response.data;
-        String errorMessage = response.message ?? 'Change password failed';
+        String errorMessage =
+            response.message ??
+            TranslationUtils.tr('auth_change_password_failed');
 
         if (errorData is Map<String, dynamic> &&
             errorData.containsKey('errors')) {
@@ -557,7 +560,7 @@ class AuthServiceImpl extends AuthService {
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult.contains(ConnectivityResult.none)) {
         return ApiResponse.error(
-          'No internet connection. Please check your network and try again.',
+          TranslationUtils.tr('auth_no_internet_connection'),
         );
       }
 
@@ -568,7 +571,8 @@ class AuthServiceImpl extends AuthService {
 
       // If response failed, check for validation errors in data
       if (!response.success) {
-        String errorMessage = response.message ?? 'Registration failed';
+        String errorMessage =
+            response.message ?? TranslationUtils.tr('auth_registration_failed');
 
         // Check if there are validation errors in response.data
         if (response.data != null) {
@@ -586,7 +590,8 @@ class AuthServiceImpl extends AuthService {
       } else {
         // If data is null or not a map, return error message from API
         final errorMessage =
-            response.message ?? 'Registration failed - invalid response';
+            response.message ??
+            TranslationUtils.tr('auth_registration_invalid_response');
         return ApiResponse.error(errorMessage);
       }
     } catch (e, t) {
@@ -606,7 +611,7 @@ class AuthServiceImpl extends AuthService {
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult.contains(ConnectivityResult.none)) {
         return ApiResponse.error(
-          'No internet connection. Please check your network and try again.',
+          TranslationUtils.tr('auth_no_internet_connection'),
         );
       }
 
@@ -617,7 +622,8 @@ class AuthServiceImpl extends AuthService {
 
       // If response failed, check for validation errors in data
       if (!response.success) {
-        String errorMessage = response.message ?? 'Registration failed';
+        String errorMessage =
+            response.message ?? TranslationUtils.tr('auth_registration_failed');
 
         // Check if there are validation errors in response.data
         if (response.data != null) {
@@ -663,7 +669,8 @@ class AuthServiceImpl extends AuthService {
           "AuthService registerWithOTPVerification failed: ${response.message}",
         );
         final errorMessage =
-            response.message ?? 'Registration failed - invalid response';
+            response.message ??
+            TranslationUtils.tr('auth_registration_invalid_response');
         return ApiResponse.error(errorMessage);
       }
     } catch (e, t) {

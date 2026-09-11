@@ -269,6 +269,29 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
     );
   }
 
+  /// Display-only label for a raw tab id. The ids stay raw because they are
+  /// passed to `filterInstruments` and compared with `==`.
+  String _tabLabel(String tab) {
+    switch (tab) {
+      case 'Favorites':
+        return TranslationUtils.tr('instruments_favorites');
+      case 'Hot':
+        return TranslationUtils.tr('iquote_market_hot');
+      case 'Crypto':
+        return TranslationUtils.tr('instruments_crypto');
+      case 'Commodity':
+        return TranslationUtils.tr('iquote_market_commodity');
+      case 'Indices':
+        return TranslationUtils.tr('instruments_indices');
+      case 'Forex':
+        return TranslationUtils.tr('instruments_forex');
+      case 'Stocks':
+        return TranslationUtils.tr('instruments_stocks');
+      default:
+        return tab;
+    }
+  }
+
   void _selectTab(String tab) {
     setState(() {
       _selectedTab = tab;
@@ -298,7 +321,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                   child: Column(
                     children: [
                       Text(
-                        tab,
+                        _tabLabel(tab),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           color: selected ? activeColor : textSecondary,
@@ -348,7 +371,7 @@ class _IquoteMarketScreenState extends State<IquoteMarketScreen> {
                 ),
                 SizedBox(height: 12.h),
                 Text(
-                  'No favorites added yet',
+                  TranslationUtils.tr('iquote_market_no_favorites_added_yet'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 14.sp,
@@ -729,7 +752,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Buy',
+                                  TranslationUtils.tr('general_buy'),
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.85),
                                     fontSize: 10.sp,
@@ -766,7 +789,7 @@ class _IquoteInstrumentRow extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Sell',
+                                  TranslationUtils.tr('general_sell'),
                                   style: TextStyle(
                                     color: Colors.white.withOpacity(0.85),
                                     fontSize: 10.sp,

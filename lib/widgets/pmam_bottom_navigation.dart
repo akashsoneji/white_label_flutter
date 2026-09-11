@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/text_styles.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../constants/color.dart';
+import '../services/language_service.dart';
 
 /// Bottom navigation for the PAMM module.
 ///
@@ -26,16 +27,37 @@ class PmamBottomNavigation extends StatelessWidget {
 
   List<_PmamTab> get _tabs => mode == PmamNavMode.manager
       ? [
-          _PmamTab('Dashboard', Icons.dashboard_rounded),
-          _PmamTab('Plans', Icons.layers_rounded),
-          _PmamTab('Investors', Icons.group_rounded),
-          _PmamTab('Explore', Icons.travel_explore_rounded),
-          _PmamTab('Invest', Icons.account_balance_wallet_rounded),
+          _PmamTab(
+            TranslationUtils.tr('copy_trading_nav_dashboard'),
+            Icons.dashboard_rounded,
+          ),
+          _PmamTab(TranslationUtils.tr('pmam_nav_plans'), Icons.layers_rounded),
+          _PmamTab(
+            TranslationUtils.tr('pmam_nav_investors'),
+            Icons.group_rounded,
+          ),
+          _PmamTab(
+            TranslationUtils.tr('copy_trading_nav_explore'),
+            Icons.travel_explore_rounded,
+          ),
+          _PmamTab(
+            TranslationUtils.tr('pmam_nav_invest'),
+            Icons.account_balance_wallet_rounded,
+          ),
         ]
       : [
-          _PmamTab('Become Mgr', Icons.workspace_premium_rounded),
-          _PmamTab('Explore', Icons.travel_explore_rounded),
-          _PmamTab('Invest', Icons.account_balance_wallet_rounded),
+          _PmamTab(
+            TranslationUtils.tr('pmam_nav_become_mgr'),
+            Icons.workspace_premium_rounded,
+          ),
+          _PmamTab(
+            TranslationUtils.tr('copy_trading_nav_explore'),
+            Icons.travel_explore_rounded,
+          ),
+          _PmamTab(
+            TranslationUtils.tr('pmam_nav_invest'),
+            Icons.account_balance_wallet_rounded,
+          ),
         ];
 
   @override

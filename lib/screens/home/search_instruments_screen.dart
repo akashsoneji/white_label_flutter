@@ -429,7 +429,7 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
               size: 64.h, color: AppColors.textGrey),
           SizedBox(height: 16.h),
           Text(
-            'No favourites added',
+            languageService.tr('search_instruments_screen_no_favourites_added'),
             style: AppTextStyles.heading.copyWith(
               fontSize: 13.sp,
               fontWeight: FontWeight.w400,
@@ -438,7 +438,9 @@ class _SearchInstrumentsScreenState extends State<SearchInstrumentsScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Add symbols from the Quote tab',
+            languageService.tr(
+              'search_instruments_screen_add_symbols_from_the_quote_tab',
+            ),
             style: AppTextStyles.subheading.copyWith(
               color: AppColors.textGrey,
               fontSize: 12.sp,

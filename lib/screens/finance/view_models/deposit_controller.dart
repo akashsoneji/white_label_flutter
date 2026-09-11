@@ -52,12 +52,16 @@ class DepositController extends GetxController {
         Get.back(closeOverlays: true);
         _setLoading(false);
         CustomToastService.showSuccess(
-          message: response.message ?? 'Deposited successfully!',
+          message:
+              response.message ??
+              TranslationUtils.tr('deposit_deposited_successfully'),
         );
       } else {
         _setLoading(false);
         CustomToastService.showError(
-          message: response.message ?? 'Deposited error!',
+          message:
+              response.message ??
+              TranslationUtils.tr('deposit_deposited_error'),
         );
       }
     } catch (e) {

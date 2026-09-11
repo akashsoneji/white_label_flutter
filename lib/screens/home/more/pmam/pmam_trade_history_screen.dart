@@ -7,6 +7,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/controllers/pmam/pmam_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/utils/app_picker_theme.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class PmamTradeHistoryScreen extends StatefulWidget {
   const PmamTradeHistoryScreen({super.key, required this.enrollment});
@@ -196,7 +197,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
           iconHeight: 30.h,
         ),
         title: Text(
-          'My P&L Trade History',
+          TranslationUtils.tr('pmam_investor_portal_screen_my_trade_history'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w800,
@@ -219,7 +220,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
               Row(
                 children: [
                   Text(
-                    'From',
+                    TranslationUtils.tr('internal_transfer_history_from'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: AppColors.textGrey,
@@ -265,7 +266,7 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                   ),
                   SizedBox(width: 10.w),
                   Text(
-                    'To',
+                    TranslationUtils.tr('pmam_trade_history_to'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: AppColors.textGrey,
@@ -334,13 +335,13 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                       Row(
                         children: [
                           metric(
-                            'Trades:',
+                            TranslationUtils.tr('pmam_trade_history_trades'),
                             total.toString(),
                             AppColors.textPrimary,
                           ),
                           SizedBox(width: 10.w),
                           metric(
-                            'Net P&L:',
+                            TranslationUtils.tr('pmam_trade_history_net_pnl'),
                             '${netPos ? '+' : ''}\$${net.abs().toStringAsFixed(2)}',
                             netPos ? AppColors.green : AppColors.error,
                           ),
@@ -350,13 +351,15 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                       Row(
                         children: [
                           metric(
-                            'Commission:',
+                            TranslationUtils.tr(
+                                'pmam_trade_history_commission_label'),
                             '${commPos ? '+' : ''}\$${comm.abs().toStringAsFixed(2)}',
                             commPos ? AppColors.green : AppColors.error,
                           ),
                           SizedBox(width: 10.w),
                           metric(
-                            'Settled P&L (this period):',
+                            TranslationUtils.tr(
+                                'pmam_trade_history_settled_pnl_this_period'),
                             '${settledPos ? '+' : ''}\$${settled.abs().toStringAsFixed(2)}',
                             settledPos ? AppColors.green : AppColors.error,
                           ),
@@ -374,7 +377,8 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                       _investorId <= 0) {
                     return Center(
                       child: Text(
-                        'Missing enrollment info for trades.',
+                        TranslationUtils.tr(
+                            'pmam_trade_history_screen_missing_enrollment_info_for_trades'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           color: AppColors.textGrey,
@@ -396,7 +400,8 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                   if (rows.isEmpty) {
                     return Center(
                       child: Text(
-                        'No trades found for the selected dates.',
+                        TranslationUtils.tr(
+                            'pmam_investor_portal_screen_no_trades_found_for_the_selected'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           color: AppColors.textGrey,
@@ -446,7 +451,8 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                                         ),
                                       )
                                       : Text(
-                                        'Load more',
+                                        TranslationUtils.tr(
+                                            'pmam_trade_history_screen_load_more'),
                                         style: AppTextStyles.bodyText.copyWith(
                                           fontSize: 12.sp,
                                           fontWeight: FontWeight.w700,
@@ -563,7 +569,8 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                             Row(
                               children: [
                                 Text(
-                                  'Position #$posId',
+                                TranslationUtils.trArgs(
+                                    'pmam_position_number', {'id': '$posId'}),
                                   style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 11.sp,
                                     color: AppColors.textGrey,
@@ -584,18 +591,21 @@ class _PmamTradeHistoryScreenState extends State<PmamTradeHistoryScreen> {
                             SizedBox(height: 10.h),
                             Row(
                               children: [
-                                kv('Lot', lot),
+                                kv(TranslationUtils.tr('scratch_card_screen_lot'),
+                                    lot),
                                 SizedBox(width: 10.w),
-                                kv('Close price', closePrice),
+                                kv(TranslationUtils.tr('close_price'),
+                                    closePrice),
                               ],
                             ),
                             SizedBox(height: 10.h),
                             Row(
                               children: [
-                                kv('Close time', closeTime),
+                                kv(TranslationUtils.tr('close_time'),
+                                    closeTime),
                                 SizedBox(width: 10.w),
                                 kv(
-                                  'Commission',
+                                  TranslationUtils.tr('general_commission'),
                                   '${comm >= 0 ? '+' : ''}\$${comm.abs().toStringAsFixed(2)}',
                                   vColor:
                                       comm >= 0

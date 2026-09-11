@@ -1,6 +1,7 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_plan_detail_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/theme_service.dart';
 import 'package:crm_app/widgets/app_svg_back_button.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
           surfaceTintColor: t.appBar,
           leading: AppSvgBackButton(onPressed: () => Get.back()),
           title: Text(
-            'Plan Details',
+            TranslationUtils.tr('master_plan_detail_screen_plan_details'),
             style: AppTextStyles.heading.copyWith(color: t.textPrimary),
           ),
         ),
@@ -74,7 +75,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
 
                 // Performance row (4-column compact grid)
                 _SectionCard(
-                  title: 'Performance',
+                  title: TranslationUtils.tr('portfolio_performance'),
                   tokens: t,
                   accentColor: t.success,
                   child: _PerformanceRow(perf: plan.performance, tokens: t),
@@ -83,7 +84,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
 
                 // Equity curve
                 _SectionCard(
-                  title: 'Equity curve (last 90 days)',
+                  title: TranslationUtils.tr('master_plan_detail_screen_equity_curve_last_90_days'),
                   tokens: t,
                   accentColor: t.success,
                   child: _EquityCurve(equity: plan.equityCurve, tokens: t),
@@ -92,7 +93,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
 
                 // Commission summary
                 _SectionCard(
-                  title: 'Commission summary',
+                  title: TranslationUtils.tr('master_plan_detail_screen_commission_summary'),
                   tokens: t,
                   accentColor: t.warning,
                   child: _CommissionSummary(
@@ -104,7 +105,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
 
                 // Settlement cycle
                 _SectionCard(
-                  title: 'Settlement cycle',
+                  title: TranslationUtils.tr('master_plan_detail_screen_settlement_cycle'),
                   tokens: t,
                   accentColor: t.warning,
                   child: _SettlementCycle(settle: plan.settlement, tokens: t),
@@ -113,7 +114,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
 
                 // Commission & fees
                 _SectionCard(
-                  title: 'Commission & fees',
+                  title: TranslationUtils.tr('master_plan_detail_screen_commission_fees'),
                   tokens: t,
                   accentColor: t.warning,
                   child: _CommissionFees(plan: plan, tokens: t),
@@ -122,7 +123,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
 
                 // Copier rules
                 _SectionCard(
-                  title: 'Copier rules',
+                  title: TranslationUtils.tr('master_plan_detail_screen_copier_rules'),
                   tokens: t,
                   child: _CopierRules(plan: plan, tokens: t),
                 ),
@@ -130,7 +131,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
 
                 // Strategy & risk disclosure
                 _SectionCard(
-                  title: 'Strategy & risk disclosure',
+                  title: TranslationUtils.tr('master_details_screen_strategy_risk_disclosure'),
                   tokens: t,
                   child: _StrategyDisclosure(plan: plan, tokens: t),
                 ),
@@ -138,7 +139,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
 
                 // Account & system
                 _SectionCard(
-                  title: 'Account & system',
+                  title: TranslationUtils.tr('master_plan_detail_screen_account_system'),
                   tokens: t,
                   child: _AccountSystem(plan: plan, tokens: t),
                 ),
@@ -146,7 +147,7 @@ class MasterPlanDetailScreen extends StatelessWidget {
 
                 // Plan timeline
                 _SectionCard(
-                  title: 'Plan timeline',
+                  title: TranslationUtils.tr('master_plan_detail_screen_plan_timeline'),
                   tokens: t,
                   accentColor: t.brandBlue,
                   child: _PlanTimeline(plan: plan, tokens: t),
@@ -259,7 +260,7 @@ class _EmptyState extends StatelessWidget {
           Icon(Icons.error_outline, size: 56, color: tokens.mutedText),
           SizedBox(height: 12),
           Text(
-            'Plan not found',
+            TranslationUtils.tr('master_plan_detail_screen_plan_not_found'),
             style: AppTextStyles.bodyText.copyWith(
               fontWeight: FontWeight.w600,
               fontSize: 16,
@@ -269,7 +270,7 @@ class _EmptyState extends StatelessWidget {
           SizedBox(height: 12),
           ElevatedButton(
             onPressed: () => onRetry(),
-            child: Text('Retry'),
+            child: Text(TranslationUtils.tr('common_retry')),
           ),
         ],
       ),
@@ -316,7 +317,7 @@ class _PlanHeaderCard extends StatelessWidget {
   }
 
   String _statusLabel() {
-    if (plan.status.isEmpty) return 'Unknown';
+    if (plan.status.isEmpty) return TranslationUtils.tr('ib_status_unknown');
     return plan.status[0].toUpperCase() + plan.status.substring(1);
   }
 
@@ -378,7 +379,7 @@ class _PlanHeaderCard extends StatelessWidget {
                         _GrayPill(
                           label: plan.commissionLabel.isNotEmpty
                               ? plan.commissionLabel
-                              : 'Commission',
+                              : TranslationUtils.tr('general_commission'),
                           tokens: tokens,
                         ),
                         // Compact "copying" indicator merged with a tiny dot
@@ -399,7 +400,7 @@ class _PlanHeaderCard extends StatelessWidget {
               Expanded(
                 child: _HeaderAction(
                   icon: Icons.edit_outlined,
-                  label: 'Edit',
+                  label: TranslationUtils.tr('general_edit'),
                   onTap: () {},
                   color: tokens.bodyText,
                   tokens: tokens,
@@ -411,7 +412,9 @@ class _PlanHeaderCard extends StatelessWidget {
                   icon: isPaused
                       ? Icons.play_arrow_rounded
                       : Icons.pause_rounded,
-                  label: isPaused ? 'Resume' : 'Pause',
+                  label: isPaused
+                      ? TranslationUtils.tr('my_plans_tab_resume')
+                      : TranslationUtils.tr('my_plans_tab_pause'),
                   onTap: isPaused
                       ? controller.resumePlan
                       : controller.pausePlan,
@@ -423,7 +426,7 @@ class _PlanHeaderCard extends StatelessWidget {
               Expanded(
                 child: _HeaderAction(
                   icon: Icons.block,
-                  label: 'Inactivate',
+                  label: TranslationUtils.tr('copy_trading_inactivate'),
                   onTap: controller.inactivatePlan,
                   color: tokens.dangerText,
                   borderColor: tokens.danger.withValues(alpha: 0.4),
@@ -519,7 +522,9 @@ class _CopyingDotPill extends StatelessWidget {
           ),
           SizedBox(width: 5),
           Text(
-            on ? 'Copying on' : 'Copying off',
+            on
+                ? TranslationUtils.tr('copy_trading_copying_on')
+                : TranslationUtils.tr('copy_trading_copying_off'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 10.5,
               color: color,
@@ -608,7 +613,7 @@ class _KpiGrid extends StatelessWidget {
             Expanded(
               child: _KpiHeroCard(
                 icon: Icons.account_balance_wallet_outlined,
-                label: 'Plan AUM',
+                label: TranslationUtils.tr('copy_trading_plan_aum'),
                 value: '\$${plan.totalCapital.toStringAsFixed(2)}',
                 accent: tokens.brandBlue,
                 tokens: tokens,
@@ -618,14 +623,14 @@ class _KpiGrid extends StatelessWidget {
             Expanded(
               child: _KpiHeroCard(
                 icon: Icons.trending_up_rounded,
-                label: 'Net P&L',
+                label: TranslationUtils.tr('pmam_net_pnl'),
                 value: '\$${plan.performance.netPnl.toStringAsFixed(2)}',
                 accent: plan.performance.netPnl >= 0
                     ? tokens.success
                     : tokens.danger,
                 tokens: tokens,
                 trailing: Text(
-                  'After fees',
+                  TranslationUtils.tr('master_plan_detail_screen_after_fees'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10,
                     color: tokens.mutedText,
@@ -647,7 +652,7 @@ class _KpiGrid extends StatelessWidget {
             children: [
               _KpiPill(
                 icon: Icons.people_alt_rounded,
-                label: 'Active Copiers',
+                label: TranslationUtils.tr('copy_trading_active_copiers'),
                 value: '${plan.activeCopiers}',
                 accent: tokens.brandBlue,
                 tokens: tokens,
@@ -655,7 +660,7 @@ class _KpiGrid extends StatelessWidget {
               SizedBox(width: 8),
               _KpiPill(
                 icon: Icons.grid_view_rounded,
-                label: 'Open Positions',
+                label: TranslationUtils.tr('dashboard_open_positions'),
                 value: '${plan.openPositions}',
                 accent: tokens.brandBlue,
                 tokens: tokens,
@@ -663,7 +668,7 @@ class _KpiGrid extends StatelessWidget {
               SizedBox(width: 8),
               _KpiPill(
                 icon: Icons.percent_rounded,
-                label: 'Floating Comm.',
+                label: TranslationUtils.tr('copy_trading_floating_comm'),
                 value:
                     '\$${plan.commissionSummary.pending.toStringAsFixed(2)}',
                 accent: tokens.warning,
@@ -672,7 +677,7 @@ class _KpiGrid extends StatelessWidget {
               SizedBox(width: 8),
               _KpiPill(
                 icon: Icons.payments_outlined,
-                label: 'Earned',
+                label: TranslationUtils.tr('ibm_earned'),
                 value:
                     '\$${plan.totalCommissionEarned.toStringAsFixed(2)}',
                 accent: tokens.success,
@@ -931,7 +936,7 @@ class _PerformanceRow extends StatelessWidget {
           children: [
             Expanded(
               child: _PerfCell(
-                label: 'Closed',
+                label: TranslationUtils.tr('ticket_status_closed'),
                 value: '${perf.closedTrades}',
                 tokens: tokens,
               ),
@@ -939,7 +944,7 @@ class _PerformanceRow extends StatelessWidget {
             SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
-                label: 'Win rate',
+                label: TranslationUtils.tr('dashboard_win_rate'),
                 value: '${perf.winRate.toStringAsFixed(2)}%',
                 tokens: tokens,
               ),
@@ -947,7 +952,7 @@ class _PerformanceRow extends StatelessWidget {
             SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
-                label: 'Profit factor',
+                label: TranslationUtils.tr('copy_trading_profit_factor'),
                 value: perf.profitFactor.toStringAsFixed(2),
                 tokens: tokens,
               ),
@@ -955,7 +960,7 @@ class _PerformanceRow extends StatelessWidget {
             SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
-                label: 'Expectancy',
+                label: TranslationUtils.tr('copy_trading_expectancy'),
                 value: '\$${perf.expectancy.toStringAsFixed(2)}',
                 valueColor: tokens.success,
                 tokens: tokens,
@@ -968,7 +973,7 @@ class _PerformanceRow extends StatelessWidget {
           children: [
             Expanded(
               child: _PerfCell(
-                label: 'Avg win',
+                label: TranslationUtils.tr('copy_trading_avg_win'),
                 value: '\$${perf.avgWin.toStringAsFixed(2)}',
                 valueColor: tokens.success,
                 tokens: tokens,
@@ -977,7 +982,7 @@ class _PerformanceRow extends StatelessWidget {
             SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
-                label: 'Avg loss',
+                label: TranslationUtils.tr('copy_trading_avg_loss'),
                 value: '\$${perf.avgLoss.toStringAsFixed(2)}',
                 valueColor: tokens.danger,
                 tokens: tokens,
@@ -986,7 +991,7 @@ class _PerformanceRow extends StatelessWidget {
             SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
-                label: 'Max DD',
+                label: TranslationUtils.tr('copy_trading_max_dd'),
                 value: '\$${perf.maxDrawdown.toStringAsFixed(2)}',
                 valueColor: tokens.danger,
                 tokens: tokens,
@@ -995,7 +1000,7 @@ class _PerformanceRow extends StatelessWidget {
             SizedBox(width: 8),
             Expanded(
               child: _PerfCell(
-                label: 'Net P&L',
+                label: TranslationUtils.tr('pmam_net_pnl'),
                 value: '\$${perf.netPnl.toStringAsFixed(2)}',
                 valueColor:
                     perf.netPnl >= 0 ? tokens.success : tokens.danger,
@@ -1083,7 +1088,7 @@ class _EquityCurve extends StatelessWidget {
         height: 220,
         child: Center(
           child: Text(
-            'No equity data yet',
+            TranslationUtils.tr('master_plan_detail_screen_no_equity_data_yet'),
             style: AppTextStyles.bodyText.copyWith(
               color: tokens.mutedText,
               fontSize: 13,
@@ -1110,7 +1115,7 @@ class _EquityCurve extends StatelessWidget {
         height: 220,
         child: Center(
           child: Text(
-            'No equity data yet',
+            TranslationUtils.tr('master_plan_detail_screen_no_equity_data_yet'),
             style: AppTextStyles.bodyText.copyWith(
               color: tokens.mutedText,
               fontSize: 13,
@@ -1245,7 +1250,7 @@ class _CommissionSummary extends StatelessWidget {
       children: [
         Expanded(
           child: _SummaryCell(
-            label: 'Lifetime',
+            label: TranslationUtils.tr('copy_trading_lifetime'),
             value: '\$${comm.lifetime.toStringAsFixed(2)}',
             tokens: tokens,
           ),
@@ -1253,7 +1258,7 @@ class _CommissionSummary extends StatelessWidget {
         _SummaryVSep(tokens: tokens),
         Expanded(
           child: _SummaryCell(
-            label: 'This month',
+            label: TranslationUtils.tr('time_this_month'),
             value: '\$${comm.thisMonth.toStringAsFixed(2)}',
             tokens: tokens,
           ),
@@ -1261,7 +1266,7 @@ class _CommissionSummary extends StatelessWidget {
         _SummaryVSep(tokens: tokens),
         Expanded(
           child: _SummaryCell(
-            label: 'Pending',
+            label: TranslationUtils.tr('transaction_history_pending'),
             value: '\$${comm.pending.toStringAsFixed(2)}',
             valueColor: tokens.warning,
             tokens: tokens,
@@ -1270,7 +1275,7 @@ class _CommissionSummary extends StatelessWidget {
         _SummaryVSep(tokens: tokens),
         Expanded(
           child: _SummaryCell(
-            label: 'Settled',
+            label: TranslationUtils.tr('copy_trading_settled'),
             value: '\$${comm.settled.toStringAsFixed(2)}',
             tokens: tokens,
           ),
@@ -1371,22 +1376,22 @@ class _SettlementCycle extends StatelessWidget {
     return Column(
       children: [
         _KeyValueRow(
-          label: 'Cycle',
-          description: 'How often pending commissions are flushed to your wallet.',
+          label: TranslationUtils.tr('copy_trading_cycle'),
+          description: TranslationUtils.tr('copy_trading_cycle_description'),
           value: _capitalize(settle.cycle),
           tokens: tokens,
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Last settled',
-          description: 'When the previous cycle ran.',
+          label: TranslationUtils.tr('copy_trading_last_settled'),
+          description: TranslationUtils.tr('copy_trading_last_settled_description'),
           value: settle.lastSettledAt.isEmpty ? '—' : _fmtDate(settle.lastSettledAt),
           tokens: tokens,
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Next payout',
-          description: 'Projected date of the next cycle flush.',
+          label: TranslationUtils.tr('copy_trading_next_payout'),
+          description: TranslationUtils.tr('copy_trading_next_payout_description'),
           value: settle.nextPayoutAt.isEmpty ? '—' : _fmtDate(settle.nextPayoutAt),
           trailingWidget: settle.isDue ? _DueBadge(tokens: tokens) : null,
           tokens: tokens,
@@ -1414,7 +1419,7 @@ class _DueBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        'Due now',
+        TranslationUtils.tr('master_plan_detail_screen_due_now'),
         style: AppTextStyles.bodyText.copyWith(
           fontSize: 10,
           color: tokens.warningText,
@@ -1439,8 +1444,8 @@ class _CommissionFees extends StatelessWidget {
     return Column(
       children: [
         _KeyValueRow(
-          label: 'Commission',
-          description: 'What copiers pay according to this plan.',
+          label: TranslationUtils.tr('general_commission'),
+          description: TranslationUtils.tr('copy_trading_commission_description'),
           value: plan.commissionLabel.isNotEmpty
               ? plan.commissionLabel
               : '${plan.commissionPercentage}%',
@@ -1448,8 +1453,8 @@ class _CommissionFees extends StatelessWidget {
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Commission type',
-          description: 'Per profitable trade vs subscription.',
+          label: TranslationUtils.tr('copy_trading_commission_type_label'),
+          description: TranslationUtils.tr('copy_trading_commission_type_description'),
           value: _capitalize(plan.commissionType.isEmpty
               ? 'per_trade'
               : plan.commissionType),
@@ -1477,23 +1482,25 @@ class _CopierRules extends StatelessWidget {
     return Column(
       children: [
         _KeyValueRow(
-          label: 'Minimum capital',
-          description: 'Smallest account a copier can join with.',
+          label: TranslationUtils.tr('copy_trading_minimum_capital'),
+          description: TranslationUtils.tr('copy_trading_minimum_capital_description'),
           value: '\$${plan.minimumCapital.toStringAsFixed(2)}',
           tokens: tokens,
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Active / cap',
-          description: 'Current copiers vs limit.',
+          label: TranslationUtils.tr('copy_trading_active_cap'),
+          description: TranslationUtils.tr('copy_trading_active_cap_description'),
           value: cap,
           tokens: tokens,
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Plan full',
-          description: 'No new copiers until someone leaves.',
-          value: plan.isFull ? 'Yes' : 'No',
+          label: TranslationUtils.tr('copy_trading_plan_full'),
+          description: TranslationUtils.tr('copy_trading_plan_full_description'),
+          value: plan.isFull
+              ? TranslationUtils.tr('general_yes')
+              : TranslationUtils.tr('general_no'),
           valueColor:
               plan.isFull ? tokens.danger : tokens.textPrimary,
           tokens: tokens,
@@ -1518,7 +1525,7 @@ class _StrategyDisclosure extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'STRATEGY DESCRIPTION',
+          TranslationUtils.tr('master_plan_detail_screen_strategy_description'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 10,
             fontWeight: FontWeight.w600,
@@ -1530,7 +1537,7 @@ class _StrategyDisclosure extends StatelessWidget {
         Text(
           plan.strategyDescription.isNotEmpty
               ? plan.strategyDescription
-              : '— Not provided. Edit the plan to add a public description for copiers.',
+              : TranslationUtils.tr('copy_trading_not_provided_add_description'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 13,
             color: tokens.bodyText,
@@ -1539,7 +1546,7 @@ class _StrategyDisclosure extends StatelessWidget {
         ),
         SizedBox(height: 16),
         Text(
-          'RISK INFORMATION',
+          TranslationUtils.tr('master_plan_detail_screen_risk_information'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 10,
             fontWeight: FontWeight.w600,
@@ -1551,7 +1558,7 @@ class _StrategyDisclosure extends StatelessWidget {
         Text(
           plan.riskInformation.isNotEmpty
               ? plan.riskInformation
-              : '— Not provided. Edit the plan to disclose drawdown and risk.',
+              : TranslationUtils.tr('copy_trading_not_provided_disclose_risk'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 13,
             color: tokens.bodyText,
@@ -1578,8 +1585,8 @@ class _AccountSystem extends StatelessWidget {
   }
 
   String _copyingLabel() {
-    if (plan.copyingPaused) return 'Paused';
-    return 'Active';
+    if (plan.copyingPaused) return TranslationUtils.tr('copy_trading_paused');
+    return TranslationUtils.tr('wallet_active');
   }
 
   String _serverLabel() {
@@ -1609,15 +1616,15 @@ class _AccountSystem extends StatelessWidget {
     return Column(
       children: [
         _KeyValueRow(
-          label: 'Status',
-          description: 'Broker / admin approval state.',
+          label: TranslationUtils.tr('common_status'),
+          description: TranslationUtils.tr('copy_trading_status_description'),
           value: _statusLabel(),
           tokens: tokens,
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Copying',
-          description: 'Whether new master trades are replicated to copiers.',
+          label: TranslationUtils.tr('copy_trading_copying'),
+          description: TranslationUtils.tr('copy_trading_copying_description'),
           value: _copyingLabel(),
           valueColor: plan.copyingPaused
               ? tokens.warning
@@ -1626,15 +1633,15 @@ class _AccountSystem extends StatelessWidget {
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Server',
-          description: 'Execution routing label.',
+          label: TranslationUtils.tr('copy_trading_server'),
+          description: TranslationUtils.tr('copy_trading_server_description'),
           value: _serverLabel(),
           tokens: tokens,
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Trading account',
-          description: 'Account number used for this plan.',
+          label: TranslationUtils.tr('copy_trading_edit_plan_trading_account'),
+          description: TranslationUtils.tr('copy_trading_trading_account_description'),
           value: plan.tradingAccountNumber.isEmpty
               ? '—'
               : plan.tradingAccountNumber,
@@ -1642,8 +1649,8 @@ class _AccountSystem extends StatelessWidget {
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Initial equity snapshot',
-          description: 'Captured when the plan was approved (if recorded).',
+          label: TranslationUtils.tr('copy_trading_initial_equity_snapshot'),
+          description: TranslationUtils.tr('copy_trading_initial_equity_snapshot_description'),
           value: _initialEquity() == null
               ? '—'
               : '\$${_initialEquity()}',
@@ -1651,8 +1658,8 @@ class _AccountSystem extends StatelessWidget {
         ),
         _Divider(tokens: tokens),
         _KeyValueRow(
-          label: 'Created',
-          description: 'Plan creation timestamp.',
+          label: TranslationUtils.tr('ticket_created'),
+          description: TranslationUtils.tr('copy_trading_created_description'),
           value: _createdAtLabel(),
           tokens: tokens,
         ),
@@ -1676,8 +1683,8 @@ class _PlanTimeline extends StatelessWidget {
 
     if (plan.createdAt.isNotEmpty) {
       events.add(_TimelineRowVM(
-        title: 'Plan created',
-        description: 'Submitted for review.',
+        title: TranslationUtils.tr('master_plan_detail_screen_plan_created'),
+        description: TranslationUtils.tr('copy_trading_submitted_for_review'),
         date: plan.createdAt,
         kind: 'created',
         tokens: tokens,
@@ -1685,8 +1692,8 @@ class _PlanTimeline extends StatelessWidget {
     }
     if (plan.approvedAt.isNotEmpty) {
       events.add(_TimelineRowVM(
-        title: 'Plan approved',
-        description: 'Live for copiers to subscribe.',
+        title: TranslationUtils.tr('master_plan_detail_screen_plan_approved'),
+        description: TranslationUtils.tr('copy_trading_live_for_copiers_to_subscribe'),
         date: plan.approvedAt,
         kind: 'approved',
         tokens: tokens,
@@ -1694,8 +1701,8 @@ class _PlanTimeline extends StatelessWidget {
     }
     if (plan.copyingPaused && plan.copyingPausedAt.isNotEmpty) {
       events.add(_TimelineRowVM(
-        title: 'Copying paused',
-        description: 'No new master trades replicated.',
+        title: TranslationUtils.tr('master_plan_detail_screen_copying_paused'),
+        description: TranslationUtils.tr('copy_trading_no_new_master_trades_replicated'),
         date: plan.copyingPausedAt,
         kind: 'paused',
         tokens: tokens,
@@ -1704,8 +1711,8 @@ class _PlanTimeline extends StatelessWidget {
     if (plan.status.toLowerCase() == 'inactive' ||
         plan.status.toLowerCase() == 'inactivated') {
       events.add(_TimelineRowVM(
-        title: 'Plan inactivated',
-        description: 'No longer accepting copiers.',
+        title: TranslationUtils.tr('master_plan_detail_screen_plan_inactivated'),
+        description: TranslationUtils.tr('copy_trading_no_longer_accepting_copiers'),
         date: plan.updatedAt,
         kind: 'inactive',
         tokens: tokens,
@@ -1714,7 +1721,7 @@ class _PlanTimeline extends StatelessWidget {
 
     if (events.isEmpty) {
       return Text(
-        'No timeline events',
+        TranslationUtils.tr('master_plan_detail_screen_no_timeline_events'),
         style: AppTextStyles.bodyText.copyWith(color: tokens.mutedText, fontSize: 13),
       );
     }

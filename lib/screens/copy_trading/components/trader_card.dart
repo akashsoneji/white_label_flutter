@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/routes/app_pages.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class TraderCard extends StatelessWidget {
   final String name;
@@ -65,7 +66,7 @@ class TraderCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'High Achiever',
+                            TranslationUtils.tr('trader_card_high_achiever'),
                             style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.textGrey,
                               fontWeight: FontWeight.w400,
@@ -105,9 +106,21 @@ class TraderCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildMetric('Gain', gain, AppColors.primary),
-                  _buildMetric('Copier', copier, AppColors.primary),
-                  _buildMetric('Commission', commission, AppColors.primary),
+                  _buildMetric(
+                    TranslationUtils.tr('trader_card_gain'),
+                    gain,
+                    AppColors.primary,
+                  ),
+                  _buildMetric(
+                    TranslationUtils.tr('trader_card_copier'),
+                    copier,
+                    AppColors.primary,
+                  ),
+                  _buildMetric(
+                    TranslationUtils.tr('general_commission'),
+                    commission,
+                    AppColors.primary,
+                  ),
                 ],
               ),
 
@@ -115,7 +128,7 @@ class TraderCard extends StatelessWidget {
 
               // Profit and Loss Row
               Text(
-                'Profit and Loss',
+                TranslationUtils.tr('trader_card_profit_and_loss'),
                 style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey, fontSize: 12),
               ),
               SizedBox(height: 4),

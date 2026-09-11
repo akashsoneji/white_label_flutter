@@ -86,7 +86,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           return;
         }
         final authenticated = await BiometricService.instance.authenticate(
-          reason: 'Authenticate to enable biometric login',
+          reason: TranslationUtils.tr('biometric_auth_reason'),
         );
         if (authenticated) {
           await SecureStorageService.setBiometricEnabled(true);
@@ -263,7 +263,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Log Out',
+                languageService?.tr('iquote_assets_log_out') ?? 'Log Out',
                 style: AppTextStyles.heading.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w800,
@@ -687,7 +687,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                             final displayName =
                                 name.trim().isNotEmpty
                                     ? name.trim()
-                                    : 'Sign in / Sign up';
+                                    : TranslationUtils.tr(
+                                      'iquote_assets_sign_in_sign_up',
+                                    );
                             return Text(
                               displayName,
                               maxLines: 1,
@@ -708,7 +710,9 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                             final subText =
                                 email.isNotEmpty
                                     ? email
-                                    : 'Manage your portfolio & accounts';
+                                    : TranslationUtils.tr(
+                                      'iquote_assets_manage_portfolio_accounts',
+                                    );
                             return Text(
                               subText,
                               maxLines: 1,
@@ -1121,7 +1125,8 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           iconColor: const Color(0xFFF97316),
           title: languageService?.tr('more_dashboard') ?? 'IB Partner Portal',
           subtitle: languageService?.tr('iquote_assets_ib_subtitle') ?? 'Commissions & client tree',
-          badgeText: 'Earn',
+          badgeText:
+              languageService?.tr('iquote_assets_badge_earn') ?? 'Earn',
           badgeColor: const Color(0xFFF97316),
           textPrimary: textPrimary,
           onTap: () async => await _handleSwitchToIB(),
@@ -1135,7 +1140,8 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             iconColor: const Color(0xFFEC4899),
             title: languageService?.tr('general_promotional') ?? 'Promotions & Rewards',
             subtitle: languageService?.tr('iquote_assets_promotions_subtitle') ?? 'Bonuses, scratch cards & offers',
-            badgeText: 'Bonus',
+            badgeText:
+                languageService?.tr('iquote_assets_badge_bonus') ?? 'Bonus',
             badgeColor: const Color(0xFFEC4899),
             textPrimary: textPrimary,
             onTap: () => Get.to(
@@ -1153,7 +1159,8 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
             iconColor: const Color(0xFF6366F1),
             title: languageService?.tr('more_copy_trading') ?? 'Copy Trading',
             subtitle: languageService?.tr('iquote_assets_copy_trading_subtitle') ?? 'Follow top verified master traders',
-            badgeText: 'Pro',
+            badgeText:
+                languageService?.tr('iquote_assets_badge_pro') ?? 'Pro',
             badgeColor: const Color(0xFF6366F1),
             textPrimary: textPrimary,
             onTap: () => Get.toNamed(AppPages.COPY_TRADING_MAIN),
@@ -1180,7 +1187,7 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
           iconColor: const Color(0xFFEAB308),
           title: languageService?.tr('more_demo_contest') ?? 'Trading Contests',
           subtitle: languageService?.tr('iquote_assets_contests_subtitle') ?? 'Compete risk-free for real cash prizes',
-          badgeText: 'Win',
+          badgeText: languageService?.tr('iquote_assets_badge_win') ?? 'Win',
           badgeColor: const Color(0xFFEAB308),
           textPrimary: textPrimary,
           onTap: () => Get.toNamed(AppPages.DEMO_CONTEST),
@@ -1267,7 +1274,12 @@ class _IquoteAssetsLayoutState extends State<IquoteAssetsLayout> {
                 : Icons.dark_mode_rounded,
             iconColor: const Color(0xFFF59E0B),
             title: languageService?.tr('theme') ?? 'Theme Appearance',
-            subtitle: AppColors.isDarkMode ? 'Dark Mode Active' : 'Light Mode Active',
+            subtitle:
+                AppColors.isDarkMode
+                    ? (languageService?.tr('iquote_assets_dark_mode_active') ??
+                        'Dark Mode Active')
+                    : (languageService?.tr('iquote_assets_light_mode_active') ??
+                        'Light Mode Active'),
             textPrimary: textPrimary,
             onTap: () => showThemeBottomSheet(context),
           ),
@@ -1578,7 +1590,10 @@ class _VerifyAccountCard extends StatelessWidget {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
-                            'Verify Your Profile',
+                            languageService?.tr(
+                                  'iquote_assets_verify_your_profile',
+                                ) ??
+                                'Verify Your Profile',
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 13.5.sp,
                               fontWeight: FontWeight.w800,
@@ -1598,7 +1613,10 @@ class _VerifyAccountCard extends StatelessWidget {
                     ),
                     SizedBox(height: 6.h),
                     Text(
-                      'Complete verification to unlock unlimited deposits and higher leverage.',
+                      languageService?.tr(
+                            'iquote_assets_verify_profile_subtitle',
+                          ) ??
+                          'Complete verification to unlock unlimited deposits and higher leverage.',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,

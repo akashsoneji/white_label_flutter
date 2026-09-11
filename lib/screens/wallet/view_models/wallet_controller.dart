@@ -252,7 +252,7 @@ class WalletController extends GetxController {
     final rawText = amountController.text.trim();
     if (rawText.isEmpty) {
       CustomToastService.showError(
-        message: 'Please enter amount',
+        message: TranslationUtils.tr('internal_transfer_enter_amount'),
       );
       return;
     }
@@ -263,7 +263,7 @@ class WalletController extends GetxController {
     final parsedAmount = PrecisionHelper.parseDouble(cleanedText);
     if (parsedAmount <= 0.0) {
       CustomToastService.showError(
-        message: 'Amount must be greater than 0.00',
+        message: TranslationUtils.tr('wallet_validation_amount_positive'),
       );
       return;
     }
@@ -277,8 +277,10 @@ class WalletController extends GetxController {
     } catch (e) {
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Failed to initiate deposit',
-          title: 'Error',
+          message: TranslationUtils.tr(
+            'wallet_controller_failed_to_initiate_deposit',
+          ),
+          title: TranslationUtils.tr('close_position_error'),
         );
       }
     } finally {
@@ -378,14 +380,16 @@ class WalletController extends GetxController {
 
     if (fromAccountId.isEmpty || toAccountId.isEmpty) {
       CustomToastService.showError(
-        message: 'Please select both From and To accounts',
+        message: TranslationUtils.tr(
+          'wallet_controller_please_select_both_from_and_to',
+        ),
       );
       return false;
     }
 
     if (amount.isEmpty) {
       CustomToastService.showError(
-        message: 'Please enter amount',
+        message: TranslationUtils.tr('internal_transfer_enter_amount'),
       );
       return false;
     }

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class AddInvestmentScreen extends StatefulWidget {
   final String traderName;
@@ -35,7 +36,10 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
           ),
           onPressed: () => Get.back(),
         ),
-        title: Text('Add Investment', style: AppTextStyles.heading),
+        title: Text(
+          TranslationUtils.tr('add_investment_screen_add_investment'),
+          style: AppTextStyles.heading,
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -45,7 +49,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
             _buildHeaderCard(),
             SizedBox(height: 16.h),
             LabeledAppTextField(
-              label: 'Investing Amount',
+              label: TranslationUtils.tr('add_investment_screen_investing_amount'),
               controller: _amountController,
               keyboardType: const TextInputType.numberWithOptions(
                 signed: true,
@@ -86,7 +90,9 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
                 ),
                 SizedBox(width: 6.w),
                 Text(
-                  'Your investment with this master trader will total \$50.01',
+                  TranslationUtils.tr(
+                    'add_investment_screen_your_investment_will_total',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
                 ),
               ],
@@ -113,7 +119,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
               elevation: 0,
             ),
             child: Text(
-              'Confirm',
+              TranslationUtils.tr('general_confirm'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -167,7 +173,7 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
               ),
               SizedBox(width: 10.w),
               Text(
-                'Important',
+                TranslationUtils.tr('add_investment_screen_important'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -181,7 +187,9 @@ class _AddInvestmentScreenState extends State<AddInvestmentScreen> {
           ),
           SizedBox(height: 12.h),
           Text(
-            'Enter the amount you want to add to your current investment with this master trader.',
+            TranslationUtils.tr(
+              'add_investment_screen_enter_the_amount_you_want_to',
+            ),
             style: AppTextStyles.bodyText.copyWith(
               fontWeight: FontWeight.w400,
               color: AppColors.icongrey,

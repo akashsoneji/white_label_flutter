@@ -382,7 +382,10 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Close position #${p.orderId}',
+              TranslationUtils.trArgs(
+                'meta_close_position_title',
+                {'orderId': '${p.orderId}'},
+              ),
               style: AppTextStyles.bodyText.copyWith(
                 color: MetaTheme.mainText(c),
                 fontSize: 15.sp,
@@ -595,8 +598,7 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 16.h),
               child: Text(
-                'Attention! The trade will be executed at market conditions, '
-                'difference with requested price may be significant!',
+                TranslationUtils.tr('meta_close_position_market_warning'),
                 style: AppTextStyles.bodyText.copyWith(
                   color: MetaTheme.subText(c),
                   fontSize: 12.sp,
@@ -645,10 +647,16 @@ class _MetaClosePositionScreenState extends State<MetaClosePositionScreen> {
                         else ...[
                           Text(
                             isPartial
-                                ? 'PARTIAL CLOSE'
+                                ? TranslationUtils.tr(
+                                    'close_position_screen_partial_close',
+                                  )
                                 : (isLoss
-                                    ? 'CLOSE WITH LOSS'
-                                    : 'CLOSE WITH PROFIT'),
+                                    ? TranslationUtils.tr(
+                                        'meta_close_position_close_with_loss',
+                                      )
+                                    : TranslationUtils.tr(
+                                        'meta_close_position_close_with_profit',
+                                      )),
                             style: AppTextStyles.bodyText.copyWith(
                               color: btnColor,
                               fontSize: 14.sp,

@@ -7,6 +7,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/pmam/pmam_manager_plan_detail_controller.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/dashBorder.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class PmamManagerPlanDetailScreen extends StatefulWidget {
   const PmamManagerPlanDetailScreen({super.key});
@@ -57,8 +58,12 @@ class _PmamManagerPlanDetailScreenState
         ),
         title: Obx(() {
           final planName =
-              _ctrl.planDetails['plan']?['plan_name'] ?? 'Plan Details';
-          return Text('Plan: $planName', style: AppTextStyles.heading);
+              _ctrl.planDetails['plan']?['plan_name'] ??
+                  TranslationUtils.tr('master_plan_detail_screen_plan_details');
+          return Text(
+            '${TranslationUtils.tr('pmam_plan_label')}: $planName',
+            style: AppTextStyles.heading,
+          );
         }),
         centerTitle: true,
       ),
@@ -115,7 +120,7 @@ class _PmamManagerPlanDetailScreenState
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Your Stats',
+                              TranslationUtils.tr('investment_tab_your_stats'),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
@@ -138,27 +143,29 @@ class _PmamManagerPlanDetailScreenState
                         child: Column(
                           children: [
                             _buildDashedStatRow(
-                              'Total AUM',
+                              TranslationUtils.tr(
+                                  'pmam_manager_dashboard_screen_total_aum'),
                               _fmtMoney(plan['total_aum']),
                             ),
                             SizedBox(height: 12.h),
                             _buildDashedStatRow(
-                              'Withdrawable',
+                              TranslationUtils.tr('pmam_withdrawable'),
                               _fmtMoney(withdrawable),
                             ),
                             SizedBox(height: 12.h),
                             _buildDashedStatRow(
-                              'Total P&L',
+                              TranslationUtils.tr('pmam_total_pnl'),
                               _fmtMoney(plan['total_pnl']),
                             ),
                             SizedBox(height: 12.h),
                             _buildDashedStatRow(
-                              'Total Commission',
+                              TranslationUtils.tr('pmam_total_commission'),
                               _fmtMoney(plan['total_commission']),
                             ),
                             SizedBox(height: 12.h),
                             _buildDashedStatRow(
-                              'Active Investors',
+                              TranslationUtils.tr(
+                                  'pmam_manager_dashboard_screen_active_investors'),
                               '${plan['active_investors'] ?? 0}',
                             ),
                           ],
@@ -177,7 +184,8 @@ class _PmamManagerPlanDetailScreenState
               child: Row(
                 children: [
                   Text(
-                    'Investor Requests',
+                    TranslationUtils.tr(
+                        'pmam_manager_plan_detail_investor_requests'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w700,
@@ -237,7 +245,8 @@ class _PmamManagerPlanDetailScreenState
               SizedBox(height: 120.h),
               Center(
                 child: Text(
-                  'No pending investor requests.',
+                  TranslationUtils.tr(
+                      'pmam_manager_plan_detail_no_pending_investor_requests'),
                   style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
                 ),
               ),
@@ -258,10 +267,12 @@ class _PmamManagerPlanDetailScreenState
               onApprove: (id) async {
                 final ok = await _ctrl.approveInvestorRequest(id);
                 Get.snackbar(
-                  ok ? 'Approved' : 'Error',
                   ok
-                      ? 'Investor request approved'
-                      : 'Failed to approve request',
+                      ? TranslationUtils.tr('kyc_verification_approved')
+                      : TranslationUtils.tr('general_error'),
+                  ok
+                      ? TranslationUtils.tr('pmam_investor_request_approved')
+                      : TranslationUtils.tr('pmam_failed_to_approve_request'),
                   backgroundColor: (ok
                           ? AppColors.green
                           : AppColors.error)
@@ -276,10 +287,12 @@ class _PmamManagerPlanDetailScreenState
               onReject: (id) async {
                 final ok = await _ctrl.rejectInvestorRequest(id);
                 Get.snackbar(
-                  ok ? 'Rejected' : 'Error',
                   ok
-                      ? 'Investor request rejected'
-                      : 'Failed to reject request',
+                      ? TranslationUtils.tr('kyc_verification_rejected')
+                      : TranslationUtils.tr('general_error'),
+                  ok
+                      ? TranslationUtils.tr('pmam_investor_request_rejected')
+                      : TranslationUtils.tr('pmam_failed_to_reject_request'),
                   backgroundColor: (ok
                           ? AppColors.green
                           : AppColors.error)
@@ -499,11 +512,11 @@ class _RequestCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _kv('Account', accNumber),
+                child: _kv(TranslationUtils.tr('settings_account'), accNumber),
               ),
               Expanded(
                 child: _kv(
-                  'Amount',
+                  TranslationUtils.tr('transaction_history_amount'),
                   fmtMoney(amount),
                   valueColor: AppColors.primary,
                   bold: true,
@@ -512,7 +525,8 @@ class _RequestCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 10.h),
-          _kv('Requested at', _formatDate(createdAt)),
+          _kv(TranslationUtils.tr('pmam_requested_at'),
+              _formatDate(createdAt)),
 
           if (isPending) ...[
             SizedBox(height: 12.h),
@@ -534,7 +548,7 @@ class _RequestCard extends StatelessWidget {
                           )
                         : Icon(Icons.check, size: 16.sp),
                     label: Text(
-                      'Approve',
+                      TranslationUtils.tr('ibm_approve'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
@@ -557,7 +571,7 @@ class _RequestCard extends StatelessWidget {
                     onPressed: isProcessing ? null : () => onReject(id),
                     icon: Icon(Icons.close, size: 16.sp),
                     label: Text(
-                      'Reject',
+                      TranslationUtils.tr('pmam_reject'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,

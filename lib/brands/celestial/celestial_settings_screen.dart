@@ -170,7 +170,8 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
       return;
     }
     final ok = await BiometricService.instance
-        .authenticate(reason: 'Enable biometric login');
+        .authenticate(
+            reason: TranslationUtils.tr('biometric_enable_checkbox'));
     if (!ok) return;
 
     await SecureStorageService.setBiometricEnabled(true);
@@ -241,25 +242,27 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
               SizedBox(height: 16.h),
 
               // ── Financial quick-action grid ───────────────────────────────
-              _sectionLabel(context, 'Financial'),
+              _sectionLabel(context, TranslationUtils.tr('general_financial')),
               SizedBox(height: 8.h),
               _buildFinancialGrid(context),
               SizedBox(height: 16.h),
 
               // ── Trading Settings ──────────────────────────────────────────
-              _sectionLabel(context, 'Trading Settings'),
+              _sectionLabel(
+                  context, TranslationUtils.tr('general_tradind_settings')),
               SizedBox(height: 8.h),
               Obx(() => _buildMenuList(context, _tradingSettingsItems(context))),
               SizedBox(height: 16.h),
 
               // ── Security & Preferences ────────────────────────────────────
-              _sectionLabel(context, 'Security & Preferences'),
+              _sectionLabel(context,
+                  TranslationUtils.tr('meta_settings_security_preferences')),
               SizedBox(height: 8.h),
               _buildMenuList(context, _securityItems(context)),
               SizedBox(height: 16.h),
 
               // ── Account ───────────────────────────────────────────────────
-              _sectionLabel(context, 'Account'),
+              _sectionLabel(context, TranslationUtils.tr('settings_account')),
               SizedBox(height: 8.h),
               _buildMenuList(context, _accountItems(context, auth)),
               SizedBox(height: 16.h),
@@ -298,7 +301,7 @@ class _CelestialSettingsScreenState extends State<CelestialSettingsScreen>
   // ─────────────────────────────────────────────────────────────────────────
 
   Widget _buildProfileCard(BuildContext c, AuthController auth) {
-    final name = auth.userFullName ?? 'User';
+    final name = auth.userFullName ?? TranslationUtils.tr('ib_user');
     final email = auth.userEmail ?? '';
     final initial =
         name.isNotEmpty ? name[0].toUpperCase() : 'U';

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class ReduceInvestmentScreen extends StatefulWidget {
   final String traderName;
@@ -34,7 +35,10 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
           ),
           onPressed: () => Get.back(),
         ),
-        title: Text('Reduce Investment', style: AppTextStyles.heading),
+        title: Text(
+          TranslationUtils.tr('reduce_investment_screen_reduce_investment'),
+          style: AppTextStyles.heading,
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -44,7 +48,9 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
             _buildHeaderCard(),
             SizedBox(height: 16.h),
             LabeledAppTextField(
-              label: 'I want to disinvest',
+              label: TranslationUtils.tr(
+                'reduce_investment_screen_i_want_to_disinvest',
+              ),
               controller: _amountController,
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
@@ -64,7 +70,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Available for withdrawal : \$${_amountController.text}',
+                '${TranslationUtils.tr('reduce_investment_screen_available_for_withdrawal')} : \$${_amountController.text}',
                 style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
               ),
             ),
@@ -73,12 +79,16 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
             SizedBox(height: 20.h),
             _buildInfoRow(
               'assets/svg/copy_trading/investment/coin.svg',
-              'Your remaining investment will total \$0.00',
+              TranslationUtils.tr(
+                'reduce_investment_screen_remaining_investment_total',
+              ),
             ),
             SizedBox(height: 12.h),
             _buildInfoRow(
               'assets/svg/copy_trading/investment/percentage.svg',
-              'The bonus will be cancelled and you will not be able to reapply it.',
+              TranslationUtils.tr(
+                'reduce_investment_screen_bonus_will_be_cancelled',
+              ),
             ),
           ],
         ),
@@ -102,7 +112,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
               elevation: 0,
             ),
             child: Text(
-              'Confirm',
+              TranslationUtils.tr('general_confirm'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
@@ -156,7 +166,7 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
               ),
               SizedBox(width: 10.w),
               Text(
-                'Important',
+                TranslationUtils.tr('add_investment_screen_important'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -170,7 +180,9 @@ class _ReduceInvestmentScreenState extends State<ReduceInvestmentScreen> {
           ),
           SizedBox(height: 12.h),
           Text(
-            'Enter the amount you want to add to your current investment with this master trader.',
+            TranslationUtils.tr(
+              'add_investment_screen_enter_the_amount_you_want_to',
+            ),
             style: AppTextStyles.bodyText.copyWith(
               fontWeight: FontWeight.w400,
               color: AppColors.icongrey,

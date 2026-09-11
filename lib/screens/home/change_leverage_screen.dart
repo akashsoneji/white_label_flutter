@@ -91,7 +91,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                     child: Row(
                       children: [
                         Text(
-                          'Select Leverage',
+                          TranslationUtils.tr('change_leverage_screen_select_leverage'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
@@ -218,7 +218,9 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: const AppBackButton(),
-        title: Text('Change Leverage'),
+        title: Text(
+          TranslationUtils.tr('change_leverage_screen_change_leverage'),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -240,7 +242,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                   Icon(Icons.account_circle, color: AppColors.primary),
                   SizedBox(width: 12.w),
                   Text(
-                    'Account: ${widget.accountNumber}',
+                    '${TranslationUtils.tr('change_leverage_account_label')}: ${widget.accountNumber}',
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -254,7 +256,7 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
 
             // Leverage Dropdown
             Text(
-              'Select Leverage',
+              TranslationUtils.tr('change_leverage_screen_select_leverage'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
@@ -282,7 +284,9 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                 ),
               ),
               decoration: InputDecoration(
-                hintText: 'Select leverage',
+                hintText: TranslationUtils.tr(
+                  'change_leverage_screen_select_leverage',
+                ),
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 16.w,
                   vertical: 16.h,
@@ -329,7 +333,9 @@ class _ChangeLeverageScreenState extends State<ChangeLeverageScreen> {
                           ),
                         )
                         : Text(
-                          'Change Leverage',
+                          TranslationUtils.tr(
+                            'change_leverage_screen_change_leverage',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,

@@ -4,6 +4,7 @@ import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/core/network/api_client.dart';
 import 'package:crm_app/core/network/api_response.dart';
 import 'package:crm_app/services/auth_service.dart';
+import 'package:crm_app/services/language_service.dart';
 
 import 'auth_repository.dart';
 
@@ -101,7 +102,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     return ApiResponse.error(
-      response.message ?? 'Invalid response',
+      response.message ?? TranslationUtils.tr('tw_invalid_response'),
       data: payload is Map<String, dynamic> ? payload : null,
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../app_lock_service.dart';
+import '../language_service.dart';
 
 class AppLockLifecycle extends StatefulWidget {
   final Widget child;
@@ -36,7 +37,9 @@ class _AppLockLifecycleState extends State<AppLockLifecycle>
       lock.markPaused();
     } else if (state == AppLifecycleState.resumed) {
       if (lock.isUnlocking.value) return;
-      lock.lockIfNeeded(reason: 'Unlock to continue');
+      lock.lockIfNeeded(
+        reason: TranslationUtils.tr('biometric_unlock_reason'),
+      );
     }
   }
 

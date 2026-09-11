@@ -3,6 +3,7 @@ import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/models/dropdown_models.dart';
 import 'package:crm_app/core/network/api_client.dart';
 import 'package:crm_app/screens/common/view_models/app_notification_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class DropdownService extends GetxService {
   // Observable lists for dropdown data
@@ -46,8 +47,8 @@ class DropdownService extends GetxService {
         print('❌ Failed to load countries: ${response.message}');
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Failed to load countries: ${response.message}',
-            title: 'Error',
+            message: TranslationUtils.tr('dropdown_failed_load_countries'),
+            title: TranslationUtils.tr('general_error'),
           );
         }
       }
@@ -55,8 +56,8 @@ class DropdownService extends GetxService {
       print('❌ Error loading countries: $e');
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Error loading countries: $e',
-          title: 'Error',
+          message: TranslationUtils.tr('dropdown_failed_load_countries'),
+          title: TranslationUtils.tr('general_error'),
         );
       }
     } finally {
@@ -87,8 +88,8 @@ class DropdownService extends GetxService {
         print('❌ Failed to load states: ${response.message}');
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Failed to load states: ${response.message}',
-            title: 'Error',
+            message: TranslationUtils.tr('dropdown_failed_load_states'),
+            title: TranslationUtils.tr('general_error'),
           );
         }
       }
@@ -96,8 +97,8 @@ class DropdownService extends GetxService {
       print('❌ Error loading states: $e');
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Error loading states: $e',
-          title: 'Error',
+          message: TranslationUtils.tr('dropdown_failed_load_states'),
+          title: TranslationUtils.tr('general_error'),
         );
       }
     } finally {
@@ -126,8 +127,8 @@ class DropdownService extends GetxService {
         print('❌ Failed to load cities: ${response.message}');
         if (Get.isRegistered<AppNotificationController>()) {
           Get.find<AppNotificationController>().showError(
-            message: 'Failed to load cities: ${response.message}',
-            title: 'Error',
+            message: TranslationUtils.tr('dropdown_failed_load_cities'),
+            title: TranslationUtils.tr('general_error'),
           );
         }
       }
@@ -135,8 +136,8 @@ class DropdownService extends GetxService {
       print('❌ Error loading cities: $e');
       if (Get.isRegistered<AppNotificationController>()) {
         Get.find<AppNotificationController>().showError(
-          message: 'Error loading cities: $e',
-          title: 'Error',
+          message: TranslationUtils.tr('dropdown_failed_load_cities'),
+          title: TranslationUtils.tr('general_error'),
         );
       }
     } finally {

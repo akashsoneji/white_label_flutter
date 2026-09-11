@@ -249,7 +249,8 @@ class _CelestialWatchlistScreenState
                         c, price.bid, digits, CelTheme.sell(c)),
                     SizedBox(height: 1.h),
                     Text(
-                      'L: ${price.dayLow.toStringAsFixed(digits)}',
+                      TranslationUtils.trArgs('meta_watchlist_day_low_value',
+                          {'price': price.dayLow.toStringAsFixed(digits)}),
                       style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.subText(c), fontSize: 10.sp),
                     ),
@@ -291,7 +292,9 @@ class _CelestialWatchlistScreenState
                             c, price.ask, digits, CelTheme.tpGreen),
                         SizedBox(height: 1.h),
                         Text(
-                          'H: ${price.dayHigh.toStringAsFixed(digits)}',
+                          TranslationUtils.trArgs(
+                              'meta_watchlist_day_high_value',
+                              {'price': price.dayHigh.toStringAsFixed(digits)}),
                           style: AppTextStyles.bodyText.copyWith(
                               color: CelTheme.subText(c), fontSize: 10.sp),
                         ),

@@ -348,9 +348,15 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         if (entered != null) {
           final converted = _convertedAmount(entered);
           if (minLimit != null && converted < minLimit) {
-            error = 'Minimum deposit is \$${minLimit.toStringAsFixed(2)}';
+            error = TranslationUtils.trArgs(
+              'deposit_real_screen_minimum_deposit_is',
+              {'amount': '\$${minLimit.toStringAsFixed(2)}'},
+            );
           } else if (maxLimit != null && converted > maxLimit) {
-            error = 'Maximum deposit is \$${maxLimit.toStringAsFixed(2)}';
+            error = TranslationUtils.trArgs(
+              'deposit_real_screen_maximum_deposit_is',
+              {'amount': '\$${maxLimit.toStringAsFixed(2)}'},
+            );
           }
         }
       }
@@ -376,7 +382,10 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
           errorText: error,
           errorStyle: TextStyle(color: AppColors.error, fontSize: 12.sp),
           helperText: (minLimit != null && maxLimit != null)
-              ? 'Limit: \$${minLimit.toStringAsFixed(2)} - \$${maxLimit.toStringAsFixed(2)}'
+              ? TranslationUtils.trArgs('deposit_real_screen_limit_min_max', {
+                'min': '\$${minLimit.toStringAsFixed(2)}',
+                'max': '\$${maxLimit.toStringAsFixed(2)}',
+              })
               : null,
           helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -421,9 +430,11 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
 
   String _amountLabel() {
     if (_hasConversion) {
-      return 'Amount ($_sourceCurrency)';
+      return TranslationUtils.trArgs('deposit_real_screen_amount_currency', {
+        'currency': _sourceCurrency,
+      });
     }
-    return 'Amount';
+    return TranslationUtils.tr('deposit_amount');
   }
 
   /// Converts the entered source-currency amount into the target (USD)
@@ -485,7 +496,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'To be deposited',
+            TranslationUtils.tr('deposit_to_be_deposited'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
@@ -519,7 +530,7 @@ class _DepositRealScreenState extends State<DepositRealScreen> {
         padding: EdgeInsets.zero,
       ),
       child: Text(
-        'Confirm',
+        TranslationUtils.tr('confirm'),
         style: AppTextStyles.bodyText.copyWith(
           fontSize: 14.sp,
           height: 1.71,

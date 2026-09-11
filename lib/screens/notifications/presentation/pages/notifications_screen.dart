@@ -1,5 +1,6 @@
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -13,7 +14,10 @@ class NotificationsScreen extends GetView<NotificationController> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Notifications', style: AppTextStyles.screenTitle),
+        title: Text(
+          TranslationUtils.tr('more_notifications'),
+          style: AppTextStyles.screenTitle,
+        ),
         centerTitle: true,
         backgroundColor: AppColors.background,
         elevation: 0,
@@ -37,7 +41,7 @@ class NotificationsScreen extends GetView<NotificationController> {
         if (controller.notifications.isEmpty) {
           return Center(
             child: Text(
-              'No notifications found',
+              TranslationUtils.tr('notifications_no_notifications_found'),
               style: AppTextStyles.bodyText.copyWith(
                 color: AppColors.textSecondary,
                 fontSize: 16.sp,

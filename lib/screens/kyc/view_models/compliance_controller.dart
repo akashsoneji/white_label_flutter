@@ -217,7 +217,11 @@ class ComplianceController extends GetxController {
         isMobileAvailable.value = true;
       } else {
         isMobileAvailable.value = false;
-        mobileError.value = response.message ?? 'Mobile number is already registered or invalid.';
+        mobileError.value =
+            response.message ??
+            TranslationUtils.tr(
+              'compliance_controller_mobile_number_is_already_registered_or',
+            );
       }
     } catch (e) {
       print('ComplianceController: Error checking mobile number: $e');
@@ -272,14 +276,22 @@ class ComplianceController extends GetxController {
 
       // Check mobile number status
       if (!isMobileAvailable.value) {
-        CustomToastService.showError(message: 'Please resolve mobile number errors before proceeding.');
+        CustomToastService.showError(
+          message: TranslationUtils.tr(
+            'compliance_controller_please_resolve_mobile_number_errors_before',
+          ),
+        );
         isLoading.value = false;
         return false;
       }
 
       final token = await SecureStorageService.getAuthToken();
       if (token == null) {
-        CustomToastService.showError(message: 'Session expired. Please log in again.');
+        CustomToastService.showError(
+          message: TranslationUtils.tr(
+            'compliance_controller_session_expired_please_log_in_again',
+          ),
+        );
         isLoading.value = false;
         return false;
       }
@@ -287,7 +299,11 @@ class ComplianceController extends GetxController {
       // 2. Build profile snapshot
       final profile = _authController.profileData;
       if (profile == null) {
-        CustomToastService.showError(message: 'Profile data missing.');
+        CustomToastService.showError(
+          message: TranslationUtils.tr(
+            'compliance_controller_profile_data_missing',
+          ),
+        );
         isLoading.value = false;
         return false;
       }
@@ -366,7 +382,13 @@ class ComplianceController extends GetxController {
       );
 
       if (!profileResponse.success) {
-        CustomToastService.showError(message: profileResponse.message ?? 'Failed to update profile details.');
+        CustomToastService.showError(
+          message:
+              profileResponse.message ??
+              TranslationUtils.tr(
+                'compliance_controller_failed_to_update_profile_details',
+              ),
+        );
         isLoading.value = false;
         return false;
       }
@@ -380,7 +402,11 @@ class ComplianceController extends GetxController {
       );
 
       if (response.success) {
-        CustomToastService.showSuccess(message: 'Regulation questionnaire saved successfully.');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr(
+            'compliance_controller_regulation_questionnaire_saved_successfully',
+          ),
+        );
         
         // Refresh local profile status so state resolves regulation_submitted = 1.
         // forceRefresh bypasses the getProfile TTL cache — this read must see the
@@ -391,7 +417,13 @@ class ComplianceController extends GetxController {
         currentStep.value = 1;
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'Failed to submit questionnaire.');
+        CustomToastService.showError(
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'compliance_controller_failed_to_submit_questionnaire',
+              ),
+        );
         return false;
       }
     } catch (e) {
@@ -406,11 +438,19 @@ class ComplianceController extends GetxController {
   // Upload Documents (Step 2 - Unified KYC)
   Future<bool> submitDocuments() async {
     if (idProofFront.value == null) {
-      CustomToastService.showWarning(message: 'Identity Document Front is mandatory.');
+      CustomToastService.showWarning(
+        message: TranslationUtils.tr(
+          'compliance_controller_identity_document_front_is_mandatory',
+        ),
+      );
       return false;
     }
     if (addressProofFront.value == null) {
-      CustomToastService.showWarning(message: 'Address Proof Front is mandatory.');
+      CustomToastService.showWarning(
+        message: TranslationUtils.tr(
+          'compliance_controller_address_proof_front_is_mandatory',
+        ),
+      );
       return false;
     }
 
@@ -418,14 +458,22 @@ class ComplianceController extends GetxController {
       isLoading.value = true;
       final token = await SecureStorageService.getAuthToken();
       if (token == null) {
-        CustomToastService.showError(message: 'Session expired. Please log in again.');
+        CustomToastService.showError(
+          message: TranslationUtils.tr(
+            'compliance_controller_session_expired_please_log_in_again',
+          ),
+        );
         isLoading.value = false;
         return false;
       }
 
       final profile = _authController.profileData;
       if (profile == null) {
-        CustomToastService.showError(message: 'Profile data missing.');
+        CustomToastService.showError(
+          message: TranslationUtils.tr(
+            'compliance_controller_profile_data_missing',
+          ),
+        );
         isLoading.value = false;
         return false;
       }
@@ -463,14 +511,24 @@ class ComplianceController extends GetxController {
       );
 
       if (response.success) {
-        CustomToastService.showSuccess(message: 'KYC documents submitted successfully.');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr(
+            'compliance_controller_kyc_documents_submitted_successfully',
+          ),
+        );
         
         // Refresh profile settings locally so that documents_submitted becomes true
         await _authController.getProfile();
         
         return true;
       } else {
-        CustomToastService.showError(message: response.message ?? 'KYC document submission failed.');
+        CustomToastService.showError(
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'compliance_controller_kyc_document_submission_failed',
+              ),
+        );
         return false;
       }
     } catch (e) {
@@ -494,7 +552,11 @@ class ComplianceController extends GetxController {
         final File file = File(result.files.single.path!);
         final size = await file.length();
         if (size > 15 * 1024 * 1024) {
-          CustomToastService.showError(message: 'File size exceeds maximum limit of 15MB.');
+          CustomToastService.showError(
+            message: TranslationUtils.tr(
+              'compliance_controller_file_size_exceeds_maximum_limit_of',
+            ),
+          );
           return;
         }
 

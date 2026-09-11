@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class MyStructureScreen extends StatefulWidget {
   final bool isEmbedded;
@@ -67,7 +68,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                   iconHeight: 30.h,
                 ),
                 title: Text(
-                  'My Structure',
+                  TranslationUtils.tr('my_structure_screen_my_structure'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
@@ -80,7 +81,9 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
         if (ibController.isLoading.value) {
           return Center(
             child: CommonLoadingWidget(
-              message: 'Loading structure...',
+              message: TranslationUtils.tr(
+                'my_structure_screen_loading_structure',
+              ),
               size: 50.0,
               color: AppColors.primary,
             ),
@@ -126,7 +129,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
               ),
               SizedBox(height: 12.h),
               Text(
-                'No progressive stats data available',
+                TranslationUtils.tr('ib_no_progressive_stats'),
                 style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
               ),
             ],
@@ -139,7 +142,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Performance Dashboard',
+          TranslationUtils.tr('ib_performance_dashboard'),
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.w400,
@@ -148,7 +151,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
         ),
         SizedBox(height: 2.h),
         Text(
-          'Track your network metrics and progression',
+          TranslationUtils.tr('ib_track_network_metrics'),
           style: TextStyle(
             fontSize: 11.sp,
             fontWeight: FontWeight.w400,
@@ -177,42 +180,46 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
       childAspectRatio: 2.2,
       children: [
         _buildMetricCard(
-          'ACTIVE CLIENTS',
+          TranslationUtils.tr('ib_active_clients').toUpperCase(),
           (stats.activeClients ?? 0).toString(),
           Icons.people_alt_outlined,
         ),
         _buildMetricCard(
-          'TOTAL DEPOSIT',
+          TranslationUtils.tr(
+            'ib_dashboard_new_screen_total_deposit',
+          ).toUpperCase(),
           '\$${(stats.totalDeposit ?? 0).toStringAsFixed(2)}',
           Icons.arrow_outward_rounded,
         ),
         _buildMetricCard(
-          'TOTAL WITHDRAWAL',
+          TranslationUtils.tr(
+            'ib_dashboard_new_screen_total_withdrawal',
+          ).toUpperCase(),
           '\$${(stats.totalWithdrawal ?? 0).toStringAsFixed(2)}',
           Icons.south_west_rounded,
         ),
         _buildMetricCard(
-          'NET DEPOSIT VOLUME',
+          TranslationUtils.tr('ib_net_deposit_volume').toUpperCase(),
           '\$${(stats.netDeposit ?? 0).toStringAsFixed(2)}',
           Icons.account_balance_wallet_outlined,
         ),
         _buildMetricCard(
-          'CURRENT TIER',
-          stats.currentTier?.name ?? 'None',
+          TranslationUtils.tr('ib_current_tier').toUpperCase(),
+          stats.currentTier?.name ?? TranslationUtils.tr('common_none'),
           Icons.verified_outlined,
         ),
         _buildMetricCard(
-          'TOTAL LOT',
+          TranslationUtils.tr('ib_dashboard_new_screen_total_lot').toUpperCase(),
           (stats.totalLots ?? 0).toStringAsFixed(2),
           Icons.grid_view_rounded,
         ),
         _buildMetricCard(
-          'CURRENT TIER REBATE',
+          TranslationUtils.tr('ib_current_tier_rebate').toUpperCase(),
           '\$${(stats.currentTierEarnings ?? 0).toStringAsFixed(2)}',
           Icons.percent_rounded,
         ),
         _buildMetricCard(
-          'TOTAL EARNED',
+          TranslationUtils.tr('ib_total_earned').toUpperCase(),
           '\$${(stats.totalEarned ?? 0).toStringAsFixed(2)}',
           Icons.payments_outlined,
         ),
@@ -334,7 +341,11 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Unlock ${nextTier?.name ?? "Next Tier"}',
+                        TranslationUtils.trArgs('ib_unlock_tier', {
+                          'tier':
+                              nextTier?.name ??
+                              TranslationUtils.tr('ib_next_tier'),
+                        }),
                         style: TextStyle(
                           fontSize: 17.sp,
                           fontWeight: FontWeight.w400,
@@ -343,7 +354,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        'Achieve both targets below to level up and maximize your commission payouts.',
+                        TranslationUtils.tr('ib_achieve_both_targets'),
                         style: TextStyle(
                           fontSize: 10.5.sp,
                           fontWeight: FontWeight.w400,
@@ -362,20 +373,24 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _buildProgressBar(
-                  'Active Clients Requirement',
+                  TranslationUtils.tr('ib_active_clients_requirement'),
                   currentClients.toString(),
                   totalClientsTarget.toString(),
                   clientProgress,
-                  '$clientsNeeded remaining',
+                  TranslationUtils.trArgs('ib_count_remaining', {
+                    'count': '$clientsNeeded',
+                  }),
                   Icons.people_outline,
                 ),
                 SizedBox(height: 16.h),
                 _buildProgressBar(
-                  'Net Deposit Requirement',
+                  TranslationUtils.tr('ib_net_deposit_requirement'),
                   '\$${currentDeposit.toStringAsFixed(2)}',
                   '\$${totalDepositTarget.toStringAsFixed(2)}',
                   depositProgress,
-                  '\$${depositNeeded.toStringAsFixed(2)} remaining',
+                  TranslationUtils.trArgs('ib_amount_remaining', {
+                    'amount': depositNeeded.toStringAsFixed(2),
+                  }),
                   Icons.account_balance_wallet_outlined,
                 ),
               ],
@@ -475,7 +490,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
           Padding(
             padding: EdgeInsets.all(14.w),
             child: Text(
-              'Active Rebates (Per Lot)',
+              TranslationUtils.tr('ib_active_rebates_per_lot'),
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w400,
@@ -503,7 +518,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
                 Expanded(
                   flex: 5,
                   child: Text(
-                    'PAYOUT RATES',
+                    TranslationUtils.tr('ib_payout_rates').toUpperCase(),
                     style: TextStyle(
                       fontSize: 11.5.sp,
                       fontWeight: FontWeight.w400,
@@ -629,7 +644,9 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
               ),
               SizedBox(height: 12.h),
               Text(
-                'No structure data found',
+                TranslationUtils.tr(
+                  'my_structure_screen_no_structure_data_found',
+                ),
                 style: TextStyle(fontSize: 14.sp, color: AppColors.textGrey),
               ),
             ],
@@ -657,7 +674,7 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
             ),
           ),
           child: Text(
-            'Groups',
+            TranslationUtils.tr('ib_groups'),
             style: TextStyle(
               fontSize: 17.sp,
               fontWeight: FontWeight.w400,
@@ -694,15 +711,17 @@ class _MyStructureScreenState extends State<MyStructureScreen> {
     return Column(
       children: [
         _buildInfoCard(
-          title: 'Standard Groups',
+          title: TranslationUtils.tr('commission_groups_screen_standard_groups'),
           description:
-              'These commission rates are used for your direct clients. Commission flows up the hierarchy: Your Rate - Sub-IB Rate = Your Profit.',
+              TranslationUtils.tr(
+                'my_structure_screen_these_commission_rates_are_used_for',
+              ),
         ),
         SizedBox(height: 12.h),
         _buildInfoCard(
-          title: 'Private Groups',
+          title: TranslationUtils.tr('commission_groups_screen_private_groups'),
           description:
-              'These are the commission rate templates assigned to you by Admin. Use these as a reference to create your own private groups with custom commission rates for your Sub-IBs.',
+              TranslationUtils.tr('ib_private_groups_description'),
         ),
       ],
     );

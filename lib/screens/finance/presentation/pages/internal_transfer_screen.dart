@@ -352,7 +352,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                   ),
                 ),
         decoration: InputDecoration(
-          labelText: 'Transfer to',
+          labelText: languageService.tr('deposit_transfer_to'),
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
@@ -402,7 +402,10 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
     if (raw.isNotEmpty && raw != '0.00' && limit != null) {
       final entered = double.tryParse(raw);
       if (entered != null && entered > limit) {
-        error = 'Maximum transfer is \$${limit.toStringAsFixed(2)}';
+        error = TranslationUtils.trArgs(
+          'internal_transfer_screen_maximum_transfer_is',
+          {'amount': '\$${limit.toStringAsFixed(2)}'},
+        );
       }
     }
 
@@ -427,13 +430,16 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
           decimal: true,
         ),
         decoration: InputDecoration(
-          labelText: 'Amount',
+          labelText: languageService.tr('deposit_amount'),
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           errorText: error,
           errorStyle: TextStyle(color: AppColors.error, fontSize: 12.sp),
           helperText: limit != null
-              ? 'Available for transfer: \$${limit.toStringAsFixed(2)}'
+              ? TranslationUtils.trArgs(
+                'internal_transfer_screen_available_for_transfer',
+                {'amount': '\$${limit.toStringAsFixed(2)}'},
+              )
               : null,
           helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
           contentPadding: EdgeInsets.symmetric(
@@ -474,7 +480,7 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
         readOnly: _showOtpSection,
         maxLines: 3,
         decoration: InputDecoration(
-          labelText: 'Comment',
+          labelText: TranslationUtils.tr('internal_transfer_screen_comment'),
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
@@ -550,7 +556,13 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                     ButtonLoadingWidget(size: 18.0, color: AppColors.pureWhite),
                     SizedBox(width: 10.w),
                     Text(
-                      _showOtpSection ? 'Submitting...' : 'Sending OTP...',
+                      _showOtpSection
+                          ? TranslationUtils.tr(
+                            'internal_transfer_screen_submitting',
+                          )
+                          : TranslationUtils.tr(
+                            'internal_transfer_screen_sending_otp',
+                          ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -560,7 +572,13 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
                   ],
                 )
                 : Text(
-                  _showOtpSection ? 'Submit OTP' : 'Transfer Now',
+                  _showOtpSection
+                      ? TranslationUtils.tr(
+                        'internal_transfer_screen_submit_otp',
+                      )
+                      : TranslationUtils.tr(
+                        'internal_transfer_screen_transfer_now',
+                      ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -1286,7 +1304,10 @@ class _InternalTransferScreenState extends State<InternalTransferScreen> {
       final limit = _getTransferFromLimit();
       if (limit != null && parsedAmount > limit) {
         CustomToastService.showError(
-          message: 'Amount cannot exceed available limit of \$${limit.toStringAsFixed(2)}',
+          message: TranslationUtils.trArgs(
+            'internal_transfer_screen_amount_cannot_exceed_limit',
+            {'amount': '\$${limit.toStringAsFixed(2)}'},
+          ),
         );
         return;
       }

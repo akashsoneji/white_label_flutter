@@ -58,31 +58,36 @@ class TradingBottomNavigation extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildIquoteNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
+              _buildIquoteNavItem(
+                0,
+                Icons.home_outlined,
+                Icons.home,
+                languageService.tr('tw_nav_home'),
+              ),
               _buildIquoteNavItem(
                 1,
                 Icons.bar_chart_outlined,
                 Icons.bar_chart,
-                'Markets',
+                languageService.tr('nav_markets'),
               ),
               _buildIquoteNavItem(
                 2,
                 Icons.insert_chart_outlined,
                 Icons.insert_chart,
-                'Charts',
+                languageService.tr('nav_tab_charts'),
               ),
               _buildIquoteNavItem(
                 3,
                 Icons.assignment_outlined,
                 Icons.assignment,
-                'Position',
+                languageService.tr('nav_position'),
                 badgeCount: openCount,
               ),
               _buildIquoteNavItem(
                 4,
                 Icons.account_balance_wallet_outlined,
                 Icons.account_balance_wallet,
-                'Assets',
+                languageService.tr('nav_assets'),
               ),
             ],
           ),
@@ -119,7 +124,7 @@ class TradingBottomNavigation extends StatelessWidget {
                 0,
                 "assets/svg/bottom_navigation/trend-up.svg",
                 "assets/svg/bottom_navigation/trend-up_bold.svg",
-                'Prices',
+                languageService.tr('nav_prices'),
               ),
             ),
             Expanded(
@@ -127,7 +132,7 @@ class TradingBottomNavigation extends StatelessWidget {
                 1,
                 "assets/svg/bottom_navigation/chart.svg",
                 "assets/svg/bottom_navigation/chart_bold.svg",
-                'Chart',
+                languageService.tr('meta_trade_chart'),
               ),
             ),
             Expanded(
@@ -135,7 +140,7 @@ class TradingBottomNavigation extends StatelessWidget {
                 2,
                 "assets/svg/bottom_navigation/candle.svg",
                 "assets/svg/bottom_navigation/candle_bold.svg",
-                'Position',
+                languageService.tr('nav_position'),
               ),
             ),
             Expanded(
@@ -143,7 +148,7 @@ class TradingBottomNavigation extends StatelessWidget {
                 3,
                 "assets/svg/bottom_navigation/wallet.svg",
                 "assets/svg/bottom_navigation/wallet_bold.svg",
-                'Accounts',
+                languageService.tr('nav_accounts'),
               ),
             ),
             Expanded(
@@ -151,7 +156,7 @@ class TradingBottomNavigation extends StatelessWidget {
                 4,
                 "assets/svg/copy_trading/bottom_navigation/dashboard.svg",
                 "assets/svg/copy_trading/bottom_navigation/dashboard_bold.svg",
-                'Dashboard',
+                languageService.tr('copy_trading_nav_dashboard'),
               ),
             ),
           ],

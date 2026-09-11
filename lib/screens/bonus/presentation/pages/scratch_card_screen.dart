@@ -124,18 +124,18 @@ class ScratchCardApiModel {
     try {
       final dt = DateTime.parse(expiresAt).toLocal();
       final months = [
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'May',
-        'Jun',
-        'Jul',
-        'Aug',
-        'Sep',
-        'Oct',
-        'Nov',
-        'Dec',
+        TranslationUtils.tr('month_short_jan'),
+        TranslationUtils.tr('month_short_feb'),
+        TranslationUtils.tr('month_short_mar'),
+        TranslationUtils.tr('month_short_apr'),
+        TranslationUtils.tr('month_short_may'),
+        TranslationUtils.tr('month_short_jun'),
+        TranslationUtils.tr('month_short_jul'),
+        TranslationUtils.tr('month_short_aug'),
+        TranslationUtils.tr('month_short_sep'),
+        TranslationUtils.tr('month_short_oct'),
+        TranslationUtils.tr('month_short_nov'),
+        TranslationUtils.tr('month_short_dec'),
       ];
       final h = dt.hour.toString().padLeft(2, '0');
       final m = dt.minute.toString().padLeft(2, '0');
@@ -327,19 +327,19 @@ class ScratchCardSummaryModel {
   String get nextCardLabel {
     final dt = nextCardDateTime;
     if (dt == null) return '';
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+    final months = [
+      TranslationUtils.tr('month_short_jan'),
+      TranslationUtils.tr('month_short_feb'),
+      TranslationUtils.tr('month_short_mar'),
+      TranslationUtils.tr('month_short_apr'),
+      TranslationUtils.tr('month_short_may'),
+      TranslationUtils.tr('month_short_jun'),
+      TranslationUtils.tr('month_short_jul'),
+      TranslationUtils.tr('month_short_aug'),
+      TranslationUtils.tr('month_short_sep'),
+      TranslationUtils.tr('month_short_oct'),
+      TranslationUtils.tr('month_short_nov'),
+      TranslationUtils.tr('month_short_dec'),
     ];
     final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
@@ -520,11 +520,11 @@ class ScratchCardController extends GetxController {
 
       if (response.success) {
         CustomToastService.showSuccess(
-          title: 'Success',
+          title: TranslationUtils.tr('general_success'),
           message:
               (response.message?.isNotEmpty == true)
                   ? response.message!
-                  : 'Scratch credit converted successfully',
+                  : TranslationUtils.tr('scratch_card_screen_credit_converted'),
         );
         await fetchCards(showLoader: false);
         if (Get.isRegistered<AccountController>()) {
@@ -532,17 +532,17 @@ class ScratchCardController extends GetxController {
         }
       } else {
         CustomToastService.showError(
-          title: 'Error',
+          title: TranslationUtils.tr('general_error'),
           message:
               (response.message?.isNotEmpty == true)
                   ? response.message!
-                  : 'Failed to convert credit to balance',
+                  : TranslationUtils.tr('scratch_card_screen_failed_convert_credit'),
         );
       }
     } catch (_) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Network error. Please check your connection.',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('error_network'),
       );
     } finally {
       isConverting.value = false;
@@ -614,11 +614,11 @@ class ScratchCardController extends GetxController {
           summary.value = null;
         }
         CustomToastService.showError(
-          title: 'Error',
+          title: TranslationUtils.tr('general_error'),
           message:
               (response.message?.isNotEmpty == true)
                   ? response.message!
-                  : 'Failed to load scratch cards',
+                  : TranslationUtils.tr('scratch_card_screen_failed_load_cards'),
         );
       }
     } catch (e, t) {
@@ -629,8 +629,8 @@ class ScratchCardController extends GetxController {
         summary.value = null;
       }
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Network error. Please check your connection.',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('error_network'),
       );
     } finally {
       isLoading.value = false;
@@ -684,11 +684,11 @@ class ScratchCardController extends GetxController {
           // Auto-generate passwords, create account, then retry reveal.
           if (_pendingScratchGroupId == null) {
             CustomToastService.showError(
-              title: 'Error',
+              title: TranslationUtils.tr('general_error'),
               message:
                   (response.message?.isNotEmpty == true)
                       ? response.message!
-                      : 'Scratch group is not configured.',
+                      : TranslationUtils.tr('scratch_card_screen_group_not_configured'),
             );
             return null;
           }
@@ -720,11 +720,11 @@ class ScratchCardController extends GetxController {
           return null; // caller should not show win/lose — handled via retry
         } else {
           CustomToastService.showError(
-            title: 'Error',
+            title: TranslationUtils.tr('general_error'),
             message:
                 (response.message?.isNotEmpty == true)
                     ? response.message!
-                    : 'Failed to reveal card',
+                    : TranslationUtils.tr('scratch_card_screen_failed_reveal_card'),
           );
         }
       }
@@ -747,8 +747,10 @@ class ScratchCardController extends GetxController {
   }) async {
     if (_pendingScratchGroupId == null) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Scratch group not found. Please try again.',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr(
+          'scratch_card_screen_scratch_group_not_found_please_try',
+        ),
       );
       return;
     }
@@ -787,11 +789,11 @@ class ScratchCardController extends GetxController {
         // Close the loading dialog on failure too
         if (Get.isDialogOpen ?? false) Get.back();
         CustomToastService.showError(
-          title: 'Error',
+          title: TranslationUtils.tr('general_error'),
           message:
               (response.message?.isNotEmpty == true)
                   ? response.message!
-                  : 'Failed to create scratch account',
+                  : TranslationUtils.tr('scratch_card_screen_failed_create_account'),
         );
       }
     } catch (e, t) {
@@ -938,7 +940,7 @@ class ScratchCardListScreen extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.refresh, color: AppColors.textPrimary),
             onPressed: () => controller.fetchCards(showLoader: false),
-            tooltip: 'Refresh',
+            tooltip: TranslationUtils.tr('general_refresh'),
           ),
         ],
       ),
@@ -1030,7 +1032,7 @@ class _ScratchCardsGridState extends State<_ScratchCardsGrid> {
             child: Row(
               children: [
                 Text(
-                  'Scratch Cards',
+                  TranslationUtils.tr('scratch_card_screen_scratch_cards'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -1041,7 +1043,9 @@ class _ScratchCardsGridState extends State<_ScratchCardsGrid> {
                 if (totalCards > 4)
                   TextButton(
                     onPressed: () => setState(() => _showAll = !_showAll),
-                    child: Text(_showAll ? 'Show less' : 'View all'),
+                    child: Text(_showAll
+                        ? TranslationUtils.tr('scratch_card_screen_show_less')
+                        : TranslationUtils.tr('tw_view_all')),
                   ),
               ],
             ),
@@ -1122,7 +1126,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Scratch Leaderboard',
+                    TranslationUtils.tr('scratch_card_screen_scratch_leaderboard'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -1152,7 +1156,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Text(
-              'Top Earners This Week',
+              TranslationUtils.tr('scratch_card_screen_top_earners_this_week'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -1179,7 +1183,7 @@ class _ScratchLeaderboardSection extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          'Scratch Leaderboard',
+                          TranslationUtils.tr('scratch_card_screen_scratch_leaderboard'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
@@ -1322,9 +1326,13 @@ class _ScratchLotsProgressSection extends StatelessWidget {
       }
 
       String statusLabel(String status) {
-        if (status == 'completed') return 'completed';
-        if (status == 'in_progress') return 'active';
-        return 'inactive';
+        if (status == 'completed') {
+          return TranslationUtils.tr('scratch_card_screen_status_completed');
+        }
+        if (status == 'in_progress') {
+          return TranslationUtils.tr('scratch_card_screen_status_active');
+        }
+        return TranslationUtils.tr('scratch_card_screen_status_inactive');
       }
 
       Color statusTextColor(String status) {
@@ -1361,7 +1369,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Lots Progress',
+                  TranslationUtils.tr('scratch_card_screen_lots_progress'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     color: AppColors.textPrimary,
@@ -1404,7 +1412,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  '0 lots',
+                  TranslationUtils.tr('scratch_card_screen_lots'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     color: AppColors.textGrey,
@@ -1414,7 +1422,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                 const Spacer(),
                 if (firstStep != null && firstStep.targetLots > 0) ...[
                   Text(
-                    '${firstStep.targetLots.toStringAsFixed(0)} lots',
+                    '${firstStep.targetLots.toStringAsFixed(0)} ${TranslationUtils.tr('scratch_card_screen_lots_lower')}',
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 10.sp,
                       color: AppColors.textGrey,
@@ -1433,7 +1441,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                 ],
                 const Spacer(),
                 Text(
-                  '${targetLots.toStringAsFixed(0)} lots ✓',
+                  '${targetLots.toStringAsFixed(0)} ${TranslationUtils.tr('scratch_card_screen_lots_lower')} ✓',
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 10.sp,
                     color: AppColors.textGrey,
@@ -1459,7 +1467,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            'Lots Completed',
+                            TranslationUtils.tr('scratch_card_screen_lots_completed'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               color: AppColors.textGrey,
@@ -1468,7 +1476,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Withdrawable Amount',
+                          TranslationUtils.tr('scratch_card_screen_withdrawable_amount'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 11.sp,
                             color: AppColors.textGrey,
@@ -1497,7 +1505,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                               child: Row(
                                 children: [
                                   Text(
-                                    '${step.step} Lot${step.step == 1 ? '' : 's'}',
+                                    '${step.step} ${step.step == 1 ? TranslationUtils.tr('scratch_card_screen_lot') : TranslationUtils.tr('general_lots')}',
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 13.sp,
                                       color:
@@ -1511,7 +1519,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                                   ),
                                   SizedBox(width: 6.w),
                                   Text(
-                                    '(${step.targetLots.toStringAsFixed(0)} lots · ${step.thresholdPercent}%)',
+                                    '(${step.targetLots.toStringAsFixed(0)} ${TranslationUtils.tr('scratch_card_screen_lots_lower')} · ${step.thresholdPercent}%)',
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 11.sp,
                                       color: AppColors.textGrey,
@@ -1584,7 +1592,7 @@ class _ScratchLotsProgressSection extends StatelessWidget {
                   children: [
                     RTLComponents.elevatedButton(
                       padding: EdgeInsets.zero,
-                      text: 'Convert to Balance',
+                      text: TranslationUtils.tr('scratch_card_screen_convert_to_balance'),
                       width: double.infinity,
                       height: 42,
                       backgroundColor:
@@ -2402,7 +2410,7 @@ class _ScratchHistoryListState extends State<_ScratchHistoryList> {
             Row(
               children: [
                 Text(
-                  'History',
+                  TranslationUtils.tr('general_history'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -2413,7 +2421,9 @@ class _ScratchHistoryListState extends State<_ScratchHistoryList> {
                 if (history.length > 4)
                   TextButton(
                     onPressed: () => setState(() => _showAll = !_showAll),
-                    child: Text(_showAll ? 'Show less' : 'View all'),
+                    child: Text(_showAll
+                        ? TranslationUtils.tr('scratch_card_screen_show_less')
+                        : TranslationUtils.tr('tw_view_all')),
                   ),
               ],
             ),
@@ -2474,7 +2484,9 @@ class _ScratchHistoryListState extends State<_ScratchHistoryList> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              reward > 0 ? 'Reward unlocked' : 'No reward',
+                              reward > 0
+                                  ? TranslationUtils.tr('scratch_card_screen_reward_unlocked_lower')
+                                  : TranslationUtils.tr('scratch_card_screen_no_reward'),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w700,
@@ -2483,7 +2495,7 @@ class _ScratchHistoryListState extends State<_ScratchHistoryList> {
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              'Expires: ${card.expiresLabel}',
+                              '${TranslationUtils.tr('scratch_card_screen_expires')}: ${card.expiresLabel}',
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 11.sp,
                                 color: Colors.grey.shade600,
@@ -2557,7 +2569,7 @@ class _SummaryBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'ScratchCard Account',
+                        TranslationUtils.tr('scratch_card_screen_scratchcard_account'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
@@ -2566,7 +2578,9 @@ class _SummaryBanner extends StatelessWidget {
                       ),
                       SizedBox(height: 6.h),
                       Text(
-                        'Account details will appear here once available.',
+                        TranslationUtils.tr(
+                          'scratch_card_screen_account_details_will_appear_here_once',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: Colors.grey.shade600,
@@ -2643,7 +2657,7 @@ class _SummaryBanner extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'ScratchCard Account',
+                          TranslationUtils.tr('scratch_card_screen_scratchcard_account'),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
@@ -2727,22 +2741,25 @@ class _SummaryBanner extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: metric('Balance', '\$${balance.toStringAsFixed(2)}'),
+                    child: metric(TranslationUtils.tr('general_balance'),
+                        '\$${balance.toStringAsFixed(2)}'),
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
-                    child: metric('Credit', '\$${credit.toStringAsFixed(2)}'),
+                    child: metric(TranslationUtils.tr('trade_metric_credit'),
+                        '\$${credit.toStringAsFixed(2)}'),
                   ),
                   SizedBox(width: 10.w),
                   Expanded(
-                    child: metric('Equity', '\$${equity.toStringAsFixed(2)}'),
+                    child: metric(TranslationUtils.tr('general_equity'),
+                        '\$${equity.toStringAsFixed(2)}'),
                   ),
                 ],
               ),
               SizedBox(height: 12.h),
               RTLComponents.elevatedButton(
                 padding: EdgeInsets.zero,
-                text: 'Trade Now',
+                text: TranslationUtils.tr('scratch_card_screen_trade_now'),
                 width: double.infinity,
                 height: 42,
                 onPressed: () async {
@@ -2782,9 +2799,10 @@ class _SummaryBanner extends StatelessWidget {
                     if (target == null) {
                       Get.loading.hideLoading();
                       CustomToastService.showError(
-                        title: 'Account not found',
-                        message:
-                            'ScratchCard trading account not available yet.',
+                        title: TranslationUtils.tr('scratch_card_screen_account_not_found'),
+                        message: TranslationUtils.tr(
+                          'scratch_card_screen_scratchcard_trading_account_not_available_yet',
+                        ),
                       );
                       return;
                     }
@@ -2800,8 +2818,10 @@ class _SummaryBanner extends StatelessWidget {
                       Get.loading.hideLoading();
                     }
                     CustomToastService.showError(
-                      title: 'Error',
-                      message: 'Unable to open Trade screen. Please try again.',
+                      title: TranslationUtils.tr('general_error'),
+                      message: TranslationUtils.tr(
+                        'scratch_card_screen_unable_to_open_trade_screen_please',
+                      ),
                     );
                   }
                 },
@@ -2846,7 +2866,9 @@ class _NextCardCountdownBannerState extends State<_NextCardCountdownBanner> {
   }
 
   String _formatCountdown(Duration diff) {
-    if (diff.inSeconds <= 0) return 'Available now!';
+    if (diff.inSeconds <= 0) {
+      return TranslationUtils.tr('scratch_card_screen_available_now');
+    }
     if (diff.inHours >= 24) {
       final d = diff.inDays;
       final h = diff.inHours % 24;
@@ -2895,7 +2917,7 @@ class _NextCardCountdownBannerState extends State<_NextCardCountdownBanner> {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    'Next card available at',
+                    TranslationUtils.tr('scratch_card_screen_next_card_available_at'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 12.sp,
                       color: Colors.orange.shade800,
@@ -2962,7 +2984,7 @@ class _NextCardCountdownBannerState extends State<_NextCardCountdownBanner> {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        'New card arriving...',
+                        TranslationUtils.tr('scratch_card_screen_new_card_arriving'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           color: Colors.orange.shade600,
@@ -2994,7 +3016,7 @@ class _EmptyState extends StatelessWidget {
           Icon(Icons.card_giftcard, size: 64.r, color: Colors.grey.shade300),
           SizedBox(height: 12.h),
           Text(
-            'No scratch cards available',
+            TranslationUtils.tr('scratch_card_screen_no_scratch_cards_available'),
             style: AppTextStyles.bodyText.copyWith(fontSize: 15.sp, color: Colors.grey.shade500),
           ),
         ],
@@ -3196,7 +3218,7 @@ class _LockedScratchCardGridItemState
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 6.w),
                       child: Text(
-                        'Unlock after: ' + _formatCountdown(diff),
+                        '${TranslationUtils.tr('scratch_card_screen_unlock_after')} ${_formatCountdown(diff)}',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
@@ -3252,7 +3274,7 @@ class _ScratchCardGridItem extends StatelessWidget {
               Positioned.fill(
                 child: Center(
                   child: Text(
-                    'Tap to Scratch',
+                    TranslationUtils.tr('scratch_card_screen_tap_to_scratch'),
                     style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.pureWhite,
                       fontSize: 16.sp,
@@ -3311,7 +3333,7 @@ class _ScratchCardGridItem extends StatelessWidget {
                           ),
                         ] else
                           Text(
-                            'No Reward',
+                            TranslationUtils.tr('scratch_card_screen_no_reward'),
                             style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.whiteColor.withOpacity(0.7),
                               fontSize: 13.sp,
@@ -3374,7 +3396,7 @@ class ScratchCardDetailScreen extends StatelessWidget {
               children: [
                 // Title
                 Text(
-                  'Hooray! 🎉',
+                  TranslationUtils.tr('scratch_card_screen_hooray'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w500,
@@ -3384,7 +3406,9 @@ class ScratchCardDetailScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  "You've got a scratch card reward!",
+                  TranslationUtils.tr(
+                    'scratch_card_screen_you_ve_got_scratch_card_reward',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 14.sp,
                     color: Colors.grey.shade600,
@@ -3431,7 +3455,9 @@ class ScratchCardDetailScreen extends StatelessWidget {
                   return Column(
                     children: [
                       Text(
-                        'Scratch the card to reveal\nyour reward',
+                        TranslationUtils.tr(
+                          'scratch_card_screen_scratch_the_card_to_reveal_your',
+                        ),
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 20.sp,
@@ -3442,7 +3468,9 @@ class ScratchCardDetailScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 10.h),
                       Text(
-                        'Scratch at least 25% to unlock your reward.\nCredited to your trading account.',
+                        TranslationUtils.tr(
+                          'scratch_card_screen_scratch_at_least_25_to_unlock',
+                        ),
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 13.sp,
@@ -3492,7 +3520,7 @@ class _ScratchCardDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Hooray! 🎉',
+                TranslationUtils.tr('scratch_card_screen_hooray'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -3502,7 +3530,9 @@ class _ScratchCardDialog extends StatelessWidget {
               ),
               SizedBox(height: 6.h),
               Text(
-                "You've got a scratch card reward!",
+                TranslationUtils.tr(
+                  'scratch_card_screen_you_ve_got_scratch_card_reward',
+                ),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -3548,7 +3578,9 @@ class _ScratchCardDialog extends StatelessWidget {
                 return Column(
                   children: [
                     Text(
-                      'Scratch the card to reveal\nyour reward',
+                      TranslationUtils.tr(
+                        'scratch_card_screen_scratch_the_card_to_reveal_your',
+                      ),
                       textAlign: TextAlign.center,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 18.sp,
@@ -3559,7 +3591,9 @@ class _ScratchCardDialog extends StatelessWidget {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Scratch at least 25% to unlock your reward.\nCredited to your trading account.',
+                      TranslationUtils.tr(
+                        'scratch_card_screen_scratch_at_least_25_to_unlock',
+                      ),
                       textAlign: TextAlign.center,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
@@ -3638,7 +3672,7 @@ class _RevealingCardState extends State<_RevealingCard> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Revealing your reward...',
+                TranslationUtils.tr('scratch_card_screen_revealing_your_reward'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   color: AppColors.primary,
@@ -3840,7 +3874,9 @@ class _RewardContent extends StatelessWidget {
                 SizedBox(height: 8.h),
                 // Status text
                 Text(
-                  hasResult ? 'Reward Unlocked!' : 'Scratch to reveal',
+                  hasResult
+                      ? TranslationUtils.tr('scratch_card_screen_reward_unlocked')
+                      : TranslationUtils.tr('scratch_card_screen_scratch_to_reveal'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
@@ -3934,7 +3970,7 @@ class _RevealedCard extends StatelessWidget {
                     )
                   else
                     Text(
-                      'Better luck\nnext time!',
+                      TranslationUtils.tr('scratch_card_screen_better_luck_next_time'),
                       textAlign: TextAlign.center,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 22.sp,
@@ -3944,7 +3980,9 @@ class _RevealedCard extends StatelessWidget {
                     ),
                   SizedBox(height: 8.h),
                   Text(
-                    isWin ? 'Reward Unlocked!' : 'No reward this time',
+                    isWin
+                        ? TranslationUtils.tr('scratch_card_screen_reward_unlocked')
+                        : TranslationUtils.tr('scratch_card_screen_no_reward_this_time'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -3999,7 +4037,7 @@ class _WinResultDialog extends StatelessWidget {
               children: [
                 // Cup icon
                 Text(
-                  'Congratulations! 🎉',
+                  TranslationUtils.tr('congratulations_title'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.w600,
@@ -4010,7 +4048,7 @@ class _WinResultDialog extends StatelessWidget {
                 SizedBox(height: 10.h),
 
                 Text(
-                  'You won',
+                  TranslationUtils.tr('scratch_card_screen_you_won'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.textPrimary,
@@ -4085,7 +4123,7 @@ class _WinResultDialog extends StatelessWidget {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Done',
+                      TranslationUtils.tr('navigation_done'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -4140,8 +4178,12 @@ class _CreditStatusBadge extends StatelessWidget {
 
     final label =
         reveal.creditStatus == 'credited'
-            ? '✓ Credited to your trading account'
-            : 'Pending — will be credited shortly';
+            ? TranslationUtils.tr(
+              'scratch_card_screen_credited_to_your_trading_account',
+            )
+            : TranslationUtils.tr(
+              'scratch_card_screen_pending_will_be_credited_shortly',
+            );
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
@@ -4198,7 +4240,7 @@ class _LoseResultDialog extends StatelessWidget {
             SizedBox(height: 20.h),
 
             Text(
-              'Better Luck Next Time!',
+              TranslationUtils.tr('scratch_card_screen_better_luck_next_time_2'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w500,
@@ -4209,7 +4251,9 @@ class _LoseResultDialog extends StatelessWidget {
             SizedBox(height: 8.h),
 
             Text(
-              'No reward this time.\nNew cards are released every 12 hours — keep scratching!',
+              TranslationUtils.tr(
+                'scratch_card_screen_no_reward_this_time_new_cards',
+              ),
               textAlign: TextAlign.center,
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
@@ -4233,7 +4277,7 @@ class _LoseResultDialog extends StatelessWidget {
                   elevation: 0,
                 ),
                 child: Text(
-                  'Close',
+                  TranslationUtils.tr('general_close'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
@@ -4282,15 +4326,18 @@ class _CreateScratchAccountDialogState
     final investor = _investorPwCtrl.text.trim();
 
     if (main.isEmpty) {
-      setState(() => _error = 'Main password is required');
+      setState(() => _error =
+          TranslationUtils.tr('scratch_card_screen_main_password_required'));
       return;
     }
     if (investor.isEmpty) {
-      setState(() => _error = 'Investor password is required');
+      setState(() => _error =
+          TranslationUtils.tr('scratch_card_screen_investor_password_required'));
       return;
     }
     if (main == investor) {
-      setState(() => _error = 'Main and investor passwords cannot be the same');
+      setState(() => _error =
+          TranslationUtils.tr('scratch_card_screen_passwords_cannot_be_same'));
       return;
     }
 
@@ -4332,7 +4379,7 @@ class _CreateScratchAccountDialogState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Create Scratch Account',
+                        TranslationUtils.tr('scratch_card_screen_create_scratch_account'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
@@ -4340,7 +4387,9 @@ class _CreateScratchAccountDialogState
                         ),
                       ),
                       Text(
-                        'Required to scratch and reveal rewards',
+                        TranslationUtils.tr(
+                          'scratch_card_screen_required_to_scratch_and_reveal_rewards',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: Colors.grey.shade500,
@@ -4355,7 +4404,7 @@ class _CreateScratchAccountDialogState
 
             // Main password
             Text(
-              'Main Password',
+              TranslationUtils.tr('scratch_card_screen_main_password'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
@@ -4365,7 +4414,7 @@ class _CreateScratchAccountDialogState
             SizedBox(height: 6.h),
             _PasswordField(
               controller: _mainPwCtrl,
-              hint: 'Enter main password',
+              hint: TranslationUtils.tr('scratch_card_screen_enter_main_password'),
               obscure: !_showMainPw,
               onToggle: () => setState(() => _showMainPw = !_showMainPw),
             ),
@@ -4373,7 +4422,7 @@ class _CreateScratchAccountDialogState
 
             // Investor password
             Text(
-              'Investor Password',
+              TranslationUtils.tr('create_account_investor_password'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
@@ -4383,7 +4432,7 @@ class _CreateScratchAccountDialogState
             SizedBox(height: 6.h),
             _PasswordField(
               controller: _investorPwCtrl,
-              hint: 'Enter investor password',
+              hint: TranslationUtils.tr('create_account_enter_investor_password'),
               obscure: !_showInvestorPw,
               onToggle:
                   () => setState(() => _showInvestorPw = !_showInvestorPw),
@@ -4425,7 +4474,7 @@ class _CreateScratchAccountDialogState
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                       ),
                       child: Text(
-                        'Cancel',
+                        TranslationUtils.tr('general_cancel'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
@@ -4457,7 +4506,7 @@ class _CreateScratchAccountDialogState
                                 ),
                               )
                               : Text(
-                                'Create',
+                                TranslationUtils.tr('scratch_card_screen_create'),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w700,

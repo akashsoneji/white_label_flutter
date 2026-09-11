@@ -45,7 +45,7 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
   Timer? _pollingTimer;
   DateTime? _pollingStartedAt;
   bool _resolved = false; // set once success/timeout/cancel fires
-  String _statusText = 'Waiting for payment...';
+  String _statusText = '';
   bool _isPolling = true;
   int _pollAttempts = 0;
 
@@ -58,6 +58,9 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
   @override
   void initState() {
     super.initState();
+    _statusText = TranslationUtils.tr(
+      'cregis_address_screen_waiting_for_payment',
+    );
     _startStatusPolling();
   }
 
@@ -127,7 +130,9 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
     if (mounted) {
       setState(() {
         _isPolling = false;
-        _statusText = 'Deposit confirmed!';
+        _statusText = TranslationUtils.tr(
+          'cregis_address_screen_deposit_confirmed',
+        );
       });
     }
     CustomToastService.showSuccess(
@@ -149,12 +154,16 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
     if (mounted) {
       setState(() {
         _isPolling = false;
-        _statusText = 'Transaction is processing. Check Transaction History.';
+        _statusText = TranslationUtils.tr(
+          'cregis_address_screen_transaction_is_processing_check_transaction',
+        );
       });
     }
     CustomToastService.showWarning(
-      message: 'Transaction is processing. Please wait in Transaction History.',
-      title: 'Processing',
+      message: TranslationUtils.tr(
+        'cregis_address_screen_transaction_is_processing_please_wait_in',
+      ),
+      title: TranslationUtils.tr('cregis_address_screen_processing'),
     );
     Get.offAllNamed(
       AppPages.TRANSACTION_HISTORY,
@@ -171,19 +180,24 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: Text('Cancel payment?'),
+        title: Text(TranslationUtils.tr('cregis_address_screen_cancel_payment')),
         content: Text(
-          'Are you sure you want to cancel this payment? The transaction '
-          'will not be processed and you will be returned to the home screen.',
+          TranslationUtils.tr(
+            'cregis_address_screen_are_you_sure_you_want_to_cancel_this_payment',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text('No, keep waiting'),
+            child: Text(
+              TranslationUtils.tr('cregis_address_screen_no_keep_waiting'),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text('Yes, cancel'),
+            child: Text(
+              TranslationUtils.tr('cregis_address_screen_yes_cancel'),
+            ),
           ),
         ],
       ),
@@ -191,7 +205,11 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
     if (confirmed != true || _resolved) return;
     _resolved = true;
     _pollingTimer?.cancel();
-    CustomToastService.showError(message: 'Transaction cancelled');
+    CustomToastService.showError(
+      message: TranslationUtils.tr(
+        'cregis_address_screen_transaction_cancelled',
+      ),
+    );
     Get.offAllNamed(AppPages.TRADING);
   }
 
@@ -246,7 +264,9 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
           elevation: 0,
           leading: AppBackButton(onPressed: _confirmCancel),
           title: Text(
-            'Direct Crypto Transfer',
+                    TranslationUtils.tr(
+                      'cregis_address_screen_direct_crypto_transfer',
+                    ),
             style: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimary, fontSize: 16.sp),
           ),
           centerTitle: true,
@@ -265,7 +285,7 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'Send',
+                  TranslationUtils.tr('common_send'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
@@ -282,7 +302,9 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'using $networkLabel',
+                  TranslationUtils.trArgs('cregis_address_screen_using_network', {
+                    'network': networkLabel,
+                  }),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.primary,
@@ -341,7 +363,9 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
               ),
               SizedBox(height: 24),
               Text(
-                'Deposit Wallet Address',
+                  TranslationUtils.tr(
+                    'cregis_address_screen_deposit_wallet_address',
+                  ),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14.sp,
                   color: AppColors.textGrey,
@@ -374,7 +398,9 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                           ClipboardData(text: widget.cregisAddress),
                         );
                         CustomToastService.showSuccess(
-                          message: 'Address copied to clipboard',
+                    message: TranslationUtils.tr(
+                      'cregis_address_screen_address_copied_to_clipboard',
+                    ),
                         );
                       },
                       child: Container(
@@ -412,7 +438,13 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Only send ${_getSafetyCurrency(widget.networkKey)} on $networkLabel. Sending other assets may result in loss.',
+                  TranslationUtils.trArgs(
+                    'cregis_address_screen_only_send_currency_on_network',
+                    {
+                      'currency': _getSafetyCurrency(widget.networkKey),
+                      'network': networkLabel,
+                    },
+                  ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: Colors.red.shade700,
@@ -425,7 +457,10 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
               ),
               SizedBox(height: 16),
               Text(
-                'Reference: ${widget.referenceNumber}',
+                  TranslationUtils.trArgs(
+                    'cregis_address_screen_reference_number',
+                    {'reference': widget.referenceNumber},
+                  ),
                 style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
               ),
               SizedBox(height: 12),
@@ -446,7 +481,7 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Debug — last poll',
+                TranslationUtils.tr('cregis_address_screen_debug_last_poll'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
@@ -528,7 +563,9 @@ class _CregisAddressScreenState extends State<CregisAddressScreen> {
                           padding: EdgeInsets.symmetric(vertical: 14.h),
                         ),
                         child: Text(
-                          'Go to Transaction History',
+                TranslationUtils.tr(
+                  'cregis_address_screen_go_to_transaction_history',
+                ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,

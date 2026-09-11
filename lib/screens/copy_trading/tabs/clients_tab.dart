@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:crm_app/services/language_service.dart';
 import '../../../constants/text_styles.dart';
 
 class ClientsTab extends StatefulWidget {
@@ -55,7 +56,7 @@ class _ClientsTabState extends State<ClientsTab> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Trades',
+          TranslationUtils.tr('tw_trades'),
           style: AppTextStyles.heading.copyWith(
             color: AppColors.textPrimary,
             fontWeight: FontWeight.w600,
@@ -107,7 +108,7 @@ class _ClientsTabState extends State<ClientsTab> {
           ),
           SizedBox(height: 16.h),
           Text(
-            'No transaction yet',
+            TranslationUtils.tr('clients_tab_no_transaction_yet'),
             style: AppTextStyles.subheading.copyWith(
               color: AppColors.textGrey,
               fontSize: 16.sp,
@@ -251,13 +252,34 @@ class _TradeHistoryCardState extends State<_TradeHistoryCard> {
                   height: 1,
                 ),
                 SizedBox(height: 12.h),
-                _buildDetailRow('Master name', data.masterName),
-                _buildDetailRow('Open time', data.openTime),
-                _buildDetailRow('Close time', data.closeTime),
-                _buildDetailRow('Open Price', data.openPrice),
-                _buildDetailRow('Close Price', data.closePrice),
-                _buildDetailRow('Order ID', data.orderId),
-                _buildDetailRow('Commission you paid', '\$${data.commission}'),
+                _buildDetailRow(
+                  TranslationUtils.tr('clients_tab_master_name'),
+                  data.masterName,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('open_time'),
+                  data.openTime,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('pmam_investor_portal_screen_close_time'),
+                  data.closeTime,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('trading_order_open_price'),
+                  data.openPrice,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('pmam_investor_portal_screen_close_price'),
+                  data.closePrice,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('clients_tab_order_id'),
+                  data.orderId,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('clients_tab_commission_you_paid'),
+                  '\$${data.commission}',
+                ),
               ],
             ],
           ),

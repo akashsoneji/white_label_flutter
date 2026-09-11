@@ -51,6 +51,38 @@ class _VantageTransactionHistoryScreenState
     'Custom',
   ];
 
+  /// Display label for a transaction-type logic value.
+  String _typeLabel(String type) {
+    switch (type) {
+      case 'All':
+        return languageService.tr('common_all');
+      case 'Deposit':
+        return languageService.tr('common_deposit');
+      case 'Withdrawal':
+        return languageService.tr('general_withdrawal');
+      case 'Fund Transfer':
+        return languageService.tr('transaction_history_transaction_type_transfer');
+    }
+    return type;
+  }
+
+  /// Display label for a time-period logic value.
+  String _periodLabel(String period) {
+    switch (period) {
+      case 'All Time':
+        return languageService.tr('transaction_history_period_all_time');
+      case 'Today':
+        return languageService.tr('dc_range_today');
+      case 'Last week':
+        return languageService.tr('transaction_history_period_last_week');
+      case 'This month':
+        return languageService.tr('time_this_month');
+      case 'Custom':
+        return languageService.tr('transaction_history_period_custom');
+    }
+    return period;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -343,7 +375,9 @@ class _VantageTransactionHistoryScreenState
           ),
           SizedBox(height: 2.h),
           Text(
-            '$count transactions',
+            languageService.tr('transaction_history_screen_count_transactions', {
+              'count': '$count',
+            }),
             style: AppTextStyles.bodyText.copyWith(fontSize: 10.sp, color: AppColors.textSecondary),
           ),
         ],
@@ -411,7 +445,7 @@ class _VantageTransactionHistoryScreenState
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      period,
+                      _periodLabel(period),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
@@ -493,7 +527,7 @@ class _VantageTransactionHistoryScreenState
                   ),
                 ),
                 Text(
-                  date != null ? _formatDate(date) : 'Select',
+                  date != null ? _formatDate(date) : languageService.tr('common_select'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
@@ -558,7 +592,7 @@ class _VantageTransactionHistoryScreenState
                             ),
                           ),
                           child: Text(
-                            type,
+                            _typeLabel(type),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.w600,

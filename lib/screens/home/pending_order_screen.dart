@@ -365,17 +365,17 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
         return;
       } else {
         CustomToastService.showError(
-          title: 'Error',
+          title: TranslationUtils.tr('close_position_error'),
           message:
               tradingController.errorMessage.isNotEmpty
                   ? tradingController.errorMessage
-                  : 'Failed to place order',
+                  : TranslationUtils.tr('chart_order_place_failed'),
         );
       }
     } catch (e) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to place order: $e',
+        title: TranslationUtils.tr('close_position_error'),
+        message: '${TranslationUtils.tr('chart_order_place_failed')}: $e',
       );
     } finally {
       // Always re-enable button after order placement completes
@@ -507,6 +507,26 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
   // Helper method to get symbol without .c suffix
   String get _displaySymbol => selectedSymbol.replaceFirst('.c', '');
 
+  // Display-only label for an order type. The raw value is still used for logic.
+  String _orderTypeLabel(String orderType) {
+    switch (orderType) {
+      case 'Buy Limit':
+        return TranslationUtils.tr('general_buy_limit');
+      case 'Sell Limit':
+        return TranslationUtils.tr('general_sell_limit');
+      case 'Buy Stop':
+        return TranslationUtils.tr('general_buy_stop');
+      case 'Sell Stop':
+        return TranslationUtils.tr('general_sell_stop');
+      case 'Buy Stop Limit':
+        return TranslationUtils.tr('general_buy_stop_limit');
+      case 'Sell Stop Limit':
+        return TranslationUtils.tr('general_sell_stop_limit');
+      default:
+        return orderType;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Both the Vantage and iQuote UI parents use the compact Vantage-style
@@ -535,14 +555,14 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Pending Order',
+                    TranslationUtils.tr('chart_pending_order_label'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.screenTitle,
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    '$orderType $_displaySymbol',
+                    '${_orderTypeLabel(orderType)} $_displaySymbol',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.label.copyWith(
@@ -569,7 +589,7 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Pending Order',
+                            TranslationUtils.tr('chart_pending_order_label'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.heading.copyWith(
@@ -580,7 +600,7 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
                           ),
                           SizedBox(height: 2.h),
                           Text(
-                            '$orderType $_displaySymbol',
+                            '${_orderTypeLabel(orderType)} $_displaySymbol',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.label.copyWith(
@@ -703,7 +723,7 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Chart',
+                  TranslationUtils.tr('bottom_navigation_chart'),
                   style: AppTextStyles.label.copyWith(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
@@ -777,7 +797,7 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
           Column(
             children: [
               Text(
-                'Bid',
+                TranslationUtils.tr('meta_watchlist_bid'),
                 style: AppTextStyles.label.copyWith(
                   fontSize: 10.sp,
                   color: AppColors.textGrey,
@@ -803,7 +823,7 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
           Column(
             children: [
               Text(
-                'Ask',
+                TranslationUtils.tr('meta_watchlist_ask'),
                 style: AppTextStyles.label.copyWith(
                   fontSize: 10.sp,
                   color: AppColors.textGrey,
@@ -844,7 +864,7 @@ class _PendingOrderScreenState extends State<PendingOrderScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Chart',
+                  TranslationUtils.tr('bottom_navigation_chart'),
                   style: AppTextStyles.label.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,

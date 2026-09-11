@@ -134,16 +134,40 @@ class CloseOrderScreen extends StatelessWidget {
           Expanded(
             child: ListView(
               children: [
-                _buildDetailRow('Open Time', position.openTime),
-                _buildDetailRow('Close Time', position.closeTime),
-                _buildDetailRow('Close Price', position.currentPrice),
-                _buildDetailRow('Reason', position.reason),
-                _buildDetailRow('Order No.', position.orderNo),
-                _buildDetailRow('Commission', '\$${position.commission}'),
-                _buildDetailRow('Swap', '\$${position.swap}'),
-                _buildDetailRow('TP (Take Profit)', position.takeProfit),
                 _buildDetailRow(
-                  'SL (Stop Loss)',
+                  TranslationUtils.tr('open_time'),
+                  position.openTime,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('pmam_investor_portal_screen_close_time'),
+                  position.closeTime,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('pmam_investor_portal_screen_close_price'),
+                  position.currentPrice,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('order_history_screen_reason'),
+                  position.reason,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('order_no'),
+                  position.orderNo,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('general_commission'),
+                  '\$${position.commission}',
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('general_swap'),
+                  '\$${position.swap}',
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('order_history_screen_tp_take_profit'),
+                  position.takeProfit,
+                ),
+                _buildDetailRow(
+                  TranslationUtils.tr('order_history_screen_sl_stop_loss'),
                   position.stopLoss == '-' ? '-' : position.stopLoss,
                 ),
               ],
@@ -188,7 +212,7 @@ class CloseOrderScreen extends StatelessWidget {
             minimumSize: Size(327.w, 46.h),
           ),
           child: Text(
-            'History',
+            TranslationUtils.tr('dashboard_history'),
             style: AppTextStyles.label.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
@@ -352,14 +376,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
           isPositive: true,
           dateTime: '25 jan 2025 • 12:49',
           expandedDetails: {
-            'Device': 'Android',
-            'Direction': 'Sell',
-            'Close Price': '3,408.65',
-            'Volume Closed': '0.03 lots',
-            'Overnight fee': '\$0.00',
-            'Gross profit': '+\$71.28',
-            'Net profit': '+\$71.28',
-            'Deal ID': '6341532',
+            TranslationUtils.tr('order_history_screen_device'): 'Android',
+            TranslationUtils.tr('trade_direction'): TranslationUtils.tr(
+              'general_sell',
+            ),
+            TranslationUtils.tr(
+              'pmam_investor_portal_screen_close_price',
+            ): '3,408.65',
+            TranslationUtils.tr(
+              'order_history_screen_volume_closed',
+            ): '0.03 lots',
+            TranslationUtils.tr('order_history_screen_overnight_fee'): '\$0.00',
+            TranslationUtils.tr('order_history_screen_gross_profit'):
+                '+\$71.28',
+            TranslationUtils.tr('order_history_screen_net_profit'): '+\$71.28',
+            TranslationUtils.tr('order_history_screen_deal_id'): '6341532',
           },
         ),
         _buildHistoryEntry(
@@ -370,10 +401,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
           isPositive: false,
           dateTime: '25 jan 2025 • 12:49',
           expandedDetails: {
-            'Device': 'Android',
-            'Direction': 'Sell',
-            'Open Price': '3,408.65',
-            'Volume': '0.03 lots',
+            TranslationUtils.tr('order_history_screen_device'): 'Android',
+            TranslationUtils.tr('trade_direction'): TranslationUtils.tr(
+              'general_sell',
+            ),
+            TranslationUtils.tr('trading_order_open_price'): '3,408.65',
+            TranslationUtils.tr('general_volume'): '0.03 lots',
           },
         ),
         _buildHistoryEntry(

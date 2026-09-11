@@ -955,7 +955,7 @@ class DashboardScreen extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Switch',
+                          TranslationUtils.tr('dashboard_screen_switch'),
                           style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.primary,
                             fontSize: 10.5.sp,
@@ -1077,7 +1077,7 @@ class DashboardScreen extends StatelessWidget {
                                 ),
                                 SizedBox(width: 3.w),
                                 Text(
-                                  'Scratchcard',
+                                  TranslationUtils.tr('iquote_scratchcard'),
                                   style: AppTextStyles.bodyText.copyWith(
                                     color: Colors.purple,
                                     fontSize: 8.sp,
@@ -1696,7 +1696,7 @@ class DashboardScreen extends StatelessWidget {
               title: Text('', style: AppTextStyles.screenTitle),
               actions: [
                 _buildHeaderIconButton(
-                  label: 'Account',
+                  label: TranslationUtils.tr('settings_account'),
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
                   margin: EdgeInsets.only(right: 16.w),
@@ -1781,7 +1781,7 @@ class DashboardScreen extends StatelessWidget {
               // centerTitle: true,
               actions: [
                 _buildHeaderIconButton(
-                  label: 'Account',
+                  label: TranslationUtils.tr('settings_account'),
                   assetPath: 'assets/svg/deshboard/add-square.svg',
                   onPressed: controller.showOpenAccountSheet,
                   margin: EdgeInsets.only(right: 16.w),
@@ -3399,7 +3399,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Account: ${account.metaAccountNumber}',
+                      '${languageService.tr('settings_account')}: ${account.metaAccountNumber}',
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
@@ -3419,13 +3419,19 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Password is required';
+                            return languageService.tr(
+                              'validation_password_required',
+                            );
                           }
                           if (value.length < 8 || value.length > 16) {
-                            return 'Password must be 8-16 characters';
+                            return languageService.tr(
+                              'dashboard_screen_password_must_be_8_16_characters',
+                            );
                           }
                           if (!_isPasswordComplex(value)) {
-                            return 'Must include uppercase, lowercase, number, and special character';
+                            return languageService.tr(
+                              'dashboard_screen_must_include_uppercase_lowercase',
+                            );
                           }
                           return null;
                         },
@@ -3478,10 +3484,14 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         obscureText: obscureConfirmPassword.value,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
+                            return languageService.tr(
+                              'create_new_password_validation_confirm',
+                            );
                           }
                           if (value != passwordController.text) {
-                            return 'Passwords do not match';
+                            return languageService.tr(
+                              'create_account_validation_password_match',
+                            );
                           }
                           return null;
                         },
@@ -3550,14 +3560,18 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                           CustomToastService.showSuccess(
                                             message:
                                                 response.data?['message'] ??
-                                                'Password changed successfully',
+                                                languageService.tr(
+                                                  'dashboard_screen_password_changed_successfully',
+                                                ),
                                           );
                                           Get.back(closeOverlays: true);
                                         } else {
                                           CustomToastService.showError(
                                             message:
                                                 response.message ??
-                                                'Failed to change password',
+                                                languageService.tr(
+                                                  'dashboard_screen_failed_to_change_password',
+                                                ),
                                           );
                                         }
                                       } catch (e) {
@@ -3590,7 +3604,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                     ),
                                   )
                                   : Text(
-                                    'Change Password',
+                                    languageService.tr('change_password'),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.w600,
@@ -3680,7 +3694,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: Text(
-                        'Reset Investor Password',
+                        languageService.tr('dashboard_reset_investor_password'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w600,
@@ -3738,13 +3752,19 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         controller: passwordController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Password is required';
+                            return languageService.tr(
+                              'validation_password_required',
+                            );
                           }
                           if (value.length < 8 || value.length > 16) {
-                            return 'Password must be 8-16 characters';
+                            return languageService.tr(
+                              'dashboard_screen_password_must_be_8_16_characters',
+                            );
                           }
                           if (!_isPasswordComplex(value)) {
-                            return 'Must include uppercase, lowercase, number, and special character';
+                            return languageService.tr(
+                              'dashboard_screen_must_include_uppercase_lowercase',
+                            );
                           }
                           return null;
                         },
@@ -3754,7 +3774,9 @@ class AccountMenuBottomSheet extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: 8),
                       child: Text(
-                        '8-16 characters with uppercase, lowercase, numbers, and special characters',
+                        languageService.tr(
+                          'dashboard_screen_password_requirements_hint',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 11.sp,
                           color: AppColors.textGrey,
@@ -3812,10 +3834,14 @@ class AccountMenuBottomSheet extends StatelessWidget {
                         controller: confirmPasswordController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please confirm password';
+                            return languageService.tr(
+                              'account_management_validation_confirm_password',
+                            );
                           }
                           if (value != passwordController.text) {
-                            return 'Passwords do not match';
+                            return languageService.tr(
+                              'create_account_validation_password_match',
+                            );
                           }
                           return null;
                         },
@@ -3859,14 +3885,18 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                           CustomToastService.showSuccess(
                                             message:
                                                 response.data?['message'] ??
-                                                'Investor password reset successfully',
+                                                languageService.tr(
+                                                  'dashboard_screen_investor_password_reset_successfully',
+                                                ),
                                           );
                                           Get.back(closeOverlays: true);
                                         } else {
                                           CustomToastService.showError(
                                             message:
                                                 response.message ??
-                                                'Failed to reset investor password',
+                                                languageService.tr(
+                                                  'dashboard_screen_failed_to_reset_investor_password',
+                                                ),
                                           );
                                         }
                                       } catch (e) {
@@ -3899,7 +3929,9 @@ class AccountMenuBottomSheet extends StatelessWidget {
                                     ),
                                   )
                                   : Text(
-                                    'Reset Password',
+                                    languageService.tr(
+                                      'create_password_reset_password',
+                                    ),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.w600,
@@ -3971,7 +4003,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
               TextButton(
                 onPressed: () => Get.back(),
                 child: Text(
-                  'Cancel',
+                  TranslationUtils.tr('account_management_cancel'),
                   style: TextStyle(
                     color: Colors.redAccent,
                     fontSize: 16,
@@ -4061,7 +4093,7 @@ class AccountMenuBottomSheet extends StatelessWidget {
                   SizedBox(height: 16),
                   _buildMenuItem(
                     icon: Icons.trending_up,
-                    label: 'Leverage',
+                    label: TranslationUtils.tr('common_leverage'),
                     onTap: () {
                       print('Leverage: ${account.leverageId}');
                       Get.back(closeOverlays: true);

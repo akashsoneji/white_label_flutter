@@ -302,7 +302,11 @@ class DepositInstructionController extends GetxController {
 
       if (response.success) {
         CustomToastService.showSuccess(
-          message: response.message ?? 'Deposit request submitted successfully',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_deposit_request_submitted_successfully',
+              ),
         );
 
         // Mark dashboard MT5 accounts as stale so it refreshes when user returns to dashboard
@@ -326,7 +330,11 @@ class DepositInstructionController extends GetxController {
         // Clear image on error so user has to upload again
         selectedImage.value = null;
         CustomToastService.showError(
-          message: response.message ?? 'Deposit submission failed',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_deposit_submission_failed',
+              ),
         );
       }
     } catch (e, t) {
@@ -366,7 +374,11 @@ class DepositInstructionController extends GetxController {
 
       if (response.success) {
         CustomToastService.showSuccess(
-          message: response.message ?? 'Deposit request submitted successfully',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_deposit_request_submitted_successfully',
+              ),
         );
 
         // Mark dashboard MT5 accounts as stale so it refreshes when user returns to dashboard
@@ -387,7 +399,11 @@ class DepositInstructionController extends GetxController {
         // Clear image on error so user has to upload again
         selectedImage.value = null;
         CustomToastService.showError(
-          message: response.message ?? 'Deposit submission failed',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_deposit_submission_failed',
+              ),
         );
       }
     } catch (e, t) {
@@ -461,7 +477,11 @@ class DepositInstructionController extends GetxController {
         }
       } else {
         CustomToastService.showError(
-          message: response.message ?? 'Failed to create deposit',
+          message:
+              response.message ??
+              TranslationUtils.tr(
+                'deposit_instruction_controller_failed_to_create_deposit',
+              ),
         );
       }
     } catch (e) {

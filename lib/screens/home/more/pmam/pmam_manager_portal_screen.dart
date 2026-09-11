@@ -8,6 +8,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/pmam/pmam_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'widgets/edit_plan_bottom_sheet.dart';
 import 'package:crm_app/screens/home/more/pmam/pmam_manager_investor_detail_screen.dart';
 
@@ -93,7 +94,9 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
           iconWidth: 30.w,
           iconHeight: 30.h,
         ),
-        title: Text('Manager Portal', style: AppTextStyles.heading),
+        title: Text(
+            TranslationUtils.tr('pmam_manager_portal_screen_manager_portal'),
+            style: AppTextStyles.heading),
         centerTitle: true,
         actions: [
           Padding(
@@ -107,7 +110,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Text(
-                  '+ New Plan',
+                  TranslationUtils.tr('pmam_manager_portal_screen_new_plan'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.onColoredBackground,
                     fontSize: 12.sp,
@@ -133,7 +136,10 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                 fontWeight: FontWeight.w600,
               ),
               unselectedLabelStyle: AppTextStyles.bodyText.copyWith(fontSize: 14.sp),
-              tabs: [Tab(text: 'My Investors'), Tab(text: 'My Plans')],
+              tabs: [
+                Tab(text: TranslationUtils.tr('pmam_main_screen_my_investors')),
+                Tab(text: TranslationUtils.tr('copy_trading_nav_my_plans')),
+              ],
             ),
           ),
         ),
@@ -193,25 +199,25 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _StatPill(
-                  label: 'Total',
+                  label: TranslationUtils.tr('common_total'),
                   value: '${allInvestors.length}',
                   color: AppColors.primary,
                 ),
                 _VertDivider(),
                 _StatPill(
-                  label: 'Active',
+                  label: TranslationUtils.tr('chart_active'),
                   value: '${counts['active']}',
                   color: AppColors.green,
                 ),
                 _VertDivider(),
                 _StatPill(
-                  label: 'Inactive',
+                  label: TranslationUtils.tr('wallet_inactive'),
                   value: '${counts['inactive']}',
                   color: AppColors.textGrey,
                 ),
                 _VertDivider(),
                 _StatPill(
-                  label: 'Rejected',
+                  label: TranslationUtils.tr('kyc_verification_rejected'),
                   value: '${counts['rejected']}',
                   color: AppColors.error,
                 ),
@@ -227,35 +233,35 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
             child: Row(
               children: [
                 _PortalFilterChip(
-                  label: 'All',
+                  label: TranslationUtils.tr('common_all'),
                   count: allInvestors.length,
                   selected: _investorFilter == 'all',
                   onTap: () => setState(() => _investorFilter = 'all'),
                 ),
                 SizedBox(width: 8.w),
                 _PortalFilterChip(
-                  label: 'Active',
+                  label: TranslationUtils.tr('chart_active'),
                   count: counts['active']!,
                   selected: _investorFilter == 'active',
                   onTap: () => setState(() => _investorFilter = 'active'),
                 ),
                 SizedBox(width: 8.w),
                 _PortalFilterChip(
-                  label: 'Inactive',
+                  label: TranslationUtils.tr('wallet_inactive'),
                   count: counts['inactive']!,
                   selected: _investorFilter == 'inactive',
                   onTap: () => setState(() => _investorFilter = 'inactive'),
                 ),
                 SizedBox(width: 8.w),
                 _PortalFilterChip(
-                  label: 'Rejected',
+                  label: TranslationUtils.tr('kyc_verification_rejected'),
                   count: counts['rejected']!,
                   selected: _investorFilter == 'rejected',
                   onTap: () => setState(() => _investorFilter = 'rejected'),
                 ),
                 SizedBox(width: 8.w),
                 _PortalFilterChip(
-                  label: 'Pending',
+                  label: TranslationUtils.tr('kyc_verification_pending'),
                   count: counts['pending']!,
                   selected: _investorFilter == 'pending',
                   onTap: () => setState(() => _investorFilter = 'pending'),
@@ -280,7 +286,8 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                           ),
                           SizedBox(height: 12.h),
                           Text(
-                            'No investors in this category',
+                            TranslationUtils.tr(
+                                'pmam_manager_portal_screen_no_investors_in_this_category'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 14.sp,
                               color: AppColors.textGrey,
@@ -429,20 +436,23 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                     children: [
                                       Expanded(
                                         child: _InvInfoCol(
-                                          label: 'Account',
+                                          label: TranslationUtils.tr(
+                                              'settings_account'),
                                           value: account,
                                         ),
                                       ),
                                       Expanded(
                                         child: _InvInfoCol(
-                                          label: 'Invested',
+                                          label:
+                                              TranslationUtils.tr('pmam_invested'),
                                           value:
                                               '\$${invested.toStringAsFixed(2)}',
                                         ),
                                       ),
                                       Expanded(
                                         child: _InvInfoCol(
-                                          label: 'Net PnL',
+                                          label: TranslationUtils.tr(
+                                              'pmam_net_pnl_short'),
                                           value:
                                               '${pnlIsPos ? '+' : ''}\$${pnl.toStringAsFixed(2)}',
                                           valueColor:
@@ -459,7 +469,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                     activeSince.length >= 10) ...[
                                   SizedBox(height: 6.h),
                                   Text(
-                                    'Active since: ${activeSince.substring(0, 10)}',
+                                    '${TranslationUtils.tr('pmam_active_since')}: ${activeSince.substring(0, 10)}',
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 10.sp,
                                       color: AppColors.textGrey,
@@ -519,7 +529,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                                 ),
                                               )
                                               : Text(
-                                                'Reject',
+                                                TranslationUtils.tr('pmam_reject'),
                                                 style: AppTextStyles.bodyText.copyWith(
                                                   color: AppColors.error,
                                                   fontSize: 13.sp,
@@ -579,7 +589,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                                 ),
                                               )
                                               : Text(
-                                                'Approve',
+                                                TranslationUtils.tr('ibm_approve'),
                                                 style: AppTextStyles.bodyText.copyWith(
                                                   fontSize: 13.sp,
                                                   fontWeight: FontWeight.w700,
@@ -613,7 +623,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                         ),
                                       ),
                                       child: Text(
-                                        'View',
+                                        TranslationUtils.tr('ibm_view'),
                                         style: AppTextStyles.bodyText.copyWith(
                                           color: AppColors.primary,
                                           fontSize: 13.sp,
@@ -646,7 +656,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
       if (plans.isEmpty) {
         return Center(
           child: Text(
-            'No plans yet',
+            TranslationUtils.tr('master_dashboard_overview_tab_no_plans_yet'),
             style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp, color: AppColors.textGrey),
           ),
         );
@@ -717,9 +727,9 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                         ),
                         child: Text(
                           status == 'approved'
-                              ? 'Approved'
+                              ? TranslationUtils.tr('kyc_verification_approved')
                               : status == 'pending_admin'
-                              ? 'Pending Admin'
+                              ? TranslationUtils.tr('pmam_pending_admin')
                               : status,
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 10.sp,
@@ -732,23 +742,24 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                   ),
                   SizedBox(height: 8.h),
                   _PortalPlanInfoRow(
-                    'Account',
+                    TranslationUtils.tr('settings_account'),
                     '${p['trading_account_number'] ?? p['trading_account_id'] ?? '-'}',
                   ),
                   _PortalPlanInfoRow(
-                    'Commission',
+                    TranslationUtils.tr('general_commission'),
                     '${p['commission_percentage'] ?? 0}%',
                   ),
                   _PortalPlanInfoRow(
-                    'Min. Investment',
+                    TranslationUtils.tr(
+                        'pmam_manager_detail_screen_min_investment'),
                     '\$${p['minimum_investment'] ?? 0}',
                   ),
                   _PortalPlanInfoRow(
-                    'Investors',
+                    TranslationUtils.tr('pmam_nav_investors'),
                     '${p['active_investors'] ?? 0}',
                   ),
                   _PortalPlanInfoRow(
-                    'Locked AUM',
+                    TranslationUtils.tr('pmam_locked_aum'),
                     '\$${p['total_locked'] ?? 0}',
                   ),
                   SizedBox(height: 8.h),
@@ -770,7 +781,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                             padding: EdgeInsets.symmetric(vertical: 8.h),
                           ),
                            label:  Text(
-                            'View',
+                            TranslationUtils.tr('ibm_view'),
                             style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                               fontSize: 13.sp,
@@ -789,7 +800,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                             color: AppColors.primary,
                           ),
                           label: Text(
-                            'Edit',
+                            TranslationUtils.tr('general_edit'),
                             style: AppTextStyles.bodyText.copyWith(
                               color: AppColors.primary,
                               fontSize: 13.sp,
@@ -828,7 +839,9 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                                   : AppColors.warningText,
                             ),
                             label: Text(
-                              isPaused ? 'Resume' : 'Pause',
+                              isPaused
+                                  ? TranslationUtils.tr('my_plans_tab_resume')
+                                  : TranslationUtils.tr('my_plans_tab_pause'),
                               style: AppTextStyles.bodyText.copyWith(
                                 color: isPaused
                                     ? AppColors.green
@@ -865,7 +878,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
                               padding: EdgeInsets.symmetric(vertical: 8.h),
                             ),
                             child: Text(
-                              'Inactivate',
+                              TranslationUtils.tr('pmam_inactivate'),
                               style: AppTextStyles.bodyText.copyWith(
                                 color: AppColors.error,
                                 fontSize: 13.sp,
@@ -900,15 +913,12 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
   }) async {
     if (planId <= 0) return;
     final title = isPaused
-        ? 'Resume plan "$planName"?'
-        : 'Pause plan "$planName"?';
+        ? TranslationUtils.trArgs(
+            'pmam_resume_plan_confirm', {'name': planName})
+        : TranslationUtils.trArgs('pmam_pause_plan_confirm', {'name': planName});
     final body = isPaused
-        ? 'New investor joins and trade allocations will restart. '
-            'MT5 trading rights on the pool account will be re-enabled.'
-        : 'New investor joins and new trade allocations will stop.\n\n'
-            'Existing investor positions stay open. While paused, you also '
-            'cannot CLOSE positions on the pool MT5 account — resume the '
-            'plan first to manage open trades.';
+        ? TranslationUtils.tr('pmam_resume_plan_body')
+        : TranslationUtils.tr('pmam_pause_plan_body');
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -937,7 +947,7 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
-              'Cancel',
+              TranslationUtils.tr('account_management_cancel'),
               style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
             ),
           ),
@@ -951,7 +961,9 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
               ),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(isPaused ? 'Resume' : 'Pause'),
+            child: Text(isPaused
+                ? TranslationUtils.tr('my_plans_tab_resume')
+                : TranslationUtils.tr('my_plans_tab_pause')),
           ),
         ],
       ),
@@ -964,7 +976,9 @@ class _PmamManagerPortalScreenState extends State<PmamManagerPortalScreen>
 
     if (!mounted) return;
     Get.snackbar(
-      result.ok ? 'Success' : 'Error',
+      result.ok
+          ? TranslationUtils.tr('create_account_success')
+          : TranslationUtils.tr('close_position_error'),
       result.message,
       backgroundColor: result.ok
           ? AppColors.green.withValues(alpha: 0.95)

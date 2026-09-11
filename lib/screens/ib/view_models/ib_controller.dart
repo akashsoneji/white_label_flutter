@@ -4,6 +4,7 @@ import 'package:crm_app/models/ib_models.dart';
 import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/screens/ib/data/repositories/ib_repository.dart';
 import 'package:crm_app/core/network/api_response.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class IBController extends GetxController {
   final IbRepository _repo = Get.find<IbRepository>();
@@ -144,7 +145,7 @@ class IBController extends GetxController {
           CustomToastService.showSuccess(
             message:
                 applicationResponse.message ??
-                'IB application submitted successfully',
+                TranslationUtils.tr('ib_application_submitted'),
           );
           return true;
         } else {
@@ -1011,8 +1012,8 @@ class IBController extends GetxController {
         CustomToastService.showSuccess(
           message:
               groupId != null
-                  ? 'Commission group updated successfully'
-                  : 'Commission group created successfully',
+                  ? TranslationUtils.tr('ib_commission_group_updated')
+                  : TranslationUtils.tr('ib_commission_group_created'),
         );
         await getCommissionGroups(showLoading: false);
         return true;
@@ -1041,7 +1042,9 @@ class IBController extends GetxController {
 
       if (response.success) {
         CustomToastService.showSuccess(
-          message: 'Commission group deleted successfully',
+          message: TranslationUtils.tr(
+            'ib_controller_commission_group_deleted_successfully',
+          ),
         );
         await getCommissionGroups(showLoading: false);
         return true;
@@ -1104,7 +1107,9 @@ class IBController extends GetxController {
 
       if (response.success) {
         CustomToastService.showSuccess(
-          message: response.message ?? 'Status updated successfully',
+          message:
+              response.message ??
+              TranslationUtils.tr('ib_status_updated_successfully'),
         );
         await getIBApprovalRequests(showLoading: false);
         return true;

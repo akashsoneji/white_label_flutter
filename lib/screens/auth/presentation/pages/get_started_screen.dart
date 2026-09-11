@@ -112,7 +112,9 @@ class GetStartedScreen extends StatelessWidget {
                               AgreementLauncher.openTerms();
                             },
                     ),
-                    TextSpan(text: " and "),
+                    TextSpan(
+                      text: " ${languageService.tr("common_and")} ",
+                    ),
                     TextSpan(
                       text: "${languageService.tr("privacy_policy_title").tr}",
                       style: AppTextStyles.bodyText.copyWith(

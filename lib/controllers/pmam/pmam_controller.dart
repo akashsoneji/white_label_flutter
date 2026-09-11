@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:crm_app/services/pmam_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:crm_app/models/pmam_model.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class PmamController extends GetxController {
   // ── Loading / Error ──
@@ -115,7 +116,9 @@ class PmamController extends GetxController {
       if (response.success) {
         managerStatus.value = 'pending';
         CustomToastService.showSuccess(
-          message: 'Manager application submitted successfully!',
+          message: TranslationUtils.tr(
+            'pmam_manager_application_submitted_successfully',
+          ),
         );
         return true;
       } else {
@@ -431,7 +434,7 @@ class PmamController extends GetxController {
       final response = await PmamService.inactivatePlan(planId);
       if (response.success) {
         CustomToastService.showSuccess(
-          message: 'Plan inactivated successfully',
+          message: TranslationUtils.tr('pmam_plan_inactivated_successfully'),
         );
         await loadManagerDashboard();
         return true;

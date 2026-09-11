@@ -44,7 +44,7 @@ class IbmMoreScreen extends StatelessWidget {
         ),
           ),
           title: Text(
-            'More',
+            languageService.tr('general_more'),
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -114,8 +114,12 @@ class IbmMoreScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                   tabs: [
-                    Tab(text: languageService.tr('Marketing')),
-                    Tab(text: languageService.tr('Settings')),
+                    Tab(
+                      text: languageService.tr(
+                        'settings_notifications_marketing',
+                      ),
+                    ),
+                    Tab(text: languageService.tr('bottom_navigation_settings')),
                   ],
                 ),
               ),

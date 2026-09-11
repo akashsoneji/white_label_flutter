@@ -28,7 +28,8 @@ class KycScaffold extends StatelessWidget {
           elevation: 0,
           automaticallyImplyLeading: false, // No back arrow
           title: Text(
-            title ?? 'Verify your account',
+            title ??
+                Get.find<LanguageService>().tr('settings_verify_account'),
             style: AppTextStyles.heading,
           ),
           centerTitle: false,
@@ -105,7 +106,9 @@ class KycScaffold extends StatelessWidget {
             ],
           ),
           content: Text(
-            'You can continue later, but you won\'t get all benefits until verification is complete',
+            Get.find<LanguageService>().tr(
+              'kyc_scaffold_you_can_continue_later',
+            ),
             style: AppTextStyles.grey14400h57,
             textAlign: TextAlign.center,
           ),
@@ -131,7 +134,9 @@ class KycScaffold extends StatelessWidget {
                       padding: EdgeInsets.symmetric(vertical: 12.h),
                     ),
                     child: Text(
-                      'Verify\nLater',
+                      Get.find<LanguageService>().tr(
+                        'kyc_scaffold_verify_later_two_line',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -154,7 +159,9 @@ class KycScaffold extends StatelessWidget {
                     ),
                     child: Text(
                       textAlign: TextAlign.center,
-                      'Continue Verification',
+                      Get.find<LanguageService>().tr(
+                        'kyc_scaffold_continue_verification',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,

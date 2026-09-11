@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
 import 'package:crm_app/models/ib_models.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:intl/intl.dart';
 import 'commission_group_form_screen.dart';
@@ -58,21 +59,23 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
     final confirm = await Get.dialog<bool>(
       AlertDialog(
         title: Text(
-          'Delete Group',
+          TranslationUtils.tr('commission_groups_screen_delete_group'),
           style: AppTextStyles.bodyText.copyWith(fontSize: 18.sp, fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'Are you sure you want to delete "${group.groupName}"?',
+          TranslationUtils.trArgs('ib_delete_group_confirm', {
+            'name': group.groupName ?? '',
+          }),
           style: AppTextStyles.bodyText.copyWith(fontSize: 14.sp),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: Text('Cancel', style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey)),
+            child: Text(TranslationUtils.tr('account_management_cancel'), style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey)),
           ),
           TextButton(
             onPressed: () => Get.back(result: true),
-            child: Text('Delete', style: AppTextStyles.bodyText.copyWith(color: AppColors.error)),
+            child: Text(TranslationUtils.tr('account_management_delete'), style: AppTextStyles.bodyText.copyWith(color: AppColors.error)),
           ),
         ],
       ),
@@ -106,7 +109,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
           onPressed: () => Get.back(closeOverlays: true),
         ),
         title: Text(
-          'Commission Groups',
+          TranslationUtils.tr('commission_groups_screen_commission_groups'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -127,7 +130,9 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                 controller.commissionGroups.isEmpty) {
               return Center(
                 child: CommonLoadingWidget(
-                  message: 'Loading commission groups...',
+                  message: TranslationUtils.tr(
+                    'commission_groups_screen_loading_commission_groups',
+                  ),
                   size: 50.0,
                   color: AppColors.primary,
                 ),
@@ -145,15 +150,21 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                   children: [
                     // Information Boxes
                     _buildInfoBox(
-                      title: 'Standard Groups',
-                      description:
-                          'These commission rates are used for your direct clients. Commission flows up the hierarchy: Your Rate - Sub-IB Rate = Your Profit.',
+                      title: TranslationUtils.tr(
+                        'commission_groups_screen_standard_groups',
+                      ),
+                      description: TranslationUtils.tr(
+                        'my_structure_screen_these_commission_rates_are_used_for',
+                      ),
                     ),
                     SizedBox(height: 16.h),
                     _buildInfoBox(
-                      title: 'Private Groups',
-                      description:
-                          'These are the commission rate templates assigned to you by Admin. Use these as a reference to create your own private groups with custom commission rates for your Sub-IBs.',
+                      title: TranslationUtils.tr(
+                        'commission_groups_screen_private_groups',
+                      ),
+                      description: TranslationUtils.tr(
+                        'ib_private_groups_description',
+                      ),
                     ),
                     SizedBox(height: 24.h),
                     // Tab Navigation
@@ -179,7 +190,9 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                               ),
                             ),
                             child: Text(
-                              'Standard Groups',
+                              TranslationUtils.tr(
+                                'commission_groups_screen_standard_groups',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
@@ -198,7 +211,9 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                       children: [
                         Flexible(
                           child: Text(
-                            'Existing Standard Groups',
+                            TranslationUtils.tr(
+                              'commission_groups_screen_existing_standard_groups',
+                            ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -223,7 +238,9 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                'Add New Standard Group',
+                                TranslationUtils.tr(
+                                  'commission_groups_screen_add_new_standard_group',
+                                ),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
@@ -246,7 +263,9 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                           ),
                           SizedBox(height: 16.h),
                           Text(
-                            'No commission groups found',
+                            TranslationUtils.tr(
+                              'commission_groups_screen_no_commission_groups_found',
+                            ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               color: AppColors.textGrey,
@@ -268,15 +287,21 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                 children: [
                   // Information Boxes - Stacked on mobile
                   _buildInfoBox(
-                    title: 'Standard Groups',
-                    description:
-                        'These commission rates are used for your direct clients. Commission flows up the hierarchy: Your Rate - Sub-IB Rate = Your Profit.',
+                    title: TranslationUtils.tr(
+                      'commission_groups_screen_standard_groups',
+                    ),
+                    description: TranslationUtils.tr(
+                      'my_structure_screen_these_commission_rates_are_used_for',
+                    ),
                   ),
                   SizedBox(height: 16.h),
                   _buildInfoBox(
-                    title: 'Private Groups',
-                    description:
-                        'These are the commission rate templates assigned to you by Admin. Use these as a reference to create your own private groups with custom commission rates for your Sub-IBs.',
+                    title: TranslationUtils.tr(
+                      'commission_groups_screen_private_groups',
+                    ),
+                    description: TranslationUtils.tr(
+                      'ib_private_groups_description',
+                    ),
                   ),
                   SizedBox(height: 24.h),
 
@@ -303,7 +328,9 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                             ),
                           ),
                           child: Text(
-                            'Standard Groups',
+                            TranslationUtils.tr(
+                              'commission_groups_screen_standard_groups',
+                            ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -323,7 +350,9 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                     children: [
                       Flexible(
                         child: Text(
-                          'Existing Standard Groups',
+                          TranslationUtils.tr(
+                            'commission_groups_screen_existing_standard_groups',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -348,7 +377,9 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
-                              'Add New Standard Group',
+                              TranslationUtils.tr(
+                                'commission_groups_screen_add_new_standard_group',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
@@ -376,7 +407,9 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                             ),
                             SizedBox(height: 16.h),
                             Text(
-                              'No commission groups found',
+                              TranslationUtils.tr(
+                                'commission_groups_screen_no_commission_groups_found',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 16.sp,
                                 color: AppColors.textGrey,
@@ -494,7 +527,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'Group Name',
+                      TranslationUtils.tr('commission_group_form_screen_group_name'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -505,7 +538,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'Created Date',
+                      TranslationUtils.tr('commission_groups_screen_created_date'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -516,7 +549,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                   Expanded(
                     flex: 2,
                     child: Text(
-                      'Actions',
+                      TranslationUtils.tr('actions_section_title'),
                       textAlign: TextAlign.right,
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
@@ -596,7 +629,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                                 ),
                               ),
                               child: Text(
-                                'Edit',
+                                TranslationUtils.tr('general_edit'),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.textPrimary,
@@ -621,7 +654,7 @@ class _CommissionGroupsScreenState extends State<CommissionGroupsScreen> {
                                 ),
                               ),
                               child: Text(
-                                'Delete',
+                                TranslationUtils.tr('account_management_delete'),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.textPrimary,

@@ -1,5 +1,6 @@
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_master_dashboard_controller.dart';
 
@@ -157,7 +158,9 @@ class MasterCopierItem {
 
   String get commissionDisplay {
     if (commissionType == 'per_trade') {
-      return '${commissionPercentage.toStringAsFixed(0)}% per trade';
+      return TranslationUtils.trArgs('copy_trading_percent_per_trade', {
+        'percent': commissionPercentage.toStringAsFixed(0),
+      });
     } else if (commissionType == 'subscription') {
       return '\$$subscriptionFee / period';
     }
@@ -275,14 +278,16 @@ class CopyTradingMasterCopiersController extends GetxController {
 
       if (!res.success || res.data == null) {
         copiers.clear();
-        errorMessage.value = res.message ?? 'Failed to load copiers';
+      errorMessage.value =
+          res.message ?? TranslationUtils.tr('copy_trading_failed_to_load_copiers');
         return;
       }
 
       final body = res.data?['data'];
       if (body is! Map) {
         copiers.clear();
-        errorMessage.value = 'Invalid response format';
+      errorMessage.value =
+          TranslationUtils.tr('copy_trading_invalid_response_format');
         return;
       }
 

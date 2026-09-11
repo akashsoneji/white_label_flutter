@@ -128,7 +128,7 @@ class KycDocsScreen extends StatelessWidget {
                                   ),
                                   SizedBox(width: 8.w),
                                   Text(
-                                    'Uploading...',
+                                    TranslationUtils.tr('kyc_docs_screen_uploading'),
                                     style: AppTextStyles.black14600h1_71
                                         .copyWith(color: AppColors.whiteColor),
                                   ),
@@ -136,8 +136,12 @@ class KycDocsScreen extends StatelessWidget {
                               )
                               : Text(
                                 hasLocalSelection
-                                    ? 'Upload Selected Documents'
-                                    : 'Select Required Documents',
+                                    ? TranslationUtils.tr(
+                                      'kyc_docs_screen_upload_selected_documents',
+                                    )
+                                    : TranslationUtils.tr(
+                                      'kyc_docs_screen_select_required_documents',
+                                    ),
                                 style: AppTextStyles.black14600h1_71.copyWith(
                                   color: AppColors.whiteColor,
                                 ),
@@ -343,7 +347,7 @@ class KycDocsScreen extends StatelessWidget {
                 Icon(Icons.error_outline, color: Colors.red, size: 32),
                 SizedBox(height: 8),
                 Text(
-                  'Error',
+                  TranslationUtils.tr('close_position_error'),
                   style: AppTextStyles.bodyText.copyWith(color: Colors.red, fontSize: 12),
                 ),
               ],
@@ -394,7 +398,7 @@ class KycDocsScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            'Optional',
+            TranslationUtils.tr('kyc_docs_screen_optional'),
             textAlign: TextAlign.center,
             style: AppTextStyles.bodyText.copyWith(color: AppColors.whiteColor, fontSize: 12),
           ),
@@ -407,15 +411,15 @@ class KycDocsScreen extends StatelessWidget {
     switch (status) {
       case 'approved':
         bg = Colors.green;
-        text = 'Approved';
+        text = TranslationUtils.tr('kyc_verification_approved');
         break;
       case 'rejected':
         bg = Colors.red;
-        text = 'Rejected  \nre-upload';
+        text = TranslationUtils.tr('kyc_docs_screen_rejected_re_upload');
         break;
       default:
         bg = Colors.orange;
-        text = 'Under review';
+        text = TranslationUtils.tr('kyc_verification_under_review');
     }
 
     return Positioned(
@@ -480,7 +484,9 @@ class KycDocsScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'Upload ${_getDocumentDisplayName(documentType)}',
+                        TranslationUtils.trArgs('kyc_docs_screen_upload_name', {
+                          'name': _getDocumentDisplayName(documentType),
+                        }),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w600,
@@ -588,15 +594,15 @@ class KycDocsScreen extends StatelessWidget {
   String _getDocumentDisplayName(String documentType) {
     switch (documentType) {
       case 'id_proof_front':
-        return 'ID Proof Front';
+        return TranslationUtils.tr('kyc_id_proof_front');
       case 'id_proof_back':
-        return 'ID Proof Back';
+        return TranslationUtils.tr('kyc_id_proof_back');
       case 'address_proof_front':
-        return 'Address Proof Front';
+        return TranslationUtils.tr('kyc_address_proof_front');
       case 'address_proof_back':
-        return 'Address Proof Back';
+        return TranslationUtils.tr('kyc_address_proof_back');
       default:
-        return 'Document';
+        return TranslationUtils.tr('kyc_docs_screen_document');
     }
   }
 

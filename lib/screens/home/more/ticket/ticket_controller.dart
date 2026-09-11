@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/models/ticket_model.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/services/secure_storage_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 import 'package:get/get.dart';
@@ -100,7 +101,8 @@ class TicketController extends GetxController {
 
       if (!res.success || res.data == null) {
         if (refresh) tickets.clear();
-        errorMessage.value = res.message ?? 'Failed to load tickets';
+        errorMessage.value =
+            res.message ?? TranslationUtils.tr('ticket_load_failed');
         return;
       }
 
@@ -200,13 +202,13 @@ class TicketController extends GetxController {
 
       if (res.success) {
         CustomToastService.showSuccess(
-          message: res.message ?? 'Ticket created successfully',
+          message: res.message ?? TranslationUtils.tr('ticket_created_success'),
         );
         await fetchTickets(refresh: true);
         return true;
       }
       CustomToastService.showError(
-        message: res.message ?? 'Failed to create ticket',
+        message: res.message ?? TranslationUtils.tr('ticket_create_failed'),
       );
       return false;
     } catch (e) {
@@ -226,7 +228,8 @@ class TicketController extends GetxController {
         endpoint: ApiConstants.ticketDetail(ticketId),
       );
       if (!res.success || res.data == null) {
-        errorMessage.value = res.message ?? 'Failed to load ticket';
+        errorMessage.value =
+            res.message ?? TranslationUtils.tr('ticket_detail_load_failed');
         return;
       }
       final data = res.data?['data'];
@@ -258,13 +261,13 @@ class TicketController extends GetxController {
       );
       if (res.success) {
         CustomToastService.showSuccess(
-          message: res.message ?? 'Reply posted successfully',
+          message: res.message ?? TranslationUtils.tr('ticket_reply_success'),
         );
         await fetchTicketDetail(ticketId);
         return true;
       }
       CustomToastService.showError(
-        message: res.message ?? 'Failed to post reply',
+        message: res.message ?? TranslationUtils.tr('ticket_reply_failed'),
       );
       return false;
     } catch (e) {
@@ -284,14 +287,14 @@ class TicketController extends GetxController {
       );
       if (res.success) {
         CustomToastService.showSuccess(
-          message: res.message ?? 'Ticket closed successfully',
+          message: res.message ?? TranslationUtils.tr('ticket_closed_success'),
         );
         await fetchTicketDetail(ticketId);
         await fetchTickets(refresh: true);
         return true;
       }
       CustomToastService.showError(
-        message: res.message ?? 'Failed to close ticket',
+        message: res.message ?? TranslationUtils.tr('ticket_close_failed'),
       );
       return false;
     } catch (e) {

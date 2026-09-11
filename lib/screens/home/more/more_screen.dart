@@ -320,7 +320,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           ),
                         ),
                         child: Text(
-                          'Add New Broker +',
+                          languageService.tr('switch_account_add_new_broker'),
                           style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.whiteColor,
                             fontSize: 16.sp,
@@ -521,7 +521,9 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                   ),
                   SizedBox(height: 12.h),
                   Text(
-                    'Current broker: $selectedBrokerName',
+                    TranslationUtils.trArgs('more_current_broker', {
+                      'broker': selectedBrokerName,
+                    }),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w500,
@@ -551,7 +553,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
                           ),
                         ),
                         child: Text(
-                          'Choose Broker',
+                          languageService.tr('add_account_choose_broker'),
                           style: AppTextStyles.bodyText.copyWith(
                             color: AppColors.whiteColor,
                             fontSize: 16.sp,
@@ -656,7 +658,7 @@ class _MoreScreenState extends State<MoreScreen> with WidgetsBindingObserver {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Dashboard',
+          languageService.tr('dashboard_title'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -1905,7 +1907,7 @@ class _OneClickTradingMenuItemState extends State<_OneClickTradingMenuItem> {
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
-              'One Click Trading',
+              TranslationUtils.tr('more_screen_one_click_trading'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 13.5.sp,
                 fontWeight: FontWeight.w500,

@@ -1,5 +1,6 @@
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/utils/app_logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -161,7 +162,8 @@ class CopyTradingMastersController extends GetxController {
       }
       if (!res.success || res.data == null) {
         masters.clear();
-        errorMessage.value = res.message ?? 'Failed to load masters';
+      errorMessage.value =
+          res.message ?? TranslationUtils.tr('copy_trading_failed_to_load_masters');
         return;
       }
 
@@ -190,7 +192,7 @@ class CopyTradingMastersController extends GetxController {
           );
         }
         masters.clear();
-        errorMessage.value = 'Invalid response';
+      errorMessage.value = TranslationUtils.tr('copy_trading_invalid_response');
         return;
       }
 

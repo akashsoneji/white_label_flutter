@@ -432,7 +432,9 @@ class KycVerificationScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'Choose\nDocument Type',
+                    TranslationUtils.tr(
+                      'kyc_verification_choose_document_type',
+                    ),
                     textAlign: TextAlign.center,
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 22,
@@ -443,7 +445,7 @@ class KycVerificationScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    'Make sure the document includes a\npicture of your face.',
+                    TranslationUtils.tr('kyc_verification_face_picture_note'),
                     textAlign: TextAlign.center,
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 14,

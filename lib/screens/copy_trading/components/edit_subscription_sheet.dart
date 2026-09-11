@@ -9,6 +9,7 @@ import 'package:crm_app/services/api_service.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_subscribe_controller.dart';
 import 'package:crm_app/widgets/labeled_app_text_field.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class EditSubscriptionSheet extends StatefulWidget {
   final int subscriptionId;
@@ -91,7 +92,8 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
 
       if (!res.success || res.data == null) {
         setState(() {
-          _detailError = res.message ?? 'Failed to load copy details';
+          _detailError = res.message ??
+              TranslationUtils.tr('edit_subscription_failed_to_load_details');
           _isLoadingDetail = false;
         });
         return;
@@ -137,7 +139,10 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
       case 'fixed':
         final fixed = double.tryParse(_fixedLotCtrl.text) ?? 0;
         if (fixed <= 0) {
-          CustomToastService.showError(title: 'Validation', message: 'Enter a valid fixed lot size');
+          CustomToastService.showError(
+            title: TranslationUtils.tr('account_management_validation'),
+            message: TranslationUtils.tr('edit_subscription_enter_valid_fixed_lot'),
+          );
           return;
         }
         _subController.fixedLotSize.value = fixed;
@@ -145,7 +150,10 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
       case 'mirror_ratio':
         final r = double.tryParse(_mirrorRatioCtrl.text) ?? 0;
         if (r <= 0) {
-          CustomToastService.showError(title: 'Validation', message: 'Enter a valid ratio');
+          CustomToastService.showError(
+            title: TranslationUtils.tr('account_management_validation'),
+            message: TranslationUtils.tr('edit_subscription_enter_valid_ratio'),
+          );
           return;
         }
         _subController.mirrorRatio.value = r;
@@ -153,7 +161,10 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
       case 'percentage_risk':
         final risk = double.tryParse(_riskPercentCtrl.text) ?? 0;
         if (risk <= 0) {
-          CustomToastService.showError(title: 'Validation', message: 'Enter a valid risk percentage');
+          CustomToastService.showError(
+            title: TranslationUtils.tr('account_management_validation'),
+            message: TranslationUtils.tr('edit_subscription_enter_valid_risk_percentage'),
+          );
           return;
         }
         _subController.percentageRisk.value = risk;
@@ -162,7 +173,10 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
         final dd = double.tryParse(_dynamicDdCtrl.text) ?? 0;
         final red = double.tryParse(_dynamicReduceCtrl.text) ?? 0;
         if (dd <= 0 || red <= 0) {
-          CustomToastService.showError(title: 'Validation', message: 'Enter valid dynamic rules');
+          CustomToastService.showError(
+            title: TranslationUtils.tr('account_management_validation'),
+            message: TranslationUtils.tr('edit_subscription_enter_valid_dynamic_rules'),
+          );
           return;
         }
         _subController.dynamicDrawdownThreshold.value = dd;
@@ -172,7 +186,10 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
         final step = double.tryParse(_fixedRatioProfitStepCtrl.text) ?? 0;
         final lot = double.tryParse(_fixedRatioLotStepCtrl.text) ?? 0;
         if (step <= 0 || lot <= 0) {
-          CustomToastService.showError(title: 'Validation', message: 'Enter valid fixed ratio parameters');
+          CustomToastService.showError(
+            title: TranslationUtils.tr('account_management_validation'),
+            message: TranslationUtils.tr('edit_subscription_enter_valid_fixed_ratio_params'),
+          );
           return;
         }
         _subController.fixedRatioProfitStep.value = step;
@@ -185,7 +202,10 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
     if (_subController.copyingMethod.value == 'proportional') {
       final mult = double.tryParse(_multiplierCtrl.text) ?? 0;
       if (mult <= 0) {
-        CustomToastService.showError(title: 'Validation', message: 'Enter a valid multiplier');
+        CustomToastService.showError(
+          title: TranslationUtils.tr('account_management_validation'),
+          message: TranslationUtils.tr('edit_subscription_enter_valid_multiplier'),
+        );
         return;
       }
       _subController.lotMultiplier.value = mult;
@@ -195,7 +215,10 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
       final tp = double.tryParse(_tpCtrl.text) ?? 0;
       final sl = double.tryParse(_slCtrl.text) ?? 0;
       if (tp <= 0 || sl <= 0) {
-        CustomToastService.showError(title: 'Validation', message: 'Enter valid TP and SL values');
+        CustomToastService.showError(
+          title: TranslationUtils.tr('account_management_validation'),
+          message: TranslationUtils.tr('edit_subscription_enter_valid_tp_sl'),
+        );
         return;
       }
       if (_subController.slTpMode.value == 'pip') {
@@ -209,10 +232,18 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
 
     final res = await _subController.updateSubscription(subscriptionId: widget.subscriptionId);
     if (res.success) {
-      CustomToastService.showSuccess(title: 'Success', message: res.message ?? 'Copy settings updated');
+      CustomToastService.showSuccess(
+        title: TranslationUtils.tr('create_account_success'),
+        message: res.message ??
+            TranslationUtils.tr('edit_subscription_copy_settings_updated'),
+      );
       Get.back(result: true);
     } else {
-      CustomToastService.showError(title: 'Failed', message: res.message ?? 'Update failed');
+      CustomToastService.showError(
+        title: TranslationUtils.tr('transaction_history_failed'),
+        message:
+            res.message ?? TranslationUtils.tr('edit_subscription_update_failed'),
+      );
     }
   }
 
@@ -252,7 +283,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Edit Copy Settings',
+                  TranslationUtils.tr('edit_subscription_edit_copy_settings'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
@@ -282,7 +313,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                   SizedBox(height: 12.h),
                   ElevatedButton(
                     onPressed: _loadSubscriptionDetail,
-                    child: Text('Retry'),
+                    child: Text(TranslationUtils.tr('common_retry')),
                   ),
                 ],
               ),
@@ -298,7 +329,10 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Copying master: ${widget.masterName}',
+                        TranslationUtils.trArgs(
+                          'edit_subscription_copying_master',
+                          {'master': widget.masterName},
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           color: AppColors.textGrey,
@@ -309,7 +343,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
 
                       // Sizing Method Dropdown
                       Text(
-                        'Sizing Method',
+                        TranslationUtils.tr('edit_subscription_sizing_method'),
                         style: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600),
                       ),
                       SizedBox(height: 6.h),
@@ -322,15 +356,60 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                           ),
                         ),
                         items: [
-                          DropdownMenuItem(value: 'fixed', child: Text('Fixed Lot Size')),
-                          DropdownMenuItem(value: 'proportional_equity', child: Text('Equity Proportional')),
-                          DropdownMenuItem(value: 'proportional_balance', child: Text('Balance Proportional')),
-                          DropdownMenuItem(value: 'multiplier_only', child: Text('Lot Multiplier')),
-                          DropdownMenuItem(value: 'mirror_ratio', child: Text('Mirror Ratio')),
-                          DropdownMenuItem(value: 'percentage_risk', child: Text('Percentage Risk')),
-                          DropdownMenuItem(value: 'reverse', child: Text('Reverse Copying')),
-                          DropdownMenuItem(value: 'dynamic_lot', child: Text('Dynamic Drawdown Lot')),
-                          DropdownMenuItem(value: 'fixed_ratio', child: Text('Fixed Profit Ratio')),
+                          DropdownMenuItem(
+                            value: 'fixed',
+                            child: Text(
+                              TranslationUtils.tr('edit_subscription_fixed_lot_size'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'proportional_equity',
+                            child: Text(
+                              TranslationUtils.tr('edit_subscription_equity_proportional'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'proportional_balance',
+                            child: Text(
+                              TranslationUtils.tr('edit_subscription_balance_proportional'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'multiplier_only',
+                            child: Text(
+                              TranslationUtils.tr('edit_subscription_lot_multiplier'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'mirror_ratio',
+                            child: Text(
+                              TranslationUtils.tr('edit_subscription_mirror_ratio'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'percentage_risk',
+                            child: Text(
+                              TranslationUtils.tr('edit_subscription_percentage_risk'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'reverse',
+                            child: Text(
+                              TranslationUtils.tr('edit_subscription_reverse_copying'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'dynamic_lot',
+                            child: Text(
+                              TranslationUtils.tr('edit_subscription_dynamic_drawdown_lot'),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'fixed_ratio',
+                            child: Text(
+                              TranslationUtils.tr('edit_subscription_fixed_profit_ratio'),
+                            ),
+                          ),
                         ],
                         onChanged: (v) {
                           if (v != null) {
@@ -344,52 +423,52 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                       // Method-specific input fields
                       if (method == 'fixed')
                         LabeledAppTextField(
-                          label: 'Fixed Lot Size *',
+                          label: TranslationUtils.tr('edit_subscription_fixed_lot_size_required'),
                           controller: _fixedLotCtrl,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          hintText: 'e.g. 0.01',
+                          hintText: TranslationUtils.tr('edit_subscription_eg_0_01'),
                         )
                       else if (method == 'mirror_ratio')
                         LabeledAppTextField(
-                          label: 'Mirror Ratio *',
+                          label: TranslationUtils.tr('edit_subscription_mirror_ratio_required'),
                           controller: _mirrorRatioCtrl,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          hintText: 'e.g. 0.5',
+                          hintText: TranslationUtils.tr('edit_subscription_eg_0_5'),
                         )
                       else if (method == 'percentage_risk')
                         LabeledAppTextField(
-                          label: 'Risk % per trade *',
+                          label: TranslationUtils.tr('edit_subscription_risk_percent_per_trade'),
                           controller: _riskPercentCtrl,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          hintText: 'e.g. 2.0',
+                          hintText: TranslationUtils.tr('edit_subscription_eg_2_0'),
                         )
                       else if (method == 'dynamic_lot') ...[
                         LabeledAppTextField(
-                          label: 'Drawdown threshold (%) *',
+                          label: TranslationUtils.tr('edit_subscription_drawdown_threshold'),
                           controller: _dynamicDdCtrl,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          hintText: 'e.g. 20',
+                          hintText: TranslationUtils.tr('edit_subscription_eg_20'),
                         ),
                         SizedBox(height: 12.h),
                         LabeledAppTextField(
-                          label: 'Reduction ratio (0–1) *',
+                          label: TranslationUtils.tr('edit_subscription_reduction_ratio'),
                           controller: _dynamicReduceCtrl,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          hintText: 'e.g. 0.5',
+                          hintText: TranslationUtils.tr('edit_subscription_eg_0_5'),
                         ),
                       ] else if (method == 'fixed_ratio') ...[
                         LabeledAppTextField(
-                          label: 'Profit milestone (USD) *',
+                          label: TranslationUtils.tr('edit_subscription_profit_milestone'),
                           controller: _fixedRatioProfitStepCtrl,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          hintText: 'e.g. 1000.00',
+                          hintText: TranslationUtils.tr('edit_subscription_eg_1000_00'),
                         ),
                         SizedBox(height: 12.h),
                         LabeledAppTextField(
-                          label: 'Lot increase per milestone *',
+                          label: TranslationUtils.tr('edit_subscription_lot_increase_per_milestone'),
                           controller: _fixedRatioLotStepCtrl,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          hintText: 'e.g. 0.01',
+                          hintText: TranslationUtils.tr('edit_subscription_eg_0_01'),
                         ),
                       ],
 
@@ -397,10 +476,10 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                       if (_subController.copyingMethod.value == 'proportional') ...[
                         SizedBox(height: 12.h),
                         LabeledAppTextField(
-                          label: 'Lot Multiplier *',
+                          label: TranslationUtils.tr('edit_subscription_lot_multiplier_required'),
                           controller: _multiplierCtrl,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          hintText: 'e.g. 1.0',
+                          hintText: TranslationUtils.tr('edit_subscription_eg_1_0'),
                         ),
                       ],
                       SizedBox(height: 16.h),
@@ -420,7 +499,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Override Master SL/TP',
+                                  TranslationUtils.tr('edit_subscription_override_master_sl_tp'),
                                   style: AppTextStyles.bodyText.copyWith(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w600,
@@ -442,7 +521,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                 children: [
                                   Expanded(
                                     child: _buildModeButton(
-                                      label: 'Pip Mode',
+                                      label: TranslationUtils.tr('edit_subscription_pip_mode'),
                                       selected: _subController.slTpMode.value == 'pip',
                                       onTap: () {
                                         _subController.slTpMode.value = 'pip';
@@ -452,7 +531,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                   SizedBox(width: 8.w),
                                   Expanded(
                                     child: _buildModeButton(
-                                      label: 'Dollar Mode',
+                                      label: TranslationUtils.tr('edit_subscription_dollar_mode'),
                                       selected: _subController.slTpMode.value == 'dollar',
                                       onTap: () {
                                         _subController.slTpMode.value = 'dollar';
@@ -466,7 +545,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                 children: [
                                   Expanded(
                                     child: LabeledAppTextField(
-                                      label: 'Take Profit',
+                                      label: TranslationUtils.tr('trade_take_profit'),
                                       controller: _tpCtrl,
                                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       hintText: '0.0',
@@ -475,7 +554,7 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                   SizedBox(width: 10.w),
                                   Expanded(
                                     child: LabeledAppTextField(
-                                      label: 'Stop Loss',
+                                      label: TranslationUtils.tr('trade_stop_loss'),
                                       controller: _slCtrl,
                                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                       hintText: '0.0',
@@ -501,7 +580,9 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                               ),
-                              child: Text('Cancel'),
+                              child: Text(
+                                TranslationUtils.tr('account_management_cancel'),
+                              ),
                             ),
                           ),
                           SizedBox(width: 12.w),
@@ -516,7 +597,9 @@ class _EditSubscriptionSheetState extends State<EditSubscriptionSheet> {
                                   borderRadius: BorderRadius.circular(10.r),
                                 ),
                               ),
-                              child: Text('Save Changes'),
+                              child: Text(
+                                TranslationUtils.tr('edit_subscription_save_changes'),
+                              ),
                             ),
                           ),
                         ],

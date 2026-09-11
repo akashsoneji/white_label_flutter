@@ -1,5 +1,6 @@
 import 'dart:io';
 import '../constants/text_styles.dart';
+import '../services/language_service.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -151,7 +152,7 @@ class _DoneBar extends StatelessWidget {
                   foregroundColor: const Color(0xFF007AFF),
                 ),
                 child: Text(
-                  'Done',
+                  TranslationUtils.tr('navigation_done'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

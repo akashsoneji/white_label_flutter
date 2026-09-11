@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/trading/view_models/account_controller.dart';
 import 'package:crm_app/screens/trading/view_models/dashboard_controller.dart';
@@ -419,14 +420,14 @@ class AccountHeaderWidget extends StatelessWidget {
       // Map account types to display text
       switch (accountType.toLowerCase()) {
         case 'live':
-          return 'Live';
+          return TranslationUtils.tr('dashboard_live');
         case 'demo':
-          return 'DEMO';
+          return TranslationUtils.tr('common_demo');
         default:
           return accountType.toUpperCase();
       }
     }
-    return 'Live'; // Default fallback
+    return TranslationUtils.tr('dashboard_live'); // Default fallback
   }
 
   Color _getAccountTypeTextColor(MT5Account? primaryAccount) {

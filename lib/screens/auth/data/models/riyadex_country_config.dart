@@ -1,4 +1,5 @@
 import 'package:country_picker/country_picker.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class RiyadexCountry {
   final String iso2;
@@ -58,7 +59,7 @@ class RiyadexGeoRule {
   factory RiyadexGeoRule.fromJson(Map<String, dynamic> json) {
     return RiyadexGeoRule(
       blockedMessage: json['blocked_message'] as String? ??
-          'Sorry, our services are not available in this country.',
+          TranslationUtils.tr('riyadex_country_not_available'),
     );
   }
 }

@@ -570,8 +570,15 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       // Sell Limit
       if (currentBidPrice.value != null &&
           limitPrice <= currentBidPrice.value!) {
-        _limitPriceError.value =
-            'Sell Limit should be above current price ${PrecisionHelper.formatPrice(currentBidPrice.value!, decimals: _getCurrentDigits())}';
+        _limitPriceError.value = TranslationUtils.trArgs(
+          'chart_screen_sell_limit_above_current',
+          {
+            'price': PrecisionHelper.formatPrice(
+              currentBidPrice.value!,
+              decimals: _getCurrentDigits(),
+            ),
+          },
+        );
       } else {
         _limitPriceError.value = null;
       }
@@ -579,8 +586,15 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       // Buy Limit
       if (currentAskPrice.value != null &&
           limitPrice >= currentAskPrice.value!) {
-        _limitPriceError.value =
-            'Buy Limit should be below current price ${PrecisionHelper.formatPrice(currentAskPrice.value!, decimals: _getCurrentDigits())}';
+        _limitPriceError.value = TranslationUtils.trArgs(
+          'chart_screen_buy_limit_below_current',
+          {
+            'price': PrecisionHelper.formatPrice(
+              currentAskPrice.value!,
+              decimals: _getCurrentDigits(),
+            ),
+          },
+        );
       } else {
         _limitPriceError.value = null;
       }
@@ -597,8 +611,15 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       // Sell Limit
       if (currentBidPrice.value != null &&
           stopLossPrice <= currentBidPrice.value!) {
-        _stopLossError.value =
-            'Stop Loss should be above current price ${PrecisionHelper.formatPrice(currentBidPrice.value!, decimals: _getCurrentDigits())}';
+        _stopLossError.value = TranslationUtils.trArgs(
+          'chart_screen_sl_above_current',
+          {
+            'price': PrecisionHelper.formatPrice(
+              currentBidPrice.value!,
+              decimals: _getCurrentDigits(),
+            ),
+          },
+        );
       } else {
         _stopLossError.value = null;
       }
@@ -606,8 +627,15 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       // Buy Limit
       if (currentAskPrice.value != null &&
           stopLossPrice >= currentAskPrice.value!) {
-        _stopLossError.value =
-            'Stop Loss should be below current price ${PrecisionHelper.formatPrice(currentAskPrice.value!, decimals: _getCurrentDigits())}';
+        _stopLossError.value = TranslationUtils.trArgs(
+          'chart_screen_sl_below_current',
+          {
+            'price': PrecisionHelper.formatPrice(
+              currentAskPrice.value!,
+              decimals: _getCurrentDigits(),
+            ),
+          },
+        );
       } else {
         _stopLossError.value = null;
       }
@@ -624,8 +652,15 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       // Sell Limit
       if (currentAskPrice.value != null &&
           takeProfitPrice >= currentAskPrice.value!) {
-        _takeProfitError.value =
-            'Take Profit should be below current price ${PrecisionHelper.formatPrice(currentAskPrice.value!, decimals: _getCurrentDigits())}';
+        _takeProfitError.value = TranslationUtils.trArgs(
+          'chart_screen_tp_below_current',
+          {
+            'price': PrecisionHelper.formatPrice(
+              currentAskPrice.value!,
+              decimals: _getCurrentDigits(),
+            ),
+          },
+        );
       } else {
         _takeProfitError.value = null;
       }
@@ -633,8 +668,15 @@ class _ChartScreenState extends State<ChartScreen> with WidgetsBindingObserver {
       // Buy Limit
       if (currentBidPrice.value != null &&
           takeProfitPrice <= currentBidPrice.value!) {
-        _takeProfitError.value =
-            'Take Profit should be above current price ${PrecisionHelper.formatPrice(currentBidPrice.value!, decimals: _getCurrentDigits())}';
+        _takeProfitError.value = TranslationUtils.trArgs(
+          'chart_screen_tp_above_current',
+          {
+            'price': PrecisionHelper.formatPrice(
+              currentBidPrice.value!,
+              decimals: _getCurrentDigits(),
+            ),
+          },
+        );
       } else {
         _takeProfitError.value = null;
       }
@@ -836,16 +878,18 @@ Placing Order:
         // Show error message from TradingController
         final errorMessage = tradingController.errorMessage;
         CustomToastService.showError(
-          title: 'Error',
+          title: languageService.tr('close_position_error'),
           message:
-              errorMessage.isNotEmpty ? errorMessage : 'Failed to place order',
+              errorMessage.isNotEmpty
+                  ? errorMessage
+                  : languageService.tr('chart_order_place_failed'),
         );
       }
     } catch (e) {
       AppLogger.error('Exception in _placePendingOrder: $e', error: e);
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Failed to place order: $e',
+        title: languageService.tr('close_position_error'),
+        message: '${languageService.tr('chart_order_place_failed')}: $e',
       );
     } finally {
       // Always reset the flag
@@ -1737,7 +1781,7 @@ Placing Order:
         child: Row(
           children: [
             Text(
-              'Loading...',
+              languageService.tr('common_loading'),
               style: AppTextStyles.label.copyWith(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
@@ -2477,15 +2521,18 @@ Placing Order:
                         } else {
                           // API validation error - show error and stay on chart screen
                           CustomToastService.showError(
-                            title: 'Error',
-                            message: result['error'] ?? 'Failed to place order',
+                            title: languageService.tr('close_position_error'),
+                            message:
+                                result['error'] ??
+                                languageService.tr('chart_order_place_failed'),
                           );
                           // Stay on chart screen - don't navigate
                         }
                       } catch (error) {
                         CustomToastService.showError(
-                          title: 'Error',
-                          message: 'Failed to place order: $error',
+                          title: languageService.tr('close_position_error'),
+                          message:
+                              '${languageService.tr('chart_order_place_failed')}: $error',
                         );
                         // Stay on chart screen - don't navigate
                       } finally {
@@ -2711,15 +2758,18 @@ Placing Order:
                         } else {
                           // API validation error - show error and stay on chart screen
                           CustomToastService.showError(
-                            title: 'Error',
-                            message: result['error'] ?? 'Failed to place order',
+                            title: languageService.tr('close_position_error'),
+                            message:
+                                result['error'] ??
+                                languageService.tr('chart_order_place_failed'),
                           );
                           // Stay on chart screen - don't navigate
                         }
                       } catch (error) {
                         CustomToastService.showError(
-                          title: 'Error',
-                          message: 'Failed to place order: $error',
+                          title: languageService.tr('close_position_error'),
+                          message:
+                              '${languageService.tr('chart_order_place_failed')}: $error',
                         );
                         // Stay on chart screen - don't navigate
                       } finally {
@@ -2850,7 +2900,7 @@ Placing Order:
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'Quantity (lots)',
+                    languageService.tr('vantage_chart_layout_quantity_lots'),
                     style: AppTextStyles.labelOnTradeQuantity,
                   ),
                   // SizedBox(height: 1.h),
@@ -3044,7 +3094,7 @@ Placing Order:
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Monetary equivalent',
+              languageService.tr('trading_order_monetary_equivalent'),
               style: AppTextStyles.label.copyWith(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
@@ -3084,7 +3134,7 @@ Placing Order:
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Required margin',
+                      languageService.tr('chart_required_margin'),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -3107,7 +3157,7 @@ Placing Order:
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      'Free margin',
+                      languageService.tr('chart_free_margin'),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -3584,7 +3634,7 @@ Placing Order:
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Confirm Buy order',
+                languageService.tr('trading_order_confirm_buy_order'),
                 style: AppTextStyles.button.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
@@ -3774,7 +3824,7 @@ Placing Order:
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Volume',
+                      languageService.tr('general_volume'),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
@@ -3989,7 +4039,7 @@ Placing Order:
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'Quantity (lots)',
+                    languageService.tr('vantage_chart_layout_quantity_lots'),
                     style: AppTextStyles.labelOnTradeQuantity,
                   ),
                   // SizedBox(height: 1.h),
@@ -4252,6 +4302,19 @@ Placing Order:
     );
   }
 
+  /// Display-only translation for TP/SL switch tile titles. The raw value is
+  /// still passed around for logic.
+  String _fieldLabel(String label) {
+    switch (label) {
+      case 'Take Profit':
+        return languageService.tr('general_take_profit');
+      case 'Stop Loss':
+        return languageService.tr('general_stop_loss');
+      default:
+        return label;
+    }
+  }
+
   Widget _buildSwitchTile(
     String title,
     ValueNotifier<bool> valueNotifier, {
@@ -4260,7 +4323,11 @@ Placing Order:
     return ValueListenableBuilder<bool>(
       valueListenable: valueNotifier,
       builder: (context, value, child) {
-        return AppSwitchTile(title: title, value: value, onChanged: onChanged);
+        return AppSwitchTile(
+          title: _fieldLabel(title),
+          value: value,
+          onChanged: onChanged,
+        );
       },
     );
   }
@@ -4280,7 +4347,9 @@ Placing Order:
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Advanced settings',
+                      languageService.tr(
+                        'subscribe_to_plan_screen_advanced_settings',
+                      ),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -4301,7 +4370,7 @@ Placing Order:
             if (expanded) ...[
               SizedBox(height: 8.h),
               _buildSwitchTile(
-                'Trailing stop',
+                languageService.tr('general_trailing_stop'),
                 _trailingStopEnabled,
                 onChanged: (value) {
                   _trailingStopEnabled.value = value;
@@ -4324,7 +4393,7 @@ Placing Order:
               ),
 
               _buildSwitchTile(
-                'Break even',
+                languageService.tr('general_break_even'),
                 _breakEvenEnabled,
                 onChanged: (value) {
                   _breakEvenEnabled.value = value;
@@ -4352,7 +4421,9 @@ Placing Order:
                       ? Column(
                         children: [
                           _buildSwitchTile(
-                            'Order expiration',
+                            languageService.tr(
+                              'chart_screen_order_expiration',
+                            ),
                             _orderExpirationEnabled,
                             onChanged: (value) {
                               _orderExpirationEnabled.value = value;
@@ -4407,7 +4478,7 @@ Placing Order:
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
-                      'Date',
+                      languageService.tr('transaction_history_date'),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -4452,7 +4523,7 @@ Placing Order:
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Time',
+                      languageService.tr('chart_screen_time'),
                       style: AppTextStyles.label.copyWith(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -4544,7 +4615,7 @@ Placing Order:
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Distance, points',
+          languageService.tr('trading_order_distance_points'),
           style: AppTextStyles.label.copyWith(
             fontSize: 14.sp,
             fontWeight: FontWeight.w500,
@@ -4771,11 +4842,11 @@ Placing Order:
               items: [
                 DropdownMenuItem<String>(
                   value: 'Asset Price',
-                  child: Text('Asset Price'),
+                  child: Text(languageService.tr('chart_asset_price')),
                 ),
                 DropdownMenuItem<String>(
                   value: 'Profit in \$',
-                  child: Text('Profit in \$'),
+                  child: Text(languageService.tr('chart_screen_profit_in')),
                 ),
               ],
               onChanged: (String? newValue) {
@@ -4805,10 +4876,10 @@ Placing Order:
           return '$time +$value% S:${value.split('.')[0]}.${value.split('.')[1]}';
         } else {
           // Show market closed
-          return 'Market closed';
+          return languageService.tr('chart_screen_market_closed');
         }
       }
     }
-    return 'Market closed';
+    return languageService.tr('chart_screen_market_closed');
   }
 }

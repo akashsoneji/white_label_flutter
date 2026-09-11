@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class CopyTradingPaymentMethodsScreen extends StatelessWidget {
   const CopyTradingPaymentMethodsScreen({super.key});
@@ -19,7 +20,7 @@ class CopyTradingPaymentMethodsScreen extends StatelessWidget {
         title: Column(
           children: [
             Text(
-              'Payment Methods',
+              TranslationUtils.tr('payment_methods_title'),
               style: AppTextStyles.heading.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -49,61 +50,61 @@ class CopyTradingPaymentMethodsScreen extends StatelessWidget {
           SizedBox(height: 16.h),
           _PaymentMethodTile(
             label: 'Bitcoin',
-            sublabel: 'Instant upto 1 hours',
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.currency_bitcoin_rounded,
             iconColor: AppColors.warning,
           ),
           _PaymentMethodTile(
             label: 'Litecoin',
-            sublabel: 'Instant upto 1 hours',
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.currency_lira_rounded, // Placeholder for Litecoin
             iconColor: AppColors.blue,
           ),
           _PaymentMethodTile(
             label: 'TRC20',
-            sublabel: 'Instant upto 1 hours',
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.token_rounded,
             iconColor: AppColors.quickActionGreen,
           ),
           _PaymentMethodTile(
             label: 'Ethereum',
-            sublabel: 'Instant upto 1 hours',
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.diamond_rounded, // Placeholder for ETH
             iconColor: AppColors.blue,
           ),
           _PaymentMethodTile(
             label: 'GPay',
-            sublabel: 'Instant upto 1 hours',
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.account_balance_wallet_rounded,
             iconColor: AppColors.blue,
           ),
           _PaymentMethodTile(
             label: 'Phone Pe',
-            sublabel: 'Instant upto 1 hours',
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.mobile_friendly_rounded,
             iconColor: AppColors.quickActionPurple,
           ),
           _PaymentMethodTile(
             label: 'Paytm',
-            sublabel: 'Instant upto 1 hours',
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.payments_rounded,
             iconColor: AppColors.blue,
           ),
           _PaymentMethodTile(
             label: 'UPI',
-            sublabel: 'Instant upto 1 hours',
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.account_balance_rounded,
             iconColor: AppColors.warning,
           ),
           _PaymentMethodTile(
-            label: 'Local Exchange',
-            sublabel: 'Instant upto 1 hours',
+            label: TranslationUtils.tr('payment_methods_local_exchange'),
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.currency_exchange_rounded,
             iconColor: AppColors.textGrey,
           ),
           _PaymentMethodTile(
-            label: 'Local Bank Transfer',
-            sublabel: 'Instant upto 1 hours',
+            label: TranslationUtils.tr('payment_methods_local_bank_transfer'),
+            sublabel: TranslationUtils.tr('payment_methods_instant_upto_1_hours'),
             icon: Icons.account_balance_outlined,
             iconColor: AppColors.quickActionPurple,
           ),

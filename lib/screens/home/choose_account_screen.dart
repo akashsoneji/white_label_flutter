@@ -99,7 +99,9 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
     return Padding(
       padding: EdgeInsets.only(left: 40.w, right: 40.w, top: 16.h, bottom: 8.h),
       child: Text(
-        'Choose an account type you\'d like to start trading with',
+        languageService.tr(
+          'choose_account_screen_choose_an_account_type_you_like',
+        ),
         textAlign: TextAlign.center,
         style: AppTextStyles.bodyText.copyWith(
           fontSize: 17.sp,
@@ -203,23 +205,23 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildSpecificationRow(
-                    'Spread from',
+                    languageService.tr('choose_account_spread_from'),
                     accountType.spread?.toString() ?? "",
                   ),
                   _buildDivider(),
                   _buildSpecificationRow(
-                    'Instruments',
+                    languageService.tr('instruments_title'),
                     accountType.tradingInstruments ?? "",
                     maxLine: 2,
                   ),
                   _buildDivider(),
                   _buildSpecificationRow(
-                    'Min deposit',
+                    languageService.tr('bonus_screen_min_deposit'),
                     accountType.minimumDeposit ?? "",
                   ),
                   _buildDivider(),
                   _buildSpecificationRow(
-                    'Maximum leverage',
+                    languageService.tr('choose_account_maximum_leverage'),
                     accountType.leverage ?? "",
                   ),
                   // _buildDivider(),
@@ -229,7 +231,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
                   // ),
                   _buildDivider(),
                   _buildSpecificationRow(
-                    'Stop Out level',
+                    languageService.tr('choose_account_stop_out_level'),
                     accountType.stopOutLevel ?? "",
                   ),
                 ],
@@ -250,7 +252,7 @@ class _ChooseAccountScreenState extends State<ChooseAccountScreen> {
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        'Open Account',
+                        languageService.tr('dashboard_open_account'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,

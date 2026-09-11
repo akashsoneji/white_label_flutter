@@ -238,12 +238,20 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
       child: Column(
         children: [
-          row2('Balance', f(a?.balance), 'Equity', f(a?.equity)),
-          row2('Margin', f(a?.margin), 'Free Margin', f(a?.marginFree)),
           row2(
-            'Margin Level',
+              TranslationUtils.tr('dashboard_balance'),
+              f(a?.balance),
+              TranslationUtils.tr('dashboard_equity'),
+              f(a?.equity)),
+          row2(
+              TranslationUtils.tr('general_margin'),
+              f(a?.margin),
+              TranslationUtils.tr('chart_free_margin'),
+              f(a?.marginFree)),
+          row2(
+            TranslationUtils.tr('general_margin_level'),
             '${(a?.marginLevel ?? 0).toStringAsFixed(0)}%',
-            'Floating P/L',
+            TranslationUtils.tr('celestial_trade_floating_pl'),
             _fmtPL(a?.profit ?? 0),
           ),
         ],
@@ -307,9 +315,9 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
       padding: EdgeInsets.fromLTRB(16.w, 8.h, 12.w, 10.h),
       child: Row(
         children: [
-          pill('Active', activeCount, 0),
+          pill(TranslationUtils.tr('chart_active'), activeCount, 0),
           SizedBox(width: 10.w),
-          pill('Pending', pendingCount, 1),
+          pill(TranslationUtils.tr('iquote_position_pending'), pendingCount, 1),
           const Spacer(),
           // + new order button
           GestureDetector(
@@ -345,7 +353,11 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
             Icon(Icons.inbox_outlined, size: 56.sp, color: CelTheme.subText(c)),
             SizedBox(height: 8.h),
             Text(
-              _tab == 0 ? 'No open positions' : 'No pending orders',
+              _tab == 0
+                  ? TranslationUtils.tr(
+                      'pmam_fund_manager_view_no_open_positions',
+                    )
+                  : TranslationUtils.tr('meta_trade_no_pending_orders'),
               style: AppTextStyles.bodyText.copyWith(
                 color: CelTheme.subText(c),
                 fontSize: 14.sp,
@@ -463,10 +475,12 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                     _metaChip(c, 'SL', _fmt(sl, p.digits), CelTheme.slRed),
                   const Spacer(),
                   if (p.swap != 0)
-                    _metaText(c, 'Swap', p.swap.toStringAsFixed(2)),
+                    _metaText(c, TranslationUtils.tr('general_swap'),
+                        p.swap.toStringAsFixed(2)),
                   if (p.commission != 0) ...[
                     SizedBox(width: 8.w),
-                    _metaText(c, 'Comm', p.commission.toStringAsFixed(2)),
+                    _metaText(c, TranslationUtils.tr('celestial_trade_comm'),
+                        p.commission.toStringAsFixed(2)),
                   ],
                 ],
               ),
@@ -600,21 +614,26 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
-              _item('Close Positions', null, isHeader: true),
+              _item(TranslationUtils.tr('meta_trade_close_positions'), null,
+                  isHeader: true),
               _item(
-                'All',
+                TranslationUtils.tr('common_all'),
                 positions.isEmpty ? null : () => closeWith(positions),
               ),
-              _item('With profit', () {
+              _item(TranslationUtils.tr('meta_trade_with_profit'), () {
                 final list = positions.where((p) => p.profitLoss > 0).toList();
                 closeWith(list);
               }),
-              _item('With loss', () {
+              _item(TranslationUtils.tr('meta_trade_with_loss'), () {
                 final list = positions.where((p) => p.profitLoss < 0).toList();
                 closeWith(list);
               }),
               if (dominantSym != null)
-                _item('All $dominantSym With Loss', () {
+                _item(
+                    TranslationUtils.trArgs(
+                      'meta_trade_all_symbol_with_loss',
+                      {'symbol': dominantSym},
+                    ), () {
                   final list =
                       positions
                           .where(
@@ -623,7 +642,8 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                           .toList();
                   closeWith(list);
                 }),
-              _item('Cancel', () => Navigator.pop(ctx), isCancel: true),
+              _item(TranslationUtils.tr('account_management_cancel'),
+                  () => Navigator.pop(ctx), isCancel: true),
               SizedBox(height: 16.h + MediaQuery.of(ctx).padding.bottom),
             ],
           ),
@@ -710,7 +730,8 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                     ),
                     const Spacer(),
                     Text(
-                      '${p.volume.toStringAsFixed(2)} lot',
+                      TranslationUtils.trArgs('meta_trade_volume_lot',
+                          {'volume': p.volume.toStringAsFixed(2)}),
                       style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 13.sp),
                     ),
                   ],
@@ -722,7 +743,8 @@ class _CelestialTradeScreenState extends State<CelestialTradeScreen> {
                 child: Row(
                   children: [
                     Text(
-                      'Price: ${_fmt(_d(p.entryPrice), p.digits)}',
+                      TranslationUtils.trArgs('meta_trade_price_value',
+                          {'price': _fmt(_d(p.entryPrice), p.digits)}),
                       style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 12.sp),
                     ),
                     if (_d(p.currentPrice) > 0) ...[
@@ -1080,16 +1102,20 @@ class _DetailSheetState extends State<_DetailSheet> {
                 Expanded(
                   child: _riskBox(
                     c,
-                    'Stop Loss',
-                    sl > 0 ? _fmt(sl, p.digits) : 'Not Set',
+                    TranslationUtils.tr('general_stop_loss'),
+                    sl > 0
+                        ? _fmt(sl, p.digits)
+                        : TranslationUtils.tr('celestial_trade_not_set'),
                   ),
                 ),
                 SizedBox(width: 12.w),
                 Expanded(
                   child: _riskBox(
                     c,
-                    'Take Profit',
-                    tp > 0 ? _fmt(tp, p.digits) : 'Not Set',
+                    TranslationUtils.tr('general_take_profit'),
+                    tp > 0
+                        ? _fmt(tp, p.digits)
+                        : TranslationUtils.tr('celestial_trade_not_set'),
                   ),
                 ),
               ],
@@ -1228,15 +1254,26 @@ class _DetailSheetState extends State<_DetailSheet> {
 
     String buttonText;
     if (isPartialClose) {
-      buttonText =
-          isPositive
-              ? 'Close ${PrecisionHelper.formatVolume(closeVolume)} Lots with Profit +$formattedProfitLoss'
-              : 'Close ${PrecisionHelper.formatVolume(closeVolume)} Lots with Loss $formattedProfitLoss';
+      final lots = PrecisionHelper.formatVolume(closeVolume);
+      buttonText = isPositive
+          ? TranslationUtils.trArgs(
+              'close_position_screen_close_lots_with_profit',
+              {'lots': lots, 'amount': '+$formattedProfitLoss'},
+            )
+          : TranslationUtils.trArgs(
+              'close_position_screen_close_lots_with_loss',
+              {'lots': lots, 'amount': formattedProfitLoss},
+            );
     } else {
-      buttonText =
-          isPositive
-              ? 'Close with Profit +$formattedProfitLoss'
-              : 'Close with Loss $formattedProfitLoss';
+      buttonText = isPositive
+          ? TranslationUtils.trArgs(
+              'close_position_screen_close_with_profit',
+              {'amount': '+$formattedProfitLoss'},
+            )
+          : TranslationUtils.trArgs(
+              'close_position_screen_close_with_loss',
+              {'amount': formattedProfitLoss},
+            );
     }
 
     final color = isPositive ? CelTheme.tpGreen : CelTheme.slRed;
@@ -1851,7 +1888,7 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
                   if (favorites.isEmpty) {
                     return Center(
                       child: Text(
-                        'No favorites found',
+                        TranslationUtils.tr('celestial_trade_no_favorites_found'),
                         style: AppTextStyles.bodyText.copyWith(
                           color: CelTheme.subText(context),
                         ),
@@ -1967,7 +2004,8 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
                           borderRadius: BorderRadius.circular(5.r),
                         ),
                         child: Text(
-                          'Spread $spread',
+                          TranslationUtils.trArgs('celestial_trade_spread_value',
+                              {'spread': '$spread'}),
                           style: CelTheme.label(c).copyWith(fontSize: 10.sp),
                         ),
                       ),
@@ -2242,11 +2280,13 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
                         final errMsg = _c.errorMessage;
                         if (Get.isRegistered<AppNotificationController>()) {
                           Get.find<AppNotificationController>().showError(
-                            title: 'Error',
+                            title: TranslationUtils.tr('close_position_error'),
                             message:
                                 errMsg.isNotEmpty
                                     ? errMsg
-                                    : 'Failed to place order',
+                                    : TranslationUtils.tr(
+                                      'chart_order_place_failed',
+                                    ),
                           );
                         }
                       }
@@ -2265,7 +2305,9 @@ class _CelestialOrderTicketState extends State<CelestialOrderTicket> {
                       : Column(
                         children: [
                           Text(
-                            _isSell ? 'Sell' : 'Buy',
+                            _isSell
+                                ? TranslationUtils.tr('general_sell')
+                                : TranslationUtils.tr('general_buy'),
                             style: AppTextStyles.bodyText.copyWith(
                               color: Colors.white,
                               fontSize: 16.sp,

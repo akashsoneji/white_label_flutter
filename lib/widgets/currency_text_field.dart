@@ -106,6 +106,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class CurrencyTextField extends StatefulWidget {
   final TextEditingController? controller;
@@ -253,7 +254,8 @@ class _CurrencyTextFieldState extends State<CurrencyTextField> {
       decoration:
           widget.decoration ??
           InputDecoration(
-            labelText: widget.labelText ?? 'Amount',
+            labelText:
+                widget.labelText ?? TranslationUtils.tr('deposit_amount'),
             hintText: widget.hintText,
             contentPadding: EdgeInsets.symmetric(
               horizontal: 16.w,

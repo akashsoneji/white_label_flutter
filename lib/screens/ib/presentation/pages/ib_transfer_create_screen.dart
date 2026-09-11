@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ib/view_models/ib_transfer_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
@@ -41,13 +42,15 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
   void _submitTransfer() async {
     if (_selectedClientId == null) {
       CustomToastService.showError(
-        message: 'Please select a recipient client.',
+        message: TranslationUtils.tr('ib_transfer_select_recipient_error'),
       );
       return;
     }
     final amount = double.tryParse(_amountController.text);
     if (amount == null || amount <= 0) {
-      CustomToastService.showError(message: 'Please enter a valid amount.');
+      CustomToastService.showError(
+        message: TranslationUtils.tr('ib_transfer_enter_valid_amount'),
+      );
       return;
     }
     final initData = _controller.initData.value;
@@ -55,7 +58,9 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
         initData.minAmount != null &&
         amount < initData.minAmount!) {
       CustomToastService.showError(
-        message: 'Minimum transfer amount is \$${initData.minAmount}.',
+        message: TranslationUtils.trArgs('ib_transfer_minimum_amount_error', {
+          'amount': '${initData.minAmount}',
+        }),
       );
       return;
     }
@@ -63,7 +68,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
         initData.availableBalance != null &&
         amount > initData.availableBalance!) {
       CustomToastService.showError(
-        message: 'Amount exceeds available balance.',
+        message: TranslationUtils.tr('ib_transfer_amount_exceeds_balance'),
       );
       return;
     }
@@ -107,7 +112,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                 ),
               ),
               Text(
-                'Select Recipient',
+                TranslationUtils.tr('ib_transfer_select_recipient'),
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 18.sp,
@@ -121,7 +126,9 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                   style: TextStyle(color: AppColors.textPrimary),
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.search, color: AppColors.textGrey),
-                    hintText: 'Search by name or email...',
+                    hintText: TranslationUtils.tr(
+                      'ib_transfer_search_by_name_or_email',
+                    ),
                     hintStyle: TextStyle(color: AppColors.textGrey),
                     filled: true,
                     fillColor: AppColors.cardBackGround,
@@ -152,7 +159,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                   if (_controller.searchResults.isEmpty) {
                     return Center(
                       child: Text(
-                        'No clients found.',
+                        TranslationUtils.tr('ib_transfer_no_clients_found'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: AppColors.textGrey,
@@ -238,7 +245,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
         elevation: 0,
         leading: AppBackButton(onPressed: () => Get.back()),
         title: Text(
-          'New Transfer',
+          TranslationUtils.tr('ib_transfer_new_transfer'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -266,7 +273,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                 Icon(Icons.block, color: AppColors.error, size: 48.sp),
                 SizedBox(height: 12.h),
                 Text(
-                  'Transfers are currently disabled.',
+                  TranslationUtils.tr('ib_transfer_currently_disabled'),
                   style: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
                 ),
               ],
@@ -280,7 +287,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Form Fields
-              _buildLabel('Recipient Client *'),
+              _buildLabel(TranslationUtils.tr('ib_transfer_recipient_client')),
               GestureDetector(
                 onTap: _showClientSearchSheet,
                 child: Container(
@@ -297,7 +304,8 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _selectedClientName ?? 'Select a client',
+                        _selectedClientName ??
+                            TranslationUtils.tr('ib_transfer_select_a_client'),
                         style: TextStyle(
                           color:
                               _selectedClientName == null
@@ -318,8 +326,13 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
 
               _buildLabel(
                 data?.availableBalance != null
-                    ? 'Transfer Amount (USD) * (Available: \$${data!.availableBalance!.toStringAsFixed(2)})'
-                    : 'Transfer Amount (USD) *',
+                    ? TranslationUtils.trArgs(
+                        'ib_transfer_amount_usd_with_available',
+                        {
+                          'amount': data!.availableBalance!.toStringAsFixed(2),
+                        },
+                      )
+                    : TranslationUtils.tr('ib_transfer_amount_usd'),
               ),
               Row(
                 children: [
@@ -343,8 +356,13 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                               ),
                             );
                             CustomToastService.showError(
-                              message:
-                                  'Amount cannot exceed available balance of \$${data.availableBalance!.toStringAsFixed(2)}',
+                              message: TranslationUtils.trArgs(
+                                'ib_transfer_amount_cannot_exceed_balance',
+                                {
+                                  'amount': data.availableBalance!
+                                      .toStringAsFixed(2),
+                                },
+                              ),
                             );
                           }
                         }
@@ -414,7 +432,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
               ),
               SizedBox(height: 20.h),
 
-              _buildLabel('Note / Comment (Optional)'),
+              _buildLabel(TranslationUtils.tr('ib_transfer_note_comment')),
               TextFormField(
                 controller: _commentController,
                 maxLines: 3,
@@ -423,7 +441,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: AppColors.cardBackGround,
-                  hintText: 'Add a note for admin...',
+                  hintText: TranslationUtils.tr('ib_transfer_add_note_hint'),
                   hintStyle: TextStyle(color: AppColors.textGrey),
                   contentPadding: EdgeInsets.symmetric(
                     vertical: 14.h,
@@ -462,7 +480,7 @@ class _IbTransferCreateScreenState extends State<IbTransferCreateScreen> {
                           ),
                         )
                         : Text(
-                          'Submit Request',
+                          TranslationUtils.tr('id_upload_screen_submit_request'),
                           style: TextStyle(
                             color: AppColors.onColoredBackground,
                             fontSize: 17.sp,

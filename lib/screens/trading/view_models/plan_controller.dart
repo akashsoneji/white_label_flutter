@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:crm_app/screens/finance/data/repositories/finance_repository.dart';
+import 'package:crm_app/services/language_service.dart';
 
 // To parse this JSON data, do
 //
@@ -279,7 +280,7 @@ class PlanController extends GetxController {
               "Expected Map with 'data' but got ${data.runtimeType}";
         }
       } else {
-        errorMessage.value = response.message ?? "Failed to fetch plan";
+        errorMessage.value = response.message ?? TranslationUtils.tr('plan_controller_failed_to_fetch_plan');
       }
     } catch (e, t) {
       errorMessage.value = "Error: $e";

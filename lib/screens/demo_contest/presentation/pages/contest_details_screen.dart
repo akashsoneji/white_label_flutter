@@ -86,10 +86,10 @@ class _ContestDetailsScreenState extends State<ContestDetailsScreen> {
               ? AppColors.success
               : AppColors.warning;
       final statusLabel = ended
-          ? 'ENDED'
+          ? languageService.tr('dc_status_ended').toUpperCase()
           : live
-              ? '● LIVE'
-              : 'UPCOMING';
+              ? '● ${languageService.tr('dc_live')}'
+              : languageService.tr('dc_tab_upcoming').toUpperCase();
 
       return Scaffold(
         backgroundColor: AppColors.backgroundLight,
@@ -253,13 +253,19 @@ class _ContestDetailsScreenState extends State<ContestDetailsScreen> {
   ) async {
     if (!_acceptedTerms) {
       CustomToastService.showError(
-        message: 'Please accept the contest terms first.',
+        message: TranslationUtils.tr(
+          'contest_details_screen_please_accept_the_contest_terms_first',
+        ),
       );
       return;
     }
     final entry = await controller.joinContest(contest.id);
     if (entry != null) {
-      CustomToastService.showSuccess(message: 'Successfully joined!');
+      CustomToastService.showSuccess(
+        message: TranslationUtils.tr(
+          'contest_details_screen_successfully_joined',
+        ),
+      );
       Get.toNamed(
         AppPages.DEMO_CONTEST_DETAILS,
         arguments: contest.id,

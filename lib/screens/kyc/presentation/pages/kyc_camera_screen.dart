@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 import 'package:crm_app/screens/kyc/view_models/kyc_docs_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import '../../../../widgets/common_loading_widget.dart';
 
 class KycCameraScreen extends StatefulWidget {
@@ -73,7 +74,7 @@ class _KycCameraScreenState extends State<KycCameraScreen> {
             onPressed: _closeCamera,
           ),
           title:   Text(
-            'Take Document Photo',
+            TranslationUtils.tr('kyc_camera_screen_take_document_photo'),
             style: AppTextStyles.bodyText.copyWith(color: AppColors.whiteColor),
           ),
         ),

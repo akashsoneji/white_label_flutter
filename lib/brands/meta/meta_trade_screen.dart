@@ -193,7 +193,14 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 ),
               ),
               if (active.isEmpty)
-                SliverToBoxAdapter(child: _emptyState(context, 'No open positions'))
+                SliverToBoxAdapter(
+                  child: _emptyState(
+                    context,
+                    TranslationUtils.tr(
+                      'pmam_fund_manager_view_no_open_positions',
+                    ),
+                  ),
+                )
               else
                 SliverList.builder(
                   itemCount: active.length,
@@ -273,7 +280,12 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 ),
               ),
               if (pending.isEmpty)
-                SliverToBoxAdapter(child: _emptyState(context, 'No pending orders'))
+                SliverToBoxAdapter(
+                  child: _emptyState(
+                    context,
+                    TranslationUtils.tr('meta_trade_no_pending_orders'),
+                  ),
+                )
               else
                 SliverList.separated(
                   itemCount: pending.length,
@@ -322,7 +334,8 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                       height: 1.1,
                     )),
                 SizedBox(height: 2.h),
-                Text(_fmtPL(netPL) + ' USD',
+                Text(
+                    '${_fmtPL(netPL)} ${TranslationUtils.tr('common_currency_usd')}',
                     style: AppTextStyles.bodyText.copyWith(
                       color: plColor,
                       fontSize: 13.sp,
@@ -412,15 +425,16 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
       padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 6.h),
       child: Column(
         children: [
-          row('Balance:', group3(f(a?.balance))),
-          row('Equity:', group3(f(a?.equity))),
-          row('Margin:', group3(f(a?.margin))),
-          row('Free margin:', group3(f(a?.marginFree))),
-          row('Margin Level (%):',
+          row(TranslationUtils.tr('meta_trade_balance'), group3(f(a?.balance))),
+          row(TranslationUtils.tr('meta_trade_equity'), group3(f(a?.equity))),
+          row(TranslationUtils.tr('meta_trade_margin'), group3(f(a?.margin))),
+          row(TranslationUtils.tr('meta_trade_free_margin'),
+              group3(f(a?.marginFree))),
+          row(TranslationUtils.tr('meta_trade_margin_level_pct'),
               group3((a?.marginLevel ?? 0).toStringAsFixed(2))),
           // Floating P/L — colored per screenshot if positive/negative
           row(
-            'Floating P/L:',
+            TranslationUtils.tr('meta_trade_floating_pl'),
             _fmtPL(a?.profit ?? 0),
             color: plCol,
           ),
@@ -528,9 +542,9 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _actionButton(c, Icons.edit_note, 'Close',
+          _actionButton(c, Icons.edit_note, TranslationUtils.tr('bank_list_close'),
               () => onAction(_PosAction.close)),
-          _actionButton(c, Icons.add_circle_outline, 'Modify',
+          _actionButton(c, Icons.add_circle_outline, TranslationUtils.tr('meta_trade_modify'),
               () => onAction(_PosAction.modify)),
           _actionButton(c, Icons.add_box_outlined, Get.find<LanguageService>().tr('meta_trade_new_order'),
               () => onAction(_PosAction.newOrder)),
@@ -631,8 +645,10 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                cell('Open:', fmtOpenTime(p.openTime)),
-                cell('Swap:', _fmt(p.swap, 2)),
+                cell(TranslationUtils.tr('meta_history_screen_open'),
+                    fmtOpenTime(p.openTime)),
+                cell(TranslationUtils.tr('meta_history_screen_swap'),
+                    _fmt(p.swap, 2)),
               ],
             ),
           ),
@@ -802,28 +818,34 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                   decoration: BoxDecoration(
                       color: sub.withOpacity(.3),
                       borderRadius: BorderRadius.circular(2.r))),
-              _item('Close Positions', null, isHeader: true),
-              _item('All',
+              _item(TranslationUtils.tr('meta_trade_close_positions'), null,
+                  isHeader: true),
+              _item(TranslationUtils.tr('common_all'),
                   positions.isEmpty ? null : () => closeWith(positions)),
-              _item('With profit', () {
+              _item(TranslationUtils.tr('meta_trade_with_profit'), () {
                 final list =
                     positions.where((p) => p.profitLoss > 0).toList();
                 closeWith(list);
               }),
-              _item('With loss', () {
+              _item(TranslationUtils.tr('meta_trade_with_loss'), () {
                 final list =
                     positions.where((p) => p.profitLoss < 0).toList();
                 closeWith(list);
               }),
               if (dominantSym != null)
-                _item('All $dominantSym With Loss', () {
+                _item(
+                    TranslationUtils.trArgs(
+                      'meta_trade_all_symbol_with_loss',
+                      {'symbol': dominantSym},
+                    ), () {
                   final list = positions
                       .where((p) =>
                           p.symbol == dominantSym && p.profitLoss < 0)
                       .toList();
                   closeWith(list);
                 }),
-              _item('Cancel', () => Navigator.pop(ctx), isCancel: true),
+              _item(TranslationUtils.tr('account_management_cancel'),
+                  () => Navigator.pop(ctx), isCancel: true),
               SizedBox(height: 16.h + MediaQuery.of(ctx).padding.bottom),
             ],
           ),
@@ -905,7 +927,9 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                     Text(p.action,
                         style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 13.sp)),
                     const Spacer(),
-                    Text('${p.volume.toStringAsFixed(2)} lot',
+                    Text(
+                        TranslationUtils.trArgs('meta_trade_volume_lot',
+                            {'volume': p.volume.toStringAsFixed(2)}),
                         style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 13.sp)),
                   ],
                 ),
@@ -916,7 +940,8 @@ class _MetaTradeScreenState extends State<MetaTradeScreen> {
                 child: Row(
                   children: [
                     Text(
-                        'Price: ${_fmt(_d(p.entryPrice), p.digits)}',
+                        TranslationUtils.trArgs('meta_trade_price_value',
+                            {'price': _fmt(_d(p.entryPrice), p.digits)}),
                         style: AppTextStyles.bodyText.copyWith(color: sub, fontSize: 12.sp)),
                     if (_d(p.currentPrice) > 0) ...[
                       Text('  →  ${_fmt(_d(p.currentPrice), p.digits)}',
@@ -1564,9 +1589,13 @@ class _OrderTicketState extends State<_OrderTicket> {
             SizedBox(height: 10.h),
             Row(
               children: [
-                Expanded(child: _sideBtn(c, 'Sell', true)),
+                Expanded(
+                    child: _sideBtn(
+                        c, TranslationUtils.tr('general_sell'), true)),
                 SizedBox(width: 12.w),
-                Expanded(child: _sideBtn(c, 'Buy', false)),
+                Expanded(
+                    child: _sideBtn(
+                        c, TranslationUtils.tr('general_buy'), false)),
               ],
             ),
             SizedBox(height: 12.h),
@@ -1754,7 +1783,9 @@ class _OrderTicketState extends State<_OrderTicket> {
                               title: Get.find<LanguageService>().tr('meta_trade_error'),
                               message: errMsg.isNotEmpty
                                   ? errMsg
-                                  : 'Failed to place order',
+                                  : TranslationUtils.tr(
+                                      'chart_order_place_failed',
+                                    ),
                             );
                           }
                         }
@@ -1768,7 +1799,10 @@ class _OrderTicketState extends State<_OrderTicket> {
                           strokeWidth: 2, color: Colors.white))
                   : Column(
                       children: [
-                        Text(_isSell ? 'Sell' : 'Buy',
+                        Text(
+                            _isSell
+                                ? TranslationUtils.tr('general_sell')
+                                : TranslationUtils.tr('general_buy'),
                             style: AppTextStyles.bodyText.copyWith(
                                 color: Colors.white,
                                 fontSize: 16.sp,

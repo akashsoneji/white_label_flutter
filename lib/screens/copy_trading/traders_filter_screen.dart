@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:flutter_svg/svg.dart';
 
 class TradersFilterScreen extends StatefulWidget {
@@ -66,7 +67,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                       left: MediaQuery.of(context).size.width * 0.1,
                     ),
                     child:   Text(
-                      'Filters',
+                      TranslationUtils.tr('traders_filter_screen_filters'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
@@ -82,7 +83,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                       });
                     },
                     child:   Text(
-                      'Reset all',
+                      TranslationUtils.tr('trade_screen_reset_all'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14,
                         color: AppColors.textPrimary,
@@ -124,7 +125,9 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            '\$25.00 or more',
+                            TranslationUtils.tr(
+                              'traders_filter_screen_25_or_more',
+                            ),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16,
                               color: AppColors.textPrimary,
@@ -138,7 +141,9 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                             color: AppColors.whiteColor,
                             padding: EdgeInsets.symmetric(horizontal: 4),
                             child: Text(
-                              'Minimum Investment',
+                              TranslationUtils.tr(
+                                'trader_details_screen_minimum_investment',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 12,
                                 color: AppColors.textGrey,
@@ -172,7 +177,9 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Free 7-day trial',
+                              TranslationUtils.tr(
+                                'traders_filter_screen_free_day_trial',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -224,7 +231,9 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           Padding(
                             padding: EdgeInsets.all(10),
                             child: Text(
-                              'Minimum Expertise',
+                              TranslationUtils.tr(
+                                'traders_filter_screen_minimum_expertise',
+                              ),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -238,6 +247,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           _buildExpertiseRadioItem(
                             'Legend',
+                            'traders_filter_screen_legend',
                             SvgPicture.asset(
                               "assets/svg/copy_trading/filters/gold_legend.svg",
                               width: 20,
@@ -252,6 +262,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           _buildExpertiseRadioItem(
                             'Expert',
+                            'traders_filter_screen_expert',
                             SvgPicture.asset(
                               "assets/svg/copy_trading/filters/blue_expert.svg",
                               width: 20,
@@ -267,6 +278,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           _buildExpertiseRadioItem(
                             'High Achiever',
+                            'trader_card_high_achiever',
                             SvgPicture.asset(
                               "assets/svg/copy_trading/filters/green_highachiever.svg",
                               width: 20,
@@ -282,6 +294,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           _buildExpertiseRadioItem(
                             'Growing Talent',
+                            'traders_filter_screen_growing_talent',
                             SvgPicture.asset(
                               "assets/svg/copy_trading/filters/grey_growing_talent.svg",
                               width: 14,
@@ -297,6 +310,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                           ),
                           _buildExpertiseRadioItem(
                             'All',
+                            'common_all',
                             SvgPicture.asset(
                               "assets/svg/menu.svg",
                               width: 20,
@@ -341,7 +355,9 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
                       Navigator.pop(context);
                     },
                     child:   Text(
-                      'Show 108 Master Traders',
+                      TranslationUtils.tr(
+                        'traders_filter_screen_show_108_master_traders',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -360,6 +376,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
 
   Widget _buildExpertiseRadioItem(
     String title,
+    String labelKey,
     Widget icon,
     String groupValue,
     ValueChanged<String?> onChanged,
@@ -374,7 +391,7 @@ class _TradersFilterScreenState extends State<TradersFilterScreen> {
             SizedBox(width: 12),
             Expanded(
               child: Text(
-                title,
+                TranslationUtils.tr(labelKey),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,

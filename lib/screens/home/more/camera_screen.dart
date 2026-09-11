@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:camera/camera.dart';
 import 'package:crm_app/screens/kyc/view_models/id_scanner_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import '../../../widgets/common_loading_widget.dart';
 import 'package:crm_app/widgets/app_back_button.dart';
 
@@ -56,7 +57,9 @@ class CameraScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Obx(() => Text(
-                  'Position ${controller.currentSide.value} side of your ID within the frame',
+                  TranslationUtils.trArgs('camera_position_side_of_id', {
+                    'side': controller.currentSide.value,
+                  }),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontSize: 16,

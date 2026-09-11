@@ -379,7 +379,10 @@ class _BottomBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Close $displaySymbol positions?',
+                  TranslationUtils.trArgs(
+                    'iquote_chart_close_symbol_positions',
+                    {'symbol': displaySymbol},
+                  ),
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 16.sp,
@@ -388,7 +391,10 @@ class _BottomBar extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  '${targets.length} position(s) will be closed at market price.',
+                  TranslationUtils.trArgs(
+                    'iquote_chart_positions_will_be_closed',
+                    {'count': '${targets.length}'},
+                  ),
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13.sp,
@@ -413,7 +419,7 @@ class _BottomBar extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'Cancel',
+                            TranslationUtils.tr('account_management_cancel'),
                             style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 14.sp,
@@ -439,7 +445,7 @@ class _BottomBar extends StatelessWidget {
                             elevation: 0,
                           ),
                           child: Text(
-                            'Confirm',
+                            TranslationUtils.tr('confirm'),
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
@@ -588,7 +594,7 @@ class _BottomBar extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'VOLUME,LOT',
+                                  TranslationUtils.tr('iquote_chart_volume_lot_upper'),
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     color: palette.axisText,
@@ -701,7 +707,7 @@ class _BottomBar extends StatelessWidget {
                                         MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'Buy',
+                                        TranslationUtils.tr('general_buy'),
                                         style: TextStyle(
                                           color: Colors.white.withOpacity(0.85),
                                           fontSize: 10.sp,
@@ -744,7 +750,7 @@ class _BottomBar extends StatelessWidget {
                                         MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'Sell',
+                                        TranslationUtils.tr('general_sell'),
                                         style: TextStyle(
                                           color: Colors.white.withOpacity(0.85),
                                           fontSize: 10.sp,
@@ -857,7 +863,7 @@ class _PendingOrderButton extends StatelessWidget {
           Icon(Icons.edit_note_rounded, size: 22.sp, color: iconColor),
           SizedBox(height: 2.h),
           Text(
-            'Pending',
+            TranslationUtils.tr('iquote_position_pending'),
             style: TextStyle(
               fontSize: 10.sp,
               fontWeight: FontWeight.w600,
@@ -1015,17 +1021,17 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
   String _labelForOrderType(String t) {
     switch (t) {
       case 'buy_limit':
-        return 'Buy Limit';
+        return TranslationUtils.tr('general_buy_limit');
       case 'sell_limit':
-        return 'Sell Limit';
+        return TranslationUtils.tr('general_sell_limit');
       case 'buy_stop':
-        return 'Buy Stop';
+        return TranslationUtils.tr('general_buy_stop');
       case 'sell_stop':
-        return 'Sell Stop';
+        return TranslationUtils.tr('general_sell_stop');
       case 'buy_stop_limit':
-        return 'Buy Stop Limit';
+        return TranslationUtils.tr('general_buy_stop_limit');
       case 'sell_stop_limit':
-        return 'Sell Stop Limit';
+        return TranslationUtils.tr('general_sell_stop_limit');
       default:
         return t;
     }
@@ -1236,7 +1242,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
             ),
             SizedBox(height: 16.h),
             Text(
-              'Volume(Lot)',
+              TranslationUtils.tr('iquote_chart_volume_lot'),
               style: TextStyle(color: fieldText, fontSize: 13.sp),
             ),
             SizedBox(height: 8.h),
@@ -1379,7 +1385,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                           size: 18.sp, color: AppColors.textPrimary),
                       SizedBox(width: 10.w),
                       Text(
-                        'Order Type',
+                        TranslationUtils.tr('order_type'),
                         style: TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 13.sp,
@@ -1408,7 +1414,9 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
               if (_isStopLimit) ...[
                 // ── Stop-limit: two prices (Trigger + Limit), Vantage-style ──
                 Text(
-                  'When Price Is Trigger Price',
+                  TranslationUtils.tr(
+                    'iquote_chart_when_price_is_trigger_price',
+                  ),
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 14.sp,
@@ -1446,7 +1454,7 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                 ),
                 SizedBox(height: 12.h),
                 Text(
-                  'When Price Is Limit Price',
+                  TranslationUtils.tr('iquote_chart_when_price_is_limit_price'),
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 14.sp,
@@ -1491,13 +1499,17 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                   String? error;
                   if (_orderType == 'buy_stop_limit') {
                     if (ask > 0 && _trigger <= ask) {
-                      error =
-                          'Trigger price should be above ${ask.toStringAsFixed(dd)}';
+                      error = TranslationUtils.trArgs(
+                        'iquote_chart_trigger_price_should_be_above',
+                        {'price': ask.toStringAsFixed(dd)},
+                      );
                     }
                   } else if (_orderType == 'sell_stop_limit') {
                     if (bid > 0 && _trigger >= bid) {
-                      error =
-                          'Trigger price should be below ${bid.toStringAsFixed(dd)}';
+                      error = TranslationUtils.trArgs(
+                        'iquote_chart_trigger_price_should_be_below',
+                        {'price': bid.toStringAsFixed(dd)},
+                      );
                     }
                   }
                   if (error == null) return const SizedBox.shrink();
@@ -1638,8 +1650,12 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                               widget.ctrl.lastAsk.value ??
                               widget.ctrl.lastBid.value ??
                               0;
-                          final sideLabel = side == 'buy' ? 'Buy' : 'Sell';
-                          final kindLabel = 'Market';
+                          final sideLabel = side == 'buy'
+                              ? TranslationUtils.tr('general_buy')
+                              : TranslationUtils.tr('general_sell');
+                          final kindLabel = TranslationUtils.tr(
+                            'iquote_tab_market',
+                          );
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -1725,7 +1741,14 @@ class _NewOrderSheetState extends State<_NewOrderSheet> {
                                       ),
                                     ),
                                     child: Text(
-                                      'Place ${_labelForOrderType(_orderType)} order',
+                                      TranslationUtils.trArgs(
+                                        'iquote_chart_place_order_type',
+                                        {
+                                          'type': _labelForOrderType(
+                                            _orderType,
+                                          ),
+                                        },
+                                      ),
                                       key: ValueKey(_orderType),
                                       style: TextStyle(
                                         fontSize: 14.sp,
@@ -1999,9 +2022,9 @@ enum _WatchSort { name, change, spread }
 
 extension on _WatchSort {
   String get label => switch (this) {
-    _WatchSort.name => 'Name (A–Z)',
-    _WatchSort.change => 'Change %',
-    _WatchSort.spread => 'Spread',
+    _WatchSort.name => TranslationUtils.tr('iquote_chart_sort_name_az'),
+    _WatchSort.change => TranslationUtils.tr('iquote_chart_sort_change_pct'),
+    _WatchSort.spread => TranslationUtils.tr('general_spread'),
   };
 }
 
@@ -2073,7 +2096,10 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
       SnackBar(
         backgroundColor: const Color(0xFF1F2937),
         content: Text(
-          'Removed $sym from favorites',
+          TranslationUtils.trArgs(
+            'iquote_chart_removed_from_favorites',
+            {'symbol': sym},
+          ),
           style: TextStyle(color: Colors.white, fontSize: 13.sp),
         ),
         duration: const Duration(seconds: 3),
@@ -2136,7 +2162,7 @@ class _FavoritesWatchlistSheetState extends State<_FavoritesWatchlistSheet> {
                 ),
                 SizedBox(width: 6.w),
                 Text(
-                  'Watchlist',
+                  TranslationUtils.tr('celestial_watchlist_title'),
                   style: TextStyle(
                     color: isDark ? Colors.white : Colors.black,
                     fontSize: 17.sp,
@@ -2373,7 +2399,7 @@ class _SortMenu extends StatelessWidget {
             Icon(Icons.sort, size: 16.sp, color: palette.axisText),
             SizedBox(width: 4.w),
             Text(
-              'Sort',
+              TranslationUtils.tr('common_sort'),
               style: TextStyle(
                 color: isDark ? Colors.white : Colors.black,
                 fontSize: 12.sp,
@@ -2423,7 +2449,11 @@ class _EmptyWatchlist extends StatelessWidget {
             ),
             SizedBox(height: 14.h),
             Text(
-              hasAnyFavorites ? 'No matches' : 'No favorites yet',
+              hasAnyFavorites
+                  ? TranslationUtils.tr('iquote_chart_no_matches')
+                  : TranslationUtils.tr(
+                    'celestial_watchlist_screen_no_favorites_yet',
+                  ),
               style: TextStyle(
                 color: isDark ? Colors.white : Colors.black,
                 fontSize: 15.sp,
@@ -2433,8 +2463,8 @@ class _EmptyWatchlist extends StatelessWidget {
             SizedBox(height: 6.h),
             Text(
               hasAnyFavorites
-                  ? 'Try a different search or category.'
-                  : 'Tap the star on any symbol in Markets to add it to your watchlist.',
+                  ? TranslationUtils.tr('iquote_chart_try_different_search')
+                  : TranslationUtils.tr('iquote_chart_tap_star_hint'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: palette.axisText,
@@ -2803,7 +2833,9 @@ class _OrderTypePickerSheet extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Select Order Type',
+                  TranslationUtils.tr(
+                    'enhanced_pending_order_content_select_order_type',
+                  ),
                   style: TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 15.sp,
@@ -2851,7 +2883,7 @@ class _OrderTypePickerSheet extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: Text(
-                              '2 prices',
+                              TranslationUtils.tr('iquote_chart_2_prices'),
                               style: TextStyle(
                                 color: AppColors.primary,
                                 fontSize: 11.sp,

@@ -8,6 +8,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/controllers/copy_trading/copy_trading_masters_controller.dart';
 import 'package:crm_app/screens/home/more/copytrading/master_details_screen.dart';
+import 'package:crm_app/services/language_service.dart';
 
 /// Explore Masters — Elite Trading Pro Redesign.
 ///
@@ -52,7 +53,7 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
         scrolledUnderElevation: 0.5,
         titleSpacing: 0,
         title: Text(
-          'Explore Masters',
+          TranslationUtils.tr('explore_masters_screen_explore_masters'),
           style: AppTextStyles.heading.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w800,
@@ -74,7 +75,7 @@ class _ExploreMastersScreenState extends State<ExploreMastersScreen> {
                 size: 18.sp,
               ),
             ),
-            tooltip: 'Refresh',
+            tooltip: TranslationUtils.tr('common_refresh'),
             onPressed: () {
               HapticFeedback.lightImpact();
               controller.refreshMasters();
@@ -237,7 +238,7 @@ class _HeroPerformanceBanner extends StatelessWidget {
                           ),
                           SizedBox(width: 5.w),
                           Text(
-                            'COPY TRADING HUB',
+                            TranslationUtils.tr('copy_trading_hub_banner_title'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 9.5.sp,
                               fontWeight: FontWeight.w800,
@@ -272,7 +273,7 @@ class _HeroPerformanceBanner extends StatelessWidget {
                       ),
                       SizedBox(width: 5.w),
                       Text(
-                        'Live Pool',
+                        TranslationUtils.tr('copy_trading_live_pool'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 9.5.sp,
                           fontWeight: FontWeight.w700,
@@ -295,7 +296,7 @@ class _HeroPerformanceBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total Community AUM',
+                      TranslationUtils.tr('copy_trading_total_community_aum'),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: Colors.white.withValues(alpha: 0.75),
@@ -328,7 +329,7 @@ class _HeroPerformanceBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'Avg Return',
+                        TranslationUtils.tr('copy_trading_avg_return'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 9.sp,
                           color: Colors.white.withValues(alpha: 0.7),
@@ -379,7 +380,7 @@ class _HeroPerformanceBanner extends StatelessWidget {
                 children: [
                   _heroSubItem(
                     icon: Icons.groups_rounded,
-                    label: 'Available Masters',
+                    label: TranslationUtils.tr('copy_trading_available_masters'),
                     value: '${all.length}',
                   ),
                   Container(
@@ -389,7 +390,7 @@ class _HeroPerformanceBanner extends StatelessWidget {
                   ),
                   _heroSubItem(
                     icon: Icons.verified_user_rounded,
-                    label: 'Enrolled By You',
+                    label: TranslationUtils.tr('copy_trading_enrolled_by_you'),
                     value: '$enrolled',
                     highlight: enrolled > 0,
                   ),
@@ -456,7 +457,7 @@ class _SearchBarSection extends StatelessWidget {
           fontSize: 13.sp,
         ),
         decoration: InputDecoration(
-          hintText: 'Search master by name, code or strategy...',
+          hintText: TranslationUtils.tr('copy_trading_search_master_hint'),
           hintStyle: AppTextStyles.bodyText.copyWith(
             color: AppColors.textGrey,
             fontSize: 12.5.sp,
@@ -509,7 +510,7 @@ class _SegmentedFilterTabs extends StatelessWidget {
           children: [
             Expanded(
               child: _segmentItem(
-                label: 'All Masters',
+                label: TranslationUtils.tr('copy_trading_all_masters'),
                 count: allCount,
                 isSelected: active == MasterFilterTab.all,
                 onTap: () => controller.selectedFilter.value = MasterFilterTab.all,
@@ -517,7 +518,7 @@ class _SegmentedFilterTabs extends StatelessWidget {
             ),
             Expanded(
               child: _segmentItem(
-                label: 'Enrolled',
+                label: TranslationUtils.tr('dc_enrolled'),
                 count: enrolledCount,
                 isSelected: active == MasterFilterTab.enrolled,
                 onTap: () => controller.selectedFilter.value = MasterFilterTab.enrolled,
@@ -525,7 +526,7 @@ class _SegmentedFilterTabs extends StatelessWidget {
             ),
             Expanded(
               child: _segmentItem(
-                label: 'Discover',
+                label: TranslationUtils.tr('copy_trading_discover'),
                 count: discoverCount,
                 isSelected: active == MasterFilterTab.discover,
                 onTap: () => controller.selectedFilter.value = MasterFilterTab.discover,
@@ -604,6 +605,25 @@ class _SegmentedFilterTabs extends StatelessWidget {
 
 // ─────────────────────────── 4. FILTER CHIPS STRIP ───────────────────────────
 
+/// Maps a raw filter value (kept untranslated because it drives the filtering
+/// logic) onto its localized display label.
+String _filterLabel(String raw) => switch (raw) {
+      'All Risks' => TranslationUtils.tr('copy_trading_all_risks'),
+      'Low (1-2)' => TranslationUtils.tr('copy_trading_risk_low'),
+      'Medium (3)' => TranslationUtils.tr('copy_trading_risk_medium'),
+      'High (4-5)' => TranslationUtils.tr('copy_trading_risk_high'),
+      'All Time' => TranslationUtils.tr('ibm_range_all_time'),
+      'Last 7 Days' => TranslationUtils.tr('ibm_last_7_days'),
+      'Last 30 Days' => TranslationUtils.tr('ibm_last_30_days'),
+      'Last 90 Days' => TranslationUtils.tr('copy_trading_last_90_days'),
+      'Last Year' => TranslationUtils.tr('copy_trading_last_year'),
+      'Gain %' => TranslationUtils.tr('copy_trading_gain_percent'),
+      'AUM' => TranslationUtils.tr('copy_trading_aum'),
+      'Copiers' => TranslationUtils.tr('my_plans_tab_copiers'),
+      'Active Days' => TranslationUtils.tr('copy_trading_active_days'),
+      _ => raw,
+    };
+
 class _FilterChipsStrip extends StatelessWidget {
   final CopyTradingMastersController controller;
   const _FilterChipsStrip({required this.controller});
@@ -618,21 +638,23 @@ class _FilterChipsStrip extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           children: [
             _chip(
-              label: controller.riskFilter.value,
+              label: _filterLabel(controller.riskFilter.value),
               icon: Icons.shield_rounded,
               isActive: controller.riskFilter.value != 'All Risks',
               onTap: () => _showRiskSheet(context, controller),
             ),
             SizedBox(width: 8.w),
             _chip(
-              label: controller.timeFilter.value,
+              label: _filterLabel(controller.timeFilter.value),
               icon: Icons.timelapse_rounded,
               isActive: controller.timeFilter.value != 'All Time',
               onTap: () => _showTimeSheet(context, controller),
             ),
             SizedBox(width: 8.w),
             _chip(
-              label: 'Sort: ${controller.sortBy.value}',
+              label: TranslationUtils.trArgs('copy_trading_sort_value', {
+                'value': _filterLabel(controller.sortBy.value),
+              }),
               icon: Icons.tune_rounded,
               isActive: controller.sortBy.value != 'Gain %',
               onTap: () => _showSortSheet(context, controller),
@@ -698,7 +720,7 @@ class _FilterChipsStrip extends StatelessWidget {
   void _showRiskSheet(BuildContext context, CopyTradingMastersController c) {
     _showOptionsSheet(
       context: context,
-      title: 'Filter by Risk Level',
+      title: TranslationUtils.tr('copy_trading_filter_by_risk_level'),
       options: ['All Risks', 'Low (1-2)', 'Medium (3)', 'High (4-5)'],
       current: c.riskFilter.value,
       onSelect: (v) => c.riskFilter.value = v,
@@ -708,7 +730,7 @@ class _FilterChipsStrip extends StatelessWidget {
   void _showTimeSheet(BuildContext context, CopyTradingMastersController c) {
     _showOptionsSheet(
       context: context,
-      title: 'Performance Timeframe',
+      title: TranslationUtils.tr('copy_trading_performance_timeframe'),
       options: [
         'All Time',
         'Last 7 Days',
@@ -724,7 +746,7 @@ class _FilterChipsStrip extends StatelessWidget {
   void _showSortSheet(BuildContext context, CopyTradingMastersController c) {
     _showOptionsSheet(
       context: context,
-      title: 'Sort Masters By',
+      title: TranslationUtils.tr('copy_trading_sort_masters_by'),
       options: ['Gain %', 'AUM', 'Copiers', 'Active Days'],
       current: c.sortBy.value,
       onSelect: (v) => c.sortBy.value = v,
@@ -791,7 +813,7 @@ class _FilterChipsStrip extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              o,
+                              _filterLabel(o),
                               style: AppTextStyles.bodyText.copyWith(
                                 fontSize: 13.5.sp,
                                 fontWeight: o == current
@@ -999,7 +1021,9 @@ class _ProMasterCard extends StatelessWidget {
                               ),
                               SizedBox(width: 6.w),
                               Text(
-                                '•  ${activeDays}D active',
+                                TranslationUtils.trArgs('copy_trading_days_active', {
+                                  'days': '$activeDays',
+                                }),
                                 style: AppTextStyles.bodyText.copyWith(
                                   fontSize: 11.sp,
                                   color: AppColors.textGrey,
@@ -1022,7 +1046,9 @@ class _ProMasterCard extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        'RISK $riskScore',
+                        TranslationUtils.trArgs('copy_trading_risk_score_pill', {
+                          'score': '$riskScore',
+                        }),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w800,
@@ -1064,7 +1090,7 @@ class _ProMasterCard extends StatelessWidget {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            'Total Gain (ROI)',
+                            TranslationUtils.tr('copy_trading_total_gain_roi'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 11.5.sp,
                               color: AppColors.textGrey,
@@ -1094,7 +1120,7 @@ class _ProMasterCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _statPill(
-                        label: 'Total P&L',
+                        label: TranslationUtils.tr('copy_trading_total_pnl'),
                         value: pnlText,
                         valueColor: pnlColor,
                       ),
@@ -1102,7 +1128,7 @@ class _ProMasterCard extends StatelessWidget {
                     SizedBox(width: 8.w),
                     Expanded(
                       child: _statPill(
-                        label: 'Max Drawdown',
+                        label: TranslationUtils.tr('copy_trading_max_drawdown'),
                         value: drawdownText,
                         valueColor: const Color(0xFFEF4444),
                       ),
@@ -1110,7 +1136,7 @@ class _ProMasterCard extends StatelessWidget {
                     SizedBox(width: 8.w),
                     Expanded(
                       child: _statPill(
-                        label: 'Min Invest',
+                        label: TranslationUtils.tr('copy_trading_min_invest'),
                         value: minInvestText,
                         valueColor: AppColors.textPrimary,
                       ),
@@ -1129,7 +1155,9 @@ class _ProMasterCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(6.r),
                       ),
                       child: Text(
-                        'Fee: $commissionPct',
+                        TranslationUtils.trArgs('copy_trading_fee_value', {
+                          'value': commissionPct,
+                        }),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 10.5.sp,
                           color: AppColors.textGrey,
@@ -1145,7 +1173,9 @@ class _ProMasterCard extends StatelessWidget {
                     ),
                     SizedBox(width: 3.w),
                     Text(
-                      '$totalCopiers copiers',
+                      TranslationUtils.trArgs('copy_trading_count_copiers', {
+                        'count': '$totalCopiers',
+                      }),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 11.sp,
                         color: AppColors.textGrey,
@@ -1168,7 +1198,9 @@ class _ProMasterCard extends StatelessWidget {
                         minimumSize: Size(0, 34.h),
                       ),
                       child: Text(
-                        hasPlan ? 'Copy Strategy' : 'No Plan',
+                        hasPlan
+                            ? TranslationUtils.tr('copy_trading_copy_strategy')
+                            : TranslationUtils.tr('copy_trading_no_plan'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w800,
@@ -1360,8 +1392,10 @@ class _NoSearchMatchesState extends StatelessWidget {
           SizedBox(height: 14.h),
           Text(
             query.isEmpty
-                ? 'Not Enrolled In Master'
-                : 'No Masters Match "$query"',
+                ? TranslationUtils.tr('copy_trading_not_enrolled_in_master')
+                : TranslationUtils.trArgs('copy_trading_no_masters_match', {
+                    'query': query,
+                  }),
             textAlign: TextAlign.center,
             style: AppTextStyles.subheading.copyWith(
               color: AppColors.textPrimary,
@@ -1378,7 +1412,7 @@ class _NoSearchMatchesState extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),
-            child: const Text('Explore All Masters'),
+            child: Text(TranslationUtils.tr('copy_trading_explore_all_masters')),
           ),
         ],
       ),
@@ -1409,7 +1443,7 @@ class _ErrorState extends StatelessWidget {
             ),
             SizedBox(height: 14.h),
             Text(
-              'Failed to Load Masters',
+              TranslationUtils.tr('copy_trading_failed_to_load_masters'),
               style: AppTextStyles.heading.copyWith(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w800,
@@ -1434,7 +1468,7 @@ class _ErrorState extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10.r),
                 ),
               ),
-              label: const Text('Retry'),
+              label: Text(TranslationUtils.tr('common_retry')),
             ),
           ],
         ),

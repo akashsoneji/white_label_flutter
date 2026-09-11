@@ -84,14 +84,14 @@ class _DemoContestScreenState extends State<DemoContestScreen> with SingleTicker
                 child: Row(
                   children: [
                     _PillTab(
-                      title: 'All Contests',
+                      title: languageService.tr('dc_all_contests'),
                       count: allContests.length,
                       isSelected: _tabController.index == 0,
                       onTap: () => setState(() => _tabController.animateTo(0)),
                     ),
                     SizedBox(width: 8.w),
                     _PillTab(
-                      title: 'My Enrollments',
+                      title: languageService.tr('dc_my_enrollments'),
                       count: myEnrollments.length,
                       isSelected: _tabController.index == 1,
                       onTap: () => setState(() => _tabController.animateTo(1)),
@@ -183,7 +183,7 @@ class _ContestList extends StatelessWidget {
       return CustomScrollView(
         slivers: [
           SliverFillRemaining(
-            child: Center(child: Text("No contests available.", style: AppTextStyles.bodyText)),
+            child: Center(child: Text(languageService.tr('dc_no_contests_available'), style: AppTextStyles.bodyText)),
           ),
         ],
       );
@@ -312,7 +312,7 @@ class _ContestCard extends StatelessWidget {
                             Icon(Icons.check_circle, color: const Color(0xFF2E7D32), size: 12.sp),
                             SizedBox(width: 4.w),
                             Text(
-                              'Enrolled (${contest.myEnrollmentsCount}/${contest.maxParticipations})',
+                              '${languageService.tr('dc_enrolled')} (${contest.myEnrollmentsCount}/${contest.maxParticipations})',
                               style: TextStyle(color: const Color(0xFF2E7D32), fontSize: 10.sp, fontWeight: FontWeight.w600),
                             ),
                           ],
@@ -338,15 +338,15 @@ class _ContestCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Expanded(child: _InfoCell(label: 'STARTING\nBALANCE', value: '\$${contest.startingBalance.toStringAsFixed(0)}', iconData: Icons.account_balance_wallet, iconBg: const Color(0xFFF3E5F5), iconColor: const Color(0xFF7B1FA2))),
-                          Expanded(child: _InfoCell(label: 'MAX\nLEVERAGE', value: contest.tradingMaxLeverage.isNotEmpty ? contest.tradingMaxLeverage : '-', iconData: Icons.bolt, iconBg: const Color(0xFFF3E5F5), iconColor: const Color(0xFF7B1FA2))),
+                          Expanded(child: _InfoCell(label: languageService.tr('dc_starting_balance_caps'), value: '\$${contest.startingBalance.toStringAsFixed(0)}', iconData: Icons.account_balance_wallet, iconBg: const Color(0xFFF3E5F5), iconColor: const Color(0xFF7B1FA2))),
+                          Expanded(child: _InfoCell(label: languageService.tr('dc_max_leverage_caps'), value: contest.tradingMaxLeverage.isNotEmpty ? contest.tradingMaxLeverage : '-', iconData: Icons.bolt, iconBg: const Color(0xFFF3E5F5), iconColor: const Color(0xFF7B1FA2))),
                         ],
                       ),
                       SizedBox(height: 12.h),
                       Row(
                         children: [
-                          Expanded(child: _InfoCell(label: 'WIN CRITERIA', value: contest.rankingBy.isNotEmpty ? contest.rankingBy.replaceAll('_', ' ') : 'Highest Return %', iconData: Icons.emoji_events, iconBg: const Color(0xFFF3E5F5), iconColor: const Color(0xFF7B1FA2))),
-                          Expanded(child: _InfoCell(label: 'ENTRY FEE', value: contest.enrollmentType == 'free' ? 'FREE' : '\$${contest.entryFee}', iconData: Icons.card_giftcard, iconBg: const Color(0xFFE8F5E9), iconColor: const Color(0xFF2E7D32), valueColor: const Color(0xFF10B981))),
+                          Expanded(child: _InfoCell(label: languageService.tr('dc_win_criteria'), value: contest.rankingBy.isNotEmpty ? contest.rankingBy.replaceAll('_', ' ') : languageService.tr('dc_highest_return_percent'), iconData: Icons.emoji_events, iconBg: const Color(0xFFF3E5F5), iconColor: const Color(0xFF7B1FA2))),
+                          Expanded(child: _InfoCell(label: languageService.tr('dc_entry_fee'), value: contest.enrollmentType == 'free' ? languageService.tr('dc_free').toUpperCase() : '\$${contest.entryFee}', iconData: Icons.card_giftcard, iconBg: const Color(0xFFE8F5E9), iconColor: const Color(0xFF2E7D32), valueColor: const Color(0xFF10B981))),
                         ],
                       ),
                       SizedBox(height: 12.h),
@@ -358,7 +358,7 @@ class _ContestCard extends StatelessWidget {
                             child: Icon(Icons.emoji_events, color: const Color(0xFF7B1FA2), size: 14.sp),
                           ),
                           SizedBox(width: 10.w),
-                          Text('Top Prize ', style: TextStyle(fontSize: 11.sp, color: AppColors.textPrimary)),
+                          Text('${languageService.tr('dc_top_prize')} ', style: TextStyle(fontSize: 11.sp, color: AppColors.textPrimary)),
                           Text('\$${topPrize.toStringAsFixed(0)}', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
                         ],
                       ),
@@ -374,7 +374,7 @@ class _ContestCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('STARTS', style: TextStyle(fontSize: 10.sp, color: AppColors.textPrimary, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                        Text(languageService.tr('dc_starts').toUpperCase(), style: TextStyle(fontSize: 10.sp, color: AppColors.textPrimary, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                         SizedBox(height: 4.h),
                         Text(dateFormat.format(contest.startsAt), style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.bold)),
                       ],
@@ -391,7 +391,7 @@ class _ContestCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('ENDS', style: TextStyle(fontSize: 10.sp, color: AppColors.textPrimary, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                        Text(languageService.tr('dc_ends').toUpperCase(), style: TextStyle(fontSize: 10.sp, color: AppColors.textPrimary, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                         SizedBox(height: 4.h),
                         Text(dateFormat.format(contest.endsAt), style: TextStyle(color: AppColors.textPrimary, fontSize: 13.sp, fontWeight: FontWeight.bold)),
                       ],
@@ -405,7 +405,7 @@ class _ContestCard extends StatelessWidget {
                     children: [
                       Icon(Icons.language, size: 14.sp, color: isDark ? Colors.white60 : Colors.grey.shade600),
                       SizedBox(width: 4.w),
-                      Text('Dubai Time (UTC+4)', style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey)),
+                      Text(languageService.tr('dc_dubai_time'), style: TextStyle(fontSize: 12.sp, color: AppColors.textGrey)),
                     ],
                   ),
                 ),
@@ -437,11 +437,11 @@ class _ContestCard extends StatelessWidget {
                         Icon(contest.isEnrolled ? Icons.show_chart : Icons.arrow_forward, color: isDark ? AppColors.pureBlack : Colors.white, size: 18.sp),
                         SizedBox(width: 8.w),
                         Text(
-                          contest.isEnrolled 
-                              ? 'View Dashboard' 
-                              : (contest.maxParticipations > 1 
-                                  ? 'Participate Now (${contest.myEnrollmentsCount}/${contest.maxParticipations})' 
-                                  : 'Participate Now'),
+                          contest.isEnrolled
+                              ? languageService.tr('dc_view_dashboard')
+                              : (contest.maxParticipations > 1
+                                  ? '${languageService.tr('dc_participate_now')} (${contest.myEnrollmentsCount}/${contest.maxParticipations})'
+                                  : languageService.tr('dc_participate_now')),
                           style: TextStyle(color: isDark ? AppColors.pureBlack : Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
                         ),
                         if (contest.isEnrolled)

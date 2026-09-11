@@ -150,7 +150,7 @@ class _ContestList extends StatelessWidget {
                 );
               } else if (!c.acceptingEntries) {
                 CustomToastService.showInfo(
-                  message: 'This contest has ended.',
+                  message: TranslationUtils.tr('dc_contest_has_ended'),
                 );
               } else {
                 Get.toNamed(

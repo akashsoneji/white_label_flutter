@@ -322,7 +322,7 @@ class _RedeemProductHeader extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  '${TradeWinFormat.points(pointsCost)} · $valueText value',
+                  '${TradeWinFormat.points(pointsCost)} · $valueText ${languageService.tr('tw_value_suffix')}',
                   style: AppTextStyles.subheading.copyWith(fontSize: 12.sp),
                 ),
               ],

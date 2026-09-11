@@ -6,6 +6,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/models/app_notification.dart';
 import 'package:crm_app/utils/precision_helper.dart';
+import 'package:crm_app/services/language_service.dart';
 
 /// Individual notification widget for app-wide notifications
 /// Supports both generic messages and trading notifications
@@ -28,7 +29,9 @@ class AppNotificationItem extends StatelessWidget {
   /// Build trading notification (for chart screen compatibility)
   Widget _buildTradingNotification() {
     final typeText =
-        notification.tradeType?.toLowerCase() == 'buy' ? 'Buy' : 'Sell';
+        notification.tradeType?.toLowerCase() == 'buy'
+            ? TranslationUtils.tr('general_buy')
+            : TranslationUtils.tr('general_sell');
 
     // Determine background color based on status
     Color backgroundColor;
@@ -44,12 +47,12 @@ class AppNotificationItem extends StatelessWidget {
       case NotificationStatus.success:
         backgroundColor = AppColors.primary;
         leftBorderColor = AppColors.success;
-        statusText = 'Done';
+        statusText = TranslationUtils.tr('navigation_done');
         break;
       case NotificationStatus.error:
         backgroundColor = AppColors.primary;
         leftBorderColor = AppColors.error;
-        statusText = 'Error';
+        statusText = TranslationUtils.tr('close_position_error');
         break;
     }
 

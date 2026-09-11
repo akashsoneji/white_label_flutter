@@ -183,7 +183,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                       Padding(
                         padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 0.h),
                         child: Text(
-                          'Quick Shortcuts',
+                          TranslationUtils.tr('iquote_home_quick_shortcuts'),
                           style: AppTextStyles.bodyText.copyWith(
                             color: textPrimary,
                             fontSize: 15.sp,
@@ -309,7 +309,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Favourites',
+                              TranslationUtils.tr('iquote_home_favourites'),
                               style: AppTextStyles.bodyText.copyWith(
                                 color: textPrimary,
                                 fontSize: 15.sp,
@@ -371,7 +371,7 @@ class _IquoteHomeScreenState extends State<IquoteHomeScreen> {
           child: Padding(
             padding: EdgeInsets.all(20.h),
             child: Text(
-              'No instruments available',
+              TranslationUtils.tr('iquote_home_no_instruments_available'),
               style: AppTextStyles.bodyText.copyWith(
                 color: textSecondary,
                 fontSize: 12.sp,

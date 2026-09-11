@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class SubscriptionSetupScreen extends StatefulWidget {
   const SubscriptionSetupScreen({super.key});
@@ -30,9 +31,21 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
 
   // Preset data
   final List<Map<String, String>> _presets = [
-    {'label': 'Equal x1', 'required': r'$47', 'volume': 'x1 trade volume'},
-    {'label': 'Equal x2', 'required': r'$94', 'volume': 'x2 trade volume'},
-    {'label': 'Triple x3', 'required': r'$141', 'volume': 'x3 trade volume'},
+    {
+      'labelKey': 'subscription_setup_screen_equal_x1',
+      'required': r'$47',
+      'volumeKey': 'subscription_setup_screen_x1_trade_volume',
+    },
+    {
+      'labelKey': 'subscription_setup_screen_equal_x2',
+      'required': r'$94',
+      'volumeKey': 'subscription_setup_screen_x2_trade_volume',
+    },
+    {
+      'labelKey': 'subscription_setup_screen_triple_x3',
+      'required': r'$141',
+      'volumeKey': 'subscription_setup_screen_x3_trade_volume',
+    },
   ];
 
   @override
@@ -45,7 +58,10 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
   // Computed summary values
   String get _summaryProportion {
     if (_isCustomMode) return _customValueCtrl.text.trim();
-    return _presets[_selectedProportion ?? 0]['label'] ?? 'Equal x1';
+    return TranslationUtils.tr(
+      _presets[_selectedProportion ?? 0]['labelKey'] ??
+          'subscription_setup_screen_equal_x1',
+    );
   }
 
   String get _summaryRequired {
@@ -89,7 +105,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          'Subscription Setup',
+          TranslationUtils.tr('subscription_setup_screen_subscription_setup'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -122,7 +138,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Funds In Wallet',
+                    TranslationUtils.tr(
+                      'subscription_setup_screen_funds_in_wallet',
+                    ),
                     style: AppTextStyles.bodyText.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   Row(
@@ -133,7 +151,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                       ),
                       SizedBox(width: 8),
                       Text(
-                        '50.01 USD',
+                        TranslationUtils.tr('change_proportion_screen_50_01_usd'),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -156,7 +174,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Copy Proportion',
+                        TranslationUtils.tr(
+                          'change_proportion_screen_copy_proportion',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -170,7 +190,13 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                           });
                         },
                         child: Text(
-                          _isCustomMode ? '< Default' : 'Custom >',
+                          _isCustomMode
+                              ? TranslationUtils.tr(
+                                'subscription_setup_screen_default',
+                              )
+                              : TranslationUtils.tr(
+                                'subscription_setup_screen_custom',
+                              ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 13,
                             color: AppColors.primary,
@@ -212,7 +238,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    _presets[i]['label']!,
+                                    TranslationUtils.tr(
+                                      _presets[i]['labelKey']!,
+                                    ),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
@@ -224,7 +252,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                   ),
                                   SizedBox(height: 4),
                                   Text(
-                                    '${_presets[i]['required']!} required',
+                                    '${_presets[i]['required']!} ${TranslationUtils.tr('subscription_setup_screen_required')}',
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
@@ -236,7 +264,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                                   ),
                                   SizedBox(height: 8),
                                   Text(
-                                    _presets[i]['volume']!,
+                                    TranslationUtils.tr(
+                                      _presets[i]['volumeKey']!,
+                                    ),
                                     style: AppTextStyles.bodyText.copyWith(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w400,
@@ -259,7 +289,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                   // Custom mode: text field
                   if (_isCustomMode) ...[
                     _buildLabeledField(
-                      label: 'Enter Value',
+                      label: TranslationUtils.tr(
+                        'change_proportion_screen_enter_value',
+                      ),
                       controller: _customValueCtrl,
                       keyboardType: TextInputType.text,
                     ),
@@ -267,7 +299,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                     Padding(
                       padding: EdgeInsets.only(left: 2),
                       child: Text(
-                        'Required investment : \$188',
+                        TranslationUtils.tr(
+                          'subscription_setup_screen_required_investment_188',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12,
                           color: AppColors.icongrey,
@@ -331,14 +365,19 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                               color: AppColors.icongrey,
                             ),
                             children: [
-                              TextSpan(text: 'Add '),
                               TextSpan(
-                                text: 'Support Funds',
+                                text:
+                                    '${TranslationUtils.tr('subscription_setup_screen_add')} ',
+                              ),
+                              TextSpan(
+                                text: TranslationUtils.tr(
+                                  'subscription_setup_screen_support_funds',
+                                ),
                                 style: AppTextStyles.bodyText.copyWith(fontWeight: FontWeight.bold),
                               ),
                               TextSpan(
                                 text:
-                                    ' to protect your investment from unexpected market movements.',
+                                    ' ${TranslationUtils.tr('subscription_setup_screen_to_protect_your_investment')}',
                               ),
                             ],
                           ),
@@ -351,7 +390,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                   if (_isCustomMode && _supportFundsEnabled) ...[
                     SizedBox(height: 12),
                     _buildLabeledField(
-                      label: 'Support Amount',
+                      label: TranslationUtils.tr(
+                        'subscription_setup_screen_support_amount',
+                      ),
                       controller: _supportAmountCtrl,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
@@ -361,7 +402,9 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                     Padding(
                       padding: EdgeInsets.only(left: 2),
                       child: Text(
-                        '39% of the required investment.',
+                        TranslationUtils.tr(
+                          'subscription_setup_screen_39_percent_of_required',
+                        ),
                         style: AppTextStyles.bodyText.copyWith(
                           fontSize: 12,
                           color: AppColors.green,
@@ -381,14 +424,31 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Summary',
+                    TranslationUtils.tr('common_summary'),
                     style: AppTextStyles.bodyText.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 14),
-                  _summaryRow('Copy proportion', _summaryProportion),
-                  _summaryRow('Required Investment', _summaryRequired),
-                  _summaryRow('Support Funds', _summarySupportFunds),
-                  _summaryRow('Total', _summaryTotal, isBold: true),
+                  _summaryRow(
+                    TranslationUtils.tr('change_proportion_screen_copy_proportion'),
+                    _summaryProportion,
+                  ),
+                  _summaryRow(
+                    TranslationUtils.tr(
+                      'subscription_setup_screen_required_investment',
+                    ),
+                    _summaryRequired,
+                  ),
+                  _summaryRow(
+                    TranslationUtils.tr(
+                      'subscription_setup_screen_support_funds',
+                    ),
+                    _summarySupportFunds,
+                  ),
+                  _summaryRow(
+                    TranslationUtils.tr('common_total'),
+                    _summaryTotal,
+                    isBold: true,
+                  ),
                 ],
               ),
             ),
@@ -417,7 +477,7 @@ class _SubscriptionSetupScreenState extends State<SubscriptionSetupScreen> {
             elevation: 0,
           ),
           child:   Text(
-            'Start Copying',
+            TranslationUtils.tr('subscription_setup_screen_start_copying'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 16,
               fontWeight: FontWeight.w600,

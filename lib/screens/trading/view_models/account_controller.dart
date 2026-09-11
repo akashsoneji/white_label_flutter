@@ -256,7 +256,7 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       // Mark as initialized after loading accounts
       _isInitialized.value = true;
     } catch (e) {
-      _setError('Failed to load accounts: $e');
+      _setError('${TranslationUtils.tr('account_controller_failed_to_load_accounts')}: $e');
       _isInitialized.value = false;
     } finally {
       _setLoading(false);
@@ -305,7 +305,7 @@ class AccountController extends GetxController with WidgetsBindingObserver {
 
       // _setSuccess('Account switched successfully');
     } catch (e) {
-      _setError('Failed to set active account: $e');
+      _setError('${TranslationUtils.tr('account_controller_failed_to_set_active_account')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -319,9 +319,9 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       await _accountService.addAccount(account);
       await loadAccounts();
 
-      _setSuccess('Account added successfully');
+      _setSuccess(TranslationUtils.tr('account_controller_account_added_successfully'));
     } catch (e) {
-      _setError('Failed to add account: $e');
+      _setError('${TranslationUtils.tr('account_controller_failed_to_add_account')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -335,9 +335,9 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       await _accountService.updateAccount(account);
       await loadAccounts();
 
-      _setSuccess('Account updated successfully');
+      _setSuccess(TranslationUtils.tr('account_controller_account_updated_successfully'));
     } catch (e) {
-      _setError('Failed to update account: $e');
+      _setError('${TranslationUtils.tr('account_controller_failed_to_update_account')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -351,9 +351,9 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       await _accountService.deleteAccount(accountId);
       await loadAccounts();
 
-      _setSuccess('Account deleted successfully');
+      _setSuccess(TranslationUtils.tr('account_controller_account_deleted_successfully'));
     } catch (e) {
-      _setError('Failed to delete account: $e');
+      _setError('${TranslationUtils.tr('account_controller_failed_to_delete_account')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -367,9 +367,9 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       await _accountService.updateAccountBalance(accountId, newBalance);
       await loadAccounts();
 
-      _setSuccess('Account balance updated successfully');
+      _setSuccess(TranslationUtils.tr('account_controller_account_balance_updated_successfully'));
     } catch (e) {
-      _setError('Failed to update account balance: $e');
+      _setError('${TranslationUtils.tr('account_controller_failed_to_update_account_balance')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -392,7 +392,7 @@ class AccountController extends GetxController with WidgetsBindingObserver {
 
       // _setSuccess('Accounts reset to default');
     } catch (e) {
-      _setError('Failed to reset accounts: $e');
+      _setError('${TranslationUtils.tr('account_controller_failed_to_reset_accounts')}: $e');
     } finally {
       _setLoading(false);
     }
@@ -594,7 +594,7 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       );
 
       if (account == null) {
-        _setError('Account not found');
+        _setError(TranslationUtils.tr('scratch_card_screen_account_not_found'));
         return;
       }
 
@@ -785,7 +785,7 @@ class AccountController extends GetxController with WidgetsBindingObserver {
 
       // _setSuccess('Account switched successfully');
     } catch (e) {
-      _setError('Failed to switch account: $e');
+      _setError('${TranslationUtils.tr('account_controller_failed_to_switch_account')}: $e');
     } finally {
       _setLoading(false);
 
@@ -1268,18 +1268,18 @@ class AccountController extends GetxController with WidgetsBindingObserver {
       }
 
       if (success != null) {
-        _successMessage.value = 'MT5 account created successfully';
+        _successMessage.value = TranslationUtils.tr('account_controller_mt5_account_created_successfully');
         // Refresh all accounts to get the latest data
         await refreshAllAccounts();
         return success; // Return the account data
       } else {
         _errorMessage.value =
             success.message ??
-            'Something went wrong'; //'Failed to create MT5 account';
+            TranslationUtils.tr('general_something_went_wrong');
         return null;
       }
     } catch (e) {
-      _errorMessage.value = 'Something went wrong';
+      _errorMessage.value = TranslationUtils.tr('general_something_went_wrong');
       return null;
     } finally {
       _setLoading(false);

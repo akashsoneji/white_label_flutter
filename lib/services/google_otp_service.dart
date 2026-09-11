@@ -2,6 +2,7 @@ import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/models/google_otp_models.dart';
 import 'package:crm_app/models/login_response_model.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:get/get.dart';
 
 class GoogleOtpService extends GetxService {
@@ -29,12 +30,14 @@ class GoogleOtpService extends GetxService {
       );
       if (!response.success) {
         return ApiResponse.error(
-          _message(response, 'Failed to generate QR code'),
+          _message(response, TranslationUtils.tr('two_factor_generate_failed')),
         );
       }
       final data = _innerData(response.data);
       if (data == null) {
-        return ApiResponse.error('Invalid response from server');
+        return ApiResponse.error(
+          TranslationUtils.tr('api_invalid_response_from_server'),
+        );
       }
       return ApiResponse.success(GoogleOtpGenerateData.fromJson(data));
     } catch (e) {
@@ -50,12 +53,14 @@ class GoogleOtpService extends GetxService {
       );
       if (!response.success) {
         return ApiResponse.error(
-          _message(response, 'Failed to verify OTP'),
+          _message(response, TranslationUtils.tr('two_factor_verify_failed')),
         );
       }
       final data = _innerData(response.data);
       if (data == null) {
-        return ApiResponse.error('Invalid response from server');
+        return ApiResponse.error(
+          TranslationUtils.tr('api_invalid_response_from_server'),
+        );
       }
       return ApiResponse.success(GoogleOtpVerifyData.fromJson(data));
     } catch (e) {
@@ -71,12 +76,14 @@ class GoogleOtpService extends GetxService {
       );
       if (!response.success) {
         return ApiResponse.error(
-          _message(response, 'Failed to disable OTP'),
+          _message(response, TranslationUtils.tr('two_factor_disable_failed')),
         );
       }
       final data = _innerData(response.data);
       if (data == null) {
-        return ApiResponse.error('Invalid response from server');
+        return ApiResponse.error(
+          TranslationUtils.tr('api_invalid_response_from_server'),
+        );
       }
       return ApiResponse.success(GoogleOtpVerifyData.fromJson(data));
     } catch (e) {
@@ -96,7 +103,10 @@ class GoogleOtpService extends GetxService {
       );
       if (!response.success) {
         return ApiResponse.error(
-          _message(response, 'Failed to verify login OTP'),
+          _message(
+            response,
+            TranslationUtils.tr('two_factor_verify_login_failed'),
+          ),
         );
       }
       if (response.data != null && response.data is Map<String, dynamic>) {
@@ -107,15 +117,19 @@ class GoogleOtpService extends GetxService {
           return ApiResponse.error(
             loginResponse.message.isNotEmpty
                 ? loginResponse.message
-                : 'OTP verification failed',
+                : TranslationUtils.tr('auth_otp_verification_failed'),
           );
         }
         if (loginResponse.data.token.isEmpty) {
-          return ApiResponse.error('Invalid login response');
+          return ApiResponse.error(
+            TranslationUtils.tr('auth_invalid_login_response'),
+          );
         }
         return ApiResponse.success(loginResponse);
       }
-      return ApiResponse.error('Invalid response from server');
+      return ApiResponse.error(
+        TranslationUtils.tr('api_invalid_response_from_server'),
+      );
     } catch (e) {
       return ApiResponse.error('Failed to verify login OTP: $e');
     }

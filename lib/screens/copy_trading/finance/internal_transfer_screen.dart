@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/constants/text_styles.dart';
 import 'package:get/get.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class CopyTradingInternalTransferScreen extends StatelessWidget {
   const CopyTradingInternalTransferScreen({super.key});
@@ -17,7 +18,7 @@ class CopyTradingInternalTransferScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Internal Transfer',
+          TranslationUtils.tr('internal_transfer'),
           style: AppTextStyles.heading.copyWith(fontWeight: FontWeight.w600),
         ),
         leading: IconButton(
@@ -33,13 +34,27 @@ class CopyTradingInternalTransferScreen extends StatelessWidget {
         padding: EdgeInsets.all(24.r),
         child: Column(
           children: [
-            _buildTextField(label: 'Transfer From', value: r'Wallet ($0.00)'),
+            _buildTextField(
+              label: TranslationUtils.tr('wallet_transfer_from'),
+              value: r'Wallet ($0.00)',
+            ),
             SizedBox(height: 20.h),
-            _buildTextField(label: 'Transfer To', value: 'Select Account'),
+            _buildTextField(
+              label: TranslationUtils.tr('wallet_transfer_to'),
+              value: TranslationUtils.tr('create_account_select_account'),
+            ),
             SizedBox(height: 20.h),
-            _buildTextField(label: 'Amount', value: '0.00', isNumeric: true),
+            _buildTextField(
+              label: TranslationUtils.tr('deposit_amount'),
+              value: '0.00',
+              isNumeric: true,
+            ),
             SizedBox(height: 20.h),
-            _buildTextField(label: 'Comment', value: '', maxLines: 3),
+            _buildTextField(
+              label: TranslationUtils.tr('internal_transfer_screen_comment'),
+              value: '',
+              maxLines: 3,
+            ),
 
             SizedBox(height: 40.h),
             SizedBox(
@@ -54,7 +69,7 @@ class CopyTradingInternalTransferScreen extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Transfer Now',
+                  TranslationUtils.tr('internal_transfer_screen_transfer_now'),
                   style: AppTextStyles.bodyText.copyWith(
                     color: AppColors.whiteColor,
                     fontSize: 16.sp,
@@ -92,7 +107,12 @@ class CopyTradingInternalTransferScreen extends StatelessWidget {
           maxLines: maxLines,
           keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
           decoration: InputDecoration(
-            hintText: value.isEmpty ? 'Enter $label' : value,
+            hintText:
+                value.isEmpty
+                    ? TranslationUtils.trArgs('common_enter_field', {
+                      'field': label,
+                    })
+                    : value,
             filled: true,
             fillColor: AppColors.border.withValues(alpha: 0.05),
             contentPadding: EdgeInsets.symmetric(

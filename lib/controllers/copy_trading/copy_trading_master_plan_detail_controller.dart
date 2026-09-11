@@ -1,5 +1,6 @@
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:get/get.dart';
 
 class CopyTradingMasterPlanDetail {
@@ -654,7 +655,8 @@ class CopyTradingMasterPlanDetailController extends GetxController {
       final res = await ApiService.get(endpoint: endpoint, queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()});
       if (!res.success || res.data == null) {
         detail.value = null;
-        errorMessage.value = res.message ?? 'Failed to load plan detail';
+      errorMessage.value = res.message ??
+          TranslationUtils.tr('copy_trading_failed_to_load_plan_detail');
         update();
         return;
       }
@@ -662,7 +664,7 @@ class CopyTradingMasterPlanDetailController extends GetxController {
       final data = res.data?['data'];
       if (data is! Map) {
         detail.value = null;
-        errorMessage.value = 'Invalid response';
+      errorMessage.value = TranslationUtils.tr('copy_trading_invalid_response');
         update();
         return;
       }

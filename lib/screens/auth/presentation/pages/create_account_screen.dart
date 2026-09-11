@@ -214,7 +214,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       _showOtpVerificationBottomSheet();
     } catch (e) {
       _hideLoadingDialog();
-      _showError('Failed to send OTP: $e');
+      _showError('${TranslationUtils.tr('auth_controller_failed_to_send_otp')}: $e');
     }
   }
 
@@ -300,7 +300,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       }
     } catch (e) {
       _hideLoadingDialog();
-      _showError('OTP verification failed: $e');
+      _showError('${TranslationUtils.tr('auth_otp_verification_failed')}: $e');
     }
   }
 
@@ -308,16 +308,16 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Please enter your email address',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('create_account_screen_please_enter_your_email_address'),
       );
       return;
     }
 
     if (!_isValidEmail(email)) {
       CustomToastService.showError(
-        title: 'Error',
-        message: 'Please check email, email is not valid',
+        title: TranslationUtils.tr('general_error'),
+        message: TranslationUtils.tr('create_account_screen_please_check_email_email_is_not'),
       );
       return;
     }
@@ -365,7 +365,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   }
 
   void _showError(String message) {
-    CustomToastService.showError(title: 'Error', message: message);
+    CustomToastService.showError(
+      title: TranslationUtils.tr('general_error'),
+      message: message,
+    );
   }
 
   void _showCountryPicker() {
@@ -382,8 +385,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           topRight: Radius.circular(20.0),
         ),
         inputDecoration: InputDecoration(
-          labelText: 'Search',
-          hintText: 'Start typing to search',          
+          labelText: TranslationUtils.tr('common_search'),
+          hintText: TranslationUtils.tr('edit_profile_start_typing'),
           prefixIcon: Icon(Icons.search, color: AppColors.textPrimary),
           border: OutlineInputBorder(
             borderSide: BorderSide(
@@ -733,7 +736,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       return _languageService.tr('validation_required');
     }
     if (!_isValidEmail(value)) {
-      return 'Please check email, email is not valid';
+      return _languageService.tr('create_account_screen_please_check_email_email_is_not');
     }
     return null;
   }

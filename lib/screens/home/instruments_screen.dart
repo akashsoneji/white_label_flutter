@@ -326,7 +326,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
             children: [
               Expanded(
                 child: Text(
-                  'Instruments',
+                  languageService.tr('instruments_title'),
                   style: AppTextStyles.screenTitle.copyWith(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
@@ -363,7 +363,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                 // Show favorites count for Favorites filter
                 final displayText =
                     filter == 'Favorites'
-                        ? 'Favorites (${_controller.favoritesCount})'
+                        ? '${languageService.tr('instruments_favorites')} (${_controller.favoritesCount})'
                         : filter;
                 return Padding(
                   padding: EdgeInsets.only(right: 8.w),
@@ -433,7 +433,9 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'By ${_controller.currentSort.value}',
+                TranslationUtils.trArgs('instruments_sort_by_value', {
+                  'sort': _sortLabel(_controller.currentSort.value),
+                }),
                 style: AppTextStyles.input.copyWith(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w400,
@@ -995,7 +997,7 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
               ),
               SizedBox(height: 16.h),
               Text(
-                'Sort by',
+                languageService.tr('instruments_screen_sort_by'),
                 style: AppTextStyles.heading.copyWith(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
@@ -1018,7 +1020,10 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
                                   padding: EdgeInsets.all(2.sp),
                                   child: _getSortIcon(option),
                                 ),
-                                Text(option, style: AppTextStyles.input),
+                                Text(
+                                  _sortLabel(option),
+                                  style: AppTextStyles.input,
+                                ),
                               ],
                             ),
                             trailing:
@@ -1046,6 +1051,21 @@ class _InstrumentsScreenState extends State<InstrumentsScreen>
         );
       },
     );
+  }
+
+  /// Display-only label for a sort option. The raw option strings are logic
+  /// values compared against [InstrumentsController.currentSort].
+  String _sortLabel(String option) {
+    switch (option) {
+      case 'Default':
+        return languageService.tr('ibm_default');
+      case 'Symbol A-Z':
+        return languageService.tr('instruments_sort_symbol_az');
+      case 'Symbol Z-A':
+        return languageService.tr('instruments_sort_symbol_za');
+      default:
+        return option;
+    }
   }
 
   Widget _getSortIcon(String option) {

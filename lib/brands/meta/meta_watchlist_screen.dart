@@ -430,7 +430,8 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                         MetaTheme.sell(c)),
                     SizedBox(height: 1.h),
                     Text(
-                      'L: ${price.dayLow.toStringAsFixed(digits)}',
+                      TranslationUtils.trArgs('meta_watchlist_day_low_value',
+                          {'price': price.dayLow.toStringAsFixed(digits)}),
                       style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c), fontSize: 10.sp),
                     ),
@@ -447,7 +448,8 @@ class _MetaWatchlistScreenState extends State<MetaWatchlistScreen> {
                         MetaTheme.buyBlue),
                     SizedBox(height: 1.h),
                     Text(
-                      'H: ${price.dayHigh.toStringAsFixed(digits)}',
+                      TranslationUtils.trArgs('meta_watchlist_day_high_value',
+                          {'price': price.dayHigh.toStringAsFixed(digits)}),
                       style: AppTextStyles.bodyText.copyWith(
                           color: MetaTheme.subText(c), fontSize: 10.sp),
                     ),
@@ -1220,8 +1222,9 @@ class _RowActionSheet extends StatelessWidget {
   Widget build(BuildContext c) {
     // When currently in simple view, offer to switch back to advanced,
     // and vice-versa — matches the two screenshots (#1 / #2).
-    final toggleLabel =
-        simpleView ? 'Advanced view mode' : 'Simple view mode';
+    final toggleLabel = simpleView
+        ? TranslationUtils.tr('meta_watchlist_advanced_view_mode')
+        : TranslationUtils.tr('meta_watchlist_simple_view_mode');
     return SafeArea(
       top: false,
       child: Padding(
@@ -1240,11 +1243,16 @@ class _RowActionSheet extends StatelessWidget {
                     fontWeight: FontWeight.w500),
               ),
             ),
-            _menu(c, 'New Order', () => _routeTo(c, RowAction.newOrder)),
-            _menu(c, 'Chart', () => _routeTo(c, RowAction.chart)),
-            _menu(c, 'Properties', () => _routeTo(c, RowAction.properties)),
-            _menu(c, 'Depth Of Market', () => _routeTo(c, RowAction.dom)),
-            _menu(c, 'Market Statistics', () => _routeTo(c, RowAction.marketStats)),
+            _menu(c, TranslationUtils.tr('trade_new_order'),
+                () => _routeTo(c, RowAction.newOrder)),
+            _menu(c, TranslationUtils.tr('bottom_navigation_chart'),
+                () => _routeTo(c, RowAction.chart)),
+            _menu(c, TranslationUtils.tr('meta_watchlist_properties'),
+                () => _routeTo(c, RowAction.properties)),
+            _menu(c, TranslationUtils.tr('meta_watchlist_depth_of_market'),
+                () => _routeTo(c, RowAction.dom)),
+            _menu(c, TranslationUtils.tr('meta_watchlist_market_statistics'),
+                () => _routeTo(c, RowAction.marketStats)),
             _menu(c, toggleLabel, () => _routeTo(c, RowAction.toggleView)),
             SizedBox(height: 4.h),
           ],

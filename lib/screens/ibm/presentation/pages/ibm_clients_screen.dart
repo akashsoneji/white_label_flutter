@@ -9,6 +9,7 @@ import 'package:crm_app/constants/text_styles.dart';
 import 'package:crm_app/screens/ibm/view_models/ibm_controller.dart';
 import 'package:crm_app/screens/ibm/presentation/pages/ibm_client_profile_screen.dart';
 import 'package:crm_app/screens/ibm/presentation/widgets/ibm_shimmer_loading.dart';
+import 'package:crm_app/services/language_service.dart';
 
 class IbmClientsScreen extends StatefulWidget {
   const IbmClientsScreen({super.key});
@@ -63,6 +64,28 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
     'All',
   ];
   String _selectedRequestTab = 'Waiting on you';
+
+  static const Map<String, String> _dateFilterKeys = {
+    'Today': 'dc_range_today',
+    'All': 'common_all',
+    'Custom': 'transaction_history_period_custom',
+  };
+
+  static const Map<String, String> _requestTabKeys = {
+    'Waiting on you': 'ibm_waiting_on_you_tab',
+    'With the broker': 'ibm_with_the_broker',
+    'Approved': 'kyc_verification_approved',
+    'Declined': 'ibm_declined',
+    'All': 'common_all',
+  };
+
+  String _dateFilterLabel(String name) {
+    final key = _dateFilterKeys[name];
+    return key == null ? name : TranslationUtils.tr(key);
+  }
+
+  String _requestTabLabel(String name) =>
+      TranslationUtils.tr(_requestTabKeys[name] ?? name);
 
   @override
   void initState() {
@@ -209,7 +232,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
         ),
         titleSpacing: 0,
         title: Text(
-          'Clients & Network',
+          TranslationUtils.tr('ibm_clients_and_network'),
           style: AppTextStyles.heading.copyWith(
             fontSize: 16.sp,
             fontWeight: FontWeight.w700,
@@ -282,7 +305,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                   fontWeight: FontWeight.bold,
                 ),
                 tabs: [
-                  const Tab(text: 'My Clients'),
+                  Tab(text: TranslationUtils.tr('my_clients')),
                   Tab(
                     child: Obx(() {
                       final reqs =
@@ -290,7 +313,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Sub-IB Requests'),
+                          Text(TranslationUtils.tr('ibm_sub_ib_requests_tab')),
                           if (reqs > 0) ...[
                             SizedBox(width: 6.w),
                             Container(
@@ -381,8 +404,14 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
 
       final subtitle =
           isNetwork
-              ? '$directPartners direct sub-IBs, $totalPartners in the whole cascade, $totalNetworkClients clients'
-              : '$totalClients client(s) assigned straight to you';
+              ? TranslationUtils.trArgs('ibm_direct_sub_ibs_summary', {
+                'direct': '$directPartners',
+                'total': '$totalPartners',
+                'clients': '$totalNetworkClients',
+              })
+              : TranslationUtils.trArgs('ibm_clients_assigned_to_you', {
+                'count': '$totalClients',
+              });
 
       // Parse Tree list from treeData or fallback
       final treeList = _extractTreeNodes(treeData);
@@ -405,7 +434,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'My Clients',
+                        TranslationUtils.tr('my_clients'),
                         style: AppTextStyles.heading.copyWith(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -434,7 +463,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
             Row(
               children: [
                 _buildSubTabBadge(
-                  label: 'Direct Clients',
+                  label: TranslationUtils.tr('ibm_direct_clients'),
                   count: totalClients,
                   isSelected: !isNetwork,
                   onTap: () {
@@ -444,7 +473,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                 ),
                 SizedBox(width: 8.w),
                 _buildSubTabBadge(
-                  label: 'Network',
+                  label: TranslationUtils.tr('ibm_nav_network'),
                   count: totalNetworkClients,
                   isSelected: isNetwork,
                   onTap: () {
@@ -464,8 +493,12 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                     children: [
                       Expanded(
                         child: _buildMobileMetricCard(
-                          title: 'Total Clients',
-                          subtitle: 'assigned straight to you',
+                          title: TranslationUtils.tr(
+                            'ib_dashboard_new_screen_total_clients',
+                          ),
+                          subtitle: TranslationUtils.tr(
+                            'ibm_assigned_straight_to_you',
+                          ),
                           value: '$totalClients',
                           icon: Icons.people_rounded,
                           color: AppColors.primary,
@@ -474,8 +507,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       SizedBox(width: 12.w),
                       Expanded(
                         child: _buildMobileMetricCard(
-                          title: 'Active',
-                          subtitle: 'traded this period',
+                          title: TranslationUtils.tr('chart_active'),
+                          subtitle: TranslationUtils.tr(
+                            'ibm_traded_this_period',
+                          ),
                           value: '$activeClients',
                           icon: Icons.person_rounded,
                           color: const Color(0xFF00C48C),
@@ -488,8 +523,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                     children: [
                       Expanded(
                         child: _buildMobileMetricCard(
-                          title: 'New',
-                          subtitle: 'joined this period',
+                          title: TranslationUtils.tr('ibm_new'),
+                          subtitle: TranslationUtils.tr(
+                            'ibm_joined_this_period',
+                          ),
                           value: '$newClients',
                           icon: Icons.person_add_rounded,
                           color: const Color(0xFF2D9CDB),
@@ -498,8 +535,12 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       SizedBox(width: 12.w),
                       Expanded(
                         child: _buildMobileMetricCard(
-                          title: 'Commission Earned',
-                          subtitle: 'from these clients',
+                          title: TranslationUtils.tr(
+                            'pmam_manager_dashboard_screen_commission_earned',
+                          ),
+                          subtitle: TranslationUtils.tr(
+                            'ibm_from_these_clients',
+                          ),
                           value: '\$${commission.toStringAsFixed(2)}',
                           icon: Icons.monetization_on_rounded,
                           color: const Color(0xFFF2994A),
@@ -518,8 +559,11 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                     children: [
                       Expanded(
                         child: _buildMobileMetricCard(
-                          title: 'Sub-IBs',
-                          subtitle: '$directPartners directly under you',
+                          title: TranslationUtils.tr('ibm_sub_ibs'),
+                          subtitle: TranslationUtils.trArgs(
+                            'ibm_directly_under_you',
+                            {'count': '$directPartners'},
+                          ),
                           value: '$totalPartners',
                           icon: Icons.account_tree_rounded,
                           color: AppColors.primary,
@@ -528,8 +572,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       SizedBox(width: 12.w),
                       Expanded(
                         child: _buildMobileMetricCard(
-                          title: 'Network Clients',
-                          subtitle: 'you and your partners',
+                          title: TranslationUtils.tr('ibm_network_clients'),
+                          subtitle: TranslationUtils.tr(
+                            'ibm_you_and_your_partners',
+                          ),
                           value: '$totalNetworkClients',
                           icon: Icons.groups_rounded,
                           color: const Color(0xFF00C48C),
@@ -542,8 +588,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                     children: [
                       Expanded(
                         child: _buildMobileMetricCard(
-                          title: 'Active',
-                          subtitle: 'traded this period',
+                          title: TranslationUtils.tr('chart_active'),
+                          subtitle: TranslationUtils.tr(
+                            'ibm_traded_this_period',
+                          ),
                           value: '$activeClients',
                           icon: Icons.person_outline_rounded,
                           color: const Color(0xFF2D9CDB),
@@ -552,8 +600,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       SizedBox(width: 12.w),
                       Expanded(
                         child: _buildMobileMetricCard(
-                          title: 'Earned',
-                          subtitle: 'across the network',
+                          title: TranslationUtils.tr('ibm_earned'),
+                          subtitle: TranslationUtils.tr(
+                            'ibm_across_the_network',
+                          ),
                           value: '\$$networkEarned',
                           icon: Icons.monetization_on_rounded,
                           color: const Color(0xFFF2994A),
@@ -588,8 +638,12 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       decoration: InputDecoration(
                         hintText:
                             isNetwork
-                                ? 'Search anyone in your network'
-                                : 'Search name or email',
+                                ? TranslationUtils.tr(
+                                  'ibm_search_anyone_in_your_network',
+                                )
+                                : TranslationUtils.tr(
+                                  'ibm_search_name_or_email',
+                                ),
                         hintStyle: TextStyle(
                           color: AppColors.textGrey,
                           fontSize: 13.sp,
@@ -642,7 +696,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                         border: Border.all(color: AppColors.divider),
                       ),
                       child: Text(
-                        'Expand all',
+                        TranslationUtils.tr('ibm_expand_all'),
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -670,7 +724,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                         border: Border.all(color: AppColors.divider),
                       ),
                       child: Text(
-                        'Collapse',
+                        TranslationUtils.tr('ibm_collapse'),
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -707,7 +761,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              'Sub-IB',
+                              TranslationUtils.tr('ib_clients_screen_sub_ib'),
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
@@ -728,7 +782,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              'Your own client',
+                              TranslationUtils.tr('ibm_your_own_client'),
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
@@ -749,7 +803,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              "A sub-IB's client",
+                              TranslationUtils.tr('ibm_a_sub_ibs_client'),
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 color: AppColors.textGrey,
@@ -770,8 +824,8 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
               if (treeList.isEmpty)
                 _buildEmptyPlaceholder(
                   icon: Icons.account_tree_outlined,
-                  title: 'No Network Partners Found',
-                  subtitle: 'No partners match your search criteria.',
+                  title: TranslationUtils.tr('ibm_no_network_partners_found'),
+                  subtitle: TranslationUtils.tr('ibm_no_partners_match_search'),
                 )
               else
                 ...treeList.map((node) => _buildTreeNodeWidget(node, level: 1)),
@@ -780,8 +834,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
               if (filteredRows.isEmpty)
                 _buildEmptyPlaceholder(
                   icon: Icons.person_off_outlined,
-                  title: 'No Clients Found',
-                  subtitle: 'No clients match your filter criteria.',
+                  title: TranslationUtils.tr(
+                    'my_clients_screen_no_clients_found',
+                  ),
+                  subtitle: TranslationUtils.tr('ibm_no_clients_match_filter'),
                 )
               else
                 ...filteredRows.map((row) => _buildClientRowCard(row)),
@@ -818,7 +874,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       final now = DateTime.now();
                       final DateTime? start = await showDatePicker(
                         context: context,
-                        helpText: 'Select start date',
+                        helpText: TranslationUtils.tr('ibm_select_start_date'),
                         initialDate:
                             _customStartDate ??
                             now.subtract(const Duration(days: 30)),
@@ -839,7 +895,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       if (start == null) return;
                       final DateTime? end = await showDatePicker(
                         context: context,
-                        helpText: 'Select end date',
+                        helpText: TranslationUtils.tr('ibm_select_end_date'),
                         initialDate: start,
                         firstDate: start,
                         lastDate: now,
@@ -894,7 +950,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                         : Text(
                             filter == 'Custom' && _customStartDate != null
                                 ? '${DateFormat('MM/dd').format(_customStartDate!)} - ${DateFormat('MM/dd').format(_customEndDate!)}'
-                                : filter,
+                                : _dateFilterLabel(filter),
                             style: TextStyle(
                               color: isSelected
                                   ? AppColors.whiteColor
@@ -983,9 +1039,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
           children: [
             Expanded(
               child: _buildMiniDetailCard(
-                title: 'Clients',
+                title: TranslationUtils.tr('ib_nav_clients'),
                 value: '$clients',
-                subtitle: 'their own / whole branch',
+                subtitle: TranslationUtils.tr('ibm_their_own_whole_branch'),
                 icon: Icons.groups_rounded,
                 color: AppColors.primary,
               ),
@@ -993,9 +1049,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
             SizedBox(width: 8.w),
             Expanded(
               child: _buildMiniDetailCard(
-                title: 'Sub-IBs',
+                title: TranslationUtils.tr('ib_sub_ibs'),
                 value: '$subIbs',
-                subtitle: 'working under them',
+                subtitle: TranslationUtils.tr('ibm_working_under_them'),
                 icon: Icons.account_tree_rounded,
                 color: AppColors.primary,
               ),
@@ -1007,9 +1063,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
           children: [
             Expanded(
               child: _buildMiniDetailCard(
-                title: 'Deposits',
+                title: TranslationUtils.tr('transaction_history_deposits'),
                 value: '\$$deposits',
-                subtitle: 'branch, this period',
+                subtitle: TranslationUtils.tr('ibm_branch_this_period'),
                 icon: Icons.arrow_downward_rounded,
                 color: const Color(0xFF00C48C),
               ),
@@ -1017,9 +1073,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
             SizedBox(width: 8.w),
             Expanded(
               child: _buildMiniDetailCard(
-                title: 'Net funding',
+                title: TranslationUtils.tr('ibm_net_funding'),
                 value: '\$$netFunding',
-                subtitle: 'deposits - withdrawals',
+                subtitle: TranslationUtils.tr('ibm_deposits_minus_withdrawals'),
                 icon: Icons.balance_rounded,
                 color: AppColors.primary,
               ),
@@ -1031,9 +1087,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
           children: [
             Expanded(
               child: _buildMiniDetailCard(
-                title: 'Lots',
+                title: TranslationUtils.tr('chart_label_lots'),
                 value: lots,
-                subtitle: 'branch, this period',
+                subtitle: TranslationUtils.tr('ibm_branch_this_period'),
                 icon: Icons.show_chart_rounded,
                 color: AppColors.primary,
               ),
@@ -1041,9 +1097,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
             SizedBox(width: 8.w),
             Expanded(
               child: _buildMiniDetailCard(
-                title: 'Equity',
+                title: TranslationUtils.tr('dashboard_equity'),
                 value: '\$$equity',
-                subtitle: 'right now, not the period',
+                subtitle: TranslationUtils.tr('ibm_right_now_not_the_period'),
                 icon: Icons.account_balance_wallet_rounded,
                 color: AppColors.primary,
               ),
@@ -1055,9 +1111,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
           children: [
             Expanded(
               child: _buildMiniDetailCard(
-                title: 'Available',
+                title: TranslationUtils.tr('ibm_available'),
                 value: '\$$available',
-                subtitle: 'their wallet',
+                subtitle: TranslationUtils.tr('ibm_their_wallet'),
                 icon: Icons.payments_rounded,
                 color: AppColors.primary,
               ),
@@ -1065,9 +1121,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
             SizedBox(width: 8.w),
             Expanded(
               child: _buildMiniDetailCard(
-                title: 'Pending payout',
+                title: TranslationUtils.tr('ibm_pending_payout'),
                 value: '\$$pendingPayout',
-                subtitle: 'locked in a request',
+                subtitle: TranslationUtils.tr('ibm_locked_in_a_request'),
                 icon: Icons.hourglass_empty_rounded,
                 color: const Color(0xFFF2994A),
               ),
@@ -1113,7 +1169,9 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       borderRadius: BorderRadius.circular(4.r),
                     ),
                     child: Text(
-                      'Sub-IB · L$level',
+                      TranslationUtils.trArgs('ibm_sub_ib_level', {
+                        'level': '$level',
+                      }),
                       style: TextStyle(
                         color: AppColors.primary,
                         fontSize: 9.sp,
@@ -1147,7 +1205,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                         border: Border.all(color: AppColors.divider),
                       ),
                       child: Text(
-                        'Show whole network',
+                        TranslationUtils.tr('ibm_show_whole_network'),
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -1181,7 +1239,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Open full page',
+                            TranslationUtils.tr('ibm_open_full_page'),
                             style: TextStyle(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
@@ -1377,7 +1435,14 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                                 ),
                                 SizedBox(height: 2.h),
                                 Text(
-                                  '$direct direct · $totalSubs sub-IBs · \$$earned earned',
+                                  TranslationUtils.trArgs(
+                                    'ibm_direct_subs_earned_line',
+                                    {
+                                      'direct': '$direct',
+                                      'subs': '$totalSubs',
+                                      'earned': '$earned',
+                                    },
+                                  ),
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     color: AppColors.textGrey,
@@ -1405,7 +1470,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Open',
+                            TranslationUtils.tr('ticket_status_open'),
                             style: TextStyle(
                               fontSize: 11.sp,
                               fontWeight: FontWeight.bold,
@@ -1442,7 +1507,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                 node['user_name'] ??
                 node['full_name'] ??
                 node['email']?.toString().split('@').first ??
-                'Partner')
+                TranslationUtils.tr('ibm_partner'))
             .toString();
     final email = (node['email'] ?? '').toString();
     final account =
@@ -1618,7 +1683,11 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
       subtitleItems.add(account.startsWith('#') ? account : '#$account');
     if (email.isNotEmpty) subtitleItems.add(email);
     if (plan.isNotEmpty) subtitleItems.add(plan);
-    if (cameVia.isNotEmpty) subtitleItems.add('via $cameVia');
+    if (cameVia.isNotEmpty) {
+      subtitleItems.add(
+        TranslationUtils.trArgs('ibm_via_source', {'source': cameVia}),
+      );
+    }
 
     return Container(
       margin: EdgeInsets.only(bottom: 8.h, left: leftIndent),
@@ -1773,7 +1842,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                                             ),
                                           ),
                                           child: Text(
-                                            'Sub-IB · L$nodeLevel',
+                                            TranslationUtils.trArgs(
+                                              'ibm_sub_ib_level',
+                                              {'level': '$nodeLevel'},
+                                            ),
                                             style: TextStyle(
                                               color: AppColors.primary,
                                               fontSize: 9.sp,
@@ -1795,9 +1867,11 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                                               4.r,
                                             ),
                                           ),
-                                          child: const Text(
-                                            'Direct client',
-                                            style: TextStyle(
+                                          child: Text(
+                                            TranslationUtils.tr(
+                                              'ibm_direct_client',
+                                            ),
+                                            style: const TextStyle(
                                               color: Color(0xFF00C48C),
                                               fontSize: 9,
                                               fontWeight: FontWeight.bold,
@@ -1819,9 +1893,11 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                                               4.r,
                                             ),
                                           ),
-                                          child: const Text(
-                                            "Sub-IB's client",
-                                            style: TextStyle(
+                                          child: Text(
+                                            TranslationUtils.tr(
+                                              'ibm_a_sub_ibs_client',
+                                            ),
+                                            style: const TextStyle(
                                               color: Color(0xFFF2994A),
                                               fontSize: 9,
                                               fontWeight: FontWeight.bold,
@@ -1899,7 +1975,13 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                                   if (downlineSubs > 0 || downlineClients > 0)
                                     _buildMiniMetricMobile(
                                       'DOWNLINE',
-                                      '$downlineSubs sub · $downlineClients cli',
+                                      TranslationUtils.trArgs(
+                                        'ibm_downline_subs_cli_short',
+                                        {
+                                          'subs': '$downlineSubs',
+                                          'clients': '$downlineClients',
+                                        },
+                                      ),
                                     ),
                                   if (double.tryParse(branchEarned) != null &&
                                       double.parse(branchEarned) > 0)
@@ -1944,7 +2026,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                             ),
                             SizedBox(width: 8.w),
                             Text(
-                              'Loading...',
+                              TranslationUtils.tr('common_loading'),
                               style: TextStyle(
                                 color: AppColors.textGrey,
                                 fontSize: 12.sp,
@@ -2234,6 +2316,15 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
     );
   }
 
+  static const Map<String, String> _miniMetricKeys = {
+    'DEPOSITS': 'ibm_metric_deposits_upper',
+    'NET': 'ibm_metric_net_upper',
+    'LOTS': 'ibm_metric_lots_upper',
+    'DOWNLINE': 'ibm_downline_caps',
+    'YOU EARNED': 'ibm_you_earned_upper',
+    'BRANCH EARNED': 'ibm_branch_earned_upper',
+  };
+
   Widget _buildMiniMetricMobile(String label, String value) {
     final isPositive =
         label == 'DEPOSITS' ||
@@ -2243,7 +2334,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          TranslationUtils.tr(_miniMetricKeys[label] ?? label),
           style: TextStyle(
             fontSize: 9.sp,
             color: AppColors.textGrey,
@@ -2494,7 +2585,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                           ),
                         ),
                         child: Text(
-                          tab,
+                          _requestTabLabel(tab),
                           style: TextStyle(
                             color:
                                 isSelected
@@ -2515,8 +2606,8 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
           if (filtered.isEmpty)
             _buildEmptyPlaceholder(
               icon: Icons.inbox_outlined,
-              title: 'No Requests',
-              subtitle: 'No requests in this category.',
+              title: TranslationUtils.tr('ibm_no_requests'),
+              subtitle: TranslationUtils.tr('ibm_no_requests_in_category'),
             )
           else
             ...filtered.map((req) => _buildRequestCard(req)),
@@ -2577,7 +2668,10 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
           ),
           SizedBox(height: 4.h),
           Text(
-            '$email • Requested $requestedAt',
+            TranslationUtils.trArgs('ibm_email_requested_on', {
+              'email': email,
+              'date': requestedAt,
+            }),
             style: TextStyle(color: AppColors.textGrey, fontSize: 11.sp),
           ),
           if (status == 'pending' || status == 'waiting') ...[
@@ -2596,7 +2690,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       ),
                     ),
                     child: Text(
-                      'Approve',
+                      TranslationUtils.tr('ibm_approve'),
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
@@ -2616,7 +2710,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
                       ),
                     ),
                     child: Text(
-                      'Decline',
+                      TranslationUtils.tr('ibm_decline'),
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
@@ -2634,7 +2728,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
 
   void _handleApprove(int requestId) {
     Get.defaultDialog(
-      title: 'Approve Request',
+      title: TranslationUtils.tr('ibm_approve_request'),
       titleStyle: TextStyle(
         fontSize: 16.sp,
         fontWeight: FontWeight.bold,
@@ -2643,12 +2737,12 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
       content: Padding(
         padding: EdgeInsets.symmetric(horizontal: 12.w),
         child: Text(
-          'Are you sure you want to approve this Sub-IB request?',
+          TranslationUtils.tr('ibm_confirm_approve_sub_ib_request'),
           style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
         ),
       ),
-      textConfirm: 'Approve',
-      textCancel: 'Cancel',
+      textConfirm: TranslationUtils.tr('ibm_approve'),
+      textCancel: TranslationUtils.tr('account_management_cancel'),
       confirmTextColor: AppColors.whiteColor,
       buttonColor: AppColors.primary,
       onConfirm: () async {
@@ -2662,7 +2756,7 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
   void _handleReject(int requestId) {
     final reasonController = TextEditingController();
     Get.defaultDialog(
-      title: 'Decline Request',
+      title: TranslationUtils.tr('ibm_decline_request'),
       titleStyle: TextStyle(
         fontSize: 16.sp,
         fontWeight: FontWeight.bold,
@@ -2673,22 +2767,22 @@ class _IbmClientsScreenState extends State<IbmClientsScreen>
         child: Column(
           children: [
             Text(
-              'Please provide a reason for declining this request:',
+              TranslationUtils.tr('ibm_please_provide_decline_reason'),
               style: TextStyle(fontSize: 13.sp, color: AppColors.textSecondary),
             ),
             SizedBox(height: 8.h),
             TextField(
               controller: reasonController,
-              decoration: const InputDecoration(
-                hintText: 'Reason for declining',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: TranslationUtils.tr('ibm_reason_for_declining'),
+                border: const OutlineInputBorder(),
               ),
             ),
           ],
         ),
       ),
-      textConfirm: 'Decline',
-      textCancel: 'Cancel',
+      textConfirm: TranslationUtils.tr('ibm_decline'),
+      textCancel: TranslationUtils.tr('account_management_cancel'),
       confirmTextColor: AppColors.whiteColor,
       buttonColor: Colors.red,
       onConfirm: () async {

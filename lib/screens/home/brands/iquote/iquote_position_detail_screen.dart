@@ -289,7 +289,9 @@ class _IQuotePositionDetailScreenState
     final pos = widget.position;
     final palette = _Palette.of(context);
     final isBuy = _isBuy(pos);
-    final sideLabel = isBuy ? 'Buy' : 'Sell';
+    final sideLabel = isBuy
+        ? TranslationUtils.tr('general_buy')
+        : TranslationUtils.tr('general_sell');
     final sideColor = isBuy ? AppColors.statusGreen : AppColors.error;
 
     return Scaffold(
@@ -320,8 +322,10 @@ class _IQuotePositionDetailScreenState
             ),
             _ActionRow(
               primaryLabel: _isTpSlDirty()
-                  ? 'Confirm'
-                  : (widget.isPending ? 'Cancel Order' : 'Close Order'),
+                  ? TranslationUtils.tr('confirm')
+                  : (widget.isPending
+                      ? TranslationUtils.tr('trade_cancel_order')
+                      : TranslationUtils.tr('order_history_close_order')),
               busy: _busy,
               onCancel: () => Get.back<void>(),
               onPrimary: () => _onPrimary(context),
@@ -344,7 +348,7 @@ class _IQuotePositionDetailScreenState
       if (widget.isPending) {
         final acct = _account.activeMT5AccountRx.value;
         if (acct == null) {
-          _toastError('No active MT5 account selected.');
+          _toastError(TranslationUtils.tr('iquote_no_mt5_account'));
           return;
         }
         await _showCancelPendingDialog(context, acct.metaAccountNumber);
@@ -375,7 +379,7 @@ class _IQuotePositionDetailScreenState
     final pos = widget.position;
     final acct = _account.activeMT5AccountRx.value;
     if (acct == null) {
-      _toastError('No active MT5 account selected.');
+      _toastError(TranslationUtils.tr('iquote_no_mt5_account'));
       return;
     }
     if (_busy) return;
@@ -409,7 +413,11 @@ class _IQuotePositionDetailScreenState
         Get.back<void>();
       } else {
         final err = _trading.errorMessage;
-        _toastError(err.isNotEmpty ? err : 'Modification failed.');
+        _toastError(
+          err.isNotEmpty
+              ? err
+              : TranslationUtils.tr('iquote_position_detail_modification_failed'),
+        );
       }
     } catch (e) {
       _toastError('An unexpected error occurred: $e');
@@ -448,7 +456,7 @@ class _IQuotePositionDetailScreenState
                 padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 14.h),
                 child: Center(
                   child: Text(
-                    'Cancel pending',
+                    TranslationUtils.tr('iquote_position_cancel_pending'),
                     style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 16.sp,
@@ -464,7 +472,9 @@ class _IQuotePositionDetailScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'You will cancel Pending Order',
+                      TranslationUtils.tr(
+                        'iquote_position_you_will_cancel_pending_order',
+                      ),
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 14.sp,
@@ -487,7 +497,7 @@ class _IQuotePositionDetailScreenState
                                 ),
                               ),
                               child: Text(
-                                'Cancel',
+                                TranslationUtils.tr('account_management_cancel'),
                                 style: TextStyle(
                                   color: AppColors.primary,
                                   fontSize: 14.sp,
@@ -518,7 +528,9 @@ class _IQuotePositionDetailScreenState
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  'Cancel pending',
+                                  TranslationUtils.tr(
+                                    'iquote_position_cancel_pending',
+                                  ),
                                   maxLines: 1,
                                   softWrap: false,
                                   overflow: TextOverflow.visible,
@@ -562,17 +574,38 @@ class _IQuotePositionDetailScreenState
       }
       if (closed) {
         final displayVolume = volume ?? pos.volume;
+        final sideLabel = _isBuy(pos)
+            ? TranslationUtils.tr('general_buy')
+            : TranslationUtils.tr('general_sell');
         CustomToastService.showSuccess(
           message: widget.isPending
-              ? 'Cancelled pending order ${pos.symbol}'
-              : 'Closed ${_sideFor(pos)} ${displayVolume.toStringAsFixed(2)} ${pos.symbol}',
-          title: widget.isPending ? 'Order Cancelled' : 'Position closed',
+              ? TranslationUtils.trArgs(
+                  'iquote_position_detail_cancelled_pending_order',
+                  {'symbol': pos.symbol},
+                )
+              : TranslationUtils.trArgs(
+                  'iquote_position_detail_closed_side_volume_symbol',
+                  {
+                    'side': sideLabel,
+                    'volume': displayVolume.toStringAsFixed(2),
+                    'symbol': pos.symbol,
+                  },
+                ),
+          title: widget.isPending
+              ? TranslationUtils.tr('iquote_position_detail_order_cancelled')
+              : TranslationUtils.tr('iquote_position_detail_position_closed'),
         );
         await _trading.refreshTradeHistory();
         if (mounted) Get.back<void>();
       } else {
         _toastError(_trading.errorMessage.isEmpty
-            ? (widget.isPending ? 'Failed to cancel order.' : 'Failed to close position.')
+            ? (widget.isPending
+                ? TranslationUtils.tr(
+                    'iquote_position_detail_failed_to_cancel_order',
+                  )
+                : TranslationUtils.tr(
+                    'iquote_position_detail_failed_to_close_position',
+                  ))
             : _trading.errorMessage);
       }
     } catch (e) {
@@ -763,7 +796,7 @@ class _Header extends StatelessWidget {
               ),
               SizedBox(width: 8.w),
               Text(
-                '${pos.volume.toStringAsFixed(2)}Lot',
+                '${pos.volume.toStringAsFixed(2)}${TranslationUtils.tr('scratch_card_screen_lot')}',
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 13.sp,
@@ -805,7 +838,7 @@ class _LivePrice extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                'Bid',
+                TranslationUtils.tr('meta_watchlist_bid'),
                 style: TextStyle(
                   color: AppColors.error,
                   fontSize: 10.sp,
@@ -827,7 +860,7 @@ class _LivePrice extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                'Ask',
+                TranslationUtils.tr('meta_watchlist_ask'),
                 style: TextStyle(
                   color: AppColors.statusGreen,
                   fontSize: 10.sp,
@@ -990,9 +1023,9 @@ class _TpSlPanel extends StatelessWidget {
               onMinus: () => _bump(tpCtl, -1.0, d, slPips: 100, position: pos),
               onPlus:  () => _bump(tpCtl,  1.0, d, slPips: 100, position: pos),
             ),
-            helper: 'When Mark Price reaches —, it will trigger '
-                'Take Profit Market order to close this position. '
-                'Estimated PNL will be \$---.',
+            helper: TranslationUtils.tr(
+              'iquote_position_detail_take_profit_helper',
+            ),
             helperColor: palette.axisText,
           ),
           SizedBox(height: 16.h),
@@ -1005,9 +1038,9 @@ class _TpSlPanel extends StatelessWidget {
               onMinus: () => _bump(slCtl, -1.0, d, slPips: 50, position: pos),
               onPlus:  () => _bump(slCtl,  1.0, d, slPips: 50, position: pos),
             ),
-            helper: 'When Mark Price reaches —, it will trigger '
-                'Stop Market order to close this position. '
-                'Estimated PNL will be \$---.',
+            helper: TranslationUtils.tr(
+              'iquote_position_detail_stop_loss_helper',
+            ),
             helperColor: palette.axisText,
           ),
         ],
@@ -1219,7 +1252,7 @@ class _ClosePanel extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'Profit / Loss',
+                  TranslationUtils.tr('iquote_position_detail_profit_loss'),
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 13.sp,
@@ -1254,7 +1287,8 @@ class _ClosePanel extends StatelessWidget {
               SizedBox(width: 6.w),
               Expanded(
                 child: Text(
-                  'Tapping Close Order will close this position at the market price. A confirmation dialog will appear before the order is submitted.',
+                  TranslationUtils.tr(
+                      'iquote_position_detail_close_order_hint'),
                   style: TextStyle(color: palette.axisText, fontSize: 11.sp),
                 ),
               ),
@@ -1302,7 +1336,7 @@ class _OrderSummaryCard extends StatelessWidget {
               _Pill(text: sideLabel, color: sideColor),
               SizedBox(width: 8.w),
               Text(
-                '${volume.toStringAsFixed(2)}Lot',
+                '${volume.toStringAsFixed(2)}${TranslationUtils.tr('scratch_card_screen_lot')}',
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 13.sp,
@@ -1358,7 +1392,7 @@ class _OrderSummaryCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                   child: Text(
-                    'VIP 0',
+                    TranslationUtils.tr('iquote_position_detail_vip_0'),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 8.sp,
@@ -1368,7 +1402,7 @@ class _OrderSummaryCard extends StatelessWidget {
                 ),
                 SizedBox(width: 6.w),
                 Text(
-                  'Cashback',
+                  TranslationUtils.tr('iquote_position_detail_cashback'),
                   style: TextStyle(
                     color: palette.axisText,
                     fontSize: 11.sp,
@@ -1426,7 +1460,7 @@ class _ActionRow extends StatelessWidget {
             child: TextButton(
               onPressed: busy ? null : onCancel,
               child: Text(
-                'Cancel',
+                TranslationUtils.tr('account_management_cancel'),
                 style: TextStyle(
                   color: AppColors.textSecondary,
                   fontSize: 15.sp,

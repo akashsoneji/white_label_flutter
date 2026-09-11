@@ -51,7 +51,9 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                 AppBackButton(onPressed: () => Navigator.pop(context)),
                 SizedBox(height: 24.h),
                 Text(
-                  'Create New Password',
+                  Get.find<LanguageService>().tr(
+                    'create_new_password_screen_create_new_password',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 16),
@@ -84,10 +86,14 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Password is required';
+                      return Get.find<LanguageService>().tr(
+                        'validation_password_required',
+                      );
                     }
                     if (value.length < 8) {
-                      return 'Password must be at least 8 characters';
+                      return Get.find<LanguageService>().tr(
+                        'create_new_password_validation_length',
+                      );
                     }
                     return null;
                   },
@@ -95,8 +101,12 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                 SizedBox(height: 16),
                 RTLHelper.rtlTextField(
                   controller: confirmPasswordController,
-                  labelText: 'Confirm Password',
-                  hintText: 'Confirm new password',
+                  labelText: Get.find<LanguageService>().tr(
+                    'create_new_password_confirm_password',
+                  ),
+                  hintText: Get.find<LanguageService>().tr(
+                    'create_new_password_screen_confirm_new_password',
+                  ),
                   obscureText: obscureConfirmPassword,
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -112,10 +122,14 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
+                      return Get.find<LanguageService>().tr(
+                        'create_new_password_validation_confirm',
+                      );
                     }
                     if (value != passwordController.text) {
-                      return 'Passwords do not match';
+                      return Get.find<LanguageService>().tr(
+                        'create_account_validation_password_match',
+                      );
                     }
                     return null;
                   },

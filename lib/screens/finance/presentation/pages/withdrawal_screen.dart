@@ -372,7 +372,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           ),
         ),
         decoration: InputDecoration(
-          labelText: 'Withdraw From',
+          labelText: languageService.tr('withdrawal_withdrawFrom'),
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
@@ -452,7 +452,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           ),
         ),
         decoration: InputDecoration(
-          labelText: 'Bank Account',
+          labelText: languageService.tr('withdrawal_screen_bank_account'),
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
@@ -512,7 +512,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
-                      'No crypto withdrawal methods available',
+                      languageService.tr(
+                        'withdrawal_screen_no_crypto_withdrawal_methods_available',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
@@ -553,7 +555,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   Icon(Icons.add, size: 20.sp,color: AppColors.whiteColor,),
                   SizedBox(width: 8.w),
                   Text(
-                    'Add Method',
+                    languageService.tr('withdrawal_screen_add_method'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -615,7 +617,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           ),
         ),
         decoration: InputDecoration(
-          labelText: 'Crypto Type',
+          labelText: languageService.tr('withdrawal_screen_crypto_type'),
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           contentPadding: EdgeInsets.symmetric(
@@ -659,9 +661,15 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
         final entered = double.tryParse(raw);
         if (entered != null) {
           if (minLimit != null && entered < minLimit) {
-            error = 'Minimum withdrawal is \$${minLimit.toStringAsFixed(2)}';
+            error = TranslationUtils.trArgs(
+              'withdrawal_screen_minimum_withdrawal_is',
+              {'amount': '\$${minLimit.toStringAsFixed(2)}'},
+            );
           } else if (maxLimit != null && entered > maxLimit) {
-            error = 'Maximum withdrawal is \$${maxLimit.toStringAsFixed(2)}';
+            error = TranslationUtils.trArgs(
+              'withdrawal_screen_maximum_withdrawal_is',
+              {'amount': '\$${maxLimit.toStringAsFixed(2)}'},
+            );
           }
         }
       }
@@ -679,13 +687,16 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
           _SingleDecimalTextFormatter(),
         ],
         decoration: InputDecoration(
-          labelText: 'Amount',
+          labelText: languageService.tr('deposit_amount'),
           labelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey),
           floatingLabelStyle: AppTextStyles.bodyText.copyWith(color: AppColors.primary),
           errorText: error,
           errorStyle: TextStyle(color: AppColors.error, fontSize: 12.sp),
           helperText: (minLimit != null && maxLimit != null)
-              ? 'Limit: \$${minLimit.toStringAsFixed(2)} - \$${maxLimit.toStringAsFixed(2)}'
+              ? TranslationUtils.trArgs('deposit_real_screen_limit_min_max', {
+                'min': '\$${minLimit.toStringAsFixed(2)}',
+                'max': '\$${maxLimit.toStringAsFixed(2)}',
+              })
               : null,
           helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
           contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -744,7 +755,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'I confirm the amount is correct. ',
+                  text: '${languageService.tr('withdrawal_confirmAmount')} ',
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.textPrimary,
@@ -752,7 +763,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   ),
                 ),
                 TextSpan(
-                  text: 'Term & Condition.',
+                  text: languageService.tr('withdrawal_terms'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     color: AppColors.primary,
@@ -1051,7 +1062,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     // Check withdrawal method
     if (controller.selectedWithdrawalMethod.value == null ||
         controller.selectedPaymentMethod.value.isEmpty) {
-      _validationMessage.value = 'Please select a withdrawal method';
+      _validationMessage.value = languageService.tr(
+        'withdrawal_screen_please_select_withdrawal_method',
+      );
       _showValidationError.value = true;
       return false;
     }
@@ -1059,7 +1072,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     // Check withdraw from account
     if (controller.selectedAccount.value == null ||
         controller.selectedAccount.value!.isEmpty) {
-      _validationMessage.value = 'Please select an account to withdraw from';
+      _validationMessage.value = languageService.tr(
+        'withdrawal_screen_please_select_account_to_withdraw_from',
+      );
       _showValidationError.value = true;
       return false;
     }
@@ -1068,7 +1083,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     if (controller.selectedPaymentMethod.value.toLowerCase() == 'bank') {
       if (controller.selectedBankAccount.value == null ||
           controller.selectedBankAccount.value!.isEmpty) {
-        _validationMessage.value = 'Please select a bank account';
+        _validationMessage.value = languageService.tr(
+          'withdrawal_screen_please_select_bank_account',
+        );
         _showValidationError.value = true;
         return false;
       }
@@ -1078,7 +1095,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     if (controller.selectedPaymentMethod.value.toLowerCase() == 'crypto') {
       if (controller.selectedCryptoAccount.value == null ||
           controller.selectedCryptoAccount.value!.isEmpty) {
-        _validationMessage.value = 'Please select a crypto account';
+        _validationMessage.value = languageService.tr(
+          'withdrawal_screen_please_select_crypto_account',
+        );
         _showValidationError.value = true;
         return false;
       }
@@ -1087,7 +1106,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     // Check amount
     String amountText = amountController.text.trim();
     if (amountText.isEmpty || amountText == '0.00') {
-      _validationMessage.value = 'Please enter withdrawal amount';
+      _validationMessage.value = languageService.tr(
+        'withdrawal_screen_please_enter_withdrawal_amount',
+      );
       _showValidationError.value = true;
       return false;
     }
@@ -1095,7 +1116,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     // Check if amount is valid
     String cleanAmount = amountText;
     if (cleanAmount.isEmpty) {
-      _validationMessage.value = 'Please enter a valid amount';
+      _validationMessage.value = languageService.tr(
+        'deposit_validation_amount',
+      );
       _showValidationError.value = true;
       return false;
     }
@@ -1103,7 +1126,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     // Check if amount is greater than 0
     double? amount = double.tryParse(cleanAmount);
     if (amount == null || amount <= 0) {
-      _validationMessage.value = 'Amount must be greater than 0';
+      _validationMessage.value = languageService.tr(
+        'withdrawal_screen_amount_must_be_greater_than_zero',
+      );
       _showValidationError.value = true;
       return false;
     }
@@ -1113,12 +1138,18 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
       final minLimit = double.tryParse(m.minLimit?.toString() ?? '');
       final maxLimit = double.tryParse(m.maxLimit?.toString() ?? '');
       if (minLimit != null && amount < minLimit) {
-        _validationMessage.value = 'Amount cannot be less than minimum limit of \$${minLimit.toStringAsFixed(2)}';
+        _validationMessage.value = languageService.tr(
+          'withdrawal_screen_amount_cannot_be_less_than_minimum',
+          {'amount': '\$${minLimit.toStringAsFixed(2)}'},
+        );
         _showValidationError.value = true;
         return false;
       }
       if (maxLimit != null && amount > maxLimit) {
-        _validationMessage.value = 'Amount cannot be more than maximum limit of \$${maxLimit.toStringAsFixed(2)}';
+        _validationMessage.value = languageService.tr(
+          'withdrawal_screen_amount_cannot_be_more_than_maximum',
+          {'amount': '\$${maxLimit.toStringAsFixed(2)}'},
+        );
         _showValidationError.value = true;
         return false;
       }
@@ -1128,12 +1159,16 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
     if (controller.isOtpSent.value) {
       final otp = _otpControllers.map((controller) => controller.text).join();
       if (otp.isEmpty) {
-        _validationMessage.value = 'Please enter OTP';
+        _validationMessage.value = languageService.tr(
+          'kyc_bank_controller_please_enter_otp',
+        );
         _showValidationError.value = true;
         return false;
       }
       if (otp.length != 6) {
-        _validationMessage.value = 'OTP must be 6 digits';
+        _validationMessage.value = languageService.tr(
+          'withdrawal_screen_otp_must_be_six_digits',
+        );
         _showValidationError.value = true;
         return false;
       }
@@ -1224,8 +1259,10 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   ? ButtonLoadingWidget(size: 20.0, color: AppColors.whiteColor)
                   : Text(
                     controller.isOtpSent.value
-                        ? 'Submit Withdrawal'
-                        : 'Send OTP',
+                        ? languageService.tr(
+                          'withdrawal_screen_submit_withdrawal',
+                        )
+                        : languageService.tr('forgot_password_screen_send_otp'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -1260,7 +1297,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                 ),
                 SizedBox(height: 24.h),
                 Text(
-                  'Select Withdrawal Method',
+                  languageService.tr(
+                    'withdrawal_screen_select_withdrawal_method',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
@@ -1435,7 +1474,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            'IB Wallet',
+                            languageService.tr('withdrawal_screen_ib_wallet'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
@@ -1514,7 +1553,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            'Wallet',
+                            languageService.tr('bottom_navigation_wallet'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
@@ -1683,7 +1722,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   SizedBox(height: 20.h),
                   // Title
                   Text(
-                    'Select Bank Account',
+                    languageService.tr('withdrawal_screen_select_bank_account'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -1701,7 +1740,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                     ),
                     SizedBox(height: 12.h),
                     Text(
-                      'No bank account found',
+                      languageService.tr(
+                        'withdrawal_screen_no_bank_account_found',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
@@ -1710,7 +1751,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                     ),
                     SizedBox(height: 6.h),
                     Text(
-                      'Please add a bank account to proceed with withdrawal.',
+                      languageService.tr(
+                        'withdrawal_screen_please_add_bank_account_to_proceed',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 13.sp,
                         color: AppColors.textGrey,
@@ -1745,7 +1788,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                         ),
                         icon: Icon(Icons.add, size: 20.sp,color: AppColors.whiteColor,),
                         label: Text(
-                          'Add Bank Account',
+                          languageService.tr(
+                            'withdrawal_screen_add_bank_account',
+                          ),
                           style: AppTextStyles.bodyText.copyWith(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -1864,7 +1909,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             Text(
               controller.noDataMessage.value.isNotEmpty
                   ? controller.noDataMessage.value
-                  : 'No data available',
+                  : languageService.tr('ticket_no_data'),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
@@ -1874,7 +1919,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
             ),
             SizedBox(height: 16.h),
             Text(
-              'Please complete the required verification or contact support for assistance.',
+              languageService.tr(
+                'withdrawal_screen_please_complete_the_required_verification_or',
+              ),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14.sp,
                 color: AppColors.icongrey,
@@ -1900,7 +1947,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   elevation: 0,
                 ),
                 child: Text(
-                  'Complete Verification',
+                  languageService.tr('withdrawal_screen_complete_verification'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -1954,7 +2001,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      'No crypto withdrawal methods available',
+                      languageService.tr(
+                        'withdrawal_screen_no_crypto_withdrawal_methods_available',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
@@ -1964,7 +2013,9 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Please add a withdrawal method to continue',
+                      languageService.tr(
+                        'withdrawal_screen_please_add_withdrawal_method_to_continue',
+                      ),
                       style: AppTextStyles.bodyText.copyWith(
                         fontSize: 14.sp,
                         color: AppColors.textGrey,
@@ -1996,7 +2047,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                           Icon(Icons.add, size: 20.sp),
                           SizedBox(width: 8.w),
                           Text(
-                            'Add Method',
+                            languageService.tr('withdrawal_screen_add_method'),
                             style: AppTextStyles.bodyText.copyWith(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -2026,7 +2077,7 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                   ),
                   SizedBox(height: 16.h),
                   Text(
-                    'Select Crypto Type',
+                    languageService.tr('withdrawal_screen_select_crypto_type'),
                     style: AppTextStyles.bodyText.copyWith(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -2056,7 +2107,10 @@ class _WithdrawalScreenState extends State<WithdrawalScreen> {
                         } else if (holderName.isNotEmpty) {
                           displayText = holderName;
                         } else {
-                          displayText = 'Crypto Method ${index + 1}';
+                          displayText = languageService.tr(
+                            'withdrawal_screen_crypto_method_n',
+                            {'number': '${index + 1}'},
+                          );
                         }
 
                         final isSelected =

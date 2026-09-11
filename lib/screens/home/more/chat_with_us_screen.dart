@@ -24,7 +24,7 @@ class ChatWithUsScreen extends StatelessWidget {
         elevation: 0,
         leading: const AppBackButton(),
         title: Text(
-          'Chat with us',
+          TranslationUtils.tr('chat_with_us'),
           style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18,
@@ -193,7 +193,9 @@ class ChatWithUsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Please select the department where you want to get assistance.",
+                  TranslationUtils.tr(
+                    'chat_with_us_screen_please_select_the_department_where_you',
+                  ),
                   style: AppTextStyles.bodyText.copyWith(fontSize: 14, color: AppColors.textPrimary),
                 ),
                 SizedBox(height: 12),

@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:crm_app/constants/color.dart';
 import 'package:crm_app/screens/ib/view_models/ib_controller.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:crm_app/screens/ib/presentation/pages/my_structure_screen.dart';
 
@@ -57,7 +58,7 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
           onPressed: () => Get.offAllNamed(AppPages.TRADING),
         ),
         title: Text(
-          'More',
+          TranslationUtils.tr('general_more'),
           style: AppTextStyles.bodyText.copyWith(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -77,7 +78,7 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
                 controller.ibStructureData.value == null) {
               return Center(
                 child: CommonLoadingWidget(
-                  message: 'Loading...',
+                  message: TranslationUtils.tr('common_loading'),
                   size: 50.0,
                   color: AppColors.primary,
                 ),
@@ -106,7 +107,7 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
                       children: [
                         _buildMenuItem(
                           icon: Icons.home,
-                          label: 'Home',
+                          label: TranslationUtils.tr('tw_nav_home'),
                           onTap: () {
                             // Navigate to dashboard/home
                                       Get.offAllNamed(AppPages.TRADING);
@@ -116,7 +117,9 @@ class _IBMoreScreenState extends State<IBMoreScreen> {
                         ),
                         _buildMenuItem(
                           icon: Icons.account_tree,
-                          label: 'My Structure',
+                          label: TranslationUtils.tr(
+                            'my_structure_screen_my_structure',
+                          ),
                           onTap: _navigateToMyStructure,
                           showTopBorder: true,
                         ),

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../services/secure_storage_service.dart';
+import '../services/language_service.dart';
 
 /// Fetches an image with a Bearer auth token attached and renders the
 /// returned bytes via [Image.memory]. Caches the result in-memory so
@@ -53,7 +54,10 @@ class _AuthenticatedNetworkImageState
 
   Future<void> _load() async {
     if (widget.url.isEmpty) {
-      setState(() => _error = 'No image');
+      setState(
+        () =>
+            _error = TranslationUtils.tr('authenticated_network_image_no_image'),
+      );
       return;
     }
     final cached = _cache[widget.url];

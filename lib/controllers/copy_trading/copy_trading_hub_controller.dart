@@ -1,5 +1,6 @@
 import 'package:crm_app/constants/api_const.dart';
 import 'package:crm_app/services/api_service.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:get/get.dart';
 
 enum CopyTradingMasterApplicationStatus { none, pending, approved, rejected, unknown }
@@ -155,7 +156,8 @@ class CopyTradingHubController extends GetxController {
         },
       );
       if (!res.success) {
-        errorMessage.value = res.message ?? 'Failed to submit application';
+        errorMessage.value = res.message ??
+            TranslationUtils.tr('copy_trading_failed_to_submit_application');
       } else {
         await refreshAll(showLoading: false);
       }

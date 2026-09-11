@@ -206,7 +206,10 @@ class _AccountManagementScreenState extends State<AccountManagementScreen> {
           languageService.tr('account_management_delete_account_title'),
         ),
         content: Text(
-          'Are you sure you want to delete ${account.type} account ${account.id}?',
+          languageService.tr('account_management_delete_confirm_message', {
+            'type': '${account.type}',
+            'id': '${account.id}',
+          }),
         ),
         actions: [
           TextButton(

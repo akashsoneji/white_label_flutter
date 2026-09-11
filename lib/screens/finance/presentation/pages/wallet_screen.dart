@@ -137,7 +137,9 @@ class _WalletScreenState extends State<WalletScreen> {
                               ),
                               SizedBox(height: 16.h),
                               Text(
-                                'No transactions found',
+                                languageService.tr(
+                                  'transaction_history_no_transactions',
+                                ),
                                 style: TextStyle(
                                   color: AppColors.textSecondary,
                                   fontSize: 14.sp,
@@ -180,7 +182,9 @@ class _WalletScreenState extends State<WalletScreen> {
                                   : !controller.hasMore.value &&
                                       controller.historyTransactions.isNotEmpty
                                   ? Text(
-                                    'No more transactions to show',
+                                    languageService.tr(
+                                      'wallet_screen_no_more_transactions_to_show',
+                                    ),
                                     style: TextStyle(
                                       color: AppColors.textSecondary,
                                       fontSize: 11.sp,
@@ -458,7 +462,8 @@ class _WalletScreenState extends State<WalletScreen> {
       if (controller.filterType.value != 'All Types') {
         chips.add(
           _buildFilterChip(
-            label: 'Type: ${controller.filterType.value}',
+            label:
+                '${languageService.tr('transaction_history_transaction_type')}: ${controller.filterType.value}',
             onDeleted: () {
               controller.filterType.value = 'All Types';
               controller.applyFilters();
@@ -470,7 +475,8 @@ class _WalletScreenState extends State<WalletScreen> {
       if (controller.filterStatus.value != 'All Status') {
         chips.add(
           _buildFilterChip(
-            label: 'Status: ${controller.filterStatus.value}',
+            label:
+                '${languageService.tr('common_status')}: ${controller.filterStatus.value}',
             onDeleted: () {
               controller.filterStatus.value = 'All Status';
               controller.applyFilters();
@@ -484,11 +490,11 @@ class _WalletScreenState extends State<WalletScreen> {
         final from =
             controller.filterDateFrom.value.isNotEmpty
                 ? controller.filterDateFrom.value
-                : 'Any';
+                : languageService.tr('wallet_screen_any');
         final to =
             controller.filterDateTo.value.isNotEmpty
                 ? controller.filterDateTo.value
-                : 'Any';
+                : languageService.tr('wallet_screen_any');
         chips.add(
           _buildFilterChip(
             label: '$from to $to',
@@ -525,7 +531,7 @@ class _WalletScreenState extends State<WalletScreen> {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      'Filters',
+                      languageService.tr('wallet_screen_filters'),
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
@@ -541,7 +547,7 @@ class _WalletScreenState extends State<WalletScreen> {
               child:
                   chips.isEmpty
                       ? Text(
-                        'All Transactions',
+                        languageService.tr('wallet_screen_all_transactions'),
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
@@ -568,7 +574,7 @@ class _WalletScreenState extends State<WalletScreen> {
               GestureDetector(
                 onTap: controller.clearFilters,
                 child: Text(
-                  'Clear All',
+                  languageService.tr('wallet_screen_clear_all'),
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: AppColors.textSecondary,
@@ -648,7 +654,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Filter Transactions',
+                    languageService.tr('wallet_screen_filter_transactions'),
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
@@ -664,7 +670,7 @@ class _WalletScreenState extends State<WalletScreen> {
               Divider(color: AppColors.divider),
               SizedBox(height: 16.h),
               Text(
-                'Date Range',
+                languageService.tr('wallet_screen_date_range'),
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
@@ -677,7 +683,9 @@ class _WalletScreenState extends State<WalletScreen> {
                   Expanded(
                     child: Obx(
                       () => _buildDateField(
-                        label: 'From Date',
+                        label: languageService.tr(
+                          'internal_transfer_history_screen_from_date',
+                        ),
                         value: localDateFrom.value,
                         onTap: () async {
                           final picked = await _pickDate(context);
@@ -690,7 +698,9 @@ class _WalletScreenState extends State<WalletScreen> {
                   Expanded(
                     child: Obx(
                       () => _buildDateField(
-                        label: 'To Date',
+                        label: languageService.tr(
+                          'internal_transfer_history_screen_to_date',
+                        ),
                         value: localDateTo.value,
                         onTap: () async {
                           final picked = await _pickDate(context);
@@ -709,7 +719,9 @@ class _WalletScreenState extends State<WalletScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Type',
+                          languageService.tr(
+                            'transaction_history_transaction_type',
+                          ),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.bold,
@@ -740,7 +752,7 @@ class _WalletScreenState extends State<WalletScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Status',
+                          languageService.tr('common_status'),
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.bold,
@@ -779,7 +791,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         localDateTo.value = '';
                       },
                       child: Text(
-                        'Reset Filters',
+                        languageService.tr('wallet_screen_reset_filters'),
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
@@ -806,7 +818,9 @@ class _WalletScreenState extends State<WalletScreen> {
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                       ),
                       child: Text(
-                        'Apply Filters',
+                        languageService.tr(
+                          'internal_transfer_history_screen_apply_filters',
+                        ),
                         style: TextStyle(
                           color: AppColors.onPrimary,
                           fontWeight: FontWeight.bold,
@@ -1005,7 +1019,8 @@ class _WalletScreenState extends State<WalletScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tx.transactionType ?? 'Transaction',
+                    tx.transactionType ??
+                        languageService.tr('wallet_screen_transaction'),
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
@@ -1191,17 +1206,26 @@ class _WalletScreenState extends State<WalletScreen> {
                 ),
               ),
               SizedBox(height: 24.h),
-              _buildDetailRow('Reference Number', tx.referenceNumber ?? 'N/A'),
-              _buildDetailRow('Transaction Type', tx.transactionType ?? 'N/A'),
-              _buildDetailRow('Payment Method', tx.paymentMethod ?? 'N/A'),
               _buildDetailRow(
-                'Account/Wallet',
-                tx.mt5AccountId != null && tx.mt5AccountId.toString().isNotEmpty
-                    ? 'MT5: ${tx.mt5AccountId}'
-                    : 'Wallet',
+                languageService.tr('tw_reference_number'),
+                tx.referenceNumber ?? 'N/A',
               ),
               _buildDetailRow(
-                'Date & Time',
+                languageService.tr('transaction_history_transaction_type'),
+                tx.transactionType ?? 'N/A',
+              ),
+              _buildDetailRow(
+                languageService.tr('deposit_screen_payment_method'),
+                tx.paymentMethod ?? 'N/A',
+              ),
+              _buildDetailRow(
+                languageService.tr('wallet_screen_account_wallet'),
+                tx.mt5AccountId != null && tx.mt5AccountId.toString().isNotEmpty
+                    ? 'MT5: ${tx.mt5AccountId}'
+                    : languageService.tr('bottom_navigation_wallet'),
+              ),
+              _buildDetailRow(
+                languageService.tr('wallet_screen_date_and_time'),
                 tx.createdAt != null
                     ? (() {
                       final parsedDate = DateTime.tryParse(tx.createdAt!);
@@ -1215,7 +1239,10 @@ class _WalletScreenState extends State<WalletScreen> {
                     : 'N/A',
               ),
               if (tx.paymentDetails != null && tx.paymentDetails!.isNotEmpty)
-                _buildDetailRow('Payment Details', tx.paymentDetails!),
+                _buildDetailRow(
+                  languageService.tr('wallet_screen_payment_details'),
+                  tx.paymentDetails!,
+                ),
 
               if (tx.proofUrl != null && tx.proofUrl!.isNotEmpty) ...[
                 SizedBox(height: 20.h),
@@ -1232,13 +1259,15 @@ class _WalletScreenState extends State<WalletScreen> {
                         );
                       } else {
                         CustomToastService.showError(
-                          message: 'Could not open proof link',
+                          message: languageService.tr(
+                            'wallet_screen_could_not_open_proof_link',
+                          ),
                         );
                       }
                     },
                     icon: Icon(Icons.receipt_long, color: AppColors.onPrimary),
                     label: Text(
-                      'View Proof',
+                      languageService.tr('wallet_screen_view_proof'),
                       style: TextStyle(
                         color: AppColors.onPrimary,
                         fontWeight: FontWeight.bold,

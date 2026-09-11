@@ -9,6 +9,20 @@ import 'package:crm_app/controllers/pmam/pmam_controller.dart';
 import 'package:crm_app/routes/app_pages.dart';
 import 'package:crm_app/widgets/common_loading_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:crm_app/services/language_service.dart';
+
+/// Display-only label for a chart tab. The raw tab value is kept as the
+/// comparand used to pick the data series, so it must not be translated.
+String _chartTabLabel(String tab) {
+  switch (tab) {
+    case 'AUM':
+      return TranslationUtils.tr('pmam_aum');
+    case 'Net P&L':
+      return TranslationUtils.tr('pmam_net_pnl');
+    default:
+      return TranslationUtils.tr('dashboard_equity');
+  }
+}
 
 class PmamManagerDashboardScreen extends StatefulWidget {
   const PmamManagerDashboardScreen({super.key});
@@ -157,14 +171,15 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
       childAspectRatio: 1.35,
       children: [
         _HeroCard(
-          title: 'Total AUM',
+          title: TranslationUtils.tr('pmam_manager_dashboard_screen_total_aum'),
           value: _fmt(hero['aum']?['current']),
           delta: hero['aum']?['delta_pct']?.toString(),
           icon: Icons.account_balance_wallet_outlined,
           sparklineData: hero['aum']?['series']?['data'],
         ),
         _HeroCard(
-          title: 'Active Investors',
+          title: TranslationUtils.tr(
+              'pmam_manager_dashboard_screen_active_investors'),
           value: _fmtNum(hero['investors']?['current']),
           delta: hero['investors']?['delta']?.toString(),
           icon: Icons.people_outline,
@@ -172,14 +187,16 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
           deltaIsAbsolute: true,
         ),
         _HeroCard(
-          title: 'Commission Earned',
+          title: TranslationUtils.tr(
+              'pmam_manager_dashboard_screen_commission_earned'),
           value: _fmt(hero['earnings']?['current']),
           delta: hero['earnings']?['delta_pct']?.toString(),
           icon: Icons.payments_outlined,
           sparklineData: hero['earnings']?['series']?['data'],
         ),
         _HeroCard(
-          title: 'ROI (Window)',
+          title:
+              TranslationUtils.tr('pmam_manager_dashboard_screen_roi_window'),
           value: '${_fmtNum(hero['roi']?['current_pct'])}%',
           delta: hero['roi']?['delta_pct']?.toString(),
           icon: Icons.trending_up,
@@ -206,7 +223,8 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Performance Overview',
+                TranslationUtils.tr(
+                    'master_dashboard_overview_tab_performance_overview'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
@@ -235,7 +253,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                       borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Text(
-                      tab,
+                      _chartTabLabel(tab),
                       style: AppTextStyles.bodyText.copyWith(
                         color: isSelected ? AppColors.primary : AppColors.textGrey,
                         fontWeight: FontWeight.w600,
@@ -266,7 +284,8 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
     final series = chartData[dataKey]?['series'];
     if (series == null || series['data'] == null || (series['data'] as List).isEmpty) {
       return Center(
-        child: Text('No data available for $_selectedChartTab',
+        child: Text(
+            '${TranslationUtils.tr('pmam_no_data_available_for')} ${_chartTabLabel(_selectedChartTab)}',
             style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey)),
       );
     }
@@ -313,9 +332,19 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
       // raw is "YYYY-MM-DD HH:mm" → return "MMM dd"
       try {
         final dt = DateTime.parse(raw.replaceFirst(' ', 'T'));
-        const months = [
-          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        final months = [
+          TranslationUtils.tr('month_short_jan'),
+          TranslationUtils.tr('month_short_feb'),
+          TranslationUtils.tr('month_short_mar'),
+          TranslationUtils.tr('month_short_apr'),
+          TranslationUtils.tr('month_short_may'),
+          TranslationUtils.tr('month_short_jun'),
+          TranslationUtils.tr('month_short_jul'),
+          TranslationUtils.tr('month_short_aug'),
+          TranslationUtils.tr('month_short_sep'),
+          TranslationUtils.tr('month_short_oct'),
+          TranslationUtils.tr('month_short_nov'),
+          TranslationUtils.tr('month_short_dec'),
         ];
         return '${months[dt.month - 1]} ${dt.day}';
       } catch (_) {
@@ -474,7 +503,8 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Investor Health',
+                  TranslationUtils.tr(
+                      'pmam_manager_dashboard_screen_investor_health'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -525,11 +555,20 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
               Expanded(
                 child: Column(
                   children: [
-                    _HealthRow(color: AppColors.green, label: 'Active', value: active.toString()),
+                    _HealthRow(
+                        color: AppColors.green,
+                        label: TranslationUtils.tr('chart_active'),
+                        value: active.toString()),
                     SizedBox(height: 8.h),
-                    _HealthRow(color: AppColors.warning, label: 'Pending', value: pending.toString()),
+                    _HealthRow(
+                        color: AppColors.warning,
+                        label: TranslationUtils.tr('kyc_verification_pending'),
+                        value: pending.toString()),
                     SizedBox(height: 8.h),
-                    _HealthRow(color: AppColors.textGrey, label: 'Inactive', value: inactive.toString()),
+                    _HealthRow(
+                        color: AppColors.textGrey,
+                        label: TranslationUtils.tr('wallet_inactive'),
+                        value: inactive.toString()),
                   ],
                 ),
               ),
@@ -566,7 +605,8 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Plan Performance',
+                TranslationUtils.tr(
+                    'master_dashboard_overview_tab_plan_performance'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
@@ -579,7 +619,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                   arguments: {'initialTab': 1},
                 ),
                 child: Text(
-                  'View All',
+                  TranslationUtils.tr('pmam_fund_manager_view_view_all'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -591,7 +631,9 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
           ),
           SizedBox(height: 12.h),
           if (plans.isEmpty)
-            Text('No plans available', style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey))
+            Text(TranslationUtils.tr('choose_account_no_plans'),
+                style:
+                    AppTextStyles.bodyText.copyWith(color: AppColors.textGrey))
           else
             ListView.separated(
               shrinkWrap: true,
@@ -668,7 +710,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Payouts',
+            TranslationUtils.tr('ibm_payouts'),
             style: AppTextStyles.bodyText.copyWith(
               fontSize: 16.sp,
               fontWeight: FontWeight.w700,
@@ -689,7 +731,8 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Earned (30d)',
+                        TranslationUtils.tr(
+                            'pmam_manager_dashboard_screen_earned_30d'),
                         style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
                       ),
                       SizedBox(height: 4.h),
@@ -717,7 +760,7 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Pending',
+                        TranslationUtils.tr('kyc_verification_pending'),
                         style: AppTextStyles.bodyText.copyWith(fontSize: 12.sp, color: AppColors.textGrey),
                       ),
                       SizedBox(height: 4.h),
@@ -756,7 +799,8 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Recent Trades',
+                TranslationUtils.tr(
+                    'master_dashboard_overview_tab_recent_trades'),
                 style: AppTextStyles.bodyText.copyWith(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
@@ -767,7 +811,11 @@ class _PmamManagerDashboardScreenState extends State<PmamManagerDashboardScreen>
           ),
           SizedBox(height: 12.h),
           if (trades.isEmpty)
-            Text('No recent trades', style: AppTextStyles.bodyText.copyWith(color: AppColors.textGrey))
+            Text(
+                TranslationUtils.tr(
+                    'pmam_manager_dashboard_screen_no_recent_trades'),
+                style:
+                    AppTextStyles.bodyText.copyWith(color: AppColors.textGrey))
           else
             ListView.separated(
               shrinkWrap: true,

@@ -20,7 +20,7 @@ class IdUploadScreen extends StatelessWidget {
         elevation: 0,
         leading: const AppBackButton(),
         title: Text(
-          'ID/Aadhar card',
+          TranslationUtils.tr('id_upload_screen_id_aadhar_card'),
           style: AppTextStyles.bodyText.copyWith(
             color: AppColors.textPrimary,
             fontSize: 18,
@@ -35,7 +35,9 @@ class IdUploadScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'The document you are providing must be valid at least 30 days and contain all of the following details:',
+              TranslationUtils.tr(
+                'id_upload_screen_the_document_you_are_providing_must',
+              ),
               style: AppTextStyles.bodyText.copyWith(
                 fontSize: 14,
                 color: AppColors.textGrey,
@@ -69,8 +71,7 @@ class IdUploadScreen extends StatelessWidget {
             // Guidelines
             _buildGuideline(
               icon: Icons.check_circle,
-              text:
-                  'Upload a colourful full-size (4 sides visible) photo of the document',
+              text: TranslationUtils.tr('id_upload_screen_guideline_upload'),
               isPositive: true,
             ),
 
@@ -78,8 +79,7 @@ class IdUploadScreen extends StatelessWidget {
 
             _buildGuideline(
               icon: Icons.cancel,
-              text:
-                  'Do not upload selfies, screenshots and do not modify the images in graphic editors.',
+              text: TranslationUtils.tr('id_upload_screen_guideline_no_selfies'),
               isPositive: false,
             ),
 
@@ -98,7 +98,7 @@ class IdUploadScreen extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: 16),
                 ),
                 child: Text(
-                  'Submit Request',
+                  TranslationUtils.tr('id_upload_screen_submit_request'),
                   style: AppTextStyles.bodyText.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

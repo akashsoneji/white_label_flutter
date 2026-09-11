@@ -2,6 +2,7 @@ import 'package:crm_app/constants/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:crm_app/screens/ibm/data/ibm_api_provider.dart';
+import 'package:crm_app/services/language_service.dart';
 import 'package:crm_app/widgets/custom_toast.dart';
 
 /// Bottom sheet for moving a specific sub-IB onto one of the partner's own
@@ -58,10 +59,10 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
         }
         _plans = rawPlans.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
       } else {
-        _error = res.message ?? 'Failed to load plans';
+        _error = res.message ?? TranslationUtils.tr('ibm_failed_to_load_plans');
       }
     } catch (e) {
-      _error = 'Error loading plans';
+      _error = TranslationUtils.tr('ibm_error_loading_plans');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -78,14 +79,19 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
       if (res.success) {
         widget.onAssigned();
         if (mounted) Navigator.pop(context);
-        CustomToastService.showSuccess(message: 'Plan updated successfully');
+        CustomToastService.showSuccess(
+          message: TranslationUtils.tr('ibm_plan_updated_successfully'),
+        );
       } else {
         CustomToastService.showError(
-          message: res.message ?? 'Failed to change plan',
+          message:
+              res.message ?? TranslationUtils.tr('ibm_failed_to_change_plan'),
         );
       }
     } catch (e) {
-      CustomToastService.showError(message: 'Error changing plan');
+      CustomToastService.showError(
+        message: TranslationUtils.tr('ibm_error_changing_plan'),
+      );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -132,7 +138,9 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Move ${widget.ibName} to another plan',
+                      TranslationUtils.trArgs('ibm_move_ib_to_another_plan', {
+                        'name': widget.ibName,
+                      }),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16.sp,
@@ -140,7 +148,7 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'It applies to commission from now on',
+                      TranslationUtils.tr('ibm_applies_to_commission_from_now'),
                       style: TextStyle(
                         color: AppColors.textGrey,
                         fontSize: 11.sp,
@@ -160,7 +168,7 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
           TextField(
             onChanged: (v) => setState(() => _query = v.trim()),
             decoration: InputDecoration(
-              hintText: 'Search your plans',
+              hintText: TranslationUtils.tr('ibm_search_your_plans'),
               prefixIcon:  Icon(Icons.search,color: AppColors.textPrimary,),
               hintStyle: TextStyle(color: AppColors.textGrey),
               border: OutlineInputBorder(
@@ -182,7 +190,9 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text(
+                    TranslationUtils.tr('account_management_cancel'),
+                  ),
                 ),
               ),
               SizedBox(width: 12.w),
@@ -204,7 +214,7 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text('Move them'),
+                      : Text(TranslationUtils.tr('ibm_move_them')),
                 ),
               ),
             ],
@@ -230,7 +240,7 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
     if (plans.isEmpty) {
       return Center(
         child: Text(
-          'No plans found.',
+          TranslationUtils.tr('ibm_no_plans_found'),
           style: TextStyle(color: AppColors.textGrey, fontSize: 14.sp),
         ),
       );
@@ -271,7 +281,7 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                   child: Text(
-                    'On it now',
+                    TranslationUtils.tr('ibm_on_it_now'),
                     style: TextStyle(fontSize: 10.sp, color: AppColors.textGrey),
                   ),
                 ),
@@ -279,7 +289,9 @@ class _ChangePlanBottomSheetState extends State<ChangePlanBottomSheet> {
             ],
           ),
           subtitle: Text(
-            '$partners partner(s) on it',
+            TranslationUtils.trArgs('ibm_partners_on_it', {
+              'count': '$partners',
+            }),
             style: TextStyle(fontSize: 11.sp, color: AppColors.textGrey),
           ),
         );
